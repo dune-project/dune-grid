@@ -1,21 +1,12 @@
-set(TESTS
-  globalindexsettest
-  tensorgridfactorytest
-  structuredgridfactorytest
-  vertexordertest
-  persistentcontainertest)
+dune_add_test(SOURCES globalindexsettest.cc)
 
-foreach(_T ${TESTS})
-  add_executable(${_T} ${_T}.cc)
-  target_link_libraries(${_T} dunegrid ${DUNE_LIBS})
-  add_test(${_T} ${_T})
-endforeach(_T ${TESTS})
+dune_add_test(SOURCES persistentcontainertest.cc)
 
-add_dune_ug_flags(${TESTS})
-add_dune_mpi_flags(structuredgridfactorytest tensorgridfactorytest)
-add_dune_alugrid_flags(vertexordertest persistentcontainertest)
+dune_add_test(SOURCES structuredgridfactorytest.cc
+              LINK_LIBRARIES dunegrid)
 
-# We do not want want to build the tests during make all,
-# but just build them on demand
-add_directory_test_target(_test_target)
-add_dependencies(${_test_target} ${TESTS})
+dune_add_test(SOURCES tensorgridfactorytest.cc
+              LINK_LIBRARIES dunegrid)
+
+dune_add_test(SOURCES vertexordertest.cc
+              LINK_LIBRARIES dunegrid)

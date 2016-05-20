@@ -6,22 +6,9 @@
 #include "dgfparser/dgfparser.hh"
 /* include the implementations */
 #include <dune/grid/albertagrid/dgfparser.hh>
-#include "dgfparser/dgfalu.hh"
 #include "dgfparser/dgfug.hh"
 #include "dgfparser/dgfoned.hh"
 #include "dgfparser/dgfyasp.hh"
-
-#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
-// this include is to be removed when SGrid is removed
-#define DUNE_AVOID_SGRID_DEPRE_WARNING_BECAUSE_I_KNOW_WHAT_IM_DOING
-#endif
-
-#include "dgfparser/dgfs.hh"
-
-#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
-#undef DUNE_AVOID_SGRID_DEPRE_WARNING_BECAUSE_I_KNOW_WHAT_IM_DOING
-#endif
-
 #include "dgfparser/dgfgeogrid.hh"
 #include "dgfparser/dgfidentitygrid.hh"
 #endif

@@ -98,7 +98,6 @@ namespace Dune {
         dim,                                                    // dimension of the world space
         Dune::YaspGrid<dim, Coordinates>,
         YaspGeometry,YaspEntity,
-        YaspEntityPointer,
         YaspLevelIterator,                                      // type used for the level iterator
         YaspIntersection,              // leaf  intersection
         YaspIntersection,              // level intersection
@@ -746,7 +745,7 @@ namespace Dune {
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       // check whether YaspGrid has been given the correct template parameter
-      static_assert(is_same<Coordinates,EquidistantCoordinates<ctype,dim> >::value,
+      static_assert(std::is_same<Coordinates,EquidistantCoordinates<ctype,dim> >::value,
                     "YaspGrid coordinate container template parameter and given constructor values do not match!");
 
       _levels.resize(1);
@@ -758,11 +757,20 @@ namespace Dune {
 
       _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
 
+#if HAVE_MPI
       // check whether the grid is large enough to be overlapping
       for (int i=0; i<dim; i++)
-        if ((s_interior[i] <= overlap) &&                // interior is very small
-            (periodic[i] || (s_interior[i] != s[i])))    // there is an overlap in that direction
+      {
+        // find out whether the grid is too small to
+        int toosmall = (s_interior[i] <= overlap) &&    // interior is very small
+            (periodic[i] || (s_interior[i] != s[i]));    // there is an overlap in that direction
+        // communicate the result to all those processes to have all processors error out if one process failed.
+        int global = 0;
+        MPI_Allreduce(&toosmall, &global, 1, MPI_INT, MPI_LOR, comm);
+        if (global)
           DUNE_THROW(Dune::GridError,"YaspGrid is too small to be overlapping");
+      }
+#endif // #if HAVE_MPI
 
       fTupel h(L);
       for (int i=0; i<dim; i++)
@@ -807,7 +815,7 @@ namespace Dune {
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       // check whether YaspGrid has been given the correct template parameter
-      static_assert(is_same<Coordinates,EquidistantOffsetCoordinates<ctype,dim> >::value,
+      static_assert(std::is_same<Coordinates,EquidistantOffsetCoordinates<ctype,dim> >::value,
                     "YaspGrid coordinate container template parameter and given constructor values do not match!");
 
       _levels.resize(1);
@@ -819,11 +827,20 @@ namespace Dune {
 
       _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
 
+#if HAVE_MPI
       // check whether the grid is large enough to be overlapping
       for (int i=0; i<dim; i++)
-        if ((s_interior[i] <= overlap) &&                // interior is very small
-            (periodic[i] || (s_interior[i] != s[i])))    // there is an overlap in that direction
+      {
+        // find out whether the grid is too small to
+        int toosmall = (s_interior[i] <= overlap) &&    // interior is very small
+            (periodic[i] || (s_interior[i] != s[i]));    // there is an overlap in that direction
+        // communicate the result to all those processes to have all processors error out if one process failed.
+        int global = 0;
+        MPI_Allreduce(&toosmall, &global, 1, MPI_INT, MPI_LOR, comm);
+        if (global)
           DUNE_THROW(Dune::GridError,"YaspGrid is too small to be overlapping");
+      }
+#endif // #if HAVE_MPI
 
       Dune::FieldVector<ctype,dim> extension(upperright);
       Dune::FieldVector<ctype,dim> h;
@@ -870,7 +887,7 @@ namespace Dune {
         DUNE_THROW(Dune::GridError,"Setup of a tensorproduct grid requires monotonous sequences of coordinates.");
 
       // check whether YaspGrid has been given the correct template parameter
-      static_assert(is_same<Coordinates,TensorProductCoordinates<ctype,dim> >::value,
+      static_assert(std::is_same<Coordinates,TensorProductCoordinates<ctype,dim> >::value,
                     "YaspGrid coordinate container template parameter and given constructor values do not match!");
 
       _levels.resize(1);
@@ -888,11 +905,21 @@ namespace Dune {
 
       _torus.partition(_torus.rank(),o,_coarseSize,o_interior,s_interior);
 
+#if HAVE_MPI
       // check whether the grid is large enough to be overlapping
       for (int i=0; i<dim; i++)
-        if ((s_interior[i] <= overlap) &&                // interior is very small
-            (periodic[i] || (s_interior[i] != _coarseSize[i])))    // there is an overlap in that direction
+      {
+        // find out whether the grid is too small to
+        int toosmall = (s_interior[i] <= overlap) &&               // interior is very small
+             (periodic[i] || (s_interior[i] != _coarseSize[i]));    // there is an overlap in that direction
+        // communicate the result to all those processes to have all processors error out if one process failed.
+        int global = 0;
+        MPI_Allreduce(&toosmall, &global, 1, MPI_INT, MPI_LOR, comm);
+        if (global)
           DUNE_THROW(Dune::GridError,"YaspGrid is too small to be overlapping");
+      }
+#endif // #if HAVE_MPI
+
 
       std::array<std::vector<ctype>,dim> newcoords;
       std::array<int, dim> offset(o_interior);
@@ -938,161 +965,6 @@ namespace Dune {
             newcoords[i].insert(newcoords[i].begin(), newcoords[i].front() - *it + *(--it));
         }
       }
-
-      TensorProductCoordinates<ctype,dim> cc(newcoords, offset);
-
-      // add level
-      makelevel(cc,periodic,o_interior,overlap);
-      init();
-    }
-
-    /** Constructor
-     *  @param comm MPI communicator where this mesh is distributed to
-     *  @param L extension of the domain
-     *  @param s number of cells on coarse mesh in each direction
-     *  @param periodic tells if direction is periodic or not
-     *  @param overlap size of overlap on coarsest grid (same in all directions)
-     *  @param lb pointer to an overloaded YLoadBalance instance
-     *
-     *  @deprecated This constructor is deprecated and will be removed after
-     *              the release of dune-grid-2.4
-     */
-    DUNE_DEPRECATED_MSG("This Yaspgrid constructor is deprecated.")
-    YaspGrid (Dune::MPIHelper::MPICommunicator comm,
-              Dune::FieldVector<ctype, dim> L,
-              std::array<int, dim> s,
-              std::bitset<dim> periodic,
-              int overlap,
-              const YLoadBalance<dim>* lb = defaultLoadbalancer())
-      : ccobj(comm), _torus(comm,tag,s,lb), leafIndexSet_(*this),
-         _L(L), keep_ovlp(true), adaptRefCount(0), adaptActive(false)
-    {
-      _periodic = periodic;
-      _levels.resize(1);
-      _overlap = overlap;
-      _coarseSize = s;
-
-      iTupel o;
-      std::fill(o.begin(), o.end(), 0);
-      iTupel o_interior(o);
-      iTupel s_interior(s);
-
-      _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
-
-      fTupel h(L);
-      for (int i=0; i<dim; i++)
-        h[i] /= s[i];
-
-      iTupel s_overlap(s_interior);
-      for (int i=0; i<dim; i++)
-      {
-        if ((o_interior[i] - overlap > 0) || (periodic[i]))
-          s_overlap[i] += overlap;
-        if ((o_interior[i] + s_interior[i] + overlap <= _coarseSize[i]) || (periodic[i]))
-          s_overlap[i] += overlap;
-      }
-
-      // check whether YaspGrid has been given the correct template parameter
-      static_assert(is_same<Coordinates,EquidistantCoordinates<ctype,dim> >::value,
-                    "YaspGrid coordinate container template parameter and given constructor values do not match!");
-
-      EquidistantCoordinates<ctype,dim> cc(h,s_overlap);
-
-      // add level
-      makelevel(cc,periodic,o_interior,overlap);
-      init();
-    }
-
-
-     /** @brief Constructor for a tensorproduct YaspGrid
-      *  @param comm MPI communicator where this mesh is distributed to
-      *  @param coords coordinate vectors to be used for coarse grid
-      *  @param periodic tells if direction is periodic or not
-      *  @param overlap size of overlap on coarsest grid (same in all directions)
-      *  @param lb pointer to an overloaded YLoadBalance instance
-      *
-      *  @deprecated This constructor is deprecated and will be removed after
-      *              the release of dune-grid-2.4
-      */
-    DUNE_DEPRECATED_MSG("This Yaspgrid constructor is deprecated.")
-    YaspGrid (Dune::MPIHelper::MPICommunicator comm,
-              std::array<std::vector<ctype>, dim> coords,
-              std::bitset<dim> periodic, int overlap,
-              const YLoadBalance<dim>* lb = defaultLoadbalancer())
-      : ccobj(comm), _torus(comm,tag,Dune::Yasp::sizeArray<dim>(coords),lb),
-        leafIndexSet_(*this),
-        _periodic(std::bitset<dim>(0)),
-        _overlap(overlap),
-        keep_ovlp(true),
-        adaptRefCount(0), adaptActive(false)
-    {
-      if (!Dune::Yasp::checkIfMonotonous(coords))
-        DUNE_THROW(Dune::GridError,"Setup of a tensorproduct grid requires monotonous sequences of coordinates.");
-      _periodic = periodic;
-      _levels.resize(1);
-      _overlap = overlap;
-
-      //determine sizes of vector to correctly construct torus structure and store for later size requests
-      for (int i=0; i<dim; i++) {
-        _coarseSize[i] = coords[i].size() - 1;
-        _L[i] = coords[i][_coarseSize[i]] - coords[i][0];
-      }
-
-      iTupel o;
-      std::fill(o.begin(), o.end(), 0);
-      iTupel o_interior(o);
-      iTupel s_interior(_coarseSize);
-
-      _torus.partition(_torus.rank(),o,_coarseSize,o_interior,s_interior);
-
-      std::array<std::vector<ctype>,dim> newcoords;
-      std::array<int, dim> offset(o_interior);
-
-      // find the relevant part of the coords vector for this processor and copy it to newcoords
-      for (int i=0; i<dim; ++i)
-      {
-        //define iterators on coords that specify the coordinate range to be used
-        typename std::vector<ctype>::iterator begin = coords[i].begin() + o_interior[i];
-        typename std::vector<ctype>::iterator end = begin + s_interior[i] + 1;
-
-        // check whether we are not at the physical boundary. In that case overlap is a simple
-        // extension of the coordinate range to be used
-        if (o_interior[i] - overlap > 0)
-        {
-          begin = begin - overlap;
-          offset[i] -= overlap;
-        }
-        if (o_interior[i] + s_interior[i] + overlap < _coarseSize[i])
-          end = end + overlap;
-
-        //copy the selected part in the new coord vector
-        newcoords[i].resize(end-begin);
-        std::copy(begin, end, newcoords[i].begin());
-
-        // check whether we are at the physical boundary and a have a periodic grid.
-        // In this case the coordinate vector has to be tweaked manually.
-        if ((periodic[i]) && (o_interior[i] + s_interior[i] + overlap >= _coarseSize[i]))
-        {
-          // we need to add the first <overlap> cells to the end of newcoords
-          typename std::vector<ctype>::iterator it = coords[i].begin();
-          for (int j=0; j<overlap; ++j)
-            newcoords[i].push_back(newcoords[i].back() - *it + *(++it));
-        }
-
-        if ((periodic[i]) && (o_interior[i] - overlap <= 0))
-        {
-          offset[i] -= overlap;
-
-          // we need to add the last <overlap> cells to the begin of newcoords
-          typename std::vector<ctype>::iterator it = coords[i].end() - 1;
-          for (int j=0; j<overlap; ++j)
-            newcoords[i].insert(newcoords[i].begin(), newcoords[i].front() - *it + *(--it));
-        }
-      }
-
-      // check whether YaspGrid has been given the correct template parameter
-      static_assert(is_same<Coordinates,TensorProductCoordinates<ctype,dim> >::value,
-                    "YaspGrid coordinate container template parameter and given constructor values do not match!");
 
       TensorProductCoordinates<ctype,dim> cc(newcoords, offset);
 
@@ -1128,7 +1000,7 @@ namespace Dune {
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
       // check whether YaspGrid has been given the correct template parameter
-      static_assert(is_same<Coordinates,TensorProductCoordinates<ctype,dim> >::value,
+      static_assert(std::is_same<Coordinates,TensorProductCoordinates<ctype,dim> >::value,
                   "YaspGrid coordinate container template parameter and given constructor values do not match!");
 
       if (!Dune::Yasp::checkIfMonotonous(coords))
@@ -1146,7 +1018,7 @@ namespace Dune {
 
       _torus.partition(_torus.rank(),o,coarseSize,o_interior,s_interior);
 
-      // get offset by modifying o_interior accoring to overlap
+      // get offset by modifying o_interior according to overlap
       std::array<int,dim> offset(o_interior);
       for (int i=0; i<dim; i++)
         if ((periodic[i]) || (o_interior[i] > 0))
@@ -1342,26 +1214,6 @@ namespace Dune {
     typename Traits::template Codim<cd>::template Partition<All_Partition>::LeafIterator leafend () const
     {
       return levelend<cd,All_Partition>(maxLevel());
-    }
-
-    /** \brief obtain EntityPointer from EntitySeed.
-     *
-     * \deprecated This method is deprecated and will be removed after the release of
-     *             dune-grid 2.4. Please use entity() instead, which will directly return
-     *             an Entity object that you can then store for later use. The EntityPointer
-     *             concept in general is deprecated and will not be available after
-     *             dune-grid 2.4 has been released.
-     */
-    template <typename Seed>
-    DUNE_DEPRECATED_MSG("entityPointer() is deprecated and will be removed after the release of dune-grid 2.4. Use entity() instead to directly obtain an Entity object.")
-    typename Traits::template Codim<Seed::codimension>::EntityPointer
-    entityPointer(const Seed& seed) const
-    {
-      const int codim = Seed::codimension;
-      YGridLevelIterator g = begin(this->getRealImplementation(seed).level());
-
-      return YaspEntityPointer<codim,GridImp>(g,
-        typename YGrid::Iterator(g->overlapfront[codim], this->getRealImplementation(seed).coord(),this->getRealImplementation(seed).offset()));
     }
 
     // \brief obtain Entity from EntitySeed. */
@@ -1779,7 +1631,7 @@ namespace Dune {
       template<class Y>
       void write (const Y& data)
       {
-        static_assert(( is_same<DT,Y>::value ), "DataType mismatch");
+        static_assert(( std::is_same<DT,Y>::value ), "DataType mismatch");
         a[i++] = data;
       }
 
@@ -1787,7 +1639,7 @@ namespace Dune {
       template<class Y>
       void read (Y& data) const
       {
-        static_assert(( is_same<DT,Y>::value ), "DataType mismatch");
+        static_assert(( std::is_same<DT,Y>::value ), "DataType mismatch");
         data = a[j++];
       }
 
@@ -1982,16 +1834,6 @@ namespace Dune {
       static const bool v = true;
     };
 
-    /** \brief YaspGrid is parallel
-     * \deprecated This capability will be removed after dune-grid 2.4.
-     * \ingroup YaspGrid
-     */
-    template<int dim, class Coordinates>
-    struct DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") isParallel< YaspGrid<dim, Coordinates> >
-    {
-      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = true;
-    };
-
     /** \brief YaspGrid is levelwise conforming
        \ingroup YaspGrid
      */
@@ -2014,5 +1856,7 @@ namespace Dune {
 
 } // end namespace
 
+// Include the specialization of the StructuredGridFactory class for YaspGrid
+#include <dune/grid/yaspgrid/structuredyaspgridfactory.hh>
 
 #endif

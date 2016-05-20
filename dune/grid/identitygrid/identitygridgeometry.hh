@@ -28,11 +28,11 @@ namespace Dune {
     enum {CodimInHostGrid = GridImp::HostGridType::dimension - mydim};
     enum {DimensionWorld = GridImp::HostGridType::dimensionworld};
 
-    // select appropiate hostgrid geometry via typeswitch
+    // select appropriate hostgrid geometry via typeswitch
     typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::Geometry HostGridGeometryType;
     typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::Geometry HostGridLocalGeometryType;
 
-    typedef typename conditional<coorddim==DimensionWorld, HostGridGeometryType, HostGridLocalGeometryType>::type HostGridGeometry;
+    typedef typename std::conditional<coorddim==DimensionWorld, HostGridGeometryType, HostGridLocalGeometryType>::type HostGridGeometry;
 
     //! type of jacobian transposed
     typedef typename HostGridGeometryType::JacobianInverseTransposed JacobianInverseTransposed;

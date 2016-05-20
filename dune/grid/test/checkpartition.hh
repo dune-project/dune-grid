@@ -4,6 +4,10 @@
 #ifndef DUNE_GRID_TEST_CHECKPARTITION_HH
 #define DUNE_GRID_TEST_CHECKPARTITION_HH
 
+#include <cstddef>
+
+#include <bitset>
+#include <set>
 #include <map>
 
 #include <dune/common/forloop.hh>
@@ -116,7 +120,7 @@ struct CheckPartitionType< GridView, pitype >::CheckCodim
   typedef typename GridView::template Codim< 0 >::template Partition< Dune::All_Partition >::Iterator AllIterator;
 
   template< class IdSet >
-  static void check ( const Dune::true_type &, const GridView &gridView,
+  static void check ( const std::true_type &, const GridView &gridView,
                       const IdSet &idSet )
   {
     typedef std::map< typename IdSet::IdType, Dune::PartitionType > Map;
@@ -144,11 +148,7 @@ struct CheckPartitionType< GridView, pitype >::CheckCodim
         const int subEntities = it->subEntities(codim);
         for( int i = 0; i < subEntities; ++i )
         {
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-          Dune::PartitionType pt = it->template subEntity< codim >( i )->partitionType();
-#else
           Dune::PartitionType pt = it->template subEntity< codim >( i ).partitionType();
-#endif
           if( !possibleSubPartitionType( ept, pt ) )
           {
             std::cerr << "Error: Codim " << codim << " entity " << idSet.subId( *it, i, codim )
@@ -187,7 +187,7 @@ struct CheckPartitionType< GridView, pitype >::CheckCodim
   }
 
   template< class IdSet >
-  static void check ( const Dune::false_type &, const GridView &gridView, const IdSet &idSet )
+  static void check ( const std::false_type &, const GridView &gridView, const IdSet &idSet )
   {
     DUNE_UNUSED_PARAMETER(gridView);
     DUNE_UNUSED_PARAMETER(idSet);
@@ -195,7 +195,7 @@ struct CheckPartitionType< GridView, pitype >::CheckCodim
 
   static void apply ( const GridView &gridView )
   {
-    Dune::integral_constant<
+    std::integral_constant<
         bool, Dune::Capabilities::hasEntity< typename GridView::Grid, codim >::v
         > capabilityVariable;
     check( capabilityVariable, gridView, gridView.grid().localIdSet() );
@@ -211,20 +211,24 @@ class CheckPartitionDataHandle
   static const int dimension = GridView::dimension;
 
   typedef typename GridView::Grid Grid;
+  typedef typename Grid::LocalIdSet IdSet;
+
+  typedef std::set< typename IdSet::IdType > CommSet;
 
   template< int codim >
   struct Contains
   {
-    static void apply ( bool (&contains)[ dimension+1 ] )
+    static void apply ( std::bitset< dimension+1 > &contains )
     {
       contains[ codim ] = Dune::Capabilities::canCommunicate< Grid, codim >::v;
     }
   };
 
 public:
-  explicit CheckPartitionDataHandle ( const Grid &grid )
-    : grid_( grid ),
-      rank_( grid_.comm().rank() ),
+  explicit CheckPartitionDataHandle ( const GridView &gridView )
+    : gridView_( gridView ),
+      rank_( gridView_.comm().rank() ),
+      idSet_( gridView_.grid().localIdSet() ),
       invalidDimension_( false ),
       invalidCodimension_( false ),
       invalidEntity_( false ),
@@ -232,13 +236,46 @@ public:
       invalidReceiveEntity_( false ),
       invalidSize_( false ),
       selfReceive_( false ),
-      doubleInterior_( false )
+      doubleInterior_( false ),
+      interiorBorder_( false )
   {
     Dune::ForLoop< Contains, 0, dimension >::apply( contains_ );
   }
 
   ~CheckPartitionDataHandle ()
   {
+    bool sendFailure = false;
+    bool receiveFailure = false;
+
+    typedef typename GridView::template Codim< 0 >::Iterator Iterator;
+    typedef typename GridView::template Codim< 0 >::Entity Entity;
+    const Iterator end = gridView_.template end< 0 >();
+    for( Iterator it = gridView_.template begin< 0 >(); it != end; ++it )
+    {
+      const Entity entity = *it;
+
+      if( entity.partitionType() == Dune::InteriorEntity )
+        continue;
+
+      const bool wasSent = (sendSet_.find( idSet_.id( entity ) ) != sendSet_.end());
+      if( Dune::EntityCommHelper< iftype >::send( entity.partitionType() ) && !wasSent )
+      {
+        std::cout << "[ " << rank_ << " ] Error: No data sent on non-interior entity "
+                  << grid().globalIdSet().id( entity ) << " of partition type "
+                  << entity.partitionType() << " contained in the send set." << std::endl;
+        sendFailure = true;
+      }
+
+      const bool wasReceived = (receiveSet_.find( idSet_.id( entity ) ) != receiveSet_.end());
+      if( Dune::EntityCommHelper< iftype >::receive( entity.partitionType() ) && !wasReceived )
+      {
+        std::cout << "[ " << rank_ << " ] Error: No data received on non-interior entity "
+                  << grid().globalIdSet().id( entity ) << " of partition type "
+                  << entity.partitionType() << " contained in the receive set." << std::endl;
+        receiveFailure = true;
+      }
+    }
+
     if( invalidDimension_ )
       std::cerr << "[ " << rank_ << " ] Error: Invalid dimension passed during communication." << std::endl;
     if( invalidCodimension_ )
@@ -255,9 +292,15 @@ public:
       std::cerr << "[ " << rank_ << " ] Warning: Received data from own process during communication." << std::endl;
     if( doubleInterior_ )
       std::cerr << "[ " << rank_ << " ] Error: Received interior data on interior entity." << std::endl;
+    if( interiorBorder_ )
+      std::cerr << "[ " << rank_ << " ] Error: Received interior data on border entity / border data on interior entity." << std::endl;
+    if( sendFailure )
+      std::cerr << "[ " << rank_ << " ] Error: No data sent on a non-interior entity within the send set." << std::endl;
+    if( receiveFailure )
+      std::cerr << "[ " << rank_ << " ] Error: No data received on a non-interior entity within the receive set." << std::endl;
   }
 
-  bool contains ( int const dim, const int codim ) const
+  bool contains ( const int dim, const int codim ) const
   {
     invalidDimension_ |= (dim != dimension);
     invalidCodimension_ |= ((codim < 0) || (codim > dimension));
@@ -272,7 +315,7 @@ public:
   }
 
   template< class Entity >
-  size_t size ( const Entity &entity ) const
+  std::size_t size ( const Entity &entity ) const
   {
     DUNE_UNUSED_PARAMETER(entity);
     static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
@@ -291,42 +334,62 @@ public:
 
     buffer.write( rank_ );
     buffer.write( int( entity.partitionType() ) );
+
+    sendSet_.insert( idSet_.id( entity ) );
   }
 
   template< class Buffer, class Entity >
-  void scatter ( Buffer &buffer, const Entity &entity, size_t n )
+  void scatter ( Buffer &buffer, const Entity &entity, std::size_t n )
   {
     static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
     static_assert( (Entity::codimension >= 0) || (Entity::codimension <= dimension), "Entity has invalid codimension." );
 
     invalidEntity_ |= !contains_[ Entity::codimension ];
     invalidSize_ |= (n != size( entity ));
-    invalidSendEntity_ |= !Dune::EntityCommHelper< iftype >::receive( entity.partitionType() );
+    invalidReceiveEntity_ |= !Dune::EntityCommHelper< iftype >::receive( entity.partitionType() );
 
     int rank, partitionType;
     buffer.read( rank );
     buffer.read( partitionType );
 
+    receiveSet_.insert( idSet_.id( entity ) );
+
     selfReceive_ |= (rank == rank_);
     if( (partitionType == int( Dune::InteriorEntity )) && (entity.partitionType() == Dune::InteriorEntity) )
     {
       std::cout << "[ " << rank_ << " ] Error: Receive interior data from process " << rank
-                << " on interior entity " << grid_.globalIdSet().id( entity ) << "." << std::endl;
+                << " on interior entity " << grid().globalIdSet().id( entity ) << "." << std::endl;
       doubleInterior_ = true;
+    }
+    if( (partitionType == int( Dune::BorderEntity )) && (entity.partitionType() == Dune::InteriorEntity) )
+    {
+      std::cout << "[ " << rank_ << " ] Error: Receive border data from process " << rank
+                << " on interior entity " << grid().globalIdSet().id( entity ) << "." << std::endl;
+      interiorBorder_ = true;
+    }
+    if( (partitionType == int( Dune::InteriorEntity )) && (entity.partitionType() == Dune::BorderEntity) )
+    {
+      std::cout << "[ " << rank_ << " ] Error: Receive interior data from process " << rank
+                << " on border entity " << grid().globalIdSet().id( entity ) << "." << std::endl;
+      interiorBorder_ = true;
     }
   }
 
   static void apply ( const GridView &gridView )
   {
     std::cout << "Checking communication for " << iftype << "..." << std::endl;
-    CheckPartitionDataHandle handle( gridView.grid() );
+    CheckPartitionDataHandle handle( gridView );
     gridView.communicate( handle, iftype, Dune::ForwardCommunication );
   }
 
+  const Grid &grid () const { return gridView_.grid(); }
+
 private:
-  const Grid &grid_;
+  const GridView &gridView_;
   const int rank_;
-  bool contains_[ dimension+1 ];
+  const IdSet &idSet_;
+  std::bitset< dimension+1 > contains_;
+  mutable CommSet sendSet_, receiveSet_;
   mutable bool invalidDimension_;
   mutable bool invalidCodimension_;
   mutable bool invalidEntity_;
@@ -335,6 +398,7 @@ private:
   bool invalidSize_;
   bool selfReceive_;
   bool doubleInterior_;
+  bool interiorBorder_;
 };
 
 

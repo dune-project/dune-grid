@@ -5,10 +5,8 @@ SUBDIRS =					\
 
 gridutilitydir =  $(includedir)/dune/grid/utility
 gridutility_HEADERS =				\
-	entitycommhelper.hh			\
-	entityrange.hh				\
-	entityset.hh				\
-	grapedataioformattypes.hh		\
+	entitycommhelper.hh 			\
+	globalindexset.hh			\
 	gridinfo-gmsh-main.hh			\
 	gridinfo.hh				\
 	gridtype.hh				\

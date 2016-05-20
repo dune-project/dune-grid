@@ -3,24 +3,24 @@
 #ifndef DUNE_DGF_GRIDPTR_HH
 #define DUNE_DGF_GRIDPTR_HH
 
+#include <cassert>
 #include <iostream>
 #include <string>
 #include <vector>
-//#include <memory>
 #include <map>
-#include <assert.h>
+#include <memory>
 
 //- Dune includes
-#include <dune/common/shared_ptr.hh>
 #include <dune/common/parallel/mpihelper.hh>
+#include <dune/common/shared_ptr.hh>
+
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/datahandleif.hh>
+#include <dune/grid/common/intersection.hh>
 
 #include <dune/grid/io/file/dgfparser/dgfexception.hh>
 #include <dune/grid/io/file/dgfparser/entitykey.hh>
 #include <dune/grid/io/file/dgfparser/parser.hh>
-
-#include <dune/grid/common/intersection.hh>
 
 namespace Dune
 {
@@ -54,9 +54,9 @@ namespace Dune
   template< class GridType >
   struct GridPtr
   {
-    class mygrid_ptr : public shared_ptr< GridType >
+    class mygrid_ptr : public std::shared_ptr< GridType >
     {
-      typedef shared_ptr< GridType > base_t ;
+      typedef std::shared_ptr< GridType > base_t ;
       // empty deleter to avoid deletion on release
       typedef null_deleter< GridType > emptydeleter_t ;
 
@@ -350,8 +350,8 @@ namespace Dune
         }
         if ( nofVtxParam_ > 0 )
         {
-          const int subEntities = el.subEntities(dimension);
-          for ( int v = 0; v < subEntities; ++v)
+          const unsigned int subEntities = el.subEntities(dimension);
+          for ( unsigned int v = 0; v < subEntities; ++v)
           {
             typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
             if ( vtxParam_[ index ].empty() )
@@ -432,7 +432,7 @@ namespace Dune
             std::swap( gridPtr_.elParam_[ indexSet.index(el) ], elData_[ idSet_.id(el) ] );
           if ( gridPtr_.nofVtxParam_ > 0 )
           {
-            for ( int v = 0; v < el.subEntities(dimension); ++v)
+            for ( unsigned int v = 0; v < el.subEntities(dimension); ++v)
             {
               typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
               if ( ! gridPtr_.vtxParam_[ index ].empty() )
@@ -466,7 +466,7 @@ namespace Dune
           }
           if ( gridPtr_.nofVtxParam_ > 0 )
           {
-            for ( int v = 0; v < el.subEntities(dimension); ++v)
+            for ( unsigned int v = 0; v < el.subEntities(dimension); ++v)
             {
               typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
               if ( gridPtr_.vtxParam_[ index ].empty() )

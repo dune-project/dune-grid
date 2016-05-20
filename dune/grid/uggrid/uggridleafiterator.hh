@@ -38,30 +38,24 @@ namespace Dune {
         if (pitype==All_Partition || pitype==Ghost_Partition) {
           do {
             this->setToTarget((UGEntity*)UG_NS<dim>::PFirstNode(grid_->multigrid_->grids[levelCounter++]), grid_);
-          } while (not this->virtualEntity_.getTarget()
-                   and levelCounter <= unsigned(grid.maxLevel()));
-        } else if (pitype == Dune::Interior_Partition || pitype == Dune::InteriorBorder_Partition) {
+          } while (not this->virtualEntity_.getTarget() and levelCounter <= grid.maxLevel());
+        } else {
           do {
             this->setToTarget((UGEntity*)UG_NS<dim>::FirstNode(grid_->multigrid_->grids[levelCounter++]), grid_);
-          } while (not this->virtualEntity_.getTarget()
-                   and levelCounter <= unsigned(grid.maxLevel()));
-        } else     // overlap and overlap-front -- these don't exist in UG grids
-          this->setToTarget(nullptr,nullptr);
+          } while (not this->virtualEntity_.getTarget() and levelCounter <= grid.maxLevel());
+        }
 
       } else if (codim==0) {
         if (pitype==All_Partition || pitype==Ghost_Partition) {
           do {
             this->setToTarget((UGEntity*)UG_NS<dim>::PFirstElement(grid_->multigrid_->grids[levelCounter++]), grid_);
-          } while (not this->virtualEntity_.getTarget()
-                   and levelCounter <= unsigned(grid.maxLevel()));
-        } else if (pitype == Dune::Interior_Partition || pitype == Dune::InteriorBorder_Partition) {
+          } while (not this->virtualEntity_.getTarget() and levelCounter <= grid.maxLevel());
+        } else {
           do {
             this->setToTarget((UGEntity*)UG_NS<dim>::FirstElement(grid_->multigrid_->grids[levelCounter++]), grid_);
           } while (not this->virtualEntity_.getTarget()
                    and levelCounter <= unsigned(grid.maxLevel()));
         }
-        else     // overlap and overlap-front -- these don't exist in UG grids
-          this->setToTarget(nullptr,nullptr);
 
       } else
         DUNE_THROW(NotImplemented, "UGGrid leaf iterators for codimension " << codim);
@@ -113,18 +107,29 @@ namespace Dune {
     bool isInPartition()
     {
       Dune::PartitionType entityPIType = this->virtualEntity_.partitionType();
-      if (pitype == All_Partition)
+      switch (pitype) {
+      case All_Partition:
         return true;
-
-      if (pitype == Ghost_Partition && entityPIType == GhostEntity)
-        return true;
-      else if (pitype == Interior_Partition && entityPIType == InteriorEntity)
-        return true;
-      else if (pitype == InteriorBorder_Partition &&
-               (entityPIType == BorderEntity ||
-                entityPIType == InteriorEntity))
-        return true;
-      return false;
+      case Ghost_Partition:
+        if (entityPIType == GhostEntity)
+          return true;
+        else
+          return false;
+      case Interior_Partition:
+        if (entityPIType == InteriorEntity)
+          return true;
+        else
+          return false;
+      case InteriorBorder_Partition:
+      case Overlap_Partition:
+      case OverlapFront_Partition:
+        if (entityPIType == BorderEntity || entityPIType == InteriorEntity)
+          return true;
+        else
+          return false;
+      default:
+        DUNE_THROW(NotImplemented, "Unhandled partition iterator type " << pitype);
+      }
     }
 
     /**

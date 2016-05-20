@@ -87,9 +87,9 @@ namespace Dune
 
   template< int mydim, int cdim, class Grid >
   class LocalGeometryReference
-    : public GeometryReference< typename remove_const< Grid >::type::Traits::template Codim< remove_const< Grid >::type::dimension - mydim >::LocalGeometryImpl >
+    : public GeometryReference< typename std::remove_const< Grid >::type::Traits::template Codim< std::remove_const< Grid >::type::dimension - mydim >::LocalGeometryImpl >
   {
-    typedef typename remove_const< Grid >::type::Traits::template Codim< remove_const< Grid >::type::dimension - mydim >::LocalGeometryImpl Implementation;
+    typedef typename std::remove_const< Grid >::type::Traits::template Codim< std::remove_const< Grid >::type::dimension - mydim >::LocalGeometryImpl Implementation;
 
   public:
     LocalGeometryReference ( const Implementation &impl )

@@ -15,11 +15,8 @@ namespace Dune
      intersections with "neighboring" elements and with the domain
      boundary.
 
-     Template parameters are:
-
-     - <tt>GridImp</tt> Type that is a model of Dune::Grid
-     - <tt>IntersectionIteratorImp</tt> Class template that is a model of
-     Dune::IntersectionIterator
+     \tparam GridImp Type that is a model of Dune::Grid
+     \tparam IntersectionIteratorImp Class template that is a model of Dune::IntersectionIterator
 
      @warning The number of neigbors may be different from the number of
      faces/edges of an element!
@@ -191,6 +188,14 @@ namespace Dune
       return *this;
     }
 
+    /** @brief Postincrement operator. Proceed to next intersection.*/
+    IntersectionIterator operator++(int)
+    {
+      IntersectionIterator copy(*this);
+      this->realIterator.increment();
+      return copy;
+    }
+
     /** @brief Default constructor. */
     IntersectionIterator()
     {}
@@ -220,21 +225,15 @@ namespace Dune
 
 } // namespace Dune
 
-namespace std {
 
-  template<class Iterator>
-  struct iterator_traits;
+namespace std
+{
 
-  template< class GridImp, class IntersectionIteratorImp,
-            class IntersectionImp >
-  struct iterator_traits< Dune::IntersectionIterator< GridImp,
-                                                      IntersectionIteratorImp,
-                                                      IntersectionImp > >
+  template< class GridImp, class IntersectionIteratorImp, class IntersectionImp >
+  struct iterator_traits< Dune::IntersectionIterator< GridImp, IntersectionIteratorImp, IntersectionImp > >
   {
     typedef ptrdiff_t difference_type;
-    typedef const typename Dune::IntersectionIterator
-      < GridImp, IntersectionIteratorImp, IntersectionImp >::Intersection
-      value_type;
+    typedef const typename Dune::Intersection< GridImp, IntersectionImp > value_type;
     typedef value_type *pointer;
     typedef value_type &reference;
     typedef forward_iterator_tag iterator_category;

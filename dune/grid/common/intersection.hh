@@ -9,7 +9,7 @@
 namespace Dune
 {
 
-  /** \brief %Intersection of a mesh entities of codimension 0 ("elements")
+  /** \brief %Intersection of a mesh entity of codimension 0 ("element")
       with a "neighboring" element or with the domain
       boundary.
 
@@ -20,7 +20,7 @@ namespace Dune
 
      Intersections are codimension 1 objects. These
      intersections are accessed via an Intersection. This allows
-     the implementation of non-matching grids, as one face can now
+     the implementation of non-matching grids, as one facet can now
      consist of several intersections.
      In a conforming mesh such an intersection corresponds to an entity of
      codimension 1 but in the general non-conforming case there will be no entity
@@ -68,7 +68,8 @@ namespace Dune
      <td>false</td><td>true</td><td><em>undefined</em></td></tr>
      <tr>
      <td>3</td><td>on periodic boundary</td>
-     <td>true</td><td>true</td><td>Ghost-/Overlap cell<br>(with transformed geometry)</td></tr>
+     <td>true</td><td>true</td><td>Ghost-/Overlap cell <br>
+                                   (with transformed geometry)</td></tr>
      <tr>
      <td>4</td><td>on processor boundary</td>
      <td>false <em>if grid has no ghosts</em><br>true <em>otherwise</em></td><td>false </td>
@@ -98,7 +99,7 @@ namespace Dune
      \if old_documentation
        Different types of physical boundaries can be modeled using either
        the global coordinates of the intersection or by using the
-       boundaryID method. On some grids (AluGrid, AlbertaGrid) this
+       boundaryID method. On some grids (dune-ALUGrid, AlbertaGrid) this
        method returns an integer value which can be individually assigned
        to each boundary intersection of the macro grid and which is
        prolonged to higher levels during grid refinement.<br>
@@ -184,9 +185,6 @@ namespace Dune
     /** \brief Type of entity that this Intersection belongs to */
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
-    /** \brief Pointer to the type of entities that this Intersection belongs to */
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-
     /** \brief Codim 1 geometry returned by geometry() */
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
 
@@ -199,11 +197,17 @@ namespace Dune
     /** \brief Codim 1 geometry returned by geometryInInside() and geometryInOutside() */
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
 
-    //! @brief Export codim of intersection (always 1)
-    enum { codimension=1 /*!< codim of intersection in grid */ };
+    /** @brief Export codim of intersection (always 1)
+     * \deprecated This number is deprecated, because it is always 1 anyway.
+     */
+    enum DUNE_DEPRECATED_MSG("Deprecated: codimensions of an intersection are always 1!") { codimension=1 /*!< codim of intersection in grid */ };
 
-    //! @brief Export grid dimension
-    enum { dimension=GridImp::dimension /*!< grid dimension */ };
+    /** @brief Export grid dimension
+     * \deprecated This number is deprecated:  First, it doesn't really give any information
+     * about the intersection itself.  Secondly: the fact the Intersection::dimension is
+     * NOT the dimension of the intersection confused too many people.
+     */
+    enum DUNE_DEPRECATED_MSG("Deprecated: get this dimension from the grid itself, or from an element!") { dimension=GridImp::dimension /*!< grid dimension */ };
 
     //! @brief Export dimension of the intersection
     enum { mydimension=GridImp::dimension-1 /*!< intersection's dimension */ };
@@ -251,7 +255,7 @@ namespace Dune
      *
      *  In the DUNE framework, data is stored in arrays, addressed by an index,
      *  in this case the boundarySegmentIndex. The size of these arrays can be
-     *  obtained by the Grid::numBoundarySegments.
+     *  obtained by the Grid::numBoundarySegments method.
      *
      *  The indices returned by this method are consecutive, zero based, and local to the
      *  processor. Notice that these indices do not necessarily coincide with the insertion
@@ -268,48 +272,22 @@ namespace Dune
       return this->real.neighbor();
     }
 
-    /*! @brief return EntityPointer to the Entity on the inside of this
-       intersection. That is the Entity where we started this .
+    /*! @brief return Entity on the inside of this
+       intersection. That is the Entity where we started this.
      */
-#ifdef DOXYGEN
-    Entity
-#else
-    typename std::conditional<
-      std::is_same<
-        decltype(real.inside()),
-        Entity
-        >::value,
-      Entity,
-      EntityPointer
-      >::type
-#endif
-    inside() const
+    Entity inside() const
     {
-      Entity::template warnOnDeprecatedEntityPointer<decltype(real.inside())>();
       return this->real.inside();
     }
 
-    /*! @brief return EntityPointer to the Entity on the outside of this
+    /*! @brief return Entity on the outside of this
        intersection. That is the neighboring Entity.
 
        @warning Don't call this method if there is no neighboring Entity
        (neighbor() returns false). In this case the result is undefined.
      */
-#ifdef DOXYGEN
-    Entity
-#else
-    typename std::conditional<
-      std::is_same<
-        decltype(real.outside()),
-        Entity
-        >::value,
-      Entity,
-      EntityPointer
-      >::type
-#endif
-    outside() const
+    Entity outside() const
     {
-      Entity::template warnOnDeprecatedEntityPointer<decltype(real.outside())>();
       return this->real.outside();
     }
 
@@ -362,7 +340,7 @@ namespace Dune
      *  local coordinates of the intersection to global (world) coordinates.
      *
      *  \note If the returned geometry has type <b>none</b> then only a limited set of features
-     *        is availalbe for the geometry, i.e. center and volume.
+     *        is available for the geometry, i.e. center and volume.
      *
      *  \note Previously, the geometry was encapsulated in the intersection object
      *        and a const reference was returned.
@@ -384,10 +362,13 @@ namespace Dune
     /** \brief Local index of codim 1 entity in the inside() entity where
      *         intersection is contained in
      *
-     *  \note This method returns the face number with respect to the generic
-     *        reference element.
+     *  This method returns the facet number with respect to the generic reference
+     *  element.
      *
-     *  \returns the index of the inside entity's face containing this
+     *  \note This index can be used with the inside entity's
+     *        `subEntity<1>()` method to obtain the facet.
+     *
+     *  \returns the index of the inside entity's facet containing this
      *           intersection (with respect to the generic reference element)
      */
     int indexInInside () const
@@ -398,10 +379,13 @@ namespace Dune
     /** \brief Local index of codim 1 entity in outside() entity where
      *         intersection is contained in
      *
-     *  \note This method returns the face number with respect to the generic
-     *        reference element.
+     *  This method returns the facet number with respect to the generic reference
+     *  element.
      *
-     *  \returns the index of the outside entity's face containing this
+     *  \note This index can be used with the outside entity's
+     *        `subEntity<1>()` method to obtain the facet.
+     *
+     *  \returns the index of the outside entity's facet containing this
      *           intersection (with respect to the generic reference element)
      */
     int indexInOutside () const
@@ -421,7 +405,7 @@ namespace Dune
     /*! @brief return unit outer normal scaled with the integration element
 
        The normal is scaled with the integration element of the intersection. This
-          method is redundant but it may be more efficent to use this function
+          method is redundant but it may be more efficient to use this function
           rather than computing the integration element via geometry().
 
        The returned vector may depend on local position within the intersection.

@@ -28,7 +28,7 @@ namespace Dune
     /** \brief Increment the MultiIndex */
     MultiIndex<dim>& operator++()
     {
-      for (int i=0; i<dim; i++)
+      for (std::size_t i=0; i<dim; i++)
       {
         // Augment digit
         (*this)[i]++;
@@ -46,7 +46,7 @@ namespace Dune
     size_t cycle() const
     {
       size_t result = 1;
-      for (int i=0; i<dim; i++)
+      for (std::size_t i=0; i<dim; i++)
         result *= limits_[i];
       return result;
     }

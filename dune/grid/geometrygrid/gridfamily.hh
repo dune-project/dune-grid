@@ -83,8 +83,6 @@ namespace Dune
           typedef GeoGrid::Entity< codim, dimension, const Grid > EntityImpl;
           typedef Dune::Entity< codim, dimension, const Grid, GeoGrid::Entity > Entity;
 
-          typedef Dune::EntityPointer< const Grid, Dune::DefaultEntityPointer< Entity > > EntityPointer;
-
           typedef Dune::EntitySeed< const Grid, GeoGrid::EntitySeed< codim, const Grid > > EntitySeed;
 
           template< PartitionIteratorType pitype >
@@ -111,14 +109,8 @@ namespace Dune
 
         typedef typename HostGrid::Traits::CollectiveCommunication CollectiveCommunication;
 
-        template< PartitionIteratorType pitype >
-        struct Partition
-        {
-          typedef Dune::GridView< GeoGrid::GridViewTraits< typename HostGrid::LeafGridView, CoordFunction, Allocator, pitype > >
-          LeafGridView;
-          typedef Dune::GridView< GeoGrid::GridViewTraits< typename HostGrid::LevelGridView, CoordFunction, Allocator, pitype > >
-          LevelGridView;
-        };
+        typedef Dune::GridView< GeoGrid::GridViewTraits< typename HostGrid::LeafGridView, CoordFunction, Allocator > > LeafGridView;
+        typedef Dune::GridView< GeoGrid::GridViewTraits< typename HostGrid::LevelGridView, CoordFunction, Allocator > > LevelGridView;
       };
     };
 

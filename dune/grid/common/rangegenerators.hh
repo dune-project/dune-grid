@@ -25,13 +25,13 @@ namespace Dune
    *
    * <h2>Range-based for loop</h2>
    *
-   * \note Range-based for loops are availabe in GCC 4.6+, Clang 3.2+ and Intel ICC 13+.
+   * \note Range-based for loops are available in GCC 4.6+, Clang 3.2+ and Intel ICC 13+.
    *
    * A range-based for loop is a short-hand way of iterating over any object that provides the standard
    * begin() and end() methods. It looks like this:
    *
    * \code
-   * for (auto&& i : vec)
+   * for (const auto& i : vec)
    *   i *= 2;
    * \endcode
    *
@@ -40,8 +40,14 @@ namespace Dune
    * do that for you using `auto`.
    *
    * \note Due to a number of upcoming changes to our grid interface, you should **always**
-   *       use `auto&&` to capture the Entity / Intersection type. Otherwise, your code will
+   *       use `const auto&&` to capture the Entity / Intersection type. Otherwise, your code will
    *       break after the release of DUNE 2.4!
+   *
+   * \note We are aware that people like Bjarne Stroustrup and Herb
+   *       Sutter advertise the use `auto&&`. Sadly GCC has a bug (see
+   *       https://gcc.gnu.org/bugzilla/show_bug.cgi?id=63506), which
+   *       prevents the use of `auto&&` in template functions. For this reason
+   *       we currently advice the use of `const auto&`.
    *
    * For those interested in the technical details, the compiler has translated the loop into
    * something resembling this (not quite, but we'll forget about the minor details here):
@@ -52,7 +58,7 @@ namespace Dune
    *      it != end;
    *      ++it)
    * {
-   *   auto&& i = *it;
+   *   const auto& i = *it;
    *   i *= 2;
    * }
    * \endcode
@@ -69,20 +75,20 @@ namespace Dune
    *
    * \code
    * // iterate over cells
-   * for (auto&& cell : elements(gv))
+   * for (const auto& cell : elements(gv))
    * {
    *   std::cout << "Cell " << gv.indexSet().index(cell) << " is centered at "
    *             << cell.geometry().center() << std::endl;
    * }
    * // iterate over vertices
-   * for (auto&& vertex : vertices(gv))
+   * for (const auto& vertex : vertices(gv))
    * {
    *   std::cout << "Vertex " << gv.indexSet().index(vertex) << " at "
    *             << vertex.geometry().center() << std::endl;
    * }
    * \endcode
    *
-   * \note As explained above, **always** use `auto&&` for the type of the Entity!
+   * \note As explained above, **always** use `const auto&` for the type of the Entity!
    *
    * There are also functions for iterating over facets() and edges() as well as generic entities() functions,
    * which allow you to specify a numeric codimension or dimension.
@@ -97,12 +103,12 @@ namespace Dune
    *
    * \code
    * // use prebuild PartitionSet
-   * for (auto&& vertex : vertices(gv,Dune::Partitions::interiorBorder))
+   * for (const auto& vertex : vertices(gv,Dune::Partitions::interiorBorder))
    * {
    *    ...
    * }
    * // construct PartitionSet by combining partitions
-   * for (auto&& vertex : vertices(gv,Dune::Partitions::interior + Dune::Partitions::border))
+   * for (const auto& vertex : vertices(gv,Dune::Partitions::interior + Dune::Partitions::border))
    * {
    *    ...
    * }
@@ -119,10 +125,10 @@ namespace Dune
    *
    * \code
    * std::size_t count = 0;
-   * for (auto&& e : elements(gv))
+   * for (const auto& e : elements(gv))
    * {
    *   do_stuff();
-   *   for (auto&& i : intersections(gv,e))
+   *   for (const auto& i : intersections(gv,e))
    *   {
    *     if (e.boundary())
    *       ++count;
@@ -212,7 +218,7 @@ namespace Dune
    * \code
    * // iterate over all cells in the LeafGridView
    * auto gv = grid.leafGridView();
-   * for (auto&& e : elements(gv))
+   * for (const auto& e : elements(gv))
    * {
    *   std::cout << e.geometry().center() << std::endl;
    * }
@@ -247,7 +253,7 @@ namespace Dune
    * \code
    * // iterate over all facets in the LeafGridView
    * auto gv = grid.leafGridView();
-   * for (auto&& e : facets(gv))
+   * for (const auto& e : facets(gv))
    * {
    *   std::cout << e.geometry().center() << std::endl;
    * }
@@ -282,7 +288,7 @@ namespace Dune
    * \code
    * // iterate over all edges in the LeafGridView
    * auto gv = grid.leafGridView();
-   * for (auto&& e : edges(gv))
+   * for (const auto& e : edges(gv))
    * {
    *   std::cout << e.geometry().center() << std::endl;
    * }
@@ -317,7 +323,7 @@ namespace Dune
    * \code
    * // iterate over all vertices in the LeafGridView
    * auto gv = grid.leafGridView();
-   * for (auto&& e : vertices(gv))
+   * for (const auto& e : vertices(gv))
    * {
    *   std::cout << e.geometry().center() << std::endl;
    * }
@@ -358,8 +364,8 @@ namespace Dune
    * \code
    * // iterate over all intersections of an entity with respect to the LeafGridView
    * auto gv = grid.leafGridView();
-   * auto&& entity = ...; // get an entity from somewhere
-   * for (auto&& i : intersections(gv,entity))
+   * const auto& entity = ...; // get an entity from somewhere
+   * for (const auto& i : intersections(gv,entity))
    * {
    *   std::cout << i.geometry().center() << std::endl;
    * }
@@ -395,8 +401,8 @@ namespace Dune
    *
    * \code
    * // iterate over all descendants of an entity
-   * auto&& entity = ...; // get an entity from somewhere
-   * for (auto&& e : descendantElements(entity,grid.maxLevel()))
+   * const auto& entity = ...; // get an entity from somewhere
+   * for (const auto& e : descendantElements(entity,grid.maxLevel()))
    * {
    *   std::cout << e.geometry().center() << std::endl;
    * }
@@ -437,7 +443,7 @@ namespace Dune
    * \code
    * // iterate over all cells in the LeafGridView
    * auto gv = grid.leafGridView();
-   * for (auto&& e : entities(gv,Dune::Codim<0>()))
+   * for (const auto& e : entities(gv,Dune::Codim<0>()))
    * {
    *   std::cout << e.geometry().center() << std::endl;
    * }
@@ -483,7 +489,7 @@ namespace Dune
    * \code
    * // iterate over all edges in the LeafGridView
    * auto gv = grid.leafGridView();
-   * for (auto&& e : entities(gv,Dune::Dim<1>()))
+   * for (const auto& e : entities(gv,Dune::Dim<1>()))
    * {
    *   std::cout << e.geometry().center() << std::endl;
    * }
@@ -537,7 +543,7 @@ namespace Dune
    * \code
    * // iterate over all ghost cells in the LeafGridView
    * auto gv = grid.leafGridView();
-   * for (auto&& e : elements(gv,Dune::Partitions::ghost))
+   * for (const auto& e : elements(gv,Dune::Partitions::ghost))
    * {
    *   std::cout << e.geometry().center() << std::endl;
    * }
@@ -569,7 +575,7 @@ namespace Dune
    * \code
    * // iterate over all interior and border facets in the LeafGridView
    * auto gv = grid.leafGridView();
-   * for (auto&& e : facets(gv,Dune::Partitions::interiorBorder))
+   * for (const auto& e : facets(gv,Dune::Partitions::interiorBorder))
    * {
    *   std::cout << e.geometry().center() << std::endl;
    * }
@@ -604,7 +610,7 @@ namespace Dune
    * \code
    * // iterate over all interior edges in the LeafGridView
    * auto gv = grid.leafGridView();
-   * for (auto&& e : edges(gv,Dune::Partitions::interior))
+   * for (const auto& e : edges(gv,Dune::Partitions::interior))
    * {
    *   std::cout << e.geometry().center() << std::endl;
    * }
@@ -636,7 +642,7 @@ namespace Dune
    * \code
    * // iterate over all interior vertices in the LeafGridView
    * auto gv = grid.leafGridView();
-   * for (auto&& e : vertices(gv,Dune::Partitions::interior))
+   * for (const auto& e : vertices(gv,Dune::Partitions::interior))
    * {
    *   std::cout << e.geometry().center() << std::endl;
    * }
@@ -674,7 +680,7 @@ namespace Dune
    * \code
    * // iterate over all interior and border cells in the LeafGridView
    * auto gv = grid.leafGridView();
-   * for (auto&& e : entities(gv,Dune::Codim<0>(),Dune::Partitions::interiorBorder))
+   * for (const auto& e : entities(gv,Dune::Codim<0>(),Dune::Partitions::interiorBorder))
    * {
    *   std::cout << e.geometry().center() << std::endl;
    * }
@@ -716,7 +722,7 @@ namespace Dune
    * \code
    * // iterate over all interior and border edges in the LeafGridView
    * auto gv = grid.leafGridView();
-   * for (auto&& e : entities(gv,Dune::Dim<1>(),Dune::Partitions::interiorBorder))
+   * for (const auto& e : entities(gv,Dune::Dim<1>(),Dune::Partitions::interiorBorder))
    * {
    *   std::cout << e.geometry().center() << std::endl;
    * }
@@ -754,9 +760,6 @@ namespace Dune
 
 #else // DOXYGEN
 
-// only make the implementations available on new compilers - there is a really nasty bug in GCC 4.4...
-#if HAVE_RANGE_BASED_FOR
-
   // ******************************************************************************************
   // Implementations
   // ******************************************************************************************
@@ -772,18 +775,12 @@ namespace Dune
    * Dune namespace or in the namespace of the GridView object.
    */
   template<typename GV, int codim, unsigned int partitions>
-  inline IteratorRange<
-    typename GV::template Codim<codim>::template Partition<
-      derive_partition_iterator_type<partitions>::value
-      >::Iterator
-    >
-  entities(const GV& gv, Codim<codim>, PartitionSet<partitions>)
+  inline auto entities(const GV& gv, Codim<codim>, PartitionSet<partitions>)
+    -> IteratorRange<decltype(gv.template begin<codim,derive_partition_iterator_type<partitions>::value>())>
   {
     static_assert(0 <= codim && codim <= GV::dimension, "invalid codimension for given GridView");
     const PartitionIteratorType pit = derive_partition_iterator_type<partitions>::value;
-    typedef IteratorRange<
-      typename GV::template Codim<codim>::template Partition<pit>::Iterator
-      > return_type;
+    typedef IteratorRange<decltype(gv.template begin<codim,pit>())> return_type;
     return return_type(gv.template begin<codim,pit>(),gv.template end<codim,pit>());
   }
 
@@ -795,15 +792,11 @@ namespace Dune
    * All other functions without PartitionSet parameter forward to this function.
    */
   template<typename GV, int codim>
-  inline IteratorRange<
-    typename GV::template Codim<codim>::Iterator
-    >
-  entities(const GV& gv, Codim<codim>)
+  inline auto entities(const GV& gv, Codim<codim>)
+    -> IteratorRange<decltype(gv.template begin<codim>())>
   {
     static_assert(0 <= codim && codim <= GV::dimension, "invalid codimension for given GridView");
-    typedef IteratorRange<
-      typename GV::template Codim<codim>::Iterator
-      > return_type;
+    typedef IteratorRange<decltype(gv.template begin<codim>())> return_type;
     return return_type(gv.template begin<codim>(),gv.template end<codim>());
   }
 
@@ -821,9 +814,10 @@ namespace Dune
    * Intersection range implementation.
    */
   template<typename GV, typename Entity>
-  inline IteratorRange<typename GV::IntersectionIterator> intersections(const GV& gv, const Entity& e)
+  inline auto intersections(const GV& gv, const Entity& e)
+    -> IteratorRange<decltype(gv.ibegin(e))>
   {
-    return IteratorRange<typename GV::IntersectionIterator>(gv.ibegin(e),gv.iend(e));
+    return IteratorRange<decltype(gv.ibegin(e))>(gv.ibegin(e),gv.iend(e));
   }
 
 
@@ -903,8 +897,6 @@ namespace Dune
   {
     return entities(gv,Dim<0>());
   }
-
-#endif // HAVE_RANGE_BASED_FOR
 
 #endif // DOXYGEN
 

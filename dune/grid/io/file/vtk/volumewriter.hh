@@ -4,7 +4,7 @@
 #ifndef DUNE_GRID_IO_FILE_VTK_VOLUMEWRITER_HH
 #define DUNE_GRID_IO_FILE_VTK_VOLUMEWRITER_HH
 
-#include <dune/common/shared_ptr.hh>
+#include <memory>
 
 #include <dune/grid/io/file/vtk/basicwriter.hh>
 #include <dune/grid/io/file/vtk/function.hh>
@@ -29,7 +29,7 @@ namespace Dune {
 
     public:
       typedef Dune::VTKFunction< GV > VTKFunction;
-      typedef shared_ptr<VTKFunction> VTKFunctionPtr;
+      typedef std::shared_ptr<VTKFunction> VTKFunctionPtr;
 
       ConformingVolumeWriter(const GV& gv_)
         : Factory(gv_), Base(static_cast<const Factory&>(*this)), gv(gv_)
@@ -38,7 +38,7 @@ namespace Dune {
       using Base::addPointData;
 
       void addCellData(const VTKFunctionPtr& p) {
-        Base::addCellData(shared_ptr<typename Base::FunctionWriter>
+        Base::addCellData(std::shared_ptr<typename Base::FunctionWriter>
                       (new VTKFunctionWriter<VTKFunction>(p)));
       }
 
@@ -52,7 +52,7 @@ namespace Dune {
       }
 
       void addVertexData(const VTKFunctionPtr& p) {
-        addPointData(shared_ptr<typename Base::FunctionWriter>
+        addPointData(std::shared_ptr<typename Base::FunctionWriter>
                        (new VTKFunctionWriter<VTKFunction>(p)));
       }
 

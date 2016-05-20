@@ -26,7 +26,7 @@ namespace Dune
   template< int codim, class GridImp >
   struct AlbertaGridCoordinateReader
   {
-    typedef typename remove_const< GridImp >::type Grid;
+    typedef typename std::remove_const< GridImp >::type Grid;
 
     static const int dimension = Grid::dimension;
     static const int codimension = codim;

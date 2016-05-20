@@ -5,13 +5,12 @@
 #include "config.h"
 #endif
 
+#include <cstdio>
 #include <iostream>
-
-#include <stdio.h>
+#include <memory>
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/io/file/vtk/boundarywriter.hh>
@@ -65,12 +64,12 @@ void doWrite( const GridView &gridView )
 
   Dune::VTK::NonConformingBoundaryWriter< GridView > vtk( gridView );
 
-  Dune::shared_ptr<ScalarFunction<GridView> > scalarFunc
+  std::shared_ptr<ScalarFunction<GridView> > scalarFunc
     (new ScalarFunction<GridView>);
   vtk.addCellData(scalarFunc, "cellScalar");
   vtk.addPointData(scalarFunc, "pointScalar");
 
-  Dune::shared_ptr<VectorFunction<GridView> > vectorFunc
+  std::shared_ptr<VectorFunction<GridView> > vectorFunc
     (new VectorFunction<GridView>);
   vtk.addCellData(vectorFunc, "cellVector");
   vtk.addPointData(vectorFunc, "pointVector");
@@ -90,7 +89,7 @@ void doWrite( const GridView &gridView )
 }
 
 template<int dim>
-void vtkCheck(const Dune::array<int,dim>& n,
+void vtkCheck(const std::array<int,dim>& n,
               const Dune::FieldVector<double,dim>& h)
 {
   std::cout << std::endl << "vtkCheck dim=" << dim << std::endl << std::endl;
@@ -113,12 +112,12 @@ int main(int argc, char **argv)
                 << std::endl;
 
     {
-      Dune::array<int,2> n = { { 5, 5 } };
+      std::array<int,2> n = { { 5, 5 } };
       Dune::FieldVector<double,2> h = { 1.0, 2.0 };
       vtkCheck<2>(n,h);
     }
     {
-      Dune::array<int,3> n = { { 5, 5, 5 } };
+      std::array<int,3> n = { { 5, 5, 5 } };
       Dune::FieldVector<double,3> h = { 1.0, 2.0, 3.0 };
       vtkCheck<3>(n,h);
     }

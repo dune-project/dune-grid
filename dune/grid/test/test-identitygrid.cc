@@ -19,7 +19,7 @@ template <int dim>
 void testDim()
 {
   typedef YaspGrid<dim> GridType;
-  Dune::array<int,dim> n;
+  std::array<int,dim> n;
   std::fill(n.begin(), n.end(), 1 << (5 - dim));
   Dune::FieldVector<double,dim> extension(1.0);
 
@@ -35,6 +35,7 @@ void testDim()
 
 int main (int argc, char *argv[]) try
 {
+  Dune::MPIHelper::instance(argc, argv);
   testDim<1>();
   testDim<2>();
   testDim<3>();

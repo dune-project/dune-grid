@@ -4,11 +4,11 @@
 #ifndef DUNE_GRID_IO_FILE_VTK_SKELETONFUNCTION_HH
 #define DUNE_GRID_IO_FILE_VTK_SKELETONFUNCTION_HH
 
+#include <memory>
 #include <string>
 #include <vector>
 
 #include <dune/common/fvector.hh>
-#include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/io/file/vtk/functionwriter.hh>
 #include <dune/grid/io/file/vtk/pvtuwriter.hh>
@@ -58,7 +58,7 @@ namespace Dune {
        * \param c      The cell (intersection) to evaluate in.
        * \param xl     The local coordinate within the cell.
        * \param result Where to store the result.  The vector is resized as
-       *               nessecary, and is overwritten.
+       *               necessary, and is overwritten.
        */
       void evaluate(const typename Traits::Cell& c,
                     const typename Traits::Domain& xl,
@@ -81,18 +81,18 @@ namespace Dune {
     {
       typedef typename Func::Traits::RangeField RF;
 
-      shared_ptr<const Func> func;
+      std::shared_ptr<const Func> func;
       std::string name_;
       unsigned dimR;
-      shared_ptr<DataArrayWriter<RF> > arraywriter;
+      std::shared_ptr<DataArrayWriter<RF> > arraywriter;
 
     public:
-      SkeletonFunctionWriter(const shared_ptr<const Func>& func_,
+      SkeletonFunctionWriter(const std::shared_ptr<const Func>& func_,
                              const std::string& name, unsigned dimR_)
         : func(func_), name_(name), dimR(dimR_)
       { }
 
-      SkeletonFunctionWriter(const shared_ptr<const Func>& func_,
+      SkeletonFunctionWriter(const std::shared_ptr<const Func>& func_,
                              const std::string& name)
         : func(func_), name_(name), dimR(func->dimRange())
       { }

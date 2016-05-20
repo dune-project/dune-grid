@@ -103,6 +103,8 @@ namespace Dune
                               MPICommunicatorType comm = MPIHelper::getCommunicator() )
     {
       std::ifstream input( filename.c_str() );
+      if( !input )
+        DUNE_THROW( DGFException, "Error: Macrofile '" << filename << "' not found" );
       generate( input, comm );
     }
 

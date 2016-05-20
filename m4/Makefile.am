@@ -7,7 +7,6 @@ ALLM4S =					\
 	dune_grid.m4				\
 	dune_griddim.m4				\
 	dune_gridtype.m4			\
-	grape.m4				\
 	psurface.m4				\
 	ug.m4
 

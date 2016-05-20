@@ -11,6 +11,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <array>
 
 #include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
@@ -117,7 +118,7 @@ int doWrite( const GridView &gridView, bool coerceToSimplex)
 }
 
 template<int dim>
-int vtkCheck(const Dune::array<int, dim>& elements,
+int vtkCheck(const std::array<int, dim>& elements,
               const Dune::FieldVector<double, dim>& upperRight)
 {
   Dune::YaspGrid<dim> g(upperRight, elements);

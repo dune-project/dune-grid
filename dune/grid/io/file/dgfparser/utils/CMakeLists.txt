@@ -8,9 +8,12 @@ foreach(exe ${EXTRA_PROGRAMS})
   target_link_libraries(${exe} dunegrid ${DUNE_LIBS})
 endforeach(exe ${EXTRA_PROGRAMS})
 
-if(ALUGRID_FOUND)
-  add_dgf_executable(gmsh2dgfalusimplex EXCLUDE_FROM_ALL gmsh2dgf.cc GRIDDIM 2 WORLDDIM 2
-    GRIDTYPE ALUGRID_SIMPLEX)
-  add_dune_alugrid_flags(gmsh2dgfalusimplex)
-  set(EXTRA_PROGRAMS ${EXTRA_PROGRAMS} gmsh2dgfalusimplex)
-endif(ALUGRID_FOUND)
+if(UG_FOUND)
+  add_dgf_executable(gmsh2dgfugsimplex
+    EXCLUDE_FROM_ALL
+    gmsh2dgf.cc
+    GRIDDIM 2 WORLDDIM 2
+    GRIDTYPE UGGRID)
+  add_dune_ug_flags(gmsh2dgfugsimplex)
+  set(EXTRA_PROGRAMS ${EXTRA_PROGRAMS} gmsh2dgfugsimplex)
+endif()

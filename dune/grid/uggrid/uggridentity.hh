@@ -8,7 +8,7 @@
  */
 
 #include <memory>
-#include <dune/common/shared_ptr.hh>
+
 #include <dune/grid/common/gridenums.hh>
 
 
@@ -331,7 +331,7 @@ namespace Dune {
         for (size_t j = 0; j < dim; j++)
             geometryCoords[i][j] = cornerCoords[i][j];
 
-      geo_ = Dune::make_shared<GeometryImpl>(type(), geometryCoords);
+      geo_ = std::make_shared<GeometryImpl>(type(), geometryCoords);
 
       gridImp_ = gridImp;
     }
@@ -355,7 +355,7 @@ namespace Dune {
     }
 
   protected:
-    Dune::shared_ptr<GeometryImpl> geo_;
+    std::shared_ptr<GeometryImpl> geo_;
 
     typename UG_NS<dim>::template Entity<codim>::T* target_;
 
@@ -520,7 +520,7 @@ namespace Dune {
         for (size_t j = 0; j < dim; j++)
             geometryCoords[i][j] = cornerCoords[i][j];
 
-      geo_ = Dune::make_shared<GeometryImpl>(type(), geometryCoords);
+      geo_ = std::make_shared<GeometryImpl>(type(), geometryCoords);
 
       gridImp_ = gridImp;
     }
@@ -537,7 +537,7 @@ namespace Dune {
     }
 
 protected:
-    Dune::shared_ptr<GeometryImpl> geo_;
+    std::shared_ptr<GeometryImpl> geo_;
 
     /** \brief The UG object (a side vector) that represents this face */
     typename UG_NS<dim>::template Entity<codim>::T* target_;

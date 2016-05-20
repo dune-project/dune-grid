@@ -21,7 +21,7 @@ namespace Dune
       typedef IdSet< Grid, HostIdSet > This;
       typedef Dune::IdSet< Grid, This, typename HostIdSet::IdType > Base;
 
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef typename std::remove_const< Grid >::type::Traits Traits;
 
     public:
       typedef typename HostIdSet::IdType IdType;

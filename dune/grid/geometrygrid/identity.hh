@@ -20,6 +20,10 @@ namespace Dune
     typedef typename Base :: DomainVector DomainVector;
     typedef typename Base :: RangeVector RangeVector;
 
+    template< typename... Args >
+    IdenticalCoordFunction( Args&... )
+    {}
+
     void evaluate ( const DomainVector &x, RangeVector &y ) const
     {
       y = x;

@@ -31,7 +31,7 @@ namespace Dune {
 
     friend class IdentityGridLeafIntersectionIterator<GridImp>;
 
-    friend struct HostGridAccess< typename remove_const< GridImp >::type >;
+    friend struct HostGridAccess< typename std::remove_const< GridImp >::type >;
 
     enum {dim=GridImp::dimension};
 
@@ -44,7 +44,6 @@ namespace Dune {
 
   public:
 
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
@@ -70,14 +69,14 @@ namespace Dune {
       return hostIntersection_ == other.hostIntersection_;
     }
 
-    //! return EntityPointer to the Entity on the inside of this intersection
+    //! return Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
     Entity inside() const {
       return IdentityGridEntity<0,dim,GridImp>(identityGrid_,hostIntersection_.inside());
     }
 
 
-    //! return EntityPointer to the Entity on the outside of this intersection
+    //! return Entity on the outside of this intersection
     //! (that is the neighboring Entity)
     Entity outside() const {
       return IdentityGridEntity<0,dim,GridImp>(identityGrid_,hostIntersection_.outside());
@@ -197,7 +196,7 @@ namespace Dune {
 
     friend class IdentityGridLevelIntersectionIterator<GridImp>;
 
-    friend struct HostGridAccess< typename remove_const< GridImp >::type >;
+    friend struct HostGridAccess< typename std::remove_const< GridImp >::type >;
 
     enum {dim=GridImp::dimension};
 
@@ -210,7 +209,6 @@ namespace Dune {
 
   public:
 
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
@@ -236,14 +234,14 @@ namespace Dune {
       return hostIntersection_ == other.hostIntersection_;
     }
 
-    //! return EntityPointer to the Entity on the inside of this intersection
+    //! return Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
     Entity inside() const {
       return IdentityGridEntity<0,dim,GridImp>(identityGrid_,hostIntersection_.inside());
     }
 
 
-    //! return EntityPointer to the Entity on the outside of this intersection
+    //! return Entity on the outside of this intersection
     //! (that is the neighboring Entity)
     Entity outside() const {
       return IdentityGridEntity<0,dim,GridImp>(identityGrid_,hostIntersection_.outside());

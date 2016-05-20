@@ -6,8 +6,6 @@
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/gridfactory.hh>
 
-#include <dune/grid/utility/grapedataioformattypes.hh>
-
 #include <dune/grid/albertagrid/macrodata.hh>
 
 #if HAVE_ALBERTA
@@ -43,13 +41,10 @@ namespace Dune
     AlbertaReader ()
     {}
 
-    template< GrapeIOFileFormatType type >
     void readGrid ( const std::string &fileName, GridFactory &factory )
     {
-      static_assert(type != pgm, "AlbertaReader: reading pgm format is not supported.");
-
       // read ALBERTA macro triangulation
-      macroData_.read( fileName, (type == xdr) );
+      macroData_.read( fileName, false );
 
       // insert all vertices into the factory
       const int numVertices = macroData_.vertexCount();
@@ -76,11 +71,6 @@ namespace Dune
 
       // release ALBERTA macro data
       macroData_.release();
-    }
-
-    void readGrid ( const std::string &filename, GridFactory &factory )
-    {
-      readGrid< ascii >( filename, factory );
     }
   };
 

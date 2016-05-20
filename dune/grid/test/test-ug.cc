@@ -4,13 +4,13 @@
 #include <config.h>
 
 #include <iostream>
+#include <memory>
+
+#include <dune/common/parallel/mpihelper.hh>
 
 /*
-
    Instantiate UG-Grid and feed it to the generic gridcheck()
-
  */
-
 #include <dune/grid/uggrid.hh>
 #include <doc/grids/gridfactory/hybridtestgrids.hh>
 
@@ -18,8 +18,8 @@
 #include "checkcommunicate.hh"
 #include "checkgeometryinfather.hh"
 #include "checkintersectionit.hh"
+#include "checkpartition.hh"
 
-#include <dune/common/parallel/mpihelper.hh>
 
 using namespace Dune;
 
@@ -70,13 +70,13 @@ void makeHalfCircleQuad(Dune::UGGrid<2>& grid, bool boundarySegments, bool param
     if (parametrization) {
 
       vertices[0] = 1;  vertices[1] = 2;
-      factory.insertBoundarySegment(vertices, shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI, M_PI*4/3)));
+      factory.insertBoundarySegment(vertices, std::shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI, M_PI*4/3)));
 
       vertices[0] = 2;  vertices[1] = 3;
-      factory.insertBoundarySegment(vertices, shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI*4/3, M_PI*5/3)));
+      factory.insertBoundarySegment(vertices, std::shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI*4/3, M_PI*5/3)));
 
       vertices[0] = 3;  vertices[1] = 0;
-      factory.insertBoundarySegment(vertices, shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI*5/3, M_PI*2)));
+      factory.insertBoundarySegment(vertices, std::shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI*5/3, M_PI*2)));
 
     } else {
 
@@ -161,7 +161,7 @@ void generalTests(bool greenClosure)
 
   for (int i=0; i<3; i++) {
     assert(cArray[i] == (*((FieldVector<double,3>*)&cArray))[i]);
-    assert(cArray[i] == (*((array<double,3>*)&cArray))[i]);
+    assert(cArray[i] == (*((std::array<double,3>*)&cArray))[i]);
   }
 
   // //////////////////////////////////////////////////////////
@@ -228,6 +228,14 @@ void generalTests(bool greenClosure)
   // check the intersection iterator
   checkIntersectionIterator(*grid2d);
   checkIntersectionIterator(*grid3d);
+
+  // Check partition iterators
+  checkPartitionType( grid2d->leafGridView() );
+  for( int i = 0; i <= grid2d->maxLevel(); ++i )
+    checkPartitionType( grid2d->levelGridView( i ) );
+  checkPartitionType( grid3d->leafGridView() );
+  for( int i = 0; i <= grid3d->maxLevel(); ++i )
+    checkPartitionType( grid3d->levelGridView( i ) );
 
 }
 

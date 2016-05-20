@@ -13,7 +13,7 @@
 #include <dune/common/parametertree.hh>
 #include <dune/common/parametertreeparser.hh>
 
-#if HAVE_PARMETIS
+#if HAVE_PARMETIS && defined(PARMETIS_MAJOR_VERSION)
 #include <dune/grid/utility/parmetisgridpartitioner.hh>
 #endif
 
@@ -78,7 +78,7 @@ typedef GridType::LeafGridView GV;
 
 int main(int argc, char** argv) try
 {
-#if ! HAVE_PARMETIS
+#if ! (HAVE_PARMETIS && defined(PARMETIS_MAJOR_VERSION))
   // Skip test -- without ParMetis it doesn't do anything useful
   return 77;
 #else
@@ -97,7 +97,7 @@ int main(int argc, char** argv) try
     lower = parameterSet.get<FieldVector<double, dim> >("lower"),
     upper = parameterSet.get<FieldVector<double, dim> >("upper");
 
-  shared_ptr<GridType> grid = StructuredGridFactory<GridType>::createSimplexGrid(lower, upper, n);
+  std::shared_ptr<GridType> grid = StructuredGridFactory<GridType>::createSimplexGrid(lower, upper, n);
 
   const GV gv = grid->leafGridView();
 
@@ -183,7 +183,7 @@ int main(int argc, char** argv) try
   }
 
   return 0;
-#endif   // HAVE_PARMETIS
+#endif   // (HAVE_PARMETIS && defined(PARMETIS_MAJOR_VERSION))
 }
 catch (Exception &e){
   std::cerr << "Exception: " << e << std::endl;

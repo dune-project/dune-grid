@@ -15,7 +15,7 @@ namespace Dune {
 
   template<class GridImp>
   class YaspGlobalIdSet : public IdSet<GridImp,YaspGlobalIdSet<GridImp>,
-                              typename remove_const<GridImp>::type::PersistentIndexType >
+                              typename std::remove_const<GridImp>::type::PersistentIndexType >
                           /*
                              We used the remove_const to extract the Type from the mutable class,
                              because the const class is not instantiated yet.
@@ -24,8 +24,8 @@ namespace Dune {
     typedef YaspGlobalIdSet< GridImp > This;
 
   public:
-    //! define the type used for persisitent indices
-    typedef typename remove_const<GridImp>::type::PersistentIndexType IdType;
+    //! define the type used for persistent indices
+    typedef typename std::remove_const<GridImp>::type::PersistentIndexType IdType;
 
     using IdSet<GridImp, This, IdType>::subId;
 
@@ -39,7 +39,7 @@ namespace Dune {
        because the const class is not instantiated yet.
      */
     template<int cd>
-    IdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
+    IdType id (const typename std::remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       return GridImp::getRealImplementation(e).persistentIndex();
     }
@@ -49,7 +49,7 @@ namespace Dune {
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
      */
-    IdType subId (const typename remove_const<GridImp>::type::Traits::template Codim< 0 >::Entity &e,
+    IdType subId (const typename std::remove_const<GridImp>::type::Traits::template Codim< 0 >::Entity &e,
                   int i, unsigned int codim ) const
     {
       return GridImp::getRealImplementation(e).subPersistentIndex(i,codim);

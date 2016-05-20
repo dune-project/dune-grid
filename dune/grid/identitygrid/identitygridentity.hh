@@ -70,7 +70,7 @@ namespace Dune {
     template<int,typename, typename>
     friend class IdentityGridEntityPointer;
 
-    friend struct HostGridAccess< typename remove_const< GridImp >::type >;
+    friend struct HostGridAccess< typename std::remove_const< GridImp >::type >;
 
 
   private:
@@ -80,7 +80,7 @@ namespace Dune {
     // The codimension of this entitypointer wrt the host grid
     enum {CodimInHostGrid = GridImp::HostGridType::dimension - GridImp::dimension + codim};
 
-    // EntityPointer to the equivalent entity in the host grid
+    // equivalent entity in the host grid
     typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::Entity HostGridEntity;
 
 
@@ -209,7 +209,7 @@ namespace Dune {
   class IdentityGridEntity<0,dim,GridImp> :
     public EntityDefaultImplementation<0,dim,GridImp, IdentityGridEntity>
   {
-    friend struct HostGridAccess< typename remove_const< GridImp >::type >;
+    friend struct HostGridAccess< typename std::remove_const< GridImp >::type >;
 
     template<int,typename, typename>
     friend class IdentityGridEntityPointer;
@@ -219,7 +219,7 @@ namespace Dune {
     // The codimension of this entitypointer wrt the host grid
     enum {CodimInHostGrid = GridImp::HostGridType::dimension - GridImp::dimension};
 
-    // EntityPointer to the equivalent entity in the host grid
+    // equivalent entity in the host grid
     typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::Entity HostGridEntity;
 
     typedef typename GridImp::template Codim<0>::Geometry Geometry;

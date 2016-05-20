@@ -3,8 +3,6 @@
 #ifndef DUNE_GEOGRID_ENTITY_HH
 #define DUNE_GEOGRID_ENTITY_HH
 
-#include <dune/common/nullptr.hh>
-
 #include <dune/geometry/referenceelements.hh>
 
 #include <dune/grid/common/grid.hh>
@@ -74,7 +72,7 @@ namespace Dune
     template< int codim, class Grid >
     class EntityBase< codim, Grid, false >
     {
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef typename std::remove_const< Grid >::type::Traits Traits;
 
     public:
       /** \name Attributes
@@ -114,8 +112,6 @@ namespace Dune
 
       //! type of corresponding host entity
       typedef typename HostGrid::template Codim< codimension >::Entity HostEntity;
-      //! type of corresponding host entity pointer
-      typedef typename HostGrid::template Codim< codimension >::EntityPointer HostEntityPointer;
 
       //! type of corresponding entity seed
       typedef typename Traits::template Codim< codimension >::EntitySeed EntitySeed;
@@ -360,7 +356,7 @@ namespace Dune
     template< int codim, class Grid >
     class EntityBase< codim, Grid, true >
     {
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef typename std::remove_const< Grid >::type::Traits Traits;
 
     public:
       /** \name Attributes
@@ -399,8 +395,6 @@ namespace Dune
 
       //! type of corresponding host entity
       typedef typename HostGrid::template Codim< codimension >::Entity HostEntity;
-      //! type of corresponding host entity pointer
-      typedef typename HostGrid::template Codim< codimension >::EntityPointer HostEntityPointer;
 
       //! type of corresponding entity seed
       typedef typename Traits::template Codim< codimension >::EntitySeed EntitySeed;
@@ -413,7 +407,6 @@ namespace Dune
 
     private:
       typedef typename HostGrid::template Codim< 0 >::Geometry HostGeometry;
-      typedef typename HostGrid::template Codim< dimension >::EntityPointer HostVertexPointer;
 
       typedef GeoGrid::CoordVector< mydimension, Grid, fake > CoordVector;
 
@@ -508,9 +501,6 @@ namespace Dune
       /** \brief obtain the partition type of this entity */
       PartitionType partitionType () const
       {
-        if( !(Capabilities::isParallel< HostGrid >::v) )
-          return InteriorEntity;
-
         const ReferenceElement< ctype, dimension > &refElement
           = ReferenceElements< ctype, dimension >::general( hostElement().type() );
 
@@ -699,7 +689,7 @@ namespace Dune
     {
       typedef EntityBase< 0, Grid > Base;
 
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef typename std::remove_const< Grid >::type::Traits Traits;
 
       typedef typename Traits::HostGrid HostGrid;
 
@@ -725,8 +715,6 @@ namespace Dune
 
       //! type of corresponding local geometry
       typedef typename Traits::template Codim< codimension >::LocalGeometry LocalGeometry;
-      //! type of corresponding entity pointer
-      typedef typename Traits::template Codim< codimension >::EntityPointer EntityPointer;
 
       typedef Dune::Entity< 0, dim, Grid, Dune::GeoGrid::Entity > EntityFacade;
 

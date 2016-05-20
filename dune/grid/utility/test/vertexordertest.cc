@@ -10,31 +10,26 @@
 #endif
 
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <iostream>
 #include <iterator>
+#include <memory>
 #include <ostream>
 #include <vector>
 
-#include <dune/common/array.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/shared_ptr.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/generalvertexorder.hh>
 
-#include <dune/grid/alugrid.hh>
 #include <dune/grid/onedgrid.hh>
 #include <dune/grid/uggrid.hh>
 #include "../structuredgridfactory.hh"
 #include "../vertexorderfactory.hh"
-
-#ifdef ALUGRID_SURFACE_2D
-#define USE_ALUGRID_SURFACE_2D
-#endif
 
 void fail(int &result) {
   result = 1;
@@ -45,7 +40,7 @@ void pass(int &result) {
 
 //! test consistency on one dimension and element
 template<std::size_t mydim, class VertexOrder>
-void testElementDim(const Dune::integral_constant<std::size_t, mydim>&,
+void testElementDim(const std::integral_constant<std::size_t, mydim>&,
                     const VertexOrder &vo)
 {
   static const std::size_t dim = VertexOrder::dimension;
@@ -76,10 +71,10 @@ void testElementDim(const Dune::integral_constant<std::size_t, mydim>&,
 
 // test inter-dimensional consistency
 template<std::size_t mydim, class VertexOrder>
-void testElementInterdim(const Dune::integral_constant<std::size_t, mydim>&,
+void testElementInterdim(const std::integral_constant<std::size_t, mydim>&,
                          const VertexOrder &vo)
 {
-  testElementDim(Dune::integral_constant<std::size_t, mydim>(), vo);
+  testElementDim(std::integral_constant<std::size_t, mydim>(), vo);
 
   static const std::size_t dim = VertexOrder::dimension;
   static const std::size_t codim = dim - mydim;
@@ -115,14 +110,14 @@ void testElementInterdim(const Dune::integral_constant<std::size_t, mydim>&,
   }
 }
 template<class VertexOrder>
-void testElementInterdim(const Dune::integral_constant<std::size_t, 0>&,
+void testElementInterdim(const std::integral_constant<std::size_t, 0>&,
                          const VertexOrder &vo)
 {
-  testElementDim(Dune::integral_constant<std::size_t, 0>(), vo);
+  testElementDim(std::integral_constant<std::size_t, 0>(), vo);
 }
 
 template<std::size_t mydim, class VertexOrder, class Intersection>
-void testNeighborDim(const Dune::integral_constant<std::size_t, mydim>&,
+void testNeighborDim(const std::integral_constant<std::size_t, mydim>&,
                      const VertexOrder &vo_s, const VertexOrder &vo_n,
                      const Intersection &is)
 {
@@ -136,13 +131,13 @@ void testNeighborDim(const Dune::integral_constant<std::size_t, mydim>&,
   std::size_t index_s = is.indexInInside();
   std::size_t index_n = is.indexInOutside();
 
-  typedef typename Intersection::EntityPointer EP;
-  EP inside = is.inside();
-  EP outside = is.outside();
+  typedef typename Intersection::Entity Entity;
+  Entity inside = is.inside();
+  Entity outside = is.outside();
 
-  typedef typename EP::Entity::Geometry Geometry;
-  const Geometry &geo_s = inside->geometry();
-  const Geometry &geo_n = outside->geometry();
+  typedef typename Entity::Geometry Geometry;
+  const Geometry &geo_s = inside.geometry();
+  const Geometry &geo_n = outside.geometry();
 
   typedef typename Intersection::ctype DF;
   typedef Dune::FieldVector<DF, Intersection::dimensionworld> DomainW;
@@ -198,21 +193,21 @@ void testNeighborDim(const Dune::integral_constant<std::size_t, mydim>&,
   }
 }
 template<class VertexOrder, class Intersection>
-void testNeighbor(const Dune::integral_constant<std::size_t, 0>&,
+void testNeighbor(const std::integral_constant<std::size_t, 0>&,
                   const VertexOrder &vo_s, const VertexOrder &vo_n,
                   const Intersection &is)
 {
-  testNeighborDim(Dune::integral_constant<std::size_t, 0>(),
+  testNeighborDim(std::integral_constant<std::size_t, 0>(),
                   vo_s, vo_n, is);
 }
 template<std::size_t mydim, class VertexOrder, class Intersection>
-void testNeighbor(const Dune::integral_constant<std::size_t, mydim>&,
+void testNeighbor(const std::integral_constant<std::size_t, mydim>&,
                   const VertexOrder &vo_s, const VertexOrder &vo_n,
                   const Intersection &is)
 {
-  testNeighbor(Dune::integral_constant<std::size_t, mydim-1>(),
+  testNeighbor(std::integral_constant<std::size_t, mydim-1>(),
                vo_s, vo_n, is);
-  testNeighborDim(Dune::integral_constant<std::size_t, mydim>(),
+  testNeighborDim(std::integral_constant<std::size_t, mydim>(),
                   vo_s, vo_n, is);
 }
 
@@ -232,13 +227,13 @@ void testVertexOrder(const GV& gv, const VertexOrderFactory &voFactory,
   for(EIterator eit = gv.template begin<0>(); eit != eend; ++eit)
     try {
       VertexOrder vo = voFactory.make(*eit);
-      testElementInterdim(Dune::integral_constant<std::size_t, dim-codim>(),
+      testElementInterdim(std::integral_constant<std::size_t, dim-codim>(),
                           vo);
       const IIterator &iend = gv.iend(*eit);
       for(IIterator iit = gv.ibegin(*eit); iit != iend; ++iit)
         if(iit->neighbor()) {
-          VertexOrder vo_n = voFactory.make(*iit->outside());
-          testNeighbor(Dune::integral_constant<std::size_t,
+          VertexOrder vo_n = voFactory.make(iit->outside());
+          testNeighbor(std::integral_constant<std::size_t,
                            dim-(codim==0 ? 1 : codim)>(),
                        vo, vo_n, *iit);
         }
@@ -257,10 +252,10 @@ void testVertexOrderByIdSimplices(int &result) {
   typedef typename Grid::ctype DF;
   typedef Dune::FieldVector<DF, dimworld> Domain;
 
-  Dune::array<unsigned int, dim> elements;
+  std::array<unsigned int, dim> elements;
   std::fill(elements.begin(), elements.end(), 4);
 
-  Dune::shared_ptr<Grid> gridp = Dune::StructuredGridFactory<Grid>::
+  std::shared_ptr<Grid> gridp = Dune::StructuredGridFactory<Grid>::
                                  createSimplexGrid(Domain(0), Domain(1), elements);
 
   typedef typename Grid::GlobalIdSet IdSet;
@@ -277,10 +272,10 @@ void testVertexOrderByIdCubes(int &result) {
   typedef typename Grid::ctype DF;
   typedef Dune::FieldVector<DF, dimworld> Domain;
 
-  Dune::array<unsigned int, dim> elements;
+  std::array<unsigned int, dim> elements;
   std::fill(elements.begin(), elements.end(), 4);
 
-  Dune::shared_ptr<Grid> gridp = Dune::StructuredGridFactory<Grid>::
+  std::shared_ptr<Grid> gridp = Dune::StructuredGridFactory<Grid>::
                                  createCubeGrid(Domain(0), Domain(1), elements);
 
   typedef typename Grid::GlobalIdSet IdSet;
@@ -320,29 +315,6 @@ try {
   testVertexOrderByIdSimplices<Dune::UGGrid<2> >(result);
 #endif // HAVE_UG
 
-#if HAVE_ALUGRID
-  std::cout << "== Testing ALUGrid<2,2,simplex,conforming> with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUGrid<2, 3, Dune::simplex, Dune::conforming> >(result);
-#ifdef USE_ALUGRID_SURFACE_2D
-  std::cout << "== Testing ALUGrid<2,3,simplex,conforming> with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUGrid<2, 3, Dune::simplex, Dune::conforming> >(result);
-#endif // USE_ALUGRID_SURFACE_2D
-
-#ifdef USE_ALUGRID_SURFACE_2D
-  std::cout << "== Testing Dune::ALUGrid<2,2,cube,nonconforming> with cubes" << std::endl;
-  testVertexOrderByIdCubes<Dune::ALUGrid<2, 3, Dune::cube, Dune::nonconforming> >(result);
-  std::cout << "== Testing Dune::ALUGrid<2,3,cube,nonconforming> with cubes" << std::endl;
-  testVertexOrderByIdCubes<Dune::ALUGrid<2, 3, Dune::cube, Dune::nonconforming> >(result);
-#endif // USE_ALUGRID_SURFACE_2D
-
-  std::cout << "== Testing ALUGrid<2,2,simplex,nonconforming> with simplices with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUGrid<2, 2, Dune::simplex, Dune::nonconforming> >(result);
-#ifdef USE_ALUGRID_SURFACE_2D
-  std::cout << "== Testing ALUGrid<2,3,simplex,nonconforming> with simplices with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUGrid<2, 3, Dune::simplex, Dune::nonconforming> >(result);
-#endif // USE_ALUGRID_SURFACE_2D
-#endif // HAVE_ALUGRID
-
   //////////////////////////////////////////////////////////////////////
   //   Test 3d grids
   //////////////////////////////////////////////////////////////////////
@@ -356,15 +328,7 @@ try {
   testVertexOrderByIdSimplices<Dune::UGGrid<3> >(result);
 #endif // HAVE_UG
 
-#if HAVE_ALUGRID
-  std::cout << "== Testing Dune::ALUGrid<3,3,cube,nonconforming> with cubes" << std::endl;
-  testVertexOrderByIdCubes<Dune::ALUGrid<3, 3, Dune::cube, Dune::nonconforming> >(result);
-  std::cout << "== Testing ALUGrid<3,3,simplex,nonconforming> with simplices" << std::endl;
-  testVertexOrderByIdSimplices<Dune::ALUGrid<3, 3, Dune::simplex, Dune::nonconforming> >(result);
-#endif // HAVE_ALUGRID
-
   return result;
-
 }
 catch (const Dune::Exception &e) {
   std::cerr << e << std::endl;

@@ -6,16 +6,17 @@
 
 #include <unistd.h>
 #include <iostream>
+#include <memory>
 #include <vector>
 
-#include <dune/grid/uggrid.hh>
-#include <dune/grid/common/mcmgmapper.hh>
-#include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/float_cmp.hh>
-#include <dune/grid/common/gridenums.hh>
-#include <dune/grid/utility/structuredgridfactory.hh>
 #include <dune/geometry/referenceelements.hh>
+#include <dune/grid/common/gridenums.hh>
+#include <dune/grid/common/mcmgmapper.hh>
+#include <dune/grid/io/file/vtk/vtkwriter.hh>
+#include <dune/grid/uggrid.hh>
+#include <dune/grid/utility/structuredgridfactory.hh>
 
 using namespace Dune;
 
@@ -349,14 +350,13 @@ public:
       for (int k = 0; k < numberOfSubEntities; k++)
       {
         typedef typename GridView::template Codim<0>::Entity Element;
-        typedef typename Element::template Codim<commCodim>::EntityPointer EntityPointer;
-        const EntityPointer entityPointer(it->template subEntity<commCodim>(k));
-        entityIndex[mapper.index(*entityPointer)]   = mapper.index(*entityPointer);
-        partitionType[mapper.index(*entityPointer)] = entityPointer->partitionType();
+        typedef typename Element::template Codim<commCodim>::Entity Entity;
+        const Entity entity(it->template subEntity<commCodim>(k));
+        entityIndex[mapper.index(entity)]   = mapper.index(entity);
+        partitionType[mapper.index(entity)] = entity.partitionType();
 
-        if (entityPointer->partitionType() == Dune::BorderEntity)
+        if (entity.partitionType() == Dune::BorderEntity)
         {
-          typedef typename GridView::template Codim<0>::Entity Element;
           const typename Element::Geometry& geometry = it->geometry();
           Dune::GeometryType gt = geometry.type();
 
@@ -366,7 +366,7 @@ public:
           entityGlobal = geometry.global(referenceElement.position(k, commCodim));
           std::cout << gridView.comm().rank()+1 << ": border codim "
                     << commCodim << " entity "
-                    << mapper.index(*entityPointer) << " (" << entityGlobal
+                    << mapper.index(entity) << " (" << entityGlobal
                     << ")" << std::endl;
         }
       }
@@ -508,9 +508,9 @@ void testParallelUG(bool localRefinement)
 
   Dune::FieldVector<double,dim> lowerLeft(0);
   Dune::FieldVector<double,dim> upperRight(1);
-  Dune::array<unsigned int, dim> elements;
+  std::array<unsigned int, dim> elements;
   std::fill(elements.begin(), elements.end(), 4);
-  shared_ptr<GridType> grid = structuredGridFactory.createCubeGrid(lowerLeft, upperRight, elements);
+  std::shared_ptr<GridType> grid = structuredGridFactory.createCubeGrid(lowerLeft, upperRight, elements);
 
   //////////////////////////////////////////////////////
   // Distribute the grid

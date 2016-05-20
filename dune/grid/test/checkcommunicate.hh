@@ -107,7 +107,7 @@ public:
   {
     // flag+data+coordinates
     typedef typename EntityType::Geometry Geometry;
-    return 2+e.geometry().corners() * Geometry::dimensionworld;
+    return 2+e.geometry().corners() * Geometry::coorddimension;
   }
 
   //! pack data from user to message buffer
@@ -126,9 +126,9 @@ public:
     const Geometry &geometry = e.geometry();
     for( int i = 0; i < geometry.corners(); ++i )
     {
-      typedef Dune::FieldVector< typename Geometry::ctype, Geometry::dimensionworld > Vector;
+      typedef Dune::FieldVector< typename Geometry::ctype, Geometry::coorddimension > Vector;
       const Vector corner = geometry.corner( i );
-      for( int j = 0; j < Geometry::dimensionworld; ++j )
+      for( int j = 0; j < Geometry::coorddimension; ++j )
         buff.write( corner[ j ] );
     }
   }
@@ -172,14 +172,14 @@ public:
       buff.read(x);
     }
 
-    // test if the sending/receving entities are geometrically the same
+    // test if the sending/receiving entities are geometrically the same
     typedef typename EntityType::Geometry Geometry;
     const Geometry &geometry = e.geometry();
     for( int i = 0; i < geometry.corners(); ++i )
     {
-      typedef Dune::FieldVector< typename Geometry::ctype, Geometry::dimensionworld > Vector;
+      typedef Dune::FieldVector< typename Geometry::ctype, Geometry::coorddimension > Vector;
       const Vector corner = geometry.corner( i );
-      for( int j = 0; j < Geometry::dimensionworld; ++j )
+      for( int j = 0; j < Geometry::coorddimension; ++j )
       {
         buff.read(x);
         if( std::abs( corner[ j ] - x ) > 1e-8 )
@@ -207,13 +207,9 @@ class CheckCommunication
 
   typedef typename IntersectionIterator :: Intersection Intersection;
 
-  typedef typename GridView :: template Codim< 0 > :: EntityPointer EntityPointer;
   typedef typename GridView :: template Codim< 0 > :: Entity Entity;
   typedef typename GridView :: template Codim< 0 > :: Iterator Iterator;
 
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-  typedef typename GridView :: template Codim< cdim > :: EntityPointer SubEntityPointer;
-#endif
   typedef typename GridView :: template Codim< cdim > :: Entity SubEntity;
 
   enum { dimworld = Grid :: dimensionworld };
@@ -297,15 +293,7 @@ class CheckCommunication
               const int e = insideRefElem.subEntity( indexInInside, 1, i, cdim );
               const int idx = indexSet_.subIndex( entity, e, cdim );
               CoordinateVector cmid( 0.0 );
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-              SubEntityPointer subEp = entity.template subEntity< cdim >( e );
-              *subEp; // check dereferencing in case grid returns entity
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-              const SubEntity& subE = *subEp;
-#else
               SubEntity subE = entity.template subEntity< cdim >( e );
-#endif
               const int c = subE.geometry().corners();
               for( int j = 0; j < c; ++j )
                 cmid += subE.geometry().corner( j );
@@ -320,15 +308,7 @@ class CheckCommunication
             // as well
             if( intersection.neighbor() )
             {
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-              EntityPointer ep = intersection.outside();
-              *ep;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-              const Entity &neigh = *ep;
-#else
               Entity neigh = intersection.outside();
-#endif
 
               assert( (level_ < 0) ? (neigh.isLeaf()) : 1);
               assert( (level_ < 0) ? 1 : (neigh.level() == level_) );
@@ -342,15 +322,7 @@ class CheckCommunication
                 const int e = outsideRefElem.subEntity( indexInOutside, 1, i, cdim );
                 const int idx = indexSet_.subIndex( neigh, e, cdim );
                 CoordinateVector cmid( 0.0 );
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-                SubEntityPointer subEp = neigh.template subEntity< cdim >( e );
-                *subEp;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-                const SubEntity& subE = *subEp;
-#else
                 SubEntity subE = neigh.template subEntity< cdim >( e );
-#endif
                 const int c = subE.geometry().corners();
                 for( int j = 0; j < c; ++j )
                   cmid += subE.geometry().corner( j );
@@ -422,15 +394,7 @@ class CheckCommunication
         const int numSubEntities = entity.subEntities(cdim);
         for( int i=0; i < numSubEntities; ++i )
         {
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-          SubEntityPointer subEp = entity.template subEntity< cdim >( i );
-          *subEp;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-          const SubEntity& subE = *subEp;
-#else
           SubEntity subE = entity.template subEntity< cdim >( i );
-#endif
 
           const int index = indexSet_.index( subE );
           CoordinateVector cmid( 0.0 );

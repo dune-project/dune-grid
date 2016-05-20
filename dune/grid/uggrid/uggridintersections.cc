@@ -6,7 +6,7 @@
 #include <dune/grid/uggrid/uggridintersections.hh>
 
 #include <set>
-
+#include <forward_list>
 
 template<class GridImp>
 const typename Dune::UGGridLevelIntersection<GridImp>::WorldVector&
@@ -110,7 +110,7 @@ Dune::UGGridLevelIntersection<GridImp>::geometryInInside () const
 
     }
 
-    geometryInInside_ = make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
+    geometryInInside_ = std::make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
 
   }
 
@@ -138,7 +138,7 @@ Dune::UGGridLevelIntersection<GridImp>::geometry () const
 
     }
 
-    geometry_ = make_shared<GeometryImpl>(intersectionGeometryType, coordinates);
+    geometry_ = std::make_shared<GeometryImpl>(intersectionGeometryType, coordinates);
 
   }
 
@@ -184,7 +184,7 @@ Dune::UGGridLevelIntersection<GridImp>::geometryInOutside () const
 
     }
 
-    geometryInOutside_ = make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
+    geometryInOutside_ = std::make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
 
   }
 
@@ -333,7 +333,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInInside () const
 
       }
 
-      geometryInInside_ = make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
+      geometryInInside_ = std::make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
 
     } else {
 
@@ -362,7 +362,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInInside () const
 
       }
 
-      geometryInInside_ = make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
+      geometryInInside_ = std::make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
     }
 
   }
@@ -401,7 +401,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometry () const
 
       }
 
-      geometry_ = make_shared<GeometryImpl>(intersectionGeometryType, coordinates);
+      geometry_ = std::make_shared<GeometryImpl>(intersectionGeometryType, coordinates);
 
     } else {
 
@@ -425,7 +425,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometry () const
 
       }
 
-      geometry_ = make_shared<GeometryImpl>(intersectionGeometryType, coordinates);
+      geometry_ = std::make_shared<GeometryImpl>(intersectionGeometryType, coordinates);
 
     }
 
@@ -477,7 +477,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInOutside () const
 
       }
 
-      geometryInOutside_ = make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
+      geometryInOutside_ = std::make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
 
     } else {
 
@@ -495,7 +495,7 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInOutside () const
 
       }
 
-      geometryInOutside_ = make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
+      geometryInOutside_ = std::make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
 
     }
 
@@ -510,9 +510,10 @@ int Dune::UGGridLeafIntersection<GridImp>::indexInOutside () const
   if (leafSubFaces_[subNeighborCount_].first == NULL)
     DUNE_THROW(GridError,"There is no neighbor!");
 
+#ifndef NDEBUG
   const int nSides = UG_NS<dim>::Sides_Of_Elem(leafSubFaces_[subNeighborCount_].first);
-
   assert(leafSubFaces_[subNeighborCount_].second < nSides);
+#endif
 
   // Renumber to DUNE numbering
   unsigned int tag = UG_NS<dim>::Tag(leafSubFaces_[subNeighborCount_].first);
@@ -696,7 +697,7 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
 
   else {
 
-    SLList<Face> list;
+    std::forward_list<Face> list;
     int levelNeighborSide = numberInNeighbor(center_, levelNeighbor);
 
     UG::INT Sons_of_Side = 0;
@@ -716,7 +717,7 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
       DUNE_THROW(GridError, "Get_Sons_of_ElementSide returned with error value " << rv);
 
     for (int i=0; i<Sons_of_Side; i++)
-      list.push_back(Face(SonList[i],SonSides[i]));
+      list.push_front(Face(SonList[i],SonSides[i]));
 
     // //////////////////////////////////////////////////
     //   Get_Sons_of_ElementSide only computes direct sons.  Therefore in order to get all
@@ -724,10 +725,9 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
     //   We do a breadth-first search.
     // //////////////////////////////////////////////////
 
-    typename SLList<Face>::iterator f = list.begin();
-    for (; f!=list.end(); ++f) {
-
-      const typename UG_NS<dim>::Element* theElement = f->first;
+    for (const auto& f : list)
+    {
+      const typename UG_NS<dim>::Element* theElement = f.first;
 
       UG::INT Sons_of_Side = 0;
       typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
@@ -736,7 +736,7 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
       if (!UG_NS<dim>::isLeaf(theElement)) {
 
         Get_Sons_of_ElementSide(theElement,
-                                f->second,      // Input element side number
+                                f.second,      // Input element side number
                                 &Sons_of_Side,     // Number of topological sons of the element side
                                 SonList,          // Output elements
                                 SonSides,         // Output element side numbers
@@ -745,7 +745,7 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
                                 true);
 
         for (int i=0; i<Sons_of_Side; i++)
-          list.push_back(Face(SonList[i],SonSides[i]));
+          list.push_front(Face(SonList[i],SonSides[i]));
 
       }
 
@@ -756,11 +756,11 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
     // //////////////////////////////
     leafSubFaces_.resize(0);
 
-    for (f = list.begin(); f!=list.end(); ++f) {
-
+    for (const auto& f : list)
+    {
       // Set element
-      if (UG_NS<dim>::isLeaf(f->first))
-        leafSubFaces_.push_back(*f);
+      if (UG_NS<dim>::isLeaf(f.first))
+        leafSubFaces_.push_back(f);
 
     }
   }

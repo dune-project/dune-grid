@@ -165,14 +165,14 @@ namespace Dune {
        because the const class is not instantiated yet.
      */
     template<int cd>
-    int index (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
+    int index (const typename std::remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       return grid_.getRealImplementation(e).leafIndex();
     }
 
     //! get index of subentity of an entity
     template<int cc>
-    int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<cc>::Entity& e,
+    int subIndex (const typename std::remove_const<GridImp>::type::Traits::template Codim<cc>::Entity& e,
                   int i,
                   unsigned int codim) const
     {
@@ -335,13 +335,13 @@ namespace Dune {
        because the const class is not instantiated yet.
      */
     template<int cd>
-    IdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
+    IdType id (const typename std::remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       return grid_.getRealImplementation(e).globalId();
     }
 
     //! get id of subentity
-    IdType subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e,
+    IdType subId (const typename std::remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e,
                   int i,
                   unsigned int codim) const
     {

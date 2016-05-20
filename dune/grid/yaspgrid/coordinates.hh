@@ -3,10 +3,10 @@
 #ifndef DUNE_GRID_YASPGRID_COORDINATES_HH
 #define DUNE_GRID_YASPGRID_COORDINATES_HH
 
+#include <array>
 #include <bitset>
 #include <vector>
 
-#include <dune/common/array.hh>
 #include <dune/common/fvector.hh>
 
 /** \file
@@ -40,7 +40,7 @@ namespace Dune
      *  the size information is kept with this container, because this is the natural
      *  way to handle this for a tensorproduct grid.
      */
-    EquidistantCoordinates(const Dune::FieldVector<ct,dim>& h, const Dune::array<int,dim>& s)
+    EquidistantCoordinates(const Dune::FieldVector<ct,dim>& h, const std::array<int,dim>& s)
       : _h(h), _s(s) {}
 
     /** \returns the meshsize in given direction at given position
@@ -78,7 +78,7 @@ namespace Dune
     EquidistantCoordinates<ct,dim> refine(std::bitset<dim> ovlp_low, std::bitset<dim> ovlp_up, int overlap, bool keep_ovlp) const
     {
       //determine new size and meshsize
-      Dune::array<int,dim> news;
+      std::array<int,dim> news;
       Dune::FieldVector<ct,dim> newh;
 
       for (int i=0; i<dim; i++)
@@ -106,7 +106,7 @@ namespace Dune
 
     private:
     Dune::FieldVector<ct,dim> _h;
-    Dune::array<int,dim> _s;
+    std::array<int,dim> _s;
   };
 
   template<class ct, int dim>
@@ -139,7 +139,7 @@ namespace Dune
       *  the size information is kept with this container, because this is the natural
       *  way to handle this for a tensorproduct grid.
       */
-     EquidistantOffsetCoordinates(const Dune::FieldVector<ct,dim>& origin, const Dune::FieldVector<ct,dim>& h, const Dune::array<int,dim>& s)
+     EquidistantOffsetCoordinates(const Dune::FieldVector<ct,dim>& origin, const Dune::FieldVector<ct,dim>& h, const std::array<int,dim>& s)
        : _origin(origin), _h(h), _s(s) {}
 
      /** \returns the meshsize in given direction at given position
@@ -185,7 +185,7 @@ namespace Dune
      EquidistantOffsetCoordinates<ct,dim> refine(std::bitset<dim> ovlp_low, std::bitset<dim> ovlp_up, int overlap, bool keep_ovlp) const
      {
        //determine new size and meshsize
-       Dune::array<int,dim> news;
+       std::array<int,dim> news;
        Dune::FieldVector<ct,dim> newh;
 
        for (int i=0; i<dim; i++)
@@ -215,7 +215,7 @@ namespace Dune
      private:
      Dune::FieldVector<ct,dim> _origin;
      Dune::FieldVector<ct,dim> _h;
-     Dune::array<int,dim> _s;
+     std::array<int,dim> _s;
    };
 
    template<class ct, int dim>
@@ -247,7 +247,7 @@ namespace Dune
      *  the size information is deduced from c. Storing offset allows for use of
      *  global coordinates in the YaspGrid code.
      */
-    TensorProductCoordinates(const Dune::array<std::vector<ct>,dim>& c, const Dune::array<int,dim>& offset)
+    TensorProductCoordinates(const std::array<std::vector<ct>,dim>& c, const std::array<int,dim>& offset)
       : _c(c),_offset(offset)
     {}
 
@@ -285,8 +285,8 @@ namespace Dune
      */
     TensorProductCoordinates<ct,dim> refine(std::bitset<dim> ovlp_low, std::bitset<dim> ovlp_up, int overlap, bool keep_ovlp) const
     {
-      Dune::array<std::vector<ct>,dim> newcoords;
-      Dune::array<int,dim> newoffset(_offset);
+      std::array<std::vector<ct>,dim> newcoords;
+      std::array<int,dim> newoffset(_offset);
       for (int i=0; i<dim; i++)
       {
         newoffset[i] *= 2;
@@ -345,8 +345,8 @@ namespace Dune
     }
 
     private:
-    Dune::array<std::vector<ct>,dim> _c;
-    Dune::array<int,dim> _offset;
+    std::array<std::vector<ct>,dim> _c;
+    std::array<int,dim> _offset;
   };
 
   template<class ct, int dim>
@@ -358,7 +358,7 @@ namespace Dune
 
  namespace Yasp {
   template<class ctype, std::size_t dim>
-  bool checkIfMonotonous(const Dune::array<std::vector<ctype>, dim>& coords)
+  bool checkIfMonotonous(const std::array<std::vector<ctype>, dim>& coords)
   {
     for (std::size_t i=0; i<dim; i++)
     {

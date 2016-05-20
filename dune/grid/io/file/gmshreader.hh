@@ -10,10 +10,9 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
-
-#include <stdio.h>
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
@@ -311,19 +310,24 @@ namespace Dune
       if (verbose) std::cout << "file contains " << number_of_nodes << " nodes" << std::endl;
 
       // read nodes
-      std::vector< GlobalVector > nodes( number_of_nodes+1 );       // store positions
+      // The '+1' is due to the fact that gmsh numbers node starting from 1 rather than from 0
+      std::vector< GlobalVector > nodes( number_of_nodes+1 );
       {
         int id;
         double x[ 3 ];
         for( int i = 1; i <= number_of_nodes; ++i )
         {
           readfile(file,4, "%d %lg %lg %lg\n", &id, &x[ 0 ], &x[ 1 ], &x[ 2 ] );
-          if( id != i )
-            DUNE_THROW( Dune::IOError, "Expected id " << i << "(got id " << id << "." );
+
+          if (id > number_of_nodes) {
+            DUNE_THROW(Dune::IOError,
+                       "Only dense sequences of node indices are currently supported (node index "
+                       << id << " is invalid).");
+          }
 
           // just store node position
           for( int j = 0; j < dimWorld; ++j )
-            nodes[ i ][ j ] = x[ j ];
+            nodes[ id ][ j ] = x[ j ];
         }
         readfile(file,1,"%s\n",buf);
         if (strcmp(buf,"$EndNodes")!=0)
@@ -339,7 +343,8 @@ namespace Dune
       if (verbose) std::cout << "file contains " << number_of_elements << " elements" << std::endl;
 
       //=========================================
-      // Pass 1: Renumber needed vertices
+      // Pass 1: Select and insert those vertices in the file that
+      //    actually occur as corners of an element.
       //=========================================
 
       long section_element_offset = ftell(file);
@@ -383,28 +388,12 @@ namespace Dune
         int id, elm_type, number_of_tags;
         readfile(file,3,"%d %d %d ",&id,&elm_type,&number_of_tags);
         int physical_entity = -1;
-        std::vector<int> mesh_partitions;
-        if ( version_number < 2.2 )
-        {
-          mesh_partitions.resize(1);
-        }
+
         for (int k=1; k<=number_of_tags; k++)
         {
           int blub;
           readfile(file,1,"%d ",&blub);
           if (k==1) physical_entity = blub;
-          // k == 2: elementary entity (not used here)
-          if ( version_number < 2.2 )
-          {
-            if (k==3) mesh_partitions[0] = blub;
-          }
-          else
-          {
-            if (k > 3)
-              mesh_partitions[k-4] = blub;
-            else
-              mesh_partitions.resize(blub);
-          }
         }
         pass2HandleElement(file, elm_type, renumber, nodes, physical_entity);
       }
@@ -415,7 +404,11 @@ namespace Dune
       fclose(file);
     }
 
-    // dimension dependent routines
+    /** \brief Process one element during the first pass through the list of all elements
+     *
+     * Mainly, the method inserts all vertices needed by the current element,
+     * unless they have been inserted already for a previous element.
+     */
     void pass1HandleElement(FILE* file, const int elm_type,
                             std::map<int,unsigned int> & renumber,
                             const std::vector< GlobalVector > & nodes)
@@ -485,7 +478,7 @@ namespace Dune
       const V& vertices
       )
     {
-      array<FieldVector<double,dimWorld>, 6> v;
+      std::array<FieldVector<double,dimWorld>, 6> v;
       for (int i=0; i<6; i++)
         for (int j=0; j<dimWorld; j++)
           v[i][j] = nodes[elementDofs[i]][j];
@@ -495,13 +488,15 @@ namespace Dune
                                                                                            v[3], v[4], v[5] );
 
       factory.insertBoundarySegment( vertices,
-                                     shared_ptr<BoundarySegment<dim,dimWorld> >(newBoundarySegment) );
+                                     std::shared_ptr<BoundarySegment<dim,dimWorld> >(newBoundarySegment) );
     }
 
 
 
-
-
+    /** \brief Process one element during the second pass through the list of all elements
+     *
+     * This method actually inserts the element into the grid factory.
+     */
     virtual void pass2HandleElement(FILE* file, const int elm_type,
                                     std::map<int,unsigned int> & renumber,
                                     const std::vector< GlobalVector > & nodes,
@@ -606,7 +601,7 @@ namespace Dune
             break;
 
           case 8 : {              // 3-node line
-            array<FieldVector<double,dimWorld>, 3> v;
+            std::array<FieldVector<double,dimWorld>, 3> v;
             for (int i=0; i<dimWorld; i++) {
               v[0][i] = nodes[elementDofs[0]][i];
               v[1][i] = nodes[elementDofs[2]][i];                    // yes, the renumbering is intended!
@@ -615,7 +610,7 @@ namespace Dune
             BoundarySegment<dim,dimWorld>* newBoundarySegment
               = (BoundarySegment<dim,dimWorld>*) new GmshReaderQuadraticBoundarySegment< 2, dimWorld >(v[0], v[1], v[2]);
             factory.insertBoundarySegment(vertices,
-                                          shared_ptr<BoundarySegment<dim,dimWorld> >(newBoundarySegment));
+                                          std::shared_ptr<BoundarySegment<dim,dimWorld> >(newBoundarySegment));
             break;
           }
           case 9 : {              // 6-node triangle
@@ -664,13 +659,13 @@ namespace Dune
     typedef GridType Grid;
 
     /** \todo doc me */
-    static Grid* read (const std::string& fileName, bool verbose = true, bool insert_boundary_segments=true)
+    static Grid* read (const std::string& fileName, bool verbose = true, bool insertBoundarySegments=true)
     {
       // make a grid factory
       Dune::GridFactory<Grid> factory;
 
       // create parse object
-      GmshReaderParser<Grid> parser(factory,verbose,insert_boundary_segments);
+      GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
       parser.read(fileName);
 
       return factory.createGrid();
@@ -678,45 +673,45 @@ namespace Dune
 
     /** \todo doc me */
     static Grid* read (const std::string& fileName,
-                       std::vector<int>& boundary_id_to_physical_entity,
-                       std::vector<int>& element_index_to_physical_entity,
-                       bool verbose = true, bool insert_boundary_segments=true)
+                       std::vector<int>& boundarySegmentToPhysicalEntity,
+                       std::vector<int>& elementToPhysicalEntity,
+                       bool verbose = true, bool insertBoundarySegments=true)
     {
       // make a grid factory
       Dune::GridFactory<Grid> factory;
 
       // create parse object
-      GmshReaderParser<Grid> parser(factory,verbose,insert_boundary_segments);
+      GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
       parser.read(fileName);
 
-      boundary_id_to_physical_entity.swap(parser.boundaryIdMap());
-      element_index_to_physical_entity.swap(parser.elementIndexMap());
+      boundarySegmentToPhysicalEntity.swap(parser.boundaryIdMap());
+      elementToPhysicalEntity.swap(parser.elementIndexMap());
 
       return factory.createGrid();
     }
 
     /** \todo doc me */
     static void read (Dune::GridFactory<Grid>& factory, const std::string& fileName,
-                      bool verbose = true, bool insert_boundary_segments=true)
+                      bool verbose = true, bool insertBoundarySegments=true)
     {
       // create parse object
-      GmshReaderParser<Grid> parser(factory,verbose,insert_boundary_segments);
+      GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
       parser.read(fileName);
     }
 
     /** \todo doc me */
     static void read (Dune::GridFactory<Grid>& factory,
                       const std::string& fileName,
-                      std::vector<int>& boundary_id_to_physical_entity,
-                      std::vector<int>& element_index_to_physical_entity,
-                      bool verbose = true, bool insert_boundary_segments=true)
+                      std::vector<int>& boundarySegmentToPhysicalEntity,
+                      std::vector<int>& elementToPhysicalEntity,
+                      bool verbose = true, bool insertBoundarySegments=true)
     {
       // create parse object
-      GmshReaderParser<Grid> parser(factory,verbose,insert_boundary_segments);
+      GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
       parser.read(fileName);
 
-      boundary_id_to_physical_entity.swap(parser.boundaryIdMap());
-      element_index_to_physical_entity.swap(parser.elementIndexMap());
+      boundarySegmentToPhysicalEntity.swap(parser.boundaryIdMap());
+      elementToPhysicalEntity.swap(parser.elementIndexMap());
     }
   };
 

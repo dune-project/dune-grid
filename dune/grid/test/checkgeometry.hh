@@ -52,28 +52,18 @@ namespace Dune
     template <int dim,class GI,template <int,int,class> class EI>
     static void apply(const Entity<0,dim,GI,EI> &entity)
     {
-      integral_constant<
+      std::integral_constant<
           bool, Dune::Capabilities::hasEntity<GI,codim>::v
           > capVar;
       check(capVar,entity);
     }
     template <class Entity>
-    static void check(const true_type&, const Entity &entity)
+    static void check(const std::true_type&, const Entity &entity)
     {
       for (unsigned int i=0; i<entity.subEntities(codim); ++i)
       {
         typedef typename Entity::template Codim< codim >::Entity SubE;
-
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-        typedef typename Entity::template Codim< codim >::EntityPointer SubEP;
-        const SubEP subEP = entity.template subEntity<codim>(i);
-        *subEP;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-        const SubE& subEn = *subEP;
-#else
         const SubE subEn = entity.template subEntity<codim>(i);
-#endif
 
         typename SubE::Geometry subGeo = subEn.geometry();
 
@@ -83,7 +73,7 @@ namespace Dune
       }
     }
     template <class Entity>
-    static void check(const false_type&, const Entity &)
+    static void check(const std::false_type&, const Entity &)
     {}
   };
 

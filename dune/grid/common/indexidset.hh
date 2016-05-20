@@ -76,7 +76,7 @@ namespace Dune
   {
     /* We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet. */
-    typedef typename remove_const< GridImp >::type::Traits Traits;
+    typedef typename std::remove_const< GridImp >::type::Traits Traits;
 
   public:
     /** \brief Export the type of the entity used as parameter in the index(...) method */
@@ -93,7 +93,7 @@ namespace Dune
     typedef TypesImp Types;
 
     /** \brief dimension of the grid (maximum allowed codimension) */
-    static const int dimension = remove_const< GridImp >::type::dimension;
+    static const int dimension = std::remove_const< GridImp >::type::dimension;
 
     //===========================================================
     /** @name Index access from entity
@@ -106,10 +106,6 @@ namespace Dune
 
             \param e Reference to codim cc entity, where cc is the template parameter of the function.
             \return An index in the range 0 ... Max number of entities in set - 1.
-     */
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
      */
     template<int cc>
     IndexType index (const typename Traits::template Codim<cc>::Entity& e) const
@@ -211,19 +207,6 @@ namespace Dune
       return asImp().types( codim );
     }
 
-    /** @brief Return vector with all geometry types of entities in domain of index map.
-            Return a vector with all geometry types of a given codimension
-            contained in the Entity set \f$E\f$.
-
-       \param[in] codim A valid codimension.
-       \return Const reference to a vector of geometry types.
-     */
-    const std::vector<GeometryType>& geomTypes (int codim) const DUNE_DEPRECATED_MSG( "Use IndexSet::types instead." )
-    {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().geomTypes(codim)));
-      return asImp().geomTypes(codim);
-    }
-
     /** @brief Return total number of entities of given geometry type in entity set \f$E\f$.
 
        \param[in] type A valid geometry type.
@@ -287,7 +270,7 @@ namespace Dune
     : public IndexSet< GridImp, IndexSetImp >
   {
     typedef IndexSet< GridImp, IndexSetImp > Base;
-    typedef typename remove_const< GridImp >::type::Traits Traits;
+    typedef typename std::remove_const< GridImp >::type::Traits Traits;
 
   public:
     /** \brief The type used for the indices */
@@ -430,7 +413,7 @@ namespace Dune
        because the const class is not instantiated yet.
      */
     template<int cc>
-    IdType id (const typename remove_const<GridImp>::type::
+    IdType id (const typename std::remove_const<GridImp>::type::
                Traits::template Codim<cc>::Entity& e) const
     {
       return asImp().template id<cc>(e);
@@ -438,7 +421,7 @@ namespace Dune
 
     /** \brief Get id of subentity i of co-dimension codim of a co-dimension 0 entity.
      */
-    IdType subId (const typename remove_const<GridImp>::type::
+    IdType subId (const typename std::remove_const<GridImp>::type::
                   Traits::template Codim<0>::Entity& e, int i, unsigned int codim) const
     {
       return asImp().subId(e,i,codim);

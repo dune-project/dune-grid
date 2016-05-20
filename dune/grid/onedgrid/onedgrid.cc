@@ -142,7 +142,7 @@ Dune::OneDGrid::lbegin(int level) const
   if (level<0 || level>maxLevel())
     DUNE_THROW(Dune::GridError, "LevelIterator in nonexisting level " << level << " requested!");
 
-  return Dune::OneDGridLevelIterator<codim,All_Partition, const Dune::OneDGrid>(const_cast<Dune::OneDEntityImp<1-codim>*>(Dune::get<1-codim>(entityImps_[level]).begin()));
+  return Dune::OneDGridLevelIterator<codim,All_Partition, const Dune::OneDGrid>(const_cast<Dune::OneDEntityImp<1-codim>*>(std::get<1-codim>(entityImps_[level]).begin()));
 }
 
 template <int codim>
@@ -162,7 +162,7 @@ Dune::OneDGrid::lbegin(int level) const
   if (level<0 || level>maxLevel())
     DUNE_THROW(Dune::GridError, "LevelIterator in nonexisting level " << level << " requested!");
 
-  return Dune::OneDGridLevelIterator<codim,PiType, const Dune::OneDGrid>(const_cast<Dune::OneDEntityImp<1-codim>*>(Dune::get<1-codim>(entityImps_[level]).begin()));
+  return Dune::OneDGridLevelIterator<codim,PiType, const Dune::OneDGrid>(const_cast<Dune::OneDEntityImp<1-codim>*>(std::get<1-codim>(entityImps_[level]).begin()));
 }
 
 template <int codim, Dune::PartitionIteratorType PiType>
@@ -449,8 +449,8 @@ bool Dune::OneDGrid::adapt()
   }
 
   // delete uppermost level if it doesn't contain elements anymore
-  if (Dune::get<1>(entityImps_.back()).size()==0) {
-    assert(Dune::get<0>(entityImps_.back()).size()==0);
+  if (std::get<1>(entityImps_.back()).size()==0) {
+    assert(std::get<0>(entityImps_.back()).size()==0);
     entityImps_.pop_back();
   }
 

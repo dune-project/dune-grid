@@ -43,10 +43,6 @@
    Geometry, etc. is granted. */
 #cmakedefine DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS 1
 
-/* This is only true if grape was found by configure _and_ if the
-   application uses the flags set by add_dune_grape_flags */
-#cmakedefine HAVE_GRAPE ENABLE_GRAPE
-
 /* Define to 1 if psurface library is found */
 #cmakedefine HAVE_PSURFACE 1
 
@@ -58,16 +54,6 @@
 
 /* Define to 1 if you have at least psurface version 2.0 */
 #cmakedefine HAVE_PSURFACE_2_0 1
-
-/* This is only true if alugrid-library was found by configure _and_ if the
-   application uses the ALUGRID_CPPFLAGS */
-#cmakedefine HAVE_ALUGRID ENABLE_ALUGRID
-
-/* Define to 1 if you have the <alugrid_parallel.h> header file. */
-#cmakedefine HAVE_ALUGRID_PARALLEL_H @HAVE_ALUGRID_PARALLEL_H@
-
-/* Define to 1 if you have the <alugrid_serial.h> header file. */
-#cmakedefine HAVE_ALUGRID_SERIAL_H @HAVE_ALUGRID_SERIAL_H@
 
 /* Alberta version found by configure, either 0x200 for 2.0 or 0x300 for 3.0 */
 #cmakedefine DUNE_ALBERTA_VERSION @DUNE_ALBERTA_VERSION@
@@ -83,6 +69,11 @@
 /* Define to 1 if you have mkstemp function */
 #cmakedefine01 HAVE_MKSTEMP
 
+/* begin bottom */
+
 /* Grid type magic for DGF parser */
 @GRID_CONFIG_H_BOTTOM@
+
+/* end bottom */
+
 /* end dune-grid */

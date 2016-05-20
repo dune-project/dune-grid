@@ -4,8 +4,7 @@
 #define DUNE_AMIRAMESH_WRITER_HH
 
 #include <string>
-
-#include <dune/common/array.hh>
+#include <array>
 
 #if HAVE_AMIRAMESH
 #include <amiramesh/AmiraMesh.h>
@@ -85,7 +84,7 @@ namespace Dune {
      */
     template <class DataContainer>
     void addUniformData(const GridView& gridView,
-                        const array<unsigned int, dim>& n,
+                        const std::array<unsigned int, dim>& n,
                         const DataContainer& data);
 
     /** \brief Write a 2d grid in a 3d world

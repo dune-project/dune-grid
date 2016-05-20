@@ -2,7 +2,6 @@ Makefile
 Makefile.in
 .deps
 .libs
-test-alugrid
 test-alberta
 test-alberta-1-1
 test-alberta-1-2
@@ -15,14 +14,11 @@ test-geogrid
 test-loadbalancing
 test-mcmg-geogrid
 test-identitygrid
-test-sgrid
 test-oned
 test-ug
 test-parallel-ug
 test-yaspgrid
-test-dgfalu-uggrid-combination
 semantic.cache
-alugrid.cfg
 *.gcda
 *.gcno
 

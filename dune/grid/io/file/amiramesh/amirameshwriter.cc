@@ -502,7 +502,7 @@ void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
   // We are forced to use float for surface (i.e. 2d-in-3d) fields, because Amira
   // can only read those in float precision
   McPrimType primType = McPrimType::mc_double;
-  if (Dune::is_same<ct,float>::value or (dim==2 and dimworld==3))
+  if (std::is_same<ct,float>::value or (dim==2 and dimworld==3))
     primType = McPrimType::mc_float;
 
   AmiraMesh::Data* nodeData = new AmiraMesh::Data("Data", amLocation, primType, ncomp);
@@ -530,7 +530,7 @@ void Dune::AmiraMeshWriter<GridView>::addVertexData(const DataContainer& data,
 
   int i=0;
 
-  if (Dune::is_same<ct,float>::value or (dim==2 and dimworld==3)) {
+  if (std::is_same<ct,float>::value or (dim==2 and dimworld==3)) {
     // Write double data
     for (; dit!=ditend; ++dit)
       for (int j=0; j<ncomp; j++)
@@ -562,7 +562,7 @@ void Dune::AmiraMeshWriter<GridView>::write(const std::string& filename,
 template<class GridView>
 template<class DataContainer>
 void Dune::AmiraMeshWriter<GridView>::addUniformData(const GridView& gridView,
-                                                     const array<unsigned int, dim>& n,
+                                                     const std::array<unsigned int, dim>& n,
                                                      const DataContainer& data)
 {
   static_assert(dim==2 || dim==3, "You can only write 2d and 3d uniform data to AmiraMesh");

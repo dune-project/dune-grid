@@ -8,7 +8,8 @@
 #include <dune/common/proxymemberaccess.hh>
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/deprecated.hh>
-#include <dune/grid/common/grid.hh>
+#include <dune/geometry/type.hh>
+#include <dune/grid/common/gridenums.hh>
 
 /** \file
     \brief Wrapper and interface class for a static iterator (EntityPointer)
@@ -78,7 +79,7 @@ namespace Dune
       Dune::EntityPointer<..., SLevelIterator> and
       Dune::HierarchicIterator<..., SHierarchicIterator> inherits
       Dune::EntityPointer<..., SHierarchicIterator>.
-      And virtualy all Dune::EntityPointer<..., SXxxIterator> are descendents
+      And virtually all Dune::EntityPointer<..., SXxxIterator> are descendents
       of Dune::EntityPointer<..., SEntityPointer>.
 
       Now you can compare Dune::LevelIterator with Dune::EntityPointer and

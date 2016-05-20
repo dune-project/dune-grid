@@ -24,8 +24,8 @@ void checkIndexSet(const GridView& gridView,
   for (auto it = gridView.template begin<0>(); it != gridView.template end<0>(); ++it)
     // Loop over all subEntities
     for (size_t i=0; i<it->subEntities(codim); i++) {
-      assert( indexSet.index(*it->template subEntity<codim>(i)) == indexSet.subIndex(*it, i, codim) );
-      indices.push_back(indexSet.index(*it->template subEntity<codim>(i)));
+      assert( indexSet.index(it->template subEntity<codim>(i)) == indexSet.subIndex(*it, i, codim) );
+      indices.push_back(indexSet.index(it->template subEntity<codim>(i)));
     }
 
   /////////////////////////////////////////////////////////////////////////
@@ -83,10 +83,10 @@ int main(int argc, char* argv[]) try
 #if 0
   typedef YaspGrid<dim> GridType;
 
-  array<int,dim> elements = {4, 4};
+  std::array<int,dim> elements = {4, 4};
   FieldVector<double,dim> bbox = {10, 10};
   std::bitset<dim> periodic(0);
-  uint overlap = 1;
+  unsigned int overlap = 1;
 
   GridType grid(MPI_COMM_WORLD, bbox, elements, periodic, overlap);
 
@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) try
 #if HAVE_UG
   typedef UGGrid<dim> GridType;
 
-  array<uint,dim> elements = { {8, 8} };
+  std::array<unsigned int,dim> elements = { {8, 8} };
   FieldVector<double,dim> lower = {0, 0};
   FieldVector<double,dim> bbox = {10, 10};
 

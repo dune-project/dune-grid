@@ -29,16 +29,16 @@ namespace Dune
     class CornerIterator
       : public ForwardIteratorFacade
         < CornerIterator<CellIterator>,
-            const Corner<typename remove_const<typename std::iterator_traits<
+            const Corner<typename std::remove_const<typename std::iterator_traits<
                         CellIterator>::value_type>::type>,
-            const Corner<typename remove_const<typename std::iterator_traits<
+            const Corner<typename std::remove_const<typename std::iterator_traits<
                         CellIterator>::value_type>::type>&,
             typename std::iterator_traits<CellIterator>::difference_type>
     {
     public:
       // reiterate the facades typedefs here
       typedef CornerIterator<CellIterator> DerivedType;
-      typedef VTK::Corner<typename remove_const<typename std::iterator_traits<
+      typedef VTK::Corner<typename std::remove_const<typename std::iterator_traits<
                   CellIterator>::value_type>::type> Corner;
       typedef const Corner Value;
       typedef Value& Reference;

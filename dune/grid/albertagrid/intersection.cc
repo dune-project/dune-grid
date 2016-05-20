@@ -3,7 +3,6 @@
 #ifndef DUNE_ALBERTA_INTERSECTION_CC
 #define DUNE_ALBERTA_INTERSECTION_CC
 
-#include <dune/common/nullptr.hh>
 #include <dune/grid/albertagrid/intersection.hh>
 
 namespace Dune
@@ -239,7 +238,7 @@ namespace Dune
   template< class GridImp >
   struct AlbertaGridIntersectionBase< GridImp >::GlobalCoordReader
   {
-    typedef typename remove_const< GridImp >::type Grid;
+    typedef typename std::remove_const< GridImp >::type Grid;
 
     static const int dimension = Grid::dimension;
     static const int codimension = 1;
@@ -306,7 +305,7 @@ namespace Dune
   template< class GridImp >
   struct AlbertaGridIntersectionBase< GridImp >::LocalCoordReader
   {
-    typedef typename remove_const< GridImp >::type Grid;
+    typedef typename std::remove_const< GridImp >::type Grid;
 
     static const int dimension = Grid::dimension;
     static const int codimension = 1;

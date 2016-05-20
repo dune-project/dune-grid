@@ -42,13 +42,13 @@ namespace Dune
       ascii,
       //! Output to the file is inline base64 binary.
       base64,
-      //! Ouput is to the file is appended raw binary
+      //! Output is to the file is appended raw binary
       appendedraw,
-      //! Ouput is to the file is appended base64 binary
+      //! Output is to the file is appended base64 binary
       appendedbase64
       // //! Output to the file is compressed inline binary.
       // binarycompressed,
-      // //! Ouput is compressed and appended to the file.
+      // //! Output is compressed and appended to the file.
       // compressedappended
     };
     //! Whether to produce conforming or non-conforming output.
@@ -70,8 +70,8 @@ namespace Dune
       conforming,
       //! Output non-conforming data.
       /**
-       * Each element has it's own set of vertices.  The position of a vertex
-       * of one element will concide with the position of the corresponding
+       * Each element has its own set of vertices.  The position of a vertex
+       * of one element will coincide with the position of the corresponding
        * vertex on another element.  This allows for multiple DoFs (one per
        * element) on the "same" vertex.
        */
@@ -106,7 +106,7 @@ namespace Dune
 
     template<>
     struct PrintType<char> {
-      typedef conditional<std::numeric_limits<char>::is_signed,
+      typedef std::conditional<std::numeric_limits<char>::is_signed,
           int, unsigned>::type
       Type;
     };

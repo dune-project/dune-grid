@@ -59,11 +59,12 @@ namespace Dune
     typedef FieldVector< ctype, dimRange > RangeVector;
 
   private:
-    AnalyticalCoordFunctionInterface ()
-    {}
-
-    AnalyticalCoordFunctionInterface ( const This & );
-    This &operator= ( const This & );
+    AnalyticalCoordFunctionInterface () = default;
+    AnalyticalCoordFunctionInterface ( const This & ) = default;
+    AnalyticalCoordFunctionInterface ( This && ) = default;
+    ~AnalyticalCoordFunctionInterface () = default;
+    This &operator= ( const This & ) = default;
+    This &operator= ( This && ) = default;
 
   public:
     //! evaluate method for global mapping
@@ -103,13 +104,14 @@ namespace Dune
     typedef typename Base :: RangeVector RangeVector;
 
   protected:
-    AnalyticalCoordFunction ()
-    {}
+    AnalyticalCoordFunction () = default;
+    AnalyticalCoordFunction ( const This & ) = default;
+    AnalyticalCoordFunction ( This && ) = default;
+    ~AnalyticalCoordFunction () = default;
+    This &operator= ( const This & ) = default;
+    This &operator= ( This && ) = default;
 
   private:
-    AnalyticalCoordFunction ( const This & );
-    This &operator= ( const This & );
-
     void evaluate ( const DomainVector &x, RangeVector &y ) const;
   };
 
@@ -153,12 +155,12 @@ namespace Dune
     typedef FieldVector< ctype, dimRange > RangeVector;
 
   private:
-    DiscreteCoordFunctionInterface ()
-    {}
-
-    DiscreteCoordFunctionInterface ( const This & );
-
-    This &operator= ( const This & );
+    DiscreteCoordFunctionInterface () = default;
+    DiscreteCoordFunctionInterface ( const This & ) = default;
+    DiscreteCoordFunctionInterface ( This && ) = default;
+    ~DiscreteCoordFunctionInterface () = default;
+    This &operator= ( const This & ) = default;
+    This &operator= ( This && ) = default;
 
   public:
     /** \brief evaluate method
@@ -212,16 +214,17 @@ namespace Dune
     typedef typename Base :: RangeVector RangeVector;
 
   protected:
-    DiscreteCoordFunction ()
-    {}
+    DiscreteCoordFunction () = default;
+    DiscreteCoordFunction ( const This & ) = default;
+    DiscreteCoordFunction ( This && ) = default;
+    ~DiscreteCoordFunction () = default;
+    This &operator= ( const This & ) = default;
+    This &operator= ( This && ) = default;
 
     void adapt ()
     {}
 
   private:
-    DiscreteCoordFunction ( const This & );
-    This &operator= ( const This & );
-
     template< class HostEntity >
     void evaluate ( const HostEntity &hostEntity, unsigned int corner,
                     RangeVector &y ) const;

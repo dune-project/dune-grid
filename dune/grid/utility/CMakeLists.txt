@@ -1,12 +1,11 @@
 add_subdirectory(partitioner)
 add_subdirectory(partitioning)
-add_subdirectory(test EXCLUDE_FROM_ALL)
+add_subdirectory(test)
 set(HEADERS
   entitycommhelper.hh
   entityrange.hh
   entityset.hh
   globalindexset.hh
-  grapedataioformattypes.hh
   gridinfo-gmsh-main.hh
   gridinfo.hh
   gridtype.hh

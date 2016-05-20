@@ -40,7 +40,6 @@ namespace Dune
     typedef FieldVector< ctype, dimension-1 > LocalCoordType;
 
     typedef typename Grid::template Codim< 0 >::Entity Entity;
-    typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
 
     typedef typename Grid::template Codim< 1 >::Geometry Geometry;
     typedef typename Grid::template Codim< 1 >::LocalGeometry LocalGeometry;
@@ -117,7 +116,6 @@ namespace Dune
     typedef typename Base::LocalCoordType LocalCoordType;
 
     typedef typename Base::Entity Entity;
-    typedef typename Base::EntityPointer EntityPointer;
 
     typedef typename Base::Geometry Geometry;
     typedef typename Base::LocalGeometry LocalGeometry;

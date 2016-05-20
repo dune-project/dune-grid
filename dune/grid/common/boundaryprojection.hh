@@ -5,10 +5,10 @@
 
 //- system includes
 #include <cmath>
+#include <memory>
 
 //- Dune includes
 #include <dune/common/fvector.hh>
-#include <dune/common/shared_ptr.hh>
 
 #include <dune/geometry/multilineargeometry.hh>
 
@@ -83,7 +83,7 @@ namespace Dune
      */
     BoundarySegmentWrapper ( const GeometryType &type,
                              const std::vector< CoordinateType > &vertices,
-                             const shared_ptr< BoundarySegment > &boundarySegment )
+                             const std::shared_ptr< BoundarySegment > &boundarySegment )
       : faceMapping_( FaceMapping( type, vertices ) ),
         boundarySegment_( boundarySegment )
     {}
@@ -100,7 +100,7 @@ namespace Dune
 
   private:
     FaceMapping faceMapping_;
-    const shared_ptr< BoundarySegment > boundarySegment_;
+    const std::shared_ptr< BoundarySegment > boundarySegment_;
   };
 
 

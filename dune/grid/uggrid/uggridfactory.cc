@@ -183,15 +183,15 @@ template <int dimworld>
 void Dune::GridFactory<Dune::UGGrid<dimworld> >::
 insertBoundarySegment(const std::vector<unsigned int>& vertices)
 {
-  insertBoundarySegment(vertices, shared_ptr<BoundarySegment<dimworld> >());
+  insertBoundarySegment(vertices, std::shared_ptr<BoundarySegment<dimworld> >());
 }
 
 template <int dimworld>
 void Dune::GridFactory<Dune::UGGrid<dimworld> >::
 insertBoundarySegment(const std::vector<unsigned int>& vertices,
-                      const shared_ptr<BoundarySegment<dimworld> > &boundarySegment)
+                      const std::shared_ptr<BoundarySegment<dimworld> > &boundarySegment)
 {
-  array<int, dimworld*2-2> segmentVertices;
+  std::array<int, dimworld*2-2> segmentVertices;
 
   for (size_t i=0; i<vertices.size(); i++)
     segmentVertices[i] = vertices[i];
@@ -491,7 +491,7 @@ createGrid()
     // Even though it's empty until the first load balancing
     // it should still be there in case someone wants to access it.
     grid_->levelIndexSets_.resize(1);
-    grid_->levelIndexSets_[0] = make_shared<UGGridLevelIndexSet<const UGGrid<dimworld> > >();
+    grid_->levelIndexSets_[0] = std::make_shared<UGGridLevelIndexSet<const UGGrid<dimworld> > >();
 
     /* here all temp memory since CreateMultiGrid is released */
     Release(grid_->multigrid_->theHeap, UG::FROM_TOP, grid_->multigrid_->MarkKey);

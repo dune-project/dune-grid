@@ -21,7 +21,6 @@ struct GeometryInterface
   static void check ( const Geometry &geo )
   {
     static_assert( (Geometry::mydimension == dim-codim), "" );
-    static_assert( (Geometry::dimension == dim), "" );
 
     typedef typename Geometry::ctype ctype DUNE_UNUSED;
 
@@ -76,7 +75,6 @@ struct ZeroEntityMethodCheck
   {
     // check types
     typedef typename Entity::HierarchicIterator HierarchicIterator DUNE_UNUSED;
-    typedef typename Entity::EntityPointer EntityPointer DUNE_UNUSED;
 
     e.subEntities(cd);
     e.template subEntity<cd>(0);
@@ -101,7 +99,6 @@ struct ZeroEntityMethodCheck<Grid, cd, false>
   {
     // check types
     typedef typename Entity::HierarchicIterator HierarchicIterator DUNE_UNUSED;
-    typedef typename Entity::EntityPointer EntityPointer DUNE_UNUSED;
 
     // recursively check on
     ZeroEntityMethodCheck<Grid, cd - 1,
@@ -123,7 +120,6 @@ struct ZeroEntityMethodCheck<Grid, 0, true>
   {
     // check types
     typedef typename Entity::HierarchicIterator HierarchicIterator DUNE_UNUSED;
-    typedef typename Entity::EntityPointer EntityPointer DUNE_UNUSED;
 
     e.subEntities(0);
     e.template subEntity<0>(0);
@@ -146,7 +142,6 @@ struct ZeroEntityMethodCheck<Grid, 0, false>
   {
     // check types
     typedef typename Entity::HierarchicIterator HierarchicIterator DUNE_UNUSED;
-    typedef typename Entity::EntityPointer EntityPointer DUNE_UNUSED;
 
     e.subEntities(0);
 #if !DISABLE_DEPRECATED_METHOD_CHECK
@@ -280,15 +275,7 @@ struct EntityInterface<Grid, 0, dim, true>
     // grid hierarchy
     if ( e.hasFather() )
     {
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)    // grid hierarchy
-      const typename Entity::EntityPointer fatherPtr = e.father();
-      *fatherPtr;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-      const Entity& father = *fatherPtr;
-#else
       const Entity father = e.father();
-#endif
       father.hbegin(0);
       e.geometryInFather();
     }
@@ -392,11 +379,8 @@ struct LeafInterface
   static void check(Grid &g)
   {
     DUNE_UNUSED_PARAMETER(g);
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-    g.template leafbegin<0>();
-    g.template leafend<0>();
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
   }
+
   LeafInterface()
   {
     c = check;
@@ -413,7 +397,6 @@ struct GridViewInterface
     typedef typename GridView::IndexSet IndexSet DUNE_UNUSED;
 
     typedef typename GridView::template Codim< 0 >::Entity Entity DUNE_UNUSED;
-    typedef typename GridView::template Codim< 0 >::EntityPointer EntityPointer DUNE_UNUSED;
     typedef typename GridView::template Codim< 0 >::Iterator Iterator DUNE_UNUSED;
 
     typedef typename GridView::Intersection Intersection DUNE_UNUSED;
@@ -437,10 +420,6 @@ struct GridViewInterface
     }
     for( int codim = 0; codim < GridView::dimension; ++codim )
       gv.indexSet().types( codim );
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-    for( int codim = 0; codim < GridView::dimension; ++codim )
-      gv.indexSet().geomTypes( codim );
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
     // intersections
     if( gv.template begin< 0 >() != gv.template end< 0 >() )
@@ -481,7 +460,6 @@ struct GridInterface
 
     typedef typename Grid::ctype ctype DUNE_UNUSED;
 
-    typedef typename Grid::template Codim<0>::EntityPointer EntityPointer DUNE_UNUSED;
 #if !DISABLE_DEPRECATED_METHOD_CHECK
     typedef typename Grid::template Codim<0>::LevelIterator LevelIterator DUNE_UNUSED;
     typedef typename Grid::template Codim<0>::LeafIterator LeafIterator DUNE_UNUSED;
@@ -513,10 +491,6 @@ struct GridInterface
     // check for iterator functions
     g.levelGridView(0).template begin<0>();
     g.levelGridView(0).template end<0>();
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-    g.template lbegin<0>(0);
-    g.template lend<0>(0);
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
     LeafInterface< Grid >();
 
@@ -543,27 +517,12 @@ struct GridInterface
     size(Dune::GeometryType(Dune::GeometryType::simplex,Grid::dimension));
     for( int codim = 0; codim < Grid::dimension; ++codim )
       g.levelIndexSet( 0 ).types( codim );
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-    for (int codim = 0; codim < Grid::dimension; codim++)
-      g.levelIndexSet(0).geomTypes(codim);
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-    if (g.template leafbegin<0>() != g.template leafend<0>() )
-    {
-      // Instantiate all methods of LeafIndexSet
-      g.leafIndexSet().index(*g.template leafbegin<0>());
-    }
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
     /** \todo Test for subindex is missing, because I don't know yet
        how to test for the existence of certain codims */
     g.leafIndexSet().size(Dune::GeometryType(Dune::GeometryType::simplex,Grid::dimension));
     for( int codim = 0; codim < Grid::dimension; ++codim )
       g.leafIndexSet().types( codim );
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-    for (int codim = 0; codim < Grid::dimension; codim++)
-      g.leafIndexSet().geomTypes(codim);
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
     if ( g.levelGridView( 0 ).template begin< 0 >() != g.levelGridView( 0 ).template end< 0 >() )
     {

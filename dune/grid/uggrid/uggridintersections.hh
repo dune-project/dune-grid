@@ -3,8 +3,7 @@
 #ifndef DUNE_UGGRID_INTERSECTIONS_HH
 #define DUNE_UGGRID_INTERSECTIONS_HH
 
-#include <dune/common/sllist.hh>
-#include <dune/common/shared_ptr.hh>
+#include <memory>
 
 #include <dune/grid/uggrid/uggridrenumberer.hh>
 
@@ -38,7 +37,6 @@ namespace Dune {
     typedef typename GridImp::Traits::template Codim<1>::LocalGeometryImpl LocalGeometryImpl;
 
   public:
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
@@ -62,13 +60,13 @@ namespace Dune {
       return center_==i.center_ && neighborCount_ == i.neighborCount_;
     }
 
-    //! return EntityPointer to the Entity on the inside of this intersection
+    //! return Entity on the inside of this intersection
     //! (that is the entity where we started this iterator)
     Entity inside() const {
       return Entity(UGGridEntity<0,dim,GridImp>(center_,gridImp_));
     }
 
-    //! return EntityPointer to the Entity on the outside of this intersection
+    //! return Entity on the outside of this intersection
     //! (that is the neighboring Entity)
     Entity outside() const {
       typename UG_NS<dim>::Element* otherelem = UG_NS<dim>::NbElem(center_, neighborCount_);
@@ -175,14 +173,10 @@ namespace Dune {
     mutable FieldVector<UGCtype, dimworld> integrationOuterNormal_;
     mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
 
-    // The geometries are only constructed when necessary.  The following
-    // flags store whether they have been constructed already.
-    mutable bool geometryIsUpToDate_;
-
     //! pointers holding the global and local geometries
-    mutable Dune::shared_ptr<GeometryImpl>      geometry_;
-    mutable Dune::shared_ptr<LocalGeometryImpl> geometryInInside_;
-    mutable Dune::shared_ptr<LocalGeometryImpl> geometryInOutside_;
+    mutable std::shared_ptr<GeometryImpl>      geometry_;
+    mutable std::shared_ptr<LocalGeometryImpl> geometryInInside_;
+    mutable std::shared_ptr<LocalGeometryImpl> geometryInOutside_;
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;
@@ -223,7 +217,6 @@ namespace Dune {
     typedef typename GridImp::Traits::template Codim<1>::LocalGeometryImpl LocalGeometryImpl;
 
   public:
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef typename GridImp::template Codim<0>::Entity Entity;
@@ -250,13 +243,13 @@ namespace Dune {
              && subNeighborCount_ == other.subNeighborCount_;
     }
 
-    //! return EntityPointer to the Entity on the inside of this intersection
+    //! return Entity on the inside of this intersection
     //! (that is the Entity where we started this Iterator)
     Entity inside() const {
       return Entity(UGGridEntity<0,dim,GridImp>(center_,gridImp_));
     }
 
-    //! return EntityPointer to the Entity on the outside of this intersection
+    //! return Entity on the outside of this intersection
     //! (that is the neighboring Entity)
     Entity outside() const {
 
@@ -433,9 +426,9 @@ namespace Dune {
     mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
 
     //! pointer to global and local intersection geometries
-    mutable Dune::shared_ptr<GeometryImpl>      geometry_;
-    mutable Dune::shared_ptr<LocalGeometryImpl> geometryInInside_;
-    mutable Dune::shared_ptr<LocalGeometryImpl> geometryInOutside_;
+    mutable std::shared_ptr<GeometryImpl>      geometry_;
+    mutable std::shared_ptr<LocalGeometryImpl> geometryInInside_;
+    mutable std::shared_ptr<LocalGeometryImpl> geometryInOutside_;
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;

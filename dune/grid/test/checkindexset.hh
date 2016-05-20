@@ -70,6 +70,9 @@ namespace Dune
     const GeometryType type = en.type();
     assert( type == en.geometry().type() );
 
+    if( type.isNone() )
+      return;
+
     const ReferenceElement< coordType, dim > &refElem
       = ReferenceElements< coordType, dim >::general( type );
 
@@ -124,16 +127,7 @@ namespace Dune
       // -- ask for the subEntity itself and then its index
       // -- ask for the subIndex directly
       typedef typename GridType::template Codim< codim >::Entity SubE;
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-      typedef typename GridType::template Codim< codim >::EntityPointer SubEntityPointer;
-      const SubEntityPointer subEntityPtr = en.template subEntity< codim >( subEntity );
-      *subEntityPtr;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-      const SubE& subE = *subEntityPtr;
-#else
       SubE subE = en.template subEntity< codim >( subEntity );
-#endif
 
       if( lset.subIndex( en, subEntity, codim ) != lset.index( subE) )
       {
@@ -163,16 +157,7 @@ namespace Dune
 
         // get entity pointer to subEntity vertex
         typedef typename GridType::template Codim< dim >::Entity VertexE;
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-        typedef typename GridType::template Codim< dim >::EntityPointer VertexPointer;
-        VertexPointer vxp = en.template subEntity< dim >( local[ j ] );
-        *vxp;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-        const VertexE& vxE = *vxp;
-#else
         VertexE vxE = en.template subEntity< dim >( local[ j ] );
-#endif
 
         // Find the global coordinate of the vertex by its index
         if(vertexCoordsMap.find(global[j]) != vertexCoordsMap.end())
@@ -279,11 +264,6 @@ namespace Dune
     for( auto it = types.begin(); it != types.end(); ++it )
       if( geometryTypes.find( *it ) == geometryTypes.end() )
         geomTypesError = true;
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-    for (size_t i=0; i<lset.geomTypes(codim).size(); i++)
-      if (geometryTypes.find(lset.geomTypes(codim)[i])==geometryTypes.end())
-        geomTypesError = true;
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
 
     // And vice versa
@@ -291,18 +271,6 @@ namespace Dune
     {
       if( std::find( types.begin(), types.end(), *it ) == types.end() )
         geomTypesError = true;
-
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-      bool found = false;
-      for (size_t i=0; i<lset.geomTypes(codim).size(); i++)
-        if (*it == lset.geomTypes(codim)[i]) {
-          found = true;
-          break;
-        }
-
-      if (!found)
-        geomTypesError = true;
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
     }
 
 
@@ -317,12 +285,6 @@ namespace Dune
       std::cerr << std::endl << "but the method types() returned:" << std::endl;
       for( auto it = types.begin(); it != types.end(); ++it )
         std::cerr << "  " << *it << std::endl;
-
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-      std::cerr << std::endl << "but the method geomTypes() returned:" << std::endl;
-      for (size_t j=0; j<lset.geomTypes(codim).size(); j++)
-        std::cerr << "  " << lset.geomTypes(codim)[j] << std::endl;
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
       DUNE_THROW(GridError, "!");
     }
@@ -373,11 +335,7 @@ namespace Dune
         const int subcount = entity.subEntities(codim);
         for( int i = 0; i < subcount; ++i )
         {
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-          const IdType id = localIdSet.id( *(entity.template subEntity< codim >( i ) ) );
-#else
           const IdType id = localIdSet.id( entity.template subEntity< codim >( i ) );
-#endif
           entityfound.insert( id );
         }
       }
@@ -434,9 +392,10 @@ namespace Dune
            << " equals all found vertices "
            << (unsigned int)lset.size(Dune::GeometryType(0))
            << "\n";
-      // assertion goes wrong for parallel grid since no iteration over ghost
-      // subentities
-      assert( count == (unsigned int)lset.size(Dune::GeometryType(0)) );
+      // assertion goes wrong:
+      // - for parallel grid since no iteration over ghost subentities
+      // - if there are vertices with geometry type 'none'
+      //assert( count == (unsigned int)lset.size(Dune::GeometryType(0)) );
     }
 
     {
@@ -492,16 +451,7 @@ namespace Dune
         {
           // get entity pointer of sub entity codim=dim (Vertex)
           typedef typename GridView::template Codim< dim >::Entity VertexE;
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-          typedef typename GridView::template Codim< dim >::EntityPointer VertexPointer;
-          VertexPointer vxp = it->template subEntity< dim >( i );
-          *vxp;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-          const VertexE& vxE = *vxp;
-#else
           VertexE vxE = it->template subEntity< dim >( i );
-#endif
 
           // get coordinates of entity pointer
           FieldVector< coordType, dimworld > vx( vxE.geometry().corner( 0 ) );
@@ -549,13 +499,8 @@ namespace Dune
               if( !nit->neighbor() )
                 continue;
 
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-              checkSubEntity< codim >( grid, *(nit->outside()), lset, sout,
-                                       setOfVerticesPerSubEntity, subEntityPerSetOfVertices, vertexCoordsMap );
-#else
               checkSubEntity< codim >( grid, nit->outside(), lset, sout,
                                        setOfVerticesPerSubEntity, subEntityPerSetOfVertices, vertexCoordsMap );
-#endif
             }
           }
           else

@@ -5,13 +5,13 @@
 #define DUNE_GRID_IO_FILE_VTK_FUNCTIONWRITER_HH
 
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <typeinfo>
 #include <vector>
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/shared_ptr.hh>
 
 #include <dune/geometry/referenceelements.hh>
 
@@ -87,11 +87,11 @@ namespace Dune
       : public FunctionWriterBase<typename Func::Entity>
     {
       typedef FunctionWriterBase<typename Func::Entity> Base;
-      shared_ptr<const Func> func;
-      shared_ptr<DataArrayWriter<float> > arraywriter;
+      std::shared_ptr<const Func> func;
+      std::shared_ptr<DataArrayWriter<float> > arraywriter;
 
     public:
-      VTKFunctionWriter(const shared_ptr<const Func>& func_)
+      VTKFunctionWriter(const std::shared_ptr<const Func>& func_)
         : func(func_)
       { }
 
@@ -143,7 +143,7 @@ namespace Dune
     {
       typedef FunctionWriterBase<Cell> Base;
 
-      shared_ptr<DataArrayWriter<float> > arraywriter;
+      std::shared_ptr<DataArrayWriter<float> > arraywriter;
 
     public:
 
@@ -189,7 +189,7 @@ namespace Dune
       static const unsigned mydim = Base::Cell::mydimension;
 
       const IteratorFactory& factory;
-      shared_ptr<DataArrayWriter<unsigned> > arraywriter;
+      std::shared_ptr<DataArrayWriter<unsigned> > arraywriter;
       std::vector<unsigned> pointIndices;
 
     public:
@@ -251,7 +251,7 @@ namespace Dune
     class NonConformingConnectivityWriter
       : public FunctionWriterBase<Cell>
     {
-      shared_ptr<DataArrayWriter<unsigned> > arraywriter;
+      std::shared_ptr<DataArrayWriter<unsigned> > arraywriter;
       unsigned counter;
 
     public:
@@ -292,7 +292,7 @@ namespace Dune
     {
       typedef FunctionWriterBase<Cell> Base;
 
-      shared_ptr<DataArrayWriter<unsigned> > arraywriter;
+      std::shared_ptr<DataArrayWriter<unsigned> > arraywriter;
       unsigned offset;
 
     public:
@@ -332,7 +332,7 @@ namespace Dune
     {
       typedef FunctionWriterBase<Cell> Base;
 
-      shared_ptr<DataArrayWriter<unsigned char> > arraywriter;
+      std::shared_ptr<DataArrayWriter<unsigned char> > arraywriter;
 
     public:
       //! return name

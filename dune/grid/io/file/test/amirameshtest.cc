@@ -9,9 +9,6 @@
 #if HAVE_ALBERTA
 #include <dune/grid/albertagrid.hh>
 #endif
-#if HAVE_ALUGRID
-#include <dune/grid/alugrid.hh>
-#endif
 
 #include <dune/grid/io/file/amirameshreader.hh>
 #include <dune/grid/io/file/amirameshwriter.hh>
@@ -52,7 +49,7 @@ void testWritingUniformData() {
   for (; vIt2d!=vEndIt2d; ++vIt2d)
     vertexdata2d[grid2d.leafIndexSet().index(*vIt2d)] = vIt2d->geometry().corner(0).two_norm();
 
-  array<unsigned int, 2> n2;
+  std::array<unsigned int, 2> n2;
   n2[0] = n[0]+1;
   n2[1] = n[1]+1;
 
@@ -76,7 +73,7 @@ void testWritingUniformData() {
   for (; vIt!=vEndIt; ++vIt)
     vertexdata3d[grid3d.leafIndexSet().index(*vIt)] = vIt->geometry().corner(0).two_norm();
 
-  array<unsigned int, 3> n3;
+  std::array<unsigned int, 3> n3;
   n3[0] = n[0]+1;
   n3[1] = n[1]+1;
   n3[2] = n[2]+1;
@@ -84,7 +81,7 @@ void testWritingUniformData() {
   // write data
   AmiraMeshWriter<YaspGrid<3>::LeafGridView> amiramesh3d;
   amiramesh3d.addUniformData(grid3d.leafGridView(), n3, vertexdata3d);
-  amiramesh3d.write("sgrid3d.am");
+  amiramesh3d.write("yaspgrid3d.am");
 
 }
 
@@ -102,17 +99,6 @@ int main() try {
 #if HAVE_ALBERTA
   std::cout << "reading AlbertaGrid<2>" << std::endl;
   testReadingUnstructuredGrid<AlbertaGrid<2> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/simplex-testgrid-2d.am");
-#endif
-
-#if HAVE_ALUGRID
-  std::cout << "reading ALUGrid<2,2,simplex,nonconforming>" << std::endl;
-  testReadingUnstructuredGrid<ALUGrid<2,2,simplex,nonconforming> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/simplex-testgrid-2d.am");
-
-  std::cout << "reading ALUGrid<3,3,simplex,nonconforming>" << std::endl;
-  testReadingUnstructuredGrid<ALUGrid<3,3,simplex,nonconforming> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/simplex-testgrid-3d.am");
-
-  std::cout << "reading ALUGrid<3,3,cube,nonconforming>" << std::endl;
-  testReadingUnstructuredGrid<ALUGrid<3,3,cube,nonconforming> >(std::string(DUNE_GRID_EXAMPLE_GRIDS_PATH) + "amiramesh/cube-testgrid-3d.am");
 #endif
 
   // Test whether writing uniform data works

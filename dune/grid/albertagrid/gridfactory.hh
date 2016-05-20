@@ -10,16 +10,14 @@
  */
 
 #include <algorithm>
+#include <array>
 #include <limits>
 #include <map>
-
-#include <dune/common/array.hh>
+#include <memory>
 
 #include <dune/geometry/referenceelements.hh>
 
 #include <dune/grid/common/gridfactory.hh>
-
-#include <dune/grid/utility/grapedataioformattypes.hh>
 
 #include <dune/grid/albertagrid/agrid.hh>
 
@@ -69,7 +67,7 @@ namespace Dune
     typedef FieldMatrix< ctype, dimensionworld, dimensionworld > WorldMatrix;
 
     typedef DuneBoundaryProjection< dimensionworld > DuneProjection;
-    typedef Dune::shared_ptr< const DuneProjection > DuneProjectionPtr;
+    typedef std::shared_ptr< const DuneProjection > DuneProjectionPtr;
     typedef Dune::BoundarySegment< dimension, dimensionworld > BoundarySegment;
 
     template< int codim >
@@ -90,7 +88,7 @@ namespace Dune
     typedef Alberta::NumberingMap< dimension, Alberta::Dune2AlbertaNumbering > NumberingMap;
     typedef Alberta::DuneBoundaryProjection< dimension > Projection;
 
-    typedef array< unsigned int, dimension > FaceId;
+    typedef std::array< unsigned int, dimension > FaceId;
     typedef std::map< FaceId, size_t > BoundaryMap;
 
     class ProjectionFactory;
@@ -227,7 +225,7 @@ namespace Dune
      */
     virtual void
     insertBoundarySegment ( const std::vector< unsigned int > &vertices,
-                            const shared_ptr< BoundarySegment > &boundarySegment )
+                            const std::shared_ptr< BoundarySegment > &boundarySegment )
     {
       const ReferenceElement< ctype, dimension-1 > &refSimplex
         = ReferenceElements< ctype, dimension-1 >::simplex();
@@ -316,34 +314,17 @@ namespace Dune
 
     /** \brief write out the macro triangulation in native grid file format
      *
-     *  \tparam  type  type of file to write (either ascii or xdr)
-     *
      *  \param[in]  filename  name of the file to write to
      *
      *  \returns \c true on success
      */
-    template< GrapeIOFileFormatType type >
     bool write ( const std::string &filename )
     {
-      static_assert( type != pgm, "AlbertaGridFactory: writing pgm format is not supported." );
       macroData_.finalize();
       if( dimension < 3 )
         macroData_.setOrientation( Alberta::Real( 1 ) );
       assert( macroData_.checkNeighbors() );
-      return macroData_.write( filename, (type == xdr) );
-    }
-
-    /** \brief write out the macro triangulation in native grid file format
-     *
-     *  The grid is written in human readable form (ascii).
-     *
-     *  \param[in]  filename  name of the file to write to
-     *
-     *  \returns \c true on success
-     */
-    virtual bool write ( const std::string &filename )
-    {
-      return write< ascii >( filename );
+      return macroData_.write( filename, false );
     }
 
     virtual unsigned int

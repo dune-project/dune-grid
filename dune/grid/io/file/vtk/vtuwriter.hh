@@ -296,7 +296,7 @@ namespace Dune {
        * \param ncells  Number of cells/lines.
        * \param npoints Number of points.
        *
-       * Inbetween the call to this method and to endMain(), there should be
+       * Between the call to this method and to endMain(), there should be
        * calls to dump the actual data:
        * <ul>
        * <li> (optional) beginCellData()/endCellData(),
@@ -328,12 +328,12 @@ namespace Dune {
        *          required.
        *
        * If this function returns true, an appended section is actually
-       * required.  In this case, inbetween the call to this method and to
+       * required.  In this case, between the call to this method and to
        * endAppended(), there should be literally the same calls (including
        * the same arguments) as between the calls to beginMain() and
        * endMain().  The only exception is, that if a DataArrayWriter in the
        * main section indicated that the calls to write could be skipped, this
-       * is not neccessarily true in the appended section also (you will have
+       * is not necessarily true in the appended section also (you will have
        * to ask the DataArrayWriter again).
        *
        * If this function returns false, no appended section is required and a
@@ -362,7 +362,7 @@ namespace Dune {
         }
       }
 
-      //! aquire a DataArrayWriter
+      //! acquire a DataArrayWriter
       /**
        * \tparam T Type of the data to write.
        *

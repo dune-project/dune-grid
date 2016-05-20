@@ -6,7 +6,6 @@
 #include <vector>
 #include <list>
 
-#include <dune/common/deprecated.hh>
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/tuples.hh>
 
@@ -43,7 +42,6 @@ namespace Dune {
     typedef GridTraits<dim,dimw,Dune::OneDGrid,
         OneDGridGeometry,
         OneDGridEntity,
-        OneDGridEntityPointer,
         OneDGridLevelIterator,
         OneDGridLeafIntersection,
         OneDGridLevelIntersection,
@@ -186,15 +184,6 @@ namespace Dune {
     template<int codim, PartitionIteratorType PiType>
     typename Traits::template Codim<codim>::template Partition<PiType>::LeafIterator leafend() const;
 
-    /** \brief Create an EntityPointer from an EntitySeed */
-    template <typename Seed>
-    static typename Traits::template Codim<Seed::codimension>::EntityPointer
-    entityPointer(const Seed& seed)
-    {
-      enum {codim = Seed::codimension};
-      return typename Traits::template Codim<codim>::EntityPointer(OneDGridEntityPointer<codim,const OneDGrid>(OneDGrid::getRealImplementation(seed).target()));
-    }
-
     /** \brief Create an Entity from an EntitySeed */
     template <typename Seed>
     static typename Traits::template Codim<Seed::codimension>::Entity
@@ -308,7 +297,7 @@ namespace Dune {
      * \param refCount if >0 mark for refinement, if <0 mark for coarsening
      * \param e Entity to the entity you want to mark
      *
-     * \return True, if marking was successfull
+     * \return True, if marking was successful
      */
     bool mark(int refCount, const Traits::Codim<0>::Entity& e );
 
@@ -373,22 +362,22 @@ namespace Dune {
 
     /** \brief Get vertex lists directly -- makes the code more readable */
     OneDGridList<OneDEntityImp<0> >& vertices(int level) {
-      return Dune::get<0>(entityImps_[level]);
+      return std::get<0>(entityImps_[level]);
     }
 
     /** \brief Get vertex lists directly -- makes the code more readable */
     const OneDGridList<OneDEntityImp<0> >& vertices(int level) const {
-      return Dune::get<0>(entityImps_[level]);
+      return std::get<0>(entityImps_[level]);
     }
 
     /** \brief Get element lists directly -- makes the code more readable */
     OneDGridList<OneDEntityImp<1> >& elements(int level) {
-      return Dune::get<1>(entityImps_[level]);
+      return std::get<1>(entityImps_[level]);
     }
 
     /** \brief Get element lists directly -- makes the code more readable */
     const OneDGridList<OneDEntityImp<1> >& elements(int level) const {
-      return Dune::get<1>(entityImps_[level]);
+      return std::get<1>(entityImps_[level]);
     }
 
     CollectiveCommunication ccobj;
@@ -462,23 +451,6 @@ namespace Dune {
     struct hasEntity< OneDGrid, cdim >
     {
       static const bool v = true;
-    };
-
-    /** \brief OneDGrid is not parallel
-       \ingroup OneDGrid
-     */
-    template<>
-    struct
-#ifndef DUNE_AVOID_CAPABILITIES_IS_PARALLEL_DEPRECATION_WARNING
-    DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.")
-#endif
-    isParallel< OneDGrid >
-    {
-      static const bool
-#ifndef DUNE_AVOID_CAPABILITIES_IS_PARALLEL_DEPRECATION_WARNING
-      DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.")
-#endif
-      v = false;
     };
 
     /** \brief OneDGrid is levelwise conforming

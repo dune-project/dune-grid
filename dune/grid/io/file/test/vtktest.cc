@@ -133,7 +133,7 @@ int doWrite( const GridView &gridView, Dune :: VTK :: DataMode dm )
 }
 
 template<int dim>
-int vtkCheck(const Dune::array<int, dim>& elements,
+int vtkCheck(const std::array<int, dim>& elements,
               const Dune::FieldVector<double, dim>& upperRight)
 {
   Dune::YaspGrid<dim> g(upperRight, elements);

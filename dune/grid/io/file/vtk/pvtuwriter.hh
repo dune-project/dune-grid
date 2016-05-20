@@ -175,7 +175,7 @@ namespace Dune {
       /**
        * \param ghostLevel Set the GhostLevel attribute
        *
-       * Inbetween the call to this method and to endMain(), there should be
+       * Between the call to this method and to endMain(), there should be
        * calls to add the actual data:
        * <ul>
        * <li> (optional) beginCellData()/endCellData(),

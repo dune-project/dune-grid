@@ -1,17 +1,41 @@
+# Implement the GRIDTYPE preprocessor magic
 #
-# Defined macros:
+# .. cmake_function:: dune_define_gridtype
 #
-# dune_define_gridtype(<output> GRIDTYPE <gridtype> DUNETYPE <dunetype>
-#   [ASSERTION <assertion>] HEADERS header1 [ header2 ...])
+#    .. cmake_param:: output
+#       :single:
+#       :required:
+#       :positional:
 #
-# Addes a new GRIDTYPE target to DUNE's preprocessor magic.
-# The generated magic will be stored in variable output
+#       TODO doc me
 #
-# Parameters: gridtype   name of the new target
-#             assertion  condition to be checked by the preprocessor
-#             dunetype   C++ type of the grid
-#             header1     name of the header file which includes the grid
+#    .. cmake_param:: GRIDTYPE
+#       :single:
+#       :required:
 #
+#       The name of the grid type to register.
+#
+#    .. cmake_param:: DUNETYPE
+#       :single:
+#       :required:
+#
+#       The C++ type of the grid to be used for the typedef
+#
+#    .. cmake_param:: ASSERTION
+#       :single:
+#
+#       TODO doc me
+#       old doc: condition to be checked by the preprocessor
+#
+#    .. cmake_param:: HEADERS
+#       :multi:
+#       :required:
+#
+#       The header files that need to be included when using this grid.
+#
+#    This function registers a new type for the GRIDTYPE magic.
+#
+
 macro(dune_define_gridtype output)
   cmake_parse_arguments(GRIDTYPE "" "GRIDTYPE;DUNETYPE;ASSERTION" "HEADERS" ${ARGN})
   if(NOT(GRIDTYPE_GRIDTYPE AND GRIDTYPE_DUNETYPE))

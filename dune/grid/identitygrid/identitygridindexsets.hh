@@ -18,13 +18,13 @@ namespace Dune {
   class IdentityGridLevelIndexSet :
     public IndexSet<GridImp,
                     IdentityGridLevelIndexSet<GridImp>,
-                    typename remove_const<GridImp>::type::HostGridType::LevelGridView::IndexSet::IndexType,
-                    typename remove_const<GridImp>::type::HostGridType::LevelGridView::IndexSet::Types
+                    typename std::remove_const<GridImp>::type::HostGridType::LevelGridView::IndexSet::IndexType,
+                    typename std::remove_const<GridImp>::type::HostGridType::LevelGridView::IndexSet::Types
                     >
   {
   public:
 
-    typedef typename remove_const<GridImp>::type::HostGridType HostGrid;
+    typedef typename std::remove_const<GridImp>::type::HostGridType HostGrid;
     typedef typename HostGrid::LevelGridView::IndexSet::Types Types;
 
     enum {dim = GridImp::dimension};
@@ -95,11 +95,11 @@ namespace Dune {
   class IdentityGridLeafIndexSet :
     public IndexSet<GridImp,
                     IdentityGridLeafIndexSet<GridImp>,
-                    typename remove_const<GridImp>::type::HostGridType::LeafGridView::IndexSet::IndexType,
-                    typename remove_const<GridImp>::type::HostGridType::LeafGridView::IndexSet::Types
+                    typename std::remove_const<GridImp>::type::HostGridType::LeafGridView::IndexSet::IndexType,
+                    typename std::remove_const<GridImp>::type::HostGridType::LeafGridView::IndexSet::Types
                     >
   {
-    typedef typename remove_const<GridImp>::type::HostGridType HostGrid;
+    typedef typename std::remove_const<GridImp>::type::HostGridType HostGrid;
 
   public:
 
@@ -109,7 +109,7 @@ namespace Dune {
      * We use the remove_const to extract the Type from the mutable class,
      * because the const class is not instantiated yet.
      */
-    enum {dim = remove_const<GridImp>::type::dimension};
+    enum {dim = std::remove_const<GridImp>::type::dimension};
 
 
     //! constructor stores reference to a grid and level
@@ -124,7 +124,7 @@ namespace Dune {
         because the const class is not instantiated yet.
      */
     template<int codim>
-    int index (const typename remove_const<GridImp>::type::template Codim<codim>::Entity& e) const
+    int index (const typename std::remove_const<GridImp>::type::template Codim<codim>::Entity& e) const
     {
       return grid_->hostgrid_->leafIndexSet().template index<codim>(grid_->template getHostEntity<codim>(e));
     }
@@ -136,7 +136,7 @@ namespace Dune {
         because the const class is not instantiated yet.
      */
     template<int cc>
-    int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<cc>::Entity& e, int i, int codim) const
+    int subIndex (const typename std::remove_const<GridImp>::type::Traits::template Codim<cc>::Entity& e, int i, int codim) const
     {
       return grid_->hostgrid_->leafIndexSet().subIndex(grid_->template getHostEntity<cc>(e),i, codim);
     }
@@ -193,10 +193,10 @@ namespace Dune {
   template <class GridImp>
   class IdentityGridGlobalIdSet :
     public IdSet<GridImp,IdentityGridGlobalIdSet<GridImp>,
-        typename remove_const<GridImp>::type::HostGridType::Traits::GlobalIdSet::IdType>
+        typename std::remove_const<GridImp>::type::HostGridType::Traits::GlobalIdSet::IdType>
   {
 
-    typedef typename remove_const<GridImp>::type::HostGridType HostGrid;
+    typedef typename std::remove_const<GridImp>::type::HostGridType HostGrid;
 
 
   public:
@@ -213,7 +213,7 @@ namespace Dune {
        because the const class is not instantiated yet.
      */
     template<int cd>
-    IdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
+    IdType id (const typename std::remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       // Return id of the host entity
       return grid_->hostgrid_->globalIdSet().id(grid_->getRealImplementation(e).hostEntity_);
@@ -225,7 +225,7 @@ namespace Dune {
         We use the remove_const to extract the Type from the mutable class,
         because the const class is not instantiated yet.
      */
-    IdType subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i, int codim) const
+    IdType subId (const typename std::remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i, int codim) const
     {
       // Return sub id of the host entity
       return grid_->hostgrid_->globalIdSet().subId(grid_->getRealImplementation(e).hostEntity_,i, codim);
@@ -245,11 +245,11 @@ namespace Dune {
   template<class GridImp>
   class IdentityGridLocalIdSet :
     public IdSet<GridImp,IdentityGridLocalIdSet<GridImp>,
-        typename remove_const<GridImp>::type::HostGridType::Traits::LocalIdSet::IdType>
+        typename std::remove_const<GridImp>::type::HostGridType::Traits::LocalIdSet::IdType>
   {
   private:
 
-    typedef typename remove_const<GridImp>::type::HostGridType HostGrid;
+    typedef typename std::remove_const<GridImp>::type::HostGridType HostGrid;
 
 
   public:
@@ -267,7 +267,7 @@ namespace Dune {
         because the const class is not instantiated yet.
      */
     template<int cd>
-    IdType id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
+    IdType id (const typename std::remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       // Return id of the host entity
       return grid_->hostgrid_->localIdSet().id(grid_->getRealImplementation(e).hostEntity_);
@@ -279,7 +279,7 @@ namespace Dune {
      * We use the remove_const to extract the Type from the mutable class,
      * because the const class is not instantiated yet.
      */
-    IdType subId (const typename remove_const<GridImp>::type::template Codim<0>::Entity& e, int i, int codim) const
+    IdType subId (const typename std::remove_const<GridImp>::type::template Codim<0>::Entity& e, int i, int codim) const
     {
       // Return sub id of the host entity
       return grid_->hostgrid_->localIdSet().subId(grid_->getRealImplementation(e).hostEntity_,i,codim);

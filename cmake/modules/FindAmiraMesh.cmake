@@ -1,14 +1,28 @@
+# .. cmake_module::
 #
-# Module that checks whether AmiraMesh is available and usable.
+#    Module that checks whether AmiraMesh is available and usable.
 #
-# Variables used by this module which you may want to set:
-# AMIRAMESH_ROOT            Path list to search for AmiraMesh
+#    Variables used by this module which you may want to set:
 #
-# Sets the follwing variable:
+#    :ref:`AMIRAMESH_ROOT`
+#       Path list to search for AmiraMesh
 #
-# AMIRAMESH_FOUND           True if AmiraMesh available and usable.
-# AMIRAMESH_INCLUDE_DIRS    Path to the AmiraMesh include dirs.
-# AMIRAMESH_LIBRARIES       Name to the AmiraMesh library.
+#    Sets the follwing variable:
+#
+#    :code:`AMIRAMESH_FOUND`
+#       True if AmiraMesh available and usable.
+#
+#    :code:`AMIRAMESH_INCLUDE_DIRS`
+#       Path to the AmiraMesh include dirs.
+#
+#    :code:`AMIRAMESH_LIBRARIES`
+#       Name to the AmiraMesh library.
+#
+# .. cmake_variable:: AMIRAMESH_ROOT
+#
+#    You may set this variable to have :ref:`FindAmiraMesh` look
+#    for the AmiraMesh package in the given path before inspecting
+#    system paths.
 #
 
 find_path(AMIRAMESH_INCLUDE_DIR

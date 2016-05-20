@@ -8,20 +8,18 @@
  */
 
 #include <algorithm>
-#include <bitset>
+#include <array>
 #include <cstddef>
 #include <cstdlib>
+#include <memory>
 
-#include <dune/common/array.hh>
 #include <dune/common/classname.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/parallel/mpihelper.hh>
-#include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/utility/multiindex.hh>
-#include <dune/grid/yaspgrid.hh>
 
 namespace Dune {
 
@@ -40,7 +38,7 @@ namespace Dune {
     static void insertVertices(GridFactory<GridType>& factory,
                                const FieldVector<ctype,dimworld>& lowerLeft,
                                const FieldVector<ctype,dimworld>& upperRight,
-                               const array<unsigned int,dim>& vertices)
+                               const std::array<unsigned int,dim>& vertices)
     {
       FactoryUtilities::MultiIndex<dim> index(vertices);
 
@@ -65,9 +63,9 @@ namespace Dune {
 
     // Compute the index offsets needed to move to the adjacent vertices
     // in the different coordinate directions
-    static array<unsigned int, dim> computeUnitOffsets(const array<unsigned int,dim>& vertices)
+    static std::array<unsigned int, dim> computeUnitOffsets(const std::array<unsigned int,dim>& vertices)
     {
-      array<unsigned int, dim> unitOffsets;
+      std::array<unsigned int, dim> unitOffsets;
       if (dim>0)        // paranoia
         unitOffsets[0] = 1;
 
@@ -88,9 +86,9 @@ namespace Dune {
         \param upperRight Upper right corner of the grid
         \param elements Number of elements in each coordinate direction
      */
-    static shared_ptr<GridType> createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
+    static std::shared_ptr<GridType> createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
                                                const FieldVector<ctype,dimworld>& upperRight,
-                                               const array<unsigned int,dim>& elements)
+                                               const std::array<unsigned int,dim>& elements)
     {
       // The grid factory
       GridFactory<GridType> factory;
@@ -98,7 +96,7 @@ namespace Dune {
       if (MPIHelper::getCollectiveCommunication().rank() == 0)
       {
         // Insert uniformly spaced vertices
-        array<unsigned int,dim> vertices = elements;
+        std::array<unsigned int,dim> vertices = elements;
         for( size_t i = 0; i < vertices.size(); ++i )
           vertices[i]++;
 
@@ -107,7 +105,7 @@ namespace Dune {
 
         // Compute the index offsets needed to move to the adjacent
         // vertices in the different coordinate directions
-        array<unsigned int, dim> unitOffsets =
+        std::array<unsigned int, dim> unitOffsets =
           computeUnitOffsets(vertices);
 
         // Compute an element template (the cube at (0,...,0).  All
@@ -147,7 +145,7 @@ namespace Dune {
       }       // if(rank == 0)
 
       // Create the grid and hand it to the calling method
-      return shared_ptr<GridType>(factory.createGrid());
+      return std::shared_ptr<GridType>(factory.createGrid());
 
     }
 
@@ -164,9 +162,9 @@ namespace Dune {
         \param upperRight Upper right corner of the grid
         \param elements Number of elements in each coordinate direction
      */
-    static shared_ptr<GridType> createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
+    static std::shared_ptr<GridType> createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
                                                   const FieldVector<ctype,dimworld>& upperRight,
-                                                  const array<unsigned int,dim>& elements)
+                                                  const std::array<unsigned int,dim>& elements)
     {
       // The grid factory
       GridFactory<GridType> factory;
@@ -174,7 +172,7 @@ namespace Dune {
       if(MPIHelper::getCollectiveCommunication().rank() == 0)
       {
         // Insert uniformly spaced vertices
-        array<unsigned int,dim> vertices = elements;
+        std::array<unsigned int,dim> vertices = elements;
         for (std::size_t i=0; i<vertices.size(); i++)
           vertices[i]++;
 
@@ -182,7 +180,7 @@ namespace Dune {
 
         // Compute the index offsets needed to move to the adjacent
         // vertices in the different coordinate directions
-        array<unsigned int, dim> unitOffsets =
+        std::array<unsigned int, dim> unitOffsets =
           computeUnitOffsets(vertices);
 
         // Insert the elements
@@ -227,122 +225,7 @@ namespace Dune {
       }       // if(rank == 0)
 
       // Create the grid and hand it to the calling method
-      return shared_ptr<GridType>(factory.createGrid());
-    }
-
-  };
-
-  /** \brief Specialization of the StructuredGridFactory for YaspGrid
-
-      This allows a YaspGrid to be constructed using the
-      StructuredGridFactory just like the unstructured Grids.  There are two
-      limitations:
-      \li YaspGrid does not support simplices
-      \li If the lower left corner should not be at the origin, the second template parameter
-          of Yaspgrid has to be chosen as Dune::EquidistantOffsetCoordinates<ctype,dim>
-   */
-  template<class ctype, int dim>
-  class StructuredGridFactory<YaspGrid<dim, EquidistantCoordinates<ctype,dim> > > {
-    typedef YaspGrid<dim, EquidistantCoordinates<ctype,dim> > GridType;
-    static const int dimworld = GridType::dimensionworld;
-
-  public:
-    /** \brief Create a structured cube grid
-
-        \param lowerLeft  Lower left corner of the grid
-        \param upperRight Upper right corner of the grid
-        \param elements   Number of elements in each coordinate direction
-
-        \note The default variant of YaspGrid only supports lowerLeft at the origin.
-              Use YaspGrid<dim, EquidistantOffsetCoordinates<ctype,dim> > instead
-              for non-trivial origin.
-     */
-    static shared_ptr<GridType>
-    createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
-                   const FieldVector<ctype,dimworld>& upperRight,
-                   const array<unsigned int,dim>& elements)
-    {
-      for(int d = 0; d < dimworld; ++d)
-        if(std::abs(lowerLeft[d]) > std::abs(upperRight[d])*1e-10)
-          DUNE_THROW(GridError, className<StructuredGridFactory>()
-                     << "::createCubeGrid(): You have to use Yaspgrid<dim"
-                     ", EquidistantOffsetCoordinates<ctype,dim> > as your"
-                     "grid type for non-trivial origin." );
-
-      // construct array of ints instead of unsigned ints
-      array<int, dim> elem;
-      std::copy(elements.begin(), elements.end(), elem.begin());
-
-      return shared_ptr<GridType>
-               (new GridType(upperRight, elem,
-                             std::bitset<dim>(), 0));  // default constructor of bitset sets to zero
-    }
-
-    /** \brief Create a structured simplex grid
-
-        \note Simplices are not supported in YaspGrid, so this functions
-              unconditionally throws a GridError.
-     */
-    static shared_ptr<GridType>
-    createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
-                      const FieldVector<ctype,dimworld>& upperRight,
-                      const array<unsigned int,dim>& elements)
-    {
-      DUNE_THROW(GridError, className<StructuredGridFactory>()
-                 << "::createSimplexGrid(): Simplices are not supported "
-                 "by YaspGrid.");
-    }
-
-  };
-
-  /** \brief Specialization of the StructuredGridFactory for YaspGrid
-
-      This allows a YaspGrid to be constructed using the
-      StructuredGridFactory just like the unstructured Grids.  There are two
-      limitations:
-      \li YaspGrid does not support simplices
-      \li If the lower left corner should not be at the origin, the second template parameter
-          of Yaspgrid has to be chosen as Dune::EquidistantOffsetCoordinates<ctype,dim>
-   */
-  template<class ctype, int dim>
-  class StructuredGridFactory<YaspGrid<dim, EquidistantOffsetCoordinates<ctype,dim> > > {
-    typedef YaspGrid<dim, EquidistantOffsetCoordinates<ctype,dim> > GridType;
-    static const int dimworld = GridType::dimensionworld;
-
-  public:
-    /** \brief Create a structured cube grid
-
-        \param lowerLeft  Lower left corner of the grid
-        \param upperRight Upper right corner of the grid
-        \param elements   Number of elements in each coordinate direction
-     */
-    static shared_ptr<GridType>
-    createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
-                   const FieldVector<ctype,dimworld>& upperRight,
-                   const array<unsigned int,dim>& elements)
-    {
-      // construct array of ints instead of unsigned ints
-      array<int, dim> elem;
-      std::copy(elements.begin(), elements.end(), elem.begin());
-
-      return shared_ptr<GridType>
-               (new GridType(lowerLeft, upperRight, elem,
-                             std::bitset<dim>(), 0));  // default constructor of bitset sets to zero
-    }
-
-    /** \brief Create a structured simplex grid
-
-        \note Simplices are not supported in YaspGrid, so this functions
-              unconditionally throws a GridError.
-     */
-    static shared_ptr<GridType>
-    createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
-                      const FieldVector<ctype,dimworld>& upperRight,
-                      const array<unsigned int,dim>& elements)
-    {
-      DUNE_THROW(GridError, className<StructuredGridFactory>()
-                 << "::createSimplexGrid(): Simplices are not supported "
-                 "by YaspGrid.");
+      return std::shared_ptr<GridType>(factory.createGrid());
     }
 
   };

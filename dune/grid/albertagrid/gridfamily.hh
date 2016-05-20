@@ -122,8 +122,6 @@ namespace Dune
         typedef AlbertaGridEntity< cd, dim, const GridImp > EntityImpl;
         typedef Dune::Entity< cd, dim, const GridImp, AlbertaGridEntity > Entity;
 
-        typedef AlbertaGridEntityPointer< cd, const GridImp > EntityPointerImpl;
-        typedef Dune::EntityPointer< const GridImp, EntityPointerImpl > EntityPointer;
         typedef Dune::EntitySeed< const GridImp, AlbertaGridEntitySeed< cd, const GridImp > > EntitySeed;
 
         template <PartitionIteratorType pitype>
@@ -137,12 +135,8 @@ namespace Dune
         typedef typename Partition< All_Partition >::LeafIterator LeafIterator;
       };
 
-      template <PartitionIteratorType pitype>
-      struct Partition
-      {
-        typedef Dune::GridView<AlbertaLevelGridViewTraits<const GridImp,pitype> > LevelGridView;
-        typedef Dune::GridView<AlbertaLeafGridViewTraits<const GridImp,pitype> > LeafGridView;
-      };
+      typedef Dune::GridView< AlbertaLevelGridViewTraits< const GridImp > > LevelGridView;
+      typedef Dune::GridView< AlbertaLeafGridViewTraits< const GridImp > > LeafGridView;
 
       typedef IndexSet< GridImp, LevelIndexSetImp, int, std::array< GeometryType, 1 > > LevelIndexSet;
       typedef IndexSet< GridImp, LeafIndexSetImp, int, std::array< GeometryType, 1 > > LeafIndexSet;

@@ -178,7 +178,7 @@ namespace Dune {
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
      */
-    enum {dim = remove_const<GridImp>::type::dimension};
+    enum {dim = std::remove_const<GridImp>::type::dimension};
 
     //! constructor stores reference to a grid and level
     UGGridLeafIndexSet (const GridImp& g)
@@ -191,7 +191,7 @@ namespace Dune {
        because the const class is not instantiated yet.
      */
     template<int cd>
-    int index (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
+    int index (const typename std::remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).getTarget());
     }
@@ -202,7 +202,7 @@ namespace Dune {
        because the const class is not instantiated yet.
      */
     template<int cc>
-    unsigned int subIndex (const typename remove_const<GridImp>::type::Traits::template Codim<cc>::Entity& e,
+    unsigned int subIndex (const typename std::remove_const<GridImp>::type::Traits::template Codim<cc>::Entity& e,
                            int i,
                            unsigned int codim) const
     {
@@ -328,9 +328,9 @@ namespace Dune {
      class implements them both at once.
    */
   template <class GridImp>
-  class UGGridIdSet : public IdSet<GridImp,UGGridIdSet<GridImp>,typename UG_NS<remove_const<GridImp>::type::dimension>::UG_ID_TYPE>
+  class UGGridIdSet : public IdSet<GridImp,UGGridIdSet<GridImp>,typename UG_NS<std::remove_const<GridImp>::type::dimension>::UG_ID_TYPE>
   {
-    enum {dim = remove_const<GridImp>::type::dimension};
+    enum {dim = std::remove_const<GridImp>::type::dimension};
 
     typedef typename std::pair<const typename UG_NS<dim>::Element*, int> Face;
 
@@ -394,7 +394,7 @@ namespace Dune {
        bugs.  Unfortunately, the proper fix for this is not easy, either.
      */
     template<int cd>
-    typename UG_NS<dim>::UG_ID_TYPE id (const typename remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
+    typename UG_NS<dim>::UG_ID_TYPE id (const typename std::remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       if (cd==0) {
         // If we're asked for the id of an element, and that element is a copy of its father, then
@@ -470,7 +470,7 @@ namespace Dune {
        may be distributed across different processors.  This will lead to very-difficult-to-fix
        bugs.  Unfortunately, the proper fix for this is not easy, either.
      */
-    typename UG_NS<dim>::UG_ID_TYPE subId (const typename remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e,
+    typename UG_NS<dim>::UG_ID_TYPE subId (const typename std::remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e,
                                            int i,
                                            unsigned int codim) const
     {

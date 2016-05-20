@@ -1,4 +1,4 @@
-add_subdirectory(test EXCLUDE_FROM_ALL)
+add_subdirectory(test)
 
 if(ALBERTA_FOUND)
   set(ALBERTAGRID_SOURCES
@@ -7,7 +7,7 @@ if(ALBERTA_FOUND)
     indexsets.cc
     macrodata.cc
     meshpointer.cc)
-  # create dimension dependant alberta libraries
+  # create dimension dependent alberta libraries
   foreach(_dim ${ALBERTA_WORLD_DIMS})
     list(APPEND ALBERTAGRID_LIBS albertagrid_${_dim}d)
     dune_add_library(albertagrid_${_dim}d OBJECT ${ALBERTAGRID_SOURCES})

@@ -1,16 +1,17 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 
-#include "config.h" // autoconf defines, needed by the dune headers
+#include "config.h"
+
+#include <memory>
+#include <vector>
+#include <unistd.h>
 
 // dune headers
 #include <dune/grid/yaspgrid.hh>
 #include <dune/grid/io/file/vtk/vtksequencewriter.hh>
 
-#include <vector>
-#include <unistd.h>
-
-const char* VTKDataMode(Dune::VTK::DataMode dm)
+std::string VTKDataMode(Dune::VTK::DataMode dm)
 {
   switch(dm)
   {
@@ -72,14 +73,13 @@ void doWrite( const GridView &gridView, Dune::VTK::DataMode dm )
 
   std::stringstream name;
   name << "vtktest-" << dim << "D-" << VTKDataMode(dm);
-  Dune :: VTKSequenceWriter< GridView >
-  vtk( gridView, name.str(), ".", "", dm );
 
+  auto vtkWriter = std::make_shared<Dune::VTKWriter<GridView> >(gridView, dm);
+  Dune :: VTKSequenceWriter< GridView > vtk( vtkWriter, name.str(), ".", "" );
 
   vtk.addVertexData(vertexdata,"vertexData");
   vtk.addCellData(celldata,"cellData");
-  Dune::shared_ptr<VTKVectorFunction<GridView> > vectordata
-    (new VTKVectorFunction< GridView >);
+  auto vectordata = std::make_shared<VTKVectorFunction<GridView> >();
   vtk.addVertexData(vectordata);
   double time = 0;
   while (time<1) {
@@ -90,7 +90,7 @@ void doWrite( const GridView &gridView, Dune::VTK::DataMode dm )
 }
 
 template<int dim>
-void vtkCheck(const Dune::array<int,dim>& n,
+void vtkCheck(const std::array<int,dim>& n,
               const Dune::FieldVector<double,dim>& h)
 {
   std::cout << std::endl << "vtkSequenceCheck dim=" << dim << std::endl << std::endl;
@@ -116,17 +116,17 @@ int main(int argc, char **argv)
                 << std::endl;
 
     {
-      Dune::array<int,1> n = { { 5 } };
+      std::array<int,1> n = { { 5 } };
       Dune::FieldVector<double,1> h = { 1.0 };
       vtkCheck<1>(n,h);
     }
     {
-      Dune::array<int,2> n = { { 5, 5 } };
+      std::array<int,2> n = { { 5, 5 } };
       Dune::FieldVector<double,2> h = { 1.0, 2.0 };
       vtkCheck<2>(n,h);
     }
     {
-      Dune::array<int,3> n = { { 5, 5, 5 } };
+      std::array<int,3> n = { { 5, 5, 5 } };
       Dune::FieldVector<double,3> h = { 1.0, 2.0, 3.0 };
       vtkCheck<3>(n,h);
     }

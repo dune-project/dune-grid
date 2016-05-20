@@ -28,7 +28,7 @@ namespace Dune
     template< int codim, class Grd >
     class EntitySeed< codim, Grd, false >
     {
-      typedef typename remove_const< Grd >::type::Traits Traits;
+      typedef typename std::remove_const< Grd >::type::Traits Traits;
 
     public:
       static const int codimension = codim;
@@ -72,7 +72,7 @@ namespace Dune
     template< int codim, class Grd >
     class EntitySeed< codim, Grd, true >
     {
-      typedef typename remove_const< Grd >::type::Traits Traits;
+      typedef typename std::remove_const< Grd >::type::Traits Traits;
 
     public:
       static const int codimension = codim;

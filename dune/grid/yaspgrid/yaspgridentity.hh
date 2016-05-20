@@ -247,7 +247,6 @@ namespace Dune {
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
     typedef typename GridImp::Traits::template Codim<codim>::GeometryImpl GeometryImpl;
 
-    typedef typename GridImp::template Codim<codim>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<codim>::EntitySeed EntitySeed;
 
     //! level of this element
@@ -321,7 +320,7 @@ namespace Dune {
     PersistentIndexType persistentIndex () const
     {
       // get size of global grid (in elements)
-      Dune::array<int,dim> size;
+      std::array<int,dim> size;
 
       for (int i=0; i<dim; i++)
       {
@@ -372,8 +371,8 @@ namespace Dune {
           j++;
         }
 
-      Dune::array<int, dim> size = _g->mg->levelSize(_g->level());
-      Dune::array<int, dim> coord = _it.coord();
+      std::array<int, dim> size = _g->mg->levelSize(_g->level());
+      std::array<int, dim> coord = _it.coord();
       for (int j=0; j<dim; j++)
       {
         if (!shift[j])
@@ -424,11 +423,9 @@ namespace Dune {
     template <int cd>
     struct Codim
     {
-      typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
       typedef typename GridImp::template Codim<cd>::Entity Entity;
     };
 
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<0>::EntitySeed EntitySeed;
     typedef typename GridImp::LevelIntersectionIterator IntersectionIterator;
@@ -436,7 +433,7 @@ namespace Dune {
     typedef typename GridImp::LeafIntersectionIterator LeafIntersectionIterator;
     typedef typename GridImp::HierarchicIterator HierarchicIterator;
 
-    //! define the type used for persisitent indices
+    //! define the type used for persistent indices
     typedef typename GridImp::PersistentIndexType PersistentIndexType;
 
     //! define type used for coordinates in grid module
@@ -712,8 +709,8 @@ namespace Dune {
 
       int trailing = (cc == dim) ? 1000 : 0;
 
-      Dune::array<int,dim> size = _g->mg->levelSize(_g->level());
-      Dune::array<int, dim> coord = _it.coord();
+      std::array<int,dim> size = _g->mg->levelSize(_g->level());
+      std::array<int, dim> coord = _it.coord();
       for (int j=0; j<dim; j++)
       {
         // correct size according to shift
@@ -764,8 +761,8 @@ namespace Dune {
       std::bitset<dim> shift = Dune::Yasp::entityShift<dim>(i,cc);
       std::bitset<dim> move = Dune::Yasp::entityMove<dim>(i,cc);
 
-      Dune::array<int,dim> size = _g->mg->levelSize(_g->level());
-      Dune::array<int, dim> coord = _it.coord();
+      std::array<int,dim> size = _g->mg->levelSize(_g->level());
+      std::array<int, dim> coord = _it.coord();
       for (int j=0; j<dim; j++)
       {
 
@@ -802,16 +799,9 @@ namespace Dune {
 
     typedef typename GridImp::template Codim<dim>::Geometry Geometry;
 
-    template <int cd>
-    struct Codim
-    {
-      typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
-    };
-
-    typedef typename GridImp::template Codim<dim>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<dim>::EntitySeed EntitySeed;
 
-    //! define the type used for persisitent indices
+    //! define the type used for persistent indices
     typedef typename GridImp::PersistentIndexType PersistentIndexType;
 
     //! define type used for coordinates in grid module

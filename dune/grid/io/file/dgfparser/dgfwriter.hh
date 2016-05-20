@@ -44,10 +44,8 @@ namespace Dune
     typedef typename GridView::IndexSet IndexSet;
     typedef typename GridView::template Codim< 0 >::Iterator ElementIterator;
     typedef typename GridView::IntersectionIterator IntersectionIterator;
-    typedef typename GridView::template Codim< dimGrid >::EntityPointer VertexPointer;
 
     typedef typename ElementIterator :: Entity Element ;
-    typedef typename Element :: EntityPointer ElementPointer;
     typedef typename Element :: EntitySeed ElementSeed ;
 
     typedef typename IndexSet::IndexType Index;
@@ -111,28 +109,17 @@ namespace Dune
                            const std::vector< Index >& vertexIndex,
                            std::ostream &gridout ) const
     {
-      if( elementSeeds.size() > 0 )
-      {
+      if (!elementSeeds.empty()) {
         // perform grid traversal based on new element ordering
-        typedef typename std::vector<ElementSeed> :: const_iterator iterator ;
-        const iterator end = elementSeeds.end();
-        for( iterator it = elementSeeds.begin(); it != end ; ++ it )
-        {
-          // convert entity seed into entity pointer
-          const ElementPointer ep = gridView_.grid().entityPointer( *it );
-          // write element
-          writeElement( *ep, indexSet, elementType, vertexIndex, gridout );
+        for (const auto& seed : elementSeeds) {
+          const Element element = gridView_.grid().entity(seed);
+          writeElement(element, indexSet, elementType, vertexIndex, gridout);
         }
       }
-      else
-      {
+      else {
         // perform default grid traversal
-        const ElementIterator end = gridView_.template end< 0 >();
-        for( ElementIterator it = gridView_.template begin< 0 >(); it != end; ++it )
-        {
-          // write element
-          writeElement( *it, indexSet, elementType, vertexIndex, gridout );
-        }
+        for (const auto& element : elements(gridView_))
+          writeElement(element, indexSet, elementType, vertexIndex, gridout);
       }
     }
 

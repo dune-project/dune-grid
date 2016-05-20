@@ -71,8 +71,8 @@ namespace Dune
         typename GridImp::GridFamily> ;
 
     // Default*GridView classes need access to intersection iterators
-    template< class, PartitionIteratorType > friend class DefaultLevelGridView;
-    template< class, PartitionIteratorType > friend class DefaultLeafGridView;
+    template< class > friend class DefaultLevelGridView;
+    template< class > friend class DefaultLeafGridView;
 #endif
     // type of underlying implementation, for internal use only
     typedef EntityImp< cd, dim, GridImp > Implementation;
@@ -163,30 +163,6 @@ namespace Dune
       return !realEntity.equals(other.realEntity);
     }
 
-    /** \brief Compares an Entity with an EntityPointer for equality.
-     *
-     * \deprecated This method only exists for backwards compatibility during the 2.4
-     *             release cycle and will be removed after dune-grid-2.4 is released.
-     */
-    template<typename ItImp>
-    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
-    bool operator==(const Dune::EntityPointer<GridImp,ItImp>& other) const
-    {
-      return (*this) == (*other);
-    }
-
-    /** \brief Compares an Entity with an EntityPointer for inequality.
-     *
-     * \deprecated This method only exists for backwards compatibility during the 2.4
-     *             release cycle and will be removed after dune-grid-2.4 is released.
-     */
-    template<typename ItImp>
-    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
-    bool operator!=(const Dune::EntityPointer<GridImp,ItImp>& other) const
-    {
-      return (*this) != (*other);
-    }
-
     Entity()
     {}
 
@@ -212,28 +188,6 @@ namespace Dune
     {
       realEntity = std::move(other.realEntity);
       return *this;
-    }
-
-    /** \brief Dereference Entity to itself for backwards compatibility with EntityPointer.
-     *
-     * \deprecated This method only exists to provide backwards compatibility for dune-grid-2.4.
-     *             It will be removed after the release of dune-grid-2.4.
-     */
-    const Entity& operator*() const
-    DUNE_DEPRECATED_MSG("This is now an Entity instead of an EntityPointer. You do not have to dereference it anymore!")
-    {
-      return *this;
-    }
-
-    /** \brief Dereference Entity to itself for backwards compatibility with EntityPointer.
-     *
-     * \deprecated This method only exists to provide backwards compatibility for dune-grid-2.4.
-     *             It will be removed after the release of dune-grid-2.4.
-     */
-    const Entity* operator->() const
-    DUNE_DEPRECATED_MSG("This is now an Entity instead of an EntityPointer. You do not have to dereference it anymore!")
-    {
-      return this;
     }
 
     //@}
@@ -287,8 +241,8 @@ namespace Dune
         typename GridImp::GridFamily> ;
 
     // Default*GridView classes need access to intersection iterators
-    template< class, PartitionIteratorType > friend class DefaultLevelGridView;
-    template< class, PartitionIteratorType > friend class DefaultLeafGridView;
+    template< class > friend class DefaultLevelGridView;
+    template< class > friend class DefaultLeafGridView;
 #endif
     // type of underlying implementation, for internal use only
     typedef EntityImp< 0, dim, GridImp > Implementation;
@@ -324,16 +278,12 @@ namespace Dune
      */
     typedef typename GridImp::template Codim<0>::LocalGeometry LocalGeometry;
 
-    /** \brief EntityPointer types of the different codimensions */
+    /** \brief Entity types of the different codimensions */
     template <int cd>
     struct Codim
     {
-      typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
       typedef typename GridImp::template Codim<cd>::Entity Entity;
     };
-
-    /** \brief The codim==0 EntityPointer type */
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
     /** \brief The HierarchicIterator type*/
     typedef typename GridImp::HierarchicIterator HierarchicIterator;
@@ -390,30 +340,6 @@ namespace Dune
       return !realEntity.equals(other.realEntity);
     }
 
-    /** \brief Compares an Entity with an EntityPointer for equality.
-     *
-     * \deprecated This method only exists for backwards compatibility during the 2.4
-     *             release cycle and will be removed after dune-grid-2.4 is released.
-     */
-    template<typename ItImp>
-    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
-    bool operator==(const Dune::EntityPointer<GridImp,ItImp>& other) const
-    {
-      return (*this) == (*other);
-    }
-
-    /** \brief Compares an Entity with an EntityPointer for equality.
-     *
-     * \deprecated This method only exists for backwards compatibility during the 2.4
-     *             release cycle and will be removed after dune-grid-2.4 is released.
-     */
-    template<typename ItImp>
-    DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now.")
-    bool operator!=(const Dune::EntityPointer<GridImp,ItImp>& other) const
-    {
-      return (*this) != (*other);
-    }
-
     Entity()
     {}
 
@@ -441,28 +367,6 @@ namespace Dune
       return *this;
     }
 
-    /** \brief Dereference Entity to itself for backwards compatibility with EntityPointer.
-     *
-     * \deprecated This method only exists to provide backwards compatibility for dune-grid-2.4.
-     *             It will be removed after the release of dune-grid-2.4.
-     */
-    const Entity& operator*() const
-    DUNE_DEPRECATED_MSG("This is now an Entity instead of an EntityPointer. You do not have to dereference it anymore!")
-    {
-      return *this;
-    }
-
-    /** \brief Dereference Entity to itself for backwards compatibility with EntityPointer.
-     *
-     * \deprecated This method only exists to provide backwards compatibility for dune-grid-2.4.
-     *             It will be removed after the release of dune-grid-2.4.
-     */
-    const Entity* operator->() const
-    DUNE_DEPRECATED_MSG("This is now an Entity instead of an EntityPointer. You do not have to dereference it anymore!")
-    {
-      return this;
-    }
-
     //@}
 
     //===========================================================
@@ -470,16 +374,6 @@ namespace Dune
      */
     //@{
     //===========================================================
-
-    /**\brief Number of subentities with codimension <tt>cc</tt>.
-     *
-     * Strictly speaking this method is redundant, because the same information can be obtained
-     * from the corresponding reference element. It is here for efficiency reasons only.
-     *
-     * \deprecated This method will be removed after the release of dune-grid-2.4.
-     *   Please use the method subEntities instead.
-     */
-    template<int codim> int DUNE_DEPRECATED_MSG("Use subEntities(unsigned int) instead!") count () const { return realEntity.template count<codim>(); }
 
     /**\brief Number of subentities with codimension <tt>codim</tt>.
      *
@@ -491,90 +385,35 @@ namespace Dune
       return realEntity.subEntities(codim);
     }
 
-#ifndef DOXYGEN
-
-    // The following ugly helper struct is here to work around deficiencies in the decltype() implementation
-    // of GCC 4.4.
-    // If we try to merge the two typedefs in the struct and put them directly into the return value of
-    // subEntity(), GCC 4.4 dies with an internal compiler error complaining that mangling of template_id_name
-    // is not supported.
-    // So we put everything into this separate struct and just instantiate it in the signature of subEntity()
-    // which makes GCC 4.4 happy.
-    template <int codim_>
-    struct subentity_return_info
-    {
-
-      // Step 1: Obtain return value of subentity from implementation class
-      //
-      // it would be more readable to use std::declval() here, but that's another thing that's missing
-      // GCC 4.4, so we do it the manual way with a static cast
-      typedef decltype(
-        static_cast<Implementation*>(nullptr)->template subEntity<codim_>(0)
-        ) implementation_return_type;
-
-      // Step 2: Check whether the implementation returned a facade entity or not
-      // If yes -> declare Entity return type
-      // If no  -> declare EntityPointer return type
-      typedef typename std::conditional<
-        std::is_same<
-          implementation_return_type,
-          typename Entity::template Codim<codim_>::Entity
-        >::value,
-        typename Entity::template Codim<codim_>::Entity,
-       typename Entity::template Codim<codim_>::EntityPointer
-        >::type type;
-    };
-
-#endif // DOXYGEN
-
-    /** \brief Obtain a pointer to a subentity
+    /** \brief Obtain a subentity
      *
      *  \tparam  codim  codimension of the desired subentity
      *
      *  \param[in]  i  number of the subentity (in generic numbering)
      *
-     *  \returns an EntityPointer to the specified subentity
+     *  \returns the specified subentity
      *
      *  \note The subentities are numbered 0, ..., subEntities( codim )-1
      */
     template< int codim >
-#ifdef DOXYGEN
     typename Codim< codim >::Entity
-#else
-    typename subentity_return_info<codim>::type
-#endif
     subEntity ( int i ) const
     {
-      warnOnDeprecatedEntityPointer<typename subentity_return_info<codim>::type>();
       return realEntity.template subEntity< codim >( i );
     }
 
     /**\brief Inter-level access to father entity on the next-coarser grid.
        The given entity resulted directly from a subdivision of its father
-       entity. For the macro elements dereferencing the EntityPointer is undefined.
+       entity. The behaviour for elements on the macro grid, that is when
+       \ref hasFather() is false, is undefined.
 
        \note If the partitionType of the Entity is GhostEntity,
              it is not guaranteed that this method is working
              or implemented in general.
              For some grids it might be available, though.
      */
-#ifdef DOXYGEN
-    Entity
-    father () const
-#else
-    template<typename Foo = void>
-    typename std::conditional<
-      std::is_same<
-        decltype(realEntity.father()),
-        Entity
-        >::value,
-      Entity,
-      EntityPointer
-      >::type
-    father (typename std::enable_if<std::is_same<Foo,void>::value,void*>::type = nullptr) const
-#endif
+    Entity father () const
     {
-      warnOnDeprecatedEntityPointer<decltype(realEntity.father())>();
       return realEntity.father();
     }
 
@@ -681,40 +520,6 @@ namespace Dune
 
     //@}
 
-#ifndef DOXYGEN
-
-    // these two methods are just here for the 2.4 transition from EntityPointer to Entity
-    // they will generate a compile time warning if the grid implementation still returns
-    // an EntityPointer from certain interface methods.
-    // These methods are also required by the intersection facade, so I just made them public
-    // and hid them from Doxygen. As they don't do anything remotely useful, I don't think any
-    // user will try to call them manually... :-P
-
-    // this non-warning version only matches if E is an entity that has been correctly wrapped
-    // in a facade class
-    template<typename E>
-    static typename std::enable_if<
-      std::is_same<
-        E,
-        typename Codim<E::codimension>::Entity
-        >::value
-      >::type
-    warnOnDeprecatedEntityPointer()
-    {}
-
-    template<typename E>
-    DUNE_DEPRECATED_MSG("This grid still returns EntityPointers instead of Entities")
-    static typename std::enable_if<
-      not std::is_same<
-        E,
-        typename Codim<E::codimension>::Entity
-        >::value
-      >::type
-    warnOnDeprecatedEntityPointer()
-    {}
-
-#endif // DOXYGEN
-
   protected:
     // needed to make copy constructor from EntityPointer work for any iterator
     template< class, class > friend class Dune::EntityPointer;
@@ -749,9 +554,6 @@ namespace Dune
 
     //! \brief The corresponding entity seed (for storage of entities)
     typedef typename GridImp::template Codim<cd>::EntitySeed EntitySeed;
-
-    //! \brief The corresponding entity seed (for storage of entities)
-    typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
 
     /** \brief Return the name of the reference element. The type can
         be used to access the Dune::ReferenceElement.
@@ -797,9 +599,6 @@ namespace Dune
     //! \brief The corresponding entity seed (for storage of entities)
     typedef typename GridImp::template Codim<0>::EntitySeed EntitySeed;
 
-    //! \brief The corresponding entity seed (for storage of entities)
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-
     /** @brief Returns true if element is of regular type in red/green type refinement.
        In bisection or hanging node refinement this is always true.
      */
@@ -824,23 +623,11 @@ namespace Dune
      */
     bool hasBoundaryIntersections () const
     {
-      {
-        typedef typename GridImp::LevelIntersectionIterator IntersectionIterator;
-        IntersectionIterator end = asImp().ilevelend();
-        for(IntersectionIterator it = asImp().ilevelbegin(); it != end; ++it)
-        {
-          if( it->boundary() ) return true;
-        }
-      }
-
-      {
-        typedef typename GridImp::LeafIntersectionIterator IntersectionIterator;
-        IntersectionIterator end = asImp().ileafend();
-        for(IntersectionIterator it = asImp().ileafbegin(); it != end; ++it)
-        {
-          if( it->boundary() ) return true;
-        }
-      }
+      typedef typename GridImp::LevelIntersectionIterator IntersectionIterator;
+      IntersectionIterator end = asImp().ilevelend();
+      for (IntersectionIterator it = asImp().ilevelbegin(); it != end; ++it)
+        if( it->boundary() )
+          return true;
 
       return false;
     }

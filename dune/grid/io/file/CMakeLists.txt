@@ -1,5 +1,5 @@
 add_subdirectory(amiramesh)
-add_subdirectory(test EXCLUDE_FROM_ALL)
+add_subdirectory(test)
 add_subdirectory(dgfparser)
 add_subdirectory(vtk)
 add_subdirectory(gnuplot)
@@ -11,6 +11,7 @@ set(HEADERS
   gmshreader.hh
   gmshwriter.hh
   gnuplot.hh
+  printgrid.hh
   starcdreader.hh
   vtk.hh)
 

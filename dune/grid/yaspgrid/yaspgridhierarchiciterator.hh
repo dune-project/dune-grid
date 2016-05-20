@@ -89,7 +89,7 @@ namespace Dune {
 
     struct StackElem {
       YGLI g;         // grid level of the element
-      array<int,dim> coord;   // and the coordinates
+      std::array<int,dim> coord;   // and the coordinates
       StackElem(YGLI gg) : g(gg) {}
     };
     std::stack<StackElem> stack;    //!< stack holding elements to be processed

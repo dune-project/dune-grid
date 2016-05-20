@@ -9,6 +9,8 @@
     \author Oliver Sander
  */
 
+#include <array>
+#include <memory>
 #include <vector>
 
 #include <dune/common/fvector.hh>
@@ -162,7 +164,7 @@ namespace Dune {
     typedef typename UGGrid<dimworld>::ctype ctype;
 
     // UGGrid only in 2d and 3d
-    static_assert(dimworld==2 || dimworld || 3, "UGGrid only in 2d and 3d");
+    static_assert(dimworld==2 || dimworld == 3, "UGGrid only in 2d and 3d");
 
   public:
 
@@ -207,7 +209,7 @@ namespace Dune {
         \param boundarySegment Class implementing the geometry of the boundary segment.
      */
     void insertBoundarySegment(const std::vector<unsigned int>& vertices,
-                               const shared_ptr<BoundarySegment<dimworld> > &boundarySegment);
+                               const std::shared_ptr<BoundarySegment<dimworld> > &boundarySegment);
 
 
     /** \brief Finalize grid creation and hand over the grid
@@ -244,6 +246,23 @@ namespace Dune {
       return UG_NS<dimension>::levelIndex(grid_->getRealImplementation(entity).target_);
     }
 
+    /** \brief Return the number of the intersection in the order of insertion into the factory
+     *
+     * For UGGrid intersections this number is the same as the boundary segment index
+     */
+    virtual unsigned int
+    insertionIndex ( const typename UGGrid<dimworld>::LeafIntersection &intersection ) const
+    {
+      return intersection.boundarySegmentIndex();
+    }
+
+    /** \brief Return true if the intersection has been explictily insterted into the factory */
+    virtual bool
+    wasInserted ( const typename UGGrid<dimworld>::LeafIntersection &intersection ) const
+    {
+      return (insertionIndex( intersection ) < boundarySegmentVertices_.size());
+    }
+
   private:
 
     // Initialize the grid structure in UG
@@ -257,7 +276,7 @@ namespace Dune {
     bool factoryOwnsGrid_;
 
     /** \brief Buffer for the vertices of each explicitly given boundary segment */
-    std::vector<array<int, dimworld*2-2> > boundarySegmentVertices_;
+    std::vector<std::array<int, dimworld*2-2> > boundarySegmentVertices_;
 
     /** \brief While inserting the elements this array records the number of
         vertices of each element. */

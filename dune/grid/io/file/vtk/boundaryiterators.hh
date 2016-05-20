@@ -5,9 +5,9 @@
 #define DUNE_GRID_IO_FILE_VTK_BOUNDARYITERATORS_HH
 
 #include <iterator>
+#include <memory>
 
 #include <dune/common/iteratorfacades.hh>
-#include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/io/file/vtk/corner.hh>
 #include <dune/grid/io/file/vtk/corneriterator.hh>
@@ -55,7 +55,7 @@ namespace Dune {
 
       const GV* gv;
       ElementIterator eit;
-      shared_ptr<IntersectionIterator> iit;
+      std::shared_ptr<IntersectionIterator> iit;
 
       bool valid() const {
         // we're valid if we're passed-the-end

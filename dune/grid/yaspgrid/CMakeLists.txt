@@ -2,6 +2,7 @@ set(HEADERS
   backuprestore.hh
   coordinates.hh
   partitioning.hh
+  structuredyaspgridfactory.hh
   torus.hh
   yaspgridentity.hh
   yaspgridentitypointer.hh

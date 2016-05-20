@@ -82,7 +82,6 @@ namespace Dune {
           \c ALUGRID_CUBE ,
           \c ALUGRID_SIMPLEX ,
           \c ALUGRID_CONFORM ,
-          \c SGRID ,
           \c UGGRID , or
           \c YASPGRID
           and the integer
@@ -204,6 +203,10 @@ namespace Dune {
          the third line consists of \c dimworld integers. used to determine the
          initial partition of the interval into equal sized cubes.
          More than one interval can be described in this fashion.
+         Optional a reordering of the i-j-k logic can be added as a first line
+         of the Interval block. The reordering is indicated by the keyword map
+         followed by the permutation of the coordinates {0,...,d}
+         (which is the default ordering).
        - \b Simplex \n
          Each line consists of \c dimworld+1 vertex indices (see \b Vertex block)
          describing one simplex
@@ -214,7 +217,7 @@ namespace Dune {
        - \b Simplexgenerator \n
          Using this block a simplex grid can be automatically generated using
          one of the freely available grid generation tools
-         Tetgen (http://tetgen.berlios.de) for \c dimworld=3 or
+         Tetgen (http://tetgen.org) for \c dimworld=3 or
          Triangle (http://www.cs.cmu.edu/~quake/triangle.html) for \c dimworld=2.
          For more detail see \ref Simplexgeneration.
        - \b Vertex \n
@@ -270,8 +273,8 @@ namespace Dune {
          boundary segments:\n
          <b>default</b> <em>function</em>\n
          Note: Currently, the attached functions map global coordinates to global
-               coordinates. This feature is only available with AlbertaGrid (Version 3.0
-                   or above) or with ALUGrid.
+               coordinates. This feature is only available with AlbertaGrid or
+               with dune-ALUGrid.
        .
 
        @section CONSTR The Grid Construction Process
@@ -288,8 +291,7 @@ namespace Dune {
        given by \c GridType can handle.
 
        @subsection CONSTRCART Cartesian grids
-       (Dune::SGrid , or
-        Dune::YaspGrid )
+       (Dune::YaspGrid )
 
        The grid is constructed using only the information from the
        first three lines of the \b Interval  block.
@@ -399,7 +401,7 @@ namespace Dune {
 
       <!---------------------------------------------->
      \section Simplexgeneration Using Tetgen/Triangle
-         The freely available simplex grid generators are direcltly
+         The freely available simplex grid generators are directly
          called via system
          call through the dgfparser.
          Therefore one should either add the path containing the executables of
@@ -415,11 +417,11 @@ namespace Dune {
             \endcode
             If the filetype is given, it will be appended to \b name and this will be
             passed to Tetgen/Triangle. Additional parameters for the grid generators
-            can be given by the the \b parameter token.
+            can be given by the \b parameter token.
             If no file type is given it is assumed that in a previous run of
             Tetgen/Triangle
             files name.node and name.ele were generated and these will be used
-            to described the vertices and elements of the Dune grid.
+            to describe the vertices and elements of the Dune grid.
          -# In the second approach the \b vertex and the \b interval blocks
             (if present)
             are used to generate the vertices of the grid; the \b Cube and \b
@@ -443,7 +445,7 @@ namespace Dune {
               segment has to be added, i.e., (p0,..,pn,p0).
             - If a \b cube or \b simplex block is found the element information
               is also passed to tetgen/triangle together with the parameters - if
-              given. Note that triangle can only handle one region atribute in
+              given. Note that a triangle can only handle one region attribute in
               its .poly files so that only the first parameter is the \b simplex
               or \b cube block can be retrived.
          .
@@ -454,7 +456,7 @@ namespace Dune {
             followed by a positive real number used as an upper bound for the
             area of all simplicies of the mesh.
          -  \b min-angle
-            followed by a positive number. In 2d this limits the angles in
+            followed by a positive number. In 2d this limits the angles in the
             resulting mesh from below; in 3d this bounds the radius-edge ratio
             from above.
          .
@@ -470,7 +472,7 @@ namespace Dune {
          The remaining identifiers are
          -  The identifier \b path
             (followed by a path name) can be used
-            to give search path for Triangle/Tetgen.
+            to give a search path for Triangle/Tetgen.
          -  The identifier \b display
             followed by 1 can be used to get a first impression
             of the resulting mesh using the visualization tools distributed with
@@ -481,7 +483,7 @@ namespace Dune {
          retrieved as described in Section \ref PARAMETERS.
 
          Download
-         - Tetgen http://tetgen.berlios.de
+         - Tetgen http://tetgen.org
          - Triangle http://www.cs.cmu.edu/~quake/triangle.html
 
 
@@ -603,10 +605,10 @@ namespace Dune {
 
      @include examplegrid5.dgf
 
-     \image html  examplegrid5c.png "The resulting grid using SGrid<2,2>"
+     \image html  examplegrid5c.png "The resulting grid using YaspGrid<2>"
      \image html  examplegrid5s.png "The resulting grid using AlbertaGrid<2,2>"
 
-     If UGGrid<2,2> is used the result would be the same as for SGrid<2,2>.
+     If UGGrid<2,2> is used the result would be the same as for YaspGrid<2>.
      If an empty \c Simplex Block
      @code
      Simplex

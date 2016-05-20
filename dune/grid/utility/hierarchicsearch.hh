@@ -43,9 +43,6 @@ namespace Dune
     //! get entity from the grid
     typedef typename Grid::template Codim<0>::Entity Entity;
 
-    //! type of EntityPointer
-    typedef typename Grid::template Codim<0>::EntityPointer EntityPointer;
-
     //! type of HierarchicIterator
     typedef typename Grid::HierarchicIterator HierarchicIterator;
 
@@ -65,7 +62,7 @@ namespace Dune
     /**
        internal helper method
 
-       @param[in] entity Entity whos children should be searched
+       @param[in] entity Entity whose children should be searched
        @param[in] global Point you are searching for
 
        Search the child entity containing point global. Recursively

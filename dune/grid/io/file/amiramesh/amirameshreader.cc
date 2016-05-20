@@ -1,7 +1,8 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#include <vector>
 #include <algorithm>
+#include <memory>
+#include <vector>
 
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/common/stdstreams.hh>
@@ -23,7 +24,7 @@ void Dune::AmiraMeshReader<GridType>::readFunction(DiscFuncType& f, const std::s
 
   // /////////////////////////////////////////////////////
   // Load the AmiraMesh file
-  AmiraMesh* am = AmiraMesh::read(filename.c_str());
+  std::unique_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
 
   if(!am)
     DUNE_THROW(IOError, "Could not open AmiraMesh file: " << filename);
@@ -144,7 +145,7 @@ void Dune::AmiraMeshReader<GridType>::readFunction(DiscFuncType& f, const std::s
 // Create the domain from an explicitly given boundary description
 template <class GridType>
 void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factory,
-                                                   const shared_ptr<PSurfaceBoundary<dim-1> >& boundary)
+                                                   const std::shared_ptr<PSurfaceBoundary<dim-1> >& boundary)
 {
 #if HAVE_PSURFACE
   if (dim!=3)
@@ -174,7 +175,7 @@ void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factor
     vertices[2] = psurface->triangles(i).vertices[2];
 
     factory.insertBoundarySegment(vertices,
-                                  shared_ptr<BoundarySegment<dim,dim> >(new typename PSurfaceBoundary<dim-1>::PSurfaceBoundarySegment(boundary,i)));
+                                  std::shared_ptr<BoundarySegment<dim,dim> >(new typename PSurfaceBoundary<dim-1>::PSurfaceBoundarySegment(boundary,i)));
 
   }
 
@@ -186,7 +187,7 @@ void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factor
 
 template <class GridType>
 GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
-                                                const shared_ptr<PSurfaceBoundary<dim-1> >& boundary)
+                                                const std::shared_ptr<PSurfaceBoundary<dim-1> >& boundary)
 {
 #if ! HAVE_PSURFACE
   DUNE_THROW(IOError, "Dune has not been built with support for the "
@@ -200,7 +201,7 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
   // /////////////////////////////////////////////////////
   // Load the AmiraMesh file
   // /////////////////////////////////////////////////////
-  AmiraMesh* am = AmiraMesh::read(filename.c_str());
+  std::unique_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
 
   if(!am)
     DUNE_THROW(IOError, "Could not open AmiraMesh file " << filename);
@@ -219,8 +220,7 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
   }
 
   // read and build the grid
-  buildGrid(factory, am);
-  delete(am);
+  buildGrid(factory, am.get());
 
   return factory.createGrid();
 #endif // #define HAVE_PSURFACE
@@ -230,7 +230,7 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
 template <class GridType>
 void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
                                            const std::string& filename,
-                                           const shared_ptr<PSurfaceBoundary<dim-1> >& boundary)
+                                           const std::shared_ptr<PSurfaceBoundary<dim-1> >& boundary)
 {
 #if ! HAVE_PSURFACE
   DUNE_THROW(IOError, "Dune has not been built with support for the "
@@ -244,7 +244,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
   // /////////////////////////////////////////////////////
   // Load the AmiraMesh file
   // /////////////////////////////////////////////////////
-  AmiraMesh* am = AmiraMesh::read(filename.c_str());
+  std::unique_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
 
   if(!am)
     DUNE_THROW(IOError, "Could not open AmiraMesh file " << filename);
@@ -263,8 +263,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
   }
 
   // read and build the grid
-  buildGrid(factory, am);
-  delete am;
+  buildGrid(factory, am.get());
 
   factory.createGrid();
 #endif // #define HAVE_PSURFACE
@@ -283,7 +282,8 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename)
   GridFactory<GridType> factory;
 
   // Load the AmiraMesh file
-  AmiraMesh* am = AmiraMesh::read(filename.c_str());
+  std::unique_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
+
   if(!am)
     DUNE_THROW(IOError, "read: Could not open AmiraMesh file " << filename);
 
@@ -292,15 +292,14 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename)
   // ////////////////////////////////////////////////////
   if (dim==3) {
 
-    buildGrid(factory, am);
+    buildGrid(factory, am.get());
 
   } else {
 
-    build2dGrid(factory, am);
+    build2dGrid(factory, am.get());
 
   }
 
-  delete(am);
   return factory.createGrid();
 }
 
@@ -311,7 +310,8 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
   static const int dim      = GridType::dimension;
   static const int dimworld = GridType::dimensionworld;
 
-  static_assert(dim==dimworld, "AmiraMesh can only be read for grids with dim==dimworld!");
+  if (dim!=dimworld)
+    DUNE_THROW(IOError, "AmiraMesh can only be read for grids with dim==dimworld!");
 
   dverb << "This is the AmiraMesh reader for file '" << filename << "'!" << std::endl;
 
@@ -319,7 +319,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
   GridFactory<GridType> factory(&grid);
 
   // Load the AmiraMesh file
-  AmiraMesh* am = AmiraMesh::read(filename.c_str());
+  std::unique_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
   if(!am)
     DUNE_THROW(IOError, "read: Could not open AmiraMesh file " << filename);
 
@@ -328,15 +328,14 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
   // ////////////////////////////////////////////////////
   if (dim==3) {
 
-    buildGrid(factory, am);
+    buildGrid(factory, am.get());
 
   } else {
 
-    build2dGrid(factory, am);
+    build2dGrid(factory, am.get());
 
   }
 
-  delete(am);
   factory.createGrid();
 }
 

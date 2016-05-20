@@ -40,22 +40,22 @@ namespace Dune
      *     dimension of the cell.
      * <li>IndexType should be the type of the indices returned by subIndex().
      * </ul>
-     * The requirements are crafted in such a way the the indexsets provided
-     * by the grid should fullfill them as long as the cells are codim=0
+     * The requirements are crafted in such a way that the indexsets provided
+     * by the grid should fulfill them as long as the cells are codim=0
      * Entities.
      */
     template<typename CellIterator, typename IS>
     class PointIterator
       : public ForwardIteratorFacade
         < PointIterator<CellIterator, IS>,
-            const Corner<typename remove_const<typename std::iterator_traits<
+            const Corner<typename std::remove_const<typename std::iterator_traits<
                         CellIterator>::value_type>::type>,
-            const Corner<typename remove_const<typename std::iterator_traits<
+            const Corner<typename std::remove_const<typename std::iterator_traits<
                         CellIterator>::value_type>::type>&,
             typename std::iterator_traits<CellIterator>::difference_type>
     {
     public:
-      typedef VTK::Corner<typename remove_const<typename std::iterator_traits<
+      typedef VTK::Corner<typename std::remove_const<typename std::iterator_traits<
                   CellIterator>::value_type>::type> Corner;
 
       // reiterate the facades typedefs here

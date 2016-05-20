@@ -3,7 +3,6 @@
 #ifndef DUNE_GEOGRID_GRID_HH
 #define DUNE_GEOGRID_GRID_HH
 
-#include <dune/common/nullptr.hh>
 #include <dune/common/deprecated.hh>
 
 #include <dune/grid/common/grid.hh>
@@ -92,7 +91,7 @@ namespace Dune
 
     template< int, class, bool > friend class GeoGrid::EntityBase;
     template< int, int, class > friend class GeoGrid::Geometry;
-    template< class, class, class, PartitionIteratorType > friend class GeoGrid::GridView;
+    template< class, class, class > friend class GeoGrid::GridView;
     template< class, class > friend class GeoGrid::Intersection;
     template< class, class > friend class GeoGrid::IntersectionIterator;
     template< class, class > friend class GeoGrid::IdSet;
@@ -138,19 +137,10 @@ namespace Dune
     /** \name Grid View Types
      *  \{ */
 
-    /** \brief Types for GridView */
-    template< PartitionIteratorType pitype >
-    struct Partition
-    {
-      typedef typename GridFamily::Traits::template Partition< pitype >::LevelGridView
-      LevelGridView;
-      typedef typename GridFamily::Traits::template Partition< pitype >::LeafGridView
-      LeafGridView;
-    };
-
-    /** \brief View types for All_Partition */
-    typedef typename Partition< All_Partition >::LevelGridView LevelGridView;
-    typedef typename Partition< All_Partition >::LeafGridView LeafGridView;
+    /** \brief type of view for leaf grid */
+    typedef typename GridFamily::Traits::LeafGridView LeafGridView;
+    /** \brief type of view for level grid */
+    typedef typename GridFamily::Traits::LevelGridView LevelGridView;
 
     /** \} */
 
@@ -234,7 +224,7 @@ namespace Dune
      */
     GeometryGrid ( HostGrid &hostGrid, CoordFunction &coordFunction, const Allocator &allocator = Allocator() )
       : hostGrid_( &hostGrid ),
-        coordFunction_( coordFunction ),
+        coordFunction_( &coordFunction ),
         removeHostGrid_( false ),
         levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
         storageAllocator_( allocator )
@@ -251,11 +241,29 @@ namespace Dune
      */
     GeometryGrid ( HostGrid *hostGrid, CoordFunction *coordFunction, const Allocator &allocator = Allocator() )
       : hostGrid_( hostGrid ),
-        coordFunction_( *coordFunction ),
+        coordFunction_( coordFunction ),
         removeHostGrid_( true ),
         levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
         storageAllocator_( allocator )
     {}
+
+    /** \brief constructor
+     *
+     *  The grid takes ownership of the pointer to host grid and it will
+     *  be deleted when the grid is destroyed. The coordinate function
+     *  is automatically constructed.
+     *
+     *  \param[in]  hostGrid       pointer to the grid to wrap
+     *  \param[in]  allocator      storage allocator
+     */
+    GeometryGrid ( HostGrid *hostGrid, const Allocator &allocator = Allocator() )
+      : hostGrid_( hostGrid ),
+        coordFunction_( new CoordFunction( this->hostGrid() ) ),
+        removeHostGrid_( true ),
+        levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
+        storageAllocator_( allocator )
+    {}
+
 
     /** \brief destructor
      */
@@ -269,7 +277,7 @@ namespace Dune
 
       if( removeHostGrid_ )
       {
-        delete &coordFunction_;
+        delete coordFunction_;
         delete hostGrid_;
       }
     }
@@ -565,17 +573,25 @@ namespace Dune
     }
 #endif
 
-    /** \brief obtain EntityPointer from EntitySeed. */
-    template< class EntitySeed >
-    typename Traits::template Codim< EntitySeed::codimension >::EntityPointer
-    DUNE_DEPRECATED_MSG("entityPointer() is deprecated and will be removed after the release of dune-grid 2.4. Use entity() instead to directly obtain an Entity object.")
-    entityPointer ( const EntitySeed &seed ) const
-    {
-      typedef typename Traits::template Codim< EntitySeed::codimension >::Entity Entity;
-      return DefaultEntityPointer< Entity >( entity( seed ) );
-    }
-
-    /** \brief obtain Entity from EntitySeed. */
+    /** \brief obtain Entity from EntitySeed
+     *
+     *  EntitySeed survives to a grid modification which only changes the grid coordinates.
+     *  Therefore it is consistent to use an EntitySeed to rebuild an Entity after this kind of grid modification.
+     *
+     *  An example of this is given by the following code:
+     *  \code
+     *  // store seed of the first entity in the leaf view
+     *  const auto& gv = grid.leafGridView();
+     *  const auto& entity = (*(gv.template begin<0>()));
+     *  auto seed = entity.seed();
+     *
+     *  // perform a grid modification
+     *  grid.coordFunction().setTime(t);
+     *
+     *  // rebuild first entity from the seed
+     *  const auto& newEntity = grid.entity(seed);
+     *  \endcode
+     */
     template< class EntitySeed >
     typename Traits::template Codim< EntitySeed::codimension >::Entity
     entity ( const EntitySeed &seed ) const
@@ -590,31 +606,13 @@ namespace Dune
      *  \{ */
 
     /** \brief View for a grid level */
-    template< PartitionIteratorType pitype >
-    typename Partition< pitype >::LevelGridView levelGridView ( int level ) const
-    {
-      typedef typename Partition< pitype >::LevelGridView View;
-      typedef typename View::GridViewImp ViewImp;
-      return View( ViewImp( *this, hostGrid().levelGridView( level ) ) );
-    }
-
-    /** \brief View for the leaf grid */
-    template< PartitionIteratorType pitype >
-    typename Partition< pitype >::LeafGridView leafGridView () const
-    {
-      typedef typename Traits::template Partition< pitype >::LeafGridView View;
-      typedef typename View::GridViewImp ViewImp;
-      return View( ViewImp( *this, hostGrid().leafGridView() ) );
-    }
-
-    /** \brief View for a grid level for All_Partition */
     LevelGridView levelGridView ( int level ) const
     {
       typedef typename LevelGridView::GridViewImp ViewImp;
       return LevelGridView( ViewImp( *this, hostGrid().levelGridView( level ) ) );
     }
 
-    /** \brief View for the leaf grid for All_Partition*/
+    /** \brief View for the leaf grid */
     LeafGridView leafGridView () const
     {
       typedef typename LeafGridView::GridViewImp ViewImp;
@@ -626,11 +624,13 @@ namespace Dune
     /** \name Miscellaneous Methods
      *  \{ */
 
+    /** \brief obtain constant reference to the host grid */
     const HostGrid &hostGrid () const
     {
       return *hostGrid_;
     }
 
+    /** \brief obtain mutable reference to the host grid */
     HostGrid &hostGrid ()
     {
       return *hostGrid_;
@@ -647,7 +647,7 @@ namespace Dune
     void update ()
     {
       // adapt the coordinate function
-      GeoGrid::AdaptCoordFunction< typename CoordFunction::Interface >::adapt( coordFunction_ );
+      GeoGrid::AdaptCoordFunction< typename CoordFunction::Interface >::adapt( coordFunction() );
 
       const int newNumLevels = maxLevel()+1;
       const int oldNumLevels = levelIndexSets_.size();
@@ -660,12 +660,16 @@ namespace Dune
       levelIndexSets_.resize( newNumLevels, nullptr );
     }
 
-    /** \} */
 
     using Base::getRealImplementation;
 
-    const CoordFunction &coordFunction () const { return coordFunction_; }
-    CoordFunction &coordFunction () { return coordFunction_; }
+    /** \brief obtain constant reference to the coordinate function */
+    const CoordFunction &coordFunction () const { return *coordFunction_; }
+
+    /** \brief obtain mutable reference to the coordinate function. */
+    CoordFunction &coordFunction () { return *coordFunction_; }
+
+    /** \} */
 
   protected:
     template< int codim >
@@ -687,7 +691,7 @@ namespace Dune
 
   private:
     HostGrid *const hostGrid_;
-    CoordFunction &coordFunction_;
+    CoordFunction *coordFunction_;
     bool removeHostGrid_;
     mutable std::vector< LevelIndexSet *, typename Allocator::template rebind< LevelIndexSet * >::other > levelIndexSets_;
     mutable LeafIndexSet leafIndexSet_;
@@ -706,7 +710,7 @@ namespace Dune
   struct GeometryGrid< HostGrid, CoordFunction, Allocator >::Codim
     : public Base::template Codim< codim >
   {
-    /** \name Entity and Entity Pointer Types
+    /** \name Entity types
      *  \{ */
 
     /** \brief type of entity
@@ -714,12 +718,6 @@ namespace Dune
      *  The entity is a model of Dune::Entity.
      */
     typedef typename Traits::template Codim< codim >::Entity Entity;
-
-    /** \brief type of entity pointer
-     *
-     *  The entity pointer is a model of Dune::EntityPointer.
-     */
-    typedef typename Traits::template Codim< codim >::EntityPointer EntityPointer;
 
     /** \} */
 
@@ -762,7 +760,7 @@ namespace Dune
       LevelIterator;
     };
 
-    /** \brief type of level iterator
+    /** \brief type of leaf iterator
      *
      *  This iterator enumerates the entites of codimension \em codim of a
      *  grid level.
@@ -771,7 +769,7 @@ namespace Dune
      */
     typedef typename Partition< All_Partition >::LeafIterator LeafIterator;
 
-    /** \brief type of leaf iterator
+    /** \brief type of level iterator
      *
      *  This iterator enumerates the entites of codimension \em codim of the
      *  leaf grid.

@@ -1,3 +1,8 @@
+# .. cmake_module::
+#
+#    This modules content is executed whenever a module required or suggests dune-grid!
+#
+
 include(CheckFunctionExists)
 check_function_exists(mkstemp HAVE_MKSTEMP)
 
@@ -9,13 +14,9 @@ set(DUNE_GRID_EXTRA_UTILS "" CACHE BOOL
 find_package(METIS)
 find_package(ParMETIS)
 include(AddParMETISFlags)
-find_package(ALUGrid)
-include(AddALUGridFlags)
 find_package(Alberta)
 include(AddAlbertaFlags)
 include(UseUG)
-find_package(Grape)
-include(AddGrapeFlags)
 find_package(Psurface)
 include(AddPsurfaceFlags)
 find_package(AmiraMesh)
@@ -25,16 +26,12 @@ include(CheckExperimentalGridExtensions)
 set(DEFAULT_DGF_GRIDDIM 1)
 set(DEFAULT_DGF_WORLDDIM 1)
 set(DEFAULT_DGF_GRIDTYPE ONEDGRID)
-set(DGF_GRIDTYPES ONEDGRID ALUGRID_CONFORM ALUGRID_SIMPLEX ALBERTAGRID SGRID GEOGRID UGGRID)
+set(DGF_GRIDTYPES ONEDGRID ALBERTAGRID GEOGRID UGGRID)
 
 dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE ONEDGRID
   ASSERTION "(GRIDDIM == 1) && (WORLDDIM == 1)"
   DUNETYPE "Dune::OneDGrid"
   HEADERS "dune/grid/onedgrid.hh" "dune/grid/io/file/dgfparser/dgfoned.hh")
-
-dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE SGRID
-  DUNETYPE "Dune::SGrid< dimgrid, dimworld >"
-  HEADERS "dune/grid/sgrid.hh" "dune/grid/io/file/dgfparser/dgfs.hh")
 
 dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE YASPGRID
   ASSERTION "GRIDDIM == WORLDDIM"

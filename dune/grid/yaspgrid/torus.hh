@@ -3,16 +3,17 @@
 #ifndef DUNE_GRID_YASPGRID_TORUS_HH
 #define DUNE_GRID_YASPGRID_TORUS_HH
 
+#include <array>
 #include <bitset>
 #include <cmath>
 #include <deque>
+#include <iostream>
 #include <vector>
 
 #if HAVE_MPI
 #include <mpi.h>
 #endif
 
-#include <dune/common/array.hh>
 #include <dune/common/binaryfunctions.hh>
 #include <dune/grid/common/exceptions.hh>
 
@@ -42,7 +43,7 @@ namespace Dune
   class Torus {
   public:
     //! type used to pass tupels in and out
-    typedef Dune::array<int, d> iTupel;
+    typedef std::array<int, d> iTupel;
 
 
   private:

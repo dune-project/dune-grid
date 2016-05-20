@@ -3,7 +3,7 @@
 #ifndef DUNE_ALBERTA_NODEPROJECTION_HH
 #define DUNE_ALBERTA_NODEPROJECTION_HH
 
-#include <dune/common/shared_ptr.hh>
+#include <memory>
 
 #include <dune/grid/common/boundaryprojection.hh>
 
@@ -41,7 +41,7 @@ namespace Dune
       typedef FieldVector< Real, dimWorld > GlobalCoordinate;
 
       typedef Dune::DuneBoundaryProjection< dimWorld > Projection;
-      typedef Dune::shared_ptr< const Projection > ProjectionPtr;
+      typedef std::shared_ptr< const Projection > ProjectionPtr;
 
       explicit DuneBoundaryProjection ( const ProjectionPtr &projection )
         : projection_( projection )

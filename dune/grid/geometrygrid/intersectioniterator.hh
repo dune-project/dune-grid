@@ -17,7 +17,7 @@ namespace Dune
     template< class Grid, class HostIntersectionIterator >
     class IntersectionIterator
     {
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef typename std::remove_const< Grid >::type::Traits Traits;
 
       typedef GeoGrid::Intersection< Grid, typename HostIntersectionIterator::Intersection > IntersectionImpl;
 

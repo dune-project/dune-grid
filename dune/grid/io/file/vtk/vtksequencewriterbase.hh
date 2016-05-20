@@ -1,18 +1,18 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 
-#ifndef DUNE_VTKSEQUENCEBASE_HH
-#define DUNE_VTKSEQUENCEBASE_HH
+#ifndef DUNE_GRID_IO_FILE_VTK_VTKSEQUENCEWRITERBASE_HH
+#define DUNE_GRID_IO_FILE_VTK_VTKSEQUENCEWRITERBASE_HH
 
 #include <vector>
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <iomanip>
+#include <memory>
 
 #include <dune/grid/io/file/vtk/common.hh>
 #include <dune/common/path.hh>
-#include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 
@@ -22,7 +22,6 @@ namespace Dune {
    *
    * Derive from this class to write pvd-file suitable for easy visualization with
    * <a href="http://www.vtk.org/">The Visualization Toolkit (VTK)</a>.
-   * The derived class needs to inherit from the VTKWriter or the SubsamplingVTKWriter
    *
    * \tparam GridView Grid view of the grid we are writing
    *
@@ -31,7 +30,7 @@ namespace Dune {
   template<class GridView>
   class VTKSequenceWriterBase
   {
-    shared_ptr<VTKWriter<GridView> > vtkWriter_;
+    std::shared_ptr<VTKWriter<GridView> > vtkWriter_;
     std::vector<double> timesteps_;
     std::string name_,path_,extendpath_;
     int rank_;
@@ -43,7 +42,7 @@ namespace Dune {
      * \param rank Process number in a multi-process setting
      * \param size Total number of processes
      */
-    explicit VTKSequenceWriterBase( shared_ptr<VTKWriter<GridView> > vtkWriter,
+    explicit VTKSequenceWriterBase( std::shared_ptr<VTKWriter<GridView> > vtkWriter,
                                     const std::string& name,
                                     const std::string& path,
                                     const std::string& extendpath,
@@ -59,13 +58,7 @@ namespace Dune {
     ~VTKSequenceWriterBase() {}
 
     /** \brief Adds a field of cell data to the VTK file */
-    void addCellData (const shared_ptr<const typename VTKWriter<GridView>::VTKFunction> &p)
-    {
-      vtkWriter_->addCellData(p);
-    }
-
-    /** \brief Adds a field of cell data to the VTK file */
-    void addCellData (typename VTKWriter<GridView>::VTKFunction *p)
+    void addCellData (const std::shared_ptr<const typename VTKWriter<GridView>::VTKFunction> &p)
     {
       vtkWriter_->addCellData(p);
     }
@@ -82,13 +75,7 @@ namespace Dune {
     }
 
     /** \brief Adds a field of vertex data to the VTK file */
-    void addVertexData (typename VTKWriter<GridView>::VTKFunction *p)
-    {
-      vtkWriter_->addVertexData(p);
-    }
-
-    /** \brief Adds a field of vertex data to the VTK file */
-    void addVertexData (const typename VTKWriter<GridView>::VTKFunctionPtr &p)
+    void addVertexData (const std::shared_ptr<const typename VTKWriter<GridView>::VTKFunction> &p)
     {
       vtkWriter_->addVertexData(p);
     }
@@ -108,9 +95,9 @@ namespace Dune {
     /**
      * \brief Writes VTK data for the given time,
      * \param time The time(step) for the data to be written.
-     * \param ot VTK output type.
+     * \param type VTK output type.
      */
-    void write (double time, VTK::OutputType ot = VTK::ascii)
+    void write (double time, VTK::OutputType type = VTK::ascii)
     {
       /* remember current time step */
       unsigned int count = timesteps_.size();
@@ -118,9 +105,9 @@ namespace Dune {
 
       /* write VTK file */
       if(size_==1)
-        vtkWriter_->write(concatPaths(path_,seqName(count)),ot);
+        vtkWriter_->write(concatPaths(path_,seqName(count)),type);
       else
-        vtkWriter_->pwrite(seqName(count), path_,extendpath_,ot);
+        vtkWriter_->pwrite(seqName(count), path_,extendpath_,type);
 
       /* write pvd file ... only on rank 0 */
       if (rank_==0) {
@@ -130,7 +117,7 @@ namespace Dune {
         std::string pvdname = name_ + ".pvd";
         pvdFile.open(pvdname.c_str());
         pvdFile << "<?xml version=\"1.0\"?> \n"
-                << "<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"LittleEndian\"> \n"
+                << "<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"" << VTK::getEndiannessString() << "\"> \n"
                 << "<Collection> \n";
         for (unsigned int i=0; i<=count; i++)
         {

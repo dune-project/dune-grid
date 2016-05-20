@@ -5,8 +5,7 @@
 
 #include <iostream>
 #include <vector>
-
-#include <dune/common/array.hh>
+#include <array>
 
 #include <dune/grid/io/file/dgfparser/blocks/basic.hh>
 
@@ -22,13 +21,35 @@ namespace Dune
     {
       struct Interval
       {
-        array< std::vector< double >, 2 > p; // lower and upper boundary points
+        Interval() {}
+        Interval( const Interval& interval, const std::vector<int>& map )
+        {
+          copy( interval, map );
+        }
+        void copy(const Interval& interval, const std::vector<int>& map )
+        {
+          const int size = map.size();
+          p[0].resize( size );
+          p[1].resize( size );
+          n.resize( size );
+          h.resize( size );
+          assert( size == int(interval.n.size()) );
+          for( int i=0; i<size; ++i )
+          {
+            p[ 0 ][ i ] = interval.p[ 0 ][ map[ i ] ];
+            p[ 1 ][ i ] = interval.p[ 1 ][ map[ i ] ];
+            n[ i ] = interval.n[ map[ i ] ];
+            h[ i ] = interval.h[ map[ i ] ];
+          }
+        }
+        std::array< std::vector< double >, 2 > p; // lower and upper boundary points
         std::vector< double > h;             // width of the cells in each direction
         std::vector< int > n;                // number of cells in each direction
       };
 
     private:
       std::vector< Interval > intervals_;
+      std::vector< int > map_;
       bool good_;                      //data read correctly
       int dimw_;                       //dimension of world
 

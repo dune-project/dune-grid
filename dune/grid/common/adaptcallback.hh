@@ -6,7 +6,7 @@
 /** \file
  *  \author Martin Nolte
  *  \brief  interfaces and wrappers needed for the callback adaptation provided
- *          by AlbertaGrid and ALUGrid
+ *          by AlbertaGrid and dune-ALUGrid
  */
 
 namespace Dune
@@ -45,9 +45,9 @@ namespace Dune
 
   public:
     /** \brief call back for activity to take place on father
-              and all decendants before the decendants are removed
+              and all descendants before the descendants are removed
 
-       \param father  entity where all decendants are going to be removed
+       \param father  entity where all descendants are going to be removed
     */
     void preCoarsening ( const Entity &father )
     {
@@ -57,7 +57,7 @@ namespace Dune
     /** \brief call back for activity to take place on newly created
               elements below the father element.
 
-       \param father  entity where all decendants were newly created
+       \param father  entity where all descendants were newly created
     */
     void postRefinement ( const Entity &father )
     {

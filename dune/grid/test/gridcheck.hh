@@ -11,6 +11,8 @@
 
  */
 
+#include <cstdlib>
+
 #include <dune/common/exceptions.hh>
 #include <dune/common/stdstreams.hh>
 #include <dune/geometry/referenceelements.hh>
@@ -68,23 +70,11 @@ struct subIndexCheck
     typedef typename Grid::template Codim< E::codimension >::EntitySeed EntitySeed;
     EntitySeed seed = e.seed();
 
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-    #ifndef NDEBUG
-    typedef typename Grid::template Codim< E::codimension >::EntityPointer EntityPointer;
-    EntityPointer ep1 ( e );
-    // regain entity pointer and check equality
-    EntityPointer ep2 = g.entityPointer( seed );
-    #endif
-    assert( ep1 == ep2 );
-#endif
-
-#if not defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
     #ifndef NDEBUG
     E e1( e );
     E e2 = g.entity( seed );
     #endif
     assert( e1 == e2 );
-#endif
 
   }
 
@@ -94,33 +84,13 @@ struct subIndexCheck
 
     checkEntitySeedRecovery(g,e);
 
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-    typedef typename Grid::template Codim< cd >::EntityPointer EntityPointer;
-#endif
     typedef typename Grid::template Codim< cd >::Entity SubEntity;
     const int imax = e.subEntities(cd);
     for( int i = 0; i < imax; ++i )
     {
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-      // check construction of entity pointers
-      EntityPointer ep( *(e.template subEntity< cd >( i ) ) );
-      assert( ep == e.template subEntity< cd >( i ) );
-      // check operator*()
-      // by directly invoking the operator on the return value of subEntity, this also checks the backwards
-      // compatibility support of the Entity facade for grids that have already been ported to the new interface
-      assert( *ep == *e.template subEntity< cd >( i ) );
-      // check operator->()
-      // by directly invoking the operator on the return value of subEntity, this also checks the backwards
-      // compatibility support of the Entity facade for grids that have already been ported to the new interface
-      assert( ep->level() == e.template subEntity< cd >( i )->level() );
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-      const SubEntity& se = *ep;
-#else
       // check construction of entities
       SubEntity se( e.template subEntity< cd >( i ) );
       assert( se == e.template subEntity< cd >( i ) );
-#endif
 
       checkEntitySeedRecovery(g,se);
 
@@ -199,9 +169,6 @@ void zeroEntityConsistency (Grid &g)
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
   typedef typename Grid::template Codim<0>::Geometry Geometry;
   typedef typename Grid::template Codim<0>::Entity Entity;
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-  typedef typename Grid::template Codim<0>::EntityPointer EntityPointer;
-#endif
 
   const typename Grid::LevelIndexSet &levelIndexSet = g.levelIndexSet( g.maxLevel() );
   const typename Grid::LeafIndexSet &leafIndexSet = g.leafIndexSet();
@@ -213,26 +180,11 @@ void zeroEntityConsistency (Grid &g)
 
   for (; it!=endit; ++it)
   {
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-    // check construction from entity
-    EntityPointer ep( *it ) ;
-    assert( ep == it );
-#endif
-#if not defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
     // check entity copy ctor
     Entity e( *it ) ;
     assert( e == *it );
-#endif
 
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-    EntityPointer subEntityPointer = it->template subEntity< 0 >( 0 );
-    *subEntityPointer;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-    const Entity& subEntity = *subEntityPointer;
-#else
     Entity subEntity = it->template subEntity< 0 >( 0 );
-#endif
     // Entity::subEntity<0>(0) == Entity
     if( levelIndexSet.index( subEntity ) != levelIndexSet.index( *it ) )
     {
@@ -264,27 +216,15 @@ void zeroEntityConsistency (Grid &g)
     // Entity::count<dim>() == Entity::geometry().corners();
     // Entity::geometry()[c] == Entity::entity<dim>.geometry()[0];
     const int numCorners = it->subEntities(dimGrid);
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-    const int numCornersOld = it->template count< dimGrid >();
-    if( numCorners != numCornersOld )
-    {
-      std::cerr << "Error: Entity::count< dimGrid >() != Entity::subEntities(dimGrid)." << std::endl;
-      assert( false );
-    }
-#endif
     if( numCorners != it->geometry().corners() )
     {
-      std::cerr << "Error: Entity::count< dimGrid >() != Entity::geometry().corners()." << std::endl;
+      std::cerr << "Error: Entity::subEntities< dimGrid >() != Entity::geometry().corners()." << std::endl;
       assert( false );
     }
     for( int c = 0; c < numCorners; ++c )
     {
       typename Geometry::GlobalCoordinate c1( it->geometry().corner( c ) );
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-      typename Geometry::GlobalCoordinate c2( it->template subEntity< dimGrid >( c )->geometry().corner( 0 ) );
-#else
       typename Geometry::GlobalCoordinate c2( it->template subEntity< dimGrid >( c ).geometry().corner( 0 ) );
-#endif
 
       if( (c2-c1).two_norm() > 10*std::numeric_limits< ctype >::epsilon() )
       {
@@ -348,9 +288,6 @@ void assertNeighbor (Grid &g)
   typedef typename Grid::GlobalIdSet GlobalIdSet;
   const GlobalIdSet & globalid = g.globalIdSet();
 
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-  typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
-#endif
   typedef typename Grid::template Codim< 0 >::Entity Entity;
 
   GridView gridView = g.levelGridView( 0 );
@@ -372,21 +309,15 @@ void assertNeighbor (Grid &g)
     }
 
     // small check if LevelIntersectionIterators
-    // from work reassigned EntityPointers
+    // from work reassigned Entity
     // after creation of LevelIterator on different level
-    if (g.maxLevel()>0)
+    if (g.maxLevel()>0
+        && g.levelGridView(0).template begin<0>() != g.levelGridView(0).template end<0>()
+        && g.levelGridView(1).template begin<0>() != g.levelGridView(1).template end<0>()
+        )
     {
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-      EntityPointer p( g.levelGridView(0).template begin<0>() );
-      p = g.levelGridView(1).template begin<0>();
-      *p;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-      const Entity& e = *p;
-#else
       Entity e( *g.levelGridView(0).template begin<0>() );
       e = *g.levelGridView(1).template begin<0>();
-#endif
       LevelIterator it = g.levelGridView(0).template begin<0>();
       ++it;
       g.levelGridView(e.level()).ibegin(e);
@@ -428,10 +359,8 @@ void assertNeighbor (Grid &g)
         typedef typename IntersectionIterator::Intersection Intersection;
         const Intersection& is = *it;
 
-#if not defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
         // check intersection copy ctor
         Intersection is2 = is;
-#endif
 
         // numbering
         const int numberInSelf = is.indexInInside();
@@ -455,14 +384,11 @@ void assertNeighbor (Grid &g)
         }
 
         // check id
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-        assert( globalid.id(*(it->inside())) == globalid.id( entity ) );
-#else
         assert( globalid.id(it->inside()) == globalid.id( entity ) );
-#endif
 
         // geometry
-        it->geometryInInside();
+        if( !it->type().isNone() )
+          it->geometryInInside();
         it->geometry();
 
         // normal vectors
@@ -480,15 +406,7 @@ void assertNeighbor (Grid &g)
 
         if( it->neighbor() )
         {
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-          const EntityPointer outsidePtr = it->outside();
-          *outsidePtr;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-          const Entity &outside = *outsidePtr;
-#else
           const Entity outside = it->outside();
-#endif
 
           if( isGhost && (outside.partitionType() == Dune::GhostEntity) )
           {
@@ -497,7 +415,8 @@ void assertNeighbor (Grid &g)
           }
 
           // geometry
-          it->geometryInOutside();
+          if( !it->type().isNone() )
+            it->geometryInOutside();
 
           // numbering
           const int indexInOutside = it->indexInOutside();
@@ -599,7 +518,6 @@ template <bool checkMark , class Grid>
 void iterate(Grid &g)
 {
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
-  //typedef typename Grid::template Codim<0>::EntityPointer EntityPointer DUNE_UNUSED;
   //typedef typename Grid::HierarchicIterator HierarchicIterator DUNE_UNUSED;
   typedef typename Grid::template Codim<0>::Geometry Geometry;
   int maxLevel = g.maxLevel();
@@ -618,21 +536,7 @@ void iterate(Grid &g)
     ++l2;
     assert( (l1 == l2) && (l2 == l1) );
 
-    origin = Dune::ReferenceElements<typename Geometry::ctype,
-               Geometry::dimension>::general(it->type()).position(0,0);
-    const Geometry &geo = it->geometry();
-
-    result = geo.local( geo.global( origin ) );
-    typename Grid::ctype error = (result-origin).two_norm();
-    if(error >= factorEpsilon * std::numeric_limits<typename Grid::ctype>::epsilon())
-    {
-      DUNE_THROW(CheckError, "|| geom.local(geom.global(" << origin
-                                                          << ")) - origin || != 0 ( || " << result << " - origin || ) = " << error);
-    };
-    geo.integrationElement( origin );
-
-    if((int)Geometry::coorddimension == (int)Geometry::mydimension)
-      geo.jacobianInverseTransposed( origin );
+    const Geometry geo = it->geometry();
 
     if( geo.type() != it->type() )
     {
@@ -640,6 +544,25 @@ void iterate(Grid &g)
                 << ", geometry.type() = " << geo.type() << "." << std::endl;
       assert( false );
     }
+
+    if( !geo.type().isNone() )
+    {
+      origin = Dune::ReferenceElements<typename Geometry::ctype,
+                 Geometry::mydimension>::general(it->type()).position(0,0);
+
+      result = geo.local( geo.global( origin ) );
+      typename Grid::ctype error = (result-origin).two_norm();
+      if(error >= factorEpsilon * std::numeric_limits<typename Grid::ctype>::epsilon())
+      {
+        DUNE_THROW(CheckError, "|| geom.local(geom.global(" << origin
+                                                            << ")) - origin || != 0 ( || " << result << " - origin || ) = " << error);
+      };
+      geo.integrationElement( origin );
+
+      if((int)Geometry::coorddimension == (int)Geometry::mydimension)
+        geo.jacobianInverseTransposed( origin );
+    }
+
     geo.corners();
     geo.corner( 0 );
   }
@@ -667,19 +590,23 @@ void iterate(Grid &g)
     // check adaptation mark for leaf entity mark
     CheckMark<Grid,checkMark>::check(g,lit);
 
-    result = lit->geometry().local(lit->geometry().global(origin));
-    typename Grid::ctype error = (result-origin).two_norm();
-    if(error >= factorEpsilon * std::numeric_limits<typename Grid::ctype>::epsilon())
+    if( !lit->type().isNone() )
     {
-      DUNE_THROW(CheckError, "|| geom.local(geom.global(" << origin
-                                                          << ")) - origin || != 0 ( || " << result << " - origin || ) = " << error);
-    };
-    lit->geometry().integrationElement(origin);
-    if((int)Geometry::coorddimension == (int)Geometry::mydimension)
-      lit->geometry().jacobianInverseTransposed(origin);
+      origin = Dune::ReferenceElements<typename Geometry::ctype,
+                 Geometry::mydimension>::general(lit->type()).position(0,0);
+      result = lit->geometry().local(lit->geometry().global(origin));
+      typename Grid::ctype error = (result-origin).two_norm();
+      if(error >= factorEpsilon * std::numeric_limits<typename Grid::ctype>::epsilon())
+      {
+        DUNE_THROW(CheckError, "|| geom.local(geom.global(" << origin
+                                                            << ")) - origin || != 0 ( || " << result << " - origin || ) = " << error);
+      }
+      lit->geometry().integrationElement(origin);
+      if((int)Geometry::coorddimension == (int)Geometry::mydimension)
+        lit->geometry().jacobianInverseTransposed(origin);
+    }
 
     lit->geometry().type();
-    lit->type();
     lit->geometry().corners();
     lit->geometry().corner( 0 );
   }
@@ -692,9 +619,6 @@ void iteratorEquals (Grid &g)
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
   typedef typename Grid::template Codim<0>::LeafIterator LeafIterator;
   typedef typename Grid::HierarchicIterator HierarchicIterator;
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE) || !DISABLE_DEPRECATED_METHOD_CHECK
-  typedef typename Grid::template Codim<0>::EntityPointer EntityPointer;
-#endif // #if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE) || !DISABLE_DEPRECATED_METHOD_CHECK
 
   typedef typename Grid::LeafGridView LeafGridView;
   typedef typename Grid::LevelGridView LevelGridView;
@@ -714,20 +638,6 @@ void iteratorEquals (Grid &g)
   if (l1 == levelGridView.template end<0>())
     return;
 
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-  // check '==' consistency
-  EntityPointer a( levelGridView.template begin<0,Dune::All_Partition>() );
-  EntityPointer i( levelGridView.template begin<0,Dune::InteriorBorder_Partition>() );
-
-  assert(
-    (levelGridView.indexSet().index(*a) != levelGridView.indexSet().index(*i)) // index equal
-    == (a != i) // entitypointer equal
-    );
-  assert(
-    (levelGridView.indexSet().index(*a) == levelGridView.indexSet().index(*i)) // index equal
-    == (a == i) // entitypointer equal
-    );
-#else
   // check '==' consistency
   typedef typename Grid::template Codim<0>::Entity Entity;
   Entity a( *levelGridView.template begin<0,Dune::All_Partition>() );
@@ -741,60 +651,17 @@ void iteratorEquals (Grid &g)
     (levelGridView.indexSet().index(a) == levelGridView.indexSet().index(i)) // index equal
     == (a == i) // entitypointer equal
     );
-#endif
 
   HierarchicIterator h1 = l1->hbegin(99);
   HierarchicIterator h2 = l2->hbegin(99);
   LeafIntersectionIterator i1 = leafGridView.ibegin( *l1 );
   LeafIntersectionIterator i2 = leafGridView.ibegin( *l2 );
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-  EntityPointer e1( l1 );
-  EntityPointer e2( h2 );
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
   // assign
   l1 = l2;
   L1 = L2;
   h1 = h2;
   i1 = i2;
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-  e1 = e2;
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
-
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-  // equals
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-  #define TestEquals(i) { \
-    { bool DUNE_UNUSED tmp = (i == e2); }                         \
-    { bool DUNE_UNUSED tmp = (i == l2); }                         \
-    { bool DUNE_UNUSED tmp = (i == h2); }                         \
-    { bool DUNE_UNUSED tmp = (i == L2); }                         \
-    if (i2 != leafGridView.iend( *l2 )) bool DUNE_UNUSED tmp = (i == i2->inside()); \
-    if (i2 != leafGridView.iend( *l2 ) && i2->neighbor()) bool DUNE_UNUSED tmp = (i == i2->outside()); \
-}
-#else
-  #define TestEquals(i) { \
-    { bool DUNE_UNUSED tmp = (i == e2); }                         \
-    { bool DUNE_UNUSED tmp = (i == l2); }                         \
-    { bool DUNE_UNUSED tmp = (i == h2); }                         \
-    { bool DUNE_UNUSED tmp = (i == L2); }                         \
-    if (i2 != leafGridView.iend( *l2 )) bool DUNE_UNUSED tmp = (i == EntityPointer(i2->inside())); \
-    if (i2 != leafGridView.iend( *l2 ) && i2->neighbor()) bool DUNE_UNUSED tmp = (i == EntityPointer(i2->outside())); \
-}
-#endif
-  TestEquals(e1);
-  TestEquals(l1);
-  TestEquals(h1);
-  TestEquals(L1);
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-  if (i1 != leafGridView.iend( *l2 )) TestEquals(i1->inside());
-  if (i1 != leafGridView.iend( *l2 ) && i1->neighbor()) TestEquals(i1->outside());
-#else
-  if (i1 != leafGridView.iend( *l2 )) TestEquals(EntityPointer(i1->inside()));
-  if (i1 != leafGridView.iend( *l2 ) && i1->neighbor()) TestEquals(EntityPointer(i1->outside()));
-#endif
-
-#endif // !DISABLE_DEPRECATED_METHOD_CHECK
 
   // iterator comparisons
   assert(l1 == l2 && !(l1 != l2));
@@ -873,9 +740,6 @@ void checkFatherLevel ( Grid &grid )
   {
     typedef typename Grid::LevelGridView GridView;
     typedef typename GridView::template Codim<0>::Iterator Iterator;
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-    typedef typename GridView::template Codim<0>::EntityPointer EntityPointer;
-#endif
     typedef typename Iterator::Entity Entity;
 
     GridView gv = grid.levelGridView(level);
@@ -899,15 +763,7 @@ void checkFatherLevel ( Grid &grid )
         {
           // check level of father for newly created entitypointer
           {
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-            EntityPointer fatherPointer = it->father();
-            *fatherPointer;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-            const Entity& f = *fatherPointer;
-#else
             Entity f = it->father();
-#endif
 
             if (f.level() != level-1)
             {
@@ -915,30 +771,12 @@ void checkFatherLevel ( Grid &grid )
                         << " for element on level " << level << std::endl;
               assert(false);
             }
-
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-            if (fatherPointer.level() != level-1)
-            {
-              std::cerr << "Error! father()->level()=" << f->level()
-                        << " for element on level " << level << std::endl;
-              assert(false);
-            }
-#endif
 
           }
           // check level of father after reassignment
           {
-#if not DISABLE_DEPRECATED_METHOD_CHECK or defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-            EntityPointer fatherPointer(*it);
-            fatherPointer = it->father();
-            *fatherPointer;
-#endif
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-            const Entity& f = *fatherPointer;
-#else
             Entity f(*it);
             f = f.father();
-#endif
 
             if (f.level() != level-1)
             {
@@ -946,14 +784,6 @@ void checkFatherLevel ( Grid &grid )
                         << " for element on level " << level << " with reassigned father pointer" << std::endl;
               assert(false);
             }
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-            if (fatherPointer->level() != level-1)
-            {
-              std::cerr << "Error! father()->level()=" << f->level()
-                        << " for element on level " << level << " with reassigned father pointer" << std::endl;
-              assert(false);
-            }
-#endif
           }
         }
       }
@@ -970,7 +800,6 @@ void checkBoundarySegmentIndex ( const GridView &gridView )
 
   size_t numBoundarySegments = gridView.grid().numBoundarySegments();
   size_t countBoundarySegments = 0;
-  std::vector< int > count( numBoundarySegments, 0 );
   bool error = false;
 
   const Iterator end = gridView.template end< 0 >();
@@ -981,9 +810,29 @@ void checkBoundarySegmentIndex ( const GridView &gridView )
     const IntersectionIterator iend = gridView.iend( *it );
     for( IntersectionIterator iit = gridView.ibegin( *it ); iit != iend; ++iit )
     {
+      if( iit->boundary() )
+        ++countBoundarySegments;
+    }
+  }
+
+  if( countBoundarySegments != numBoundarySegments )
+  {
+    std::cerr << "Error: Wrong number of boundary segments (reported: "
+              << numBoundarySegments << ", counted: "
+              << countBoundarySegments << ")." << std::endl;
+    std::abort();
+  }
+
+  std::vector< int > count( numBoundarySegments, 0 );
+  for( Iterator it = gridView.template begin< 0 >(); it != end; ++it )
+  {
+    if( !it->hasBoundaryIntersections() )
+      continue;
+    const IntersectionIterator iend = gridView.iend( *it );
+    for( IntersectionIterator iit = gridView.ibegin( *it ); iit != iend; ++iit )
+    {
       if( !iit->boundary() )
         continue;
-      ++countBoundarySegments;
       const size_t index = iit->boundarySegmentIndex();
       if( index >= numBoundarySegments )
       {
@@ -997,14 +846,6 @@ void checkBoundarySegmentIndex ( const GridView &gridView )
       if( !it->isLeaf() )
         checkBoundarySegmentIndexProlongation( gridView.grid(), *it, *iit );
     }
-  }
-
-  if( countBoundarySegments != numBoundarySegments )
-  {
-    std::cerr << "Error: Wrong number of boundary segments (reported: "
-              << numBoundarySegments << ", counted: "
-              << countBoundarySegments << ")." << std::endl;
-    error = true;
   }
 
   for( size_t i = 0; i < count.size(); ++i )
@@ -1057,12 +898,15 @@ void gridcheck (Grid &g)
   {
     for (int i=0; i<=dim; i++)
     {
-      assert(g.size(i)>0);
-      for (int j=0; j<=g.maxLevel(); j++)
-        if (g.comm().size() == 0)
-          assert(g.size(j,i)>0);
-        else
-          assert(g.size(j,i)>=0);   // in parallel this could be zero (depends on definition of maxLevel() method in parallel)
+      // if entities for a specific codimension are not available the size can be 0
+      if( g.size(i) > 0 )
+      {
+        for (int j=0; j<=g.maxLevel(); j++)
+          if (g.comm().size() == 1)
+            assert(g.size(j,i)>0);
+          else
+            assert(g.size(j,i)>=0);   // in parallel this could be zero (depends on definition of maxLevel() method in parallel)
+      }
     }
   }
 
@@ -1116,17 +960,9 @@ void gridcheck (Grid &g)
     for (; it != end; ++it)
     {
       g.globalIdSet().subId(*it,0,dim);
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-      if(g.globalIdSet().subId(*it,0,dim) != g.globalIdSet().id(*(it->template subEntity<dim>(0))))
-#else
       if(g.globalIdSet().subId(*it,0,dim) != g.globalIdSet().id(it->template subEntity<dim>(0)))
-#endif
       {
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-        std::cerr << "Error: Inconsistent global subId for vertex 0 (id(subEntity)=" << g.globalIdSet().id(*(it->template subEntity<dim>(0)))
-#else
         std::cerr << "Error: Inconsistent global subId for vertex 0 (id(subEntity)=" << g.globalIdSet().id(it->template subEntity<dim>(0))
-#endif
                   << ", subId=" << g.globalIdSet().subId(*it,0,dim) << ") of cell " << g.globalIdSet().id(*it) << std::endl;
         assert(false);
       }

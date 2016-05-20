@@ -7,7 +7,6 @@
  * \brief The OneDGridLevelIntersection and OneDGridLeafIntersection classes
  */
 
-#include <dune/common/nullptr.hh>
 #include <dune/grid/onedgrid/onedgridentity.hh>
 
 namespace Dune {
@@ -47,7 +46,6 @@ namespace Dune {
 
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
     //! equality
@@ -267,7 +265,6 @@ namespace Dune {
 
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
-    typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
     //! equality

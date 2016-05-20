@@ -10,9 +10,6 @@
 
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/yaspgrid.hh>
-#if HAVE_ALUGRID
-#include <dune/grid/alugrid.hh>
-#endif
 
 #include <dune/grid/utility/persistentcontainer.hh>
 #include <dune/grid/utility/structuredgridfactory.hh>
@@ -52,9 +49,9 @@ bool test(GridType &grid)
       ccontainer0[*eit] = container0[*eit] = eit->geometry().center();
       const Dune::ReferenceElement< typename GridType::ctype, GridType::dimension > &refElement
         = Dune::ReferenceElements< typename GridType::ctype, GridType::dimension >::general( eit->type() );
-      for (int i=0; i<eit->subEntities(1); ++i)
+      for (unsigned int i=0; i<eit->subEntities(1); ++i)
         ccontainer1(*eit,i) = container1(*eit,i) = eit->geometry().global( refElement.position(i,1) );
-      for (int i=0; i<eit->subEntities(2); ++i)
+      for (unsigned int i=0; i<eit->subEntities(2); ++i)
         container2(*eit,i) = eit->geometry().global( refElement.position(i,2) );
     }
   }
@@ -91,18 +88,18 @@ bool test(GridType &grid)
         ret = false;
         break;
       }
-      typename GridType::template Codim<0>::EntityPointer up = eit->father();
-      while ( !container0[*up].used )
+      typename GridType::template Codim<0>::Entity up = eit->father();
+      while ( !container0[up].used )
       {
-        if (up->level() == 0)
+        if (up.level() == 0)
         {
           std::cout << "ERROR: could not find a father element in container - stop testing" << std::endl;
           ret = false;
           break;
         }
-        up = up->father();
+        up = up.father();
       }
-      if ( ( container0[*up].coord - up->geometry().center() ).two_norm() > 1e-8 )
+      if ( ( container0[up].coord - up.geometry().center() ).two_norm() > 1e-8 )
       {
         std::cout << "ERROR: wrong data stored in container0 - stop testing" << std::endl;
         ret = false;
@@ -110,15 +107,15 @@ bool test(GridType &grid)
       }
       const Dune::ReferenceElement< typename GridType::ctype, GridType::dimension > &refElement
         = Dune::ReferenceElements< typename GridType::ctype, GridType::dimension >::general( eit->type() );
-      for (int i=0; i<eit->subEntities(1); ++i)
-        if ( ( container1(*up,i).coord - up->geometry().global( refElement.position(i,1) ) ).two_norm() > 1e-8 )
+      for (unsigned int i=0; i<eit->subEntities(1); ++i)
+        if ( ( container1(up,i).coord - up.geometry().global( refElement.position(i,1) ) ).two_norm() > 1e-8 )
         {
           std::cout << "ERROR: wrong data stored in container1 - stop testing" << std::endl;
           ret = false;
           break;
         }
-      for (int i=0; i<eit->subEntities(2); ++i)
-        if ( ( container2(*up,i).coord - up->geometry().global( refElement.position(i,2) ) ).two_norm() > 1e-8 )
+      for (unsigned int i=0; i<eit->subEntities(2); ++i)
+        if ( ( container2(up,i).coord - up.geometry().global( refElement.position(i,2) ) ).two_norm() > 1e-8 )
         {
           std::cout << "ERROR: wrong data stored in container1 - stop testing" << std::endl;
           ret = false;
@@ -141,7 +138,7 @@ try {
   {
     typedef YaspGrid<2> GridType;
     Dune::FieldVector<double,2> Len; Len = 1.0;
-    Dune::array<int,2> s = { {2, 6} };
+    std::array<int,2> s = { {2, 6} };
     std::bitset<2> p;
     int overlap = 1;
     GridType grid(Len,s,p,overlap);
@@ -149,20 +146,7 @@ try {
     test(grid);
   }
 
-#if HAVE_ALUGRID
-  {
-    typedef Dune::ALUGrid<2, 2, cube, nonconforming> GridType;
-    array<unsigned int,2> elements2d;
-    elements2d.fill(4);
-    shared_ptr<GridType> grid = StructuredGridFactory<GridType>::createCubeGrid(FieldVector<double,2>(0),
-                                                                                FieldVector<double,2>(1), elements2d);
-    std::cout << "Testing ALUGrid" << std::endl;
-    test(*grid);
-  }
-#endif
-
   return 0;
-
 }
 catch (Exception &e) {
   std::cerr << e << std::endl;

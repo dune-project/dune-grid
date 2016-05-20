@@ -5,7 +5,6 @@
 
 #include <utility>
 
-#include <dune/common/nullptr.hh>
 #include <dune/common/typetraits.hh>
 
 #include <dune/geometry/referenceelements.hh>
@@ -57,7 +56,7 @@ namespace Dune
     template< class Grid >
     struct GeometryTraits
     {
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef typename std::remove_const< Grid >::type::Traits Traits;
 
       typedef typename Traits::ctype ctype;
 
@@ -87,7 +86,7 @@ namespace Dune
     {
       typedef Geometry< mydim, cdim, Grid > This;
 
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef typename std::remove_const< Grid >::type::Traits Traits;
 
       template< int, int, class > friend class Geometry;
 

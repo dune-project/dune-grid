@@ -11,21 +11,21 @@
 namespace Dune
 {
 
-    template< class GridImp, PartitionIteratorType pitype >
+    template< class GridImp>
     class UGGridLevelGridView;
 
-    template< class GridImp, PartitionIteratorType pitype >
+    template< class GridImp>
     class UGGridLeafGridView;
 
 
     /** \brief Collect several types associated to UGGrid LevelGridViews */
-    template< class GridImp, PartitionIteratorType pitype >
+    template< class GridImp>
     struct UGGridLevelGridViewTraits
     {
-      typedef UGGridLevelGridView< GridImp, pitype > GridViewImp;
+      typedef UGGridLevelGridView< GridImp > GridViewImp;
 
       /** \brief type of the grid */
-      typedef typename remove_const<GridImp>::type Grid;
+      typedef typename std::remove_const<GridImp>::type Grid;
 
       /** \brief type of the index set */
       typedef typename Grid :: Traits :: LevelIndexSet IndexSet;
@@ -44,12 +44,10 @@ namespace Dune
       struct Codim
       {
         typedef typename Grid :: Traits
-        :: template Codim< cd > :: template Partition< pitype > :: LevelIterator
+        :: template Codim< cd > :: template Partition< All_Partition > :: LevelIterator
         Iterator;
 
         typedef typename Grid :: Traits :: template Codim< cd > :: Entity Entity;
-        typedef typename Grid :: Traits :: template Codim< cd > :: EntityPointer
-        EntityPointer;
 
         typedef typename Grid :: template Codim< cd > :: Geometry Geometry;
         typedef typename Grid :: template Codim< cd > :: LocalGeometry
@@ -71,11 +69,11 @@ namespace Dune
 
 
     /** \brief Implementation class of LevelGridViews for UGGrid */
-    template< class GridImp, PartitionIteratorType pitype >
+    template< class GridImp>
     class UGGridLevelGridView
     {
     public:
-      typedef UGGridLevelGridViewTraits<GridImp,pitype> Traits;
+      typedef UGGridLevelGridViewTraits<GridImp> Traits;
 
       /** \brief type of the grid */
       typedef typename Traits::Grid Grid;
@@ -132,7 +130,7 @@ namespace Dune
       template< int cd >
       typename Codim< cd > :: Iterator begin () const
       {
-        return grid().template lbegin< cd, pitype >( level_ );
+        return grid().template lbegin< cd, All_Partition >( level_ );
       }
 
       /** \brief obtain begin iterator for this view */
@@ -146,7 +144,7 @@ namespace Dune
       template< int cd >
       typename Codim< cd > :: Iterator end () const
       {
-        return grid().template lend< cd, pitype >( level_ );
+        return grid().template lend< cd, All_Partition >( level_ );
       }
 
       /** \brief obtain end iterator for this view */
@@ -204,12 +202,12 @@ namespace Dune
     };
 
 
-    template< class GridImp, PartitionIteratorType pitype >
+    template< class GridImp>
     struct UGGridLeafGridViewTraits {
-      typedef UGGridLeafGridView< GridImp, pitype > GridViewImp;
+      typedef UGGridLeafGridView< GridImp > GridViewImp;
 
       /** \brief type of the grid */
-      typedef typename remove_const<GridImp>::type Grid;
+      typedef typename std::remove_const<GridImp>::type Grid;
 
       /** \brief type of the index set */
       typedef typename Grid :: Traits :: LeafIndexSet IndexSet;
@@ -228,12 +226,10 @@ namespace Dune
       struct Codim
       {
         typedef typename Grid :: Traits
-        :: template Codim< cd > :: template Partition< pitype > :: LeafIterator
+        :: template Codim< cd > :: template Partition< All_Partition > :: LeafIterator
         Iterator;
 
         typedef typename Grid :: Traits :: template Codim< cd > :: Entity Entity;
-        typedef typename Grid :: Traits :: template Codim< cd > :: EntityPointer
-        EntityPointer;
 
         typedef typename Grid :: template Codim< cd > :: Geometry Geometry;
         typedef typename Grid :: template Codim< cd > :: LocalGeometry
@@ -255,11 +251,11 @@ namespace Dune
 
 
     /** \brief Implementation class of LeafGridViews for UGGrid */
-    template< class GridImp, PartitionIteratorType pitype >
+    template< class GridImp >
     class UGGridLeafGridView
     {
     public:
-      typedef UGGridLeafGridViewTraits<GridImp,pitype> Traits;
+      typedef UGGridLeafGridViewTraits<GridImp> Traits;
 
       /** \brief type of the grid */
       typedef typename Traits::Grid Grid;
@@ -316,7 +312,7 @@ namespace Dune
       template< int cd >
       typename Codim< cd > :: Iterator begin () const
       {
-        return grid().template leafbegin< cd, pitype >();
+        return grid().template leafbegin< cd, All_Partition >();
       }
 
       /** \brief obtain begin iterator for this view */
@@ -330,7 +326,7 @@ namespace Dune
       template< int cd >
       typename Codim< cd > :: Iterator end () const
       {
-        return grid().template leafend< cd, pitype >();
+        return grid().template leafend< cd, All_Partition >();
       }
 
       /** \brief obtain end iterator for this view */

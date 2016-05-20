@@ -1,15 +1,61 @@
-#
 # This module first tests for UG and then sets the necessary flags
 # and config.h defines. If UG is found UG_FOUND will be true.
 #
-# Provides the following function:
+# .. cmake_module::
 #
-# add_dune_ug_flags(<target1> [<target2> ...] [SOURCE_ONLY] [OBJECT])
+#    Checks for presence and usability of the UG library.
 #
-# This functions sets the necessary flags for a program that uses UG.
-# The option SOURCE_ONLY indicates that the targets are source files.
-# The option OBJECT indicates that the targets are object libraries.
+#    You may set the following variables to configure this module:
 #
+#    :ref:`UG_ROOT`
+#       Path list to search for UG
+#
+#    This module sets the following variables:
+#
+#    :code:`UG_FOUND`
+#       True if the UG library was found
+#
+#    :code:`UG_VERSION`
+#       The version string of the found UG library
+#
+#    :code:`UG_INCLUDES`
+#       The include directories needed or UG
+#
+#    :code:`UG_LIBRARIES`
+#       The libraries, UG needs to link to
+#
+#    .. note::
+#       This module is not called `FindUG`, because UG does ship the module
+#       of that name and we would otherwise shadow that one.
+#
+# .. cmake_variable:: UG_ROOT
+#
+#    You may set this variable to have :ref:`UseUG` look
+#    for the UG package in the given path before inspecting
+#    system paths.
+#
+# .. cmake_function:: add_dune_ug_flags
+#
+#    .. cmake_param:: targets
+#       :single:
+#       :positional:
+#       :required:
+#
+#       The targets to add the UG flags to.
+#
+#    .. cmake_param:: SOURCE_ONLY
+#       :option:
+#
+#       TODO doc me
+#       old doc: indicates that the targets are source files.
+#
+#    .. cmake_param:: OBJECT
+#       :option:
+#
+#       TODO doc me
+#       old doc: indicates that the targets are object libraries.
+#
+
 if(UG_ROOT AND NOT UG_DIR)
   # define the directory where the config file resides
   if(EXISTS "${UG_ROOT}/lib/cmake/ug/ug-config.cmake")
@@ -39,6 +85,11 @@ if(UG_FOUND)
   # parse patch level: last number in UG version string is DUNE patch level
   string(REGEX MATCH "[0-9]*$" UG_DUNE_PATCHLEVEL ${UG_VERSION})
 
+  if (UG_VERSION VERSION_GREATER 3.13.0
+      OR UG_VERSION VERSION_EQUAL 3.13.0)
+    list(APPEND UG_DEFINITIONS "UG_USE_NEW_DIMENSION_DEFINES")
+  endif()
+
   dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE UGGRID ASSERTION GRIDDIM == WORLDDIM
       DUNETYPE "Dune::UGGrid< dimgrid >"
       HEADERS dune/grid/uggrid.hh dune/grid/io/file/dgfparser/dgfug.hh)
@@ -62,9 +113,9 @@ if(UG_FOUND)
   endforeach(lib ugS2 ugS3 devS)
 
   # register all UG related flags
-  set(UG_DEFINITIONS "ENABLE_UG=1")
+  list(APPEND UG_DEFINITIONS "ENABLE_UG=1")
   if(UG_PARALLEL STREQUAL "yes")
-    set(UG_DEFINITIONS "ENABLE_UG=1;ModelP")
+    list(APPEND UG_DEFINITIONS "ModelP")
   endif()
   dune_register_package_flags(COMPILE_DEFINITIONS "${UG_DEFINITIONS}"
                               INCLUDE_DIRS "${UG_INCLUDES}"
@@ -117,6 +168,12 @@ function(add_dune_ug_flags)
     set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS}
       APPEND PROPERTY
       COMPILE_DEFINITIONS ENABLE_UG)
+    if (UG_VERSION VERSION_GREATER 3.13.0
+        OR UG_VERSION VERSION_EQUAL 3.13.0)
+      set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS}
+        APPEND PROPERTY
+        COMPILE_DEFINITIONS UG_USE_NEW_DIMENSION_DEFINES)
+    endif()
     # Add linker arguments
     if(NOT (ADD_UG_SOURCE_ONLY OR ADD_UG_OBJECT))
       if(NOT ADD_UG_NO_LINK_DUNEGRID)

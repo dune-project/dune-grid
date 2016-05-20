@@ -4,7 +4,6 @@
 #define DUNE_ONE_D_GRID_ENTITY_SEED_HH
 
 #include "onedgridentity.hh"
-#include <dune/common/nullptr.hh>
 
 /** \file
  *  \brief Implementation of EntitySeed for the OneDGrid grid manager

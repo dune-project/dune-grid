@@ -10,14 +10,17 @@
 
 #if HAVE_ALBERTA || DOXYGEN
 
-#include <iostream>
-#include <fstream>
+#include <cassert>
+#include <cstddef>
 
 #include <algorithm>
-#include <cassert>
+#include <iostream>
+#include <fstream>
+#include <memory>
 #include <vector>
 
 // Dune includes
+#include <dune/common/deprecated.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 #include <dune/common/stdstreams.hh>
@@ -31,9 +34,6 @@
 //- Local includes
 // some cpp defines and include of alberta.h
 #include "albertaheader.hh"
-
-// grape data io
-#include <dune/grid/utility/grapedataioformattypes.hh>
 
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/capabilities.hh>
@@ -145,8 +145,8 @@ namespace Dune
 
     template< int, int, class > friend class AlbertaGridEntity;
     template< int, class > friend class AlbertaGridEntityPointer;
-    template< class, PartitionIteratorType > friend class AlbertaLevelGridView;
-    template< class, PartitionIteratorType > friend class AlbertaLeafGridView;
+    template< class > friend class AlbertaLevelGridView;
+    template< class > friend class AlbertaLeafGridView;
 
     friend class GridFactory< This >;
     friend struct DGFGridFactory< This >;
@@ -302,8 +302,8 @@ namespace Dune
      *  \param[in]  projection  shared pointer to a global boundary projection (defaults to 0)
      */
     AlbertaGrid ( const Alberta::MacroData< dimension > &macroData,
-                  const Dune::shared_ptr< DuneBoundaryProjection< dimensionworld > > &projection
-                    = Dune::shared_ptr< DuneBoundaryProjection< dimensionworld > >() );
+                  const std::shared_ptr< DuneBoundaryProjection< dimensionworld > > &projection
+                    = std::shared_ptr< DuneBoundaryProjection< dimensionworld > >() );
 
     template< class Proj, class Impl >
     AlbertaGrid ( const Alberta::MacroData< dimension > &macroData,
@@ -380,43 +380,23 @@ namespace Dune
     int size (GeometryType type) const;
 
     //! number of boundary segments within the macro grid
-    size_t numBoundarySegments () const
+    std::size_t numBoundarySegments () const
     {
       return numBoundarySegments_;
     }
 
-    //! View for a grid level
-    template< PartitionIteratorType pitype >
-    typename Traits::template Partition< pitype >::LevelGridView
-    levelGridView ( int level ) const
-    {
-      typedef typename Traits::template Partition< pitype >::LevelGridView View;
-      typedef typename View::GridViewImp ViewImp;
-      return View( ViewImp( *this, level ) );
-    }
-
-    //! View for the leaf grid
-    template< PartitionIteratorType pitype >
-    typename Traits::template Partition< pitype >::LeafGridView leafGridView () const
-    {
-      typedef typename Traits::template Partition< pitype >::LeafGridView View;
-      typedef typename View::GridViewImp ViewImp;
-      return View( ViewImp( *this ) );
-    }
-
     //! View for a grid level for All_Partition
-    typename Traits::template Partition< All_Partition >::LevelGridView
-    levelGridView ( int level ) const
+    typename Traits::LevelGridView levelGridView ( int level ) const
     {
-      typedef typename Traits::template Partition< All_Partition >::LevelGridView View;
+      typedef typename Traits::LevelGridView View;
       typedef typename View::GridViewImp ViewImp;
       return View( ViewImp( *this, level ) );
     }
 
     //! View for the leaf grid for All_Partition
-    typename Traits::template Partition< All_Partition >::LeafGridView leafGridView () const
+    typename Traits::LeafGridView leafGridView () const
     {
-      typedef typename Traits::template Partition< All_Partition >::LeafGridView View;
+      typedef typename Traits::LeafGridView View;
       typedef typename View::GridViewImp ViewImp;
       return View( ViewImp( *this ) );
     }
@@ -467,23 +447,6 @@ namespace Dune
       return s.str();
     }
 
-    /** \brief obtain EntityPointer from EntitySeed.
-     *
-     * \deprecated This method is deprecated and will be removed after the release of
-     *             dune-grid 2.4. Please use entity() instead, which will directly return
-     *             an Entity object that you can then store for later use. The EntityPointer
-     *             concept in general is deprecated and will not be available after
-     *             dune-grid 2.4 has been released.
-     */
-    template< class EntitySeed >
-    DUNE_DEPRECATED_MSG("entityPointer() is deprecated and will be removed after the release of dune-grid 2.4. Use entity() instead to directly obtain an Entity object.")
-    typename Traits::template Codim< EntitySeed::codimension >::EntityPointer
-    entityPointer ( const EntitySeed &seed ) const
-    {
-      typedef typename Traits::template Codim< EntitySeed::codimension >::EntityPointerImpl EntityPointerImpl;
-      return EntityPointerImpl( *this, this->getRealImplementation(seed).elementInfo( meshPointer() ), this->getRealImplementation(seed).subEntity() );
-    }
-
     /** \brief obtain Entity from EntitySeed. */
     template< class EntitySeed >
     typename Traits::template Codim< EntitySeed::codimension >::Entity
@@ -496,12 +459,10 @@ namespace Dune
     //**********************************************************
     // End of Interface Methods
     //**********************************************************
-    /** \brief write Grid to file in specified GrapeIOFileFormatType */
-    template< GrapeIOFileFormatType ftype >
+    /** \brief write Grid to file in Xdr */
     bool writeGrid( const std::string &filename, ctype time ) const;
 
     /** \brief read Grid from file filename and store time of mesh in time */
-    template< GrapeIOFileFormatType ftype >
     bool readGrid( const std::string &filename, ctype &time );
 
     // return hierarchic index set
@@ -567,10 +528,14 @@ namespace Dune
     }
 
     // write ALBERTA mesh file
-    bool writeGridXdr ( const std::string &filename, ctype time ) const;
+    bool
+    DUNE_DEPRECATED_MSG("Deprecated in Dune 3.0, use writeGrid instead.")
+    writeGridXdr ( const std::string &filename, ctype time ) const;
 
     //! reads ALBERTA mesh file
-    bool readGridXdr ( const std::string &filename, ctype &time );
+    bool
+    DUNE_DEPRECATED_MSG("Deprecated in Dune 3.0, use readGrid instead.")
+    readGridXdr ( const std::string &filename, ctype &time );
 
   private:
     using Base::getRealImplementation;

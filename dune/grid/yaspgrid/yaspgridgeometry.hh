@@ -13,7 +13,7 @@
 
    As of September 2014, the functionality of YaspGeometry is identical
    to that of AxisAlignedCubeGeometry. The latter cannot be used directly
-   due to the grid interface facade construction (it isnt templated to the
+   due to the grid interface facade construction (it isn't templated to the
    GridImp). As soon as template aliases are available, this header boils
    down to one line.
  */

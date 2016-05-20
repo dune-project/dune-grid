@@ -8,12 +8,12 @@
 #include <iomanip>
 #include <iterator>
 #include <list>
+#include <memory>
 #include <sstream>
 #include <string>
 
 #include <dune/common/parallel/mpiguard.hh>
 #include <dune/common/path.hh>
-#include <dune/common/shared_ptr.hh>
 
 #include <dune/geometry/referenceelements.hh>
 
@@ -41,7 +41,7 @@ namespace Dune
       typedef FunctionWriterBase<Cell> FunctionWriter;
 
     private:
-      typedef std::list<shared_ptr<FunctionWriter> > WriterList;
+      typedef std::list<std::shared_ptr<FunctionWriter> > WriterList;
       typedef typename WriterList::const_iterator WIterator;
 
       typedef typename Cell::Geometry::ctype ctype;
@@ -71,11 +71,11 @@ namespace Dune
       //  Methods for adding data
       //
 
-      void addCellData(const shared_ptr<FunctionWriter>& writer) {
+      void addCellData(const std::shared_ptr<FunctionWriter>& writer) {
         cellData.push_back(writer);
       }
 
-      void addPointData(const shared_ptr<FunctionWriter>& writer) {
+      void addPointData(const std::shared_ptr<FunctionWriter>& writer) {
         pointData.push_back(writer);
       }
 
@@ -394,7 +394,7 @@ namespace Dune
       {
         MPIGuard guard(factory.comm());
 
-        // do some magic because paraview can only cope with relative pathes to
+        // do some magic because paraview can only cope with relative paths to
         // piece files
         std::ofstream file;
         file.exceptions(std::ios_base::badbit | std::ios_base::failbit |

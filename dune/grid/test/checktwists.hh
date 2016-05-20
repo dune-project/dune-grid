@@ -53,16 +53,8 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
   const int tIn = mapTwist( intersection.twistInInside() );
   const int tOut = mapTwist( intersection.twistInOutside() );
 
-#if defined(DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE)
-  typedef typename Intersection::EntityPointer EntityPointer;
-  const EntityPointer ptrIn = intersection.inside();
-  const EntityPointer ptrOut = intersection.outside();
-  const Entity &entityIn = *ptrIn;
-  const Entity &entityOut = *ptrOut;
-#else
   const Entity entityIn = intersection.inside();
   const Entity entityOut = intersection.outside();
-#endif
 
   const Geometry &geoIn = entityIn.geometry();
   const Geometry &geoOut = entityOut.geometry();

@@ -1,177 +1,110 @@
-if(ALBERTA_FOUND)
-  set(ALBERTA_PROGRAMS
-    test-alberta
-    test-alberta-1-1
-    test-alberta-1-2
-    test-alberta-2-2
-    test-alberta-1-3
-    test-alberta-2-3
-    test-alberta-3-3
-    test-alberta-generic)
-endif(ALBERTA_FOUND)
+dune_add_test(SOURCES geometrygrid-coordfunction-copyconstructor.cc)
 
-if(ALUGRID_FOUND)
-  set(ALUGRID_PROGRAMS test-alugrid)
-endif(ALUGRID_FOUND)
+dune_add_test(SOURCES test-geogrid.cc
+              LINK_LIBRARIES dunegrid
+              COMPILE_DEFINITIONS COORDFUNCTION=IdenticalCoordFunction<double,2>
+                                  CACHECOORDFUNCTION=0
+                                  DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
+                                  GRIDDIM=2
+                                  WORLDDIM=2
+                                  YASPGRID)
+
+dune_add_test(SOURCES test-identitygrid.cc)
+
+dune_add_test(SOURCES test-oned.cc
+              LINK_LIBRARIES dunegrid)
+
+dune_add_test(SOURCES test-mcmg-geogrid.cc)
+
+dune_add_test(SOURCES test-yaspgrid.cc
+              COMPILE_DEFINITIONS GRIDDIM=2 WORLDDIM=2)
+
+dune_add_test(SOURCES testiteratorranges.cc)
+
+dune_add_test(SOURCES test-hierarchicsearch.cc)
 
 if(UG_FOUND)
-  set(UG_PROGRAMS
-    test-ug
-    test-parallel-ug)
+  dune_add_test(SOURCES test-ug.cc)
+
+  dune_add_test(SOURCES test-parallel-ug.cc)
+
+  dune_add_test(SOURCES test-loadbalancing.cc
+                SKIP_ON_77)
 endif(UG_FOUND)
 
-if(UG_FOUND AND ALUGRID_FOUND)
-  set(DGFALUGRID_UG_PROGRAMS test-dgfalu-uggrid-combination)
-endif(UG_FOUND AND ALUGRID_FOUND)
-set(GRIDDIM 2)
-set(WORLDDIM 2)
-
-#
-## Some parameters for the geogrid test
-#
-set(COORDFUNCTION "IdenticalCoordFunction<double,${GRIDDIM}>")
-# set(COORDFUNCTION "Helix")
-# set(COORDFUNCTION  "ThickHelix")
-# set(COORDFUNCTION "DGFCoordFunction\\<${GRIDDIM},${GRIDDIM}\\>")
-# set(COORDFUNCTION "DGFCoordFunction\\<2,3\\>")
-set(CACHECOORDFUNCTION 0)
-
-#
-## define the lists of tests to build and run
-#
-
-# tests where program to build and program to run are equal
-set(TESTS
-  test-geogrid test-identitygrid test-oned test-sgrid test-yaspgrid
-  ${ALBERTA_PROGRAMS} ${ALUGRID_PROGRAMS} ${UG_PROGRAMS}
-  ${DGFALUGRID_UG_PROGRAMS} test-mcmg-geogrid
-  testiteratorranges test-hierarchicsearch)
-
-set_property(DIRECTORY APPEND PROPERTY
-  COMPILE_DEFINITIONS "DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"")
-
-add_executable(test-geogrid EXCLUDE_FROM_ALL test-geogrid.cc)
-add_executable(test-identitygrid EXCLUDE_FROM_ALL test-identitygrid.cc)
-add_executable(test-oned EXCLUDE_FROM_ALL test-oned.cc)
-add_executable(test-mcmg-geogrid EXCLUDE_FROM_ALL test-mcmg-geogrid.cc)
-add_executable(test-sgrid EXCLUDE_FROM_ALL test-sgrid.cc)
-add_executable(test-yaspgrid EXCLUDE_FROM_ALL test-yaspgrid.cc)
-add_dune_mpi_flags(test-yaspgrid)
-
-set_property(TARGET test-sgrid test-oned test-yaspgrid test-geogrid APPEND
-  PROPERTY COMPILE_DEFINITIONS "GRIDDIM=${GRIDDIM}" "WORLDDIM=${GRIDDIM}" "YASPGRID")
-
-set_property(TARGET test-geogrid APPEND PROPERTY COMPILE_DEFINITIONS
-  COORDFUNCTION=${COORDFUNCTION} CACHECOORDFUNCTION=${CACHECOORDFUNCTION})
-
+# The alberta tests are only alibi-ported, until the  grid and world dimension
+# are configuretime parameters and we can treat alberta just as any other grid manager
+# - buildsystemwise. PLEASE DON'T LOOK AT THIS IF YOU WANT TO KNOW HOW TO WRITE TESTS.
 if(ALBERTA_FOUND)
   add_executable(test-alberta EXCLUDE_FROM_ALL test-alberta.cc)
-  add_dune_alberta_flags(test-alberta WORLDDIM ${GRIDDIM})
+  add_dune_alberta_flags(test-alberta WORLDDIM 2)
+  target_compile_definitions(test-alberta PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+  dune_add_test(TARGET test-alberta)
+
   add_executable(test-alberta-1-1 EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test-alberta-1-1 GRIDDIM 1 WORLDDIM 1)
+  target_compile_definitions(test-alberta-1-1 PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+  dune_add_test(TARGET test-alberta-1-1)
+
   add_executable(test-alberta-1-1-no-deprecated EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test-alberta-1-1-no-deprecated GRIDDIM 1 WORLDDIM 1)
-  set_property(TARGET test-alberta-1-1-no-deprecated APPEND PROPERTY COMPILE_DEFINITIONS
+  target_compile_definitions(test-alberta-1-1-no-deprecated PUBLIC
+    DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
     DISABLE_DEPRECATED_METHOD_CHECK=1)
+  dune_add_test(TARGET test-alberta-1-1-no-deprecated)
+
   add_executable(test-alberta-1-2 EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test-alberta-1-2 WORLDDIM 2)
+  target_compile_definitions(test-alberta-1-2 PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+  dune_add_test(TARGET test-alberta-1-2)
+
   add_executable(test-alberta-2-2 EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test-alberta-2-2 WORLDDIM 2)
+  target_compile_definitions(test-alberta-2-2 PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+  dune_add_test(TARGET test-alberta-2-2)
+
   add_executable(test-alberta-1-3 EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test-alberta-1-3 WORLDDIM 3)
+  target_compile_definitions(test-alberta-1-3 PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+  dune_add_test(TARGET test-alberta-1-3)
+
   add_executable(test-alberta-2-3 EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test-alberta-2-3 WORLDDIM 3)
+  target_compile_definitions(test-alberta-2-3 PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+  dune_add_test(TARGET test-alberta-2-3)
+
   add_executable(test-alberta-3-3 EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test-alberta-3-3 WORLDDIM 3)
+  target_compile_definitions(test-alberta-3-3 PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+  dune_add_test(TARGET test-alberta-3-3)
+
   add_executable(test-alberta-generic EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test-alberta-generic USE_GENERIC WORLDDIM 2)
+  target_compile_definitions(test-alberta-generic PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+  dune_add_test(TARGET test-alberta-generic)
 endif(ALBERTA_FOUND)
 
-if(ALUGRID_FOUND)
-  add_executable(test-alugrid EXCLUDE_FROM_ALL test-alugrid.cc)
-  add_dune_alugrid_flags(test-alugrid)
-endif(ALUGRID_FOUND)
-
-if(UG_FOUND)
-  add_executable(test-ug EXCLUDE_FROM_ALL test-ug.cc)
-  add_dune_ug_flags(test-ug)
-  add_executable(test-parallel-ug EXCLUDE_FROM_ALL test-parallel-ug.cc)
-  add_dune_ug_flags(test-parallel-ug)
-  # test-loadbalancing
-  add_executable(test-loadbalancing EXCLUDE_FROM_ALL test-loadbalancing.cc)
-  add_dune_ug_flags(test-loadbalancing)
-  add_dune_parmetis_flags(test-loadbalancing)
-endif(UG_FOUND)
-
-if(ALUGRID_FOUND AND UG_FOUND)
-  add_executable(test-dgfalu-uggrid-combination EXCLUDE_FROM_ALL test-dgfalu-uggrid-combination.cc)
-  add_dune_ug_flags(test-dgfalu-uggrid-combination)
-  add_dune_alugrid_flags(test-dgfalu-uggrid-combination)
-endif(ALUGRID_FOUND AND UG_FOUND)
-
-add_executable(testiteratorranges EXCLUDE_FROM_ALL testiteratorranges.cc)
-add_dune_mpi_flags(testiteratorranges)
-
-add_executable(test-hierarchicsearch EXCLUDE_FROM_ALL test-hierarchicsearch.cc)
-add_dune_mpi_flags(test-hierarchicsearch)
-
-
-# tell gridcheck to use old entity and intersections interface for unported grids
-set_property(TARGET
-  ${ALUGRID_PROGRAMS}
-  APPEND PROPERTY COMPILE_DEFINITIONS "DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE"
-  )
-
-
-foreach(_exe ${TESTS})
-  target_link_libraries(${_exe} "dunegrid" ${DUNE_LIBS})
-  add_test(${_exe} ${_exe})
-endforeach(_exe ${TESTS})
-
-# We do not want want to build the tests during make all,
-# but just build them on demand
-add_directory_test_target(_test_target)
-add_dependencies(${_test_target} ${TESTS})
-
-# define HAVE_DUNE_GRID for the dgfparser
-set_property(TARGET ${TESTS} APPEND PROPERTY
-  COMPILE_DEFINITIONS HAVE_DUNE_GRID=1)
-
-set(SOURCES
-  basicunitcube.hh
-  check-albertareader.cc
-  check-albertareader.hh
-  checkadaptation.cc
-  checkadaptation.hh
-  checkcommunicate.cc
-  checkcommunicate.hh
-  checkentitylifetime.hh
-  checkentityseed.cc
-  checkentityseed.hh
-  checkgeometry.cc
-  checkgeometry.hh
-  checkgeometryinfather.cc
-  checkgeometryinfather.hh
-  checkindexset.cc
-  checkindexset.hh
-  checkintersectionit.cc
-  checkintersectionit.hh
-  checkintersectionlifetime.hh
-  checkiterators.cc
-  checkiterators.hh
-  checkjacobians.cc
-  checkjacobians.hh
-  checkpartition.cc
-  checkpartition.hh
-  checktwists.cc
-  checktwists.hh
-  functions.hh
-  gridcheck.cc
-  gridcheck.hh
-  staticcheck.hh)
-
-# install the tests as we want to support testing 3rdparty grids with installed dune-grid
-install(FILES ${SOURCES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/test)
+# install the test tools as we want to support testing 3rdparty grids with installed dune-grid
+install(FILES basicunitcube.hh
+              check-albertareader.hh
+              checkadaptation.hh
+              checkcommunicate.hh
+              checkentitylifetime.hh
+              checkentityseed.hh
+              checkgeometry.hh
+              checkgeometryinfather.hh
+              checkgridfactory.hh
+              checkindexset.hh
+              checkintersectionit.hh
+              checkintersectionlifetime.hh
+              checkiterators.hh
+              checkjacobians.hh
+              checkpartition.hh
+              checktwists.hh
+              functions.hh
+              gridcheck.hh
+              staticcheck.hh
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/test)
 
 # clean up additional files during make clean. Unfortunately it is not possible with
 # cmake to use search patterns here. Automake wanted to clean the following files:

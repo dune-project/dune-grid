@@ -10,18 +10,17 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <memory>
 
 #include <vector>
 #include <list>
 
-#include <dune/common/deprecated.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/std/memory.hh>
 #include <dune/common/indent.hh>
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/path.hh>
-#include <dune/common/shared_ptr.hh>
 #include <dune/geometry/referenceelements.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/common/gridenums.hh>
@@ -47,9 +46,33 @@
 
 namespace Dune
 {
+
+  namespace detail {
+
+    template<typename F, typename = int>
+    struct _has_local_context
+      : public std::false_type
+    {};
+
+    template<typename T>
+    struct _has_local_context<T,typename std::enable_if<(sizeof(std::declval<T>().localContext()) > 0),int>::type>
+      : public std::true_type
+    {};
+
+  }
+
+  namespace VTKWriteTypeTraits {
+    template<typename T>
+    struct IsLocalFunction
+    {
+    };
+  }
+
   // Forward-declaration here, so the class can be friend of VTKWriter
   template <class GridView>
   class VTKSequenceWriterBase;
+  template <class GridView>
+  class VTKSequenceWriter;
 
   /**
    * @brief Writer for the ouput of grid functions in the vtk format.
@@ -65,6 +88,8 @@ namespace Dune
     // VTKSequenceWriterBase needs getSerialPieceName
     // and getParallelHeaderName
     friend class VTKSequenceWriterBase<GridView>;
+    // VTKSequenceWriter needs the grid view, to get the MPI size and rank
+    friend class VTKSequenceWriter<GridView>;
 
     // extract types
     typedef typename GridView::Grid Grid;
@@ -111,7 +136,6 @@ namespace Dune
   public:
 
     typedef Dune::VTKFunction< GridView > VTKFunction;
-    typedef shared_ptr< const VTKFunction > VTKFunctionPtr;
 
   protected:
 
@@ -131,10 +155,10 @@ namespace Dune
       {
 
         //! Bind data set to grid entity - must be called before evaluating (i.e. calling write())
-        virtual void bind(const Entity& e) const = 0;
+        virtual void bind(const Entity& e) = 0;
 
         //! Unbind data set from current grid entity - mostly here for performance and symmetry reasons
-        virtual void unbind() const = 0;
+        virtual void unbind() = 0;
 
         //! Evaluate data set at local position pos inside the current entity and write result to w.
         /**
@@ -152,18 +176,19 @@ namespace Dune
       struct FunctionWrapper
         : public FunctionWrapperBase
       {
+        using Function = typename std::decay<F>::type;
 
         template<typename F_>
         FunctionWrapper(F_&& f)
           : _f(std::forward<F_>(f))
         {}
 
-        virtual void bind(const Entity& e) const
+        virtual void bind(const Entity& e)
         {
           _f.bind(e);
         }
 
-        virtual void unbind() const
+        virtual void unbind()
         {
           _f.unbind();
         }
@@ -191,24 +216,24 @@ namespace Dune
           w.write(r);
         }
 
-        F _f;
+        Function _f;
       };
 
       //! Type erasure implementation for legacy VTKFunctions.
       struct VTKFunctionWrapper
         : public FunctionWrapperBase
       {
-        VTKFunctionWrapper(const VTKFunctionPtr& f)
+        VTKFunctionWrapper(const std::shared_ptr< const VTKFunction >& f)
           : _f(f)
           , _entity(nullptr)
         {}
 
-        virtual void bind(const Entity& e) const
+        virtual void bind(const Entity& e)
         {
           _entity = &e;
         }
 
-        virtual void unbind() const
+        virtual void unbind()
         {
           _entity = nullptr;
         }
@@ -221,20 +246,31 @@ namespace Dune
 
       private:
 
-        VTKFunctionPtr _f;
-        mutable const Entity* _entity;
+        std::shared_ptr< const VTKFunction > _f;
+        const Entity* _entity;
 
       };
 
       //! Construct a VTKLocalFunction for a dune-functions style LocalFunction
       template<typename F>
-      VTKLocalFunction(F&& f, VTK::FieldInfo fieldInfo)
+      VTKLocalFunction(F&& f, VTK::FieldInfo fieldInfo,
+        typename std::enable_if<detail::_has_local_context<F>::value,int>::type dummy = 0)
         : _f(Dune::Std::make_unique<FunctionWrapper<F> >(std::forward<F>(f)))
         , _fieldInfo(fieldInfo)
       {}
 
+      //! Construct a VTKLocalFunction for a dune-functions style Function
+      template<typename F>
+      VTKLocalFunction(F&& f, VTK::FieldInfo fieldInfo,
+        typename std::enable_if<not detail::_has_local_context<F>::value,int>::type dummy = 0)
+        : _f(Dune::Std::make_unique< FunctionWrapper<
+          typename std::decay<decltype(localFunction(std::forward<F>(f)))>::type
+          > >(localFunction(std::forward<F>(f))))
+        , _fieldInfo(fieldInfo)
+      {}
+
       //! Construct a VTKLocalFunction for a legacy VTKFunction
-      explicit VTKLocalFunction (const VTKFunctionPtr& vtkFunctionPtr)
+      explicit VTKLocalFunction (const std::shared_ptr< const VTKFunction >& vtkFunctionPtr)
         : _f(Dune::Std::make_unique<VTKFunctionWrapper>(vtkFunctionPtr))
         , _fieldInfo(
           vtkFunctionPtr->name(),
@@ -545,9 +581,9 @@ namespace Dune
 
     /**
      * @brief Add a grid function that lives on the cells of the grid to the visualization.
-     * @param p Dune::shared_ptr to the function to visualize
+     * @param p std::shared_ptr to the function to visualize
      */
-    void addCellData (const VTKFunctionPtr & p)
+    void addCellData (const std::shared_ptr< const VTKFunction > & p)
     {
       celldata.push_back(VTKLocalFunction(p));
     }
@@ -559,20 +595,10 @@ namespace Dune
     }
 
     /**
-     * @brief Add a grid function that lives on the cells of the grid to the visualization.
-     * @param p The function to visualize.  The VTKWriter object will take
-     *          ownership of the VTKFunction *p and delete it when it's done.
-     */
-    void addCellData (VTKFunction* p) DUNE_DEPRECATED_MSG("Don't pass raw pointers, use the version with shared_ptr")
-    {
-      celldata.push_back(VTKLocalFunction(VTKFunctionPtr(p)));
-    }
-
-    /**
      * @brief Add a grid function (represented by container) that lives on the cells of
      * the grid to the visualization.
      *
-     * The container has to have random access via operator[] (e. g. std::vector). The
+     * The container has to have random access via operator[] (e.g. std::vector). The
      * value of the grid function for an arbitrary element
      * will be accessed by calling operator[] with the index (corresponding
      * to the index from the MGMC mapper on the grid view) of the element.
@@ -583,35 +609,25 @@ namespace Dune
      * @param name A name to identify the grid function.
      * @param ncomps Number of components (default is 1).
      */
-    template<class V>
-    void addCellData (const V& v, const std::string &name, int ncomps = 1)
+    template<class Container>
+    void addCellData (const Container& v, const std::string &name, int ncomps = 1)
     {
-      typedef P0VTKFunction<GridView, V> Function;
+      typedef P0VTKFunction<GridView, Container> Function;
       for (int c=0; c<ncomps; ++c) {
         std::stringstream compName;
         compName << name;
         if (ncomps>1)
           compName << "[" << c << "]";
         VTKFunction* p = new Function(gridView_, v, compName.str(), ncomps, c);
-        addCellData(VTKFunctionPtr(p));
+        addCellData(std::shared_ptr< const VTKFunction >(p));
       }
     }
 
     /**
      * @brief Add a grid function that lives on the vertices of the grid to the visualization.
-     * @param p The function to visualize.  The VTKWriter object will take
-     *          ownership of the VTKFunction *p and delete it when it's done.
+     * @param p std::shared_ptr to the function to visualize
      */
-    void addVertexData (VTKFunction* p) DUNE_DEPRECATED_MSG("Don't pass raw pointers, use the version with shared_ptr")
-    {
-      vertexdata.push_back(VTKLocalFunction(VTKFunctionPtr(p)));
-    }
-
-    /**
-     * @brief Add a grid function that lives on the vertices of the grid to the visualization.
-     * @param p Dune::shared_ptr to the function to visualize
-     */
-    void addVertexData (const VTKFunctionPtr & p)
+    void addVertexData (const std::shared_ptr< const VTKFunction > & p)
     {
       vertexdata.push_back(VTKLocalFunction(p));
     }
@@ -627,7 +643,7 @@ namespace Dune
      * @brief Add a grid function (represented by container) that lives on the vertices of the
      * grid to the visualization output.
      *
-     * The container has to have random access via operator[] (e. g. std::vector). The value
+     * The container has to have random access via operator[] (e.g. std::vector). The value
      * of the grid function for an arbitrary element
      * will be accessed by calling operator[] with the index (corresponding
      * to the index from the MGMC mapper on the grid view) of the vertex.
@@ -638,17 +654,17 @@ namespace Dune
      * @param name A name to identify the grid function.
      * @param ncomps Number of components (default is 1).
      */
-    template<class V>
-    void addVertexData (const V& v, const std::string &name, int ncomps=1)
+    template<class Container>
+    void addVertexData (const Container& v, const std::string &name, int ncomps=1)
     {
-      typedef P1VTKFunction<GridView, V> Function;
+      typedef P1VTKFunction<GridView, Container> Function;
       for (int c=0; c<ncomps; ++c) {
         std::stringstream compName;
         compName << name;
         if (ncomps>1)
           compName << "[" << c << "]";
         VTKFunction* p = new Function(gridView_, v, compName.str(), ncomps, c);
-        addVertexData(VTKFunctionPtr(p));
+        addVertexData(std::shared_ptr< const VTKFunction >(p));
       }
     }
 
@@ -695,7 +711,7 @@ namespace Dune
      *                   piece as well as the parallel collection file.
      * \param path       Directory where to put the parallel collection
      *                   (.pvtu/.pvtp) file.  If it is relative, it is taken
-     *                   realtive to the current directory.
+     *                   relative to the current directory.
      * \param extendpath Directory where to put the piece file (.vtu/.vtp) of
      *                   this process.  If it is relative, it is taken
      *                   relative to the directory denoted by path.
@@ -882,7 +898,7 @@ namespace Dune
       // make data mode visible to private functions
       outputtype=ot;
 
-      // do some magic because paraview can only cope with relative pathes to piece files
+      // do some magic because paraview can only cope with relative paths to piece files
       std::ofstream file;
       file.exceptions(std::ios_base::badbit | std::ios_base::failbit |
                       std::ios_base::eofbit);
@@ -1146,7 +1162,7 @@ namespace Dune
           case VTK::FieldInfo::Type::tensor:
             DUNE_THROW(NotImplemented,"VTK output for tensors not implemented yet");
           }
-        shared_ptr<VTK::DataArrayWriter<float> > p
+        std::shared_ptr<VTK::DataArrayWriter<float> > p
           (writer.makeArrayWriter<float>(f.name(), writecomps, nentries));
         if(!p->writeIsNoop())
           for (Iterator eit = begin; eit!=end; ++eit)
@@ -1196,7 +1212,7 @@ namespace Dune
     {
       writer.beginPoints();
 
-      shared_ptr<VTK::DataArrayWriter<float> > p
+      std::shared_ptr<VTK::DataArrayWriter<float> > p
         (writer.makeArrayWriter<float>("Coordinates", 3, nvertices));
       if(!p->writeIsNoop()) {
         VertexIterator vEnd = vertexEnd();
@@ -1222,7 +1238,7 @@ namespace Dune
 
       // connectivity
       {
-        shared_ptr<VTK::DataArrayWriter<int> > p1
+        std::shared_ptr<VTK::DataArrayWriter<int> > p1
           (writer.makeArrayWriter<int>("connectivity", 1, ncorners));
         if(!p1->writeIsNoop())
           for (CornerIterator it=cornerBegin(); it!=cornerEnd(); ++it)
@@ -1231,7 +1247,7 @@ namespace Dune
 
       // offsets
       {
-        shared_ptr<VTK::DataArrayWriter<int> > p2
+        std::shared_ptr<VTK::DataArrayWriter<int> > p2
           (writer.makeArrayWriter<int>("offsets", 1, ncells));
         if(!p2->writeIsNoop()) {
           int offset = 0;
@@ -1246,7 +1262,7 @@ namespace Dune
       // types
       if (n>1)
       {
-        shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
+        std::shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
           (writer.makeArrayWriter<unsigned char>("types", 1, ncells));
         if(!p3->writeIsNoop())
           for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)

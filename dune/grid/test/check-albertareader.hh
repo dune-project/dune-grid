@@ -39,7 +39,7 @@ template< class Grid >
 void checkAlbertaReader ()
 {
   std::cerr << "Warning: Skipping AlbertaReader check, "
-            << "because ALBERTA 2.0 or newer is not available." << std::endl;
+            << "because ALBERTA is not available." << std::endl;
 }
 
 #endif // #if HAVE_ALBERTA

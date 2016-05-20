@@ -8,6 +8,8 @@
  * \brief The UGGrid class
  */
 
+#include <memory>
+
 #include <dune/common/classname.hh>
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/exceptions.hh>
@@ -24,16 +26,19 @@
 #include <dune/common/parallel/mpicollectivecommunication.hh>
 #endif
 
-/* The following lines including the necessary UG headers are somewhat
+/* [Before reading the following: the macros UG_DIM_2 and UG_DIM_3 where named
+ *  _2 and _3, respectively, up until ug-3.12.0.]
+ *
+ * The following lines including the necessary UG headers are somewhat
    tricky.  Here's what's happening:
-   UG can support two- and three-dimensional grids.  You choose be setting
-   either _2 oder _3 while compiling.  This changes all sorts of stuff, in
+   UG can support two- and three-dimensional grids.  You choose by setting
+   either UG_DIM_2 or UG_DIM_3 while compiling.  This changes all sorts of stuff, in
    particular data structures in the headers.
    UG was never supposed to provide 2d and 3d grids at the same time.
    However, when compiling it as c++, the dimension-dependent parts are
    wrapped up cleanly in the namespaces UG::D2 and UG::D3, respectively.  That
    way it is possible to link together the UG lib for 2d and the one for 3d.
-   But we also need the headers twice!  Once with _2 set and once with _3!
+   But we also need the headers twice!  Once with UG_DIM_2 set and once with UG_DIM_3!
    So here we go:*/
 
 /* The following define tells the UG headers that we want access to a few
@@ -41,7 +46,11 @@
 #define FOR_DUNE
 
 // Set UG's space-dimension flag to 2d
+#ifdef UG_USE_NEW_DIMENSION_DEFINES
+#define UG_DIM_2
+#else
 #define _2
+#endif
 // And include all necessary UG headers
 #include "uggrid/ugincludes.hh"
 
@@ -54,7 +63,11 @@
 // UG defines a whole load of preprocessor macros.  ug_undefs.hh undefines
 // them all, so we don't get name clashes.
 #include "uggrid/ug_undefs.hh"
+#ifdef UG_USE_NEW_DIMENSION_DEFINES
+#undef UG_DIM_2
+#else
 #undef _2
+#endif
 
 /* Now we're done with 2d, and we can do the whole thing over again for 3d */
 
@@ -72,7 +85,12 @@
 #define __PPIF__
 #endif
 
+#ifdef UG_USE_NEW_DIMENSION_DEFINES
+#define UG_DIM_3
+#else
 #define _3
+#endif
+
 #include "uggrid/ugincludes.hh"
 
 // Wrap a few large UG macros by functions before they get undef'ed away.
@@ -84,7 +102,11 @@
 // undef all macros defined by UG
 #include "uggrid/ug_undefs.hh"
 
+#ifdef UG_USE_NEW_DIMENSION_DEFINES
+#undef UG_DIM_3
+#else
 #undef _3
+#endif
 #undef FOR_DUNE
 
 // The components of the UGGrid interface
@@ -137,7 +159,6 @@ namespace Dune {
     typedef GridTraits<dim,dim,Dune::UGGrid<dim>,
         UGGridGeometry,
         UGGridEntity,
-        UGGridEntityPointer,
         UGGridLevelIterator,
         UGGridLeafIntersection,
         UGGridLevelIntersection,
@@ -224,9 +245,9 @@ namespace Dune {
     friend class UGGridLevelIndexSet<const UGGrid<dim> >;
     friend class UGGridLeafIndexSet<const UGGrid<dim> >;
     friend class UGGridIdSet<const UGGrid<dim> >;
-    template <class GridImp_, PartitionIteratorType PiType_>
+    template <class GridImp_>
     friend class UGGridLeafGridView;
-    template <class GridImp_, PartitionIteratorType PiType_>
+    template <class GridImp_>
     friend class UGGridLevelGridView;
 
     friend class GridFactory<UGGrid<dim> >;
@@ -271,7 +292,7 @@ namespace Dune {
     UGGrid();
 
     //! Destructor
-    ~UGGrid();
+    ~UGGrid()  noexcept(false);
 
     //! Return maximum level defined in this grid. Levels are numbered
     //! 0 ... maxlevel with 0 the coarsest level.
@@ -315,16 +336,6 @@ namespace Dune {
     template<int codim, PartitionIteratorType PiType>
     typename Traits::template Codim<codim>::template Partition<PiType>::LeafIterator leafend() const {
       return UGGridLeafIterator<codim,PiType, const UGGrid<dim> >();
-    }
-
-    /** \brief Create an EntityPointer from an EntitySeed */
-    template <typename Seed>
-    DUNE_DEPRECATED_MSG("entityPointer() is deprecated and will be removed after the release of dune-grid 2.4. Use entity() instead to directly obtain an Entity object.")
-    typename Traits::template Codim<Seed::codimension>::EntityPointer
-    entityPointer(const Seed& seed) const
-    {
-      enum {codim = Seed::codimension};
-      return typename Traits::template Codim<codim>::EntityPointer(UGGridEntityPointer<codim,const UGGrid<dim> >(this->getRealImplementation(seed).target(),this));
     }
 
     /** \brief Create an Entity from an EntitySeed */
@@ -410,7 +421,7 @@ namespace Dune {
 
     /** \brief Mark method accepting a UG refinement rule
 
-       \param e Pointer to the element to be marked for refinement
+       \param e element to be marked for refinement
        \param rule One of the UG refinement rules
        \param side If rule==UG::%D2::%BLUE (one quadrilateral is split into two rectangles)
        you can choose the orientation of the cut by setting side==0 or side==1
@@ -434,7 +445,6 @@ namespace Dune {
        - NO_REFINEMENT
        - COPY
        - RED
-       - BLUE
        - COARSE
 
        - TETRA_RED_HEX
@@ -613,8 +623,8 @@ namespace Dune {
 
     /** \brief The communication interface for all codims on a given level
        @param dataHandle type used to gather/scatter data in and out of the message buffer
-       @param iftype one of the predifined interface types, throws error if it is not implemented
-       @param dir choose beetween forward and backward communication
+       @param iftype one of the predefined interface types, throws error if it is not implemented
+       @param dir choose between forward and backward communication
        @param level communicate for entities on the given level
 
        Implements a generic communication function sending an object of type P for each entity
@@ -649,8 +659,8 @@ namespace Dune {
 
     /** \brief The communication interface for all codims on the leaf level
        @param dataHandle type used to gather/scatter data in and out of the message buffer
-       @param iftype one of the predifined interface types, throws error if it is not implemented
-       @param dir choose beetween forward and backward communication
+       @param iftype one of the predefined interface types, throws error if it is not implemented
+       @param dir choose between forward and backward communication
 
        Implements a generic communication function sending an object of type P for each entity
        in the intersection of two processors. P has two methods gather and scatter that implement
@@ -828,45 +838,6 @@ namespace Dune {
     // End of Interface Methods
     // **********************************************************
 
-#ifdef DOXYGEN
-
-    /** \brief Rudimentary substitute for a hierarchic iterator on faces
-        \param e, elementSide Grid face specified by an element and one of its sides
-        \param maxl The finest level that should be traversed by the iterator
-        \param[out] childElements For each subface: element index, elementSide, and level
-        \param[out] childElementSides Indices for transformation because Dune numbers the
-                                      faces of several elements differently than UG
-
-        \deprecated This method is deprecated and will be removed after the release of Dune
-                    2.4. Please use the corresponding method that uses entities instead of
-                    EntityPointers.
-     */
-    void getChildrenOfSubface(const typename Traits::template Codim<0>::EntityPointer & e,
-                              int elementSide,
-                              int maxl,
-                              std::vector<typename Traits::template Codim<0>::EntityPointer>& childElements,
-                              std::vector<unsigned char>& childElementSides) const;
-
-#else
-
-    // This is the actual implementation of the deprecated method. We need this ugly trick of turning
-    // it into a template to avoid triggering a deprecation warning every time UGGrid is used.
-    template< typename T >
-    DUNE_DEPRECATED_MSG("This version of getChildrenOfSubface() uses EntityPointer and is deprecated. It will be removed after the release of Dune 2.4. Please use the new version with entities instead.")
-    typename std::enable_if<
-      std::is_same<
-        T,
-        typename UGGrid<dim>::Traits::template Codim<0>::EntityPointer
-        >::value
-      >::type
-    getChildrenOfSubface(const T & e,
-                         int elementSide,
-                         int maxl,
-                         std::vector<typename Traits::template Codim<0>::EntityPointer>& childElements,
-                         std::vector<unsigned char>& childElementSides) const;
-
-#endif
-
     /** \brief Rudimentary substitute for a hierarchic iterator on faces
         \param e, elementSide Grid face specified by an element and one of its sides
         \param maxl The finest level that should be traversed by the iterator
@@ -916,36 +887,6 @@ namespace Dune {
       heapSize_ = size;
     }
 
-#ifdef DOXYGEN
-
-    /** \brief Sets a vertex to a new position
-
-        Changing a vertex' position changes its position on all grid levels!
-
-        \deprecated This method is deprecated and will be removed after the release of Dune
-                    2.4. Please use the corresponding method that uses entities instead of
-                    EntityPointers.
-    */
-    void setPosition(const typename Traits::template Codim<dim>::EntityPointer& e,
-                     const FieldVector<double, dim>& pos);
-
-#else
-
-    // This is the actual implementation of the deprecated method. We need this ugly trick of turning
-    // it into a template to avoid triggering a deprecation warning every time UGGrid is used.
-    template< typename T >
-    DUNE_DEPRECATED_MSG("This version of setPosition() uses EntityPointer and is deprecated. It will be removed after the release of Dune 2.4. Please use the new version with entities instead.")
-    typename std::enable_if<
-      std::is_same<
-        T,
-        typename UGGrid<dim>::Traits::template Codim<dim>::EntityPointer
-        >::value
-      >::type
-    setPosition(const T& e,
-                const FieldVector<double, dim>& pos);
-
-#endif
-
     /** \brief Sets a vertex to a new position
 
        Changing a vertex' position changes its position on all grid levels!*/
@@ -990,7 +931,7 @@ namespace Dune {
     std::string name_;
 
     // Our set of level indices
-    std::vector<shared_ptr<UGGridLevelIndexSet<const UGGrid<dim> > > > levelIndexSets_;
+    std::vector<std::shared_ptr<UGGridLevelIndexSet<const UGGrid<dim> > > > levelIndexSets_;
 
     UGGridLeafIndexSet<const UGGrid<dim> > leafIndexSet_;
 
@@ -1034,7 +975,7 @@ namespace Dune {
     static unsigned int heapSize_;
 
     /** \brief The classes implementing the geometry of the boundary segments, if requested */
-    std::vector<shared_ptr<BoundarySegment<dim> > > boundarySegments_;
+    std::vector<std::shared_ptr<BoundarySegment<dim> > > boundarySegments_;
 
     /** \brief Overall number of coarse grid boundary segments.
 
@@ -1075,19 +1016,6 @@ namespace Dune {
     struct hasEntity< UGGrid<dim>, dim>
     {
       static const bool v = true;
-    };
-
-    /** \brief UGGrid is parallel
-       \ingroup UGGrid
-     */
-    template<int dim>
-    struct DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") isParallel< UGGrid<dim> >
-    {
-#ifdef ModelP
-      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = true;
-#else // !ModelP
-      static const bool DUNE_DEPRECATED_MSG("Capabilities::isParallel will be removed after dune-grid-2.4.") v = false;
-#endif // !ModelP
     };
 
     /** \brief UGGrid is levelwise conforming
