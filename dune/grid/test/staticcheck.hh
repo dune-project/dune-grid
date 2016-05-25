@@ -480,6 +480,7 @@ struct GridInterface
     // number of leaf entities per geometry type in this process
     g.size(Dune::GeometryType(Dune::GeometryType::cube,Grid::dimension));
 
+    DUNE_NO_DEPRECATED_BEGIN
     // Check overlap and ghost size on level 0
     g.overlapSize(0,0);
     g.ghostSize(0,0);
@@ -487,6 +488,7 @@ struct GridInterface
     // Check overlap and ghost size on the leaf level
     g.overlapSize(0);
     g.ghostSize(0);
+    DUNE_NO_DEPRECATED_END
 
     // check for iterator functions
     g.levelGridView(0).template begin<0>();

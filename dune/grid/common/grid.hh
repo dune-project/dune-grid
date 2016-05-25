@@ -723,6 +723,7 @@ namespace Dune {
     //===========================================================
 
     //! Return size of overlap for a given codim on a given level
+    DUNE_DEPRECATED_MSG("overlapSize() is deprecated. Use the method on the LevelGridView instead.")
     int overlapSize (int level, int codim) const
     {
       CHECK_INTERFACE_IMPLEMENTATION(asImp().overlapSize(level,codim));
@@ -730,6 +731,7 @@ namespace Dune {
     }
 
     //! Return size of overlap region for a given codim on the leaf grid
+    DUNE_DEPRECATED_MSG("overlapSize() is deprecated. Use the method on the LeafGridView instead.")
     int overlapSize (int codim) const
     {
       CHECK_INTERFACE_IMPLEMENTATION(asImp().overlapSize(codim));
@@ -737,6 +739,7 @@ namespace Dune {
     }
 
     //! Return size of ghost region for a given codim on a given level
+    DUNE_DEPRECATED_MSG("ghostSize() is deprecated. Use the method on the LevelGridView instead.")
     int ghostSize (int level, int codim) const
     {
       CHECK_INTERFACE_IMPLEMENTATION(asImp().ghostSize(level,codim));
@@ -744,6 +747,7 @@ namespace Dune {
     }
 
     //! Return size of ghost region for a given codim on the leaf grid
+    DUNE_DEPRECATED_MSG("ghostSize() is deprecated. Use the method on the LeafGridView instead.")
     int ghostSize (int codim) const
     {
       CHECK_INTERFACE_IMPLEMENTATION(asImp().ghostSize(codim));
@@ -762,6 +766,7 @@ namespace Dune {
      * happen.
      */
     template<class DataHandleImp, class DataTypeImp>
+    DUNE_DEPRECATED_MSG("communicate() is deprecated. Use the method on the LevelGridView instead.")
     void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, InterfaceType iftype, CommunicationDirection dir, int level) const
     {
       CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir,level)));
@@ -779,6 +784,7 @@ namespace Dune {
      * (forward or backward).
      */
     template<class DataHandleImp, class DataTypeImp>
+    DUNE_DEPRECATED_MSG("communicate() is deprecated. Use the method on the LeafGridView instead.")
     void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, InterfaceType iftype, CommunicationDirection dir) const
     {
       CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir)));
