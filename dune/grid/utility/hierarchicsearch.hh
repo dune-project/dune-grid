@@ -136,7 +136,7 @@ namespace Dune
     Entity findEntity(const FieldVector<ct,dimw>& global) const
     {
       typedef typename Grid::LevelGridView LevelGV;
-      const LevelGV &gv = grid_.template levelGridView(0);
+      const LevelGV &gv = grid_.levelGridView(0);
 
       //! type of LevelIterator
       typedef typename LevelGV::template Codim<0>::template Partition<partition>::Iterator LevelIterator;

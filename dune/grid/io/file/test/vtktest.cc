@@ -147,15 +147,15 @@ int vtkCheck(const std::array<int, dim>& elements,
 
   int result = 0;
 
-  acc(result, doWrite( g.template leafGridView(), Dune::VTK::conforming ));
-  acc(result, doWrite( g.template leafGridView(), Dune::VTK::nonconforming ));
-  acc(result, doWrite( g.template levelGridView( 0 ),
+  acc(result, doWrite( g.leafGridView(), Dune::VTK::conforming ));
+  acc(result, doWrite( g.leafGridView(), Dune::VTK::nonconforming ));
+  acc(result, doWrite( g.levelGridView( 0 ),
                        Dune::VTK::conforming ));
-  acc(result, doWrite( g.template levelGridView( 0 ),
+  acc(result, doWrite( g.levelGridView( 0 ),
                        Dune::VTK::nonconforming ));
-  acc(result, doWrite( g.template levelGridView( g.maxLevel() ),
+  acc(result, doWrite( g.levelGridView( g.maxLevel() ),
                        Dune::VTK::conforming ));
-  acc(result, doWrite( g.template levelGridView( g.maxLevel() ),
+  acc(result, doWrite( g.levelGridView( g.maxLevel() ),
                        Dune::VTK::nonconforming ));
 
   return result;

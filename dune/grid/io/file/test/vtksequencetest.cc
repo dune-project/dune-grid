@@ -97,12 +97,12 @@ void vtkCheck(const std::array<int,dim>& n,
   Dune::YaspGrid<dim> g(h, n);
   g.globalRefine(1);
 
-  doWrite( g.template leafGridView(), Dune::VTK::conforming );
-  doWrite( g.template leafGridView(), Dune::VTK::nonconforming );
-  doWrite( g.template levelGridView( 0 ), Dune::VTK::conforming );
-  doWrite( g.template levelGridView( 0 ), Dune::VTK::nonconforming );
-  doWrite( g.template levelGridView( g.maxLevel() ), Dune::VTK::conforming );
-  doWrite( g.template levelGridView( g.maxLevel() ), Dune::VTK::nonconforming );
+  doWrite( g.leafGridView(), Dune::VTK::conforming );
+  doWrite( g.leafGridView(), Dune::VTK::nonconforming );
+  doWrite( g.levelGridView( 0 ), Dune::VTK::conforming );
+  doWrite( g.levelGridView( 0 ), Dune::VTK::nonconforming );
+  doWrite( g.levelGridView( g.maxLevel() ), Dune::VTK::conforming );
+  doWrite( g.levelGridView( g.maxLevel() ), Dune::VTK::nonconforming );
 }
 
 int main(int argc, char **argv)
