@@ -12,4 +12,4 @@ set(ALLM4S
   ug.m4)
 
 install(FILES ${ALLM4S}
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/aclocal)
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/dune/aclocal)
