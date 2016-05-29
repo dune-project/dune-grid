@@ -5,7 +5,6 @@
 #define DUNE_GRID_COMMON_MCMGMAPPER_HH
 
 #include <iostream>
-#include <map>
 
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/type.hh>
@@ -192,7 +191,7 @@ namespace Dune
         result = 0;
         return false;
       }
-      result = map(e);
+      result = index(e);
       return true;
     }
 
