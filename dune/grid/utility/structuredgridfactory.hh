@@ -183,9 +183,6 @@ namespace Dune {
         std::array<unsigned int, dim> unitOffsets =
           computeUnitOffsets(vertices);
 
-        // Insert the elements
-        std::vector<unsigned int> corners(dim+1);
-
         // Loop over all "cubes", and split up each cube into dim!
         // (factorial) simplices
         FactoryUtilities::MultiIndex<dim> elementsIndex(elements);

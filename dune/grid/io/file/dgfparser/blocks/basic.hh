@@ -32,7 +32,7 @@ namespace Dune
       bool empty;                // block was found but was empty
       std::string identifier;    // identifier of this block
       int linecount;             // total number of lines in the block
-      std::stringstream block;   // the block itself
+      std::stringstream block_;  // the block itself
       std::string oneline;       // the active line in the block
 
       // get the block (if it exists)
@@ -49,8 +49,8 @@ namespace Dune
       void reset ()
       {
         pos = -1;
-        block.clear();
-        block.seekg( 0 );
+        block_.clear();
+        block_.seekg( 0 );
       }
 
       // get next line and store in string stream
