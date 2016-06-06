@@ -41,7 +41,7 @@ dune_add_test(NAME gmshtest-uggrid
               SOURCES gmshtest.cc
               COMPILE_DEFINITIONS GMSH_UGGRID
                                   DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
-              UG_FOUND)
+              CMAKE_GUARD UG_FOUND)
 
 if(HAVE_ALBERTA)
   add_executable(gmshtest-alberta2d gmshtest.cc)
