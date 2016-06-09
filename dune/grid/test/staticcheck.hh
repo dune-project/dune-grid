@@ -468,6 +468,8 @@ struct GridInterface
     // check for grid views
     g.levelGridView( 0 );
     g.leafGridView();
+    levelGridView(g, 0);
+    leafGridView(g);
 
     // check for member functions
     g.maxLevel();
