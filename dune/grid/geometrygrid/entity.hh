@@ -447,6 +447,16 @@ namespace Dune
         , geo_( std::move( other.geo_ ) )
       {}
 
+      /*
+       * This method is required by constructors in the `Entity` class
+       * below, however it cannot do anything useful for fake
+       * entities.
+       */
+      EntityBase(const Grid& grid, const HostEntity& hostEntity)
+      {
+        DUNE_THROW(Dune::Exception, "GeometryGrid: Cannot create fake entity of codim " << codimension << " from real host entity.");
+      }
+
       /** \} */
 
       const EntityBase &operator= ( const EntityBase &other )
