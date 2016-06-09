@@ -575,7 +575,6 @@ namespace Dune
 
       const HostElement &hostElement () const
       {
-        assert( *this );
         return hostElement_;
       }
 
