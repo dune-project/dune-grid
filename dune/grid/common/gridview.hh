@@ -40,7 +40,8 @@ namespace Dune
    *  .
    *
    *  The default GridViews can be obtained from the grid by calling one of the
-   *  levelGridView() or leafGridView() methods.
+   *  levelGridView() or leafGridView() methods which are provided as both
+   *  free functions and member functions of the Grid interface class.
    */
 
 

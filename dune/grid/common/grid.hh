@@ -840,6 +840,47 @@ namespace Dune {
 #undef CHECK_INTERFACE_IMPLEMENTATION
 #undef CHECK_AND_CALL_INTERFACE_IMPLEMENTATION
 
+  /**
+   * \addtogroup GIGridView
+   *  @{
+   */
+
+  /**
+   * \brief level grid view for the given grid and level.
+   *
+   * Identical to the method in the Grid interface, but provided
+   * as a free function.
+   *
+   * \see Grid::levelGridView
+   *
+   * \param grid Grid to obtain the level grid view for
+   * \param level level of the level grid view
+   */
+  template<int dim, int dimworld, class ct, class GridFamily>
+  typename Grid<dim, dimworld, ct, GridFamily>::LevelGridView
+  levelGridView(const Grid<dim, dimworld, ct, GridFamily>& grid, int level)
+  {
+    return grid.levelGridView(level);
+  }
+
+  /**
+   * \brief leaf grid view for the given grid
+   *
+   * Identical to the method in the Grid interface, but provided
+   * as a free function.
+   *
+   * \see Grid::leafGridView
+   *
+   * \param grid Grid to obtain the leaf grid view for
+   */
+  template<int dim, int dimworld, class ct, class GridFamily>
+  typename Grid<dim, dimworld, ct, GridFamily>::LeafGridView
+  leafGridView(const Grid<dim, dimworld, ct, GridFamily>& grid)
+  {
+    return grid.leafGridView();
+  }
+
+  /** @} */
 
   /**
      \ingroup GridDevel
