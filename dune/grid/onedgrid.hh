@@ -39,10 +39,11 @@ namespace Dune {
   template <int mydim, int coorddim, class GridImp>
   using OneDGridGeometry = AxisAlignedCubeGeometry<double, mydim, coorddim>;
 
-  template<int dim, int dimw>
   struct OneDGridFamily
   {
-    typedef GridTraits<dim,dimw,Dune::OneDGrid,
+    typedef GridTraits<1,   // Grid dimension
+                       1,   // Dimension of the physical space
+                       Dune::OneDGrid,
         OneDGridGeometry,
         OneDGridEntity,
         OneDGridLevelIterator,
@@ -82,7 +83,7 @@ namespace Dune {
      grids only. The OneDGrid can be nonuniform
      and provides local mesh refinement and coarsening.
    */
-  class OneDGrid : public GridDefaultImplementation <1, 1,double,OneDGridFamily<1,1> >
+  class OneDGrid : public GridDefaultImplementation <1, 1,double,OneDGridFamily>
   {
     // Grid and world dimension are hardwired in this grid
     enum {dim = 1};
@@ -135,10 +136,10 @@ namespace Dune {
     typedef double ctype;
 
     /** \brief GridFamily of OneDGrid */
-    typedef OneDGridFamily<dim,dimworld> GridFamily;
+    typedef OneDGridFamily GridFamily;
 
     //Provides the standard grid types
-    typedef OneDGridFamily<dim,dimworld>::Traits Traits;
+    typedef OneDGridFamily::Traits Traits;
 
     /** \brief Constructor with an explicit set of coordinates */
     OneDGrid(const std::vector<ctype>& coords);
