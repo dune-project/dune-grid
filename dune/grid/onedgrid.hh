@@ -36,6 +36,11 @@ namespace Dune {
 
   class OneDGrid;
 
+  /** \brief The type used to for OneDGrid geometries
+
+    If you ever want OneDGrid to use a different type for coordinates,
+    you need to change the first argument of AxisAlignedCubeGeometry here.
+  */
   template <int mydim, int coorddim, class GridImp>
   using OneDGridGeometry = AxisAlignedCubeGeometry<double, mydim, coorddim>;
 
@@ -83,7 +88,7 @@ namespace Dune {
      grids only. The OneDGrid can be nonuniform
      and provides local mesh refinement and coarsening.
    */
-  class OneDGrid : public GridDefaultImplementation <1, 1,double,OneDGridFamily>
+  class OneDGrid : public GridDefaultImplementation <1, 1,typename OneDGridGeometry<0,1,OneDGrid>::ctype, OneDGridFamily>
   {
     // Grid and world dimension are hardwired in this grid
     enum {dim = 1};
@@ -128,12 +133,8 @@ namespace Dune {
   public:
 
     /** \brief The type used to store coordinates
-
-       If you ever want OneDGrid to use a different type for coordinates,
-       you need to change this type and the third template argument of
-       the base class.
      */
-    typedef double ctype;
+    typedef typename OneDGridGeometry<0,1,OneDGrid>::ctype ctype;
 
     /** \brief GridFamily of OneDGrid */
     typedef OneDGridFamily GridFamily;
