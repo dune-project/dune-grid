@@ -329,14 +329,6 @@ namespace Dune {
     //! return the element type identifier (segment)
     GeometryType type () const {return GeometryType(1);}
 
-    /** \brief Return the number of subentities of codimension cc.
-     */
-    template<int cc>
-    int count () const {
-      assert(cc==0 || cc==1);
-      return (cc==0) ? 1 : 2;
-    }
-
     /** \brief Return the number of subentities of codimension codim.
      */
     unsigned int subEntities (unsigned int codim) const

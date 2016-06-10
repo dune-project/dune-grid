@@ -7,17 +7,11 @@
 
 #include <dune/grid/common/geometry.hh>
 
-#include <dune/grid/onedgrid/onedgridentity.hh>
-
 /** \file
  * \brief The OneDGridElement class and its specializations
  */
 
 namespace Dune {
-
-  // forward declaration
-  template <int codim, int dim, class GridImp>
-  class OneDGridEntity;
 
   /** \brief Unspecialized class.  Not used for anything */
   template<int mydim, int coorddim, class GridImp>
