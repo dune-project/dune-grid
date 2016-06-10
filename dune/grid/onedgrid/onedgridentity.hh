@@ -149,7 +149,10 @@ namespace Dune {
 
   };
 
-
+  // forward declarations
+  template<class GridImp> class OneDGridLevelIndexSet;
+  template<class GridImp> class OneDGridLeafIndexSet;
+  template<class GridImp> class OneDGridIdSet;
 
   //**********************************************************************
   //
@@ -172,6 +175,11 @@ namespace Dune {
     friend class OneDGridLevelIterator;
 
     friend class OneDGrid;
+
+    // IndexSets and IdSets need to access indices and ids
+    friend class OneDGridLevelIndexSet<GridImp>;
+    friend class OneDGridLeafIndexSet<GridImp>;
+    friend class OneDGridIdSet<GridImp>;
 
     typedef typename GridImp::Traits::template Codim< cd >::GeometryImpl GeometryImpl;
 
@@ -201,12 +209,14 @@ namespace Dune {
     //! only interior entities
     PartitionType partitionType () const { return InteriorEntity; }
 
+  private:
     unsigned int levelIndex() const {return target_->levelIndex_;}
 
     unsigned int leafIndex() const {return target_->leafIndex_;}
 
     unsigned int globalId() const {return target_->id_;}
 
+  public:
     //! return the element type identifier (segment)
     GeometryType type () const {return GeometryType(0);}
 
@@ -254,6 +264,11 @@ namespace Dune {
     friend class OneDGridHierarchicIterator <GridImp>;
     friend class OneDGridLevelIterator <0,All_Partition,GridImp>;
 
+    // IndexSets and IdSets need to access indices and ids
+    friend class OneDGridLevelIndexSet<GridImp>;
+    friend class OneDGridLeafIndexSet<GridImp>;
+    friend class OneDGridIdSet<GridImp>;
+
     typedef typename GridImp::Traits::template Codim< 0 >::GeometryImpl GeometryImpl;
     typedef typename GridImp::Traits::template Codim< 0 >::GeometryImpl LocalGeometryImpl;
 
@@ -296,6 +311,7 @@ namespace Dune {
     //! only interior entities
     PartitionType partitionType () const { return InteriorEntity; }
 
+  private:
     //! Level index is unique and consecutive per level and codim
     unsigned int levelIndex() const {return target_->levelIndex_;}
 
@@ -303,6 +319,7 @@ namespace Dune {
 
     unsigned int globalId() const {return target_->id_;}
 
+  public:
     //! Geometry of this entity
     Geometry geometry () const { return Geometry( GeometryImpl(target_->vertex_[0]->pos_, target_->vertex_[1]->pos_) ); }
 
@@ -328,6 +345,7 @@ namespace Dune {
       return (codim==0) ? 1 : 2;
     }
 
+  private:
     /** \brief Return index of sub entity with codim = cc and local number i
      */
     int subLevelIndex (int i,unsigned int codim) const {
@@ -355,6 +373,7 @@ namespace Dune {
              : target_->vertex_[i]->id_;
     }
 
+  public:
     /** \brief Access to codim 0 subentities */
     template<int cc>
     typename std::enable_if<
