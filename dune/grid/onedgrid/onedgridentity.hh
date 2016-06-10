@@ -29,8 +29,6 @@ namespace Dune {
   class OneDGridLevelIterator;
   template<class GridImp>
   class OneDGridHierarchicIterator;
-  template<int mydim, int coorddim, class GridImp>
-  class OneDGridGeometry;
 
   template <int mydim>
   class OneDEntityImp {};

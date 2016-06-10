@@ -14,6 +14,7 @@
 #include <dune/grid/common/gridfactory.hh>
 
 #include <dune/geometry/genericgeometry/topologytypes.hh>
+#include <dune/geometry/axisalignedcubegeometry.hh>
 
 /** \file
  * \brief The OneDGrid class
@@ -24,7 +25,6 @@
 #include "onedgrid/onedgridentity.hh"
 #include "onedgrid/onedgridentitypointer.hh"
 #include "onedgrid/onedgridentityseed.hh"
-#include "onedgrid/onedgridgeometry.hh"
 #include "onedgrid/onedgridintersections.hh"
 #include "onedgrid/onedgridintersectioniterators.hh"
 #include "onedgrid/onedgridleveliterator.hh"
@@ -35,6 +35,9 @@
 namespace Dune {
 
   class OneDGrid;
+
+  template <int mydim, int coorddim, class GridImp>
+  using OneDGridGeometry = AxisAlignedCubeGeometry<double, mydim, coorddim>;
 
   template<int dim, int dimw>
   struct OneDGridFamily
