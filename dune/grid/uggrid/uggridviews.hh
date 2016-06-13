@@ -47,6 +47,8 @@ namespace Dune
         :: template Codim< cd > :: template Partition< All_Partition > :: LevelIterator
         Iterator;
 
+        using ReverseIterator = Iterator;
+
         typedef typename Grid :: Traits :: template Codim< cd > :: Entity Entity;
 
         typedef typename Grid :: template Codim< cd > :: Geometry Geometry;
@@ -61,6 +63,9 @@ namespace Dune
           typedef typename Grid :: template Codim< cd >
           :: template Partition< pit > :: LevelIterator
           Iterator;
+
+          using ReverseIterator = Iterator;
+
         };
       };
 
@@ -229,6 +234,8 @@ namespace Dune
         :: template Codim< cd > :: template Partition< All_Partition > :: LeafIterator
         Iterator;
 
+        using ReverseIterator = Iterator;
+
         typedef typename Grid :: Traits :: template Codim< cd > :: Entity Entity;
 
         typedef typename Grid :: template Codim< cd > :: Geometry Geometry;
@@ -243,6 +250,9 @@ namespace Dune
           typedef typename Grid :: template Codim< cd >
           :: template Partition< pit > :: LeafIterator
           Iterator;
+
+          using ReverseIterator = Iterator;
+
         };
       };
 
