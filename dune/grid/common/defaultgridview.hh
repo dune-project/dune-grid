@@ -47,6 +47,10 @@ namespace Dune
       :: template Codim< cd > :: template Partition< All_Partition > :: LevelIterator
       Iterator;
 
+      typedef typename Grid :: Traits
+      :: template Codim< cd > :: template Partition< All_Partition > :: ReverseLevelIterator
+      ReverseIterator;
+
       typedef typename Grid :: Traits :: template Codim< cd > :: Entity Entity;
 
       typedef typename Grid :: template Codim< cd > :: Geometry Geometry;
@@ -61,6 +65,10 @@ namespace Dune
         typedef typename Grid :: template Codim< cd >
         :: template Partition< pit > :: LevelIterator
         Iterator;
+        /** \brief reverse iterator over a given codim and partition type */
+        typedef typename Grid :: template Codim< cd >
+        :: template Partition< pit > :: ReverseLevelIterator
+        ReverseIterator;
       };
     };
 
@@ -170,6 +178,36 @@ namespace Dune
       return grid().template lend< cd, pit >( level_ );
     }
 
+
+    /** \brief obtain begin iterator for this view */
+    template< int cd >
+    typename Codim< cd > :: ReverseIterator rbegin () const
+    {
+      return grid().template rlbegin< cd, All_Partition >( level_ );
+    }
+
+    /** \brief obtain begin iterator for this view */
+    template< int cd, PartitionIteratorType pit >
+    typename Codim< cd > :: template Partition< pit > :: ReverseIterator rbegin () const
+    {
+      return grid().template rlbegin< cd, pit >( level_ );
+    }
+
+    /** \brief obtain end iterator for this view */
+    template< int cd >
+    typename Codim< cd > :: ReverseIterator rend () const
+    {
+      return grid().template rlend< cd, All_Partition >( level_ );
+    }
+
+    /** \brief obtain end iterator for this view */
+    template< int cd, PartitionIteratorType pit >
+    typename Codim< cd > :: template Partition< pit > :: ReverseIterator rend () const
+    {
+      return grid().template rlend< cd, pit >( level_ );
+    }
+
+
     /** \brief obtain begin intersection iterator with respect to this view */
     IntersectionIterator
     ibegin ( const typename Codim< 0 > :: Entity &entity ) const
@@ -244,6 +282,10 @@ namespace Dune
       :: template Codim< cd > :: template Partition< All_Partition > :: LeafIterator
       Iterator;
 
+      typedef typename Grid :: Traits
+      :: template Codim< cd > :: template Partition< All_Partition > :: ReverseLeafIterator
+      ReverseIterator;
+
       typedef typename Grid :: Traits :: template Codim< cd > :: Entity Entity;
 
       typedef typename Grid :: template Codim< cd > :: Geometry Geometry;
@@ -258,6 +300,11 @@ namespace Dune
         typedef typename Grid :: template Codim< cd >
         :: template Partition< pit > :: LeafIterator
         Iterator;
+
+        /** \brief reverse iterator over a given codim and partition type */
+        typedef typename Grid :: template Codim< cd >
+        :: template Partition< pit > :: ReverseLeafIterator
+        ReverseIterator;
       };
     };
 
@@ -351,6 +398,37 @@ namespace Dune
     {
       return grid().template leafend< cd, pit >();
     }
+
+
+    /** \brief obtain begin iterator for this view */
+    template< int cd >
+    typename Codim< cd > :: ReverseIterator rbegin () const
+    {
+      return grid().template rleafbegin< cd, All_Partition >();
+    }
+
+    /** \brief obtain begin iterator for this view */
+    template< int cd, PartitionIteratorType pit >
+    typename Codim< cd > :: template Partition< pit > :: ReverseIterator rbegin () const
+    {
+      return grid().template rleafbegin< cd, pit >();
+    }
+
+    /** \brief obtain end iterator for this view */
+    template< int cd >
+    typename Codim< cd > :: ReverseIterator rend () const
+    {
+      return grid().template rleafend< cd, All_Partition >();
+    }
+
+    /** \brief obtain end iterator for this view */
+    template< int cd, PartitionIteratorType pit >
+    typename Codim< cd > :: template Partition< pit > :: ReverseIterator rend () const
+    {
+      return grid().template rleafend< cd, pit >();
+    }
+
+
 
     /** \brief obtain begin intersection iterator with respect to this view */
     IntersectionIterator

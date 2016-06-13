@@ -96,6 +96,9 @@ namespace Dune
       /** \brief type of iterator returned by the grid view */
       typedef typename Traits :: template Codim<cd> :: Iterator Iterator;
 
+      /** \brief type of reverse iterator returned by the grid view */
+      typedef typename Traits :: template Codim<cd> :: ReverseIterator ReverseIterator;
+
       /** \brief type of corresponding entity */
       typedef typename Traits :: template Codim<cd> :: Entity Entity;
 
@@ -112,6 +115,10 @@ namespace Dune
         /** \brief iterator over a given codim and partition type */
         typedef typename Traits :: template Codim< cd >
         :: template Partition< pit > :: Iterator Iterator;
+
+        /** \brief iterator over a given codim and partition type */
+        typedef typename Traits :: template Codim< cd >
+        :: template Partition< pit > :: ReverseIterator ReverseIterator;
       };
     }; //: public Traits :: template Codim<cd> {};
 
@@ -227,6 +234,38 @@ namespace Dune
     {
       return impl().template end<cd,pitype>();
     }
+
+
+    /** \brief obtain begin iterator for this view */
+    template< int cd >
+    typename Codim< cd > :: ReverseIterator rbegin () const
+    {
+      return impl().template rbegin<cd>();
+    }
+
+    /** \brief obtain end iterator for this view */
+    template< int cd >
+    typename Codim< cd > :: ReverseIterator rend () const
+    {
+      return impl().template rend<cd>();
+    }
+
+    /** \brief obtain begin iterator for this view */
+    template< int cd , PartitionIteratorType pitype >
+    typename Codim< cd > :: template Partition< pitype > :: ReverseIterator
+    rbegin () const
+    {
+      return impl().template rbegin<cd,pitype>();
+    }
+
+    /** \brief obtain end iterator for this view */
+    template< int cd, PartitionIteratorType pitype >
+    typename Codim< cd > :: template Partition< pitype > :: ReverseIterator
+    rend () const
+    {
+      return impl().template rend<cd,pitype>();
+    }
+
 
     /** \brief obtain begin intersection iterator with respect to this view */
     IntersectionIterator
