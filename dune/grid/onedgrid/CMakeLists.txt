@@ -3,7 +3,6 @@ set(HEADERS nulliteratorfactory.hh
   onedgridentitypointer.hh
   onedgridentityseed.hh
   onedgridfactory.hh
-  onedgridgeometry.hh
   onedgridhieriterator.hh
   onedgridindexsets.hh
   onedgridleafiterator.hh
