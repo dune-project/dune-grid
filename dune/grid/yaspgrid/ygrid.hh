@@ -135,6 +135,8 @@ namespace Dune {
           _superincrement[i] = inc;
           inc *= _supersize[i];
         }
+      for (int i = 0 ; i < d ; ++i)
+        _max[i] = _origin[i] + this->size(i) - 1;
     }
 
     //! Return origin in direction i
@@ -220,7 +222,12 @@ namespace Dune {
     //! Return maximum index in direction i
     int max (int i) const
     {
-      return _origin[i] + size(i) - 1;
+      return _max[i];
+    }
+
+    const iTupel& max() const
+    {
+      return _max;
     }
 
     //! Return true if YGrid is empty, i.e. has size 0 in all directions.
@@ -504,6 +511,7 @@ namespace Dune {
 
   private:
     iTupel _origin;
+    iTupel _max;
     std::bitset<d> _shift;
     Coordinates* _coords;
     iTupel _size;
