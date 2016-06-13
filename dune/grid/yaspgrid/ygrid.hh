@@ -302,10 +302,13 @@ namespace Dune {
     class Iterator {
     public:
       // default constructor
-      Iterator () {}
+      Iterator ()
+        : _sentinel(true)
+      {}
 
       //! Make iterator pointing to first cell in a grid.
-      Iterator (const YGridComponent<Coordinates>& r) : _grid(&r)
+      Iterator (const YGridComponent<Coordinates>& r)
+        : _grid(&r)
       {
         iTupel coord(r.origin());
         reinit(r,coord);
@@ -330,18 +333,19 @@ namespace Dune {
           _superindex += (r.offset(i)+coord[i]-r.origin(i))*r.superincrement(i);
 
         _grid = &r;
+        _sentinel = false;
       }
 
       //! Return true when two iterators over the same grid are equal (!).
       bool operator== (const Iterator& i) const
       {
-        return _superindex == i._superindex;
+        return _sentinel == i._sentinel && _superindex == i._superindex;
       }
 
       //! Return true when two iterators over the same grid are not equal (!).
       bool operator!= (const Iterator& i) const
       {
-        return _superindex != i._superindex;
+        return _sentinel != i._sentinel || _superindex != i._superindex;
       }
 
       //! Return consecutive index in enclosing grid
@@ -393,12 +397,32 @@ namespace Dune {
             _superindex -= _grid->size(i) * _grid->superincrement(i);
           }
         }
-        // if we wrapped around, back to to begin(), we must put the iterator to end()
+        // if we wrapped around, back to begin(), we are at the end
         if (_coord == _grid->origin())
         {
-          for (int i=0; i<d; i++)
-            _superindex += (_grid->size(i)-1) * _grid->superincrement(i);
-          _superindex += _grid->superincrement(0);
+          _sentinel = true;
+        }
+        return *this;
+      }
+
+      //! decrement iterator to previous cell with position.
+      Iterator& operator-- ()
+      {
+        for (int i=0; i<d; i++)         // check for wrap around
+        {
+          _superindex -= _grid->superincrement(i);   // move on cell in direction i
+          if (--_coord[i] >= _grid->origin(i)) //<= _grid->max(i))
+            return *this;
+          else
+          {
+            _coord[i] = _grid->max(i);         // move back to max in direction i
+            _superindex += _grid->size(i) * _grid->superincrement(i);
+          }
+        }
+        // if we wrapped around, back to end(), we are at the end of the range
+        if (_coord == _grid->max())
+        {
+          _sentinel = true;
         }
         return *this;
       }
@@ -470,6 +494,7 @@ namespace Dune {
       iTupel _coord;       //!< current position in index set
       int _superindex;        //!< consecutive index in enclosing grid
       const YGridComponent<Coordinates>* _grid;
+      bool _sentinel;
     };
 
 
@@ -502,11 +527,20 @@ namespace Dune {
     //! return subiterator to last element of index set
     Iterator end () const
     {
+      return Iterator();
+    }
+
+    Iterator rbegin () const
+    {
       iTupel last;
       for (int i=0; i<d; i++)
         last[i] = max(i);
-      last[0] += 1;
       return Iterator(*this,last);
+    }
+
+    Iterator rend () const
+    {
+      return Iterator();
     }
 
   private:
