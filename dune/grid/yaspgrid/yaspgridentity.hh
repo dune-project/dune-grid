@@ -23,6 +23,9 @@
 
 namespace Dune {
 
+  template<int codim, PartitionIteratorType pitype, class GridImp>
+  class YaspReverseLevelIterator;
+
   namespace Yasp {
 
 #ifndef DOXYGEN
@@ -241,6 +244,9 @@ namespace Dune {
     template<int, PartitionIteratorType, typename>
     friend class YaspLevelIterator;
 
+    template<int, PartitionIteratorType, typename>
+    friend class YaspReverseLevelIterator;
+
   public:
     typedef typename GridImp::ctype ctype;
 
@@ -407,6 +413,9 @@ namespace Dune {
 
     template<int, PartitionIteratorType, typename>
     friend class YaspLevelIterator;
+
+    template<int, PartitionIteratorType, typename>
+    friend class YaspReverseLevelIterator;
 
     template<typename>
     friend class YaspHierarchicIterator;

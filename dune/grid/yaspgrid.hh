@@ -59,6 +59,7 @@ namespace Dune {
   template<int codim, class GridImp>            class YaspEntityPointer;
   template<int codim, class GridImp>            class YaspEntitySeed;
   template<int codim, PartitionIteratorType pitype, class GridImp> class YaspLevelIterator;
+  template<int codim, PartitionIteratorType pitype, class GridImp> class YaspReverseLevelIterator;
   template<class GridImp>            class YaspIntersectionIterator;
   template<class GridImp>            class YaspIntersection;
   template<class GridImp>            class YaspHierarchicIterator;
@@ -79,6 +80,7 @@ namespace Dune {
 #include <dune/grid/yaspgrid/yaspgridentityseed.hh>
 #include <dune/grid/yaspgrid/yaspgridentitypointer.hh>
 #include <dune/grid/yaspgrid/yaspgridleveliterator.hh>
+#include <dune/grid/yaspgrid/yaspgridreverseleveliterator.hh>
 #include <dune/grid/yaspgrid/yaspgridindexsets.hh>
 #include <dune/grid/yaspgrid/yaspgrididset.hh>
 #include <dune/grid/yaspgrid/yaspgridpersistentcontainer.hh>
@@ -166,6 +168,9 @@ namespace Dune {
 
     template<int, PartitionIteratorType, typename>
     friend class YaspLevelIterator;
+
+    template<int, PartitionIteratorType, typename>
+    friend class YaspReverseLevelIterator;
 
     template<typename>
     friend class YaspHierarchicIterator;
