@@ -1104,7 +1104,9 @@ namespace Dune {
       template<class> class LevelGridViewTraits,
       template<class> class LeafGridViewTraits,
       template<int,class> class EntitySeedImp,
-      template<int,int,class> class LocalGeometryImp = GeometryImp
+      template<int,int,class> class LocalGeometryImp = GeometryImp,
+      template<int,PartitionIteratorType,class> class ReverseLevelIteratorImp = LevelIteratorImp,
+      template<int,PartitionIteratorType,class> class ReverseLeafIteratorImp = LeafIteratorImp
       >
   struct GridTraits
   {
@@ -1156,6 +1158,10 @@ namespace Dune {
         typedef Dune::EntityIterator< cd, const GridImp, LevelIteratorImp< cd, pitype, const GridImp > > LevelIterator;
         /** \brief The type of the iterator over the leaf entities of this codim on this partition. */
         typedef Dune::EntityIterator< cd, const GridImp, LeafIteratorImp< cd, pitype, const GridImp > > LeafIterator;
+        /** \brief The type of the iterator over the level entities of this codim on this partition. */
+        typedef Dune::EntityIterator< cd, const GridImp, ReverseLevelIteratorImp< cd, pitype, const GridImp > > ReverseLevelIterator;
+        /** \brief The type of the iterator over the leaf entities of this codim on this partition. */
+        typedef Dune::EntityIterator< cd, const GridImp, ReverseLeafIteratorImp< cd, pitype, const GridImp > > ReverseLeafIterator;
       };
 
       /** \brief The type of the iterator over all leaf entities of this codim. */
@@ -1163,6 +1169,12 @@ namespace Dune {
 
       /** \brief The type of the entity pointer for entities of this codim.*/
       typedef typename Partition< All_Partition >::LevelIterator LevelIterator;
+
+      /** \brief The type of the iterator over all leaf entities of this codim. */
+      typedef typename Partition< All_Partition >::ReverseLeafIterator ReverseLeafIterator;
+
+      /** \brief The type of the entity pointer for entities of this codim.*/
+      typedef typename Partition< All_Partition >::ReverseLevelIterator ReverseLevelIterator;
 
     private:
       friend class Dune::Entity<cd, dim, const GridImp, EntityImp>;
