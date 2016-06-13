@@ -785,8 +785,8 @@ namespace Dune
    * or partially specializing this single function. The specialization has to be placed either in the
    * Dune namespace or in the namespace of the GridView object.
    */
-  template<typename GV, int codim, unsigned int partitions>
-  inline auto entities(const GV& gv, Codim<codim>, PartitionSet<partitions>)
+  template<typename GV, int codim, unsigned int partitions, typename Dir = Direction::Forward>
+  inline auto entities(const GV& gv, Codim<codim>, PartitionSet<partitions>, Dir = Dir())
     -> IteratorRange<decltype(gv.template begin<codim,derive_partition_iterator_type<partitions>::value>())>
   {
     static_assert(0 <= codim && codim <= GV::dimension, "invalid codimension for given GridView");
@@ -795,6 +795,18 @@ namespace Dune
     return return_type(gv.template begin<codim,pit>(),gv.template end<codim,pit>());
   }
 
+
+  template<typename GV, int codim, unsigned int partitions>
+  inline auto entities(const GV& gv, Codim<codim>, PartitionSet<partitions>, Direction::Reverse)
+    -> IteratorRange<decltype(gv.template rbegin<codim,derive_partition_iterator_type<partitions>::value>())>
+  {
+    static_assert(0 <= codim && codim <= GV::dimension, "invalid codimension for given GridView");
+    const PartitionIteratorType pit = derive_partition_iterator_type<partitions>::value;
+    typedef IteratorRange<decltype(gv.template rbegin<codim,pit>())> return_type;
+    return return_type(gv.template rbegin<codim,pit>(),gv.template rend<codim,pit>());
+  }
+
+
   /**
    * Entity range implementation without PartitionSet parameter. The default implementation obtains the
    * standard iterators by calling begin() and end() without specifying a partition type. This makes it
@@ -802,14 +814,24 @@ namespace Dune
    *
    * All other functions without PartitionSet parameter forward to this function.
    */
-  template<typename GV, int codim>
-  inline auto entities(const GV& gv, Codim<codim>)
+  template<typename GV, int codim, typename Dir = Direction::Forward>
+  inline auto entities(const GV& gv, Codim<codim>, Dir = Dir())
     -> IteratorRange<decltype(gv.template begin<codim>())>
   {
     static_assert(0 <= codim && codim <= GV::dimension, "invalid codimension for given GridView");
     typedef IteratorRange<decltype(gv.template begin<codim>())> return_type;
     return return_type(gv.template begin<codim>(),gv.template end<codim>());
   }
+
+  template<typename GV, int codim>
+  inline auto entities(const GV& gv, Codim<codim>, Direction::Reverse)
+    -> IteratorRange<decltype(gv.template rbegin<codim>())>
+  {
+    static_assert(0 <= codim && codim <= GV::dimension, "invalid codimension for given GridView");
+    typedef IteratorRange<decltype(gv.template rbegin<codim>())> return_type;
+    return return_type(gv.template rbegin<codim>(),gv.template rend<codim>());
+  }
+
 
   /**
    * Hierarchic entity range implementation.
@@ -837,76 +859,76 @@ namespace Dune
    * correct function.
    */
 
-  template<typename GV, int dim, unsigned int partitions>
-  inline auto entities(const GV& gv, Dim<dim>, PartitionSet<partitions>)
-    -> decltype(entities(gv,Codim<GV::dimension - dim>(),PartitionSet<partitions>()))
+  template<typename GV, int dim, unsigned int partitions, typename Dir = Direction::Forward>
+  inline auto entities(const GV& gv, Dim<dim>, PartitionSet<partitions>, Dir = Dir())
+    -> decltype(entities(gv,Codim<GV::dimension - dim>(),PartitionSet<partitions>(),Dir()))
   {
     static_assert(0 <= dim && dim <= GV::dimension, "invalid dimension for given GridView");
-    return entities(gv,Codim<GV::dimension - dim>(),PartitionSet<partitions>());
+    return entities(gv,Codim<GV::dimension - dim>(),PartitionSet<partitions>(),Dir());
   }
 
-  template<typename GV, int dim>
-  inline auto entities(const GV& gv, Dim<dim>)
-    -> decltype(entities(gv,Codim<GV::dimension - dim>()))
+  template<typename GV, int dim, typename Dir = Direction::Forward>
+  inline auto entities(const GV& gv, Dim<dim>, Dir = Dir())
+    -> decltype(entities(gv,Codim<GV::dimension - dim>(),Dir()))
   {
     static_assert(0 <= dim && dim <= GV::dimension, "invalid dimension for given GridView");
-    return entities(gv,Codim<GV::dimension - dim>());
+    return entities(gv,Codim<GV::dimension - dim>(),Dir());
   }
 
-  template<typename GV, unsigned int partitions>
-  inline auto elements(const GV& gv, PartitionSet<partitions>)
-    -> decltype(entities(gv,Codim<0>(),PartitionSet<partitions>()))
+  template<typename GV, unsigned int partitions, typename Dir = Direction::Forward>
+  inline auto elements(const GV& gv, PartitionSet<partitions>, Dir = Dir())
+    -> decltype(entities(gv,Codim<0>(),PartitionSet<partitions>(),Dir()))
   {
-    return entities(gv,Codim<0>(),PartitionSet<partitions>());
+    return entities(gv,Codim<0>(),PartitionSet<partitions>(),Dir());
   }
 
-  template<typename GV>
-  inline auto elements(const GV& gv)
-    -> decltype(entities(gv,Codim<0>()))
+  template<typename GV, typename Dir = Direction::Forward>
+  inline auto elements(const GV& gv, Dir = Dir())
+    -> decltype(entities(gv,Codim<0>(),Dir()))
   {
-    return entities(gv,Codim<0>());
+    return entities(gv,Codim<0>(),Dir());
   }
 
-  template<typename GV, unsigned int partitions>
-  inline auto facets(const GV& gv, PartitionSet<partitions>)
-    -> decltype(entities(gv,Codim<1>(),PartitionSet<partitions>()))
+  template<typename GV, unsigned int partitions, typename Dir = Direction::Forward>
+  inline auto facets(const GV& gv, PartitionSet<partitions>, Dir = Dir())
+    -> decltype(entities(gv,Codim<1>(),PartitionSet<partitions>(),Dir()))
   {
-    return entities(gv,Codim<1>(),PartitionSet<partitions>());
+    return entities(gv,Codim<1>(),PartitionSet<partitions>(),Dir());
   }
 
-  template<typename GV>
-  inline auto facets(const GV& gv)
-    -> decltype(entities(gv,Codim<1>()))
+  template<typename GV, typename Dir = Direction::Forward>
+  inline auto facets(const GV& gv, Dir = Dir())
+    -> decltype(entities(gv,Codim<1>(),Dir()))
   {
-    return entities(gv,Codim<1>());
+    return entities(gv,Codim<1>(),Dir());
   }
 
-  template<typename GV, unsigned int partitions>
-  inline auto edges(const GV& gv, PartitionSet<partitions>)
-    -> decltype(entities(gv,Dim<1>(),PartitionSet<partitions>()))
+  template<typename GV, unsigned int partitions, typename Dir = Direction::Forward>
+  inline auto edges(const GV& gv, PartitionSet<partitions>, Dir = Dir())
+    -> decltype(entities(gv,Dim<1>(),PartitionSet<partitions>(),Dir()))
   {
-    return entities(gv,Dim<1>(),PartitionSet<partitions>());
+    return entities(gv,Dim<1>(),PartitionSet<partitions>(),Dir());
   }
 
-  template<typename GV>
-  inline auto edges(const GV& gv)
-    -> decltype(entities(gv,Dim<1>()))
+  template<typename GV, typename Dir = Direction::Forward>
+  inline auto edges(const GV& gv, Dir = Dir())
+    -> decltype(entities(gv,Dim<1>(),Dir()))
   {
-    return entities(gv,Dim<1>());
+    return entities(gv,Dim<1>(),Dir());
   }
 
-  template<typename GV, unsigned int partitions>
-  inline auto vertices(const GV& gv, PartitionSet<partitions>)
-    -> decltype(entities(gv,Dim<0>(),PartitionSet<partitions>()))
+  template<typename GV, unsigned int partitions, typename Dir = Direction::Forward>
+  inline auto vertices(const GV& gv, PartitionSet<partitions>, Dir = Dir())
+    -> decltype(entities(gv,Dim<0>(),PartitionSet<partitions>(),Dir()))
   {
-    return entities(gv,Dim<0>(),PartitionSet<partitions>());
+    return entities(gv,Dim<0>(),PartitionSet<partitions>(),Dir());
   }
 
-  template<typename GV>
-  inline auto vertices(const GV& gv)
-    -> decltype(entities(gv,Dim<0>()))
+  template<typename GV, typename Dir = Direction::Forward>
+  inline auto vertices(const GV& gv, Dir = Dir())
+    -> decltype(entities(gv,Dim<0>(),Dir()))
   {
-    return entities(gv,Dim<0>());
+    return entities(gv,Dim<0>(),Dir());
   }
 
 #endif // DOXYGEN
