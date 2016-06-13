@@ -760,6 +760,17 @@ namespace Dune
 
 #else // DOXYGEN
 
+  namespace Direction
+  {
+    struct Forward {};
+    struct Reverse {};
+
+    namespace {
+      constexpr Forward forward = {};
+      constexpr Reverse reverse = {};
+    }
+  }
+
   // ******************************************************************************************
   // Implementations
   // ******************************************************************************************
