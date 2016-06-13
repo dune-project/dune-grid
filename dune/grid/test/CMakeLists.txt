@@ -84,6 +84,8 @@ if(ALBERTA_FOUND)
   dune_add_test(TARGET test-alberta-generic)
 endif(ALBERTA_FOUND)
 
+dune_add_test(SOURCES test-yaspgrid-reverse-iteration.cc)
+
 # install the test tools as we want to support testing 3rdparty grids with installed dune-grid
 install(FILES basicunitcube.hh
               check-albertareader.hh
