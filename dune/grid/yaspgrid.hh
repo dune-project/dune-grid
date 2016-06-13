@@ -115,7 +115,11 @@ namespace Dune {
         bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+dim>,
         CCType,
         DefaultLevelGridViewTraits, DefaultLeafGridViewTraits,
-        YaspEntitySeed>
+        YaspEntitySeed,
+        YaspGeometry,
+        YaspReverseLevelIterator,
+        YaspReverseLevelIterator
+                       >
     Traits;
   };
 
@@ -1221,6 +1225,67 @@ namespace Dune {
       return levelend<cd,All_Partition>(maxLevel());
     }
 
+
+
+
+    //! one past the end on this level
+    template<int cd, PartitionIteratorType pitype>
+    typename Traits::template Codim<cd>::template Partition<pitype>::ReverseLevelIterator rlbegin (int level) const
+    {
+      return rlevelbegin<cd,pitype>(level);
+    }
+
+    //! Iterator to one past the last entity of given codim on level for partition type
+    template<int cd, PartitionIteratorType pitype>
+    typename Traits::template Codim<cd>::template Partition<pitype>::ReverseLevelIterator rlend (int level) const
+    {
+      return rlevelend<cd,pitype>(level);
+    }
+
+    //! version without second template parameter for convenience
+    template<int cd>
+    typename Traits::template Codim<cd>::template Partition<All_Partition>::ReverseLevelIterator rlbegin (int level) const
+    {
+      return rlevelbegin<cd,All_Partition>(level);
+    }
+
+    //! version without second template parameter for convenience
+    template<int cd>
+    typename Traits::template Codim<cd>::template Partition<All_Partition>::ReverseLevelIterator rlend (int level) const
+    {
+      return rlevelend<cd,All_Partition>(level);
+    }
+
+    //! return LeafIterator which points to the first entity in maxLevel
+    template<int cd, PartitionIteratorType pitype>
+    typename Traits::template Codim<cd>::template Partition<pitype>::ReverseLeafIterator rleafbegin () const
+    {
+      return rlevelbegin<cd,pitype>(maxLevel());
+    }
+
+    //! return LeafIterator which points behind the last entity in maxLevel
+    template<int cd, PartitionIteratorType pitype>
+    typename Traits::template Codim<cd>::template Partition<pitype>::ReverseLeafIterator rleafend () const
+    {
+      return rlevelend<cd,pitype>(maxLevel());
+    }
+
+    //! return LeafIterator which points to the first entity in maxLevel
+    template<int cd>
+    typename Traits::template Codim<cd>::template Partition<All_Partition>::ReverseLeafIterator rleafbegin () const
+    {
+      return rlevelbegin<cd,All_Partition>(maxLevel());
+    }
+
+    //! return LeafIterator which points behind the last entity in maxLevel
+    template<int cd>
+    typename Traits::template Codim<cd>::template Partition<All_Partition>::ReverseLeafIterator rleafend () const
+    {
+      return rlevelend<cd,All_Partition>(maxLevel());
+    }
+
+
+
     // \brief obtain Entity from EntitySeed. */
     template <typename Seed>
     typename Traits::template Codim<Seed::codimension>::Entity
@@ -1693,6 +1758,50 @@ namespace Dune {
 
       DUNE_THROW(GridError, "YaspLevelIterator with this codim or partition type not implemented");
     }
+
+
+
+    //! one past the end on this level
+    template<int cd, PartitionIteratorType pitype>
+    YaspReverseLevelIterator<cd,pitype,GridImp> rlevelbegin (int level) const
+    {
+      YGridLevelIterator g = begin(level);
+      if (level<0 || level>maxLevel()) DUNE_THROW(RangeError, "level out of range");
+
+      if (pitype==Interior_Partition)
+        return YaspReverseLevelIterator<cd,pitype,GridImp>(g,g->interior[cd].rbegin());
+      if (pitype==InteriorBorder_Partition)
+        return YaspReverseLevelIterator<cd,pitype,GridImp>(g,g->interiorborder[cd].rbegin());
+      if (pitype==Overlap_Partition)
+        return YaspReverseLevelIterator<cd,pitype,GridImp>(g,g->overlap[cd].rbegin());
+      if (pitype<=All_Partition)
+        return YaspReverseLevelIterator<cd,pitype,GridImp>(g,g->overlapfront[cd].rbegin());
+      if (pitype==Ghost_Partition)
+        return rlevelend <cd, pitype> (level);
+
+      DUNE_THROW(GridError, "YaspLevelIterator with this codim or partition type not implemented");
+    }
+
+    //! Iterator to one past the last entity of given codim on level for partition type
+    template<int cd, PartitionIteratorType pitype>
+    YaspReverseLevelIterator<cd,pitype,GridImp> rlevelend (int level) const
+    {
+      YGridLevelIterator g = begin(level);
+      if (level<0 || level>maxLevel()) DUNE_THROW(RangeError, "level out of range");
+
+      if (pitype==Interior_Partition)
+        return YaspReverseLevelIterator<cd,pitype,GridImp>(g,g->interior[cd].rend());
+      if (pitype==InteriorBorder_Partition)
+        return YaspReverseLevelIterator<cd,pitype,GridImp>(g,g->interiorborder[cd].rend());
+      if (pitype==Overlap_Partition)
+        return YaspReverseLevelIterator<cd,pitype,GridImp>(g,g->overlap[cd].rend());
+      if (pitype<=All_Partition || pitype == Ghost_Partition)
+        return YaspReverseLevelIterator<cd,pitype,GridImp>(g,g->overlapfront[cd].rend());
+
+      DUNE_THROW(GridError, "YaspLevelIterator with this codim or partition type not implemented");
+    }
+
+
 
     CollectiveCommunicationType ccobj;
 
