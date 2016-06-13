@@ -645,18 +645,34 @@ namespace Dune {
       }
 
       //! create an iterator to start or end of the codimension
-      Iterator (const YGrid<Coordinates>& yg, bool end=false) : _yg(&yg)
+      Iterator (const YGrid<Coordinates>& yg, bool end=false, bool reverse=false) : _yg(&yg)
       {
-        if (end)
-        {
-          _it = _yg->_itends.back();
-          _which = _yg->_itends.size() - 1;
-        }
+        if (reverse)
+          {
+            if (end)
+              {
+                _it = _yg->_itrends.front();
+                _which = 0;
+              }
+            else
+              {
+                _which = _yg->_itends.size() - 1;
+                _it = _yg->_itrbegins[_which];
+              }
+          }
         else
-        {
-          _it = _yg->_itbegins[0];
-          _which = 0;
-        }
+          {
+            if (end)
+              {
+                _it = _yg->_itends.back();
+                _which = _yg->_itends.size() - 1;
+              }
+            else
+              {
+                _it = _yg->_itbegins[0];
+                _which = 0;
+              }
+          }
       }
 
       //! reinitializes an iterator, as if it was just constructed.
@@ -733,25 +749,30 @@ namespace Dune {
       //! increment to the next entity jumping to next component if necessary
       Iterator& operator++ ()
       {
-        if ((++_it == _yg->_itends[_which]) && (_which < _yg->_itends.size()-1))
+        if ((++_it == _yg->_itends[_which]) && (_which < static_cast<int>(_yg->_itends.size()-1)))
           _it = _yg->_itbegins[++_which];
         return *this;
       }
 
+      //! decrement to the previous entity jumping to previous component if necessary
+      Iterator& operator-- ()
+      {
+        if ((--_it == _yg->_itrends[_which]) && (_which > 0))
+          _it = _yg->_itrbegins[--_which];
+        return *this;
+      }
+
+
       //! compare two iterators: component has to match
       bool operator==(const Iterator& i) const
       {
-        if (_which != i._which)
-          return false;
-        return _it == i._it;
+        return _which == i._which and _it == i._it;
       }
 
       //! compare two iterators: component has to match
       bool operator!=(const Iterator& i) const
       {
-        if (_it != i._it)
-          return true;
-        return _which != i._which;
+        return not (*this == i);
       }
 
       //! return the current component number
@@ -778,7 +799,7 @@ namespace Dune {
 
 
       private:
-      unsigned int _which;
+      int _which;
       const YGrid<Coordinates>* _yg;
       typename YGridComponent<Coordinates>::Iterator _it;
     };
@@ -801,6 +822,19 @@ namespace Dune {
       return Iterator(*this,true);
     }
 
+    //! return begin iterator for the codimension and partition the ygrid represents
+    Iterator rbegin() const
+    {
+      return Iterator(*this,false,true);
+    }
+
+    //! return end iterator for the codimension and partition the ygrid represents
+    Iterator rend() const
+    {
+      return Iterator(*this,true,true);
+    }
+
+
     int superindex(const iTupel& coord, int which) const
     {
       return _indexOffset[which] + (dataBegin()+which)->superindex(coord);
@@ -821,6 +855,9 @@ namespace Dune {
         _itbegins.push_back(i->begin());
         _itends.push_back(i->end());
 
+        _itrbegins.push_back(i->rbegin());
+        _itrends.push_back(i->rend());
+
         // store index offset
         _indexOffset.push_back(_indexOffset.back() + i->totalsize());
 
@@ -838,6 +875,8 @@ namespace Dune {
     std::array<int,StaticPower<2,dim>::power> _shiftmapping;
     std::vector<typename YGridComponent<Coordinates>::Iterator> _itbegins;
     std::vector<typename YGridComponent<Coordinates>::Iterator> _itends;
+    std::vector<typename YGridComponent<Coordinates>::Iterator> _itrbegins;
+    std::vector<typename YGridComponent<Coordinates>::Iterator> _itrends;
     std::vector<int> _indexOffset;
   };
 
