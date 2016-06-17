@@ -443,6 +443,11 @@ namespace Dune {
               the iterator adjusts it to the next entity in the leaf grid.
          */
         typedef typename GridFamily::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator LeafIterator;
+
+
+        typedef typename GridFamily::Traits::template Codim<cd>::template Partition<pitype>::ReverseLevelIterator ReverseLevelIterator;
+        typedef typename GridFamily::Traits::template Codim<cd>::template Partition<pitype>::ReverseLeafIterator ReverseLeafIterator;
+
       };
 
       /*! \brief A type that is a model of Dune::LevelIterator with partition type All_Partition
@@ -452,6 +457,10 @@ namespace Dune {
       /*! \brief A type that is a model of Dune::LeafIterator with partition type All_Partition
        */
       typedef typename GridFamily::Traits::template Codim<cd>::LeafIterator LeafIterator;
+
+      typedef typename GridFamily::Traits::template Codim<cd>::ReverseLevelIterator ReverseLevelIterator;
+      typedef typename GridFamily::Traits::template Codim<cd>::ReverseLeafIterator ReverseLeafIterator;
+
     };
 
     /*! \brief A type that is a model of Dune::Intersection, an
