@@ -40,7 +40,7 @@ namespace Dune
     template< class HostGrid, class CoordFunction, class Allocator, int codim >
     struct canCommunicate< GeometryGrid< HostGrid, CoordFunction, Allocator >, codim >
     {
-      static const bool v = canCommunicate< HostGrid, codim >::v;
+      static const bool v = canCommunicate< HostGrid, codim >::v && hasEntity< HostGrid, codim >::v;
     };
 
 
