@@ -114,6 +114,7 @@ namespace Dune {
         {
           _superincrement[i] = inc;
           inc *= _supersize[i];
+          _max[i] = _origin[i] + this->size(i) - 1;
         }
     }
 
