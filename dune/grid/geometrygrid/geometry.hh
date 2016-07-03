@@ -7,6 +7,7 @@
 
 #include <dune/common/typetraits.hh>
 
+#include <dune/geometry/implementation/matrixhelper.hh>
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/multilineargeometry.hh>
 
@@ -60,7 +61,7 @@ namespace Dune
 
       typedef typename Traits::ctype ctype;
 
-      typedef GenericGeometry::MatrixHelper< GenericGeometry::DuneCoordTraits< ctype > > MatrixHelper;
+      typedef impl::MatrixHelper< GenericGeometry::DuneCoordTraits< ctype > > MatrixHelper;
 
       static ctype tolerance () { return 16 * std::numeric_limits< ctype >::epsilon(); }
 
