@@ -340,13 +340,13 @@ namespace Dune {
       //! Return true when two iterators over the same grid are equal (!).
       bool operator== (const Iterator& i) const
       {
-        return _sentinel == i._sentinel && _superindex == i._superindex;
+        return (_sentinel and i._sentinel) or (_sentinel == i._sentinel and _superindex == i._superindex);
       }
 
       //! Return true when two iterators over the same grid are not equal (!).
       bool operator!= (const Iterator& i) const
       {
-        return _sentinel != i._sentinel || _superindex != i._superindex;
+        return not (*this == i);
       }
 
       //! Return consecutive index in enclosing grid
