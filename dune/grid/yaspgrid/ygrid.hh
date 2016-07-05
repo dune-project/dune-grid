@@ -87,6 +87,18 @@ namespace Dune {
       std::fill(_max.begin(), _max.end(), 0);
     }
 
+    void init()
+    {
+      // compute superincrements and setup _max
+      int inc = 1;
+      for (int i=0; i<d; ++i)
+        {
+          _superincrement[i] = inc;
+          inc *= _supersize[i];
+          _max[i] = _origin[i] + this->size(i) - 1;
+        }
+    }
+
     /** @brief make ygrid without coordinate information
      *  @param origin origin of the grid in global coordinates
      *  @param size size of the grid
@@ -97,14 +109,7 @@ namespace Dune {
     YGridComponent(iTupel origin, iTupel size)
       : _origin(origin), _size(size)
     {
-      // compute superincrements
-      int inc = 1;
-      for (int i=0; i<d; ++i)
-        {
-          _superincrement[i] = inc;
-          inc *= _supersize[i];
-          _max[i] = _origin[i] + this->size(i) - 1;
-        }
+      init();
     }
 
     /** @brief make a subgrid by taking coordinates from a larger grid
@@ -118,14 +123,7 @@ namespace Dune {
       for (int i=0; i<d; i++)
         _offset[i] = origin[i] - enclosing.origin(i) + enclosing.offset(i);
 
-      // compute superincrements
-      int inc = 1;
-      for (int i=0; i<d; ++i)
-        {
-          _superincrement[i] = inc;
-          inc *= _supersize[i];
-          _max[i] = _origin[i] + this->size(i) - 1;
-        }
+      init();
     }
 
     /** @brief Make YGridComponent by giving all parameters
@@ -139,14 +137,7 @@ namespace Dune {
     YGridComponent (iTupel origin, std::bitset<d> shift, Coordinates* coords, iTupel size, iTupel offset, iTupel supersize)
       : _origin(origin), _shift(shift), _coords(coords), _size(size), _offset(offset), _supersize(supersize)
     {
-      // compute superincrements
-      int inc = 1;
-      for (int i=0; i<d; ++i)
-        {
-          _superincrement[i] = inc;
-          inc *= _supersize[i];
-          _max[i] = _origin[i] + this->size(i) - 1;
-        }
+      init();
     }
 
     //! Return origin in direction i
