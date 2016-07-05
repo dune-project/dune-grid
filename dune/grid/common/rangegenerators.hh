@@ -25,8 +25,6 @@ namespace Dune
    *
    * <h2>Range-based for loop</h2>
    *
-   * \note Range-based for loops are available in GCC 4.6+, Clang 3.2+ and Intel ICC 13+.
-   *
    * A range-based for loop is a short-hand way of iterating over any object that provides the standard
    * begin() and end() methods. It looks like this:
    *
@@ -39,12 +37,8 @@ namespace Dune
    * You can also specify the exact type of the variable, but it is normally much easier to let the compiler
    * do that for you using `auto`.
    *
-   * \note Due to a number of upcoming changes to our grid interface, you should **always**
-   *       use `const auto&&` to capture the Entity / Intersection type. Otherwise, your code will
-   *       break after the release of DUNE 2.4!
-   *
    * \note We are aware that people like Bjarne Stroustrup and Herb
-   *       Sutter advertise the use `auto&&`. Sadly GCC has a bug (see
+   *       Sutter advertise the use `auto&&`. Sadly GCC prior to version 6 has a bug (see
    *       https://gcc.gnu.org/bugzilla/show_bug.cgi?id=63506), which
    *       prevents the use of `auto&&` in template functions. For this reason
    *       we currently advice the use of `const auto&`.
@@ -231,7 +225,6 @@ namespace Dune
    *
    * \sa elements(const GV&,PartitionSet<partitions>)
    *
-   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the elements.
    * \returns    an unspecified object that is guaranteed to fulfil the interface
@@ -266,7 +259,6 @@ namespace Dune
    *
    * \sa facets(const GV&,PartitionSet<partitions>)
    *
-   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the facets.
    * \returns    an unspecified object that is guaranteed to fulfil the interface
@@ -301,7 +293,6 @@ namespace Dune
    *
    * \sa edges(const GV&,PartitionSet<partitions>)
    *
-   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the edges.
    * \returns    an unspecified object that is guaranteed to fulfil the interface
@@ -336,7 +327,6 @@ namespace Dune
    *
    * \sa vertices(const GV&,PartitionSet<partitions>)
    *
-   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the vertices.
    * \returns    an unspecified object that is guaranteed to fulfil the interface
@@ -371,7 +361,6 @@ namespace Dune
    * }
    * \endcode
    *
-   * \since      GCC 4.6
    * \relates    GridView
    * \relates    Entity
    * \param gv   the GridView to use for determining interior intesections.
@@ -412,7 +401,6 @@ namespace Dune
    *       call this function with an entity of higher codimension will result in a compile
    *       time error.
    *
-   * \since      GCC 4.6
    * \relates         Entity
    * \param e         the Entity whose descendants should be iterated over.
    * \param maxLevel  the maximum grid level for which to return descendants. Elements with
@@ -451,7 +439,7 @@ namespace Dune
    *
    * \remark This function allows you to write loops that are parameterized on the codimension of
    *         the entities. While this allows for extra flexibility (for e.g. some codimension-agnostic
-   *         algorithms), it reduces the code readibility. If you don't need this flexibility, consider
+   *         algorithms), it reduces the code readability. If you don't need this flexibility, consider
    *         using elements(), facets(), edges() or vertices() instead.
    *
    * \remark This is the default version of the entities() function. It will always iterate over all
@@ -465,7 +453,6 @@ namespace Dune
    * \sa entities(const GV&,Codim<codim>,PartitionSet<partitions>)
    * \sa entities(const GV&,Dim<dim>)
    *
-   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the entities.
    * \param cd   a Codim object that is used to specify the codimension of the entities by means
@@ -497,7 +484,7 @@ namespace Dune
 
    * \remark This function allows you to write loops that are parameterized on the codimension of
    *         the entities. While this allows for extra flexibility (for e.g. some codimension-agnostic
-   *         algorithms), it reduces the code readibility. If you don't need this flexibility, consider
+   *         algorithms), it reduces the code readability. If you don't need this flexibility, consider
    *         using elements(), facets(), edges() or vertices() instead.
    *
    * \remark This is the default version of the entities() function. It will always iterate over all
@@ -511,7 +498,6 @@ namespace Dune
    * \sa entities(const GV&,Dim<dim>,PartitionSet<partitions>)
    * \sa entities(const GV&,Codim<codim>)
    *
-   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the entities.
    * \param d    a Dim object that is used to specify the dimension of the entities by means
@@ -551,7 +537,6 @@ namespace Dune
    *
    * \sa elements(const GV&)
    *
-   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the elements.
    * \param ps   a PartitionSet object that is used to specify the set of Dune::PartitionType to which
@@ -583,7 +568,6 @@ namespace Dune
    *
    * \sa facets(const GV&)
    *
-   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the facets.
    * \param ps   a PartitionSet object that is used to specify the set of Dune::PartitionType to which
@@ -618,7 +602,6 @@ namespace Dune
    *
    * \sa edges(const GV&)
    *
-   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the edges.
    * \param ps   a PartitionSet object that is used to specify the set of Dune::PartitionType to which
@@ -650,7 +633,6 @@ namespace Dune
    *
    * \sa vertices(const GV&)
    *
-   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the vertices.
    * \param ps   a PartitionSet object that is used to specify the set of Dune::PartitionType to which
@@ -688,7 +670,7 @@ namespace Dune
    *
    * \remark This function allows you to write loops that are parameterized on the codimension of
    *         the entities. While this allows for extra flexibility (for e.g. some codimension-agnostic
-   *         algorithms), it reduces the code readibility. If you don't need this flexibility, consider
+   *         algorithms), it reduces the code readability. If you don't need this flexibility, consider
    *         using elements(), facets(), edges() or vertices() instead.
    *
    * \remark If you have to iterate over entities with a specific *dimension*, consider using
@@ -698,7 +680,6 @@ namespace Dune
    * \sa entities(const GV&,Codim<codim>)
    * \sa entities(const GV&,Dim<dim>,PartitionSet<partitions>)
    *
-   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the entities.
    * \param cd   a Codim object that is used to specify the codimension of the entities by means
@@ -730,7 +711,7 @@ namespace Dune
    *
    * \remark This function allows you to write loops that are parameterized on the dimension of
    *         the entities. While this allows for extra flexibility (for e.g. some codimension-agnostic
-   *         algorithms), it reduces the code readibility. If you don't need this flexibility, consider
+   *         algorithms), it reduces the code readability. If you don't need this flexibility, consider
    *         using elements(), facets(), edges() or vertices() instead.
    *
    * \remark If you have to iterate over entities with a specific *codimension*, consider using
@@ -740,7 +721,6 @@ namespace Dune
    * \sa entities(const GV&,Dim<dim>)
    * \sa entities(const GV&,Codim<codim>,PartitionSet<partitions>)
    *
-   * \since      GCC 4.6
    * \relates    GridView
    * \param gv   a GridView object that contains the entities.
    * \param d    a Dim object that is used to specify the dimension of the entities by means
