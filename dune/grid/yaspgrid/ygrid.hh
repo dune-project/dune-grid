@@ -96,7 +96,16 @@ namespace Dune {
      */
     YGridComponent(iTupel origin, iTupel size)
       : _origin(origin), _size(size)
-    {}
+    {
+      // compute superincrements
+      int inc = 1;
+      for (int i=0; i<d; ++i)
+        {
+          _superincrement[i] = inc;
+          inc *= _supersize[i];
+          _max[i] = _origin[i] + this->size(i) - 1;
+        }
+    }
 
     /** @brief make a subgrid by taking coordinates from a larger grid
      *  @param origin origin of the grid to be constructed
