@@ -84,6 +84,7 @@ namespace Dune {
       std::fill(_origin.begin(), _origin.end(), 0);
       std::fill(_offset.begin(), _offset.end(), 0);
       std::fill(_size.begin(), _size.end(), 0);
+      std::fill(_max.begin(), _max.end(), 0);
     }
 
     /** @brief make ygrid without coordinate information
