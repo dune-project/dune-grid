@@ -135,9 +135,8 @@ namespace Dune {
         {
           _superincrement[i] = inc;
           inc *= _supersize[i];
+          _max[i] = _origin[i] + this->size(i) - 1;
         }
-      for (int i = 0 ; i < d ; ++i)
-        _max[i] = _origin[i] + this->size(i) - 1;
     }
 
     //! Return origin in direction i
