@@ -1,0 +1,33 @@
+---
+before_script:
+  - duneci-install-module https://gitlab.dune-project.org/core/dune-common.git
+  - duneci-install-module https://gitlab.dune-project.org/core/dune-geometry.git
+  - duneci-install-module https://gitlab.dune-project.org/staging/dune-uggrid.git
+
+debian:9--gcc:
+  image: duneci/base:9
+  script:
+  - dunecontrol --current --opts=/duneci/opts.gcc all
+  - dunecontrol --current make build_tests
+  - cd build-cmake; duneci-ctest
+
+debian:9--clang:
+  image: duneci/base:9
+  script:
+  - dunecontrol --current --opts=/duneci/opts.clang all
+  - dunecontrol --current make build_tests
+  - cd build-cmake; duneci-ctest
+
+debian:8--gcc:
+  image: duneci/base:8
+  script:
+  - dunecontrol --current --opts=/duneci/opts.gcc all
+  - dunecontrol --current make build_tests
+  - cd build-cmake; duneci-ctest
+
+debian:8--clang:
+  image: duneci/base:8
+  script:
+  - dunecontrol --current --opts=/duneci/opts.clang all
+  - dunecontrol --current make build_tests
+  - cd build-cmake; duneci-ctest
