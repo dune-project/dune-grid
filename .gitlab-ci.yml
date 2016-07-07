@@ -1,21 +1,22 @@
 ---
 before_script:
   - pushd /duneci/modules
+  - ln -s /duneci/modules/dune-common/bin/dunecontrol /duneci/bin
   - git clone https://gitlab.dune-project.org/core/dune-common.git
   - git clone https://gitlab.dune-project.org/core/dune-geometry.git
-  - ./dune-common/bin/dunecontrol --opts=/duneci/opts.gcc all
+  - dunecontrol --opts=/duneci/opts.gcc all
   - popd
 
 debian:9--gcc:
   image: duneci/base:9
   script:
-  - /duneci/modules/dune-common/bin/dune-control --current --opts=/duneci/opts.gcc all
-  - /duneci/modules/dune-common/bin/dune-control --current make build_tests
+  - dunecontrol --current --opts=/duneci/opts.gcc all
+  - dunecontrol --current make build_tests
   - cd build-cmake; duneci-ctest
 
 debian:9--clang:
   image: duneci/base:9
   script:
-  - /duneci/modules/dune-common/bin/dune-control --current --opts=/duneci/opts.clang all
-  - /duneci/modules/dune-common/bin/dune-control --current make build_tests
+  - dunecontrol --current --opts=/duneci/opts.clang all
+  - dunecontrol --current make build_tests
   - cd build-cmake; duneci-ctest
