@@ -44,8 +44,9 @@ namespace Dune
                    const FieldVector<ctype,dimworld>& upperRight,
                    const std::array<unsigned int,dim>& elements)
     {
+      using std::abs;
       for(int d = 0; d < dimworld; ++d)
-        if(std::abs(lowerLeft[d]) > std::abs(upperRight[d])*1e-10)
+        if(abs(lowerLeft[d]) > abs(upperRight[d])*1e-10)
           DUNE_THROW(GridError, className<StructuredGridFactory>()
                      << "::createCubeGrid(): You have to use Yaspgrid<dim"
                      ", EquidistantOffsetCoordinates<ctype,dim> > as your"
