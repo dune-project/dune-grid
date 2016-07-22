@@ -175,7 +175,7 @@ namespace Dune
 
         for (IntersectionIterator iIt = gv.template ibegin(*eIt); iIt != gv.template iend(*eIt); ++iIt) {
           if (iIt->neighbor()) {
-            adjncy.push_back(globalIndex.index(*iIt->outside()));
+            adjncy.push_back(globalIndex.index(iIt->outside()));
 
             ++numNeighbors;
           }
