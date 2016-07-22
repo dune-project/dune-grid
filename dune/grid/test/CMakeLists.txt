@@ -10,17 +10,16 @@ dune_add_test(NAME test-geogrid-yaspgrid
                                   WORLDDIM=2
                                   YASPGRID)
 
-if(UG_FOUND)
-  dune_add_test(NAME test-geogrid-uggrid
-                SOURCES test-geogrid.cc
-                LINK_LIBRARIES dunegrid
-                COMPILE_DEFINITIONS COORDFUNCTION=IdenticalCoordFunction<double,2>
-                                    CACHECOORDFUNCTION=0
-                                    DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
-                                    GRIDDIM=2
-                                    WORLDDIM=2
-                                    UGGRID)
-endif()
+dune_add_test(NAME test-geogrid-uggrid
+              SOURCES test-geogrid.cc
+              LINK_LIBRARIES dunegrid
+              COMPILE_DEFINITIONS COORDFUNCTION=IdenticalCoordFunction<double,2>
+                                  CACHECOORDFUNCTION=0
+                                  DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
+                                  GRIDDIM=2
+                                  WORLDDIM=2
+                                  UGGRID
+              CMAKE_GUARD UG_FOUND)
 
 dune_add_test(SOURCES test-identitygrid.cc)
 
@@ -36,14 +35,14 @@ dune_add_test(SOURCES testiteratorranges.cc)
 
 dune_add_test(SOURCES test-hierarchicsearch.cc)
 
-if(UG_FOUND)
-  dune_add_test(SOURCES test-ug.cc)
+dune_add_test(SOURCES test-ug.cc
+              CMAKE_GUARD UG_FOUND)
 
-  dune_add_test(SOURCES test-parallel-ug.cc)
+dune_add_test(SOURCES test-parallel-ug.cc
+              CMAKE_GUARD UG_FOUND)
 
-  dune_add_test(SOURCES test-loadbalancing.cc
-                SKIP_ON_77)
-endif(UG_FOUND)
+dune_add_test(SOURCES test-loadbalancing.cc
+              CMAKE_GUARD UG_FOUND)
 
 # The alberta tests are only alibi-ported, until the  grid and world dimension
 # are configuretime parameters and we can treat alberta just as any other grid manager

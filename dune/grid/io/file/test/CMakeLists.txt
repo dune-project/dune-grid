@@ -23,14 +23,12 @@ dune_add_test(SOURCES vtktest.cc
 
 dune_add_test(SOURCES vtksequencetest.cc)
 
-if(AMIRAMESH_FOUND)
-  dune_add_test(SOURCES amirameshtest.cc)
-endif()
+dune_add_test(SOURCES amirameshtest.cc
+              CMAKE_GUARD AMIRAMESH_FOUND)
 
-if(UG_FOUND)
-  dune_add_test(SOURCES starcdreadertest.cc
-                COMPILE_DEFINITIONS DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
-endif()
+dune_add_test(SOURCES starcdreadertest.cc
+              COMPILE_DEFINITIONS DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
+              CMAKE_GUARD UG_FOUND)
 
 # the gmsh tests
 dune_add_test(NAME gmshtest-onedgrid
@@ -39,12 +37,11 @@ dune_add_test(NAME gmshtest-onedgrid
               COMPILE_DEFINITIONS GMSH_ONEDGRID
                                   DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
 
-if(HAVE_UG)
-  dune_add_test(NAME gmshtest-uggrid
-                SOURCES gmshtest.cc
-                COMPILE_DEFINITIONS GMSH_UGGRID
-                                    DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
-endif()
+dune_add_test(NAME gmshtest-uggrid
+              SOURCES gmshtest.cc
+              COMPILE_DEFINITIONS GMSH_UGGRID
+                                  DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
+              CMAKE_GUARD UG_FOUND)
 
 if(HAVE_ALBERTA)
   add_executable(gmshtest-alberta2d gmshtest.cc)

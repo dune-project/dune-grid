@@ -35,11 +35,10 @@ if(ALBERTA_FOUND)
   dune_add_test(TARGET test-dgf-alberta)
 endif(ALBERTA_FOUND)
 
-if(UG_FOUND)
-  dune_add_test(NAME test-dgf-ug
-                SOURCES test-dgf.cc
-                COMPILE_DEFINITIONS UGGRID
-                                    GRIDDIM=3
-                                    HAVE_DUNE_GRID=1
-                                    DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
-endif(UG_FOUND)
+dune_add_test(NAME test-dgf-ug
+              SOURCES test-dgf.cc
+              COMPILE_DEFINITIONS UGGRID
+                                  GRIDDIM=3
+                                  HAVE_DUNE_GRID=1
+                                  DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
+              CMAKE_GUARD UG_FOUND)
