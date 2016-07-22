@@ -13,8 +13,11 @@
 #include <dune/common/parametertree.hh>
 #include <dune/common/parametertreeparser.hh>
 
-#if HAVE_PARMETIS && defined(PARMETIS_MAJOR_VERSION)
-#include <dune/grid/utility/parmetisgridpartitioner.hh>
+#if HAVE_PARMETIS
+#include <parmetis.h>
+#  ifdef PARMETIS_MAJOR_VERSION
+#    include <dune/grid/utility/parmetisgridpartitioner.hh>
+#  endif
 #endif
 
 using namespace Dune;
@@ -80,6 +83,8 @@ int main(int argc, char** argv) try
 {
 #if ! (HAVE_PARMETIS && defined(PARMETIS_MAJOR_VERSION))
   // Skip test -- without ParMetis it doesn't do anything useful
+  std::cerr << "This test requires ParMetis.\n"
+            << "Note that the emulation layer provided by scotch is not sufficient.\n";
   return 77;
 #else
   // Create MPIHelper instance

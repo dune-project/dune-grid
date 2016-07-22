@@ -18,12 +18,11 @@
 
 #if HAVE_PARMETIS
 
+#include <parmetis.h>
+
 // only enable for ParMETIS because the implementation uses functions that
 // are not emulated by scotch
 #ifdef PARMETIS_MAJOR_VERSION
-
-#include <parmetis.h>
-
 
 namespace Dune
 {
