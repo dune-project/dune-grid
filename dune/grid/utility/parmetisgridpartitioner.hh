@@ -37,7 +37,7 @@ namespace Dune
     // define index type as provided by ParMETIS
 #if PARMETIS_MAJOR_VERSION > 3
     typedef idx_t idx_type;
-    typedef real_t real_type;
+    typedef ::real_t real_type;
 #else
     typedef int idx_type;
     typedef float real_type;
