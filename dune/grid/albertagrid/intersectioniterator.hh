@@ -28,7 +28,7 @@ namespace Dune
   public:
     typedef Dune::Intersection< GridImp, AlbertaGridLeafIntersection< GridImp > > Intersection;
 
-    static const int dimension = Intersection::dimension;
+    static const int dimension = Intersection::Entity::dimension;
 
     struct Begin {};
     struct End {};
