@@ -18,12 +18,11 @@
 
 #if HAVE_PARMETIS
 
+#include <parmetis.h>
+
 // only enable for ParMETIS because the implementation uses functions that
 // are not emulated by scotch
 #ifdef PARMETIS_MAJOR_VERSION
-
-#include <parmetis.h>
-
 
 namespace Dune
 {
@@ -38,7 +37,7 @@ namespace Dune
     // define index type as provided by ParMETIS
 #if PARMETIS_MAJOR_VERSION > 3
     typedef idx_t idx_type;
-    typedef real_t real_type;
+    typedef ::real_t real_type;
 #else
     typedef int idx_type;
     typedef float real_type;
@@ -176,7 +175,7 @@ namespace Dune
 
         for (IntersectionIterator iIt = gv.template ibegin(*eIt); iIt != gv.template iend(*eIt); ++iIt) {
           if (iIt->neighbor()) {
-            adjncy.push_back(globalIndex.index(*iIt->outside()));
+            adjncy.push_back(globalIndex.index(iIt->outside()));
 
             ++numNeighbors;
           }
