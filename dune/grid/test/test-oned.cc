@@ -15,56 +15,49 @@
 
 using namespace Dune;
 
-OneDGrid* testFactory()
+std::unique_ptr<OneDGrid> testFactory()
 {
   GridFactory<OneDGrid> factory;
 
   // Insert vertices
-  std::vector<FieldVector<double,1> > vertexPositions(7);
-  vertexPositions[0][0] = 0.6;    factory.insertVertex(vertexPositions[0]);
-  vertexPositions[1][0] = 1.0;    factory.insertVertex(vertexPositions[1]);
-  vertexPositions[2][0] = 0.2;    factory.insertVertex(vertexPositions[2]);
-  vertexPositions[3][0] = 0.0;    factory.insertVertex(vertexPositions[3]);
-  vertexPositions[4][0] = 0.4;    factory.insertVertex(vertexPositions[4]);
-  vertexPositions[5][0] = 0.3;    factory.insertVertex(vertexPositions[5]);
-  vertexPositions[6][0] = 0.7;    factory.insertVertex(vertexPositions[6]);
+  std::vector<FieldVector<double,1> > vertexPositions = {0.6, 1.0, 0.2, 0.0, 0.4, 0.3, 0.7};
+
+  for (auto&& pos : vertexPositions)
+    factory.insertVertex(pos);
 
   // Insert elements
   GeometryType segment(GeometryType::simplex,1);
-  std::vector<unsigned int> v(2);
-  v[0] = 6;  v[1] = 1;   factory.insertElement(segment, v);
-  v[0] = 4;  v[1] = 0;   factory.insertElement(segment, v);
-  v[0] = 0;  v[1] = 6;   factory.insertElement(segment, v);
-  v[0] = 5;  v[1] = 4;   factory.insertElement(segment, v);
-  v[0] = 3;  v[1] = 2;   factory.insertElement(segment, v);
-  v[0] = 2;  v[1] = 5;   factory.insertElement(segment, v);
+  factory.insertElement(segment, {6,1});
+  factory.insertElement(segment, {4,0});
+  factory.insertElement(segment, {0,6});
+  factory.insertElement(segment, {5,4});
+  factory.insertElement(segment, {3,2});
+  factory.insertElement(segment, {2,5});
 
   // Insert boundary segments
-  std::vector<unsigned int> s(1);
-  s[0] = 1;   factory.insertBoundarySegment(s);
-  s[0] = 3;   factory.insertBoundarySegment(s);
+  factory.insertBoundarySegment({1});
+  factory.insertBoundarySegment({3});
 
   // Create the grid
-  OneDGrid* grid = factory.createGrid();
+  std::unique_ptr<OneDGrid> grid(factory.createGrid());
 
   // //////////////////////////////////////////////////////////////
   //   Test whether the vertex numbering is in insertion order
   // //////////////////////////////////////////////////////////////
-  OneDGrid::Codim<1>::LevelIterator vIt    = grid->levelGridView(0).begin<1>();
-  OneDGrid::Codim<1>::LevelIterator vEndIt = grid->levelGridView(0).end<1>();
 
   const OneDGrid::LevelGridView::IndexSet& levelIndexSet = grid->levelGridView(0).indexSet();
   const OneDGrid::LeafGridView::IndexSet&  leafIndexSet  = grid->leafGridView().indexSet();
 
-  for (; vIt!=vEndIt; ++vIt) {
-    unsigned int idx = levelIndexSet.index(*vIt);
-    FieldVector<double,1> p = vIt->geometry().corner(0);
+  for (const auto& vertex : vertices(grid->levelGridView(0)))
+  {
+    auto idx = levelIndexSet.index(vertex);
+    FieldVector<double,1> p = vertex.geometry().corner(0);
     if ( (vertexPositions[idx] - p).two_norm() > 1e-6 )
       DUNE_THROW(GridError, "Vertex with level index " << idx << " should have position " << vertexPositions[idx]
                                                        << " but has position " << p << ".");
 
     // leaf index should be the same
-    if (idx != leafIndexSet.index(*vIt))
+    if (idx != leafIndexSet.index(vertex))
       DUNE_THROW(GridError, "Newly created OneDGrids should have matching level- and leaf vertex indices.");
   }
 
@@ -80,18 +73,16 @@ OneDGrid* testFactory()
   elementCenters[4] = 0.1;
   elementCenters[5] = 0.25;
 
-  OneDGrid::Codim<0>::LevelIterator eIt    = grid->levelGridView(0).begin<0>();
-  OneDGrid::Codim<0>::LevelIterator eEndIt = grid->levelGridView(0).end<0>();
-
-  for (; eIt!=eEndIt; ++eIt) {
-    unsigned int idx = levelIndexSet.index(*eIt);
-    FieldVector<double,1> p = eIt->geometry().center();
+  for (const auto& element : elements(grid->levelGridView(0)))
+  {
+    auto idx = levelIndexSet.index(element);
+    FieldVector<double,1> p = element.geometry().center();
     if ( (elementCenters[idx] - p).two_norm() > 1e-6 )
       DUNE_THROW(GridError, "Element with index " << idx << " should have center " << elementCenters[idx]
                                                   << " but has center " << p << ".");
 
     // leaf index should be the same
-    if (idx != leafIndexSet.index(*eIt))
+    if (idx != leafIndexSet.index(element))
       DUNE_THROW(GridError, "Newly created OneDGrids should have matching level- and leaf element indices.");
   }
 
@@ -100,24 +91,22 @@ OneDGrid* testFactory()
   // /////////////////////////////////////////////////////////////////////////
 
   typedef  OneDGrid::LeafGridView GridView;
-  typedef  GridView::IntersectionIterator IntersectionIterator;
   const GridView gridView = grid->leafGridView();
 
-  for (eIt = grid->levelGridView(0).begin<0>(); eIt!=eEndIt; ++eIt) {
-    IntersectionIterator iIt = gridView.ibegin(*eIt);
-    const IntersectionIterator iEndIt = gridView.iend(*eIt);
+  for (const auto& element : elements(grid->levelGridView(0)))
+  {
+    for (const auto& intersection : intersections(gridView, element))
+    {
 
-    for (; iIt!=iEndIt; ++iIt) {
+      if (intersection.boundary()) {
 
-      if (iIt->boundary()) {
-
-        if (iIt->boundarySegmentIndex()==0 && std::abs(iIt->geometry().corner(0)[0] - 1) > 1e-6)
+        if (intersection.boundarySegmentIndex()==0 && std::abs(intersection.geometry().corner(0)[0] - 1) > 1e-6)
           DUNE_THROW(GridError, "BoundarySegment with index 0 should have position 1,"
-                     << " but has " << iIt->geometry().corner(0) << ".");
+                     << " but has " << intersection.geometry().corner(0) << ".");
 
-        if (iIt->boundarySegmentIndex()==1 && std::abs(iIt->geometry().corner(0)[0]) > 1e-6)
+        if (intersection.boundarySegmentIndex()==1 && std::abs(intersection.geometry().corner(0)[0]) > 1e-6)
           DUNE_THROW(GridError, "BoundarySegment with index 1 should have position 0,"
-                     << " but has " << iIt->geometry().corner(0) << ".");
+                     << " but has " << intersection.geometry().corner(0) << ".");
 
       }
 
@@ -166,16 +155,15 @@ int main () try
   // Create a OneDGrid using the grid factory and test it
   std::unique_ptr<Dune::OneDGrid> factoryGrid(testFactory());
 
-  testOneDGrid(*factoryGrid.get());
+  testOneDGrid(*factoryGrid);
 
   // Create a OneDGrid with an array of vertex coordinates and test it
-  std::vector<double> coords(6);
-  coords[0] = -1;
-  coords[1] = -0.4;
-  coords[2] = 0.1;
-  coords[3] = 0.35;
-  coords[4] = 0.38;
-  coords[5] = 1;
+  std::vector<double> coords = {-1,
+                                -0.4,
+                                 0.1,
+                                 0.35,
+                                 0.38,
+                                 1};
 
   Dune::OneDGrid coordsGrid(coords);
 
