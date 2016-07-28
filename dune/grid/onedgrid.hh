@@ -23,7 +23,6 @@
 #include "onedgrid/onedgridlist.hh"
 #include "onedgrid/nulliteratorfactory.hh"
 #include "onedgrid/onedgridentity.hh"
-#include "onedgrid/onedgridentitypointer.hh"
 #include "onedgrid/onedgridentityseed.hh"
 #include "onedgrid/onedgridintersections.hh"
 #include "onedgrid/onedgridintersectioniterators.hh"
@@ -93,9 +92,6 @@ namespace Dune {
     // Grid and world dimension are hardwired in this grid
     enum {dim = 1};
     enum {dimworld = 1};
-
-    template <int, class >
-    friend class OneDGridEntityPointer;
 
     template <int , PartitionIteratorType, class >
     friend class OneDGridLevelIterator;

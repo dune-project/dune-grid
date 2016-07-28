@@ -9,8 +9,6 @@
 
 #include <stack>
 
-#include <dune/grid/onedgrid/onedgridentitypointer.hh>
-
 namespace Dune {
 
   //**********************************************************************
@@ -25,8 +23,7 @@ namespace Dune {
      starting from a given entity.
    */
   template<class GridImp>
-  class OneDGridHierarchicIterator :
-    public Dune::OneDGridEntityPointer <0,GridImp>
+  class OneDGridHierarchicIterator
   {
     enum { dim = GridImp::dimension };
     friend class OneDGridEntity<0,dim,GridImp>;
@@ -38,9 +35,12 @@ namespace Dune {
 
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
+    //! We iterating only over elements
+    enum {codimension = 0};
+
     //! Constructor
-    OneDGridHierarchicIterator(int maxlevel) : OneDGridEntityPointer<0,GridImp>(OneDGridNullIteratorFactory<1>::null()),
-                                               maxlevel_(maxlevel), elemStack()
+    OneDGridHierarchicIterator(int maxlevel)
+    : maxlevel_(maxlevel), elemStack()
     {}
 
     //! prefix increment
@@ -73,7 +73,18 @@ namespace Dune {
                                                                        ? OneDGridNullIteratorFactory<1>::null() : elemStack.top());
     }
 
+    //! dereferencing
+    const Entity& dereference() const {return virtualEntity_;}
+
+    //! equality
+    bool equals(const OneDGridHierarchicIterator<GridImp>& other) const {
+      return virtualEntity_ == other.virtualEntity_;
+    }
+
   private:
+
+    //! The entity that the iterator is pointing to
+    Entity virtualEntity_;
 
     //! max level to go down
     int maxlevel_;

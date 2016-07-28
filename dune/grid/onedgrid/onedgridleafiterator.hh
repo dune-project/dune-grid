@@ -3,10 +3,6 @@
 #ifndef DUNE_ONE_D_GRID_LEAFITERATOR_HH
 #define DUNE_ONE_D_GRID_LEAFITERATOR_HH
 
-#include <dune/common/tuples.hh>
-
-#include <dune/grid/onedgrid/onedgridentitypointer.hh>
-
 /** \file
  * \brief The OneDGridLeafIterator class
  */
@@ -17,14 +13,16 @@ namespace Dune {
    * \ingroup OneDGrid
    */
   template<int codim, PartitionIteratorType pitype, class GridImp>
-  class OneDGridLeafIterator :
-    public Dune::OneDGridEntityPointer <codim,GridImp>
+  class OneDGridLeafIterator
   {
     enum {dim = GridImp::dimension};
 
     friend class OneDGridEntity<codim,dim,GridImp>;
 
   public:
+
+    typedef typename GridImp::template Codim<codim>::Entity Entity;
+    enum {codimension = codim};
 
     OneDGridLeafIterator(const GridImp& grid) : grid_(&grid) {
 
@@ -50,6 +48,14 @@ namespace Dune {
         globalIncrement();
       } while (GridImp::getRealImplementation(this->virtualEntity_).target_
                && !GridImp::getRealImplementation(this->virtualEntity_).target_->isLeaf());
+    }
+
+    //! dereferencing
+    const Entity& dereference() const {return virtualEntity_;}
+
+    //! equality
+    bool equals(const OneDGridLeafIterator<codim,pitype,GridImp>& other) const {
+      return virtualEntity_ == other.virtualEntity_;
     }
 
   private:
@@ -78,6 +84,8 @@ namespace Dune {
     // /////////////////////////////////////
     const GridImp* grid_;
 
+    //! The entity that the iterator is pointing to
+    Entity virtualEntity_;
   };
 
 }  // namespace Dune
