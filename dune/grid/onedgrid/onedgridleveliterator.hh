@@ -9,8 +9,6 @@
 
 #include <dune/grid/common/gridenums.hh>
 
-#include <dune/grid/onedgrid/onedgridentitypointer.hh>
-
 namespace Dune {
 
 
@@ -23,8 +21,7 @@ namespace Dune {
    * \ingroup OneDGrid
    */
   template<int codim, PartitionIteratorType pitype, class GridImp>
-  class OneDGridLevelIterator :
-    public OneDGridEntityPointer <codim, GridImp>
+  class OneDGridLevelIterator
   {
   public:
     enum {dim=GridImp::dimension};
@@ -33,13 +30,15 @@ namespace Dune {
     friend class OneDGridEntity<0,dim,GridImp>;
 
     typedef typename GridImp::template Codim<codim>::Entity Entity;
+    enum {codimension = codim};
 
   protected:
 
     /** \brief Constructor from a given iterator */
     OneDGridLevelIterator<codim,pitype, GridImp>(OneDEntityImp<dim-codim>* it)
-      : OneDGridEntityPointer<codim, GridImp>(it)
-    {}
+    {
+      GridImp::getRealImplementation(virtualEntity_).setToTarget(it);
+    }
 
   public:
 
@@ -47,6 +46,19 @@ namespace Dune {
     void increment() {
       GridImp::getRealImplementation(this->virtualEntity_).setToTarget(GridImp::getRealImplementation(this->virtualEntity_).target_->succ_);
     }
+
+    //! dereferencing
+    const Entity& dereference() const {return virtualEntity_;}
+
+    //! equality
+    bool equals(const OneDGridLevelIterator<codim,pitype,GridImp>& other) const {
+      return virtualEntity_ == other.virtualEntity_;
+    }
+
+  protected:
+
+    //! The entity that the iterator is pointing to
+    Entity virtualEntity_;
   };
 
 }  // namespace Dune

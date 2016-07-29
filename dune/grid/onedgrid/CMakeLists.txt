@@ -1,6 +1,5 @@
 set(HEADERS nulliteratorfactory.hh
   onedgridentity.hh
-  onedgridentitypointer.hh
   onedgridentityseed.hh
   onedgridfactory.hh
   onedgridhieriterator.hh
