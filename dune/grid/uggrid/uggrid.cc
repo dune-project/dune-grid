@@ -483,7 +483,6 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
   //   Extract result from stack
   // //////////////////////////////
 
-  // Use reserve / push_back since EntityPointer is not default constructable
   childElements.clear();
   childElements.reserve(std::distance(list.begin(), list.end()));
   childElementSides.resize(childElements.size());

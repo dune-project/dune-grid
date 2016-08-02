@@ -3,11 +3,11 @@
 #ifndef DUNE_UGGRIDLEVELITERATOR_HH
 #define DUNE_UGGRIDLEVELITERATOR_HH
 
-#include <dune/grid/uggrid/uggridentitypointer.hh>
-
 /** \file
  * \brief The UGGridLevelIterator class
  */
+
+#include <dune/grid/uggrid/uggridentity.hh>
 
 namespace Dune {
 
@@ -19,8 +19,7 @@ namespace Dune {
    * \ingroup UGGrid
    */
   template<int codim, PartitionIteratorType pitype, class GridImp>
-  class UGGridLevelIterator :
-    public Dune::UGGridEntityPointer <codim,GridImp>
+  class UGGridLevelIterator
   {
     enum {dim = GridImp::dimension};
 
@@ -33,11 +32,12 @@ namespace Dune {
   public:
 
     typedef typename GridImp::template Codim<codim>::Entity Entity;
+    enum {codimension = codim};
 
     //! Constructor
     explicit UGGridLevelIterator()
     {
-      this->virtualEntity_.setToTarget(nullptr,nullptr);
+      virtualEntity_.setToTarget(nullptr,nullptr);
     }
 
     //! Constructor
@@ -47,33 +47,41 @@ namespace Dune {
       assert(theGrid);
       if (codim==dim) {
         if (pitype==All_Partition || pitype==Ghost_Partition)
-          this->virtualEntity_.setToTarget((UGEntity*)UG_NS<dim>::PFirstNode(theGrid),gridImp_);
+          virtualEntity_.setToTarget((UGEntity*)UG_NS<dim>::PFirstNode(theGrid),gridImp_);
         else
-          this->virtualEntity_.setToTarget((UGEntity*)UG_NS<dim>::FirstNode(theGrid),gridImp_);
+          virtualEntity_.setToTarget((UGEntity*)UG_NS<dim>::FirstNode(theGrid),gridImp_);
 
       }
       else if (codim==0) {
         if (pitype==All_Partition || pitype==Ghost_Partition)
-          this->virtualEntity_.setToTarget((UGEntity*)UG_NS<dim>::PFirstElement(theGrid),gridImp_);
+          virtualEntity_.setToTarget((UGEntity*)UG_NS<dim>::PFirstElement(theGrid),gridImp_);
         else
-          this->virtualEntity_.setToTarget((UGEntity*)UG_NS<dim>::FirstElement(theGrid),gridImp_);
+          virtualEntity_.setToTarget((UGEntity*)UG_NS<dim>::FirstElement(theGrid),gridImp_);
       }
       else
         DUNE_THROW(NotImplemented, "UGGrid level iterators for codimension " << codim);
 
-      if (this->virtualEntity_.getTarget() && !entityOK_())
+      if (virtualEntity_.getTarget() && !entityOK_())
         increment();
     }
 
     //! prefix increment
     void increment()
     {
-      assert(this->level() == UG_NS<dim>::myLevel(this->virtualEntity_.getTarget()));
+      assert(virtualEntity_.level() == UG_NS<dim>::myLevel(virtualEntity_.getTarget()));
       // Increment
       do {
-        this->virtualEntity_.setToTarget(UG_NS<dim>::succ(this->virtualEntity_.getTarget()),gridImp_);
+        virtualEntity_.setToTarget(UG_NS<dim>::succ(virtualEntity_.getTarget()),gridImp_);
       }
-      while (this->virtualEntity_.getTarget() && !entityOK_());
+      while (virtualEntity_.getTarget() && !entityOK_());
+    }
+
+    //! dereferencing
+    const Entity& dereference() const {return virtualEntity_;}
+
+    //! equality
+    bool equals(const UGGridLevelIterator<codim,pitype,GridImp>& other) const {
+      return virtualEntity_ == other.virtualEntity_;
     }
 
   private:
@@ -83,7 +91,7 @@ namespace Dune {
      */
     bool entityOK_()
     {
-      Dune::PartitionType entityPIType = this->virtualEntity_.partitionType();
+      Dune::PartitionType entityPIType = virtualEntity_.partitionType();
       switch (pitype) {
       case All_Partition:
         return true;
@@ -114,6 +122,8 @@ namespace Dune {
     // /////////////////////////////////////
     const GridImp* gridImp_;
 
+    //! The makeable entity that the iterator is pointing to
+    UGMakeableEntity<codim,dim,GridImp> virtualEntity_;
   };
 
 }  // namespace Dune

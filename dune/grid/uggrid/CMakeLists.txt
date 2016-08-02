@@ -17,7 +17,6 @@ exclude_all_but_from_headercheck(
 
 set(HEADERS
   uggridfactory.hh
-  uggridentitypointer.hh
   uggridentityseed.hh
   uggridentity.hh
   uggridgeometry.hh
