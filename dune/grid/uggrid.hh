@@ -113,7 +113,6 @@
 #include "uggrid/uggridgeometry.hh"
 #include "uggrid/uggridlocalgeometry.hh"
 #include "uggrid/uggridentity.hh"
-#include "uggrid/uggridentitypointer.hh"
 #include "uggrid/uggridentityseed.hh"
 #include "uggrid/uggridintersections.hh"
 #include "uggrid/uggridintersectioniterators.hh"
@@ -260,8 +259,6 @@ namespace Dune {
     friend class UGGridLeafIterator;
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
     friend class UGGridLevelIterator;
-    template <int codim_, class GridImp_>
-    friend class UGGridEntityPointer;
 
     /** \brief UGGrid is only implemented for 2 and 3 dimension */
     static_assert(dim==2 || dim==3, "Use UGGrid only for 2d and 3d!");

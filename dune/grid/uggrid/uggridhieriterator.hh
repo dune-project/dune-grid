@@ -9,8 +9,6 @@
 
 #include <stack>
 
-#include <dune/grid/uggrid/uggridentitypointer.hh>
-
 namespace Dune {
 
   //**********************************************************************
@@ -26,14 +24,16 @@ namespace Dune {
    */
 
   template<class GridImp>
-  class UGGridHierarchicIterator :
-    public Dune::UGGridEntityPointer <0,GridImp>
+  class UGGridHierarchicIterator
   {
 
     friend class UGGridEntity<0,GridImp::dimension,GridImp>;
 
   public:
     typedef typename GridImp::template Codim<0>::Entity Entity;
+
+    //! iterate only over elements
+    enum {codimension = 0};
 
     //! the default Constructor
     UGGridHierarchicIterator(int maxLevel, const GridImp* gridImp)
@@ -42,6 +42,18 @@ namespace Dune {
     {}
 
     void increment();
+
+    //! dereferencing
+    const Entity& dereference() const {return virtualEntity_;}
+
+    //! equality
+    bool equals(const UGGridHierarchicIterator<GridImp>& other) const {
+      return virtualEntity_ == other.virtualEntity_;
+    }
+
+  private:
+    //! The makeable entity that the iterator is pointing to
+    UGMakeableEntity<0,GridImp::dimension,GridImp> virtualEntity_;
 
     //! max level to go down
     int maxlevel_;
