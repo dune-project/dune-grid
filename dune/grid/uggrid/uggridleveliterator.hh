@@ -7,6 +7,8 @@
  * \brief The UGGridLevelIterator class
  */
 
+#include <dune/grid/uggrid/uggridentity.hh>
+
 namespace Dune {
 
   //**********************************************************************

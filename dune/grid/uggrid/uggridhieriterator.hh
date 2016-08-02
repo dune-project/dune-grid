@@ -9,6 +9,8 @@
 
 #include <stack>
 
+#include <dune/grid/uggrid/uggridentity.hh>
+
 namespace Dune {
 
   //**********************************************************************

@@ -7,6 +7,8 @@
  * \brief The UGGridLeafIterator class
  */
 
+#include <dune/grid/uggrid/uggridentity.hh>
+
 namespace Dune {
 
   /** \brief Iterator over all entities of a given codimension and level of a grid.
