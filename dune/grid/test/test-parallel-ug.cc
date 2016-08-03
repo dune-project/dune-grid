@@ -124,35 +124,27 @@ private:
 template <class GridView>
 void checkIntersections(const GridView &gv)
 {
-  typedef typename GridView::template Codim<0>::Iterator Iterator;
-  typedef typename GridView::IntersectionIterator IntersectionIterator;
-
-  Iterator it = gv.template begin<0>();
-  const Iterator &endIt = gv.template end<0>();
-  // check the intersections
-  for (; it != endIt; ++it) {
-    if (it->partitionType() == Dune::GhostEntity)
+  for (const auto& element : elements(gv)) {
+    if (element.partitionType() == Dune::GhostEntity)
       continue;
 
-    IntersectionIterator isIt           = gv.ibegin(*it);
-    const IntersectionIterator &isEndIt = gv.iend(*it);
     unsigned int n = 0;
-    for (; isIt != isEndIt; ++isIt) {
-      isIt->boundary();
-      isIt->inside();
-      if (isIt->neighbor()) {
-        isIt->outside();
+    for (const auto& intersection : intersections(gv, element)) {
+      intersection.boundary();
+      intersection.inside();
+      if (intersection.neighbor()) {
+        intersection.outside();
       }
 
       ++ n;
     }
 
-    if (n != it->subEntities(1))
+    if (n != element.subEntities(1))
     {
 
       DUNE_THROW(Dune::InvalidStateException,
                  "Number of faces for non-ghost cell incorrect. Is "
-                 << n << " but should be " << it->subEntities(1));
+                 << n << " but should be " << element.subEntities(1));
     }
   }
 }
@@ -161,15 +153,10 @@ void checkIntersections(const GridView &gv)
 template <int codim, class GridView>
 void checkMappers(const GridView &gridView)
 {
-  typename GridView::template Codim<codim>::Iterator
-  it = gridView.template begin<codim>();
-  const typename GridView::template Codim<codim>::Iterator
-  &endIt = gridView.template end<codim>();
-
   // make sure the number of entities is the same for
   // gridView.size() and iterating through the grid
   int numEntities = 0;
-  for (; it != endIt; ++it)
+  for (DUNE_UNUSED const auto& entity : entities(gridView, Dune::Codim<codim>()))
     ++ numEntities;
   if (numEntities != gridView.size(codim)) {
     DUNE_THROW(InvalidStateException,
@@ -185,9 +172,8 @@ void checkMappers(const GridView &gridView)
 
   // make sure no entity has two indices
   std::vector<int> indices(numEntities, -100);
-  it = gridView.template begin<codim>();
-  for (; it != endIt; ++it) {
-    int i = mapper.index(*it);
+  for (const auto& entity : entities(gridView, Dune::Codim<codim>())) {
+    int i = mapper.index(entity);
     if (i < 0 || i >= numEntities) {
       DUNE_THROW(InvalidStateException,
                  gridView.comm().rank() + 1
@@ -259,13 +245,9 @@ void testCommunication(const GridView &gridView, bool isLeaf, bool printVTK=fals
 
   // write the partition type of each entity into the corrosponding
   // result array
-  typename GridView::template Codim<commCodim>::Iterator
-  it = gridView.template begin<commCodim>();
-  const typename GridView::template Codim<commCodim>::Iterator
-  &endIt = gridView.template end<commCodim>();
-  for (; it != endIt; ++it) {
-    entityIndex[mapper.index(*it)]   = mapper.index(*it);
-    partitionType[mapper.index(*it)] = it->partitionType();
+  for (const auto& entity : entities(gridView, Dune::Codim<commCodim>())) {
+    entityIndex[mapper.index(entity)]   = mapper.index(entity);
+    partitionType[mapper.index(entity)] = entity.partitionType();
   }
 
   // initialize data handle (marks the nodes where some data was
@@ -341,29 +323,23 @@ public:
 
     // write the partition type of each entity into the corresponding
     // result array
-    typename GridView::template Codim<0>::Iterator
-    it = gridView.template begin<0>();
-    const typename GridView::template Codim<0>::Iterator
-    &endIt = gridView.template end<0>();
-    for (; it != endIt; ++it) {
-      int numberOfSubEntities = it->subEntities(commCodim);
+    for (const auto& element : elements(gridView)) {
+      int numberOfSubEntities = element.subEntities(commCodim);
       for (int k = 0; k < numberOfSubEntities; k++)
       {
         typedef typename GridView::template Codim<0>::Entity Element;
         typedef typename Element::template Codim<commCodim>::Entity Entity;
-        const Entity entity(it->template subEntity<commCodim>(k));
+        const Entity entity(element.template subEntity<commCodim>(k));
         entityIndex[mapper.index(entity)]   = mapper.index(entity);
         partitionType[mapper.index(entity)] = entity.partitionType();
 
         if (entity.partitionType() == Dune::BorderEntity)
         {
-          const typename Element::Geometry& geometry = it->geometry();
-          Dune::GeometryType gt = geometry.type();
+          const auto geometry = element.geometry();
+          const auto gt = geometry.type();
 
-          const typename Dune::ReferenceElementContainer<double, dim>::value_type&
-          referenceElement = Dune::ReferenceElements<double, dim>::general(gt);
-          const Dune::FieldVector<double, dim>&
-          entityGlobal = geometry.global(referenceElement.position(k, commCodim));
+          const auto& referenceElement = Dune::ReferenceElements<double, dim>::general(gt);
+          const auto entityGlobal = geometry.global(referenceElement.position(k, commCodim));
           std::cout << gridView.comm().rank()+1 << ": border codim "
                     << commCodim << " entity "
                     << mapper.index(entity) << " (" << entityGlobal
@@ -451,17 +427,13 @@ public:
     std::vector<Position> dataVector(grid.leafGridView().size(commCodim));
 
     // fill the data vector
-    typedef typename Grid::LeafGridView LeafGV;
-    typedef typename LeafGV::template Codim<commCodim>::template Partition
-    <Dune::InteriorBorder_Partition>::Iterator Iterator;
-    const LeafGV& gv = grid.leafGridView();
-    Iterator it = gv.template begin<commCodim, Dune::InteriorBorder_Partition>();
-    const Iterator& endIt = gv.template end<commCodim, Dune::InteriorBorder_Partition>();
-    for (; it != endIt; ++it) {
-      int index = gv.indexSet().index(*it);
+    const auto& gv = grid.leafGridView();
+    for (const auto& entity : entities(gv, Dune::Codim<commCodim>(),
+                                       Dune::Partitions::interiorBorder)) {
+      int index = gv.indexSet().index(entity);
 
       // assign the position of the entity to the entry in the vector
-      dataVector[index] = it->geometry().center();
+      dataVector[index] = entity.geometry().center();
     }
 
     // balance the grid and the data
@@ -469,11 +441,11 @@ public:
     grid.loadBalance(dataHandle);
 
     // check for correctness
-    it = gv.template begin<commCodim, Dune::InteriorBorder_Partition>();
-    for (; it != endIt; ++it) {
-      int index = gv.indexSet().index(*it);
+    for (const auto& entity : entities(gv, Dune::Codim<commCodim>(),
+                                       Dune::Partitions::interiorBorder)) {
+      int index = gv.indexSet().index(entity);
 
-      const Position& position = it->geometry().center();
+      const auto position = entity.geometry().center();
 
       // compare the position with the balanced data
       for (int k = 0; k < dim; k++)
@@ -508,9 +480,9 @@ void testParallelUG(bool localRefinement)
 
   Dune::FieldVector<double,dim> lowerLeft(0);
   Dune::FieldVector<double,dim> upperRight(1);
-  std::array<unsigned int, dim> elements;
-  std::fill(elements.begin(), elements.end(), 4);
-  std::shared_ptr<GridType> grid = structuredGridFactory.createCubeGrid(lowerLeft, upperRight, elements);
+  std::array<unsigned int, dim> numElements;
+  std::fill(numElements.begin(), numElements.end(), 4);
+  std::shared_ptr<GridType> grid = structuredGridFactory.createCubeGrid(lowerLeft, upperRight, numElements);
 
   //////////////////////////////////////////////////////
   // Distribute the grid
@@ -565,18 +537,18 @@ void testParallelUG(bool localRefinement)
   checkMappersWrapper<dim, 3, LeafGV>::check(leafGridView);
 
   // Test element and node communication on level view
-  testCommunication<typename GridType::LevelGridView, 0>(level0GridView, false);
-  testCommunication<typename GridType::LevelGridView, dim>(level0GridView, false);
-  EdgeAndFaceCommunication<typename GridType::LevelGridView, dim-1>::test(level0GridView);
+  testCommunication<LevelGV, 0>(level0GridView, false);
+  testCommunication<LevelGV, dim>(level0GridView, false);
+  EdgeAndFaceCommunication<LevelGV, dim-1>::test(level0GridView);
   if (dim == 3)
-    EdgeAndFaceCommunication<typename GridType::LevelGridView, 1>::test(level0GridView);
+    EdgeAndFaceCommunication<LevelGV, 1>::test(level0GridView);
 
   // Test element and node communication on leaf view
-  testCommunication<typename GridType::LeafGridView, 0>(leafGridView, true);
-  testCommunication<typename GridType::LeafGridView, dim>(leafGridView, true);
-  EdgeAndFaceCommunication<typename GridType::LeafGridView, dim-1>::test(leafGridView);
+  testCommunication<LeafGV, 0>(leafGridView, true);
+  testCommunication<LeafGV, dim>(leafGridView, true);
+  EdgeAndFaceCommunication<LeafGV, dim-1>::test(leafGridView);
   if (dim == 3)
-    EdgeAndFaceCommunication<typename GridType::LeafGridView, 1>::test(leafGridView);
+    EdgeAndFaceCommunication<LeafGV, 1>::test(leafGridView);
 
   ////////////////////////////////////////////////////
   //  Refine globally and test again
@@ -592,14 +564,10 @@ void testParallelUG(bool localRefinement)
     std::cout << "Local refinement\n";
 
     // mark all elements with x-coordinate < 0.5 for refinement
-    typename LeafGV::template Codim<0>::Iterator
-    it = grid->leafGridView().template begin<0>();
-    const typename LeafGV::template Codim<0>::Iterator
-    &endIt = grid->leafGridView().template end<0>();
-    for (; it != endIt; ++it) {
+    for (const auto& element : elements(grid->leafGridView())) {
       int nRefine = 1;
-      if (it->geometry().center()[0] < 0.5)
-        grid->mark(nRefine, *it);
+      if (element.geometry().center()[0] < 0.5)
+        grid->mark(nRefine, element);
     }
 
     // adapt the grid
@@ -630,25 +598,24 @@ void testParallelUG(bool localRefinement)
 
   for (int i=0; i<=grid->maxLevel(); i++)
   {
-    testCommunication<typename GridType::LevelGridView, 0>(grid->levelGridView(i), false);
-    testCommunication<typename GridType::LevelGridView, dim>(grid->levelGridView(i), false);
-    EdgeAndFaceCommunication<typename GridType::LevelGridView, dim-1>::test(grid->levelGridView(i));
+    testCommunication<LevelGV, 0>(grid->levelGridView(i), false);
+    testCommunication<LevelGV, dim>(grid->levelGridView(i), false);
+    EdgeAndFaceCommunication<LevelGV, dim-1>::test(grid->levelGridView(i));
     if (dim == 3)
-      EdgeAndFaceCommunication<typename GridType::LevelGridView, 1>::test(grid->levelGridView(i));
+      EdgeAndFaceCommunication<LevelGV, 1>::test(grid->levelGridView(i));
   }
-  testCommunication<typename GridType::LeafGridView, 0>(grid->leafGridView(), true);
-  testCommunication<typename GridType::LeafGridView, dim>(grid->leafGridView(), true);
-  EdgeAndFaceCommunication<typename GridType::LeafGridView, dim-1>::test(grid->leafGridView());
+  testCommunication<LeafGV, 0>(grid->leafGridView(), true);
+  testCommunication<LeafGV, dim>(grid->leafGridView(), true);
+  EdgeAndFaceCommunication<LeafGV, dim-1>::test(grid->leafGridView());
   if (dim == 3)
-    EdgeAndFaceCommunication<typename GridType::LeafGridView, 1>::test(grid->leafGridView());
+    EdgeAndFaceCommunication<LeafGV, 1>::test(grid->leafGridView());
 
 }
 
 int main (int argc , char **argv) try
 {
   // initialize MPI, finalize is done automatically on exit
-  Dune::MPIHelper &mpiHelper =
-    Dune::MPIHelper::instance(argc, argv);
+  auto &mpiHelper = Dune::MPIHelper::instance(argc, argv);
 
   std::cout << "This is process "
             << mpiHelper.rank() + 1
