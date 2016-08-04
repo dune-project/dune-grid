@@ -78,11 +78,6 @@ find_package(UG 3.11.0
   NO_MODULE
   NO_SYSTEM_ENVIRONMENT_PATH)
 
-if(UG_FOUND AND (NOT UG_FOR_DUNE STREQUAL "yes"))
-  message(WARNING "UG was not configured for DUNE. Did you pass --enable-dune to its configure?")
-  set(UG_FOUND "UG_FOUND-NOTFOUND")
-endif()
-
 set(HAVE_UG ${UG_FOUND})
 
 if(UG_FOUND)
