@@ -41,10 +41,6 @@
    But we also need the headers twice!  Once with UG_DIM_2 set and once with UG_DIM_3!
    So here we go:*/
 
-/* The following define tells the UG headers that we want access to a few
-   special fields, for example the extra index fields in the element data structures. */
-#define FOR_DUNE
-
 // Set UG's space-dimension flag to 2d
 #ifdef UG_USE_NEW_DIMENSION_DEFINES
 #define UG_DIM_2
@@ -107,7 +103,6 @@
 #else
 #undef _3
 #endif
-#undef FOR_DUNE
 
 // The components of the UGGrid interface
 #include "uggrid/uggridgeometry.hh"
