@@ -10,16 +10,14 @@ dune_add_test(SOURCES gnuplottest.cc)
 
 dune_add_test(SOURCES nonconformboundaryvtktest.cc)
 
-dune_add_test(SOURCES printgridtest.cc SKIP_ON_77)
+dune_add_test(SOURCES printgridtest.cc)
 
 dune_add_test(NAME subsamplingvtktest
-              SOURCES subsamplingvtktest.cc test-linking.cc
-              SKIP_ON_77)
+              SOURCES subsamplingvtktest.cc test-linking.cc)
 
 dune_add_test(SOURCES vtktest.cc
               MPI_RANKS 1 2
-              TIMEOUT 600
-              SKIP_ON_77)
+              TIMEOUT 600)
 
 dune_add_test(SOURCES vtksequencetest.cc)
 
