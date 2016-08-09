@@ -90,7 +90,7 @@ namespace Dune
       eptr.push_back(numVertices);
 
       for (InteriorElementIterator eIt = gv.template begin<0, Interior_Partition>(); eIt != gv.template end<0, Interior_Partition>(); ++eIt) {
-        const int curNumVertices = ReferenceElements<double, dimension>::general(eIt->type()).size(dimension);
+        const size_t curNumVertices = ReferenceElements<double, dimension>::general(eIt->type()).size(dimension);
 
         numVertices += curNumVertices;
         eptr.push_back(numVertices);
