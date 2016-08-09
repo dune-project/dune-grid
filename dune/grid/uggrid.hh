@@ -284,6 +284,9 @@ namespace Dune {
     //! The type used to store coordinates
     typedef UG::DOUBLE ctype;
 
+    //! The type used for process ranks
+    typedef unsigned int Rank;
+
     /** \brief Default constructor
      *
      * Uses the default heapsize, which can be set using the static method
@@ -583,7 +586,7 @@ namespace Dune {
      *
      * \return true
      */
-    bool loadBalance(const std::vector<unsigned int>& targetProcessors, unsigned int fromLevel);
+    bool loadBalance(const std::vector<Rank>& targetProcessors, unsigned int fromLevel);
 
     /** \brief Distributes the grid over the processes of a parallel machine, and sends data along with it
      *
@@ -595,7 +598,7 @@ namespace Dune {
      * \return true
      */
     template<class DataHandle>
-    bool loadBalance (const std::vector<unsigned int>& targetProcessors, unsigned int fromLevel, DataHandle& dataHandle)
+    bool loadBalance (const std::vector<Rank>& targetProcessors, unsigned int fromLevel, DataHandle& dataHandle)
     {
 #ifdef ModelP
       // gather element data

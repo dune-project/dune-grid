@@ -524,7 +524,7 @@ bool Dune::UGGrid < dim >::loadBalance(int minlevel)
 }
 
 template < int dim >
-bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetProcessors, unsigned int fromLevel)
+bool Dune::UGGrid < dim >::loadBalance(const std::vector<Rank>& targetProcessors, unsigned int fromLevel)
 {
   // Do nothing if we are on a single process
   if (comm().size()==1)
@@ -552,7 +552,7 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetPr
 
       if (it->isLeaf()) {
 
-        unsigned int targetRank = targetProcessors[elementMapper.index(*it)];
+        auto targetRank = targetProcessors[elementMapper.index(*it)];
 
         // sanity check
         if (targetRank >= comm().size())
@@ -562,8 +562,8 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetPr
         UG_NS<dim>::Partition(this->getRealImplementation(*it).target_) = targetRank;
       } else {
 
-        std::map<int,int> rank;
-        unsigned int mostFrequentRank = 0;    // which rank occurred most often?
+        std::map<Rank,unsigned int> rank;
+        Rank mostFrequentRank = 0;    // which rank occurred most often?
         unsigned int mostFrequentCount = 0;   // how often did it occur?
 
         // Loop over all children and collect the ranks they are assigned to
@@ -571,7 +571,7 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<unsigned int>& targetPr
         typename Base::LevelGridView::template Codim<0>::Entity::HierarchicIterator endChild = it->hend(it->level()+1);
         for (; child !=  endChild; ++child) {
 
-          int childRank = UG_NS<dim>::Partition(this->getRealImplementation(*child).target_);
+          auto childRank = UG_NS<dim>::Partition(this->getRealImplementation(*child).target_);
 
           if (rank.find(childRank) == rank.end())
             rank[childRank] = 1;
