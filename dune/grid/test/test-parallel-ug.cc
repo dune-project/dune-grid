@@ -494,12 +494,6 @@ void testParallelUG(bool localRefinement)
             << " elements and " << grid->size(dim)
             << " nodes.\n";
 
-
-  std::cout << "Process " << grid->comm().rank() + 1
-            << " has " << grid->size(0)
-            << " elements and " << grid->size(dim)
-            << " nodes.\n";
-
   // make sure each process has some elements
   assert(grid->size(0) > 0);
   // make sure each process has some nodes
