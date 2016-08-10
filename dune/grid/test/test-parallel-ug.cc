@@ -466,7 +466,7 @@ public:
 };
 
 template <int dim>
-void testParallelUG(bool simplexGrid, bool localRefinement)
+void testParallelUG(bool simplexGrid, bool localRefinement, int refinementDim, bool refineUpperPart)
 {
   std::cout << "Testing parallel UGGrid for " << dim << "D\n";
 
@@ -564,7 +564,14 @@ void testParallelUG(bool simplexGrid, bool localRefinement)
     // mark all elements with x-coordinate < 0.5 for refinement
     for (const auto& element : elements(grid->leafGridView())) {
       int nRefine = 1;
-      if (element.geometry().center()[0] < 0.5)
+      bool refine;
+      if (refineUpperPart) {
+        refine = (element.geometry().center()[refinementDim] > 0.5);
+      }
+      else {
+        refine = (element.geometry().center()[refinementDim] < 0.5);
+      }
+      if (refine)
         grid->mark(nRefine, element);
     }
 
@@ -630,8 +637,12 @@ int main (int argc , char **argv) try
    */
   for (const bool simplexGrid : {false, true}) {
     for (const bool localRefinement : {false, true}) {
-      testParallelUG<2>(simplexGrid, localRefinement);
-      testParallelUG<3>(simplexGrid, localRefinement);
+      for (const bool refineUpperPart : {false, true}) {
+        for (const int refinementDim : {0,1})
+          testParallelUG<2>(simplexGrid, localRefinement, refinementDim, refineUpperPart);
+        for (const int refinementDim : {0,1,2})
+          testParallelUG<3>(simplexGrid, localRefinement, refinementDim, refineUpperPart);
+      }
     }
   }
 
