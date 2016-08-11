@@ -39,7 +39,9 @@ dune_add_test(SOURCES test-ug.cc
               CMAKE_GUARD UG_FOUND)
 
 dune_add_test(SOURCES test-parallel-ug.cc
-              CMAKE_GUARD UG_FOUND)
+              CMAKE_GUARD UG_FOUND
+              MPI_RANKS 1 2 3 4 8
+              TIMEOUT 300)
 
 dune_add_test(SOURCES test-loadbalancing.cc
               CMAKE_GUARD UG_FOUND)

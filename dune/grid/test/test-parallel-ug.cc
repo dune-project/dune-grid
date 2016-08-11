@@ -466,7 +466,7 @@ public:
 };
 
 template <int dim>
-void testParallelUG(bool localRefinement)
+void testParallelUG(bool simplexGrid, bool localRefinement, int refinementDim, bool refineUpperPart)
 {
   std::cout << "Testing parallel UGGrid for " << dim << "D\n";
 
@@ -482,18 +482,16 @@ void testParallelUG(bool localRefinement)
   Dune::FieldVector<double,dim> upperRight(1);
   std::array<unsigned int, dim> numElements;
   std::fill(numElements.begin(), numElements.end(), 4);
-  std::shared_ptr<GridType> grid = structuredGridFactory.createCubeGrid(lowerLeft, upperRight, numElements);
+  std::shared_ptr<GridType> grid;
+  if (simplexGrid)
+    grid = structuredGridFactory.createSimplexGrid(lowerLeft, upperRight, numElements);
+  else
+    grid = structuredGridFactory.createCubeGrid(lowerLeft, upperRight, numElements);
 
   //////////////////////////////////////////////////////
   // Distribute the grid
   //////////////////////////////////////////////////////
   LoadBalance::test(*grid);
-
-  std::cout << "Process " << grid->comm().rank() + 1
-            << " has " << grid->size(0)
-            << " elements and " << grid->size(dim)
-            << " nodes.\n";
-
 
   std::cout << "Process " << grid->comm().rank() + 1
             << " has " << grid->size(0)
@@ -566,7 +564,14 @@ void testParallelUG(bool localRefinement)
     // mark all elements with x-coordinate < 0.5 for refinement
     for (const auto& element : elements(grid->leafGridView())) {
       int nRefine = 1;
-      if (element.geometry().center()[0] < 0.5)
+      bool refine;
+      if (refineUpperPart) {
+        refine = (element.geometry().center()[refinementDim] > 0.5);
+      }
+      else {
+        refine = (element.geometry().center()[refinementDim] < 0.5);
+      }
+      if (refine)
         grid->mark(nRefine, element);
     }
 
@@ -625,17 +630,21 @@ int main (int argc , char **argv) try
             << getpid()
             << " .\n";
 
-  // test 2D grid with uniform refinement
-  testParallelUG<2>(false);
-
-  // test 3D grid with uniform refinement
-  testParallelUG<3>(false);
-
-  // test 2D grid with adaptive refinement
-  testParallelUG<2>(true);
-
-  // test 3D grid with adaptive refinement
-  testParallelUG<3>(true);
+  /*
+   * Test 2D and 3D grids,
+   * on structured cube and simplex grids,
+   * with global and local refinement.
+   */
+  for (const bool simplexGrid : {false, true}) {
+    for (const bool localRefinement : {false, true}) {
+      for (const bool refineUpperPart : {false, true}) {
+        for (const int refinementDim : {0,1})
+          testParallelUG<2>(simplexGrid, localRefinement, refinementDim, refineUpperPart);
+        for (const int refinementDim : {0,1,2})
+          testParallelUG<3>(simplexGrid, localRefinement, refinementDim, refineUpperPart);
+      }
+    }
+  }
 
   return 0;
 }
