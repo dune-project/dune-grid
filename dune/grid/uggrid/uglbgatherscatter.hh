@@ -32,7 +32,7 @@ namespace Dune {
       }
 
       LBMessageBuffer()
-        : count_(0), data_(0)
+        : count_(0), data_(nullptr)
       {}
 
     private:
@@ -55,19 +55,17 @@ namespace Dune {
 
       // write the data into a global vector on process 0
       // write the macrogrid index of each entity into the corresponding UG vector
-      typedef typename GridView::template Codim<codim>::Iterator Iterator;
-      Iterator it = gridView.template begin<codim>();
-      const Iterator& endIt = gridView.template end<codim>();
-      for (; it != endIt; ++it) {
-        int numberOfParams = dataHandle.size(*it);
+      for (const auto entity : entities(gridView, Codim<codim>()))
+      {
+        int numberOfParams = dataHandle.size(entity);
         if (!numberOfParams)
           continue;
 
         // obtain data from DUNE handle and write it into the UG message buffer
         LBMessageBuffer lbMessageBuffer;
-        dataHandle.gather(lbMessageBuffer, *it);
+        dataHandle.gather(lbMessageBuffer, entity);
 
-        char*& buffer = gridView.grid().getRealImplementation(*it).getTarget()->message_buffer;
+        char*& buffer = gridView.grid().getRealImplementation(entity).getTarget()->message_buffer;
         assert(not buffer);
 
         typedef typename DataHandle::DataType DataType;
@@ -95,16 +93,14 @@ namespace Dune {
 
       // obtain the data from the global vector with help of
       // the macro index and scatter it
-      typedef typename GridView::template Codim<codim>::Iterator Iterator;
-      Iterator it = gridView.template begin<codim>();
-      const Iterator& endIt = gridView.template end<codim>();
-      for (; it != endIt; ++it) {
-        int numberOfParams = dataHandle.size(*it);
+      for (const auto entity : entities(gridView, Codim<codim>()))
+      {
+        int numberOfParams = dataHandle.size(entity);
         if (!numberOfParams)
           continue;
 
         // get data from UG message buffer and write to DUNE message buffer
-        char*& buffer = gridView.grid().getRealImplementation(*it).getTarget()->message_buffer;
+        char*& buffer = gridView.grid().getRealImplementation(entity).getTarget()->message_buffer;
         assert(buffer);
 
         LBMessageBuffer lbMessageBuffer;
@@ -117,7 +113,7 @@ namespace Dune {
         }
 
         // call the data handle with the message buffer
-        dataHandle.scatter(lbMessageBuffer, *it, numberOfParams);
+        dataHandle.scatter(lbMessageBuffer, entity, numberOfParams);
 
         // free object's local message buffer
         free (buffer);
