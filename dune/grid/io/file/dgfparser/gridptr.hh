@@ -487,7 +487,7 @@ namespace Dune
         return (codim==dim || codim==0);
       }
 
-      bool fixedsize (int dim, int codim) const
+      bool fixedSize (int dim, int codim) const
       {
         return false;
       }

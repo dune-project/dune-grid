@@ -70,7 +70,7 @@ namespace Dune {
       if ((level == -1 && UG_NS<dim>::isLeaf(ugEP)) || entity.level() == level)
       {
         ThisType msgBuf(static_cast<DataType*>(data));
-        if (!duneDataHandle_->fixedsize(dim, codim))
+        if (!duneDataHandle_->fixedSize(dim, codim))
           msgBuf.template writeRaw_<unsigned>(duneDataHandle_->size(entity));
         duneDataHandle_->gather(msgBuf, entity);
       }
@@ -97,7 +97,7 @@ namespace Dune {
       {
         ThisType msgBuf(static_cast<DataType*>(data));
         int size;
-        if (!duneDataHandle_->fixedsize(dim, codim))
+        if (!duneDataHandle_->fixedSize(dim, codim))
           msgBuf.readRaw_(size);
         else
           size = duneDataHandle_->template size<DuneMakeableEntity>(entity);
@@ -133,7 +133,7 @@ namespace Dune {
     template <class GridView>
     static unsigned ugBufferSize_(const GridView &gv)
     {
-      if (Base::duneDataHandle_->fixedsize(dim, codim)) {
+      if (Base::duneDataHandle_->fixedSize(dim, codim)) {
         return sizeof(DataType)
                * Base::duneDataHandle_->size(*gv.template begin<codim,InteriorBorder_Partition>());
       }
@@ -183,7 +183,7 @@ namespace Dune {
     template <class GridView>
     static unsigned ugBufferSize_(const GridView &gv)
     {
-      if (Base::duneDataHandle_->fixedsize(dim, codim)) {
+      if (Base::duneDataHandle_->fixedSize(dim, codim)) {
         typedef typename GridView::template Codim<0>::template Partition<InteriorBorder_Partition>::Iterator ElementIterator;
         ElementIterator element = gv.template begin<0, InteriorBorder_Partition>();
         return sizeof(DataType)
