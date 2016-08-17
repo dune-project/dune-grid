@@ -301,46 +301,6 @@ namespace Dune {
     //! 0 ... maxlevel with 0 the coarsest level.
     int maxLevel() const;
 
-    //! Iterator to first entity of given codim on level
-    template<int codim>
-    typename Traits::template Codim<codim>::LevelIterator lbegin (int level) const;
-
-    //! one past the end on this level
-    template<int codim>
-    typename Traits::template Codim<codim>::LevelIterator lend (int level) const;
-
-    //! Iterator to first entity of given codim on level
-    template<int codim, PartitionIteratorType PiType>
-    typename Traits::template Codim<codim>::template Partition<PiType>::LevelIterator lbegin (int level) const;
-
-    //! one past the end on this level
-    template<int codim, PartitionIteratorType PiType>
-    typename Traits::template Codim<codim>::template Partition<PiType>::LevelIterator lend (int level) const;
-
-    //! Iterator to first leaf entity of given codim
-    template<int codim>
-    typename Traits::template Codim<codim>::LeafIterator leafbegin() const {
-      return typename Traits::template Codim<codim>::template Partition<All_Partition>::LeafIterator(*this);
-    }
-
-    //! one past the end of the sequence of leaf entities
-    template<int codim>
-    typename Traits::template Codim<codim>::LeafIterator leafend() const {
-      return UGGridLeafIterator<codim,All_Partition, const UGGrid<dim> >();
-    }
-
-    //! Iterator to first leaf entity of given codim
-    template<int codim, PartitionIteratorType PiType>
-    typename Traits::template Codim<codim>::template Partition<PiType>::LeafIterator leafbegin() const {
-      return typename Traits::template Codim<codim>::template Partition<PiType>::LeafIterator(*this);
-    }
-
-    //! one past the end of the sequence of leaf entities
-    template<int codim, PartitionIteratorType PiType>
-    typename Traits::template Codim<codim>::template Partition<PiType>::LeafIterator leafend() const {
-      return UGGridLeafIterator<codim,PiType, const UGGrid<dim> >();
-    }
-
     /** \brief Create an Entity from an EntitySeed */
     template <typename Seed>
     typename Traits::template Codim<Seed::codimension>::Entity
