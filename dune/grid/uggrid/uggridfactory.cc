@@ -556,11 +556,8 @@ createGrid()
   grid_->setIndices(true, &nodePermutation);
 
   // Clear refinement flags
-  typename UGGrid<dimworld>::Traits::template Codim<0>::LevelIterator eIt    = grid_->template lbegin<0>(0);
-  typename UGGrid<dimworld>::Traits::template Codim<0>::LevelIterator eEndIt = grid_->template lend<0>(0);
-
-  for (; eIt!=eEndIt; ++eIt)
-    UG_NS<dimworld>::WriteCW(grid_->getRealImplementation(*eIt).target_, UG_NS<dimworld>::NEWEL_CE, 0);
+  for (const auto& element : elements(grid_->levelGridView(0)))
+    UG_NS<dimworld>::WriteCW(grid_->getRealImplementation(element).target_, UG_NS<dimworld>::NEWEL_CE, 0);
 
 
   // ///////////////////////////////////////////////////

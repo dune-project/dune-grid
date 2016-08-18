@@ -130,28 +130,40 @@ namespace Dune
       template< int cd >
       typename Codim< cd > :: Iterator begin () const
       {
-        return grid().template lbegin< cd, All_Partition >( level_ );
+        if (!grid().multigrid_)
+          DUNE_THROW(GridError, "The grid has not been properly initialized!");
+
+        if (!grid().multigrid_->grids[level_])
+          DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level_ << " requested!");
+
+        return UGGridLevelIterator<cd, All_Partition, const Grid>( grid(), level_ );
       }
 
       /** \brief obtain begin iterator for this view */
       template< int cd, PartitionIteratorType pit >
       typename Codim< cd > :: template Partition< pit > :: Iterator begin () const
       {
-        return grid().template lbegin< cd, pit >( level_ );
+        if (!grid().multigrid_)
+          DUNE_THROW(GridError, "The grid has not been properly initialized!");
+
+        if (!grid().multigrid_->grids[level_])
+          DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level_ << " requested!");
+
+        return UGGridLevelIterator<cd, pit, const Grid>( grid(), level_ );
       }
 
       /** \brief obtain end iterator for this view */
       template< int cd >
       typename Codim< cd > :: Iterator end () const
       {
-        return grid().template lend< cd, All_Partition >( level_ );
+        return UGGridLevelIterator<cd, All_Partition, const Grid>();
       }
 
       /** \brief obtain end iterator for this view */
       template< int cd, PartitionIteratorType pit >
       typename Codim< cd > :: template Partition< pit > :: Iterator end () const
       {
-        return grid().template lend< cd, pit >( level_ );
+        return UGGridLevelIterator<cd, pit, const Grid>();
       }
 
       /** \brief obtain begin intersection iterator with respect to this view */
@@ -312,28 +324,28 @@ namespace Dune
       template< int cd >
       typename Codim< cd > :: Iterator begin () const
       {
-        return grid().template leafbegin< cd, All_Partition >();
+        return UGGridLeafIterator<cd, All_Partition, const Grid>(grid());
       }
 
       /** \brief obtain begin iterator for this view */
       template< int cd, PartitionIteratorType pit >
       typename Codim< cd > :: template Partition< pit > :: Iterator begin () const
       {
-        return grid().template leafbegin< cd, pit >();
+        return UGGridLeafIterator<cd, pit, const Grid>(grid());
       }
 
       /** \brief obtain end iterator for this view */
       template< int cd >
       typename Codim< cd > :: Iterator end () const
       {
-        return grid().template leafend< cd, All_Partition >();
+        return UGGridLeafIterator<cd, All_Partition, const Grid>();
       }
 
       /** \brief obtain end iterator for this view */
       template< int cd, PartitionIteratorType pit >
       typename Codim< cd > :: template Partition< pit > :: Iterator end () const
       {
-        return grid().template leafend< cd, pit >();
+        return UGGridLeafIterator<cd, pit, const Grid>();
       }
 
       /** \brief obtain begin intersection iterator with respect to this view */

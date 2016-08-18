@@ -133,14 +133,11 @@ void makeHalfCircleQuad(Dune::UGGrid<2>& grid, bool boundarySegments, bool param
 template <class GridType >
 void markOne ( GridType & grid , int num , int ref )
 {
-  typedef typename GridType::template Codim<0>::LeafIterator LeafIterator;
-
   int count = 0;
 
-  LeafIterator endit = grid.template leafend  <0> ();
-  for(LeafIterator it = grid.template leafbegin<0> (); it != endit ; ++it )
+  for(const auto& element : elements(grid.leafGridView()))
   {
-    if(num == count) grid.mark( ref, *it );
+    if(num == count) grid.mark( ref, element );
     count++;
   }
 
