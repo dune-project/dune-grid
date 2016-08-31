@@ -28,7 +28,7 @@ namespace Dune {
 
     //! construct entity seed from entity
     UGGridEntitySeed (const UGGridEntity<codim,dim,GridImp>& entity)
-      : target_(entity.target_)
+      : target_(entity.getTarget())
     {}
 
     //! check whether the EntitySeed refers to a valid Entity
