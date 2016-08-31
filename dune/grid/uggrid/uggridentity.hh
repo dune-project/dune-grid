@@ -240,9 +240,6 @@ namespace Dune {
 
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
 
-    /** \brief The type of UGGrid Entity seeds */
-    typedef typename GridImp::Traits::template Codim<codim>::EntitySeed EntitySeed;
-
     UGEdgeEntity()
       : target_(nullptr)
       , gridImp_(nullptr)
@@ -296,9 +293,6 @@ namespace Dune {
 
     //! geometry of this entity
     Geometry geometry () const { return Geometry( *geo_ ); }
-
-    /** \brief Get the seed corresponding to this entity */
-    EntitySeed seed () const { return EntitySeed( *this ); }
 
   protected:
 #ifdef ModelP
@@ -370,6 +364,8 @@ namespace Dune {
   {
 
   public:
+    /** \brief The type of UGGrid Entity seeds */
+    typedef typename GridImp::Traits::template Codim<1>::EntitySeed EntitySeed;
 
     UGGridEntity()
     {}
@@ -377,6 +373,15 @@ namespace Dune {
     UGGridEntity(typename UG_NS<2>::template Entity<1>::T* target, const GridImp* gridImp)
       : UGEdgeEntity<2,GridImp>(target,gridImp)
     {}
+
+    /** \brief Get the seed corresponding to this entity
+     *
+     * This method cannot be moved to the base class, because the 'this' pointer has the wrong type there.
+     */
+    EntitySeed seed () const
+    {
+      return EntitySeed( *this );
+    }
 
   };
 
@@ -389,6 +394,8 @@ namespace Dune {
   {
 
   public:
+    /** \brief The type of UGGrid Entity seeds */
+    typedef typename GridImp::Traits::template Codim<2>::EntitySeed EntitySeed;
 
     UGGridEntity()
     {}
@@ -397,8 +404,16 @@ namespace Dune {
       : UGEdgeEntity<3,GridImp>(target,gridImp)
     {}
 
-  };
+    /** \brief Get the seed corresponding to this entity
+     *
+     * This method cannot be moved to the base class, because the 'this' pointer has the wrong type there.
+     */
+    EntitySeed seed () const
+    {
+      return EntitySeed( *this );
+    }
 
+  };
 
   /*! \brief UGGrid face entity in 3d grids
    * \ingroup UGGrid
@@ -415,6 +430,9 @@ namespace Dune {
   public:
 
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
+
+    /** \brief The type of UGGrid Entity seeds */
+    typedef typename GridImp::Traits::template Codim<codim>::EntitySeed EntitySeed;
 
     UGGridEntity()
       : target_(nullptr)
@@ -496,6 +514,12 @@ namespace Dune {
 
     //! geometry of this entity
     Geometry geometry () const { return Geometry( *geo_ ); }
+
+    /** \brief Get the seed corresponding to this entity */
+    EntitySeed seed () const
+    {
+      return EntitySeed( *this );
+    }
 
     /** \brief Set to a UG side vector object
         \param target The UG side vector to point to
