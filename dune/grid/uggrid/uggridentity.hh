@@ -400,13 +400,14 @@ namespace Dune {
   };
 
 
-  /*! \brief UGGrid face entity
+  /*! \brief UGGrid face entity in 3d grids
    * \ingroup UGGrid
    */
-  template<int dim, class GridImp>
-  class UGFaceEntity
+  template<class GridImp>
+  class UGGridEntity<1,3,GridImp>
   {
     enum {codim = 1};
+    enum {dim = 3};
     typedef typename GridImp::ctype UGCtype;
 
     typedef typename GridImp::Traits::template Codim<codim>::GeometryImpl GeometryImpl;
@@ -415,12 +416,12 @@ namespace Dune {
 
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
 
-    UGFaceEntity()
+    UGGridEntity()
       : target_(nullptr)
       , gridImp_(nullptr)
     {}
 
-    UGFaceEntity(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp)
+    UGGridEntity(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp)
     {
       setToTarget(target,gridImp);
     }
@@ -525,7 +526,7 @@ namespace Dune {
     }
 
     //! equality
-    bool equals(const UGFaceEntity& other) const
+    bool equals(const UGGridEntity& other) const
     {
       return getTarget() == other.getTarget();
     }
@@ -540,25 +541,6 @@ protected:
      * But code is simpler if we just keep it everywhere.
      */
     const GridImp* gridImp_;
-  };
-
-  /*! \brief Specialization for faces in 3D
-   * \ingroup UGGrid
-   */
-  template<class GridImp>
-  class UGGridEntity<1,3,GridImp>
-    : public UGFaceEntity<3,GridImp>
-  {
-
-  public:
-
-    UGGridEntity()
-    {}
-
-    UGGridEntity(typename UG_NS<3>::template Entity<1>::T* target, const GridImp* gridImp)
-      : UGFaceEntity<3,GridImp>(target,gridImp)
-    {}
-
   };
 
 
