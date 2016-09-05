@@ -98,6 +98,8 @@ namespace Dune
 
        This method calls 'fixedSize' (with a capital S) of the derived class,
        if it exists in the derived class.  Otherwise, it calls 'fixedsize'.
+
+       @deprecated This method (with the lower-case 's') is deprecated.  Use 'fixedSize' instead!
      */
     bool fixedsize (int dim, int codim) const
     {
