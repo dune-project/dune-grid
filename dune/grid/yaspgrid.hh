@@ -1376,7 +1376,7 @@ namespace Dune {
       // define type to iterate over send and recv lists
       typedef typename YGridList<Coordinates>::Iterator ListIt;
 
-      if (data.fixedsize(dim,codim))
+      if (data.fixedSize(dim,codim))
       {
         // fixed size: just take a dummy entity, size can be computed without communication
         cnt=0;
@@ -1537,7 +1537,7 @@ namespace Dune {
         MessageBuffer<DataType> mb(buf);
 
         // copy data from receive buffer; iterate over cells in intersection
-        if (data.fixedsize(dim,codim))
+        if (data.fixedSize(dim,codim))
         {
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
           it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));

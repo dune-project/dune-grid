@@ -307,7 +307,7 @@ public:
     return ((codim >= 0) && (codim <= dimension) ? contains_[ codim ] : false);
   }
 
-  bool fixedsize ( const int dim, const int codim ) const
+  bool fixedSize ( const int dim, const int codim ) const
   {
     invalidDimension_ |= (dim != dimension);
     invalidCodimension_ |= ((codim < 0) || (codim > dimension));

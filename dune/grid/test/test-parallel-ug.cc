@@ -62,7 +62,7 @@ public:
   }
 
   //! returns true if size per entity of given dim and codim is a constant
-  bool fixedsize (int dim, int codim) const
+  bool fixedSize (int dim, int codim) const
   {
     return true;
   }
@@ -379,7 +379,7 @@ class LoadBalance
     bool contains (int dim, int codim) const
     { return (codim == commCodim); }
 
-    bool fixedsize (int dim, int codim) const
+    bool fixedSize (int dim, int codim) const
     { return true; }
 
     template<class Entity>
