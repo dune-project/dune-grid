@@ -221,7 +221,7 @@ namespace Dune
         result = 0;
         return false;
       }
-      result = map(e);
+      result = index(e);
       return true;
     }
 
