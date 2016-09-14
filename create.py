@@ -1,0 +1,38 @@
+from __future__ import absolute_import, division, print_function, unicode_literals
+__metaclass__ = type
+
+import hashlib
+import sys
+from types import ModuleType
+
+import dune.common as common
+from ..generator.generator import SimpleGenerator
+
+from types import ModuleType
+
+def triangulation(self):
+    if self.dimGrid != 2 or self.dimWorld != 2:
+        raise Exception("Grid must be 2-dimensional for use as matplotlib triangulation.")
+    from matplotlib.tri import Triangulation
+    x = self.coordinates()
+    triangles = self.tesselate()
+    return Triangulation(x[:,0], x[:,1], triangles)
+
+def addAttr(module, cls):
+    setattr(cls, "_module", module)
+    setattr(cls, "triangulation", triangulation)
+
+generator = SimpleGenerator("Grid", "Dune::CorePy", "LeafGrid")
+
+def module(includes, typeName, constructors=None, methods=None):
+    typeName = typeName + "::LeafGridView"
+    includes = includes + ["dune/corepy/grid.hh"]
+    typeHash = "grid_" + hashlib.md5(typeName.encode('utf-8')).hexdigest()
+    module = generator.load(includes, typeName, typeHash, constructors, methods)
+    addAttr(module, module.LeafGrid)
+    return module
+
+#############################################
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod(optionflags=doctest.ELLIPSIS)
