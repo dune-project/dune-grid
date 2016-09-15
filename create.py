@@ -34,10 +34,10 @@ def module(includes, typeName, constructors=None, methods=None):
     return module
 
 gridNames = { "Alberta"        : "dune.grid.alberta",
-              "OneDGrid"       : "dune.grid.aoned",
-              "SPGrid"         : "dune.grid.asp",
-              "UGGrid"         : "dune.grid.aug",
-              "YaspGrid"       : "dune.grid.ayasp"
+              "OneDGrid"       : "dune.grid.oned",
+              "SPGrid"         : "dune.grid.sp",
+              "UGGrid"         : "dune.grid.ug",
+              "YaspGrid"       : "dune.grid.yasp"
             }
 def create(grid, *args, **kwargs):
     gridModule = importlib.import_module(gridNames[grid])
