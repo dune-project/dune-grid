@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from .create import module
+from .grid_generator import module
 
 def create(constructor, dimgrid,
         coordinates="Dune::EquidistantCoordinates", ctype="double", refinement="Dune::SPIsotropicRefinement",
