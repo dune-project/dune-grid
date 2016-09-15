@@ -3,6 +3,7 @@ __metaclass__ = type
 
 import hashlib
 import sys
+import importlib
 from types import ModuleType
 
 import dune.common as common
@@ -31,6 +32,16 @@ def module(includes, typeName, constructors=None, methods=None):
     module = generator.load(includes, typeName, typeHash, constructors, methods)
     addAttr(module, module.LeafGrid)
     return module
+
+gridNames = { "Alberta"        : "dune.grid.alberta",
+              "OneDGrid"       : "dune.grid.aoned",
+              "SPGrid"         : "dune.grid.asp",
+              "UGGrid"         : "dune.grid.aug",
+              "YaspGrid"       : "dune.grid.ayasp"
+            }
+def create(grid, *args, **kwargs):
+    gridModule = importlib.import_module(gridNames[grid])
+    return gridModule.create(*args,**kwargs)
 
 #############################################
 if __name__ == "__main__":
