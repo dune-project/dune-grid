@@ -33,11 +33,11 @@ def module(includes, typeName, constructors=None, methods=None):
     addAttr(module, module.LeafGrid)
     return module
 
-gridNames = { "Alberta"        : "dune.grid.alberta",
-              "OneDGrid"       : "dune.grid.oned",
-              "SPGrid"         : "dune.grid.sp",
-              "UGGrid"         : "dune.grid.ug",
-              "YaspGrid"       : "dune.grid.yasp"
+gridNames = { "Alberta"    : "dune.grid.alberta",
+              "OneD"       : "dune.grid.oned",
+              "SP"         : "dune.grid.sp",
+              "UG"         : "dune.grid.ug",
+              "Yasp"       : "dune.grid.yasp"
             }
 
 def register(**kwargs):
