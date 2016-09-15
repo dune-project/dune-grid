@@ -11,6 +11,10 @@
 
  */
 
+#include <tuple>
+#include <type_traits>
+#include <utility>
+
 #include <dune/common/deprecated.hh>
 #include <dune/geometry/type.hh>
 #include <dune/grid/common/capabilities.hh>
@@ -392,13 +396,42 @@ struct LeafInterface
 template< class GridView >
 struct GridViewInterface
 {
+  template< int codim >
+  static void checkCodim ( const GridView &gridView, std::integral_constant< int, codim > )
+  {
+    typedef typename GridView::template Codim< codim >::Entity Entity;
+    typedef typename GridView::template Codim< codim >::Iterator Iterator DUNE_UNUSED;
+
+    if( gridView.template begin< 0 >() == gridView.template end< 0 >() )
+      return;
+
+    const Entity &entity = gridView.template begin< 0 >()->template subEntity< codim >( 0 );
+    gridView.indexSet().index( entity );
+    gridView.indexSet().contains( entity );
+    try
+    {
+      gridView.indexSet().subIndex( entity, 0, 0u );
+    }
+    catch( Dune::NotImplemented )
+    {
+      // ignore Dune::NotImplemented for higher codimension
+      if( codim == 0 )
+        throw;
+    }
+  }
+
+  template< int... codim >
+  static void checkCodim ( const GridView &gridView, std::integer_sequence< int, codim... > )
+  {
+    std::ignore = std::make_tuple( (checkCodim( gridView, std::integral_constant< int, codim >() ), codim)... );
+  }
+
   static void check ( const GridView &gv )
   {
+    const int dimension = GridView::dimension;
+
     typedef typename GridView::Grid Grid DUNE_UNUSED;
     typedef typename GridView::IndexSet IndexSet DUNE_UNUSED;
-
-    typedef typename GridView::template Codim< 0 >::Entity Entity DUNE_UNUSED;
-    typedef typename GridView::template Codim< 0 >::Iterator Iterator DUNE_UNUSED;
 
     typedef typename GridView::Intersection Intersection DUNE_UNUSED;
     typedef typename GridView::IntersectionIterator IntersectionIterator DUNE_UNUSED;
@@ -413,13 +446,8 @@ struct GridViewInterface
 
     // index set
     gv.indexSet();
-    if( gv.template begin< 0 >() !=gv.template end< 0 >() )
-    {
-      gv.indexSet().index( *gv.template begin< 0 >() );
-      gv.indexSet().subIndex( *gv.template begin< 0 >(), 0, 0u );
-      gv.indexSet().contains( *gv.template begin< 0 >() );
-    }
-    for( int codim = 0; codim < GridView::dimension; ++codim )
+    checkCodim( gv, std::make_integer_sequence< int, dimension+1 >() );
+    for( int codim = 0; codim < dimension; ++codim )
       gv.indexSet().types( codim );
 
     // intersections
