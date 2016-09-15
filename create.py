@@ -39,6 +39,10 @@ gridNames = { "Alberta"        : "dune.grid.alberta",
               "UGGrid"         : "dune.grid.ug",
               "YaspGrid"       : "dune.grid.yasp"
             }
+
+def register(**kwargs):
+    gridNames.update(kwargs)
+
 def create(grid, *args, **kwargs):
     gridModule = importlib.import_module(gridNames[grid])
     return gridModule.create(*args,**kwargs)
