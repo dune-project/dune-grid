@@ -16,6 +16,7 @@
 #include <utility>
 
 #include <dune/common/deprecated.hh>
+#include <dune/common/hybridutilities.hh>
 #include <dune/geometry/type.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/gridenums.hh>
@@ -396,35 +397,6 @@ struct LeafInterface
 template< class GridView >
 struct GridViewInterface
 {
-  template< int codim >
-  static void checkCodim ( const GridView &gridView, std::integral_constant< int, codim > )
-  {
-    typedef typename GridView::template Codim< codim >::Entity Entity;
-    typedef typename GridView::template Codim< codim >::Iterator Iterator DUNE_UNUSED;
-
-    if( gridView.template begin< 0 >() == gridView.template end< 0 >() )
-      return;
-
-    const Entity &entity = gridView.template begin< 0 >()->template subEntity< codim >( 0 );
-    gridView.indexSet().index( entity );
-    gridView.indexSet().contains( entity );
-    try
-    {
-      gridView.indexSet().subIndex( entity, 0, 0u );
-    }
-    catch( Dune::NotImplemented )
-    {
-      // ignore Dune::NotImplemented for higher codimension
-      if( codim == 0 )
-        throw;
-    }
-  }
-
-  template< int... codim >
-  static void checkCodim ( const GridView &gridView, std::integer_sequence< int, codim... > )
-  {
-    std::ignore = std::make_tuple( (checkCodim( gridView, std::integral_constant< int, codim >() ), codim)... );
-  }
 
   static void check ( const GridView &gv )
   {
@@ -446,9 +418,30 @@ struct GridViewInterface
 
     // index set
     gv.indexSet();
-    checkCodim( gv, std::make_integer_sequence< int, dimension+1 >() );
-    for( int codim = 0; codim < dimension; ++codim )
+    using namespace Dune::Hybrid;
+    forEach(std::make_integer_sequence< int, dimension+1 >(), [&](auto codim) {
+      typedef typename GridView::template Codim< codim >::Entity Entity;
+      typedef typename GridView::template Codim< codim >::Iterator Iterator DUNE_UNUSED;
+
+      if( gv.template begin< 0 >() == gv.template end< 0 >() )
+        return;
+
+      const Entity &entity = gv.template begin< 0 >()->template subEntity< codim >( 0 );
+      gv.indexSet().index( entity );
+      gv.indexSet().contains( entity );
+      try
+      {
+        gv.indexSet().subIndex( entity, 0, 0u );
+      }
+      catch( Dune::NotImplemented )
+      {
+        // ignore Dune::NotImplemented for higher codimension
+        if( codim == 0 )
+          throw;
+      }
+
       gv.indexSet().types( codim );
+    });
 
     // intersections
     if( gv.template begin< 0 >() != gv.template end< 0 >() )
