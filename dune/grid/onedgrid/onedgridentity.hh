@@ -212,6 +212,20 @@ namespace Dune {
 
     unsigned int globalId() const {return target_->id_;}
 
+    /** \brief Returns vertex level index, the arguments are ignored
+     */
+    int subLevelIndex (DUNE_UNUSED int i, DUNE_UNUSED unsigned int codim) const
+    {
+      return target_->levelIndex_;
+    }
+
+    /** \brief Returns vertex leaf index, the arguments are ignored
+     */
+    int subLeafIndex (DUNE_UNUSED int i, DUNE_UNUSED unsigned int codim) const
+    {
+      return target_->leafIndex_;
+    }
+
   public:
     //! return the element type identifier (segment)
     GeometryType type () const {return GeometryType(0);}
