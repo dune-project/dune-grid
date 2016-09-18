@@ -186,7 +186,7 @@ void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factor
 
 
 template <class GridType>
-void Dune::AmiraMeshReader<GridType>::read(Dune::GridFactory<GridType> &factory, const std::string& filename,
+void Dune::AmiraMeshReader<GridType>::readImp(Dune::GridFactory<GridType> &factory, const std::string& filename,
                                                 const std::shared_ptr<PSurfaceBoundary<dim-1> >& boundary)
 {
 #if ! HAVE_PSURFACE
@@ -224,7 +224,7 @@ void Dune::AmiraMeshReader<GridType>::read(Dune::GridFactory<GridType> &factory,
 
 
 template <class GridType>
-void Dune::AmiraMeshReader<GridType>::read(Dune::GridFactory<GridType> &factory, const std::string& filename)
+void Dune::AmiraMeshReader<GridType>::readImp(Dune::GridFactory<GridType> &factory, const std::string& filename)
 {
   static const int dim      = GridType::dimension;
   static const int dimworld = GridType::dimensionworld;

@@ -11,6 +11,11 @@
 
 namespace Dune {
 
+  namespace aux {
+    template<typename... Ts> struct make_void { typedef void type;};
+    template<typename... Ts> using void_t = typename make_void<Ts...>::type;
+  }
+
   /** \brief Grid reader abstract base class
    *
    *  Interface class for a file-reader for grids. The reader interface defines two
@@ -37,13 +42,31 @@ namespace Dune {
   template< class Grid, class GridReaderImp >
   class GridReader
   {
-  protected:
+  public:
     // type of underlying implementation, for internal use only
     typedef GridReaderImp Implementation;
 
-    //! Read the grid from a file with filename and return a unique_ptr to the created grid
+    //! Reads the grid from a file with filename and return a unique_ptr to the created grid.
+    //! Redirects to concrete implementation of derivated class.
     template <class... Args>
     static std::unique_ptr<Grid> read(const std::string &filename, Args&&... args)
+    {
+      return Implementation::readImp(filename, std::forward<Args>(args)...);
+    }
+
+    //! Reads the grid from a file with filename into a grid-factory.
+    //! Redirects to concrete implementation of derivated class.
+    template <class... Args>
+    static void read(GridFactory<Grid> &factory, const std::string &filename, Args&&... args)
+    {
+      Implementation::readFactoryImp(factory, filename, std::forward<Args>(args)...);
+    }
+
+  protected: // default implementations
+
+    // Default implementation, redirects to factory read implementation.
+    template <class... Args>
+    static std::unique_ptr<Grid> readImp(const std::string &filename, Args&&... args)
     {
       GridFactory<Grid> factory;
       read(factory, filename, std::forward<Args>(args)...);
@@ -51,13 +74,13 @@ namespace Dune {
       return std::unique_ptr<Grid>{ factory.createGrid() };
     }
 
-    //! Read the grid from a file with filename into a grid-factory. Must be implemented by derived class.
+    // Default implementation for reading into grid-factory: produces a runtime-error.
     template <class... Args>
-    static void read(GridFactory<Grid> &factory, const std::string &filename, Args&&... args)
+    static void readFactoryImp(GridFactory<Grid> &/*factory*/, const std::string &/*filename*/, Args&&... /*args*/)
     {
-      Implementation::read(factory, filename, std::forward<Args>(args)...);
+      DUNE_THROW( Dune::NotImplemented,
+                  "GridReader using a factory argument not implemented for concrete reader implementation." );
     }
-
   };
 
 } // end namespace Dune

@@ -50,8 +50,6 @@ namespace Dune {
   class StarCDReader
       : public GridReader<GridType, StarCDReader<GridType>>
   {
-    typedef GridReader<GridType, StarCDReader<GridType>> Base;
-
   public:
 
     /** \brief Read grid from a Star-CD file
@@ -59,7 +57,7 @@ namespace Dune {
      *    \param fileName The base file name of the Star-CD files
      *    \param verbose Tlag to set whether information should be printed
      */
-    static void read(GridFactory<GridType> &factory, const std::string &fileName, bool verbose = true)
+    static void readFactoryImp(GridFactory<GridType> &factory, const std::string &fileName, bool verbose = true)
     {
       // extract the grid dimension
       const int dim = GridType::dimension;
@@ -167,8 +165,6 @@ namespace Dune {
                   << numberOfSimplices << " simplices, " << numberOfPyramids << " pyramids, "
                   << numberOfPrisms << " prisms, " << numberOfCubes << " cubes." << std::endl;
     }
-
-    using Base::read;
   };
 
 }

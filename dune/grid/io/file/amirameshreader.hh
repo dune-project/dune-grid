@@ -29,8 +29,6 @@ namespace Dune {
   class AmiraMeshReader
       : public GridReader<GridType, AmiraMeshReader<GridType>>
   {
-    typedef GridReader<GridType, AmiraMeshReader<GridType>> Base;
-
     /** \brief Dimension of the grid */
     enum {dim = GridType::dimension};
 
@@ -44,12 +42,11 @@ namespace Dune {
     static void build2dGrid(GridFactory<GridType>& factory, AmiraMesh* am);
 
   public:
-
     /** \brief The method that does the reading.
      *
      * @param filename The filename
      */
-    static void read(GridFactory<GridType>& factory, const std::string& filename);
+    static void readFactoryImp(GridFactory<GridType>& factory, const std::string& filename);
 
 
     /** \brief Read a grid with a parametrized boundary
@@ -61,10 +58,8 @@ namespace Dune {
        @param filename The name of the grid file
        @param boundary Pointer to an object holding the description of the grid domain boundary
      */
-    static void read(GridFactory<GridType>& factory, const std::string& filename,
+    static void readFactoryImp(GridFactory<GridType>& factory, const std::string& filename,
                      const std::shared_ptr<PSurfaceBoundary<dim-1> >& boundary);
-
-    using Base::read;
 
   public:
     /** \brief Read a block vector from an AmiraMesh file

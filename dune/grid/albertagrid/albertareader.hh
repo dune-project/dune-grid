@@ -19,7 +19,6 @@ namespace Dune
       : public GridReader<Grid, AlbertaReader<Grid>>
   {
     typedef AlbertaReader< Grid > This;
-    typedef GridReader<Grid, AlbertaReader<Grid>> Base;
 
   public:
     typedef Dune::GridFactory< Grid > GridFactory;
@@ -29,13 +28,11 @@ namespace Dune
     static const int dimension = Grid::dimension;
     static const int dimensionworld = Grid::dimensionworld;
 
-    static void read(GridFactory &factory, const std::string &fileName)
+    static void readFactoryImp(GridFactory &factory, const std::string &fileName)
     {
       AlbertaReader<Grid> reader;
       reader.readGrid(fileName, factory);
     }
-
-    using Base::read;
 
   private:
     static_assert(dimensionworld == Alberta::dimWorld,
