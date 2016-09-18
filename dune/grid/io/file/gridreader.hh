@@ -11,11 +11,6 @@
 
 namespace Dune {
 
-  namespace aux {
-    template<typename... Ts> struct make_void { typedef void type;};
-    template<typename... Ts> using void_t = typename make_void<Ts...>::type;
-  }
-
   /** \brief Grid reader abstract base class
    *
    *  Interface class for a file-reader for grids. The reader interface defines two
