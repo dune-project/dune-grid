@@ -106,12 +106,6 @@ target_compile_definitions(test-gridreader PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\
 dune_add_test(TARGET test-gridreader)
 
 
-add_executable(temp EXCLUDE_FROM_ALL temp.cc)
-add_dune_ug_flags(temp)
-target_compile_definitions(temp PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
-dune_add_test(TARGET temp)
-
-
 # install the test tools as we want to support testing 3rdparty grids with installed dune-grid
 install(FILES basicunitcube.hh
               check-albertareader.hh

@@ -41,8 +41,6 @@ namespace Dune {
     // type of underlying implementation, for internal use only
     typedef GridReaderImp Implementation;
 
-  public:
-
     //! Read the grid from a file with filename and return a unique_ptr to the created grid
     template <class... Args>
     static std::unique_ptr<Grid> read(const std::string &filename, Args&&... args)
