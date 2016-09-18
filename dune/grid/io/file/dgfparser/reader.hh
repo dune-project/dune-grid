@@ -13,15 +13,22 @@
 
 namespace Dune
 {
+  /** \ingroup DuneGridFormatParser
+   *
+   *  \brief Read DGF mesh file
+   *
+   *  Read a .dgf file and construct a grid using the dgf-grid factory interface.
+   *  Reader is implemented conforming the \ref GridReader interface. The exception is
+   *  that the `read` method accepting a \ref GridFactory is not supported.
+   */
   template <typename GridType>
   class DgfReader
       : private GridReader<GridType, DgfReader<GridType>>
   {
-    typedef GridReader<GridType, DgfReader<GridType>> Base;
-
   public:
     typedef GridType Grid;
 
+    //! Read .dgf file and return a unique_ptr to the created grid.
     static std::unique_ptr<Grid> read (const std::string& filename,
                                        MPIHelper::MPICommunicator comm = MPIHelper::getCommunicator())
     {
@@ -30,6 +37,7 @@ namespace Dune
       return std::unique_ptr<Grid>{ factory.grid() };
     }
 
+    //! Read .dgf file into a \ref GridFactory is not supported!
     static void read (Dune::GridFactory<Grid>& /*factory*/, const std::string& /*filename*/)
     {
       DUNE_THROW( DGFException, "DGF reader does not support to read into a GridFactory directly." );
