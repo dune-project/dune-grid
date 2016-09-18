@@ -45,7 +45,6 @@ namespace Dune
     AlbertaReader ( const This & );
     This &operator= ( const This & );
 
-//   private:
   public:
     AlbertaReader ()
     {}
