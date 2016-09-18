@@ -107,7 +107,7 @@ void testReaderFactory()
   std::ostringstream filename;
   filename << DUNE_GRID_EXAMPLE_GRIDS_PATH << "amc/grid-" << dim << "-" << dow << ".amc";
   Reader::read(factory, filename.str());
-  auto grid = factory.createGrid();
+  auto grid = std::unique_ptr<Grid>{ factory.createGrid() };
   }
 #endif
 
@@ -120,7 +120,7 @@ void testReaderFactory()
   std::ostringstream filename;
   filename << DUNE_GRID_EXAMPLE_GRIDS_PATH << "dgf/simplex-testgrid-3d.dgf";
 //   Reader::read(factory, filename.str()); // NOTE: not supported
-//   auto grid = factory.createGrid();
+//   auto grid = std::unique_ptr<Grid>{ factory.createGrid() };
   }
 
 
@@ -132,7 +132,7 @@ void testReaderFactory()
   std::ostringstream filename;
   filename << DUNE_GRID_EXAMPLE_GRIDS_PATH << "gmsh/simplex-testgrid-3d.msh";
   Reader::read(factory, filename.str());
-  auto grid = factory.createGrid();
+  auto grid = std::unique_ptr<Grid>{ factory.createGrid() };
   }
 
 
@@ -144,7 +144,7 @@ void testReaderFactory()
   std::ostringstream filename;
   filename << DUNE_GRID_EXAMPLE_GRIDS_PATH << "starcd/tets"; // NOTE: give filename without extension
   Reader::read(factory, filename.str());
-  auto grid = factory.createGrid();
+  auto grid = std::unique_ptr<Grid>{ factory.createGrid() };
   }
 
 
@@ -157,7 +157,7 @@ void testReaderFactory()
   std::ostringstream filename;
   filename << DUNE_GRID_EXAMPLE_GRIDS_PATH << "amiramesh/simplex-testgrid-3d.am";
   Reader::read(factory, filename.str());
-  auto grid = factory.createGrid();
+  auto grid = std::unique_ptr<Grid>{ factory.createGrid() };
   }
 #endif
 
