@@ -21,6 +21,7 @@
 
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/grid/common/gridfactory.hh>
+#include <dune/grid/io/file/gridreader.hh>
 
 namespace Dune
 {
@@ -654,41 +655,12 @@ namespace Dune
    */
   template<typename GridType>
   class GmshReader
+      : public GridReader<GridType, GmshReader<GridType>>
   {
+    typedef GridReader<GridType, GmshReader<GridType>> Base;
+
   public:
     typedef GridType Grid;
-
-    /** \todo doc me */
-    static Grid* read (const std::string& fileName, bool verbose = true, bool insertBoundarySegments=true)
-    {
-      // make a grid factory
-      Dune::GridFactory<Grid> factory;
-
-      // create parse object
-      GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
-      parser.read(fileName);
-
-      return factory.createGrid();
-    }
-
-    /** \todo doc me */
-    static Grid* read (const std::string& fileName,
-                       std::vector<int>& boundarySegmentToPhysicalEntity,
-                       std::vector<int>& elementToPhysicalEntity,
-                       bool verbose = true, bool insertBoundarySegments=true)
-    {
-      // make a grid factory
-      Dune::GridFactory<Grid> factory;
-
-      // create parse object
-      GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
-      parser.read(fileName);
-
-      boundarySegmentToPhysicalEntity.swap(parser.boundaryIdMap());
-      elementToPhysicalEntity.swap(parser.elementIndexMap());
-
-      return factory.createGrid();
-    }
 
     /** \todo doc me */
     static void read (Dune::GridFactory<Grid>& factory, const std::string& fileName,
@@ -700,8 +672,7 @@ namespace Dune
     }
 
     /** \todo doc me */
-    static void read (Dune::GridFactory<Grid>& factory,
-                      const std::string& fileName,
+    static void read (Dune::GridFactory<Grid>& factory, const std::string& fileName,
                       std::vector<int>& boundarySegmentToPhysicalEntity,
                       std::vector<int>& elementToPhysicalEntity,
                       bool verbose = true, bool insertBoundarySegments=true)
@@ -713,6 +684,8 @@ namespace Dune
       boundarySegmentToPhysicalEntity.swap(parser.boundaryIdMap());
       elementToPhysicalEntity.swap(parser.elementIndexMap());
     }
+
+    using Base::read;
   };
 
   /** \} */

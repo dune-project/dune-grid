@@ -28,6 +28,7 @@
 #include <dune/grid/io/file/dgfparser/gridptr.hh>
 #include <dune/grid/io/file/dgfparser/macrogrid.hh>
 #include <dune/grid/io/file/dgfparser/dgfgridfactory.hh>
+#include <dune/grid/io/file/dgfparser/reader.hh>
 
 
 #include <dune/grid/io/file/dgfparser/blocks/basic.hh>

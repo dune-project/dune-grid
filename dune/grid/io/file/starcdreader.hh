@@ -6,6 +6,8 @@
 #include <dune/common/exceptions.hh>
 #include <dune/geometry/type.hh>
 #include <dune/grid/common/gridfactory.hh>
+#include <dune/grid/io/file/gridreader.hh>
+
 #include <iostream>
 #include <fstream>
 
@@ -45,7 +47,10 @@ namespace Dune {
    *    Currently no boundary element data is passed to \a grid.
    */
   template <class GridType>
-  class StarCDReader {
+  class StarCDReader
+      : public GridReader<GridType, StarCDReader<GridType>>
+  {
+    typedef GridReader<GridType, StarCDReader<GridType>> Base;
 
   public:
 
@@ -54,7 +59,7 @@ namespace Dune {
      *    \param fileName The base file name of the Star-CD files
      *    \param verbose Tlag to set whether information should be printed
      */
-    static GridType* read(const std::string& fileName, bool verbose = true)
+    static void read(GridFactory<GridType> &factory, const std::string &fileName, bool verbose = true)
     {
       // extract the grid dimension
       const int dim = GridType::dimension;
@@ -63,9 +68,6 @@ namespace Dune {
       if (dim != 3)
         DUNE_THROW(Dune::NotImplemented,
                    "Reading Star-CD format is not implemented for dimension " << dim);
-
-      // set up the grid factory
-      GridFactory<GridType> factory;
 
       // set the name of the vertex file
       std::string vertexFileName = fileName + ".vrt";
@@ -164,15 +166,9 @@ namespace Dune {
         std::cout << numberOfElements << " elements read: "
                   << numberOfSimplices << " simplices, " << numberOfPyramids << " pyramids, "
                   << numberOfPrisms << " prisms, " << numberOfCubes << " cubes." << std::endl;
-
-      // finish off the construction of the grid object
-      if (verbose)
-        std::cout << "Starting createGrid() ... " << std::flush;
-
-      return factory.createGrid();
-
     }
 
+    using Base::read;
   };
 
 }

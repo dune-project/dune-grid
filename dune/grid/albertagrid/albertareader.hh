@@ -5,6 +5,7 @@
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/gridfactory.hh>
+#include <dune/grid/io/file/gridreader.hh>
 
 #include <dune/grid/albertagrid/macrodata.hh>
 
@@ -15,8 +16,10 @@ namespace Dune
 
   template< class Grid >
   class AlbertaReader
+      : public GridReader<Grid, AlbertaReader<Grid>>
   {
     typedef AlbertaReader< Grid > This;
+    typedef GridReader<Grid, AlbertaReader<Grid>> Base;
 
   public:
     typedef Dune::GridFactory< Grid > GridFactory;
@@ -25,6 +28,14 @@ namespace Dune
 
     static const int dimension = Grid::dimension;
     static const int dimensionworld = Grid::dimensionworld;
+
+    static void read(GridFactory &factory, const std::string &fileName)
+    {
+      AlbertaReader<Grid> reader;
+      reader.readGrid(fileName, factory);
+    }
+
+    using Base::read;
 
   private:
     static_assert(dimensionworld == Alberta::dimWorld,
@@ -37,6 +48,7 @@ namespace Dune
     AlbertaReader ( const This & );
     This &operator= ( const This & );
 
+//   private:
   public:
     AlbertaReader ()
     {}

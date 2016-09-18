@@ -186,7 +186,7 @@ void Dune::AmiraMeshReader<GridType>::createDomain(GridFactory<GridType>& factor
 
 
 template <class GridType>
-GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
+void Dune::AmiraMeshReader<GridType>::read(Dune::GridFactory<GridType> &factory, const std::string& filename,
                                                 const std::shared_ptr<PSurfaceBoundary<dim-1> >& boundary)
 {
 #if ! HAVE_PSURFACE
@@ -195,9 +195,6 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
 #else
   dverb << "This is the AmiraMesh reader for " << className<GridType>() << std::endl;
 
-  // Create a grid factory
-  GridFactory<GridType> factory;
-
   // /////////////////////////////////////////////////////
   // Load the AmiraMesh file
   // /////////////////////////////////////////////////////
@@ -222,65 +219,18 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename,
   // read and build the grid
   buildGrid(factory, am.get());
 
-  return factory.createGrid();
 #endif // #define HAVE_PSURFACE
 }
 
 
 template <class GridType>
-void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
-                                           const std::string& filename,
-                                           const std::shared_ptr<PSurfaceBoundary<dim-1> >& boundary)
-{
-#if ! HAVE_PSURFACE
-  DUNE_THROW(IOError, "Dune has not been built with support for the "
-             << " psurface library!");
-#else
-  dverb << "This is the AmiraMesh reader for" << className<GridType>() << "!" << std::endl;
-
-  // Create a grid factory
-  GridFactory<GridType> factory(&grid);
-
-  // /////////////////////////////////////////////////////
-  // Load the AmiraMesh file
-  // /////////////////////////////////////////////////////
-  std::unique_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
-
-  if(!am)
-    DUNE_THROW(IOError, "Could not open AmiraMesh file " << filename);
-
-  if (am->findData("Hexahedra", HxINT32, 8, "Nodes")) {
-
-    // Load a domain from an AmiraMesh hexagrid file
-    Dune::dwarn << "Hexahedral grids with a parametrized boundary are not supported!" << std::endl;
-    Dune::dwarn << "I will therefore ignore the boundary parametrization." << std::endl;
-
-  } else {
-
-    // Load domain from an AmiraMesh tetragrid file
-    createDomain(factory, boundary);
-
-  }
-
-  // read and build the grid
-  buildGrid(factory, am.get());
-
-  factory.createGrid();
-#endif // #define HAVE_PSURFACE
-}
-
-
-template <class GridType>
-GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename)
+void Dune::AmiraMeshReader<GridType>::read(Dune::GridFactory<GridType> &factory, const std::string& filename)
 {
   static const int dim      = GridType::dimension;
   static const int dimworld = GridType::dimensionworld;
 
   static_assert(dim==dimworld, "AmiraMesh can only be read for grids with dim==dimworld!");
 
-  // Create a grid factory
-  GridFactory<GridType> factory;
-
   // Load the AmiraMesh file
   std::unique_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
 
@@ -299,45 +249,8 @@ GridType* Dune::AmiraMeshReader<GridType>::read(const std::string& filename)
     build2dGrid(factory, am.get());
 
   }
-
-  return factory.createGrid();
 }
 
-template <class GridType>
-void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
-                                           const std::string& filename)
-{
-  static const int dim      = GridType::dimension;
-  static const int dimworld = GridType::dimensionworld;
-
-  if (dim!=dimworld)
-    DUNE_THROW(IOError, "AmiraMesh can only be read for grids with dim==dimworld!");
-
-  dverb << "This is the AmiraMesh reader for file '" << filename << "'!" << std::endl;
-
-  // Create a grid factory
-  GridFactory<GridType> factory(&grid);
-
-  // Load the AmiraMesh file
-  std::unique_ptr<AmiraMesh> am(AmiraMesh::read(filename.c_str()));
-  if(!am)
-    DUNE_THROW(IOError, "read: Could not open AmiraMesh file " << filename);
-
-  // ////////////////////////////////////////////////////
-  //   Build the grids
-  // ////////////////////////////////////////////////////
-  if (dim==3) {
-
-    buildGrid(factory, am.get());
-
-  } else {
-
-    build2dGrid(factory, am.get());
-
-  }
-
-  factory.createGrid();
-}
 
 template <class GridType>
 void Dune::AmiraMeshReader<GridType>::build2dGrid(GridFactory<GridType>& factory, AmiraMesh* am)

@@ -7,6 +7,7 @@
 #include <string>
 
 #include <dune/grid/common/gridfactory.hh>
+#include <dune/grid/io/file/gridreader.hh>
 
 #if HAVE_PSURFACE
 #include <dune/grid/io/file/amiramesh/psurfaceboundary.hh>
@@ -25,7 +26,10 @@ namespace Dune {
    *
    */
   template<class GridType>
-  class AmiraMeshReader {
+  class AmiraMeshReader
+      : public GridReader<GridType, AmiraMeshReader<GridType>>
+  {
+    typedef GridReader<GridType, AmiraMeshReader<GridType>> Base;
 
     /** \brief Dimension of the grid */
     enum {dim = GridType::dimension};
@@ -45,15 +49,8 @@ namespace Dune {
      *
      * @param filename The filename
      */
-    static GridType* read(const std::string& filename);
+    static void read(GridFactory<GridType>& factory, const std::string& filename);
 
-    /** \brief Read a grid from file into a given grid object
-     *
-     * @param grid The grid objects that is to be read
-     * @param filename The filename
-     */
-    static void read(GridType& grid,
-                     const std::string& filename);
 
     /** \brief Read a grid with a parametrized boundary
 
@@ -64,22 +61,10 @@ namespace Dune {
        @param filename The name of the grid file
        @param boundary Pointer to an object holding the description of the grid domain boundary
      */
-    static GridType* read(const std::string& filename,
-                          const std::shared_ptr<PSurfaceBoundary<dim-1> >& boundary);
-
-  private:
-    /** \brief Read a grid with a parametrized boundary into a given grid object
-
-       \note Reading files into existing grid objects is not officially supported,
-       and this method is here only for a transition period.
-
-       @param grid The grid objects that is to be read
-       @param filename The name of the grid file
-       @param boundary The PSurface boundary object
-     */
-    static void read(GridType& grid,
-                     const std::string& filename,
+    static void read(GridFactory<GridType>& factory, const std::string& filename,
                      const std::shared_ptr<PSurfaceBoundary<dim-1> >& boundary);
+
+    using Base::read;
 
   public:
     /** \brief Read a block vector from an AmiraMesh file
