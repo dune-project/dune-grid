@@ -24,11 +24,12 @@ def addAttr(module, cls):
     setattr(cls, "triangulation", triangulation)
 
 generator = SimpleGenerator("Grid", "Dune::CorePy", "LeafGrid")
+fileBase = "grid"
 
 def module(includes, typeName, constructors=None, methods=None):
     typeName = typeName + "::LeafGridView"
     includes = includes + ["dune/corepy/grid.hh"]
-    typeHash = "grid_" + hashlib.md5(typeName.encode('utf-8')).hexdigest()
+    typeHash = fileBase + "_" + hashlib.md5(typeName.encode('utf-8')).hexdigest()
     module = generator.load(includes, typeName, typeHash, constructors, methods)
     addAttr(module, module.LeafGrid)
     return module
