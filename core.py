@@ -22,7 +22,8 @@ def cartesianDomain(lower,upper,division,**parameters):
         dgf += key + " " + str(parameters[key]) + "\n"
     dgf += "#\n"
     return (reader.dgfString, dgf)
-
+def string2dgf(dgf):
+    return (reader.dgfString,"DGF\n" + dgf)
 class P1VTKFunction:
     def __init__(self, module, gridView, container):
         self.module = module
