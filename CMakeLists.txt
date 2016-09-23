@@ -1,10 +1,13 @@
 # configure_file(__init__.py __init__.py COPYONLY)
 
-# add_python_target(grid_generator)
-# add_python_target(yasp)
-# add_python_target(core)
-# add_python_target(map)
-# add_python_target(alberta)
-# add_python_target(oned)
-# add_python_target(sp)
-# add_python_target(ug)
+add_python_targets(grid
+  __init__
+  grid_generator
+  yasp
+  core
+  map
+  alberta
+  oned
+  sp
+  ug
+)
