@@ -114,11 +114,11 @@ void testReaderFactory()
 
   {
   std::cout << ">>> Checking DgfReader..." << std::endl;
-  Dune::GridFactory<Grid> factory;
-  typedef Dune::DgfReader< Grid > Reader;
-
-  std::ostringstream filename;
-  filename << DUNE_GRID_EXAMPLE_GRIDS_PATH << "dgf/simplex-testgrid-3d.dgf";
+//   Dune::GridFactory<Grid> factory;
+//   typedef Dune::DgfReader< Grid > Reader;
+//
+//   std::ostringstream filename;
+//   filename << DUNE_GRID_EXAMPLE_GRIDS_PATH << "dgf/simplex-testgrid-3d.dgf";
 //   Reader::read(factory, filename.str()); // NOTE: not supported
 //   auto grid = std::unique_ptr<Grid>{ factory.createGrid() };
   }

@@ -41,10 +41,14 @@ namespace Dune {
     /** \brief Create the actual grid */
     static void build2dGrid(GridFactory<GridType>& factory, AmiraMesh* am);
 
-  public:
+  protected:
+
     /** \brief The method that does the reading.
      *
+     * @param factory  A grid-factory that does the final construction of the grid
      * @param filename The filename
+     *
+     * Implementation of \ref GridReader::read.
      */
     static void readFactoryImp(GridFactory<GridType>& factory, const std::string& filename);
 
@@ -55,11 +59,14 @@ namespace Dune {
        functions describing the true shape of the boundary segment.
        This information will the be considered when refining the grid.
 
+       @param factory  A grid-factory that does the final construction of the grid
        @param filename The name of the grid file
        @param boundary Pointer to an object holding the description of the grid domain boundary
+
+       Implementation of \ref GridReader::read.
      */
     static void readFactoryImp(GridFactory<GridType>& factory, const std::string& filename,
-                     const std::shared_ptr<PSurfaceBoundary<dim-1> >& boundary);
+                               const std::shared_ptr<PSurfaceBoundary<dim-1> >& boundary);
 
   public:
     /** \brief Read a block vector from an AmiraMesh file

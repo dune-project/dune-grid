@@ -28,6 +28,8 @@ namespace Dune
     static const int dimension = Grid::dimension;
     static const int dimensionworld = Grid::dimensionworld;
 
+  protected:
+    /// Implementation of \ref GridReader::read.
     static void readFactoryImp(GridFactory &factory, const std::string &fileName)
     {
       AlbertaReader<Grid> reader;

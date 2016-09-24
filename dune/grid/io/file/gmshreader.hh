@@ -657,10 +657,10 @@ namespace Dune
   class GmshReader
       : public GridReader<GridType, GmshReader<GridType>>
   {
-  public:
+  protected:
     typedef GridType Grid;
 
-    /** \todo doc me */
+    /// Implementation of \ref GridReader::read.
     static void readFactoryImp (Dune::GridFactory<Grid>& factory, const std::string& fileName,
                       bool verbose = true, bool insertBoundarySegments=true)
     {
@@ -669,7 +669,7 @@ namespace Dune
       parser.read(fileName);
     }
 
-    /** \todo doc me */
+    /// Implementation of \ref GridReader::read.
     static void readFactoryImp (Dune::GridFactory<Grid>& factory, const std::string& fileName,
                       std::vector<int>& boundarySegmentToPhysicalEntity,
                       std::vector<int>& elementToPhysicalEntity,

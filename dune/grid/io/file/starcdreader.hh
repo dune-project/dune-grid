@@ -50,12 +50,14 @@ namespace Dune {
   class StarCDReader
       : public GridReader<GridType, StarCDReader<GridType>>
   {
-  public:
+  protected:
 
     /** \brief Read grid from a Star-CD file
      *    \return Pointer to the grid
      *    \param fileName The base file name of the Star-CD files
      *    \param verbose Tlag to set whether information should be printed
+     *
+     *  Implementation of \ref GridReader::read
      */
     static void readFactoryImp(GridFactory<GridType> &factory, const std::string &fileName, bool verbose = true)
     {

@@ -22,31 +22,65 @@ namespace Dune {
    *  creating a \ref GridFactory and calling the second read method on this factory instance.
    *
    *  The factory `read` method redirects to the concrete implementation provided as template
-   *  parameter `GridReaderImp`.
+   *  parameter `GridReaderImp` and forwards additional arguments to the concrete implementation
+   *  of the derived class. The redirection is implemented using an accessor pattern, i.e. a class
+   *  that is derived from the implementation class, to be able to call protected (static) members.
+   *  So, the concrete implementation can hide the implementation details from the user by making
+   *  it protected.
    *
-   *  Both `read` methods forward additional arguments to the concrete implementation of the
-   *  derived class.
+   *  Example of a concrete implementation:
+   *  ```c++
+   *  template <class Grid>
+   *  class MyReader : public GridReader<Grid, MyReader<Grid>>
+   *  {
+   *  protected:
+   *    static void readFactoryImp(GridFactory<Grid> &factory, const std::string &filename,
+   *                               additional arguments...) { ... }
+   *
+   *    // optional:
+   *    static std::unique_ptr<Grid> readImp(const std::string &filename,
+   *                                         additional arguments...) { ... }
+   *  };
+   *  ```
    *
    *  Example of usage:
-   *  ```
+   *  ```c++
    *  typedef Dune::UGGrid<3> Grid;
-   *  typedef Dune::AlbertaReader<Grid> Reader;
+   *  typedef MyReader<Grid> Reader;
    *  auto grid = Reader::read("docs/grids/amc/grid-3-3.amc");
    *  ```
+   *
    */
-  template< class Grid, class GridReaderImp >
+  template <class Grid, class GridReaderImp>
   class GridReader
   {
-  public:
+  private:
     // type of underlying implementation, for internal use only
     typedef GridReaderImp Implementation;
 
-    //! Reads the grid from a file with filename and return a unique_ptr to the created grid.
+    //! \brief An accessor class to call protected members of reader implementations.
+    struct Accessor : public Implementation
+    {
+      template <class... Args>
+      static std::unique_ptr<Grid> readImp(Args&&... args)
+      {
+        return Implementation::readImp(std::forward<Args>(args)...);
+      }
+
+      template <class... Args>
+      static void readFactoryImp(Args&&... args)
+      {
+        return Implementation::readFactoryImp(std::forward<Args>(args)...);
+      }
+    };
+
+  public:
+    //! Reads the grid from a file with filename and returns a unique_ptr to the created grid.
     //! Redirects to concrete implementation of derivated class.
     template <class... Args>
     static std::unique_ptr<Grid> read(const std::string &filename, Args&&... args)
     {
-      return Implementation::readImp(filename, std::forward<Args>(args)...);
+      return Accessor::readImp(filename, std::forward<Args>(args)...);
     }
 
     //! Reads the grid from a file with filename into a grid-factory.
@@ -54,7 +88,7 @@ namespace Dune {
     template <class... Args>
     static void read(GridFactory<Grid> &factory, const std::string &filename, Args&&... args)
     {
-      Implementation::readFactoryImp(factory, filename, std::forward<Args>(args)...);
+      Accessor::readFactoryImp(factory, filename, std::forward<Args>(args)...);
     }
 
   protected: // default implementations
@@ -71,7 +105,8 @@ namespace Dune {
 
     // Default implementation for reading into grid-factory: produces a runtime-error.
     template <class... Args>
-    static void readFactoryImp(GridFactory<Grid> &/*factory*/, const std::string &/*filename*/, Args&&... /*args*/)
+    static void readFactoryImp(GridFactory<Grid> &/*factory*/, const std::string &/*filename*/,
+                               Args&&... /*args*/)
     {
       DUNE_THROW( Dune::NotImplemented,
                   "GridReader using a factory argument not implemented for concrete reader implementation." );

@@ -25,12 +25,13 @@ namespace Dune
   class DgfReader
       : public GridReader<GridType, DgfReader<GridType>>
   {
-  public:
+  protected:
     typedef GridType Grid;
 
-    //! Read .dgf file and return a unique_ptr to the created grid.
+    //! \brief Read .dgf file and return a unique_ptr to the created grid.
+    //! Implementation of \ref GridReader::read.
     static std::unique_ptr<Grid> readImp (const std::string& filename,
-                                       MPIHelper::MPICommunicator comm = MPIHelper::getCommunicator())
+                                          MPIHelper::MPICommunicator comm = MPIHelper::getCommunicator())
     {
       DGFGridFactory<Grid> factory(filename, comm);
 
