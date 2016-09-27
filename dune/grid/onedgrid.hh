@@ -30,6 +30,7 @@
 #include "onedgrid/onedgridleafiterator.hh"
 #include "onedgrid/onedgridhieriterator.hh"
 #include "onedgrid/onedgridindexsets.hh"
+#include "onedgrid/onedgridviews.hh"
 
 namespace Dune {
 
@@ -64,8 +65,8 @@ namespace Dune {
         OneDGridIdSet<const OneDGrid>,
         unsigned int,
         CollectiveCommunication<Dune::OneDGrid>,
-        DefaultLevelGridViewTraits,
-        DefaultLeafGridViewTraits,
+        OneDGridLevelGridViewTraits,
+        OneDGridLeafGridViewTraits,
         OneDGridEntitySeed>
     Traits;
   };
@@ -112,6 +113,9 @@ namespace Dune {
 
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
     friend class OneDGridLeafIterator;
+
+    friend class OneDGridLeafGridView<const OneDGrid>;
+    friend class OneDGridLevelGridView<const OneDGrid>;
 
     template <class GridType_>
     friend class GridFactory;
