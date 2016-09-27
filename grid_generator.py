@@ -11,6 +11,7 @@ from ..generator.generator import SimpleGenerator
 
 from types import ModuleType
 
+
 def triangulation(self):
     if self.dimGrid != 2 or self.dimWorld != 2:
         raise Exception("Grid must be 2-dimensional for use as matplotlib triangulation.")
@@ -19,12 +20,15 @@ def triangulation(self):
     triangles = self.tesselate()
     return Triangulation(x[:,0], x[:,1], triangles)
 
+
 def addAttr(module, cls):
     setattr(cls, "_module", module)
     setattr(cls, "triangulation", triangulation)
 
+
 generator = SimpleGenerator("Grid", "Dune::CorePy", "LeafGrid")
 fileBase = "grid"
+
 
 def module(includes, typeName, constructors=None, methods=None):
     typeName = typeName + "::LeafGridView"
@@ -34,21 +38,7 @@ def module(includes, typeName, constructors=None, methods=None):
     addAttr(module, module.LeafGrid)
     return module
 
-gridNames = { "Alberta"    : "dune.grid.alberta",
-              "OneD"       : "dune.grid.oned",
-              "SP"         : "dune.grid.sp",
-              "UG"         : "dune.grid.ug",
-              "Yasp"       : "dune.grid.yasp"
-            }
 
-def register(**kwargs):
-    gridNames.update(kwargs)
-
-def create(grid, *args, **kwargs):
-    gridModule = importlib.import_module(gridNames[grid])
-    return gridModule.create(*args,**kwargs)
-
-#############################################
 if __name__ == "__main__":
     import doctest
     doctest.testmod(optionflags=doctest.ELLIPSIS)

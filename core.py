@@ -1,4 +1,3 @@
-# from .alberta import create as albertaGrid
 # from .alu import create as aluGrid
 # from .alusimplex import create as aluSimplexGrid
 # from .alucube import create as aluCubeGrid
@@ -7,6 +6,7 @@
 # from .sp import create as spGrid
 # from .ug import create as ugGrid
 # from .yasp import create as yaspGrid
+
 
 from ..common import reader
 
@@ -22,8 +22,12 @@ def cartesianDomain(lower,upper,division,**parameters):
         dgf += key + " " + str(parameters[key]) + "\n"
     dgf += "#\n"
     return (reader.dgfString, dgf)
+
+
 def string2dgf(dgf):
     return (reader.dgfString,"DGF\n" + dgf)
+
+
 class P1VTKFunction:
     def __init__(self, module, gridView, container):
         self.module = module
