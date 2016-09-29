@@ -212,24 +212,28 @@ namespace Dune {
 
     /** \brief The processor overlap for parallel computing.  Always zero because
         this is a strictly sequential grid */
+    DUNE_DEPRECATED_MSG("overlapSize() is deprecated. Use the method on the LeafGridView instead.")
     int overlapSize(int codim) const {
       return 0;
     }
 
     /** \brief The processor ghost overlap for parallel computing.  Always zero because
         this is a strictly sequential grid */
+    DUNE_DEPRECATED_MSG("ghostSize() is deprecated. Use the method on the LeafGridView instead.")
     int ghostSize(int codim) const {
       return 0;
     }
 
     /** \brief The processor overlap for parallel computing.  Always zero because
         this is a strictly sequential grid */
+    DUNE_DEPRECATED_MSG("overlapSize() is deprecated. Use the method on the LevelGridView instead.")
     int overlapSize(int level, int codim) const {
       return 0;
     }
 
     /** \brief The processor ghost overlap for parallel computing.  Always zero because
         this is a strictly sequential grid */
+    DUNE_DEPRECATED_MSG("ghostSize() is deprecated. Use the method on the LevelGridView instead.")
     int ghostSize(int level, int codim) const {
       return 0;
     }

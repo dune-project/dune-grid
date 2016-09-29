@@ -171,13 +171,13 @@ namespace Dune
     /** \brief Return size of the overlap region for a given codim on the grid view.  */
     int overlapSize(int codim) const
     {
-      return grid().overlapSize(level_, codim);
+      return 0;
     }
 
     /** \brief Return size of the ghost region for a given codim on the grid view.  */
     int ghostSize(int codim) const
     {
-      return grid().ghostSize(level_, codim);
+      return 0;
     }
 
     /** communicate data on this view */
@@ -349,13 +349,13 @@ namespace Dune
     /** \brief Return size of the overlap region for a given codim on the grid view.  */
     int overlapSize(int codim) const
     {
-      return grid().overlapSize(codim);
+      return 0;
     }
 
     /** \brief Return size of the ghost region for a given codim on the grid view.  */
     int ghostSize(int codim) const
     {
-      return grid().ghostSize(codim);
+      return 0;
     }
 
     /** \brief Communicate data on this view -- does nothing because OneDGrid is purely sequential */
