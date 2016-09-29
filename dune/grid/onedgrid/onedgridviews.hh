@@ -185,9 +185,7 @@ namespace Dune
     void communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
                        InterfaceType iftype,
                        CommunicationDirection dir ) const
-    {
-      return grid().communicate( data, iftype, dir, level_ );
-    }
+    {}
 
   private:
     const Grid *grid_;
@@ -360,14 +358,12 @@ namespace Dune
       return grid().ghostSize(codim);
     }
 
-    /** communicate data on this view */
+    /** \brief Communicate data on this view -- does nothing because OneDGrid is purely sequential */
     template< class DataHandleImp, class DataType >
     void communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
                        InterfaceType iftype,
                        CommunicationDirection dir ) const
-    {
-      return grid().communicate( data, iftype, dir );
-    }
+    {}
 
   private:
     const Grid *grid_;

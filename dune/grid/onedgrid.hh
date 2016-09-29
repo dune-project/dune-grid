@@ -318,10 +318,12 @@ namespace Dune {
     // dummy parallel functions
 
     template<class DataHandle>
+    DUNE_DEPRECATED_MSG("communicate() is deprecated. Use the method on the LevelGridView instead.")
     void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
     {}
 
     template<class DataHandle>
+    DUNE_DEPRECATED_MSG("communicate() is deprecated. Use the method on the LeafGridView instead.")
     void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const
     {}
 
