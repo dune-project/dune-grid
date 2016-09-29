@@ -26,11 +26,11 @@
 #include "onedgrid/onedgridentityseed.hh"
 #include "onedgrid/onedgridintersections.hh"
 #include "onedgrid/onedgridintersectioniterators.hh"
-#include "onedgrid/onedgridleveliterator.hh"
 #include "onedgrid/onedgridleafiterator.hh"
+#include "onedgrid/onedgridviews.hh"
+#include "onedgrid/onedgridleveliterator.hh"
 #include "onedgrid/onedgridhieriterator.hh"
 #include "onedgrid/onedgridindexsets.hh"
-#include "onedgrid/onedgridviews.hh"
 
 namespace Dune {
 
@@ -156,38 +156,6 @@ namespace Dune {
        Levels are numbered 0 ... maxlevel with 0 the coarsest level.
      */
     int maxLevel() const {return entityImps_.size()-1;}
-
-    //! Iterator to first entity of given codim on level
-    template<int codim>
-    typename Traits::template Codim<codim>::LevelIterator lbegin (int level) const;
-
-    //! one past the end on this level
-    template<int codim>
-    typename Traits::template Codim<codim>::LevelIterator lend (int level) const;
-
-    //! Iterator to first entity of given codim on level
-    template<int codim, PartitionIteratorType PiType>
-    typename Traits::template Codim<codim>::template Partition<PiType>::LevelIterator lbegin (int level) const;
-
-    //! one past the end on this level
-    template<int codim, PartitionIteratorType PiType>
-    typename Traits::template Codim<codim>::template Partition<PiType>::LevelIterator lend (int level) const;
-
-    //! Iterator to first entity of given codim on leaf level
-    template<int codim>
-    typename Traits::template Codim<codim>::LeafIterator leafbegin () const;
-
-    //! one past the end on leaf level
-    template<int codim>
-    typename Traits::template Codim<codim>::LeafIterator leafend () const;
-
-    //! Iterator to first entity of given codim on level
-    template<int codim, PartitionIteratorType PiType>
-    typename Traits::template Codim<codim>::template Partition<PiType>::LeafIterator leafbegin() const;
-
-    //! one past the end on this level
-    template<int codim, PartitionIteratorType PiType>
-    typename Traits::template Codim<codim>::template Partition<PiType>::LeafIterator leafend() const;
 
     /** \brief Create an Entity from an EntitySeed */
     template <typename Seed>

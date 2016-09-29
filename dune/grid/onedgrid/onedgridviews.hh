@@ -124,28 +124,28 @@ namespace Dune
     template< int cd >
     typename Codim< cd > :: Iterator begin () const
     {
-      return grid().template lbegin< cd, All_Partition >( level_ );
+      return OneDGridLevelIterator<cd,All_Partition,GridImp>(const_cast<OneDEntityImp<1-cd>*>(std::get<1-cd>(grid_->entityImps_[level_]).begin()));
     }
 
     /** \brief obtain begin iterator for this view */
     template< int cd, PartitionIteratorType pit >
     typename Codim< cd > :: template Partition< pit > :: Iterator begin () const
     {
-      return grid().template lbegin< cd, pit >( level_ );
+      return OneDGridLevelIterator<cd,pit,GridImp>(const_cast<OneDEntityImp<1-cd>*>(std::get<1-cd>(grid_->entityImps_[level_]).begin()));
     }
 
     /** \brief obtain end iterator for this view */
     template< int cd >
     typename Codim< cd > :: Iterator end () const
     {
-      return grid().template lend< cd, All_Partition >( level_ );
+      return OneDGridLevelIterator<cd,All_Partition,GridImp>(nullptr);
     }
 
     /** \brief obtain end iterator for this view */
     template< int cd, PartitionIteratorType pit >
     typename Codim< cd > :: template Partition< pit > :: Iterator end () const
     {
-      return grid().template lend< cd, pit >( level_ );
+      return OneDGridLevelIterator<cd,pit,GridImp>(static_cast<OneDEntityImp<1-cd>*>(nullptr));
     }
 
     /** \brief obtain begin intersection iterator with respect to this view */
@@ -304,28 +304,28 @@ namespace Dune
     template< int cd >
     typename Codim< cd > :: Iterator begin () const
     {
-      return grid().template leafbegin< cd, All_Partition >();
+      return OneDGridLeafIterator<cd,All_Partition,GridImp>(*grid_);
     }
 
     /** \brief obtain begin iterator for this view */
     template< int cd, PartitionIteratorType pit >
     typename Codim< cd > :: template Partition< pit > :: Iterator begin () const
     {
-      return grid().template leafbegin< cd, pit >();
+      return OneDGridLeafIterator<cd,pit,GridImp>(*grid_);
     }
 
     /** \brief obtain end iterator for this view */
     template< int cd >
     typename Codim< cd > :: Iterator end () const
     {
-      return grid().template leafend< cd, All_Partition >();
+      return OneDGridLeafIterator<cd,All_Partition,GridImp>();
     }
 
     /** \brief obtain end iterator for this view */
     template< int cd, PartitionIteratorType pit >
     typename Codim< cd > :: template Partition< pit > :: Iterator end () const
     {
-      return grid().template leafend< cd, pit >();
+      return OneDGridLeafIterator<cd,pit,GridImp>();
     }
 
     /** \brief obtain begin intersection iterator with respect to this view */
