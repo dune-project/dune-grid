@@ -1,28 +1,23 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GRID_COMMON_DEFAULTGRIDVIEW_HH
-#define DUNE_GRID_COMMON_DEFAULTGRIDVIEW_HH
-
-#include <dune/common/typetraits.hh>
-#include <dune/common/exceptions.hh>
-
-#include <dune/grid/common/capabilities.hh>
-#include <dune/grid/common/gridview.hh>
+#ifndef DUNE_GRID_ONEDGRID_ONEDGRIDVIEWS_HH
+#define DUNE_GRID_ONEDGRID_ONEDGRIDVIEWS_HH
 
 namespace Dune
 {
 
   template< class GridImp >
-  class DefaultLevelGridView;
+  class OneDGridLevelGridView;
 
   template< class GridImp >
-  class DefaultLeafGridView;
+  class OneDGridLeafGridView;
 
 
-  template< class GridImp >
-  struct DefaultLevelGridViewTraits
+  /** \brief Collect several types associated to OneDGrid LevelGridViews */
+  template< class GridImp>
+  struct OneDGridLevelGridViewTraits
   {
-    typedef DefaultLevelGridView< GridImp > GridViewImp;
+    typedef OneDGridLevelGridView< GridImp > GridViewImp;
 
     /** \brief type of the grid */
     typedef typename std::remove_const<GridImp>::type Grid;
@@ -64,17 +59,15 @@ namespace Dune
       };
     };
 
-    enum { conforming = Capabilities :: isLevelwiseConforming< Grid > :: v };
+    enum { conforming = true };
   };
 
-
+  /** \brief Implementation class of LevelGridViews for OneDGrid */
   template< class GridImp >
-  class DefaultLevelGridView
+  class OneDGridLevelGridView
   {
-    typedef DefaultLevelGridView< GridImp > ThisType;
-
   public:
-    typedef DefaultLevelGridViewTraits<GridImp> Traits;
+    typedef OneDGridLevelGridViewTraits<GridImp> Traits;
 
     /** \brief type of the grid */
     typedef typename Traits::Grid Grid;
@@ -97,7 +90,7 @@ namespace Dune
 
     enum { conforming = Traits :: conforming };
 
-    DefaultLevelGridView ( const Grid &grid, int level )
+    OneDGridLevelGridView ( const Grid &grid, int level )
       : grid_( &grid ),
         level_( level )
     {}
@@ -131,42 +124,42 @@ namespace Dune
     template< int cd >
     typename Codim< cd > :: Iterator begin () const
     {
-      return grid().template lbegin< cd, All_Partition >( level_ );
+      return OneDGridLevelIterator<cd,All_Partition,GridImp>(const_cast<OneDEntityImp<1-cd>*>(std::get<1-cd>(grid_->entityImps_[level_]).begin()));
     }
 
     /** \brief obtain begin iterator for this view */
     template< int cd, PartitionIteratorType pit >
     typename Codim< cd > :: template Partition< pit > :: Iterator begin () const
     {
-      return grid().template lbegin< cd, pit >( level_ );
+      return OneDGridLevelIterator<cd,pit,GridImp>(const_cast<OneDEntityImp<1-cd>*>(std::get<1-cd>(grid_->entityImps_[level_]).begin()));
     }
 
     /** \brief obtain end iterator for this view */
     template< int cd >
     typename Codim< cd > :: Iterator end () const
     {
-      return grid().template lend< cd, All_Partition >( level_ );
+      return OneDGridLevelIterator<cd,All_Partition,GridImp>(nullptr);
     }
 
     /** \brief obtain end iterator for this view */
     template< int cd, PartitionIteratorType pit >
     typename Codim< cd > :: template Partition< pit > :: Iterator end () const
     {
-      return grid().template lend< cd, pit >( level_ );
+      return OneDGridLevelIterator<cd,pit,GridImp>(static_cast<OneDEntityImp<1-cd>*>(nullptr));
     }
 
     /** \brief obtain begin intersection iterator with respect to this view */
     IntersectionIterator
     ibegin ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return entity.impl().ilevelbegin();
+      return GridImp::getRealImplementation(entity).ilevelbegin();
     }
 
     /** \brief obtain end intersection iterator with respect to this view */
     IntersectionIterator
     iend ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return entity.impl().ilevelend();
+      return GridImp::getRealImplementation(entity).ilevelend();
     }
 
     /** \brief obtain collective communication object */
@@ -178,13 +171,13 @@ namespace Dune
     /** \brief Return size of the overlap region for a given codim on the grid view.  */
     int overlapSize(int codim) const
     {
-      return grid().overlapSize(level_, codim);
+      return 0;
     }
 
     /** \brief Return size of the ghost region for a given codim on the grid view.  */
     int ghostSize(int codim) const
     {
-      return grid().ghostSize(level_, codim);
+      return 0;
     }
 
     /** communicate data on this view */
@@ -192,9 +185,7 @@ namespace Dune
     void communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
                        InterfaceType iftype,
                        CommunicationDirection dir ) const
-    {
-      return grid().communicate( data, iftype, dir, level_ );
-    }
+    {}
 
   private:
     const Grid *grid_;
@@ -202,9 +193,11 @@ namespace Dune
   };
 
 
-  template< class GridImp >
-  struct DefaultLeafGridViewTraits {
-    typedef DefaultLeafGridView< GridImp > GridViewImp;
+  /** \brief Collect several types associated to OneDGrid LeafGridViews */
+  template< class GridImp>
+  struct OneDGridLeafGridViewTraits
+  {
+    typedef OneDGridLeafGridView< GridImp > GridViewImp;
 
     /** \brief type of the grid */
     typedef typename std::remove_const<GridImp>::type Grid;
@@ -216,8 +209,7 @@ namespace Dune
     typedef typename Grid :: Traits :: LeafIntersection Intersection;
 
     /** \brief type of the intersection iterator */
-    typedef typename Grid :: Traits :: LeafIntersectionIterator
-    IntersectionIterator;
+    typedef typename Grid :: Traits :: LeafIntersectionIterator IntersectionIterator;
 
     /** \brief type of the collective communication */
     typedef typename Grid :: Traits :: CollectiveCommunication CollectiveCommunication;
@@ -232,8 +224,7 @@ namespace Dune
       typedef typename Grid :: Traits :: template Codim< cd > :: Entity Entity;
 
       typedef typename Grid :: template Codim< cd > :: Geometry Geometry;
-      typedef typename Grid :: template Codim< cd > :: LocalGeometry
-      LocalGeometry;
+      typedef typename Grid :: template Codim< cd > :: LocalGeometry LocalGeometry;
 
       /** \brief Define types needed to iterate over entities of a given partition type */
       template <PartitionIteratorType pit >
@@ -246,17 +237,15 @@ namespace Dune
       };
     };
 
-    enum { conforming = Capabilities :: isLeafwiseConforming< Grid > :: v };
+    enum { conforming = true };
   };
 
-
+  /** \brief Implementation class of LeafGridViews for UGGrid */
   template< class GridImp >
-  class DefaultLeafGridView
+  class OneDGridLeafGridView
   {
-    typedef DefaultLeafGridView< GridImp > ThisType;
-
   public:
-    typedef DefaultLeafGridViewTraits<GridImp> Traits;
+    typedef OneDGridLeafGridViewTraits<GridImp> Traits;
 
     /** \brief type of the grid */
     typedef typename Traits::Grid Grid;
@@ -280,7 +269,7 @@ namespace Dune
     enum { conforming = Traits :: conforming };
 
   public:
-    DefaultLeafGridView ( const Grid &grid )
+    OneDGridLeafGridView ( const Grid &grid )
       : grid_( &grid )
     {}
 
@@ -313,42 +302,42 @@ namespace Dune
     template< int cd >
     typename Codim< cd > :: Iterator begin () const
     {
-      return grid().template leafbegin< cd, All_Partition >();
+      return OneDGridLeafIterator<cd,All_Partition,GridImp>(*grid_);
     }
 
     /** \brief obtain begin iterator for this view */
     template< int cd, PartitionIteratorType pit >
     typename Codim< cd > :: template Partition< pit > :: Iterator begin () const
     {
-      return grid().template leafbegin< cd, pit >();
+      return OneDGridLeafIterator<cd,pit,GridImp>(*grid_);
     }
 
     /** \brief obtain end iterator for this view */
     template< int cd >
     typename Codim< cd > :: Iterator end () const
     {
-      return grid().template leafend< cd, All_Partition >();
+      return OneDGridLeafIterator<cd,All_Partition,GridImp>();
     }
 
     /** \brief obtain end iterator for this view */
     template< int cd, PartitionIteratorType pit >
     typename Codim< cd > :: template Partition< pit > :: Iterator end () const
     {
-      return grid().template leafend< cd, pit >();
+      return OneDGridLeafIterator<cd,pit,GridImp>();
     }
 
     /** \brief obtain begin intersection iterator with respect to this view */
     IntersectionIterator
     ibegin ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return entity.impl().ileafbegin();
+      return GridImp::getRealImplementation(entity).ileafbegin();
     }
 
     /** \brief obtain end intersection iterator with respect to this view */
     IntersectionIterator
     iend ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return entity.impl().ileafend();
+      return GridImp::getRealImplementation(entity).ileafend();
     }
 
     /** \brief obtain collective communication object */
@@ -360,23 +349,21 @@ namespace Dune
     /** \brief Return size of the overlap region for a given codim on the grid view.  */
     int overlapSize(int codim) const
     {
-      return grid().overlapSize(codim);
+      return 0;
     }
 
     /** \brief Return size of the ghost region for a given codim on the grid view.  */
     int ghostSize(int codim) const
     {
-      return grid().ghostSize(codim);
+      return 0;
     }
 
-    /** communicate data on this view */
+    /** \brief Communicate data on this view -- does nothing because OneDGrid is purely sequential */
     template< class DataHandleImp, class DataType >
     void communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
                        InterfaceType iftype,
                        CommunicationDirection dir ) const
-    {
-      return grid().communicate( data, iftype, dir );
-    }
+    {}
 
   private:
     const Grid *grid_;

@@ -8,7 +8,8 @@ set(HEADERS nulliteratorfactory.hh
   onedgridleveliterator.hh
   onedgridlist.hh
   onedgridintersections.hh
-  onedgridintersectioniterators.hh)
+  onedgridintersectioniterators.hh
+  onedgridviews.hh)
 
 install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/onedgrid/)
 

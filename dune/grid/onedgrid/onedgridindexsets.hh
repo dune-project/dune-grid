@@ -225,12 +225,9 @@ namespace Dune {
     bool contains (const EntityType& e) const
     {
       enum { cd = EntityType::codimension };
-      typedef typename GridImp::template Codim<cd>::template Partition<All_Partition>::LeafIterator IteratorType;
-      IteratorType iend = grid_.template leafend<cd,All_Partition>();
-      for (IteratorType it = grid_.template leafbegin<cd,All_Partition>();
-           it != iend; ++it)
+      for (const auto& entity : entities(grid_.leafGridView(), Codim<cd>()))
       {
-        if (it->level() == e.level() && this->template index<cd>(*it) == this->template index<cd>(e))
+        if (entity.level() == e.level() && this->template index<cd>(entity) == this->template index<cd>(e))
           return true;
       }
       return false;
@@ -266,14 +263,8 @@ namespace Dune {
       //   Init the element indices
       // ///////////////////////////////
       numElements_ = 0;
-      typename GridImp::Traits::template Codim<0>::LeafIterator eIt    = grid_.template leafbegin<0>();
-      typename GridImp::Traits::template Codim<0>::LeafIterator eEndIt = grid_.template leafend<0>();
-
-      for (; eIt!=eEndIt; ++eIt) {
-
-        grid_.getRealImplementation(*eIt).target_->leafIndex_ = numElements_++;
-
-      }
+      for (const auto& element : elements(grid_.leafGridView()))
+        grid_.getRealImplementation(element).target_->leafIndex_ = numElements_++;
 
       // //////////////////////////////
       //   Init the vertex indices

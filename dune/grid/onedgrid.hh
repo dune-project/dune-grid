@@ -26,8 +26,9 @@
 #include "onedgrid/onedgridentityseed.hh"
 #include "onedgrid/onedgridintersections.hh"
 #include "onedgrid/onedgridintersectioniterators.hh"
-#include "onedgrid/onedgridleveliterator.hh"
 #include "onedgrid/onedgridleafiterator.hh"
+#include "onedgrid/onedgridviews.hh"
+#include "onedgrid/onedgridleveliterator.hh"
 #include "onedgrid/onedgridhieriterator.hh"
 #include "onedgrid/onedgridindexsets.hh"
 
@@ -64,8 +65,8 @@ namespace Dune {
         OneDGridIdSet<const OneDGrid>,
         unsigned int,
         CollectiveCommunication<Dune::OneDGrid>,
-        DefaultLevelGridViewTraits,
-        DefaultLeafGridViewTraits,
+        OneDGridLevelGridViewTraits,
+        OneDGridLeafGridViewTraits,
         OneDGridEntitySeed>
     Traits;
   };
@@ -113,6 +114,9 @@ namespace Dune {
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
     friend class OneDGridLeafIterator;
 
+    friend class OneDGridLeafGridView<const OneDGrid>;
+    friend class OneDGridLevelGridView<const OneDGrid>;
+
     template <class GridType_>
     friend class GridFactory;
 
@@ -152,38 +156,6 @@ namespace Dune {
        Levels are numbered 0 ... maxlevel with 0 the coarsest level.
      */
     int maxLevel() const {return entityImps_.size()-1;}
-
-    //! Iterator to first entity of given codim on level
-    template<int codim>
-    typename Traits::template Codim<codim>::LevelIterator lbegin (int level) const;
-
-    //! one past the end on this level
-    template<int codim>
-    typename Traits::template Codim<codim>::LevelIterator lend (int level) const;
-
-    //! Iterator to first entity of given codim on level
-    template<int codim, PartitionIteratorType PiType>
-    typename Traits::template Codim<codim>::template Partition<PiType>::LevelIterator lbegin (int level) const;
-
-    //! one past the end on this level
-    template<int codim, PartitionIteratorType PiType>
-    typename Traits::template Codim<codim>::template Partition<PiType>::LevelIterator lend (int level) const;
-
-    //! Iterator to first entity of given codim on leaf level
-    template<int codim>
-    typename Traits::template Codim<codim>::LeafIterator leafbegin () const;
-
-    //! one past the end on leaf level
-    template<int codim>
-    typename Traits::template Codim<codim>::LeafIterator leafend () const;
-
-    //! Iterator to first entity of given codim on level
-    template<int codim, PartitionIteratorType PiType>
-    typename Traits::template Codim<codim>::template Partition<PiType>::LeafIterator leafbegin() const;
-
-    //! one past the end on this level
-    template<int codim, PartitionIteratorType PiType>
-    typename Traits::template Codim<codim>::template Partition<PiType>::LeafIterator leafend() const;
 
     /** \brief Create an Entity from an EntitySeed */
     template <typename Seed>
@@ -240,24 +212,28 @@ namespace Dune {
 
     /** \brief The processor overlap for parallel computing.  Always zero because
         this is a strictly sequential grid */
+    DUNE_DEPRECATED_MSG("overlapSize() is deprecated. Use the method on the LeafGridView instead.")
     int overlapSize(int codim) const {
       return 0;
     }
 
     /** \brief The processor ghost overlap for parallel computing.  Always zero because
         this is a strictly sequential grid */
+    DUNE_DEPRECATED_MSG("ghostSize() is deprecated. Use the method on the LeafGridView instead.")
     int ghostSize(int codim) const {
       return 0;
     }
 
     /** \brief The processor overlap for parallel computing.  Always zero because
         this is a strictly sequential grid */
+    DUNE_DEPRECATED_MSG("overlapSize() is deprecated. Use the method on the LevelGridView instead.")
     int overlapSize(int level, int codim) const {
       return 0;
     }
 
     /** \brief The processor ghost overlap for parallel computing.  Always zero because
         this is a strictly sequential grid */
+    DUNE_DEPRECATED_MSG("ghostSize() is deprecated. Use the method on the LevelGridView instead.")
     int ghostSize(int level, int codim) const {
       return 0;
     }
@@ -346,10 +322,12 @@ namespace Dune {
     // dummy parallel functions
 
     template<class DataHandle>
+    DUNE_DEPRECATED_MSG("communicate() is deprecated. Use the method on the LevelGridView instead.")
     void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
     {}
 
     template<class DataHandle>
+    DUNE_DEPRECATED_MSG("communicate() is deprecated. Use the method on the LeafGridView instead.")
     void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const
     {}
 

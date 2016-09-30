@@ -126,7 +126,7 @@ void testOneDGrid(OneDGrid& grid)
   gridcheck(grid);
 
   // create hybrid grid
-  grid.mark(1, * grid.leafbegin<0>());
+  grid.mark(1, * grid.leafGridView().begin<0>());
   grid.preAdapt();
   grid.adapt();
   grid.postAdapt();

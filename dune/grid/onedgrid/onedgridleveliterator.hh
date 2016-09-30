@@ -28,6 +28,7 @@ namespace Dune {
     friend class OneDGrid;
     friend class OneDGridEntity<codim,dim,GridImp>;
     friend class OneDGridEntity<0,dim,GridImp>;
+    friend class OneDGridLevelGridView<GridImp>;
 
     typedef typename GridImp::template Codim<codim>::Entity Entity;
     enum {codimension = codim};

@@ -135,75 +135,6 @@ Dune::OneDGrid::~OneDGrid()
       delete levelIndexSets_[i];
 }
 
-template <int codim>
-typename Dune::OneDGrid::Traits::template Codim<codim>::LevelIterator
-Dune::OneDGrid::lbegin(int level) const
-{
-  if (level<0 || level>maxLevel())
-    DUNE_THROW(Dune::GridError, "LevelIterator in nonexisting level " << level << " requested!");
-
-  return Dune::OneDGridLevelIterator<codim,All_Partition, const Dune::OneDGrid>(const_cast<Dune::OneDEntityImp<1-codim>*>(std::get<1-codim>(entityImps_[level]).begin()));
-}
-
-template <int codim>
-typename Dune::OneDGrid::Traits::template Codim<codim>::LevelIterator
-Dune::OneDGrid::lend(int level) const
-{
-  if (level<0 || level>maxLevel())
-    DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
-
-  return OneDGridLevelIterator<codim,All_Partition, const Dune::OneDGrid>(0);
-}
-
-template <int codim, Dune::PartitionIteratorType PiType>
-typename Dune::OneDGrid::Traits::template Codim<codim>::template Partition<PiType>::LevelIterator
-Dune::OneDGrid::lbegin(int level) const
-{
-  if (level<0 || level>maxLevel())
-    DUNE_THROW(Dune::GridError, "LevelIterator in nonexisting level " << level << " requested!");
-
-  return Dune::OneDGridLevelIterator<codim,PiType, const Dune::OneDGrid>(const_cast<Dune::OneDEntityImp<1-codim>*>(std::get<1-codim>(entityImps_[level]).begin()));
-}
-
-template <int codim, Dune::PartitionIteratorType PiType>
-typename Dune::OneDGrid::Traits::template Codim<codim>::template Partition<PiType>::LevelIterator
-Dune::OneDGrid::lend(int level) const
-{
-  if (level<0 || level>maxLevel())
-    DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
-
-  return OneDGridLevelIterator<codim,PiType, const Dune::OneDGrid>(static_cast<Dune::OneDEntityImp<dim-codim>*>(0));
-}
-
-
-template <int codim>
-typename Dune::OneDGrid::Traits::template Codim<codim>::LeafIterator
-Dune::OneDGrid::leafbegin() const
-{
-  return OneDGridLeafIterator<codim,All_Partition,const OneDGrid>(*this);
-}
-
-template <int codim>
-typename Dune::OneDGrid::Traits::template Codim<codim>::LeafIterator
-Dune::OneDGrid::leafend() const
-{
-  return OneDGridLeafIterator<codim,All_Partition, const Dune::OneDGrid>();
-}
-
-template <int codim, Dune::PartitionIteratorType PiType>
-typename Dune::OneDGrid::Traits::template Codim<codim>::template Partition<PiType>::LeafIterator
-Dune::OneDGrid::leafbegin() const
-{
-  return OneDGridLeafIterator<codim,PiType, const Dune::OneDGrid>(*this);
-}
-
-template <int codim, Dune::PartitionIteratorType PiType>
-typename Dune::OneDGrid::Traits::template Codim<codim>::template Partition<PiType>::LeafIterator
-Dune::OneDGrid::leafend() const
-{
-  return OneDGridLeafIterator<codim,PiType, const Dune::OneDGrid>();
-}
-
 Dune::OneDGridList<Dune::OneDEntityImp<0> >::iterator
 Dune::OneDGrid::getLeftUpperVertex(const OneDEntityImp<1>* eIt)
 {
@@ -536,11 +467,8 @@ bool Dune::OneDGrid::adapt()
 
 bool Dune::OneDGrid::preAdapt()
 {
-  Codim<0>::LeafIterator eIt    = leafbegin<0>();
-  Codim<0>::LeafIterator eEndIt = leafend<0>();
-
-  for (; eIt!=eEndIt; ++eIt)
-    if (getRealImplementation(*eIt).target_->markState_ == OneDEntityImp<1>::COARSEN)
+  for (const auto& element : Dune::elements(leafGridView()))
+    if (getRealImplementation(element).target_->markState_ == OneDEntityImp<1>::COARSEN)
       return true;
 
   return false;
@@ -589,11 +517,8 @@ void Dune::OneDGrid::globalRefine(int refCount)
   for (int i=0; i<refCount; i++) {
 
     // mark all entities for grid refinement
-    Codim<0>::LeafIterator iIt    = leafbegin<0>();
-    Codim<0>::LeafIterator iEndIt = leafend<0>();
-
-    for (; iIt!=iEndIt; ++iIt)
-      mark(1, *iIt);
+    for (const auto& element : Dune::elements(leafGridView()))
+      mark(1, element);
 
     this->preAdapt();
     adapt();
@@ -632,126 +557,3 @@ int Dune::OneDGrid::getMark(const Codim<0>::Entity & e ) const
     return 1;
   return 0;
 }
-
-
-
-// /////////////////////////////////////////////////////////////////////////
-//   Explicitly instantiate the OnedGrid member templates.
-//   gcc-4.0 wants these instantiations after the method implementations
-// /////////////////////////////////////////////////////////////////////////
-
-template Dune::OneDGrid::Codim<0>::LevelIterator Dune::OneDGrid::lbegin<0>(int level) const;
-template Dune::OneDGrid::Codim<1>::LevelIterator Dune::OneDGrid::lbegin<1>(int level) const;
-
-template Dune::OneDGrid::Codim<0>::LevelIterator Dune::OneDGrid::lend<0>(int level) const;
-template Dune::OneDGrid::Codim<1>::LevelIterator Dune::OneDGrid::lend<1>(int level) const;
-
-template Dune::OneDGrid::Codim<0>::Partition<Dune::Interior_Partition>::LevelIterator
-Dune::OneDGrid::lbegin<0,Dune::Interior_Partition>(int level) const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
-Dune::OneDGrid::lbegin<0,Dune::InteriorBorder_Partition>(int level) const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::Overlap_Partition>::LevelIterator
-Dune::OneDGrid::lbegin<0,Dune::Overlap_Partition>(int level) const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::OverlapFront_Partition>::LevelIterator
-Dune::OneDGrid::lbegin<0,Dune::OverlapFront_Partition>(int level) const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::All_Partition>::LevelIterator
-Dune::OneDGrid::lbegin<0,Dune::All_Partition>(int level) const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::Ghost_Partition>::LevelIterator
-Dune::OneDGrid::lbegin<0,Dune::Ghost_Partition>(int level) const;
-
-template Dune::OneDGrid::Codim<0>::Partition<Dune::Interior_Partition>::LevelIterator
-Dune::OneDGrid::lend<0,Dune::Interior_Partition>(int level) const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
-Dune::OneDGrid::lend<0,Dune::InteriorBorder_Partition>(int level) const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::Overlap_Partition>::LevelIterator
-Dune::OneDGrid::lend<0,Dune::Overlap_Partition>(int level) const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::OverlapFront_Partition>::LevelIterator
-Dune::OneDGrid::lend<0,Dune::OverlapFront_Partition>(int level) const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::All_Partition>::LevelIterator
-Dune::OneDGrid::lend<0,Dune::All_Partition>(int level) const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::Ghost_Partition>::LevelIterator
-Dune::OneDGrid::lend<0,Dune::Ghost_Partition>(int level) const;
-
-template Dune::OneDGrid::Codim<1>::Partition<Dune::Interior_Partition>::LevelIterator
-Dune::OneDGrid::lbegin<1,Dune::Interior_Partition>(int level) const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
-Dune::OneDGrid::lbegin<1,Dune::InteriorBorder_Partition>(int level) const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::Overlap_Partition>::LevelIterator
-Dune::OneDGrid::lbegin<1,Dune::Overlap_Partition>(int level) const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::OverlapFront_Partition>::LevelIterator
-Dune::OneDGrid::lbegin<1,Dune::OverlapFront_Partition>(int level) const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::All_Partition>::LevelIterator
-Dune::OneDGrid::lbegin<1,Dune::All_Partition>(int level) const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::Ghost_Partition>::LevelIterator
-Dune::OneDGrid::lbegin<1,Dune::Ghost_Partition>(int level) const;
-
-template Dune::OneDGrid::Codim<1>::Partition<Dune::Interior_Partition>::LevelIterator
-Dune::OneDGrid::lend<1,Dune::Interior_Partition>(int level) const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::InteriorBorder_Partition>::LevelIterator
-Dune::OneDGrid::lend<1,Dune::InteriorBorder_Partition>(int level) const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::Overlap_Partition>::LevelIterator
-Dune::OneDGrid::lend<1,Dune::Overlap_Partition>(int level) const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::OverlapFront_Partition>::LevelIterator
-Dune::OneDGrid::lend<1,Dune::OverlapFront_Partition>(int level) const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::All_Partition>::LevelIterator
-Dune::OneDGrid::lend<1,Dune::All_Partition>(int level) const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::Ghost_Partition>::LevelIterator
-Dune::OneDGrid::lend<1,Dune::Ghost_Partition>(int level) const;
-
-template Dune::OneDGrid::Codim<0>::LeafIterator Dune::OneDGrid::leafbegin<0>() const;
-template Dune::OneDGrid::Codim<1>::LeafIterator Dune::OneDGrid::leafbegin<1>() const;
-
-template Dune::OneDGrid::Codim<0>::LeafIterator Dune::OneDGrid::leafend<0>() const;
-template Dune::OneDGrid::Codim<1>::LeafIterator Dune::OneDGrid::leafend<1>() const;
-
-template Dune::OneDGrid::Codim<0>::Partition<Dune::Interior_Partition>::LeafIterator
-Dune::OneDGrid::leafbegin<0,Dune::Interior_Partition>() const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
-Dune::OneDGrid::leafbegin<0,Dune::InteriorBorder_Partition>() const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::Overlap_Partition>::LeafIterator
-Dune::OneDGrid::leafbegin<0,Dune::Overlap_Partition>() const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::OverlapFront_Partition>::LeafIterator
-Dune::OneDGrid::leafbegin<0,Dune::OverlapFront_Partition>() const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::All_Partition>::LeafIterator
-Dune::OneDGrid::leafbegin<0,Dune::All_Partition>() const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::Ghost_Partition>::LeafIterator
-Dune::OneDGrid::leafbegin<0,Dune::Ghost_Partition>() const;
-
-template Dune::OneDGrid::Codim<0>::Partition<Dune::Interior_Partition>::LeafIterator
-Dune::OneDGrid::leafend<0,Dune::Interior_Partition>() const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
-Dune::OneDGrid::leafend<0,Dune::InteriorBorder_Partition>() const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::Overlap_Partition>::LeafIterator
-Dune::OneDGrid::leafend<0,Dune::Overlap_Partition>() const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::OverlapFront_Partition>::LeafIterator
-Dune::OneDGrid::leafend<0,Dune::OverlapFront_Partition>() const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::All_Partition>::LeafIterator
-Dune::OneDGrid::leafend<0,Dune::All_Partition>() const;
-template Dune::OneDGrid::Codim<0>::Partition<Dune::Ghost_Partition>::LeafIterator
-Dune::OneDGrid::leafend<0,Dune::Ghost_Partition>() const;
-
-template Dune::OneDGrid::Codim<1>::Partition<Dune::Interior_Partition>::LeafIterator
-Dune::OneDGrid::leafbegin<1,Dune::Interior_Partition>() const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
-Dune::OneDGrid::leafbegin<1,Dune::InteriorBorder_Partition>() const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::Overlap_Partition>::LeafIterator
-Dune::OneDGrid::leafbegin<1,Dune::Overlap_Partition>() const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::OverlapFront_Partition>::LeafIterator
-Dune::OneDGrid::leafbegin<1,Dune::OverlapFront_Partition>() const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::All_Partition>::LeafIterator
-Dune::OneDGrid::leafbegin<1,Dune::All_Partition>() const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::Ghost_Partition>::LeafIterator
-Dune::OneDGrid::leafbegin<1,Dune::Ghost_Partition>() const;
-
-template Dune::OneDGrid::Codim<1>::Partition<Dune::Interior_Partition>::LeafIterator
-Dune::OneDGrid::leafend<1,Dune::Interior_Partition>() const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::InteriorBorder_Partition>::LeafIterator
-Dune::OneDGrid::leafend<1,Dune::InteriorBorder_Partition>() const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::Overlap_Partition>::LeafIterator
-Dune::OneDGrid::leafend<1,Dune::Overlap_Partition>() const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::OverlapFront_Partition>::LeafIterator
-Dune::OneDGrid::leafend<1,Dune::OverlapFront_Partition>() const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::All_Partition>::LeafIterator
-Dune::OneDGrid::leafend<1,Dune::All_Partition>() const;
-template Dune::OneDGrid::Codim<1>::Partition<Dune::Ghost_Partition>::LeafIterator
-Dune::OneDGrid::leafend<1,Dune::Ghost_Partition>() const;
