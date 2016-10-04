@@ -127,6 +127,15 @@ AC_DEFUN([DUNE_PATH_UG],[
         UG_CPPFLAGS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --cflags-only-I libug` -DENABLE_UG"
         direct_UG_CPPFLAGS="`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --cflags-only-I libug` -DENABLE_UG"
 
+        AC_MSG_CHECKING([whether UG version is 3.13 or greater])
+        if PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --atleast-version=3.13 libug; then
+            AC_MSG_RESULT([yes, appending -DUG_USE_NEW_DIMENSION_DEFINES to CPPFLAGS])
+            UG_CPPFLAGS="${UG_CPPFLAGS} -DUG_USE_NEW_DIMENSION_DEFINES"
+            direct_UG_CPPFLAGS="${direct_UG_CPPFLAGS} -DUG_USE_NEW_DIMENSION_DEFINES"
+        else
+            AC_MSG_RESULT([no])
+        fi
+
         if test x`PKG_CONFIG_PATH=$PKG_CONFIG_PATH $PKG_CONFIG --variable=parallel libug` == xyes; then
 
           # Add additional flags needed for parallel UG  
