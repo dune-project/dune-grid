@@ -10,6 +10,7 @@
 #include <vector>
 #include <set>
 
+#include <dune/common/hybridutilities.hh>
 #include <dune/grid/common/grid.hh>
 
 namespace Dune {
@@ -48,39 +49,109 @@ namespace Dune {
       return UG_NS<dim>::levelIndex(grid_->getRealImplementation(e).getTarget());
     }
 
-    //! get index of subEntity of a codim 0 entity
+    /** \brief Get index of subEntity of a codim cc entity
+     * \param codim Codimension WITH RESPECT TO THE GRID of the subentity whose index we want
+     */
     template<int cc>
     unsigned int subIndex (const typename GridImp::Traits::template Codim<cc>::Entity& e,
                            int i,
                            unsigned int codim) const
     {
+      // The entity is a vertex, so each subentity must be a vertex too (anything else is not supported)
       if (cc==dim)
+      {
+        assert(codim==dim);
         return UG_NS<dim>::levelIndex(grid_->getRealImplementation(e).getTarget());
-
-      if (codim==dim)
-        return UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
-                                                         UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.type())));
-
-      if (codim==0)
-        return UG_NS<dim>::levelIndex(grid_->getRealImplementation(e).getTarget());
-
-      if (codim==dim-1) {
-
-        int a=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,0,dim);
-        int b=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,1,dim);
-        return UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
-                                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
-                                                          UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
-                                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(b,e.type()))));
       }
 
-      if (codim==1)
-        return UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(grid_->getRealImplementation(e).getTarget(),
-                                                             UGGridRenumberer<dim>::facesDUNEtoUG(i,e.type())));
+      // The following block is for 2d grids
+      Hybrid::ifElse(Std::bool_constant<dim==2>(), [&](auto id)
+      {
+        // The entity is an element
+        Hybrid::ifElse(Std::bool_constant<cc==0>(), [&](auto id) -> unsigned int
+        {
+          // Element indices
+          if (codim==0)
+            return UG_NS<dim>::levelIndex(grid_->getRealImplementation(e).getTarget());
 
-      DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subIndex isn't implemented for codim==" << codim );
+          // Edge indices
+          if (codim==1)
+          {
+            auto a=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,0,dim);
+            auto b=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,1,dim);
+            return UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
+                                                              UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(b,e.type()))));
+          }
+
+          // Vertex indices
+          if (codim==dim)
+            return UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
+                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.type())));
+        });
+
+        // The entity is an edge
+        Hybrid::ifElse(Std::bool_constant<cc==1>(), [&](auto id) -> unsigned int
+        {
+          DUNE_THROW(NotImplemented, "Subindices of an element edge");
+          return (unsigned int)0;
+        });
+
+        return (unsigned int)0;
+      });
+
+      // The following block is for 3d grids
+      Hybrid::ifElse(Std::bool_constant<dim==3>(), [&](auto id) -> unsigned int
+      {
+        // The entity is an element
+        Hybrid::ifElse(Std::bool_constant<cc==0>(), [&](auto id) -> unsigned int
+        {
+          // Element indices
+          if (codim==0)
+            return UG_NS<dim>::levelIndex(grid_->getRealImplementation(e).getTarget());
+
+          // Face indices
+          if (codim==1)
+            return UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(grid_->getRealImplementation(e).getTarget(),
+                                                                 UGGridRenumberer<dim>::facesDUNEtoUG(i,e.type())));
+
+          // Edge indices
+          if (codim==2)
+          {
+            auto a=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,0,dim);
+            auto b=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,1,dim);
+            return UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
+                                                              UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(b,e.type()))));
+          }
+
+          // Vertex indices
+          assert (codim==dim);
+          return UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
+                                                           UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.type())));
+        });
+
+        // The entity is a face
+        Hybrid::ifElse(Std::bool_constant<cc==1>(), [&](auto id) -> unsigned int
+        {
+          DUNE_THROW(NotImplemented, "Subindices of an element face");
+          return 0;
+        });
+
+        // The entity is an edge
+        Hybrid::ifElse(Std::bool_constant<cc==1>(), [&](auto id) -> unsigned int
+        {
+          DUNE_THROW(NotImplemented, "Subindices of an element edge");
+          return 0;
+        });
+
+        return (unsigned int)0;
+      });
+
+      DUNE_THROW(GridError, "UGGrid<" << dim << ">::subIndex isn't implemented for codim==" << codim );
     }
-
 
     //! get number of entities of given codim, type and on this level
     int size (int codim) const {
@@ -206,33 +277,100 @@ namespace Dune {
                            int i,
                            unsigned int codim) const
     {
+      // The entity is a vertex, so each subentity must be a vertex too (anything else is not supported)
       if (cc==dim)
+      {
+        assert(codim==dim);
         return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).getTarget());
-
-      if (codim==0)
-        return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).getTarget());
-
-      const GeometryType type = e.type();
-
-      if (codim==dim)
-        return UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
-                                                        UGGridRenumberer<dim>::verticesDUNEtoUG(i,type)));
-
-      if (codim==dim-1) {
-
-        int a=ReferenceElements<double,dim>::general(type).subEntity(i,dim-1,0,dim);
-        int b=ReferenceElements<double,dim>::general(type).subEntity(i,dim-1,1,dim);
-        return UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
-                                                                            UGGridRenumberer<dim>::verticesDUNEtoUG(a,type)),
-                                                         UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
-                                                                            UGGridRenumberer<dim>::verticesDUNEtoUG(b,type))));
       }
 
-      if (codim==1)
-        return UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(grid_.getRealImplementation(e).getTarget(),
-                                                            UGGridRenumberer<dim>::facesDUNEtoUG(i,type)));
+      // The following block is for 2d grids
+      Hybrid::ifElse(Std::bool_constant<dim==2>(), [&](auto id) -> unsigned int
+      {
+        // The entity is an element
+        Hybrid::ifElse(Std::bool_constant<cc==0>(), [&](auto id) -> unsigned int
+        {
+          // Element indices
+          if (codim==0)
+            return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).getTarget());
 
-      DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subLeafIndex isn't implemented for codim==" << codim );
+          // Edge indices
+          if (codim==1)
+          {
+            auto a=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,0,dim);
+            auto b=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,1,dim);
+            return UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
+                                                              UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(b,e.type()))));
+          }
+
+          // Vertex indices
+          if (codim==dim)
+            return UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
+                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.type())));
+        });
+
+        // The entity is an edge
+        Hybrid::ifElse(Std::bool_constant<cc==1>(), [&](auto id) -> unsigned int
+        {
+          DUNE_THROW(NotImplemented, "Subindices of an element edge");
+          return (unsigned int)0;
+        });
+
+        return (unsigned int)0;
+      });
+
+      // The following block is for 3d grids
+      Hybrid::ifElse(Std::bool_constant<dim==3>(), [&](auto id) -> unsigned int
+      {
+        // The entity is an element
+        Hybrid::ifElse(Std::bool_constant<cc==0>(), [&](auto id) -> unsigned int
+        {
+          // Element indices
+          if (codim==0)
+            return UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).getTarget());
+
+          // Face indices
+          if (codim==1)
+            return UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(grid_.getRealImplementation(e).getTarget(),
+                                                                 UGGridRenumberer<dim>::facesDUNEtoUG(i,e.type())));
+
+          // Edge indices
+          if (codim==2)
+          {
+            auto a=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,0,dim);
+            auto b=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,1,dim);
+            return UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
+                                                              UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(b,e.type()))));
+          }
+
+          // Vertex indices
+          assert (codim==dim);
+          return UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
+                                                           UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.type())));
+        });
+
+        // The entity is a face
+        Hybrid::ifElse(Std::bool_constant<cc==1>(), [&](auto id) -> unsigned int
+        {
+          DUNE_THROW(NotImplemented, "Subindices of an element face");
+          return 0;
+        });
+
+        // The entity is an edge
+        Hybrid::ifElse(Std::bool_constant<cc==1>(), [&](auto id) -> unsigned int
+        {
+          DUNE_THROW(NotImplemented, "Subindices of an element edge");
+          return 0;
+        });
+
+        return (unsigned int)0;
+      });
+
+      DUNE_THROW(GridError, "UGGrid<" << dim << "> leaf index set subIndex isn't implemented for codim==" << codim );
     }
 
     //! get number of entities of given codim and type
