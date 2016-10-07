@@ -12,12 +12,11 @@ from ..generator.generator import SimpleGenerator
 from types import ModuleType
 
 
-def triangulation(grid):
+def triangulation(grid, level=0):
     if grid.dimGrid != 2 or grid.dimWorld != 2:
         raise Exception("Grid must be 2-dimensional for use as matplotlib triangulation.")
     from matplotlib.tri import Triangulation
-    x = grid.coordinates()
-    triangles = grid.tesselate()
+    x, triangles = grid.tesselate(level)
     return Triangulation(x[:,0], x[:,1], triangles)
 
 
