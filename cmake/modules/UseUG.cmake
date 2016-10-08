@@ -69,7 +69,7 @@ if(NOT dune-uggrid_FOUND)
     else()
       message(WARNING "Could not find file ug-config.cmake relative to given UG_ROOT")
     endif()
-  endif(UG_ROOT AND NOT UG_DIR)
+  endif()
 
   find_package(UG 3.11.0
     NO_MODULE QUIET
@@ -93,24 +93,23 @@ if(NOT dune-uggrid_FOUND)
         DUNETYPE "Dune::UGGrid< dimgrid >"
         HEADERS dune/grid/uggrid.hh dune/grid/io/file/dgfparser/dgfug.hh)
 
-    #Overwrite flags by hand (like for autoconf).
     # Overwrite flags by hand
     set(UG_LIBRARIES "")
     set(_paths "${prefix}")
 
-    #Find out the full path to the libs.
+    # Find out the full path to the libs
     foreach(entry ${UG_LIBRARY_FLAGS} -L/bla)
       string(REGEX REPLACE "^-L([a-zA-Z/-_]+)" "\\1" _path ${entry})
       list(APPEND _paths ${_path})
-    endforeach(entry {UG_LIBRARY_FLAGS})
+    endforeach()
 
     foreach(lib ugS2 ugS3 devS)
         set(full_path "full_path-NOTFOUND")
         find_library(full_path ${lib} PATHS ${_paths} NO_DEFAULT_PATH)
         if(full_path)
           list(APPEND UG_LIBRARIES ${full_path})
-        endif(full_path)
-    endforeach(lib ugS2 ugS3 devS)
+        endif()
+    endforeach()
 
     # register all UG related flags
     list(APPEND UG_DEFINITIONS "ENABLE_UG=1")
@@ -139,7 +138,7 @@ if(NOT dune-uggrid_FOUND)
     UG_DIR
     HAVE_UG
   )
-endif(NOT dune-uggrid_FOUND)
+endif()
 
 # Add dgf magic to config.h and register flags
 if(UG_FOUND)
@@ -166,7 +165,7 @@ function(add_dune_ug_flags)
           endif()
           target_link_libraries(${_target}
             ${UG_LIBRARIES} ${DUNE_LIBS})
-        endforeach(_target ${ADD_UG_UNPARSED_ARGUMENTS})
+        endforeach()
       endif()
       set(_prefix TARGET)
     endif()
@@ -200,6 +199,6 @@ function(add_dune_ug_flags)
         COMPILE_DEFINITIONS ModelP)
       # Add mpi flags.
       add_dune_mpi_flags(${ADD_UG_UNPARSED_ARGUMENTS} ${_source_only})
-    endif(UG_PARALLEL STREQUAL "yes")
-  endif(UG_FOUND)
+    endif()
+  endif()
 endfunction(add_dune_ug_flags)
