@@ -58,6 +58,7 @@
 #       old doc: indicates that the targets are object libraries.
 #
 
+set_package_info("UG" "External UG grid, superseded by dune-uggrid" "http://www.iwr.uni-heidelberg.de/frame/iwrwikiequipment/software/ug")
 
 if(NOT dune-uggrid_FOUND)
   if(UG_ROOT AND NOT UG_DIR)
@@ -148,6 +149,8 @@ if(UG_FOUND)
   dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE UGGRID ASSERTION GRIDDIM == WORLDDIM
     DUNETYPE "Dune::UGGrid< dimgrid >"
     HEADERS dune/grid/uggrid.hh dune/grid/io/file/dgfparser/dgfug.hh)
+
+    message(WARNING "The support of UG as an external library is deprecated. Use dune-uggrid instead.")
 endif()
 
 # Add flags to targets
