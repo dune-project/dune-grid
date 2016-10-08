@@ -94,8 +94,9 @@ if(NOT dune-uggrid_FOUND)
         HEADERS dune/grid/uggrid.hh dune/grid/io/file/dgfparser/dgfug.hh)
 
     #Overwrite flags by hand (like for autoconf).
-    set(UG_LIBRARIES)
-    set(paths "${prefix}")
+    # Overwrite flags by hand
+    set(UG_LIBRARIES "")
+    set(_paths "${prefix}")
 
     #Find out the full path to the libs.
     foreach(entry ${UG_LIBRARY_FLAGS} -L/bla)
