@@ -60,84 +60,84 @@
 
 
 if(NOT dune-uggrid_FOUND)
-if(UG_ROOT AND NOT UG_DIR)
-  # define the directory where the config file resides
-  if(EXISTS "${UG_ROOT}/lib/cmake/ug/ug-config.cmake")
-    set(UG_DIR ${UG_ROOT}/lib/cmake/ug)
-  elseif(EXISTS "${UG_ROOT}/lib64/cmake/ug/ug-config.cmake")
-    set(UG_DIR ${UG_ROOT}/lib64/cmake/ug)
+  if(UG_ROOT AND NOT UG_DIR)
+    # define the directory where the config file resides
+    if(EXISTS "${UG_ROOT}/lib/cmake/ug/ug-config.cmake")
+      set(UG_DIR ${UG_ROOT}/lib/cmake/ug)
+    elseif(EXISTS "${UG_ROOT}/lib64/cmake/ug/ug-config.cmake")
+      set(UG_DIR ${UG_ROOT}/lib64/cmake/ug)
+    else()
+      message(WARNING "Could not find file ug-config.cmake relative to given UG_ROOT")
+    endif()
+  endif(UG_ROOT AND NOT UG_DIR)
+
+  find_package(UG 3.11.0
+    NO_MODULE QUIET
+    NO_DEFAULT_PATH)
+  find_package(UG 3.11.0
+    NO_MODULE
+    NO_SYSTEM_ENVIRONMENT_PATH)
+
+  set(HAVE_UG ${UG_FOUND})
+
+  if(UG_FOUND)
+    # parse patch level: last number in UG version string is DUNE patch level
+    string(REGEX MATCH "[0-9]*$" UG_DUNE_PATCHLEVEL ${UG_VERSION})
+
+    if (UG_VERSION VERSION_GREATER 3.13.0
+        OR UG_VERSION VERSION_EQUAL 3.13.0)
+      list(APPEND UG_DEFINITIONS "UG_USE_NEW_DIMENSION_DEFINES")
+    endif()
+
+    dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE UGGRID ASSERTION GRIDDIM == WORLDDIM
+        DUNETYPE "Dune::UGGrid< dimgrid >"
+        HEADERS dune/grid/uggrid.hh dune/grid/io/file/dgfparser/dgfug.hh)
+
+    #Overwrite flags by hand (like for autoconf).
+    set(UG_LIBRARIES)
+    set(paths "${prefix}")
+
+    #Find out the full path to the libs.
+    foreach(entry ${UG_LIBRARY_FLAGS} -L/bla)
+      string(REGEX REPLACE "^-L([a-zA-Z/-_]+)" "\\1" _path ${entry})
+      list(APPEND _paths ${_path})
+    endforeach(entry {UG_LIBRARY_FLAGS})
+
+    foreach(lib ugS2 ugS3 devS)
+        set(full_path "full_path-NOTFOUND")
+        find_library(full_path ${lib} PATHS ${_paths} NO_DEFAULT_PATH)
+        if(full_path)
+          list(APPEND UG_LIBRARIES ${full_path})
+        endif(full_path)
+    endforeach(lib ugS2 ugS3 devS)
+
+    # register all UG related flags
+    list(APPEND UG_DEFINITIONS "ENABLE_UG=1")
+    if(UG_PARALLEL STREQUAL "yes")
+      list(APPEND UG_DEFINITIONS "ModelP")
+    endif()
+
+    # log result
+    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+      "Determining location of UG ${UG_VERSION} succeeded:\n"
+      "Include directories: ${UG_INCLUDES}\n"
+      "Libraries: ${UG_LIBRARIES}\n\n")
   else()
-    message(WARNING "Could not find file ug-config.cmake relative to given UG_ROOT")
-  endif()
-endif(UG_ROOT AND NOT UG_DIR)
-
-find_package(UG 3.11.0
-  NO_MODULE QUIET
-  NO_DEFAULT_PATH)
-find_package(UG 3.11.0
-  NO_MODULE
-  NO_SYSTEM_ENVIRONMENT_PATH)
-
-set(HAVE_UG ${UG_FOUND})
-
-if(UG_FOUND)
-  # parse patch level: last number in UG version string is DUNE patch level
-  string(REGEX MATCH "[0-9]*$" UG_DUNE_PATCHLEVEL ${UG_VERSION})
-
-  if (UG_VERSION VERSION_GREATER 3.13.0
-      OR UG_VERSION VERSION_EQUAL 3.13.0)
-    list(APPEND UG_DEFINITIONS "UG_USE_NEW_DIMENSION_DEFINES")
+    # log errornous result
+    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+      "Determining location of UG failed:\n"
+      "Include directories: ${UG_INCLUDES}\n"
+      "Libraries: ${UG_LIBRARIES}\n\n")
   endif()
 
-  dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE UGGRID ASSERTION GRIDDIM == WORLDDIM
-      DUNETYPE "Dune::UGGrid< dimgrid >"
-      HEADERS dune/grid/uggrid.hh dune/grid/io/file/dgfparser/dgfug.hh)
-
-  #Overwrite flags by hand (like for autoconf).
-  set(UG_LIBRARIES)
-  set(paths "${prefix}")
-
-  #Find out the full path to the libs.
-  foreach(entry ${UG_LIBRARY_FLAGS} -L/bla)
-    string(REGEX REPLACE "^-L([a-zA-Z/-_]+)" "\\1" _path ${entry})
-    list(APPEND _paths ${_path})
-  endforeach(entry {UG_LIBRARY_FLAGS})
-
-  foreach(lib ugS2 ugS3 devS)
-      set(full_path "full_path-NOTFOUND")
-      find_library(full_path ${lib} PATHS ${_paths} NO_DEFAULT_PATH)
-      if(full_path)
-        list(APPEND UG_LIBRARIES ${full_path})
-      endif(full_path)
-  endforeach(lib ugS2 ugS3 devS)
-
-  # register all UG related flags
-  list(APPEND UG_DEFINITIONS "ENABLE_UG=1")
-  if(UG_PARALLEL STREQUAL "yes")
-    list(APPEND UG_DEFINITIONS "ModelP")
-  endif()
-
-  # log result
-  file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-    "Determining location of UG ${UG_VERSION} succeeded:\n"
-    "Include directories: ${UG_INCLUDES}\n"
-    "Libraries: ${UG_LIBRARIES}\n\n")
-else()
-  # log errornous result
-  file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-    "Determining location of UG failed:\n"
-    "Include directories: ${UG_INCLUDES}\n"
-    "Libraries: ${UG_LIBRARIES}\n\n")
-endif()
-
-# output whether UG found
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(
-  "UG"
-  DEFAULT_MSG
-  UG_DIR
-  HAVE_UG
-)
+  # output whether UG found
+  include(FindPackageHandleStandardArgs)
+  find_package_handle_standard_args(
+    "UG"
+    DEFAULT_MSG
+    UG_DIR
+    HAVE_UG
+  )
 endif(NOT dune-uggrid_FOUND)
 
 # Add dgf magic to config.h and register flags
