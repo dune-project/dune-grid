@@ -3,6 +3,8 @@
 #ifndef DUNE_POLYHEDRON_HH
 #define DUNE_POLYHEDRON_HH
 
+#include <algorithm>
+
 #include <dune/grid/io/file/dgfparser/blocks/polygon.hh>
 
 namespace Dune
@@ -57,7 +59,7 @@ namespace Dune
         return polyhedra.size();
       }
 
-    private:
+    protected:
       const int numPolys_;
     };
 

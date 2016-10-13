@@ -4,12 +4,10 @@
 #define DUNE_POLYGON_HH
 
 #include <iostream>
-#include <algorithm>
-#include <numeric>
 #include <vector>
 
 #include <dune/common/typetraits.hh>
-#include <dune/grid/io/file/dgfparser/dgfparser.hh>
+#include <dune/grid/io/file/dgfparser/blocks/basic.hh>
 
 namespace Dune
 {
@@ -46,7 +44,7 @@ namespace Dune
         return polygons.size();
       }
 
-    private:
+    protected:
       int vtxBegin_, vtxEnd_;
     };
 
