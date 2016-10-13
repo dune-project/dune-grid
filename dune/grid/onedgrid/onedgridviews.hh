@@ -3,6 +3,19 @@
 #ifndef DUNE_GRID_ONEDGRID_ONEDGRIDVIEWS_HH
 #define DUNE_GRID_ONEDGRID_ONEDGRIDVIEWS_HH
 
+#include <type_traits>
+#include <tuple>
+
+//- includes from dune-geometry
+#include <dune/geometry/type.hh>
+
+//- includes from dune-grid
+#include <dune/grid/common/gridenums.hh>
+#include <dune/grid/common/datahandleif.hh>
+
+#include <dune/grid/onedgrid/onedgridentity.hh>
+#include <dune/grid/onedgrid/onedgridleafiterator.hh>
+
 namespace Dune
 {
 
