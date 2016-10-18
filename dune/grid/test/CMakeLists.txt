@@ -6,9 +6,7 @@ dune_add_test(NAME test-geogrid-yaspgrid
               COMPILE_DEFINITIONS COORDFUNCTION=IdenticalCoordFunction<double,2>
                                   CACHECOORDFUNCTION=0
                                   DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
-                                  GRIDDIM=2
-                                  WORLDDIM=2
-                                  YASPGRID)
+                                  GRIDTYPE=Dune::YaspGrid<2>)
 
 dune_add_test(NAME test-geogrid-uggrid
               SOURCES test-geogrid.cc
@@ -16,9 +14,7 @@ dune_add_test(NAME test-geogrid-uggrid
               COMPILE_DEFINITIONS COORDFUNCTION=IdenticalCoordFunction<double,2>
                                   CACHECOORDFUNCTION=0
                                   DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
-                                  GRIDDIM=2
-                                  WORLDDIM=2
-                                  UGGRID
+                                  GRIDTYPE=Dune::UGGrid<2>
               CMAKE_GUARD UG_FOUND)
 
 dune_add_test(SOURCES test-identitygrid.cc)
