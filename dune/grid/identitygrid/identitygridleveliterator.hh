@@ -3,36 +3,32 @@
 #ifndef DUNE_IDENTITYGRIDLEVELITERATOR_HH
 #define DUNE_IDENTITYGRIDLEVELITERATOR_HH
 
-#include "identitygridentitypointer.hh"
 
 /** \file
- * \brief The IdentityGridLevelIterator class and its specializations
+ * \brief The IdentityGridLevelIterator class
  */
 
 namespace Dune {
 
-
-
-
-  //**********************************************************************
-  //
-  // --IdentityGridLevelIterator
   /** \brief Iterator over all entities of a given codimension and level of a grid.
    * \ingroup IdentityGrid
    */
   template<int codim, PartitionIteratorType pitype, class GridImp>
-  class IdentityGridLevelIterator :
-    public Dune::IdentityGridEntityPointer<codim,GridImp,typename GridImp::HostGridType::Traits::template Codim<codim>::template Partition<pitype>::LevelIterator>
+  class IdentityGridLevelIterator
   {
 
     typedef typename GridImp::HostGridType::Traits::template Codim<codim>::template Partition<pitype>::LevelIterator HostGridLevelIterator;
-    typedef Dune::IdentityGridEntityPointer<codim,GridImp,HostGridLevelIterator> Base;
 
   public:
 
+    enum {codimension = codim};
+
+    typedef typename GridImp::template Codim<codim>::Entity Entity;
+
     //! Constructor
     explicit IdentityGridLevelIterator(const GridImp* identityGrid, int level)
-      : Base(identityGrid, identityGrid->hostgrid_->levelGridView(level).template begin<codim,pitype>())
+    : identityGrid_(identityGrid),
+      hostLevelIterator_(identityGrid->hostgrid_->levelGridView(level).template begin<codim,pitype>())
     {}
 
 
@@ -42,15 +38,30 @@ namespace Dune {
         \param level         grid level on which the iterator shall be created
      */
     explicit IdentityGridLevelIterator(const GridImp* identityGrid, int level, bool endDummy)
-      : Base(identityGrid, identityGrid->hostgrid_->levelGridView(level).template end<codim,pitype>())
+    : identityGrid_(identityGrid),
+      hostLevelIterator_(identityGrid->hostgrid_->levelGridView(level).template end<codim,pitype>())
     {}
 
 
     //! prefix increment
     void increment() {
-      ++this->hostEntityPointer_;
+      ++hostLevelIterator_;
     }
 
+    //! dereferencing
+    Entity dereference() const {
+      return Entity{{identityGrid_,*hostLevelIterator_}};
+    }
+
+    //! equality
+    bool equals(const IdentityGridLevelIterator& i) const {
+      return hostLevelIterator_ == i.hostLevelIterator_;
+    }
+
+  private:
+    const GridImp* identityGrid_;
+
+    HostGridLevelIterator hostLevelIterator_;
   };
 
 

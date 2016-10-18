@@ -3,7 +3,6 @@
 #ifndef DUNE_IDENTITYGRIDHIERITERATOR_HH
 #define DUNE_IDENTITYGRIDHIERITERATOR_HH
 
-#include "identitygridentitypointer.hh"
 /** \file
  * \brief The IdentityGridHierarchicIterator class
  */
@@ -21,36 +20,52 @@ namespace Dune {
      starting from a given entity.
    */
   template<class GridImp>
-  class IdentityGridHierarchicIterator :
-    public Dune::IdentityGridEntityPointer<0,GridImp,typename GridImp::HostGridType::template Codim<0>::Entity::HierarchicIterator>
+  class IdentityGridHierarchicIterator
   {
 
     // Type of the corresponding HierarchicIterator in the host grid
     typedef typename GridImp::HostGridType::template Codim<0>::Entity::HierarchicIterator HostGridHierarchicIterator;
 
-    typedef Dune::IdentityGridEntityPointer<0,GridImp,typename GridImp::HostGridType::template Codim<0>::Entity::HierarchicIterator> Base;
-
   public:
 
-    typedef typename Base::Entity Entity;
+    enum {codimension = 0};
+
+    typedef typename GridImp::template Codim<0>::Entity Entity;
 
     //! the default Constructor
     explicit IdentityGridHierarchicIterator(const GridImp* identityGrid, const Entity& startEntity, int maxLevel) :
-      Base(identityGrid, GridImp::getRealImplementation(startEntity).hostEntity_.hbegin(maxLevel))
+      identityGrid_(identityGrid),
+      hostHierarchicIterator_(GridImp::getRealImplementation(startEntity).hostEntity_.hbegin(maxLevel))
     {}
 
 
     //! \todo Please doc me !
     explicit IdentityGridHierarchicIterator(const GridImp* identityGrid, const Entity& startEntity, int maxLevel, bool endDummy) :
-      Base(identityGrid, GridImp::getRealImplementation(startEntity).hostEntity_.hend(maxLevel))
+      identityGrid_(identityGrid),
+      hostHierarchicIterator_(GridImp::getRealImplementation(startEntity).hostEntity_.hend(maxLevel))
     {}
 
 
     //! \todo Please doc me !
     void increment()
     {
-      ++this->hostEntityPointer_;
+      ++hostHierarchicIterator_;
     }
+
+    //! dereferencing
+    Entity dereference() const {
+      return Entity{{identityGrid_,*hostHierarchicIterator_}};
+    }
+
+    //! equality
+    bool equals(const IdentityGridHierarchicIterator& i) const {
+      return hostHierarchicIterator_ == i.hostHierarchicIterator_;
+    }
+
+  private:
+    const GridImp* identityGrid_;
+
+    HostGridHierarchicIterator hostHierarchicIterator_;
 
   };
 

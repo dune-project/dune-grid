@@ -18,7 +18,6 @@
 // The components of the IdentityGrid interface
 #include "identitygrid/identitygridgeometry.hh"
 #include "identitygrid/identitygridentity.hh"
-#include "identitygrid/identitygridentitypointer.hh"
 #include "identitygrid/identitygridentityseed.hh"
 #include "identitygrid/identitygridintersectioniterator.hh"
 #include "identitygrid/identitygridleveliterator.hh"
