@@ -3,7 +3,7 @@
 #include <dune/grid/uggrid.hh>
 #include <dune/grid/io/file/dgfparser.hh>
 #include "../dgfug.hh"
-#include "test-dgf.cc"
+#include "checkdgf.hh"
 
 using namespace Dune;
 

@@ -3,7 +3,7 @@
 #include <dune/grid/yaspgrid.hh>
 #include <dune/grid/io/file/dgfparser.hh>
 #include "../dgfyasp.hh"
-#include "test-dgf.cc"
+#include "checkdgf.hh"
 
 using namespace Dune;
 
