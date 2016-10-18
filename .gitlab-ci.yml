@@ -6,28 +6,24 @@ before_script:
 
 debian:9--gcc:
   image: duneci/base:9
-  script:
-  - dunecontrol --current --opts=/duneci/opts.gcc all
-  - dunecontrol --current make build_tests
-  - cd build-cmake; duneci-ctest
+  script: duneci-standard-test
 
 debian:9--clang:
   image: duneci/base:9
-  script:
-  - dunecontrol --current --opts=/duneci/opts.clang all
-  - dunecontrol --current make build_tests
-  - cd build-cmake; duneci-ctest
+  script: duneci-standard-test --opts=/duneci/opts.clang
 
 debian:8--gcc:
   image: duneci/base:8
-  script:
-  - dunecontrol --current --opts=/duneci/opts.gcc all
-  - dunecontrol --current make build_tests
-  - cd build-cmake; duneci-ctest
+  script: duneci-standard-test
 
-debian:8--clang:
-  image: duneci/base:8
-  script:
-  - dunecontrol --current --opts=/duneci/opts.clang all
-  - dunecontrol --current make build_tests
-  - cd build-cmake; duneci-ctest
+debian:8-backports--clang:
+  image: duneci/base:8-backports
+  script: duneci-standard-test --opts=/duneci/opts.clang
+
+ubuntu:16.04--gcc:
+  image: duneci/base:16.04
+  script: duneci-standard-test
+
+ubuntu:16.04--clang:
+  image: duneci/base:16.04
+  script: duneci-standard-test --opts=/duneci/opts.clang
