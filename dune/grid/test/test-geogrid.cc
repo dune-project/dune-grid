@@ -20,6 +20,13 @@
 
 #include <dune/grid/geometrygrid.hh>
 #include <dune/grid/geometrygrid/cachedcoordfunction.hh>
+#include <dune/grid/io/file/dgfparser.hh>
+#if HAVE_UG
+#include <dune/grid/uggrid.hh>
+#include <dune/grid/io/file/dgfparser/dgfug.hh>
+#endif
+#include <dune/grid/yaspgrid.hh>
+#include <dune/grid/io/file/dgfparser/dgfyasp.hh>
 #include <dune/grid/io/file/dgfparser/dgfgeogrid.hh>
 
 #include "functions.hh"
@@ -56,7 +63,7 @@ struct EnableLevelIntersectionIteratorCheck< Dune::GeometryGrid< HostGrid, Coord
 
 typedef Dune::COORDFUNCTION AnalyticalCoordFunction;
 
-typedef Dune::GridSelector::GridType Grid;
+typedef GRIDTYPE Grid;
 
 #if CACHECOORDFUNCTION
 typedef Dune::CachedCoordFunction< Grid, AnalyticalCoordFunction > CoordFunction;
