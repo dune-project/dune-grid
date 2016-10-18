@@ -1,9 +1,12 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#include <config.h>
 
 #define DISABLE_DEPRECATED_METHOD_CHECK 1
 #define CHECK 1
+
+#include <string>
+
+#include <dune/grid/common/rangegenerators.hh>
 
 #include <dune/grid/test/gridcheck.hh>
 #include <dune/grid/test/checkgeometryinfather.hh>
@@ -26,14 +29,13 @@ struct EnableLevelIntersectionIteratorCheck< Dune::AlbertaGrid< dim, dimworld > 
   static const bool v = false;
 };
 
-using namespace Dune;
 template< class GridView >
 void display ( const std::string &name,
                const GridView &view,
                std::vector< double > &elDat, int nofElParams,
                std::vector< double > &vtxDat, int nofVtxParams )
 {
-  VTKWriter<GridView> vtkWriter(view);
+  Dune::VTKWriter<GridView> vtkWriter(view);
   // SubsamplingVTKWriter<GridView> vtkWriter(view,6);
   if( nofElParams + nofVtxParams > 0 )
   {
@@ -57,13 +59,11 @@ void test ( Grid &grid )
   checkIntersectionIterator( grid, skip );
 }
 
-int main(int argc, char ** argv, char ** envp)
-try {
-#ifndef COMPLETE_GRID_TYPE
-  typedef GridSelector::GridType GridType;
-#else
-  typedef COMPLETE_GRID_TYPE GridType;
-#endif // COMPLETE_GRID_TYPE
+template<typename GridType>
+void runDGFTest(int argc, char ** argv)
+{
+  using namespace Dune;
+
   // this method calls MPI_Init, if MPI is enabled
   MPIHelper & mpiHelper = MPIHelper::instance(argc,argv);
 
@@ -82,8 +82,8 @@ try {
 
   std::cout << "tester: start grid reading; file " << filename << std::endl;
 
-  typedef GridType::LeafGridView GridView;
-  typedef GridView::IndexSet IndexSetType;
+  typedef typename GridType::LeafGridView GridView;
+  typedef typename GridView::IndexSet IndexSetType;
 
   // create Grid from DGF parser
   GridType *grid;
@@ -102,9 +102,9 @@ try {
       std::cout << "Reading Element Parameters:" << std::endl;
       eldat.resize( indexSet.size(0) * nofElParams );
       const PartitionIteratorType partType = All_Partition;
-      typedef GridView::Codim< 0 >::Partition< partType >::Iterator Iterator;
-      const Iterator enditer = gridView.end< 0, partType >();
-      for( Iterator iter = gridView.begin< 0, partType >(); iter != enditer; ++iter )
+      typedef typename GridView::template Codim< 0 >::template Partition< partType >::Iterator Iterator;
+      const Iterator enditer = gridView.template end< 0, partType >();
+      for( Iterator iter = gridView.template begin< 0, partType >(); iter != enditer; ++iter )
       {
         const std::vector< double > &param = gridPtr.parameters( *iter );
         assert( param.size() == nofElParams );
@@ -122,20 +122,14 @@ try {
     {
       std::cout << "Reading Vertex Parameters:" << std::endl;
       vtxdat.resize( indexSet.size( GridType::dimension ) * nofVtxParams );
-      const PartitionIteratorType partType = All_Partition;
-      typedef GridView::Codim< GridType::dimension >::Partition< partType >::Iterator Iterator;
-      const Iterator enditer = gridView.end< GridType::dimension, partType >();
-      for( Iterator iter = gridView.begin< GridType::dimension, partType >(); iter != enditer; ++iter )
+      for(const auto & e : elements(gridView /*, Partitions::All */))
       {
-        const std::vector< double > &param = gridPtr.parameters( *iter );
+        const std::vector< double > &param = gridPtr.parameters( e );
         assert( param.size() == nofVtxParams );
-        // std::cout << (*iter).geometry()[0] << " -\t ";
         for( size_t i = 0; i < nofVtxParams; ++i )
         {
-          // std::cout << param[i] << " ";
-          vtxdat[ indexSet.index(*iter) * nofVtxParams + i ] = param[ i ];
+          vtxdat[ indexSet.index(e) * nofVtxParams + i ] = param[ i ];
         }
-        // std::cout << std::endl;
       }
     }
 
@@ -160,15 +154,4 @@ try {
   test(*grid);
 #endif
   delete grid;
-  return 0;
-}
-catch( const Dune::Exception &e )
-{
-  std::cerr << e << std::endl;
-  return 1;
-}
-catch (...)
-{
-  std::cerr << "Generic exception!" << std::endl;
-  return 1;
 }
