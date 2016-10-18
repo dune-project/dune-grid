@@ -1,6 +1,5 @@
 set(HEADERS
   identitygridentity.hh
-  identitygridentitypointer.hh
   identitygridentityseed.hh
   identitygridhierarchiciterator.hh
   identitygridgeometry.hh

@@ -17,9 +17,6 @@ namespace Dune {
   template<int codim, int dim, class GridImp>
   class IdentityGridEntity;
 
-  template<int codim, class GridImp, typename HostEntityPointer>
-  class IdentityGridEntityPointer;
-
   template<int codim, PartitionIteratorType pitype, class GridImp>
   class IdentityGridLevelIterator;
 
@@ -67,9 +64,6 @@ namespace Dune {
     template <class GridImp_>
     friend class IdentityGridGlobalIdSet;
 
-    template<int,typename, typename>
-    friend class IdentityGridEntityPointer;
-
     friend struct HostGridAccess< typename std::remove_const< GridImp >::type >;
 
 
@@ -77,7 +71,7 @@ namespace Dune {
 
     typedef typename GridImp::ctype ctype;
 
-    // The codimension of this entitypointer wrt the host grid
+    // The codimension of this entity wrt the host grid
     enum {CodimInHostGrid = GridImp::HostGridType::dimension - GridImp::dimension + codim};
 
     // equivalent entity in the host grid
@@ -210,9 +204,6 @@ namespace Dune {
     public EntityDefaultImplementation<0,dim,GridImp, IdentityGridEntity>
   {
     friend struct HostGridAccess< typename std::remove_const< GridImp >::type >;
-
-    template<int,typename, typename>
-    friend class IdentityGridEntityPointer;
 
   public:
 

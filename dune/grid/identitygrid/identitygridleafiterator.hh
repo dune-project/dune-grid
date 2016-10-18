@@ -3,7 +3,6 @@
 #ifndef DUNE_IDENTITYGRIDLEAFITERATOR_HH
 #define DUNE_IDENTITYGRIDLEAFITERATOR_HH
 
-#include "identitygridentitypointer.hh"
 
 /** \file
  * \brief The IdentityGridLeafIterator class
@@ -16,21 +15,23 @@ namespace Dune {
    *  \ingroup IdentityGrid
    */
   template<int codim, PartitionIteratorType pitype, class GridImp>
-  class IdentityGridLeafIterator :
-    public Dune::IdentityGridEntityPointer<codim,GridImp,typename GridImp::HostGridType::template Codim<codim>::template Partition<pitype>::LeafIterator>
+  class IdentityGridLeafIterator
   {
   private:
 
     // LevelIterator to the equivalent entity in the host grid
     typedef typename GridImp::HostGridType::template Codim<codim>::template Partition<pitype>::LeafIterator HostGridLeafIterator;
 
-    typedef Dune::IdentityGridEntityPointer<codim,GridImp,HostGridLeafIterator> Base;
-
   public:
+
+    enum {codimension = codim};
+
+    typedef typename GridImp::template Codim<codim>::Entity Entity;
 
     //! \todo Please doc me !
     explicit IdentityGridLeafIterator(const GridImp* identityGrid) :
-      Base(identityGrid, identityGrid->hostgrid_->leafGridView().template begin<codim,pitype>())
+      identityGrid_(identityGrid),
+      hostLeafIterator_(identityGrid->hostgrid_->leafGridView().template begin<codim,pitype>())
     {}
 
     /** \brief Constructor which create the end iterator
@@ -38,14 +39,30 @@ namespace Dune {
      *  \param identityGrid  pointer to grid instance
      */
     explicit IdentityGridLeafIterator(const GridImp* identityGrid, bool endDummy) :
-      Base(identityGrid, identityGrid->hostgrid_->leafGridView().template end<codim,pitype>())
+      identityGrid_(identityGrid),
+      hostLeafIterator_(identityGrid->hostgrid_->leafGridView().template end<codim,pitype>())
     {}
 
 
     //! prefix increment
     void increment() {
-      ++this->hostEntityPointer_;
+      ++hostLeafIterator_;
     }
+
+    //! dereferencing
+    Entity dereference() const {
+      return Entity{{identityGrid_,*hostLeafIterator_}};
+    }
+
+    //! equality
+    bool equals(const IdentityGridLeafIterator& i) const {
+      return hostLeafIterator_ == i.hostLeafIterator_;
+    }
+
+  private:
+    const GridImp* identityGrid_;
+
+    HostGridLeafIterator hostLeafIterator_;
 
   };
 
