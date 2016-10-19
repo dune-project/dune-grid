@@ -168,6 +168,12 @@ namespace Dune {
       return hostEntity_.template count<cc>();
     }
 
+    /** \brief Return the number of subEntities of codimension codim.
+     */
+    unsigned int subEntities (unsigned int cc) const
+    {
+      return hostEntity_.subEntities(cc);
+    }
 
     //! geometry of this entity
     Geometry geometry () const

@@ -3,10 +3,13 @@
 #ifndef DUNE_GRID_ENTITY_HH
 #define DUNE_GRID_ENTITY_HH
 
+#include <type_traits>
+
 #include <dune/common/iteratorrange.hh>
 #include <dune/common/typetraits.hh>
 
 #include <dune/geometry/dimension.hh>
+#include <dune/geometry/referenceelements.hh>
 
 #include "grid.hh"
 #include "entitypointer.hh"
@@ -145,6 +148,22 @@ namespace Dune
        be used to access the Dune::ReferenceElement.
      */
     GeometryType type () const { return realEntity.type(); }
+
+    /**
+     * \brief Number of subentities for a given codimension
+     *
+     * \param  codim  codimension to obtain number of subentities for
+     *
+     * \note The codimension is specified with respect to the grid dimension.
+     *
+     * \note Unless the geometry type is None, this method is redundant and
+     *       the same information can be obtained from the corresponding
+     *       reference element.
+     **/
+    unsigned int subEntities ( unsigned int codim ) const
+    {
+      return realEntity.subEntities(codim);
+    }
 
     /** \brief Return the entity seed which contains sufficient information
      *  to generate the entity again and uses as little memory as possible
@@ -318,6 +337,22 @@ namespace Dune
     //! @copydoc Dune::Entity::geometry()
     Geometry geometry () const { return realEntity.geometry(); }
 
+    /**
+     * \brief Number of subentities for a given codimension
+     *
+     * \param  codim  codimension to obtain number of subentities for
+     *
+     * \note The codimension is specified with respect to the grid dimension.
+     *
+     * \note Unless the geometry type is None, this method is redundant and
+     *       the same information can be obtained from the corresponding
+     *       reference element.
+     **/
+    unsigned int subEntities ( unsigned int codim ) const
+    {
+      return realEntity.subEntities(codim);
+    }
+
     /** \brief Return the name of the reference element. The type can
         be used to access the Dune::ReferenceElement.
      */
@@ -374,16 +409,6 @@ namespace Dune
      */
     //@{
     //===========================================================
-
-    /**\brief Number of subentities with codimension <tt>codim</tt>.
-     *
-     * Strictly speaking this method is redundant, because the same information can be obtained
-     * from the corresponding reference element. It is here for efficiency reasons only.
-     */
-    unsigned int subEntities(unsigned int codim) const
-    {
-      return realEntity.subEntities(codim);
-    }
 
     /** \brief Obtain a subentity
      *
@@ -555,6 +580,23 @@ namespace Dune
     //! \brief The corresponding entity seed (for storage of entities)
     typedef typename GridImp::template Codim<cd>::EntitySeed EntitySeed;
 
+    /**
+     * \brief Number of subentities for a given codimension
+     *
+     * \param  codim  codimension to obtain number of subentities for
+     *
+     * \note The codimension is specified with respect to the grid dimension.
+     *
+     * \note Unless the geometry type is None, this method is redundant and
+     *       the same information can be obtained from the corresponding
+     *       reference element.
+     **/
+    unsigned int subEntities ( unsigned int codim ) const
+    {
+      typedef typename std::remove_const< GridImp >::type::ctype ctype;
+      return ReferenceElements< ctype, mydimension >::general( asImp().type() ).size( codim - codimension );
+    }
+
     /** \brief Return the name of the reference element. The type can
         be used to access the Dune::ReferenceElement.
      */
@@ -603,6 +645,23 @@ namespace Dune
        In bisection or hanging node refinement this is always true.
      */
     bool isRegular() const { return true; }
+
+    /**
+     * \brief Number of subentities for a given codimension
+     *
+     * \param  codim  codimension to obtain number of subentities for
+     *
+     * \note The codimension is specified with respect to the grid dimension.
+     *
+     * \note Unless the geometry type is None, this method is redundant and
+     *       the same information can be obtained from the corresponding
+     *       reference element.
+     **/
+    unsigned int subEntities ( unsigned int codim ) const
+    {
+      typedef typename std::remove_const< GridImp >::type::ctype ctype;
+      return ReferenceElements< ctype, mydimension >::general( asImp().type() ).size( codim - codimension );
+    }
 
     /** \brief Return the name of the reference element. The type can
         be used to access the Dune::ReferenceElement.
