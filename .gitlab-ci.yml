@@ -1,4 +1,7 @@
 ---
+variables:
+  DUNECI_BRANCH: releases/2.5
+
 before_script:
   - duneci-install-module https://gitlab.dune-project.org/core/dune-common.git
   - duneci-install-module https://gitlab.dune-project.org/core/dune-geometry.git
