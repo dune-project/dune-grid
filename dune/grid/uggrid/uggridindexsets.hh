@@ -359,7 +359,7 @@ namespace Dune {
         });
 
         // The entity is an edge
-        Hybrid::ifElse(Std::bool_constant<cc==1>(), [&](auto id)
+        Hybrid::ifElse(Std::bool_constant<cc==2>(), [&](auto id)
         {
           DUNE_THROW(NotImplemented, "Subindices of an element edge");
         });
