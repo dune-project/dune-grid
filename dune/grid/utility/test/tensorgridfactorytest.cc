@@ -62,7 +62,7 @@ try {
   {
     auto grid = fac4.createGrid();
     gridcheck(*grid);
-    std::cout << "UGGrid<2> with " << grid->size(0) << " cells created." << std::endl;
+    std::cout << "UGGrid<3> with " << grid->size(0) << " cells created." << std::endl;
   }
 #endif
 
