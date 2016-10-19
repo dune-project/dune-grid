@@ -270,6 +270,15 @@ namespace Dune {
       return Geometry(_geometry);
     }
 
+    /*! Return number of subentities with codimension cc.
+     *
+     * That number is (dim over (dim-codim)) times 2^codim
+     */
+    unsigned int subEntities (unsigned int cc) const
+    {
+      return Dune::Yasp::subEnt<dim>(dim-codim,cc-codim);
+    }
+
     //! return partition type attribute
     PartitionType partitionType () const
     {
@@ -840,6 +849,15 @@ namespace Dune {
      */
     EntitySeed seed () const {
       return EntitySeed(YaspEntitySeed<dim,GridImp>(_g->level(), _it.coord(), _it.which()));
+    }
+
+    /*! Return number of subentities with codimension cc.
+     *
+     * That number is (dim over (dim-codim)) times 2^codim
+     */
+    unsigned int subEntities (unsigned int cc) const
+    {
+      return Dune::Yasp::subEnt<dim>(dim-dim,cc-dim);
     }
 
     //! geometry of this entity

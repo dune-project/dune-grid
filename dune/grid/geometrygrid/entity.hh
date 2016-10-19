@@ -256,6 +256,11 @@ namespace Dune
         return Geometry( geo_ );
       }
 
+      unsigned int subEntities ( unsigned int cc ) const
+      {
+        return hostEntity().subEntities( cc );
+      }
+
       /** \brief return EntitySeed of host grid entity */
       EntitySeed seed () const { return typename EntitySeed::Implementation( hostEntity().seed() ); }
       /** \} */
@@ -569,6 +574,13 @@ namespace Dune
         return Geometry( geo_ );
       }
 
+      unsigned int subEntities ( unsigned int cc ) const
+      {
+        const ReferenceElement< ctype, dimension > &refElement
+          = ReferenceElements< ctype, dimension >::general( hostElement().type() );
+        return refElement.size( subEntity_, codimension, cc );
+      }
+
       /** \brief return EntitySeed of host grid entity */
       EntitySeed seed () const { return typename EntitySeed::Implementation( hostElement().seed(), subEntity_ ); }
       /** \} */
@@ -770,17 +782,6 @@ namespace Dune
       Entity ( const Grid &grid, const HostEntity &hostEntity, int i ) : Base( grid, hostEntity )
       {
         assert( i == 0 );
-      }
-
-      template< int codim >
-      int count () const
-      {
-        return hostEntity().template count< codim >();
-      }
-
-      unsigned int subEntities (unsigned int codim) const
-      {
-        return hostEntity().subEntities(codim);
       }
 
       template< int codim >
