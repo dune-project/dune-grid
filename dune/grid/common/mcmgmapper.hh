@@ -159,7 +159,11 @@ namespace Dune
      */
     Index subIndex (const typename GV::template Codim<0>::Entity& e, int i, unsigned int codim) const
     {
-      GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
+      const GeometryType eType = e.type();
+      GeometryType gt = eType.isNone() ?
+        GeometryType( GeometryType::none, GV::dimension - codim ) :
+        ReferenceElements<double,GV::dimension>::general(eType).type(i,codim) ;
+      //GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
       assert(layout.contains(gt));
       return is.subIndex(e, i, codim) + offset[GlobalGeometryTypeIndex::index(gt)];
     }
@@ -205,7 +209,11 @@ namespace Dune
      */
     bool contains (const typename GV::template Codim<0>::Entity& e, int i, int cc, Index& result) const
     {
-      GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,cc);
+      const GeometryType eType = e.type();
+      const GeometryType gt = eType.isNone() ?
+        GeometryType( GeometryType::none, GV::dimension - cc ) :
+        ReferenceElements<double,GV::dimension>::general(eType).type(i,cc) ;
+      //GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,cc);
       if (not layout.contains(gt))
         return false;
       result = is.subIndex(e, i, cc) + offset[GlobalGeometryTypeIndex::index(gt)];
