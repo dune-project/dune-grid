@@ -3,11 +3,11 @@
 #ifndef DUNE_ONE_D_GRID_HH
 #define DUNE_ONE_D_GRID_HH
 
+#include <tuple>
 #include <vector>
 #include <list>
 
 #include <dune/common/parallel/collectivecommunication.hh>
-#include <dune/common/tuples.hh>
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/grid.hh>
@@ -381,7 +381,7 @@ namespace Dune {
     OneDGridList<OneDEntityImp<1> >::iterator getLeftNeighborWithSon(OneDGridList<OneDEntityImp<1> >::iterator eIt);
 
     // The vertices and elements of the grid hierarchy
-    std::vector<tuple<OneDGridList<OneDEntityImp<0> >,
+    std::vector<std::tuple<OneDGridList<OneDEntityImp<0> >,
             OneDGridList<OneDEntityImp<1> > > > entityImps_;
 
     // Our set of level indices
