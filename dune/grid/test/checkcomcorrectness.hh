@@ -1,5 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+#ifndef DUNE_GRID_TEST_CHECKCOMMCORRECTNESS_HH
+#define DUNE_GRID_TEST_CHECKCOMMCORRECTNESS_HH
 
 #include <config.h>
 
@@ -12,6 +14,10 @@
 
 #include <dune/common/hash.hh>
 #include <dune/common/float_cmp.hh>
+#include <dune/geometry/dimension.hh>
+#include <dune/grid/common/capabilities.hh>
+#include <dune/grid/common/datahandleif.hh>
+#include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 
 namespace Dune {
@@ -344,3 +350,5 @@ namespace Dune {
 
   } // namespace GridCheck
 } // namespace Dune
+
+#endif
