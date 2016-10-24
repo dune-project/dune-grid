@@ -141,7 +141,9 @@ namespace Dune
      *  \param[in]  e      reference to codimension cc entity
      *  \param[in]  i      number subentity of e within the codimension
      *  \param[in]  codim  codimension of the subentity we're interested in
-     *                     (must satisfy cc <= codim <= dimension)
+     *
+     *  \note The parameter <tt>codim</tt> denotes the codimension with respect
+     *        to the grid, i.e., it must satisfy cc <= codim <= dimension.
      *
      *  \return An index in the range 0 ... Max number of entities in set - 1.
      */
@@ -168,6 +170,9 @@ namespace Dune
      *  \param[in]  e      reference to entity
      *  \param[in]  i      number subentity of e within the codimension
      *  \param[in]  codim  codimension of the subentity we're interested in
+     *
+     *  \note The parameter <tt>codim</tt> denotes the codimension with respect
+     *        to the grid, i.e., it must satisfy cc <= codim <= dimension.
      *
      *  \return An index in the range 0 ... Max number of entities in set - 1.
      */
