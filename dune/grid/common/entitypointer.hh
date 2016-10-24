@@ -9,6 +9,7 @@
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/deprecated.hh>
 #include <dune/geometry/type.hh>
+#include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/gridenums.hh>
 
 /** \file
