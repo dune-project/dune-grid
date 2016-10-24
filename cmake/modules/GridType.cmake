@@ -7,25 +7,24 @@
 #       :required:
 #       :positional:
 #
-#       TODO doc me
+#       String variable grid definition is written to.
 #
 #    .. cmake_param:: GRIDTYPE
 #       :single:
 #       :required:
 #
-#       The name of the grid type to register.
+#       The name of the grid type to register, .e.g. YASPGRID.
 #
 #    .. cmake_param:: DUNETYPE
 #       :single:
 #       :required:
 #
-#       The C++ type of the grid to be used for the typedef
+#       The C++ type of the grid to be used for the typedef, e.g. YaspGrid< dimgrid >.
 #
 #    .. cmake_param:: ASSERTION
 #       :single:
 #
-#       TODO doc me
-#       old doc: condition to be checked by the preprocessor
+#       Condition to be checked by the preprocessor, e.g. GRIDDIM == WORLDDIM for grids like YaspGrid.
 #
 #    .. cmake_param:: HEADERS
 #       :multi:
@@ -36,8 +35,13 @@
 #    This function registers a new type for the GRIDTYPE magic.
 #
 
+# option to enable GridSelector
+option(DUNE_GRID_GRIDTYPE_SELECTOR "Grid selector definition added to config.h" OFF)
+
 macro(dune_define_gridtype output)
-  cmake_parse_arguments(GRIDTYPE "" "GRIDTYPE;DUNETYPE;ASSERTION" "HEADERS" ${ARGN})
+
+cmake_parse_arguments(GRIDTYPE "" "GRIDTYPE;DUNETYPE;ASSERTION" "HEADERS" ${ARGN})
+if(DUNE_GRID_GRIDTYPE_SELECTOR)
   if(NOT(GRIDTYPE_GRIDTYPE AND GRIDTYPE_DUNETYPE))
     message(ERROR "Both GRIDTYPE and DUNETYPE have to be set")
   endif(NOT(GRIDTYPE_GRIDTYPE AND GRIDTYPE_DUNETYPE))
@@ -86,5 +90,9 @@ macro(dune_define_gridtype output)
   #define HAVE_GRIDTYPE 1
   #define USED_${GRIDTYPE_GRIDTYPE}_GRIDTYPE 1
 #endif // #if HAVE_DUNE_GRID && defined ${GRIDTYPE_GRIDTYPE} && ..")
+# if disabled print message how to enable
+else(DUNE_GRID_GRIDTYPE_SELECTOR)
+  set(${output}
+    "${${output}}\n/* ${GRIDTYPE_GRIDTYPE} not available, enable with cmake variable DUNE_GRID_GRIDTYPE_SELECTOR=ON */")
+endif(DUNE_GRID_GRIDTYPE_SELECTOR)
 endmacro(dune_define_gridtype output)
-
