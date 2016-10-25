@@ -18,6 +18,9 @@
 namespace Dune
 {
 
+  template<class Grid>
+  struct GeometryChecker;
+
   /** \param geometry The local geometry to be tested
    * \param type The type of the element that the local geometry is embedded in
    * \param geoName Helper string that will appear in the error message
@@ -26,6 +29,8 @@ namespace Dune
   void checkLocalGeometry ( const Geometry< mydim, cdim, Grid, Imp > &geometry,
                             GeometryType type, const std::string &geoName = "local geometry" )
   {
+    //GeometryChecker<Grid> checker;
+    //checker.checkGeometry( geometry );
     checkGeometry( geometry );
 
     // check that corners are within the reference element of the given type
@@ -46,35 +51,39 @@ namespace Dune
   }
 
 
-  template <int codim>
+  template <class GI>
   struct CheckSubEntityGeometry
   {
-    template <int dim,class GI,template <int,int,class> class EI>
-    static void apply(const Entity<0,dim,GI,EI> &entity)
+    template <int codim>
+    struct Operation
     {
-      std::integral_constant<
+      template <class Entity>
+      static void apply(const Entity &entity)
+      {
+        std::integral_constant<
           bool, Dune::Capabilities::hasEntity<GI,codim>::v
           > capVar;
-      check(capVar,entity);
-    }
-    template <class Entity>
-    static void check(const std::true_type&, const Entity &entity)
-    {
-      for (unsigned int i=0; i<entity.subEntities(codim); ++i)
-      {
-        typedef typename Entity::template Codim< codim >::Entity SubE;
-        const SubE subEn = entity.template subEntity<codim>(i);
-
-        typename SubE::Geometry subGeo = subEn.geometry();
-
-        if( subEn.type() != subGeo.type() )
-          std::cerr << "Error: Entity and geometry report different geometry types on codimension " << codim << "." << std::endl;
-        checkGeometry(subGeo);
+        check(capVar,entity);
       }
-    }
-    template <class Entity>
-    static void check(const std::false_type&, const Entity &)
-    {}
+      template <class Entity>
+      static void check(const std::true_type&, const Entity &entity)
+      {
+        for (unsigned int i=0; i<entity.subEntities(codim); ++i)
+          {
+            typedef typename Entity::template Codim< codim >::Entity SubE;
+            const SubE subEn = entity.template subEntity<codim>(i);
+
+            typename SubE::Geometry subGeo = subEn.geometry();
+
+            if( subEn.type() != subGeo.type() )
+              std::cerr << "Error: Entity and geometry report different geometry types on codimension " << codim << "." << std::endl;
+            checkGeometry(subGeo);
+          }
+      }
+      template <class Entity>
+      static void check(const std::false_type&, const Entity &)
+      {}
+    };
   };
 
   template<typename GV>
@@ -109,19 +118,29 @@ namespace Dune
     }
   }
 
-  template< class VT >
-  void checkGeometry ( const GridView< VT > &gridView )
+  template<class Grid>
+  struct GeometryChecker
   {
-    typedef typename GridView< VT >::template Codim<0>::Iterator Iterator;
 
-    const Iterator end = gridView.template end<0>();
-    Iterator it = gridView.template begin<0>();
+    template<int codim>
+    using SubEntityGeometryChecker =
+      typename CheckSubEntityGeometry<Grid>::template Operation<codim>;
 
-    for( ; it != end; ++it )
+    template< class VT >
+    void checkGeometry ( const GridView< VT > &gridView )
     {
-      ForLoop<CheckSubEntityGeometry,0,GridView<VT>::dimension>::apply(*it);
+      typedef typename GridView< VT >::template Codim<0>::Iterator Iterator;
+
+      const Iterator end = gridView.template end<0>();
+      Iterator it = gridView.template begin<0>();
+
+      for( ; it != end; ++it )
+        {
+          ForLoop<SubEntityGeometryChecker,0,GridView<VT>::dimension>
+            ::apply(*it);
+        }
     }
-  }
+  };
 
 } // namespace Dune
 
