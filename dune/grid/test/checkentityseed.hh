@@ -61,15 +61,14 @@ namespace CheckEntitySeed // don't blur namespace Dune
   { };
 
 
-  // Template specialization for Dune::Geometry
+  // Equals for Dune::Geometry
   // ------------------------------------------
 
-  template< int mydim, int cdim, class GridImp, template< int, int, class > class GeometryImp >
-  struct Equals< Dune::Geometry< mydim, cdim, GridImp, GeometryImp > >
+  template<class Geometry>
+  struct GeometryEquals
   {
-    typedef typename Dune::Geometry< mydim, cdim, GridImp, GeometryImp > Type;
 
-    static bool apply ( const Type &t1, const Type &t2, const double eps = 1e-10 )
+    static bool apply ( const Geometry &t1, const Geometry &t2, const double eps = 1e-10 )
     {
       //typedef typename Type::GlobalCoordinate GlobalCooridinate;
 
@@ -175,7 +174,7 @@ namespace CheckEntitySeed // don't blur namespace Dune
 
       // compare geometries
       const double eps = 1e-10;
-      if( !Equals< Geometry >::apply( e1.geometry(), e2.geometry(), eps ) )
+      if( !GeometryEquals< Geometry >::apply( e1.geometry(), e2.geometry(), eps ) )
         output << "Warning: Geometries do not conincide" << std::endl;
     }
 
