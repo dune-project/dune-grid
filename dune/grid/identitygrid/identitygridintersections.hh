@@ -4,6 +4,7 @@
 #define DUNE_IDENTITYGRID_INTERSECTIONS_HH
 
 #include "identitygridleafiterator.hh"
+#include <dune/grid/identitygrid/identitygridentity.hh>
 
 /** \file
  * \brief The IdentityGridLeafIntersection and IdentityGridLevelIntersection classes

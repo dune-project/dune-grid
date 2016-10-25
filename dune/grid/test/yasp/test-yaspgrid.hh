@@ -1,5 +1,9 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
+#ifndef DUNE_GRID_TEST_TEST_YASPGRID_HH
+#define DUNE_GRID_TEST_TEST_YASPGRID_HH
+
+#include <dune/grid/yaspgrid.hh>
 
 #include <dune/grid/test/gridcheck.hh>
 #include <dune/grid/test/checkcommunicate.hh>
@@ -9,7 +13,9 @@
 #include <dune/grid/test/checkadaptation.hh>
 #include <dune/grid/test/checkpartition.hh>
 
-#include "dune/grid/test/checkcomcorrectness.hh"
+#include <dune/grid/test/checkcomcorrectness.hh>
+
+#include <dune/grid/yaspgrid/coordinates.hh>
 
 
 template<int dim, class CC>
@@ -197,3 +203,5 @@ void check_backuprestore(Dune::YaspGrid<dim,CC>* grid)
 
    delete grid;
 }
+
+#endif
