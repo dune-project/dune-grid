@@ -431,7 +431,9 @@ struct GridViewInterface
       gv.indexSet().contains( entity );
       try
       {
-        gv.indexSet().subIndex( entity, 0, 0u );
+        forEach(std::make_integer_sequence< int, dimension+1 - codim>(), [&](auto subCodim) {
+          gv.indexSet().subIndex( entity, 0, codim+subCodim);
+        });
       }
       catch( Dune::NotImplemented )
       {
