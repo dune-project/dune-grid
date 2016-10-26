@@ -29,8 +29,6 @@ namespace Dune
   void checkLocalGeometry ( const Geometry< mydim, cdim, Grid, Imp > &geometry,
                             GeometryType type, const std::string &geoName = "local geometry" )
   {
-    //GeometryChecker<Grid> checker;
-    //checker.checkGeometry( geometry );
     checkGeometry( geometry );
 
     // check that corners are within the reference element of the given type
