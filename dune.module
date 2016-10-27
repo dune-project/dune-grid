@@ -1,6 +1,6 @@
 Module: dune-grid
-Version: 3.0-git
+Version: 2.5-git
 Maintainer: dune-devel@dune-project.org
-Depends: dune-geometry (>= 3.0)
+Depends: dune-geometry (>= 2.5)
 Suggests: dune-uggrid
 Whitespace-Hook: Yes
