@@ -41,17 +41,9 @@ namespace Dune {
       : _entity(YaspEntityImp(g,it))
     {}
 
-
-// skip this constructor for GCC 4.4, which has a number of nasty bugs in its rvalue reference support
-// As this behavior is hard to trigger in small configuration tests and because we'll probably drop GCC 4.4
-// after the next release anyway, I hacked in this hardcoded check for the compiler version
-#if not (defined(__GNUC__) && (__GNUC__ < 5) && (__GNUC_MINOR__ < 5))
-
     YaspEntityPointer (YGLI&& g, I&& it)
       : _entity(YaspEntityImp(std::move(g),std::move(it)))
     {}
-
-#endif
 
     //! copying and moving
     YaspEntityPointer (const YaspEntityImp& entity)
