@@ -60,7 +60,7 @@ namespace Dune
 
       typedef typename Traits::ctype ctype;
 
-      typedef GenericGeometry::MatrixHelper< GenericGeometry::DuneCoordTraits< ctype > > MatrixHelper;
+      typedef Impl::FieldMatrixHelper< ctype > MatrixHelper;
 
       static ctype tolerance () { return 16 * std::numeric_limits< ctype >::epsilon(); }
 
