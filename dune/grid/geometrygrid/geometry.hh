@@ -7,8 +7,9 @@
 
 #include <dune/common/typetraits.hh>
 
-#include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/multilineargeometry.hh>
+#include <dune/geometry/referenceelements.hh>
+#include <dune/geometry/type.hh>
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/geometrygrid/cornerstorage.hh>
@@ -38,14 +39,14 @@ namespace Dune
     struct InferHasSingleGeometryType< hasSingleGeometryType, dim, 1 >
     {
       static const bool v = true;
-      static const unsigned int topologyId = GenericGeometry::CubeTopology< 1 >::type::id;
+      static const unsigned int topologyId = Impl::CubeTopology< 1 >::type::id;
     };
 
     template< class hasSingleGeometryType, int dim >
     struct InferHasSingleGeometryType< hasSingleGeometryType, dim, 0 >
     {
       static const bool v = true;
-      static const unsigned int topologyId = GenericGeometry::CubeTopology< 0 >::type::id;
+      static const unsigned int topologyId = Impl::CubeTopology< 0 >::type::id;
     };
 
 

@@ -3,6 +3,8 @@
 #ifndef DUNE_ALBERTA_ALBERTAREADER_HH
 #define DUNE_ALBERTA_ALBERTAREADER_HH
 
+#include <dune/geometry/type.hh>
+
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/gridfactory.hh>
 
@@ -65,7 +67,7 @@ namespace Dune
         const typename MacroData::ElementId &id = macroData_.element( i );
         for( int j = 0; j <= dimension; ++j )
           vertices[ j ] = id[ j ];
-        typedef typename GenericGeometry::SimplexTopology< dimension >::type Topology;
+        typedef typename Impl::SimplexTopology< dimension >::type Topology;
         factory.insertElement( GeometryType( Topology() ), vertices );
       }
 
