@@ -214,7 +214,7 @@ namespace Dune
     virtual void
     insertBoundarySegment ( const std::vector< unsigned int >& vertices )
     {
-      typedef typename GenericGeometry::SimplexTopology< dimension-1 >::type Topology;
+      typedef typename Impl::SimplexTopology< dimension-1 >::type Topology;
       insertBoundaryProjection( GeometryType( Topology() ), vertices, 0 );
     }
 

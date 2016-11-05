@@ -11,6 +11,7 @@
 #include <set>
 
 #include <dune/common/hybridutilities.hh>
+#include <dune/common/std/type_traits.hh>
 #include <dune/grid/common/grid.hh>
 
 namespace Dune {
