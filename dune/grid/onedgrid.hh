@@ -13,8 +13,8 @@
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/gridfactory.hh>
 
-#include <dune/geometry/genericgeometry/topologytypes.hh>
 #include <dune/geometry/axisalignedcubegeometry.hh>
+#include <dune/geometry/type.hh>
 
 /** \file
  * \brief The OneDGrid class
@@ -419,7 +419,7 @@ namespace Dune {
     struct hasSingleGeometryType< OneDGrid >
     {
       static const bool v = true;
-      static const unsigned int topologyId = GenericGeometry :: CubeTopology< 1 > :: type :: id ;
+      static const unsigned int topologyId = Impl::CubeTopology< 1 >::type::id;
     };
 
 
