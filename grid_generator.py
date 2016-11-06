@@ -13,7 +13,7 @@ from types import ModuleType
 
 
 def triangulation(grid, level=0):
-    if grid.dimGrid != 2 or grid.dimWorld != 2:
+    if grid.dimGrid != 2:
         raise Exception("Grid must be 2-dimensional for use as matplotlib triangulation.")
     from matplotlib.tri import Triangulation
     x, triangles = grid.tesselate(level)
