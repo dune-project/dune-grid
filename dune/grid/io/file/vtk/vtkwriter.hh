@@ -1293,7 +1293,6 @@ namespace Dune
     bool checkForPolyhedralCells() const
     {
       // check if polyhedron cells are present
-      bool foundPolyhedron = false ;
       for( const auto& geomType : gridView_.indexSet().types( 0 ) )
       {
         if( VTK::geometryType( geomType ) == VTK::polyhedron )
