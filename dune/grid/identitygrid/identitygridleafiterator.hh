@@ -3,6 +3,7 @@
 #ifndef DUNE_IDENTITYGRIDLEAFITERATOR_HH
 #define DUNE_IDENTITYGRIDLEAFITERATOR_HH
 
+#include <dune/grid/common/gridenums.hh>
 
 /** \file
  * \brief The IdentityGridLeafIterator class

@@ -302,16 +302,9 @@ namespace Dune {
       : _it(it), _g(g)
     {}
 
-// skip this constructor for GCC 4.4, which has a number of nasty bugs in its rvalue reference support
-// As this behavior is hard to trigger in small configuration tests and because we'll probably drop GCC 4.4
-// after the next release anyway, I hacked in this hardcoded check for the compiler version
-#if not (defined(__GNUC__) && (__GNUC__ < 5) && (__GNUC_MINOR__ < 5))
-
     YaspEntity (YGLI&& g, const I&& it)
       : _it(std::move(it)), _g(std::move(g))
     {}
-
-#endif
 
     //! Return true when two iterators over the same grid are equal (!).
     bool equals (const YaspEntity& e) const
@@ -460,16 +453,9 @@ namespace Dune {
       : _it(std::move(it)), _g(g)
     {}
 
-// skip this constructor for GCC 4.4, which has a number of nasty bugs in its rvalue reference support
-// As this behavior is hard to trigger in small configuration tests and because we'll probably drop GCC 4.4
-// after the next release anyway, I hacked in this hardcoded check for the compiler version
-#if not (defined(__GNUC__) && (__GNUC__ < 5) && (__GNUC_MINOR__ < 5))
-
     YaspEntity (YGLI&& g, I&& it)
       : _it(std::move(it)), _g(std::move(g))
     {}
-
-#endif
 
     //! Return true when two iterators over the same grid are equal (!).
     bool equals (const YaspEntity& e) const
@@ -824,16 +810,9 @@ namespace Dune {
       : _it(it), _g(g)
     {}
 
-// skip this constructor for GCC 4.4, which has a number of nasty bugs in its rvalue reference support
-// As this behavior is hard to trigger in small configuration tests and because we'll probably drop GCC 4.4
-// after the next release anyway, I hacked in this hardcoded check for the compiler version
-#if not (defined(__GNUC__) && (__GNUC__ < 5) && (__GNUC_MINOR__ < 5))
-
     YaspEntity (YGLI&& g, I&& it)
       : _it(std::move(it)), _g(std::move(g))
     {}
-
-#endif
 
     //! Return true when two iterators over the same grid are equal (!).
     bool equals (const YaspEntity& e) const

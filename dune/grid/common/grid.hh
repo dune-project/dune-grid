@@ -726,32 +726,28 @@ namespace Dune {
     DUNE_DEPRECATED_MSG("overlapSize() is deprecated. Use the method on the LevelGridView instead.")
     int overlapSize (int level, int codim) const
     {
-      CHECK_INTERFACE_IMPLEMENTATION(asImp().overlapSize(level,codim));
-      return asImp().overlapSize(level,codim);
+      return levelGridView(level).overlapSize(codim);
     }
 
     //! Return size of overlap region for a given codim on the leaf grid
     DUNE_DEPRECATED_MSG("overlapSize() is deprecated. Use the method on the LeafGridView instead.")
     int overlapSize (int codim) const
     {
-      CHECK_INTERFACE_IMPLEMENTATION(asImp().overlapSize(codim));
-      return asImp().overlapSize(codim);
+      return leafGridView().overlapSize(codim);
     }
 
     //! Return size of ghost region for a given codim on a given level
     DUNE_DEPRECATED_MSG("ghostSize() is deprecated. Use the method on the LevelGridView instead.")
     int ghostSize (int level, int codim) const
     {
-      CHECK_INTERFACE_IMPLEMENTATION(asImp().ghostSize(level,codim));
-      return asImp().ghostSize(level,codim);
+      return levelGridView(level).ghostSize(codim);
     }
 
     //! Return size of ghost region for a given codim on the leaf grid
     DUNE_DEPRECATED_MSG("ghostSize() is deprecated. Use the method on the LeafGridView instead.")
     int ghostSize (int codim) const
     {
-      CHECK_INTERFACE_IMPLEMENTATION(asImp().ghostSize(codim));
-      return asImp().ghostSize(codim);
+      return leafGridView().ghostSize(codim);
     }
 
     /**

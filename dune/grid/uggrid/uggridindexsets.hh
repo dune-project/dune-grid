@@ -11,6 +11,7 @@
 #include <set>
 
 #include <dune/common/hybridutilities.hh>
+#include <dune/common/std/type_traits.hh>
 #include <dune/grid/common/grid.hh>
 
 namespace Dune {
@@ -83,15 +84,15 @@ namespace Dune {
           {
             auto a=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,0,dim);
             auto b=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,1,dim);
-            result = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
+            result = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_->getRealImplementation(id(e)).getTarget(),
                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
-                                                              UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
-                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(b,e.type()))));
+                                                              UG_NS<dim>::Corner(grid_->getRealImplementation(id(e)).getTarget(),
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(b,id(e).type()))));
           }
 
           // Vertex indices
           if (codim==dim)
-            result = UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
+            result = UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(grid_->getRealImplementation(id(e)).getTarget(),
                                                              UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.type())));
         });
 
@@ -110,11 +111,11 @@ namespace Dune {
         {
           // Element indices
           if (codim==0)
-            result = UG_NS<dim>::levelIndex(grid_->getRealImplementation(e).getTarget());
+            result = UG_NS<dim>::levelIndex(grid_->getRealImplementation(id(e)).getTarget());
 
           // Face indices
           if (codim==1)
-            result = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(grid_->getRealImplementation(e).getTarget(),
+            result = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(grid_->getRealImplementation(id(e)).getTarget(),
                                                                  UGGridRenumberer<dim>::facesDUNEtoUG(i,e.type())));
 
           // Edge indices
@@ -122,15 +123,15 @@ namespace Dune {
           {
             auto a=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,0,dim);
             auto b=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,1,dim);
-            result = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
+            result = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_->getRealImplementation(id(e)).getTarget(),
                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
-                                                              UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
+                                                              UG_NS<dim>::Corner(grid_->getRealImplementation(id(e)).getTarget(),
                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(b,e.type()))));
           }
 
           // Vertex indices
           if (codim==3)
-            result = UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(grid_->getRealImplementation(e).getTarget(),
+            result = UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(grid_->getRealImplementation(id(e)).getTarget(),
                                                                UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.type())));
         });
 
@@ -294,22 +295,22 @@ namespace Dune {
         {
           // Element indices
           if (codim==0)
-            result = UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).getTarget());
+            result = UG_NS<dim>::leafIndex(grid_.getRealImplementation(id(e)).getTarget());
 
           // Edge indices
           if (codim==1)
           {
             auto a=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,0,dim);
             auto b=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,1,dim);
-            result = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
+            result = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_.getRealImplementation(id(e)).getTarget(),
                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
-                                                              UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
+                                                              UG_NS<dim>::Corner(grid_.getRealImplementation(id(e)).getTarget(),
                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(b,e.type()))));
           }
 
           // Vertex indices
           if (codim==dim)
-            result = UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
+            result = UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(grid_.getRealImplementation(id(e)).getTarget(),
                                                              UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.type())));
         });
 
@@ -328,11 +329,11 @@ namespace Dune {
         {
           // Element indices
           if (codim==0)
-            result = UG_NS<dim>::leafIndex(grid_.getRealImplementation(e).getTarget());
+            result = UG_NS<dim>::leafIndex(grid_.getRealImplementation(id(e)).getTarget());
 
           // Face indices
           if (codim==1)
-            result = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(grid_.getRealImplementation(e).getTarget(),
+            result = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(grid_.getRealImplementation(id(e)).getTarget(),
                                                                  UGGridRenumberer<dim>::facesDUNEtoUG(i,e.type())));
 
           // Edge indices
@@ -340,15 +341,15 @@ namespace Dune {
           {
             auto a=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,0,dim);
             auto b=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,1,dim);
-            result = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
+            result = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_.getRealImplementation(id(e)).getTarget(),
                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
-                                                              UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
+                                                              UG_NS<dim>::Corner(grid_.getRealImplementation(id(e)).getTarget(),
                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(b,e.type()))));
           }
 
           // Vertex indices
           if (codim==3)
-            result = UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(grid_.getRealImplementation(e).getTarget(),
+            result = UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(grid_.getRealImplementation(id(e)).getTarget(),
                                                               UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.type())));
         });
 
@@ -359,7 +360,7 @@ namespace Dune {
         });
 
         // The entity is an edge
-        Hybrid::ifElse(Std::bool_constant<cc==1>(), [&](auto id)
+        Hybrid::ifElse(Std::bool_constant<cc==2>(), [&](auto id)
         {
           DUNE_THROW(NotImplemented, "Subindices of an element edge");
         });

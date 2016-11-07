@@ -79,7 +79,7 @@ namespace Dune
   template< class Grid >
   inline GeometryType AlbertaGridIntersectionBase< Grid >::type () const
   {
-    typedef typename GenericGeometry::SimplexTopology< dimension-1 >::type Topology;
+    typedef typename Impl::SimplexTopology< dimension-1 >::type Topology;
     return GeometryType( Topology() );
   }
 

@@ -3,9 +3,9 @@
 #ifndef DUNE_ALBERTA_CAPABILITIES_HH
 #define DUNE_ALBERTA_CAPABILITIES_HH
 
-#include <dune/grid/common/capabilities.hh>
-#include <dune/geometry/genericgeometry/topologytypes.hh>
+#include <dune/geometry/type.hh>
 
+#include <dune/grid/common/capabilities.hh>
 
 #if HAVE_ALBERTA
 
@@ -33,7 +33,7 @@ namespace Dune
     struct hasSingleGeometryType< AlbertaGrid< dim, dimworld > >
     {
       static const bool v = true;
-      static const unsigned int topologyId = GenericGeometry :: SimplexTopology< dim > :: type :: id ;
+      static const unsigned int topologyId = Impl::SimplexTopology< dim >::type::id;
     };
 
 
