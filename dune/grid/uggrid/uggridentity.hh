@@ -9,6 +9,8 @@
 
 #include <memory>
 
+#include <dune/geometry/referenceelements.hh>
+
 #include <dune/grid/common/gridenums.hh>
 
 
@@ -177,6 +179,13 @@ namespace Dune {
     /** \brief Get the seed corresponding to this entity */
     EntitySeed seed () const { return EntitySeed( *this ); }
 
+    /** \brief Return the number of subEntities of codimension codim.
+     */
+    unsigned int subEntities (unsigned int cd) const
+    {
+      return ReferenceElements<UGCtype, dim-codim>::general(type()).size(cd-codim);
+    }
+
     typename UG_NS<dim>::template Entity<codim>::T* getTarget() const
     {
       return target_;
@@ -259,6 +268,13 @@ namespace Dune {
     GeometryType type() const
     {
       return GeometryType(1);
+    }
+
+    /** \brief Return the number of subEntities of codimension codim.
+     */
+    unsigned int subEntities (unsigned int cd) const
+    {
+      return ReferenceElements<UGCtype, dim-codim>::general(type()).size(cd-codim);
     }
 
     /** \brief The partition type for parallel computing
@@ -519,6 +535,13 @@ namespace Dune {
     EntitySeed seed () const
     {
       return EntitySeed( *this );
+    }
+
+    /** \brief Return the number of subEntities of codimension codim.
+     */
+    unsigned int subEntities (unsigned int cd) const
+    {
+      return ReferenceElements<UGCtype, dim-codim>::general(type()).size(cd-codim);
     }
 
     /** \brief Set to a UG side vector object

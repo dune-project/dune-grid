@@ -230,6 +230,14 @@ namespace Dune {
     //! return the element type identifier (segment)
     GeometryType type () const {return GeometryType(0);}
 
+    /** \brief Return the number of subentities of codimension codim.
+     */
+    unsigned int subEntities (unsigned int codim) const
+    {
+      assert(codim==1);
+      return 1;
+    }
+
     //! geometry of this entity
     Geometry geometry () const { return Geometry(GeometryImpl(target_->pos_)); }
 
