@@ -184,7 +184,8 @@ namespace Dune
       tetrahedron = 10,
       hexahedron = 12,
       prism = 13,
-      pyramid = 14 //, polyhedron = 42
+      pyramid = 14,
+      polyhedron = 42
     };
 
     //! mapping from GeometryType to VTKGeometryType
@@ -207,7 +208,7 @@ namespace Dune
       if (t.isNone() )
       {
         if( t.dim() == 2 ) return polygon;
-        // if( t.dim() == 3 ) return polyhedron;
+        if( t.dim() == 3 ) return polyhedron;
       }
 
       DUNE_THROW(IOError,"VTKWriter: unsupported GeometryType " << t);

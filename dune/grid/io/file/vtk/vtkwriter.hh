@@ -14,6 +14,7 @@
 
 #include <vector>
 #include <list>
+#include <map>
 
 #include <dune/common/typetraits.hh>
 #include <dune/common/exceptions.hh>
@@ -576,7 +577,8 @@ namespace Dune
     explicit VTKWriter ( const GridView &gridView,
                          VTK::DataMode dm = VTK::conforming )
       : gridView_( gridView ),
-        datamode( dm )
+        datamode( dm ),
+        polyhedralCellsPresent_( checkForPolyhedralCells() )
     { }
 
     /**
@@ -1262,17 +1264,171 @@ namespace Dune
       // types
       if (n>1)
       {
-        std::shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
-          (writer.makeArrayWriter<unsigned char>("types", 1, ncells));
-        if(!p3->writeIsNoop())
-          for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
+        {
+          std::shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
+            (writer.makeArrayWriter<unsigned char>("types", 1, ncells));
+
+          if(!p3->writeIsNoop())
           {
-            int vtktype = VTK::geometryType(it->type());
-            p3->write(vtktype);
+            for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
+            {
+              int vtktype = VTK::geometryType(it->type());
+              p3->write(vtktype);
+            }
           }
+        }
+
+
+        // if polyhedron cells found also cell faces need to be written
+        if( polyhedralCellsPresent_ )
+        {
+          writeCellFaces( writer );
+        }
       }
 
       writer.endCells();
+    }
+
+  protected:
+    bool checkForPolyhedralCells() const
+    {
+      // check if polyhedron cells are present
+      for( const auto& geomType : gridView_.indexSet().types( 0 ) )
+      {
+        if( VTK::geometryType( geomType ) == VTK::polyhedron )
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    //! write the connectivity array
+    virtual void writeCellFaces(VTK::VTUWriter& writer)
+    {
+      if( ! faceVertices_ )
+      {
+        faceVertices_.reset( new std::pair< std::vector<int>, std::vector<int> > () );
+        // fill face vertex structure
+        fillFaceVertices( cornerBegin(), cornerEnd(), gridView_.indexSet(),
+                          faceVertices_->first, faceVertices_->second );
+      }
+
+      std::vector< int >& faces = faceVertices_->first;
+      std::vector< int >& faceOffsets = faceVertices_->second;
+      assert( int(faceOffsets.size()) == ncells );
+
+      {
+        std::shared_ptr<VTK::DataArrayWriter< int > > p4
+          (writer.makeArrayWriter< int >("faces", 1, faces.size()));
+        if(!p4->writeIsNoop())
+        {
+          for( const auto& face : faces )
+            p4->write( face );
+        }
+      }
+
+      {
+        std::shared_ptr<VTK::DataArrayWriter< int > > p5
+          (writer.makeArrayWriter< int >("faceoffsets", 1, ncells ));
+        if(!p5->writeIsNoop())
+        {
+          for( const auto& offset : faceOffsets )
+            p5->write( offset );
+
+          // clear face vertex structure
+          faceVertices_.reset();
+        }
+      }
+    }
+
+    template <class CornerIterator, class IndexSet, class T>
+    inline void fillFaceVertices( CornerIterator it,
+                           const CornerIterator end,
+                           const IndexSet& indexSet,
+                           std::vector<T>& faces,
+                           std::vector<T>& faceOffsets )
+    {
+      if( n == 3 && it != end )
+      {
+        // clear output arrays
+        faces.clear();
+        faces.reserve( 15 * ncells );
+        faceOffsets.clear();
+        faceOffsets.reserve( ncells );
+
+        int offset = 0;
+
+        Cell element = *it;
+        int elIndex = indexSet.index( element );
+        std::vector< T > vertices;
+        vertices.reserve( 30 );
+        for( ; it != end; ++it )
+        {
+          const Cell& cell = *it ;
+          const int cellIndex = indexSet.index( cell ) ;
+          if( elIndex != cellIndex )
+          {
+            fillFacesForElement( element, indexSet, vertices, offset, faces, faceOffsets );
+
+            vertices.clear();
+            element = cell ;
+            elIndex = cellIndex ;
+          }
+          vertices.push_back( it.id() );
+        }
+
+        // fill faces for last element
+        fillFacesForElement( element, indexSet, vertices, offset, faces, faceOffsets );
+      }
+    }
+
+    template <class Entity, class IndexSet, class T>
+    static void fillFacesForElement( const Entity& element,
+                                     const IndexSet& indexSet,
+                                     const std::vector<T>& vertices,
+                                     T& offset,
+                                     std::vector<T>& faces,
+                                     std::vector<T>& faceOffsets )
+    {
+      const int dim = n;
+
+      std::map< T, T > vxMap;
+
+      // get number of local faces
+      const int nVertices = element.subEntities( dim );
+      for( int vx = 0; vx < nVertices; ++ vx )
+      {
+        const int vxIdx = indexSet.subIndex( element, vx, dim );
+        vxMap[ vxIdx ] = vertices[ vx ];
+      }
+
+      // get number of local faces
+      const int nFaces = element.subEntities( 1 );
+      // store number of faces for current element
+      faces.push_back( nFaces );
+      ++offset;
+      // extract each face as a set of vertex indices
+      for( int fce = 0; fce < nFaces; ++ fce )
+      {
+        // obtain face
+        const auto face = element.template subEntity< 1 > ( fce );
+
+        // get all vertex indices from current face
+        const int nVxFace = face.subEntities( dim );
+        faces.push_back( nVxFace );
+        ++offset ;
+        for( int i=0; i<nVxFace; ++i )
+        {
+          const T vxIndex = indexSet.subIndex( face, i, dim );
+          assert( vxMap.find( vxIndex ) != vxMap.end() );
+          faces.push_back( vxMap[ vxIndex ] );
+          ++offset ;
+        }
+      }
+
+      // store face offset for each element
+      faceOffsets.push_back( offset );
     }
 
   protected:
@@ -1293,6 +1449,13 @@ namespace Dune
     // hold its number in the iteration order (VertexIterator)
     std::vector<int> number;
     VTK::DataMode datamode;
+
+    // true if polyhedral cells are present in the grid
+    const bool polyhedralCellsPresent_;
+
+    // pointer holding face vertex connectivity if needed
+    std::shared_ptr< std::pair< std::vector<int>, std::vector<int> > > faceVertices_;
+
   protected:
     VTK::OutputType outputtype;
   };
