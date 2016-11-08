@@ -98,6 +98,29 @@ namespace Dune
     //! obtain entity seed
     EntitySeed seed () const { return EntitySeed( AlbertaGridEntitySeed< codim, Grid >( elementInfo(), subEntity() ) ); }
 
+    /** \brief Obtain the number of subentities of a given codimension
+     *
+     * That number is ((mydimension+1) over (dim-cd+1))
+     *
+     *  \param  cd  codimension
+     *
+     *  \returns the number of subentities of the given codimension
+     */
+    unsigned int subEntities ( unsigned int cd ) const
+    {
+      int n = mydimension+1;
+      int k = dimension-cd+1;
+
+      // binomial: n over k
+      int binomial=1;
+      for (int i=n-k+1; i<=n; i++)
+        binomial *= i;
+      for (long i=2; i<=k; i++)
+        binomial /= i;
+
+      return binomial;
+    }
+
     //***********************************************
     // end of interface methods
     //***********************************************
@@ -233,16 +256,16 @@ namespace Dune
 
     /** \brief Obtain the number of subentities of a given codimension
      *
-     * That number is ((dim+1) over (dim-codim+1))
+     * That number is ((mydimension+1) over (dim-cd+1))
      *
-     *  \param  codim  codimension
+     *  \param  cd  codimension
      *
      *  \returns the number of subentities of the given codimension
      */
-    unsigned int subEntities (unsigned int codim) const
+    unsigned int subEntities ( unsigned int cd ) const
     {
-      int n = dimension+1;
-      int k = dimension-codim+1;
+      int n = mydimension+1;
+      int k = dimension-cd+1;
 
       // binomial: n over k
       int binomial=1;
