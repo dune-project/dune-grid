@@ -43,7 +43,7 @@ namespace Dune
           polyhedra.push_back( polyhedron );
         }
 
-        // substract minimal number to have 0 starting numbering
+        // subtract minimal number to have 0 starting numbering
         if( minPolyId > 0 )
         {
           const size_t polySize = polyhedra.size();
