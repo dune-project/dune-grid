@@ -58,7 +58,7 @@
 #       old doc: indicates that the targets are object libraries.
 #
 
-# support for exgernal UG is deprecated in Dune 2.5. We will keep it in Dune 2.6-git as long as feasable
+# Support for external UG is deprecated in Dune 2.5. We will keep it in Dune 2.6-git as long as feasible.
 set_package_info("UG" "External UG grid, superseded by dune-uggrid" "http://www.iwr.uni-heidelberg.de/frame/iwrwikiequipment/software/ug")
 
 if(NOT dune-uggrid_FOUND)
@@ -151,7 +151,7 @@ if(UG_FOUND)
     DUNETYPE "Dune::UGGrid< dimgrid >"
     HEADERS dune/grid/uggrid.hh dune/grid/io/file/dgfparser/dgfug.hh)
 
-    # support for exgernal UG is deprecated in Dune 2.5. We will keep it in Dune 2.6-git as long as feasable
+    # Support for external UG is deprecated in Dune 2.5. We will keep it in Dune 2.6-git as long as feasible.
     message(WARNING "The support of UG as an external library is deprecated in Dune 2.5. Use dune-uggrid instead.")
 endif()
 
