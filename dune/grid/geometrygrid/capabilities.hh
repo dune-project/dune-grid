@@ -5,7 +5,8 @@
 
 #include <cassert>
 
-#include <dune/common/forloop.hh>
+#include <dune/common/hybridutilities.hh>
+#include <dune/common/std/utility.hh>
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/geometrygrid/declaration.hh>
@@ -105,14 +106,12 @@ namespace Dune
     {
       static const int dimension = Grid::dimension;
 
-      template< int codim >
-      struct BuildCache;
-
       bool hasHostEntity_[ Grid::dimension + 1 ];
 
       CodimCache ()
       {
-        Dune::ForLoop< BuildCache, 0, dimension >::apply( hasHostEntity_ );
+        Hybrid::forEach( Std::make_index_sequence< dimension+1 >{},
+          [ & ]( auto i ){ hasHostEntity_[ i ] = Capabilities::hasHostEntity< Grid, i >::v; } );
       }
 
       static CodimCache &instance ()
@@ -126,16 +125,6 @@ namespace Dune
       {
         assert( (codim >= 0) && (codim <= dimension) );
         return instance().hasHostEntity_[ codim ];
-      }
-    };
-
-    template< class Grid >
-    template< int codim >
-    struct CodimCache< Grid >::BuildCache
-    {
-      static void apply ( bool (&hasHostEntity)[ dimension + 1 ] )
-      {
-        hasHostEntity[ codim ] = Capabilities::hasHostEntity< Grid, codim >::v;
       }
     };
 
