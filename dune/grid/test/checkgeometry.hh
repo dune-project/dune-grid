@@ -6,7 +6,8 @@
 
 #include <limits>
 
-#include <dune/common/forloop.hh>
+#include <dune/common/hybridutilities.hh>
+#include <dune/common/std/utility.hh>
 #include <dune/common/typetraits.hh>
 
 #include <dune/geometry/test/checkgeometry.hh>
@@ -119,7 +120,6 @@ namespace Dune
   template<class Grid>
   struct GeometryChecker
   {
-
     template<int codim>
     using SubEntityGeometryChecker =
       typename CheckSubEntityGeometry<Grid>::template Operation<codim>;
@@ -127,16 +127,8 @@ namespace Dune
     template< class VT >
     void checkGeometry ( const GridView< VT > &gridView )
     {
-      typedef typename GridView< VT >::template Codim<0>::Iterator Iterator;
-
-      const Iterator end = gridView.template end<0>();
-      Iterator it = gridView.template begin<0>();
-
       for( ; it != end; ++it )
-        {
-          ForLoop<SubEntityGeometryChecker,0,GridView<VT>::dimension>
-            ::apply(*it);
-        }
+        Hybrid::forEach(Std::make_index_sequence<GridView<VT>::dimension+1>{},[&](auto i){SubEntityGeometryChecker<i>::apply(*it);});
     }
   };
 
