@@ -15,12 +15,13 @@
 
 #include <dune/common/classname.hh>
 #include <dune/common/exceptions.hh>
-#include <dune/common/forloop.hh>
 #include <dune/common/fvector.hh>
-#include <dune/geometry/type.hh>
-#include <dune/geometry/referenceelements.hh>
+#include <dune/common/hybridutilities.hh>
+#include <dune/common/std/utility.hh>
 
 #include <dune/geometry/multilineargeometry.hh>
+#include <dune/geometry/referenceelements.hh>
+#include <dune/geometry/type.hh>
 
 #include <dune/grid/common/mcmgmapper.hh>
 
@@ -167,7 +168,7 @@ namespace Dune {
   }
 
 #ifndef DOXYGEN
-  //! operation for ForLoop Internally used by fillGridViewInfoSerial
+  //! operation for Hybrid::forEach Internally used by fillGridViewInfoSerial
   template<int codim>
   struct FillGridInfoOperation {
     template<class Entity, class Mapper, class Visited, class RefElem>
@@ -245,9 +246,8 @@ namespace Dune {
 
       if(!eit->type().isNone()) {
         const EGeometry &geo = eit->geometry();
-        ForLoop<FillGridInfoOperation, 1, dim>::
-        apply(*eit, mapper, visited, geo, RefElems::general(eit->type()),
-              gridViewInfo);
+        Hybrid::forEach(Std::make_index_sequence< dim >{},
+          [ & ](auto i){ FillGridInfoOperation< i+1 >::apply(*eit, mapper, visited, geo, RefElems::general(eit->type()), gridViewInfo); } );
       }
     }
 

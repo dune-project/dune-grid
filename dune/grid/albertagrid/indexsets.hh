@@ -5,7 +5,9 @@
 
 #include <array>
 
+#include <dune/common/hybridutilities.hh>
 #include <dune/common/stdstreams.hh>
+#include <dune/common/std/utility.hh>
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/indexidset.hh>
@@ -463,7 +465,8 @@ namespace Dune
         const AlbertaGridEntity< 0, dim, const Grid > &entityImp
           = Grid::getRealImplementation( *it );
         const Alberta::Element *element = entityImp.elementInfo().el();
-        ForLoop< Insert, 0, dimension >::apply( element, *this );
+        Hybrid::forEach( Std::make_index_sequence< dimension+1 >{},
+          [ & ]( auto i ){ Insert< i >::apply( element, *this ); } );
       }
     }
 
