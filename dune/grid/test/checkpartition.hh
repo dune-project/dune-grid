@@ -10,7 +10,8 @@
 #include <set>
 #include <map>
 
-#include <dune/common/forloop.hh>
+#include <dune/common/hybridutilities.hh>
+#include <dune/common/std/utility.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/common/unused.hh>
 
@@ -107,7 +108,7 @@ public:
   static void apply ( const GridView &gridView )
   {
     std::cout << "Checking iterators for " << pitype << "..." << std::endl;
-    Dune::ForLoop< CheckCodim, 0, GridView::dimension >::apply( gridView );
+    Dune::Hybrid::forEach( Std::make_index_sequence< GridView::dimension+1 >{}, [ & ]( auto i ){ CheckCodim< i >::apply( gridView ); } );
   }
 };
 
@@ -215,15 +216,6 @@ class CheckPartitionDataHandle
 
   typedef std::set< typename IdSet::IdType > CommSet;
 
-  template< int codim >
-  struct Contains
-  {
-    static void apply ( std::bitset< dimension+1 > &contains )
-    {
-      contains[ codim ] = Dune::Capabilities::canCommunicate< Grid, codim >::v;
-    }
-  };
-
 public:
   explicit CheckPartitionDataHandle ( const GridView &gridView )
     : gridView_( gridView ),
@@ -239,7 +231,8 @@ public:
       doubleInterior_( false ),
       interiorBorder_( false )
   {
-    Dune::ForLoop< Contains, 0, dimension >::apply( contains_ );
+    Dune::Hybrid::forEach( Std::make_index_sequence< dimension+1 >{},
+      [ & ]( auto i ){ contains_[ i ] = Dune::Capabilities::canCommunicate< Grid, i >::v; } );
   }
 
   ~CheckPartitionDataHandle ()

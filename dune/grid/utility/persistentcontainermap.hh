@@ -6,8 +6,9 @@
 #include <algorithm>
 #include <cassert>
 
+#include <dune/common/hybridutilities.hh>
+#include <dune/common/std/utility.hh>
 #include <dune/common/typetraits.hh>
-#include <dune/common/forloop.hh>
 #include <dune/grid/common/capabilities.hh>
 
 namespace Dune
@@ -25,9 +26,6 @@ namespace Dune
   protected:
     template< class reference, class iterator >
     class IteratorWrapper;
-
-    template< int codim >
-    struct Resize;
 
   public:
     typedef G Grid;
@@ -85,7 +83,8 @@ namespace Dune
 
     void resize ( const Value &value = Value() )
     {
-      return ForLoop< Resize, 0, Grid::dimension >::apply( *this, value );
+      Hybrid::forEach( Std::make_index_sequence< Grid::dimension+1 >{},
+        [ & ]( auto i ){ if( i == this->codimension() ) this->template resize< i >( value ); } );
     }
 
     void shrinkToFit () {}
@@ -162,22 +161,6 @@ namespace Dune
     iterator it_;
   };
 
-
-
-  // PersistentContainerMap::Resize
-  // ------------------------------
-
-  template< class G, class IdSet, class Map >
-  template< int codim >
-  struct PersistentContainerMap< G, IdSet, Map >::Resize
-  {
-    static void apply ( PersistentContainerMap< G, IdSet, Map > &container,
-                        const Value &value )
-    {
-      if( codim == container.codimension() )
-        container.template resize< codim >( value );
-    }
-  };
 
 
 

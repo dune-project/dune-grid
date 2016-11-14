@@ -3,10 +3,12 @@
 #ifndef DUNE_GRID_TEST_CHECKITERATORS_HH
 #define DUNE_GRID_TEST_CHECKITERATORS_HH
 
+#include <iostream>
 #include <map>
 
-#include <dune/common/forloop.hh>
 #include <dune/common/exceptions.hh>
+#include <dune/common/hybridutilities.hh>
+#include <dune/common/std/utility.hh>
 #include <dune/common/test/iteratortest.hh>
 
 #include <dune/grid/common/capabilities.hh>
@@ -55,7 +57,7 @@ public:
   static void apply ( const GridView &gridView )
   {
     std::cout << "Checking iterators for higher codimension..." << std::endl;
-    Dune::ForLoop< CheckCodim, 1, GridView::dimension >::apply( gridView );
+    Dune::Hybrid::forEach( Std::make_index_sequence< GridView::dimension >{}, [ & ]( auto i ){ CheckCodim< i+1 >::apply( gridView ); } );
   }
 };
 
