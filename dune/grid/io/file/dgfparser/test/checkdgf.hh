@@ -1,10 +1,19 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 
+#ifndef DUNE_GRID_TEST_CHECKDGF_HH
+#define DUNE_GRID_TEST_CHECKDGF_HH
+
 #define DISABLE_DEPRECATED_METHOD_CHECK 1
 #define CHECK 1
 
+#ifndef DUNE_GRID_EXAMPLE_GRIDS_PATH
+#define DUNE_GRID_EXAMPLE_GRIDS_PATH
+#endif
+
 #include <string>
+
+#include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/grid/common/rangegenerators.hh>
 
@@ -12,6 +21,8 @@
 #include <dune/grid/test/checkgeometryinfather.hh>
 #include <dune/grid/test/checkintersectionit.hh>
 
+#include <dune/grid/io/file/dgfparser.hh>
+#include <dune/grid/io/file/dgfparser/gridptr.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/grid/io/file/vtk/subsamplingvtkwriter.hh>
 
@@ -155,3 +166,5 @@ void runDGFTest(int argc, char ** argv)
 #endif
   delete grid;
 }
+
+#endif // #ifndef DUNE_GRID_TEST_CHECKDGF_HH
