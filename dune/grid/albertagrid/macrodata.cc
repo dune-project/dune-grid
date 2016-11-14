@@ -10,8 +10,6 @@
  *  \brief  provides a wrapper for ALBERTA's macro_data structure
  */
 
-#include <dune/common/forloop.hh>
-
 #include <dune/grid/common/exceptions.hh>
 
 #if HAVE_ALBERTA

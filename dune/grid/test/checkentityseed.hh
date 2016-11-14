@@ -8,7 +8,8 @@
 #include <ostream>
 
 //- dune-common includes
-#include <dune/common/forloop.hh>
+#include <dune/common/hybridutilities.hh>
+#include <dune/common/std/utility.hh>
 
 //- dune-grid includes
 #include <dune/grid/common/capabilities.hh>
@@ -210,7 +211,8 @@ namespace Dune
   void checkEntitySeed ( const GridView< VT > &gridView, std::ostream &output = std::cerr )
   {
     const int dimension = GridView< VT >::dimension;
-    ForLoop< CheckEntitySeed::IfHasEntitySeed, 0, dimension >::apply( gridView, output );
+    Hybrid::forEach( Std::make_index_sequence< dimension+1 >{},
+      [ & ]( auto i ){ CheckEntitySeed::IfHasEntitySeed< i >::apply( gridView, output ); } );
   }
 
 } // namespace Dune
