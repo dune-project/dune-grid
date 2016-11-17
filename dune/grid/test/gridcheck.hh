@@ -937,8 +937,9 @@ void gridcheck (Grid &g)
   checkFatherLevel(cg);
 
   // check geometries of macro level and leaf level
-  checkGeometry( g.levelGridView( 0 ) );
-  checkGeometry( g.leafGridView() );
+  Dune::GeometryChecker<Grid> checker;
+  checker.checkGeometry( g.levelGridView( 0 ) );
+  checker.checkGeometry( g.leafGridView() );
 
   // check entity seeds
   Dune::checkEntitySeed( g.leafGridView(), std::cerr );
