@@ -387,7 +387,7 @@ namespace Dune
     inline ElementInfo< dim >::ElementInfo ( ElementInfo &&other )
       : instance_( NULL )
     {
-      using namespace std;
+      using std::swap;
       swap( instance_, other.instance_ );
     }
 
@@ -412,7 +412,7 @@ namespace Dune
     inline ElementInfo< dim > &
     ElementInfo< dim >::operator= ( ElementInfo< dim > &&other )
     {
-      using namespace std;
+      using std::swap;
       swap( instance_, other.instance_ );
       return *this;
     }
