@@ -25,8 +25,8 @@ typedef unsigned char uint8_t;
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/deprecated.hh>
-#include <dune/geometry/genericgeometry/topologytypes.hh>
 #include <dune/geometry/axisalignedcubegeometry.hh>
+#include <dune/geometry/type.hh>
 #include <dune/grid/common/indexidset.hh>
 #include <dune/grid/common/datahandleif.hh>
 
@@ -1804,7 +1804,7 @@ namespace Dune {
     struct hasSingleGeometryType< YaspGrid<dim, Coordinates> >
     {
       static const bool v = true;
-      static const unsigned int topologyId = GenericGeometry :: CubeTopology< dim > :: type :: id ;
+      static const unsigned int topologyId = Impl::CubeTopology< dim >::type::id;
     };
 
     /** \brief YaspGrid is a Cartesian grid

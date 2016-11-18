@@ -5,6 +5,8 @@
 // compile surface grid support into the lib even for ALBERTA 2.0
 #define DUNE_ALBERTA_SURFACE_GRID 1
 
+#include <dune/geometry/type.hh>
+
 #include <dune/grid/albertagrid/dgfparser.hh>
 
 #if HAVE_ALBERTA
@@ -52,7 +54,7 @@ namespace Dune
           elementId[ i ] = dgf_.elements[ n ][ i ];
       }
 
-      typedef typename GenericGeometry::SimplexTopology< dimension >::type Topology;
+      typedef typename Impl::SimplexTopology< dimension >::type Topology;
       factory_.insertElement( GeometryType( Topology() ), elementId );
 
       // look for bounaries and insert them
@@ -101,7 +103,7 @@ namespace Dune
       const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
       const DuneBoundaryProjection< dimworld > *projection
         = projectionBlock.template boundaryProjection< dimworld >( i );
-      typedef typename GenericGeometry::SimplexTopology< dimension-1 >::type Topology;
+      typedef typename Impl::SimplexTopology< dimension-1 >::type Topology;
       factory_.insertBoundaryProjection( GeometryType( Topology() ), vertices, projection );
     }
 

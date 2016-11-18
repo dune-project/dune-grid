@@ -147,7 +147,7 @@ namespace Dune
     /** \brief obtain the type of reference element */
     GeometryType type () const
     {
-      typedef typename GenericGeometry::SimplexTopology< mydimension >::type Topology;
+      typedef typename Impl::SimplexTopology< mydimension >::type Topology;
       return GeometryType( Topology() );
     }
 
@@ -349,7 +349,7 @@ namespace Dune
     /** \brief obtain the type of reference element */
     GeometryType type () const
     {
-      typedef typename GenericGeometry::SimplexTopology< mydimension >::type Topology;
+      typedef typename Impl::SimplexTopology< mydimension >::type Topology;
       return GeometryType( Topology() );
     }
 
