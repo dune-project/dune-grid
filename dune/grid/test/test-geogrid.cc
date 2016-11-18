@@ -91,9 +91,11 @@ void test(const std::string& gridfile)
   gridcheck( geogrid );
 
   std::cerr << "Checking geometry... " << std::endl;
-  checkGeometry( geogrid.leafGridView() );
+  Dune::GeometryChecker< GeometryGridType > checker;
+
+  checker.checkGeometry( geogrid.leafGridView() );
   for( int i = 0; i <= geogrid.maxLevel(); ++i )
-    checkGeometry( geogrid.levelGridView( i ) );
+    checker.checkGeometry( geogrid.levelGridView( i ) );
 
   std::cerr << "Checking geometry in father..." << std::endl;
   checkGeometryInFather( geogrid );
