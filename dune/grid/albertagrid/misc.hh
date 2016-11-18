@@ -6,8 +6,9 @@
 #include <cassert>
 
 #include <dune/common/exceptions.hh>
+#include <dune/common/hybridutilities.hh>
+#include <dune/common/std/utility.hh>
 #include <dune/common/typetraits.hh>
-#include <dune/common/forloop.hh>
 
 #include <dune/grid/albertagrid/albertaheader.hh>
 
@@ -372,7 +373,7 @@ namespace Dune
     public:
       NumberingMap ()
       {
-        ForLoop< Initialize, 0, dim >::apply( *this );
+        Hybrid::forEach( Std::make_index_sequence< dim+1 >{}, [ & ]( auto i ){ Initialize< i >::apply( *this ); } );
       }
 
       ~NumberingMap ()

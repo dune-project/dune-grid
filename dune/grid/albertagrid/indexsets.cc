@@ -145,14 +145,16 @@ namespace Dune
   template< int dim, int dimworld >
   void AlbertaGridHierarchicIndexSet< dim, dimworld >::create ()
   {
-    ForLoop< CreateEntityNumbers, 0, dimension >::apply( dofNumbering_, *this );
+    Hybrid::forEach( Std::make_index_sequence< dimension+1 >{},
+      [ & ]( auto i ){ CreateEntityNumbers< i >::apply( dofNumbering_, *this ); } );
   }
 
 
   template< int dim, int dimworld >
   void AlbertaGridHierarchicIndexSet< dim, dimworld >::read ( const std::string &filename )
   {
-    ForLoop< CreateEntityNumbers, 0, dimension >::apply( filename, dofNumbering_.mesh(), *this );
+    Hybrid::forEach( Std::make_index_sequence< dimension+1 >{},
+      [ & ]( auto i ){ CreateEntityNumbers< i >::apply( filename, dofNumbering_.mesh(), *this ); } );
   }
 
 
