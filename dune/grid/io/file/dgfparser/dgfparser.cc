@@ -52,7 +52,7 @@ namespace Dune
     {
       out << "Step 1 finished: " << std::endl;
       out << "                 " << dimw << "d" << std::endl;
-      out << "                 " << nofvtx << " verticies" << std::endl;
+      out << "                 " << nofvtx << " vertices" << std::endl;
       out << "                 " << nofel << " elements" << std::endl;
     }
 
@@ -651,7 +651,7 @@ namespace Dune
                    << dimw << " dimensions!");
       } else if (dimw==-1) {
         DUNE_THROW(DGFException,
-                   "SimplexGen: connot determine dimension of grid," <<
+                   "SimplexGen: cannot determine dimension of grid," <<
                    " include parameter DIMENSION in the "
                                                                      << "Simplexgeneration-Block");
       }

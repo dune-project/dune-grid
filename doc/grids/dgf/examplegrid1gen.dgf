@@ -7,7 +7,7 @@ display 0
 %path $HOME/bin  % path to Triangle
 
 #
-Vertex        % the verticies of the grid
+Vertex        % the vertices of the grid
 -1   -1       % vertex 0
 -0.2 -1       % vertex 1
  1   -1       % vertex 2
