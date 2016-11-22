@@ -7,8 +7,9 @@
 #include <vector>
 #include <set>
 
-#include <dune/common/forloop.hh>
 #include <dune/common/exceptions.hh>
+#include <dune/common/hybridutilities.hh>
+#include <dune/common/std/utility.hh>
 
 #include <dune/geometry/type.hh>
 #include <dune/geometry/referenceelements.hh>
@@ -176,7 +177,7 @@ namespace Dune {
       if( level >= (int) levelSizes_[codim].size() ) return 0;
 
       if( levelSizes_[codim][level] < 0)
-        ForLoop< CountLevelEntities, 0, dim > :: apply( *this, level, codim );
+        Hybrid::forEach( Std::make_index_sequence< dim+1 >{}, [ & ]( auto i ){ CountLevelEntities< i >::apply( *this, level, codim ); } );
 
       //  CountLevelEntities<ThisType,All_Partition,dim>::count(*this,level,codim);
 
@@ -187,9 +188,9 @@ namespace Dune {
     /** \copydoc Dune::Grid::size(int level,GeometryType type) const */
     int size (int level, GeometryType type) const
     {
-      const int codim = GridType ::dimension - type.dim();
+      int codim = GridType ::dimension - type.dim();
       if( levelSizes_[codim][level] < 0)
-        ForLoop< CountLevelEntities, 0, dim > :: apply( *this, level, codim );
+        Hybrid::forEach( Std::make_index_sequence< dim+1 >{}, [ & ]( auto i ){ CountLevelEntities< i >::apply( *this, level, codim ); } );
 
       assert( levelTypeSizes_[codim][level][gtIndex( type )] >= 0 );
       return levelTypeSizes_[codim][level][gtIndex( type )];
@@ -204,7 +205,7 @@ namespace Dune {
       assert( codim >= 0 );
       assert( codim < nCodim );
       if( leafSizes_[codim] < 0 )
-        ForLoop< CountLeafEntities, 0, dim > :: apply( *this, codim );
+        Hybrid::forEach( Std::make_index_sequence< dim+1 >{}, [ & ]( auto i ){ CountLeafEntities< i >::apply( *this, codim ); } );
 
       assert( leafSizes_[codim] >= 0 );
       return leafSizes_[codim];
@@ -213,9 +214,9 @@ namespace Dune {
     /** \copydoc Dune::Grid::size(GeometryType type) const */
     int size ( const GeometryType type ) const
     {
-      const int codim = GridType :: dimension - type.dim();
+      int codim = GridType :: dimension - type.dim();
       if( leafSizes_[codim] < 0 )
-        ForLoop< CountLeafEntities, 0, dim > :: apply( *this, codim );
+        Hybrid::forEach( Std::make_index_sequence< dim+1 >{}, [ & ]( auto i ){ CountLeafEntities< i >::apply( *this, codim ); } );
 
       assert( leafTypeSizes_[codim][ gtIndex( type )] >= 0 );
       return leafTypeSizes_[codim][ gtIndex( type )];

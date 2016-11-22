@@ -6,7 +6,8 @@
 
 #include <limits>
 
-#include <dune/common/forloop.hh>
+#include <dune/common/hybridutilities.hh>
+#include <dune/common/std/utility.hh>
 #include <dune/common/typetraits.hh>
 
 #include <dune/geometry/test/checkgeometry.hh>
@@ -33,8 +34,7 @@ namespace Dune
 
     // check that corners are within the reference element of the given type
     assert( type.dim() == cdim );
-    const ReferenceElement< typename Grid::ctype, cdim > &refElement
-      = ReferenceElements< typename Grid::ctype, cdim >::general( type );
+    const auto& refElement = ReferenceElements< typename Grid::ctype, cdim >::general( type );
 
     const int numCorners = geometry.corners();
     for( int i = 0; i < numCorners; ++i )
@@ -68,10 +68,8 @@ namespace Dune
       {
         for (unsigned int i=0; i<entity.subEntities(codim); ++i)
           {
-            typedef typename Entity::template Codim< codim >::Entity SubE;
-            const SubE subEn = entity.template subEntity<codim>(i);
-
-            typename SubE::Geometry subGeo = subEn.geometry();
+            const auto subEn = entity.template subEntity<codim>(i);
+            auto subGeo = subEn.geometry();
 
             if( subEn.type() != subGeo.type() )
               std::cerr << "Error: Entity and geometry report different geometry types on codimension " << codim << "." << std::endl;
@@ -87,16 +85,14 @@ namespace Dune
   template<typename GV>
   void checkGeometryLifetime (const GV &gridView)
   {
-    typedef typename GV::template Codim<0>::Iterator Iterator;
-    typedef typename GV::template Codim<0>::Geometry Geometry;
     typedef typename GV::ctype ctype;
     enum { dim  = GV::dimension };
     enum { dimw = GV::dimensionworld };
 
     const FieldVector<ctype, dim> pos(0.2);
 
-    Iterator it = gridView.template begin<0>();
-    const Iterator end = gridView.template end<0>();
+    auto it = gridView.template begin<0>();
+    const auto end = gridView.template end<0>();
 
     // check that it != end otherwise the following is not valid
     if( it == end ) return ;
@@ -105,7 +101,7 @@ namespace Dune
     const FieldVector<ctype, dimw> glob = it->geometry().global(pos);
     #endif
 
-    const Geometry geomCopy = it->geometry();
+    const auto geomCopy = it->geometry();
     checkGeometry ( geomCopy );
 
     for( ; it != end; ++it )
@@ -119,7 +115,6 @@ namespace Dune
   template<class Grid>
   struct GeometryChecker
   {
-
     template<int codim>
     using SubEntityGeometryChecker =
       typename CheckSubEntityGeometry<Grid>::template Operation<codim>;
@@ -127,16 +122,10 @@ namespace Dune
     template< class VT >
     void checkGeometry ( const GridView< VT > &gridView )
     {
-      typedef typename GridView< VT >::template Codim<0>::Iterator Iterator;
-
-      const Iterator end = gridView.template end<0>();
-      Iterator it = gridView.template begin<0>();
-
+      const auto end = gridView.template end<0>();
+      auto it = gridView.template begin<0>();
       for( ; it != end; ++it )
-        {
-          ForLoop<SubEntityGeometryChecker,0,GridView<VT>::dimension>
-            ::apply(*it);
-        }
+        Hybrid::forEach(Std::make_index_sequence<GridView<VT>::dimension+1>{},[&](auto i){SubEntityGeometryChecker<i>::apply(*it);});
     }
   };
 

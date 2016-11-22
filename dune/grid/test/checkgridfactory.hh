@@ -72,7 +72,6 @@ namespace Dune
       for( const auto &intersection : intersections( grid.leafGridView(), entity ) )
         if( factory.wasInserted( intersection ) )
         {
-          auto geometry = intersection.geometry();
           std::vector< unsigned int > vertices;
           const int numSubEntitites = refelement.size( intersection.indexInInside(), 1, Grid::dimension );
           for( int i = 0; i < numSubEntitites; ++i )
