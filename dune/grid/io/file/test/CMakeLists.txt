@@ -13,11 +13,12 @@ dune_add_test(SOURCES nonconformboundaryvtktest.cc)
 dune_add_test(SOURCES printgridtest.cc)
 
 dune_add_test(NAME subsamplingvtktest
-              SOURCES subsamplingvtktest.cc test-linking.cc)
+              SOURCES subsamplingvtktest.cc test-linking.cc
+              TIMEOUT 600)
 
 dune_add_test(SOURCES vtktest.cc
               MPI_RANKS 1 2
-              TIMEOUT 600)
+              TIMEOUT 1200)
 
 dune_add_test(SOURCES vtksequencetest.cc)
 
