@@ -12,6 +12,7 @@
 #include <dune/geometry/referenceelements.hh>
 
 #include <dune/grid/common/gridenums.hh>
+#include <dune/grid/uggrid/uggridrenumberer.hh>
 
 
 namespace Dune {
@@ -560,7 +561,7 @@ namespace Dune {
       std::vector<FieldVector<UGCtype, dim> > geometryCoords(numCorners);
       for(size_t i = 0; i < numCorners; i++)
         for (size_t j = 0; j < dim; j++)
-            geometryCoords[i][j] = cornerCoords[i][j];
+            geometryCoords[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, type())][j] = cornerCoords[i][j];
 
       geo_ = std::make_shared<GeometryImpl>(type(), geometryCoords);
 
