@@ -336,7 +336,7 @@ namespace Dune {
       std::vector<FieldVector<UGCtype, dim> > geometryCoords(2);
       for(size_t i = 0; i < 2; i++)
         for (size_t j = 0; j < dim; j++)
-            geometryCoords[i][j] = cornerCoords[i][j];
+            geometryCoords[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, type())][j] = cornerCoords[i][j];
 
       geo_ = std::make_shared<GeometryImpl>(type(), geometryCoords);
 
