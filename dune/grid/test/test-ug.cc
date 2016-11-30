@@ -6,6 +6,7 @@
 #include <iostream>
 #include <memory>
 
+#include <dune/common/float_cmp.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
 /*
@@ -167,6 +168,37 @@ void generalTests(bool greenClosure)
 
   std::unique_ptr<Dune::UGGrid<2> > grid2d(make2DHybridTestGrid<Dune::UGGrid<2> >());
   std::unique_ptr<Dune::UGGrid<3> > grid3d(make3DHybridTestGrid<Dune::UGGrid<3> >());
+
+  // check if the face ({0,0,0},{0.25,0,0},{0,0.25,0},{0.25.0.25,0}) of the first hexahedron (see hybridtestgrids.hh, line 295)
+  // is present and the corners are in the right order. As the face is on the boundary, it should be the subEntity of exactly one
+  // element of the grid.
+  size_t found = 0;
+  for (const auto& entity : Dune::elements(grid3d->leafGridView())) {
+    for (size_t i = 0; i < entity.subEntities(1); ++i) {
+      const auto& subEntity = entity.template subEntity<1>(i);
+      if (subEntity.type() == GeometryType(GeometryType::cube,2)) {
+        const auto& subGeom = subEntity.geometry();
+        if (   Dune::FloatCmp::eq(subGeom.corner(0), Dune::FieldVector<double, 3>({0,0,0}))
+               && Dune::FloatCmp::eq(subGeom.corner(1), Dune::FieldVector<double, 3>({0,0.25,0}))
+               && Dune::FloatCmp::eq(subGeom.corner(2), Dune::FieldVector<double, 3>({0.25,0,0}))
+               && Dune::FloatCmp::eq(subGeom.corner(3), Dune::FieldVector<double, 3>({0.25,0.25,0})))
+          ++found;
+        if (   Dune::FloatCmp::eq(subGeom.corner(0), Dune::FieldVector<double, 3>({0,0,0}))
+               && Dune::FloatCmp::eq(subGeom.corner(1), Dune::FieldVector<double, 3>({0,0.25,0}))) {
+          std::cout << "Corners are: " << std::endl;
+          std::cout << subGeom.corner(0) << " and " << subGeom.corner(1) << " and " << subGeom.corner(2) << " and " << subGeom.corner(3) << std::endl;
+          if (!found) {
+          std::cout << "Should be " << std::endl;
+          std::cout << Dune::FieldVector<double, 3>({0,0,0})
+              << " and " << Dune::FieldVector<double, 3>({0,0.25,0})
+              << " and " << Dune::FieldVector<double, 3>({0.25,0,0})
+              << " and " << Dune::FieldVector<double, 3>({0.25,0.25,0}) << std::endl;
+          }
+        }
+      }
+    }
+  }
+  assert(found == 1);
 
   // Switch of the green closure, if requested
   if (!greenClosure) {
