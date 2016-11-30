@@ -14,6 +14,7 @@
 #include <cstdlib>
 
 #include <dune/common/exceptions.hh>
+#include <dune/common/float_cmp.hh>
 #include <dune/common/stdstreams.hh>
 #include <dune/geometry/referenceelements.hh>
 #include <dune/grid/common/gridinfo.hh>
@@ -876,6 +877,56 @@ void checkBoundarySegmentIndex ( const GridView &gridView )
 }
 
 
+// Test whether the local-to-global map for codim 1 subentities is a bijective
+// mapping from the reference element onto the global element.
+// This is hard to test in general, but for elements that lie in an axis-parallel plane
+// we can just ignore one coordinate and check whether the determinant of the
+// Jacobian with respect to the other two coordinates is non-zero everywhere. As we
+// can't actually check "everywhere", test whether the determinant changes sign between
+// different quadrature points. As the determinant should be continuous, a sign flip
+// implies that the determinant is zero at some point.
+template <class Grid>
+typename std::enable_if<Grid::dimension == 3, void>::type checkCodim1Mapping(const Grid &g)
+{
+  for (const auto& entity : Dune::elements(g.leafGridView())) {
+    for (unsigned int index = 0; index < entity.subEntities(1); ++index) {
+      const auto& subEntity = entity.template subEntity<1>(index);
+      const auto& subGeom = subEntity.geometry();
+      const auto numCorners = subGeom.corners();
+      std::bitset<3> equalCoords("111");
+      const auto& firstCornerCoords = subGeom.corner(0);
+      for (int c = 1; c < numCorners; ++c)
+        for (size_t i = 0; i < 3; ++i)
+          equalCoords[i] = equalCoords[i] && Dune::FloatCmp::eq(subGeom.corner(c)[i],
+                                                                firstCornerCoords[i]);
+      if (equalCoords.count() == 1) {
+        size_t detPositive(0), detNegative(0), detZero(0), size(0);
+        for (const auto& ip : Dune::QuadratureRules<double,2>::rule(subEntity.type(),2)) {
+          ++size;
+          const auto& full_jacT = subEntity.geometry().jacobianTransposed(ip.position());
+          Dune::FieldMatrix<double,2,2> jacT(0);
+          size_t k = 0;
+          for (size_t j = 0; j < 3; ++j) {
+            if (!equalCoords[j]) {
+              for (size_t i = 0; i < 2; ++i)
+                jacT[i][k] += full_jacT[i][j];
+              ++k;
+            }
+          }
+          const auto det = jacT.determinant();
+          det > 0 ? ++detPositive : (det < 0 ? ++detNegative : ++detZero);
+        }
+        assert(detZero == 0 && "Mapping has to be invertible");
+        assert((detPositive == size || detNegative == size) && "Mapping has to be invertible!");
+      }
+    }
+  }
+}
+
+template<class Grid>
+typename std::enable_if<Grid::dimension != 3, void>::type checkCodim1Mapping(const Grid &/*g*/)
+{}
+
 template <class Grid>
 void gridcheck (Grid &g)
 {
@@ -935,6 +986,7 @@ void gridcheck (Grid &g)
   assertNeighbor(cg);
   checkFatherLevel(g);
   checkFatherLevel(cg);
+  checkCodim1Mapping(g);
 
   // check geometries of macro level and leaf level
   Dune::GeometryChecker<Grid> checker;

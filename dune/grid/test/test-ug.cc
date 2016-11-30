@@ -6,7 +6,6 @@
 #include <iostream>
 #include <memory>
 
-#include <dune/common/float_cmp.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
 /*
@@ -168,46 +167,6 @@ void generalTests(bool greenClosure)
 
   std::unique_ptr<Dune::UGGrid<2> > grid2d(make2DHybridTestGrid<Dune::UGGrid<2> >());
   std::unique_ptr<Dune::UGGrid<3> > grid3d(make3DHybridTestGrid<Dune::UGGrid<3> >());
-
-  // Test whether the local-to-global map for codim 1 subentities is a bijective
-  // mapping from the reference element onto the global element.
-  // This is hard to test in general, but for elements that lie in the x-y-plane
-  // we can just ignore the last coordinate and check whether the determinant of the
-  // Jacobian with respect to the first two coordinates is non-zero everywhere. As we
-  // can't actually check "everywhere", test whether the determinant changes sign between
-  // different quadrature points. As the determinant should be continuous, a sign flip
-  // implies that the determinant is zero at some point.
-  for (const auto& entity : Dune::elements(grid3d->leafGridView())) {
-    for (unsigned int index = 0; index < entity.subEntities(1); ++index) {
-      const auto& subEntity = entity.template subEntity<1>(index);
-      const auto& subGeom = subEntity.geometry();
-      const auto numCorners = subGeom.corners();
-      bool inXYPlane = true;
-      for (int c = 0; c < numCorners; ++c) {
-        if (!Dune::FloatCmp::eq(subGeom.corner(c)[2], 0.)) {
-          inXYPlane = false;
-          break;
-        }
-      }
-      if (inXYPlane) {
-        size_t detPositive(0), detNegative(0), detZero(0), size(0);
-
-        for (const auto& ip : QuadratureRules<double,2>::rule(subEntity.type(),2)) {
-          ++size;
-          const auto& full_jacT = subEntity.geometry().jacobianTransposed(ip.position());
-          Dune::FieldMatrix<double,2,2> jacT(0);
-
-          for (size_t i = 0; i < 2; ++i)
-            for (size_t j = 0; j < 2; ++j)
-              jacT[i][j] += full_jacT[i][j];
-          const auto det = jacT.determinant();
-          det > 0 ? ++detPositive : (det < 0 ? ++detNegative : ++detZero);
-        }
-        assert(detZero == 0 && "Mapping has to be invertible");
-        assert((detPositive == size || detNegative == size) && "Determinant must not flip sign!");
-      }
-    }
-  }
 
   // Switch of the green closure, if requested
   if (!greenClosure) {
