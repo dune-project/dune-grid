@@ -888,7 +888,9 @@ void checkBoundarySegmentIndex ( const GridView &gridView )
 template <class Grid>
 typename std::enable_if<Grid::dimension == 3, void>::type checkCodim1Mapping(const Grid &g)
 {
-  for (const auto& entity : Dune::elements(g.leafGridView())) {
+  bool error = false;
+  const auto& gv = g.leafGridView();
+  for (const auto& entity : Dune::elements(gv)) {
     for (unsigned int index = 0; index < entity.subEntities(1); ++index) {
       const auto& subEntity = entity.template subEntity<1>(index);
       const auto& subGeom = subEntity.geometry();
@@ -916,10 +918,24 @@ typename std::enable_if<Grid::dimension == 3, void>::type checkCodim1Mapping(con
           const auto det = jacT.determinant();
           det > 0 ? ++detPositive : (det < 0 ? ++detNegative : ++detZero);
         }
-        assert(detZero == 0 && "Mapping has to be invertible");
-        assert((detPositive == size || detNegative == size) && "Mapping has to be invertible!");
+        if (!(detPositive == size || detNegative == size))
+        {
+          std::cerr << "Error: Local-to-global mapping for codim 1 subEntity "
+                    << index << " of element with index "
+                    << gv.indexSet().index(entity) << " is not invertible!"
+                    << std::endl;
+          error = true;
+        }
       }
     }
+  }
+  if (error)
+  {
+    std::string msg("Error encountered during checkCodim1Mapping!.");
+    if( g.comm().size() > 1 )
+      std::cerr << msg << std::endl;
+    else
+      DUNE_THROW(Dune::Exception, msg );
   }
 }
 
