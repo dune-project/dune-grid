@@ -271,7 +271,7 @@ namespace Dune
     // get grid parameters
     dgf::YaspGridParameterBlock grdParam( gridin );
 
-    grid_ = new YaspGrid< dim >( lang, anz, per, grdParam.overlap(), comm );
+    grid_ = new YaspGrid< dim , EquidistantCoordinates<ctype, dim> >( lang, anz, per, grdParam.overlap(), comm );
 
     boundaryDomainBlock_ = new dgf::BoundaryDomBlock( gridin, dimension );
   }
