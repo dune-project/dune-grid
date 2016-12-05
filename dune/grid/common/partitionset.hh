@@ -79,6 +79,45 @@ namespace Dune {
         : public std::integral_constant<PartitionIteratorType,Ghost_Partition>
     {};
 
+
+    // Simple TMP to deduce set of partitions from partition iterator type.
+
+    template<PartitionIteratorType pitype>
+    struct derive_partition_set;
+
+
+    // specializations of derive_partition_set for existing PartitionIteratorTypes
+
+    template<>
+    struct derive_partition_set<Interior_Partition>
+      : std::integral_constant<unsigned int, (1 << InteriorEntity)>
+    {};
+
+    template<>
+    struct derive_partition_set<InteriorBorder_Partition>
+      : std::integral_constant<unsigned int, (1 << InteriorEntity) | (1 << BorderEntity)>
+    {};
+
+    template<>
+    struct derive_partition_set<Overlap_Partition>
+      : std::integral_constant<unsigned int, (1 << InteriorEntity) | (1 << BorderEntity) | (1 << OverlapEntity)>
+    {};
+
+    template<>
+    struct derive_partition_set<OverlapFront_Partition>
+      : std::integral_constant<unsigned int, (1 << InteriorEntity) | (1 << BorderEntity) | (1 << OverlapEntity) | (1 << FrontEntity)>
+    {};
+
+    template<>
+    struct derive_partition_set<Ghost_Partition>
+      : std::integral_constant<unsigned int, (1 << GhostEntity)>
+    {};
+
+    template<>
+    struct derive_partition_set<All_Partition>
+      : std::integral_constant<unsigned int, (1 << InteriorEntity) | (1 << BorderEntity) | (1 << OverlapEntity) | (1 << FrontEntity) | (1 << GhostEntity)>
+    {};
+
   } // anonymous namespace
 
 
@@ -180,6 +219,16 @@ namespace Dune {
   PartitionSet<(1 << p)> partitionSet()
   {
     return PartitionSet<(1 << p)>();
+  }
+
+  /**
+   * \brief creates a PartitionSet for the given PartitionIteratorType
+   * \related PartitionSet
+   */
+  template<PartitionIteratorType pitype>
+  constexpr PartitionSet<derive_partition_set<pitype>::value> partitionSet()
+  {
+    return PartitionSet<derive_partition_set<pitype>::value>();
   }
 
   //! Predefined PartitionSets for commonly used combinations of parallel grid PartitionTypes.
