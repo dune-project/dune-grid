@@ -63,6 +63,22 @@ namespace Dune
           > capVar;
         check(capVar,entity);
       }
+      template<class Geometry>
+      static void checkGeometryStatic(const Geometry& geometry)
+      {
+        std::integral_constant<
+          bool, Dune::Capabilities::hasGeometry<GI,codim>::v
+          > capVar;
+        checkGeometry(capVar, geometry);
+      }
+      template<class Geometry>
+      static void checkGeometry(const std::true_type&,const Geometry& geometry)
+      {
+        Dune::checkGeometry(geometry);
+      }
+      template<class Geometry>
+      static void checkGeometry(const std::false_type&,const Geometry& geometry)
+      {}
       template <class Entity>
       static void check(const std::true_type&, const Entity &entity)
       {
@@ -73,7 +89,36 @@ namespace Dune
 
             if( subEn.type() != subGeo.type() )
               std::cerr << "Error: Entity and geometry report different geometry types on codimension " << codim << "." << std::endl;
-            checkGeometry(subGeo);
+
+            // Move from dynamic codim to static codim to
+            // prevent checking non-existing geometries
+            switch(codim+1)
+              {
+              case 0:
+                {
+                  Operation<0> geometryChecker;
+                  geometryChecker.checkGeometryStatic(subGeo);
+                  break;
+                }
+              case 1:
+                {
+                  Operation<1> geometryChecker;
+                  geometryChecker.checkGeometryStatic(subGeo);
+                  break;
+                }
+              case 2:
+                {
+                  Operation<2> geometryChecker;
+                  geometryChecker.checkGeometryStatic(subGeo);
+                  break;
+                }
+              case 3:
+                {
+                  Operation<3> geometryChecker;
+                  geometryChecker.checkGeometryStatic(subGeo);
+                  break;
+                }
+              }
           }
       }
       template <class Entity>

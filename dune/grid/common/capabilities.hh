@@ -57,6 +57,16 @@ namespace Dune
       static const bool v = false;
     };
 
+    /** \brief Specialize with 'false' for all codims that a grid does not
+      implement geometries for. (default=true)
+        \ingroup GICapabilities
+     */
+    template<class Grid, int codim>
+    struct hasGeometry
+    {
+      static const bool v = true;
+    };
+
     /** \brief specialize with 'true' for all codims that a grid can communicate data on (default=false)
      *
      *  \note Being able to communicate data on a codimension implies that the
