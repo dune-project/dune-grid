@@ -1,56 +1,58 @@
 Copyright holders:
 
-2015          Marco Agnese
+2015--2016    Marco Agnese
 2003--2012    Peter Bastian
 2013          Timo Betcke
-2004--2015    Markus Blatt
-2012--2015    Ansgar Burchardt
+2004--2016    Markus Blatt
 2013          Andreas Buhr
-2015          Andreas Nüßing
+2012--2016    Ansgar Burchardt
 2004--2005    Adrian Burri
 2013          Benjamin Bykowski
-2006--2014    Andreas Dedner
+2006--2015    Andreas Dedner
 2010          Martin Drohmann
 2003          Marc Droske
-2003--2015    Christian Engwer
-2004--2015    Jorrit Fahlke
-2007--2015    Bernd Flemisch
-2006--2015    Christoph Gersbacher
-2005--2015    Carsten Gräser
-2015          Felix Gruber
-2012--2015    Christoph Grüninger
+2003--2016    Christian Engwer
+2004--2016    Jorrit Fahlke
+2007--2016    Bernd Flemisch
+2006--2016    Christoph Gersbacher
+2005--2016    Carsten Gräser
+2015--2016    Felix Gruber
+2012--2016    Christoph Grüninger
 2006          Bernhard Haasdonk
+2016          René Heß
 2013          Sven Kaulmann
-2013--2015    Dominic Kempf
+2013--2016    Dominic Kempf
 2010--2015    Ole Klein
 2015          Angela Klewinghaus
-2003--2015    Robert Klöfkorn
+2003--2016    Robert Klöfkorn
+2005--2007    Sreejith Pulloor Kuttanikkad
 2009--2013    Andreas Lauser
-2012--2015    Tobias Malkmus
+2012--2016    Tobias Malkmus
 2007--2009    Sven Marnach
 2013          René Milk
 2012          Eike Müller
 2011          Thomas Müller
-2010--2015    Steffen Müthing
+2010--2016    Steffen Müthing
 2003--2005    Thimo Neubauer
 2011          Adrian Ngo
-2008--2015    Martin Nolte
+2008--2016    Martin Nolte
+2015          Andreas Nüßing
 2004--2006    Mario Ohlberger
 2014--2015    Marian Piatkowski
-2009--2014    Elias Pipping
+2009--2016    Elias Pipping
 2010          Dan Popovic
-2005--2007    Sreejith Pulloor Kuttanikkad
 2009          Atgeirr Flø Rassmussen
 2009          Uli Sack
-2003--2015    Oliver Sander
+2003--2016    Oliver Sander
 2011--2012    Alexander Schlaich
 2004          Roland Schulz
 2012--2013    Nicolas Schwenck
-2015          Linus Seelinger
+2015--2016    Linus Seelinger
+2016          Michaël Sghaïer
 2008          Nina Shokina
 2010          Bård Skaflestad
-2009--2014    Jonathan Youett
 2012          Markus Wolf
+2009--2016    Jonathan Youett
 
 The DUNE library and headers are licensed under version 2 of the GNU
 General Public License (see below), with a special exception for
