@@ -1,5 +1,5 @@
 Module: dune-grid
-Version: 2.5.0
+Version: 2.5.1-git
 Maintainer: dune-devel@dune-project.org
 Depends: dune-geometry (>= 2.5.0)
 Suggests: dune-uggrid
