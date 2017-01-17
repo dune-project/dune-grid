@@ -117,7 +117,6 @@ namespace Dune
     MultipleCodimMultipleGeomTypeMapper (const GV& gridView_, const Layout<GV::dimension> layout)
       : gridView(gridView_),
         is(gridView.indexSet()),
-        offset(GlobalGeometryTypeIndex::size(GV::dimension)),
         layout(layout)
     {
       update();
@@ -129,8 +128,7 @@ namespace Dune
      */
     MultipleCodimMultipleGeomTypeMapper (const GV& gridView_)
       : gridView(gridView_),
-        is(gridView.indexSet()),
-        offset(GlobalGeometryTypeIndex::size(GV::dimension))
+        is(gridView.indexSet())
     {
       update();
     }
@@ -250,7 +248,7 @@ namespace Dune
     const GV gridView;
     const typename GV::IndexSet& is;
     // provide an array for the offsets
-    std::vector<int> offset;
+    std::array<int, GlobalGeometryTypeIndex::size(GV::dimension)> offset;
     mutable Layout<GV::dimension> layout;     // get layout object
   };
 
