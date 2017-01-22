@@ -130,7 +130,7 @@ namespace Dune
      * \return std::vector with one uint per All_Partition element.  For each Interior_Partition element, the entry is the
      *    number of the partition the element is assigned to.
      */
-    static std::vector<unsigned> repartition(const GridView& gv, const Dune::MPIHelper& mpihelper, real_type itr = 1000) {
+    static std::vector<unsigned> repartition(const GridView& gv, const Dune::MPIHelper& mpihelper, real_type& itr = 1000) {
 
       // Create global index map
       GlobalIndexSet<GridView> globalIndex(gv,0);
