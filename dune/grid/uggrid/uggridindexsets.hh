@@ -67,7 +67,11 @@ namespace Dune {
 
       // Returning values from within a lambda is tricky.  We therefore write the result of
       // the method into this variable, and return only once, at the end of the method.
-      unsigned int result;
+
+      // We need to initialize this with something, because the compiler warns otherwise.
+      // The initializer should never get out of this method, so let's use an insane
+      // value to make sure that we notice early if it does escape after all.
+      unsigned int result = std::numeric_limits<unsigned int>::max();
 
       // The following block is for 2d grids
       Hybrid::ifElse(Std::bool_constant<dim==2>(), [&](auto id)
@@ -285,7 +289,11 @@ namespace Dune {
 
       // Returning values from within a lambda is tricky.  We therefore write the result of
       // the method into this variable, and return only once, at the end of the method.
-      unsigned int result;
+
+      // We need to initialize this with something, because the compiler warns otherwise.
+      // The initializer should never get out of this method, so let's use an insane
+      // value to make sure that we notice early if it does escape after all.
+      unsigned int result = std::numeric_limits<unsigned int>::max();
 
       // The following block is for 2d grids
       Hybrid::ifElse(Std::bool_constant<dim==2>(), [&](auto id)
