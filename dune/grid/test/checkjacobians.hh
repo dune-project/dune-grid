@@ -94,7 +94,8 @@ namespace Dune
     {
       // field type
       typedef typename Jacobian::field_type field_type;
-      static_assert((Conversion< ctype, field_type >::isTwoWay),
+      static_assert(( std::is_convertible<ctype, field_type>::value &&
+                      std::is_convertible<field_type, ctype>::value ),
                     "Field type not compatible with geometry's coordinate type");
       // size type
       typedef typename Jacobian::size_type size_type;
