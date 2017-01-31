@@ -1858,5 +1858,7 @@ namespace Dune {
 
 // Include the specialization of the StructuredGridFactory class for YaspGrid
 #include <dune/grid/yaspgrid/structuredyaspgridfactory.hh>
+// Include the specialization of the BackupRestoreFacility class for YaspGrid
+#include <dune/grid/yaspgrid/backuprestore.hh>
 
 #endif
