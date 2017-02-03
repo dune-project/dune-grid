@@ -3,6 +3,8 @@
 #ifndef DUNE_GRID_TEST_TEST_YASPGRID_HH
 #define DUNE_GRID_TEST_TEST_YASPGRID_HH
 
+#include <memory>
+
 #include <dune/grid/yaspgrid.hh>
 
 #include <dune/grid/test/gridcheck.hh>
@@ -41,6 +43,28 @@ struct YaspFactory<dim, Dune::EquidistantCoordinates<double,dim> >
     int overlap = 1;
 
     auto grid = new Dune::YaspGrid<dim>(Len,s,p,overlap);
+    grid->refineOptions (keepPhysicalOverlap);
+    grid->globalRefine (refCount);
+    return grid;
+  }
+
+  static std::unique_ptr<Dune::YaspGrid<dim> > buildGridWithGenericConstructor(
+      bool keepPhysicalOverlap = true, int refCount = 0, bool periodic = false)
+  {
+    std::cout << " using equidistant coordinate container with generic constructor!" << std::endl << std::endl;
+
+    Dune::FieldVector<double,dim> len(1.0);
+    std::array<int,dim> s;
+    if (dim < 3)
+      std::fill(s.begin(), s.end(), 8);
+    else
+      std::fill(s.begin(), s.end(), 4);
+    std::bitset<dim> p(0);
+    p[0] = periodic;
+    int overlap = 1;
+
+    Dune::EquidistantCoordinates<double,dim> coordinates(len,s);
+    auto grid = std::make_unique<Dune::YaspGrid<dim> >(coordinates,p,overlap);
     grid->refineOptions (keepPhysicalOverlap);
     grid->globalRefine (refCount);
     return grid;
