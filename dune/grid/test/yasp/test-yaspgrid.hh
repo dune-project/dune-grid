@@ -4,6 +4,7 @@
 #define DUNE_GRID_TEST_TEST_YASPGRID_HH
 
 #include <string>
+#include <memory>
 
 #include <dune/grid/yaspgrid.hh>
 
