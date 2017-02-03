@@ -29,6 +29,8 @@ int main (int argc , char **argv) {
     check_yasp(testID + "tensor",
                YaspFactory<1,Dune::TensorProductCoordinates<double,1> >::buildGrid());
 
+    check_yasp(YaspFactory<1,Dune::EquidistantCoordinates<double,1> >::buildGridWithGenericConstructor().release());
+
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
     return 1;
