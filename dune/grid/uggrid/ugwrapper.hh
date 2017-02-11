@@ -1056,9 +1056,8 @@ namespace Dune {
       return UG_NAMESPACE ::CreateFormatCmd(argc, argv);
     }
 
-    static void* CreateDomain(const char* name, const double* midPoint, double radius,
-                              int segments, int corners, int convex) {
-      return UG_NAMESPACE ::CreateDomain(name, midPoint, radius, segments, corners, convex);
+    static void* CreateDomain(const char* name, int segments, int corners) {
+      return UG_NAMESPACE ::CreateDomain(name, segments, corners);
     }
 
     static void RemoveDomain(const char* name) {
