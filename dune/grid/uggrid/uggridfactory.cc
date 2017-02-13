@@ -327,7 +327,7 @@ createGrid()
     // We copy four vertices here even if the segment is a triangle -- it doesn't matter
     int vertices_c_style[dimworld*2-2];
     for (int j=0; j<dimworld*2-2; j++)
-      vertices_c_style[j] = boundarySegmentVertices_[i][j];
+      vertices_c_style[j] = isBoundaryNode[boundarySegmentVertices_[i][j]];
 
     if (grid_->boundarySegments_[i]) {
 
