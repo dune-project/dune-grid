@@ -175,6 +175,12 @@ function(add_dune_ug_flags)
       set(_prefix TARGET)
     endif()
 
+    if(ADD_UG_OBJECT)
+      set(_object OBJECT)
+    else()
+      set(_object)
+    endif()
+
     # Add compiler flags
     include_directories(${UG_INCLUDES})
     set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS}
@@ -203,7 +209,7 @@ function(add_dune_ug_flags)
         APPEND PROPERTY
         COMPILE_DEFINITIONS ModelP)
       # Add mpi flags.
-      add_dune_mpi_flags(${ADD_UG_UNPARSED_ARGUMENTS} ${_source_only})
+      add_dune_mpi_flags(${ADD_UG_UNPARSED_ARGUMENTS} ${_source_only} ${_object})
     endif()
   endif()
 endfunction(add_dune_ug_flags)
