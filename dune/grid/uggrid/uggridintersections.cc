@@ -577,7 +577,6 @@ int Dune::UGGridLeafIntersection<GridImp>::getFatherSide(const Face& currentFace
     }
 
     DUNE_THROW(InvalidStateException,"getFatherSide() didn't find a father.");
-    return 0;
 
   } else {    //  dim==3
 
