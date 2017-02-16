@@ -410,19 +410,21 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
 
     if (UG_NS<dim>::myLevel(theElement) < maxl) {
 
-      Get_Sons_of_ElementSide(theElement,
-                              side,         // Input element side number
-                              &Sons_of_Side,       // Number of topological sons of the element side
-                              SonList,            // Output elements
-                              SonSides,           // Output element side numbers
-                              true,
-                              true);
+      int rv = Get_Sons_of_ElementSide(theElement,
+                                       side,          // Input element side number
+                                       &Sons_of_Side, // Number of topological sons of the element side
+                                       SonList,       // Output elements
+                                       SonSides,      // Output element side numbers
+                                       true,
+                                       true);
+
+      if (rv != 0)
+        DUNE_THROW(GridError, "Get_Sons_of_ElementSide returned with error value " << rv);
 
       for (int i=0; i<Sons_of_Side; i++)
         list.emplace_back(SonList[i], SonSides[i]);
 
     }
-
   }
 
   // //////////////////////////////
