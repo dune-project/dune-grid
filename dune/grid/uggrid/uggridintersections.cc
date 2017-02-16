@@ -633,7 +633,7 @@ int Dune::UGGridLeafIntersection<GridImp>::getFatherSide(const Face& currentFace
   }
 
   // Should never happen
-  return -1;
+  DUNE_THROW(GridError, "Reached code path that should never be reached");
 }
 
 template< class GridImp>
