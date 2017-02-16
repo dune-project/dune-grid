@@ -10,7 +10,7 @@
 #include <dune/grid/uggrid.hh>
 
 /** \todo Remove the following two includes once getAllSubfaces... is gone */
-#include <forward_list>
+#include <list>
 #include <iterator>
 #include <dune/common/stdstreams.hh>
 #include <dune/grid/common/mcmgmapper.hh>
@@ -360,7 +360,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
 
   typedef std::pair<typename UG_NS<dim>::Element*,int> ListEntryType;
 
-  std::forward_list<ListEntryType> list;
+  std::list<ListEntryType> list;
 
   // //////////////////////////////////////////////////////////////////////
   //   Change the input face number from Dune numbering to UG numbering
@@ -391,7 +391,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
       DUNE_THROW(GridError, "Get_Sons_of_ElementSide returned with error value " << rv);
 
     for (int i=0; i<Sons_of_Side; i++)
-      list.push_front(ListEntryType(SonList[i],SonSides[i]));
+      list.emplace_back(SonList[i],SonSides[i]);
 
   }
 
@@ -419,7 +419,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
                               true);
 
       for (int i=0; i<Sons_of_Side; i++)
-        list.push_front(ListEntryType(SonList[i],SonSides[i]));
+        list.emplace_back(SonList[i], SonSides[i]);
 
     }
 
