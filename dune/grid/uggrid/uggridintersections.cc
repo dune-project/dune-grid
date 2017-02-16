@@ -734,14 +734,17 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
 
       if (!UG_NS<dim>::isLeaf(theElement)) {
 
-        Get_Sons_of_ElementSide(theElement,
-                                f.second,      // Input element side number
-                                &Sons_of_Side,     // Number of topological sons of the element side
-                                SonList,          // Output elements
-                                SonSides,         // Output element side numbers
-                                true,
-                                false,
-                                true);
+        int rv = Get_Sons_of_ElementSide(theElement,
+                                         f.second,      // Input element side number
+                                         &Sons_of_Side, // Number of topological sons of the element side
+                                         SonList,       // Output elements
+                                         SonSides,      // Output element side numbers
+                                         true,
+                                         false,
+                                         true);
+
+        if (rv!=0)
+          DUNE_THROW(GridError, "Get_Sons_of_ElementSide returned with error value " << rv);
 
         for (int i=0; i<Sons_of_Side; i++)
           list.emplace_back(SonList[i], SonSides[i]);
