@@ -697,26 +697,9 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
   else {
 
     std::list<Face> list;
-    int levelNeighborSide = numberInNeighbor(center_, levelNeighbor);
 
-    UG::INT Sons_of_Side = 0;
-    typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
-    UG::INT SonSides[UG_NS<dim>::MAX_SONS];
-
-    int rv = Get_Sons_of_ElementSide(levelNeighbor,
-                                     levelNeighborSide,
-                                     &Sons_of_Side,
-                                     SonList,      // the output elements
-                                     SonSides,     // Output element side numbers
-                                     true,        // Element sons are not precomputed
-                                     false,        // ioflag: Obsolete debugging flag
-                                     true);
-
-    if (rv!=0)
-      DUNE_THROW(GridError, "Get_Sons_of_ElementSide returned with error value " << rv);
-
-    for (int i=0; i<Sons_of_Side; i++)
-      list.emplace_back(SonList[i], SonSides[i]);
+    const int levelNeighborSide = numberInNeighbor(center_, levelNeighbor);
+    list.emplace_back(levelNeighbor, levelNeighborSide);
 
     // //////////////////////////////////////////////////
     //   Get_Sons_of_ElementSide only computes direct sons.  Therefore in order to get all
@@ -752,6 +735,11 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
       }
 
     }
+
+    // Remove the element itself.
+    // We are only interested in leaf elements and in this code branch
+    // the element we start with is never a leaf.
+    list.pop_front();
 
     // //////////////////////////////
     //   Extract result from stack
