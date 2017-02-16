@@ -41,6 +41,9 @@ dune_add_test(SOURCES test-parallel-ug.cc
 dune_add_test(SOURCES test-loadbalancing.cc
               CMAKE_GUARD UG_FOUND)
 
+dune_add_test(SOURCES issue-53-uggrid-intersections.cc
+              CMAKE_GUARD UG_FOUND)
+
 # The alberta tests are only alibi-ported, until the  grid and world dimension
 # are configuretime parameters and we can treat alberta just as any other grid manager
 # - buildsystemwise. PLEASE DON'T LOOK AT THIS IF YOU WANT TO KNOW HOW TO WRITE TESTS.
