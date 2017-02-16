@@ -5,8 +5,8 @@
 #include <dune/grid/uggrid.hh>
 #include <dune/grid/uggrid/uggridintersections.hh>
 
+#include <list>
 #include <set>
-#include <forward_list>
 
 template<class GridImp>
 const typename Dune::UGGridLevelIntersection<GridImp>::WorldVector&
@@ -696,7 +696,7 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
 
   else {
 
-    std::forward_list<Face> list;
+    std::list<Face> list;
     int levelNeighborSide = numberInNeighbor(center_, levelNeighbor);
 
     UG::INT Sons_of_Side = 0;
@@ -716,7 +716,7 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
       DUNE_THROW(GridError, "Get_Sons_of_ElementSide returned with error value " << rv);
 
     for (int i=0; i<Sons_of_Side; i++)
-      list.push_front(Face(SonList[i],SonSides[i]));
+      list.emplace_back(SonList[i], SonSides[i]);
 
     // //////////////////////////////////////////////////
     //   Get_Sons_of_ElementSide only computes direct sons.  Therefore in order to get all
@@ -744,7 +744,7 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
                                 true);
 
         for (int i=0; i<Sons_of_Side; i++)
-          list.push_front(Face(SonList[i],SonSides[i]));
+          list.emplace_back(SonList[i], SonSides[i]);
 
       }
 
