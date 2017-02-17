@@ -123,6 +123,43 @@ void test(const std::string& gridfile)
 
 }
 
+void testNestedGeometryGrid(const std::string& gridfile) {
+
+  using NestedGeometryGrid = Dune::GeometryGrid< GeometryGrid, Dune::IdenticalCoordFunction< Grid::ctype, Grid::dimensionworld > >;
+  using NestedGgLeafView = NestedGeometryGrid::LeafGridView;
+
+  Dune::GridPtr< NestedGeometryGrid > pgeogrid(gridfile);
+  NestedGeometryGrid &geogrid = *pgeogrid;
+  geogrid.globalRefine( 1 );
+
+  // creating different variables for storing grid views
+  NestedGgLeafView gv1 = geogrid.leafGridView();
+  std::shared_ptr<NestedGgLeafView> pgv2;
+  NestedGgLeafView gv3 = geogrid.leafGridView();
+
+  // use geometry grid views copy constructor and copy assignment operator
+  {
+    NestedGgLeafView tmpGv = geogrid.leafGridView();
+    // copying/assigning temporary grid view would be dangerous with default implementation of copy constructor or copy assignment operator from geomrtry grid view
+    pgv2 = std::make_shared<NestedGgLeafView> (tmpGv);
+    gv3 = tmpGv;
+  }
+  // The following test would now be guaranteed to fail with the default implementation of geometry grid views copy constructor
+  // assert(&(pgv2->indexSet().hostIndexSet()) == &(pgv2->impl().hostGridView().indexSet()))
+  // but this would not compile since the member functions impl() and hostIndexSet() are protected/private.
+  // So we do the following
+
+  // get index sets and do some arbitrary test to check whether they work correctly
+  auto const& is1 = gv1.indexSet();
+  auto const& is2 = pgv2->indexSet();
+  auto const& is3 = gv3.indexSet();
+  for(auto const& e : elements(gv1)) {
+    bool idxCorrect = (is1.index(e)==is2.index(e));
+    idxCorrect &= (is1.index(e)==is3.index(e));
+    assert(idxCorrect);
+  }
+}
+
 int main ( int argc, char **argv )
 try
 {
@@ -139,6 +176,10 @@ try
   watch.reset();
   test<GeometryGrid>(gridfile);
   std::cout << "=== GeometryGrid took " << watch.elapsed() << " seconds\n";
+
+  watch.reset();
+  testNestedGeometryGrid(gridfile);
+  std::cout << "=== NestedGeometryGrid took " << watch.elapsed() << " seconds\n";
 
   // compile, but do not actually call, because it is not working yet
   if (false)
