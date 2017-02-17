@@ -322,8 +322,10 @@ createGrid()
     // Copy the vertices into a C-style array
     // We copy four vertices here even if the segment is a triangle -- it doesn't matter
     int vertices_c_style[dimworld*2-2];
-    for (int j=0; j<dimworld*2-2; j++)
-      vertices_c_style[j] = isBoundaryNode[boundarySegmentVertices_[i][j]];
+    for (int j=0; j<dimworld*2-2; j++) {
+      const auto idx = boundarySegmentVertices_[i][j];
+      vertices_c_style[j] = idx == -1 ? -1 : isBoundaryNode[idx];
+    }
 
     if (grid_->boundarySegments_[i]) {
 
@@ -413,8 +415,10 @@ createGrid()
     // Copy the vertices into a C-style array
     int vertices_c_style[4];
 
-    for (int j=0; j<thisSegment.numVertices(); j++)
-      vertices_c_style[j] = isBoundaryNode[thisSegment[j]];
+    for (int j=0; j<thisSegment.numVertices(); j++) {
+      const auto idx = thisSegment[j];
+      vertices_c_style[j] = idx == -1 ? -1 : isBoundaryNode[idx];
+    }
 
     // Create some boundary segment name
     char segmentName[20];
