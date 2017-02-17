@@ -112,9 +112,34 @@ namespace Dune
       static const bool conforming = Traits::conforming;
 
       GridView ( const Grid &grid, const HostGridView &hostGridView )
-        : grid_( &grid ),
-          hostGridView_( hostGridView )
+        : grid_( &grid ), hostGridView_( hostGridView )
       {}
+
+      GridView ( const This &other )
+        : grid_( other.grid_ ), hostGridView_( other.hostGridView_ )
+      {}
+
+      GridView ( This &&other )
+        : grid_( other.grid_ ), hostGridView_( std::move( other.hostGridView_ ) )
+      {}
+
+      This &operator= ( const This &other )
+      {
+        grid_ = other.grid_;
+        hostGridView_ = other.hostGridView_;
+        if( indexSet_ )
+          indexSet_.reset( hostGridView().indexSet() );
+        return *this;
+      }
+
+      This &operator= ( This &&other )
+      {
+        grid_ = other.grid_;
+        hostGridView_ = std::move( other.hostGridView_ );
+        if( indexSet_ )
+          indexSet_.reset( hostGridView().indexSet() );
+        return *this;
+      }
 
       const Grid &grid () const
       {
@@ -124,8 +149,7 @@ namespace Dune
 
       const IndexSet &indexSet () const
       {
-        if( !indexSet_ )
-          indexSet_ = IndexSet( hostGridView().indexSet() );
+        indexSet_.reset( hostGridView().indexSet() );
         return indexSet_;
       }
 
