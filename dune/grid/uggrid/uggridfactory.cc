@@ -329,7 +329,7 @@ createGrid()
     for (int j=0; j<dimworld*2-2; j++) {
       // For parameterized boundary segments, -1 is used as a sentinel value
       // for unused vertices and must be preserved.
-      const auto idx = boundarySegmentVertices_[i][j];
+      const int idx = boundarySegmentVertices_[i][j];
       vertices_c_style[j] = idx == -1 ? -1 : isBoundaryNode[idx];
     }
 
