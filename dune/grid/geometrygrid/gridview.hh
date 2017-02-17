@@ -116,6 +116,18 @@ namespace Dune
           hostGridView_( hostGridView )
       {}
 
+      GridView( const This &other )
+        : grid_( other.grid_ ),
+          hostGridView_( other.hostGridView_ ),
+          indexSet_() // indexSet_ contains a pointer to host index set, so copying this can be dangerous in case we create GeometryGrid<GeometryGrid<...>,>
+      {}
+
+      This & operator=(This const& other) {
+        grid_ = other.grid_;
+        hostGridView_ = other.hostGridView_;
+        indexSet_ = IndexSet{}; // indexSet_ contains a pointer to host index set, so assigning it from other.indexSet_ can be dangerous in case we create GeometryGrid<GeometryGrid<...>,>
+      }
+
       const Grid &grid () const
       {
         assert( grid_ );
