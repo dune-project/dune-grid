@@ -10,7 +10,7 @@
 #include <dune/grid/uggrid.hh>
 
 /** \todo Remove the following two includes once getAllSubfaces... is gone */
-#include <forward_list>
+#include <list>
 #include <iterator>
 #include <dune/common/stdstreams.hh>
 #include <dune/grid/common/mcmgmapper.hh>
@@ -360,7 +360,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
 
   typedef std::pair<typename UG_NS<dim>::Element*,int> ListEntryType;
 
-  std::forward_list<ListEntryType> list;
+  std::list<ListEntryType> list;
 
   // //////////////////////////////////////////////////////////////////////
   //   Change the input face number from Dune numbering to UG numbering
@@ -375,23 +375,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
       && e.level() < maxl) {
 
     typename UG_NS<dim>::Element* theElement = this->getRealImplementation(e).target_;
-
-    UG::INT Sons_of_Side = 0;
-    typename UG_NS<dim>::Element* SonList[UG_NS<dim>::MAX_SONS];
-    UG::INT SonSides[UG_NS<dim>::MAX_SONS];
-
-    int rv = Get_Sons_of_ElementSide(theElement,
-                                     elementSide,
-                                     &Sons_of_Side,
-                                     SonList,          // the output elements
-                                     SonSides,         // Output element side numbers
-                                     true,            // Element sons are not precomputed
-                                     true);            // ioflag: I have no idea what this is supposed to do
-    if (rv!=0)
-      DUNE_THROW(GridError, "Get_Sons_of_ElementSide returned with error value " << rv);
-
-    for (int i=0; i<Sons_of_Side; i++)
-      list.push_front(ListEntryType(SonList[i],SonSides[i]));
+    list.emplace_back(theElement, elementSide);
 
   }
 
@@ -410,20 +394,25 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
 
     if (UG_NS<dim>::myLevel(theElement) < maxl) {
 
-      Get_Sons_of_ElementSide(theElement,
-                              side,         // Input element side number
-                              &Sons_of_Side,       // Number of topological sons of the element side
-                              SonList,            // Output elements
-                              SonSides,           // Output element side numbers
-                              true,
-                              true);
+      int rv = Get_Sons_of_ElementSide(theElement,
+                                       side,          // Input element side number
+                                       &Sons_of_Side, // Number of topological sons of the element side
+                                       SonList,       // Output elements
+                                       SonSides,      // Output element side numbers
+                                       true,
+                                       true);
+
+      if (rv != 0)
+        DUNE_THROW(GridError, "Get_Sons_of_ElementSide returned with error value " << rv);
 
       for (int i=0; i<Sons_of_Side; i++)
-        list.push_front(ListEntryType(SonList[i],SonSides[i]));
+        list.emplace_back(SonList[i], SonSides[i]);
 
     }
-
   }
+
+  // Remove the element itself. We are only interested in the children.
+  list.pop_front();
 
   // //////////////////////////////
   //   Extract result from stack
