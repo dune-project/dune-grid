@@ -326,8 +326,12 @@ createGrid()
     // Copy the vertices into a C-style array
     // We copy four vertices here even if the segment is a triangle -- it doesn't matter
     int vertices_c_style[dimworld*2-2];
-    for (int j=0; j<dimworld*2-2; j++)
-      vertices_c_style[j] = boundarySegmentVertices_[i][j];
+    for (int j=0; j<dimworld*2-2; j++) {
+      // For parameterized boundary segments, -1 is used as a sentinel value
+      // for unused vertices and must be preserved.
+      const auto idx = boundarySegmentVertices_[i][j];
+      vertices_c_style[j] = idx == -1 ? -1 : isBoundaryNode[idx];
+    }
 
     if (grid_->boundarySegments_[i]) {
 
