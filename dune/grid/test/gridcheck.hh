@@ -905,7 +905,7 @@ typename std::enable_if<Grid::dimension == 3, void>::type checkCodim1Mapping(con
         size_t detPositive(0), detNegative(0), detZero(0), size(0);
         for (const auto& ip : Dune::QuadratureRules<double,2>::rule(subEntity.type(),2)) {
           ++size;
-          const auto& full_jacT = subEntity.geometry().jacobianTransposed(ip.position());
+          const Dune::FieldMatrix< typename Grid::ctype, 2, 3 > full_jacT( subGeom.jacobianTransposed( ip.position() ) );
           Dune::FieldMatrix<double,2,2> jacT(0);
           size_t k = 0;
           for (size_t j = 0; j < 3; ++j) {
