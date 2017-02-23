@@ -1,13 +1,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 __metaclass__ = type
 
-import hashlib
 import sys
 import importlib
 from types import ModuleType
 
 import dune.common as common
 from ..generator.generator import SimpleGenerator
+from ..generator import hashIt
 
 from types import ModuleType
 
@@ -52,7 +52,7 @@ fileBase = "grid"
 def module(includes, typeName, constructors=None, methods=None):
     typeName = typeName + "::LeafGridView"
     includes = includes + ["dune/corepy/grid.hh"]
-    typeHash = fileBase + "_" + hashlib.md5(typeName.encode('utf-8')).hexdigest()
+    typeHash = fileBase + "_" + hashIt(typeName)
     module = generator.load(includes, typeName, typeHash, constructors, methods)
     addAttr(module, module.LeafGrid)
     return module
