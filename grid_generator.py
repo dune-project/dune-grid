@@ -7,7 +7,7 @@ from types import ModuleType
 
 import dune.common as common
 from ..generator.generator import SimpleGenerator
-from ..generator import hashIt
+from dune.common.hashit import hashIt
 
 from types import ModuleType
 
