@@ -98,7 +98,6 @@ namespace Dune {
       return Entity(_outside);
     }
 
-#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
     //! identifier for boundary segment from macro grid
     //! (attach your boundary condition as needed)
     int boundaryId() const
@@ -106,7 +105,6 @@ namespace Dune {
       if(boundary()) return indexInInside()+1;
       return 0;
     }
-#endif
 
     //! identifier for boundary segment from macro grid
     //! (attach your boundary condition as needed)

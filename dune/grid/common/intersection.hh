@@ -160,17 +160,8 @@ namespace Dune
   template< class GridImp, class IntersectionImp >
   class Intersection
   {
-#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
   public:
-#else
-  protected:
-    // give the GridDefaultImplementation class access to the realImp
-    friend class GridDefaultImplementation<
-        GridImp::dimension, GridImp::dimensionworld,
-        typename GridImp::ctype,
-        typename GridImp::GridFamily> ;
-#endif
-    // type of underlying implementation, for internal use only
+    //! type of underlying implementation
     typedef IntersectionImp Implementation;
 
     //! return reference to the real implementation
@@ -224,7 +215,6 @@ namespace Dune
       return this->real.boundary();
     }
 
-#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
     /**
        \brief Identifier for boundary segment from macro grid.
 
@@ -244,7 +234,6 @@ namespace Dune
     {
       return this->real.boundaryId();
     }
-#endif
 
     /** \brief index of the boundary segment within the macro grid
      *
