@@ -79,22 +79,26 @@ namespace Dune
   template< class GridImp, class IntersectionIteratorImp, class IntersectionImp >
   class IntersectionIterator
   {
-#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
   public:
-#else
-  protected:
-    // give the GridDefaultImplementation class access to the realImp
-    friend class GridDefaultImplementation<
-        GridImp::dimension, GridImp::dimensionworld,
-        typename GridImp::ctype,
-        typename GridImp::GridFamily> ;
-#endif
-    // type of underlying implementation, for internal use only
+    /**
+     * \brief type of underlying implementation
+     *
+     * \warning Implementation details may change without prior notification.
+     **/
     typedef IntersectionIteratorImp Implementation;
 
-    //! return reference to the real implementation
+    /**
+     * \brief access to the underlying implementation
+     *
+     * \warning Implementation details may change without prior notification.
+     **/
     Implementation &impl () { return realIterator; }
-    //! return reference to the real implementation
+
+    /**
+     * \brief access to the underlying implementation
+     *
+     * \warning Implementation details may change without prior notification.
+     **/
     const Implementation &impl () const { return realIterator; }
 
   protected:

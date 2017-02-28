@@ -62,26 +62,25 @@ namespace Dune
   template<int cd, int dim, class GridImp, template<int,int,class> class EntityImp>
   class Entity
   {
-#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
   public:
-#else
-  protected:
-    // give the GridDefaultImplementation class access to the realImp
-    friend class GridDefaultImplementation<
-        GridImp::dimension, GridImp::dimensionworld,
-        typename GridImp::ctype,
-        typename GridImp::GridFamily> ;
-
-    // Default*GridView classes need access to intersection iterators
-    template< class > friend class DefaultLevelGridView;
-    template< class > friend class DefaultLeafGridView;
-#endif
-    // type of underlying implementation, for internal use only
+    /**
+     * \brief type of underlying implementation
+     *
+     * \warning Implementation details may change without prior notification.
+     **/
     typedef EntityImp< cd, dim, GridImp > Implementation;
 
-    //! Return reference to the real implementation
+    /**
+     * \brief access to the underlying implementation
+     *
+     * \warning Implementation details may change without prior notification.
+     **/
     Implementation &impl () { return realEntity; }
-    //! Return const reference to the real implementation
+    /**
+     * \brief access to the underlying implementation
+     *
+     * \warning Implementation details may change without prior notification.
+     **/
     const Implementation &impl () const { return realEntity; }
 
   protected:
@@ -242,21 +241,13 @@ namespace Dune
   template<int dim, class GridImp, template<int,int,class> class EntityImp>
   class Entity <0,dim,GridImp,EntityImp>
   {
-#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
   public:
-#else
-  protected:
-    // give the GridDefaultImplementation class access to the realImp
-    friend class GridDefaultImplementation<
-        GridImp::dimension, GridImp::dimensionworld,
-        typename GridImp::ctype,
-        typename GridImp::GridFamily> ;
-
-    // Default*GridView classes need access to intersection iterators
-    template< class > friend class DefaultLevelGridView;
-    template< class > friend class DefaultLeafGridView;
-#endif
-    // type of underlying implementation, for internal use only
+    /**
+     * \brief Type of underlying implementation
+     *
+     * \note This code may change without prior warning
+     *
+     **/
     typedef EntityImp< 0, dim, GridImp > Implementation;
 
     //! Return reference to the real implementation
