@@ -64,23 +64,13 @@ namespace Dune
   template< int mydim, int cdim, class GridImp, template< int, int, class > class GeometryImp >
   class Geometry
   {
-  #if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
   public:
-  #else
-  protected:
-    // give the GridDefaultImplementation class access to the realImp
-    friend class GridDefaultImplementation<
-        GridImp::dimension, GridImp::dimensionworld,
-        typename GridImp::ctype,
-        typename GridImp::GridFamily> ;
-  #endif
-    // type of underlying implementation, for internal use only
+    //! type of underlying implementation
     typedef GeometryImp< mydim, cdim, GridImp > Implementation;
 
     //! return reference to the implementation
     const Implementation &impl () const { return realGeometry; }
 
-  public:
     //! @brief export geometry dimension
     enum { mydimension=mydim /*!< geometry dimension */ };
     //! @brief export coordinate dimension
