@@ -27,7 +27,12 @@ namespace Dune {
     //! codimension of underlying entity
     enum { codimension = EntitySeedImp::codimension };
 
-    //! Export the implementation type
+    /**
+     * \brief Type of underlying implementation
+     *
+     * \note This code may change without prior warning
+     *
+     **/
     typedef EntitySeedImp Implementation;
 
     /** \brief Construct an empty (i.e. isValid() == false) seed */
@@ -45,23 +50,23 @@ namespace Dune {
       return implementation_.isValid();
     }
 
-#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
-  public:
-#else
-  protected:
-    // give the GridDefaultImplementation class access to the impl
-    friend class GridDefaultImplementation<
-        GridImp::dimension, GridImp::dimensionworld,
-        typename GridImp::ctype,
-        typename GridImp::GridFamily> ;
-#endif
-
-    /** \brief Access to the actual implementation */
+    /**
+     * \brief Access to the underlying implementation
+     *
+     * \note This code may change without prior warning
+     *
+     **/
     Implementation& impl()
     {
       return implementation_;
     }
-    /** \brief const Access to the actual implementation */
+
+    /**
+     * \brief Access to the underlying implementation
+     *
+     * \note This code may change without prior warning
+     *
+     **/
     const Implementation& impl() const
     {
       return implementation_;
