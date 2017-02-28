@@ -45,17 +45,6 @@ namespace Dune {
       return implementation_.isValid();
     }
 
-#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
-  public:
-#else
-  protected:
-    // give the GridDefaultImplementation class access to the impl
-    friend class GridDefaultImplementation<
-        GridImp::dimension, GridImp::dimensionworld,
-        typename GridImp::ctype,
-        typename GridImp::GridFamily> ;
-#endif
-
     /** \brief Access to the actual implementation */
     Implementation& impl()
     {

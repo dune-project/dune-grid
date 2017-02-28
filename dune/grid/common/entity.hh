@@ -63,21 +63,8 @@ namespace Dune
   template<int cd, int dim, class GridImp, template<int,int,class> class EntityImp>
   class Entity
   {
-#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
   public:
-#else
-  protected:
-    // give the GridDefaultImplementation class access to the realImp
-    friend class GridDefaultImplementation<
-        GridImp::dimension, GridImp::dimensionworld,
-        typename GridImp::ctype,
-        typename GridImp::GridFamily> ;
-
-    // Default*GridView classes need access to intersection iterators
-    template< class > friend class DefaultLevelGridView;
-    template< class > friend class DefaultLeafGridView;
-#endif
-    // type of underlying implementation, for internal use only
+    //! type of underlying implementation
     typedef EntityImp< cd, dim, GridImp > Implementation;
 
     //! Return reference to the real implementation
@@ -249,21 +236,8 @@ namespace Dune
   template<int dim, class GridImp, template<int,int,class> class EntityImp>
   class Entity <0,dim,GridImp,EntityImp>
   {
-#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
   public:
-#else
-  protected:
-    // give the GridDefaultImplementation class access to the realImp
-    friend class GridDefaultImplementation<
-        GridImp::dimension, GridImp::dimensionworld,
-        typename GridImp::ctype,
-        typename GridImp::GridFamily> ;
-
-    // Default*GridView classes need access to intersection iterators
-    template< class > friend class DefaultLevelGridView;
-    template< class > friend class DefaultLeafGridView;
-#endif
-    // type of underlying implementation, for internal use only
+    //! type of underlying implementation
     typedef EntityImp< 0, dim, GridImp > Implementation;
 
     //! Return reference to the real implementation
