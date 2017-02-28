@@ -60,15 +60,10 @@ namespace Dune
   {
     typedef GridView< ViewTraits > ThisType;
 
-#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
   public:
-#else
-  protected:
-#endif
-    // type of underlying implementation, for internal use only
+    //! type of underlying implementation
     typedef typename ViewTraits :: GridViewImp Implementation;
 
-  public:
     typedef typename ViewTraits :: GridViewImp GridViewImp;
 
     /** \brief Traits class */
@@ -270,13 +265,6 @@ namespace Dune
       impl().communicate(data,iftype,dir);
     }
 
-#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
-  public:
-#else
-  protected:
-    // give the GridDefaultImplementation class access to the realImp
-    friend class GridDefaultImplementation< Grid::dimension, Grid::dimensionworld, typename Grid::ctype, typename Grid::GridFamily >;
-#endif
     //! return reference to the real implementation
     Implementation &impl () { return impl_; }
     //! return reference to the real implementation
