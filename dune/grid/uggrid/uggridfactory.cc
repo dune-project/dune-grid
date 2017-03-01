@@ -347,7 +347,6 @@ createGrid()
                                                  1,                        //  id of left subdomain
                                                  2,                        //  id of right subdomain
                                                  i,  // Index of the segment
-                                                 1,                 // Resolution, only for the UG graphics
                                                  vertices_c_style,
                                                  alpha,
                                                  beta,

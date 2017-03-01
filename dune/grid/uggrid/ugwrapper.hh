@@ -1069,7 +1069,7 @@ namespace Dune {
     }
 
     static void* CreateBoundarySegment(const char *name, int left, int right,
-                                       int index, int res,
+                                       int index,
                                        UG::INT *point,
                                        const double *alpha, const double *beta,
                                        UG_NAMESPACE ::BndSegFuncPtr boundarySegmentFunction,
@@ -1079,7 +1079,6 @@ namespace Dune {
                                                   right,             //  id of right subdomain
                                                   index,         // Index of the segment
                                                   UG_NAMESPACE ::NON_PERIODIC, // I don't know what this means
-                                                  res,             // Resolution, only for the UG graphics
                                                   point,
                                                   alpha,
                                                   beta,
