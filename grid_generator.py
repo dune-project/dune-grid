@@ -1,16 +1,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 __metaclass__ = type
 
-import sys
-import importlib
-from types import ModuleType
-
 import dune.common as common
 from ..generator.generator import SimpleGenerator
 from dune.common.hashit import hashIt
-
-from types import ModuleType
-
 
 def triangulation(grid, level=0):
     if grid.dimGrid != 2:
