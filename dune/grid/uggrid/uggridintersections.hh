@@ -136,8 +136,8 @@ namespace Dune {
     outerNormal (const FaceVector& local) const;
 
     //! return outer normal
-    const FieldVector<UGCtype, dimworld>&
-    integrationOuterNormal (const FieldVector<UGCtype, dim-1>& local) const
+    const WorldVector&
+    integrationOuterNormal (const FaceVector& local) const
     {
       integrationOuterNormal_ = outerNormal(local);
 
@@ -148,8 +148,8 @@ namespace Dune {
     }
 
     //! return outer normal
-    const FieldVector<UGCtype, GridImp::dimensionworld>&
-    unitOuterNormal (const FieldVector<UGCtype, dim-1>& local) const
+    const WorldVector&
+    unitOuterNormal (const FaceVector& local) const
     {
       unitOuterNormal_ = outerNormal(local);
       unitOuterNormal_ /= unitOuterNormal_.two_norm();
@@ -157,7 +157,7 @@ namespace Dune {
     }
 
     //! return outer normal
-    const FieldVector<UGCtype, GridImp::dimensionworld>&
+    const WorldVector&
     centerUnitOuterNormal () const
     {
       GeometryType type = geometry().type();
@@ -169,9 +169,9 @@ namespace Dune {
   private:
 
     //! vector storing the outer normal
-    mutable FieldVector<UGCtype, dimworld> outerNormal_;
-    mutable FieldVector<UGCtype, dimworld> integrationOuterNormal_;
-    mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
+    mutable WorldVector outerNormal_;
+    mutable WorldVector integrationOuterNormal_;
+    mutable WorldVector unitOuterNormal_;
 
     //! pointers holding the global and local geometries
     mutable std::shared_ptr<GeometryImpl>      geometry_;
@@ -365,8 +365,8 @@ namespace Dune {
     outerNormal (const FaceVector& local) const;
 
     //! return outer normal
-    const FieldVector<UGCtype, dimworld>&
-    integrationOuterNormal (const FieldVector<UGCtype, dim-1>& local) const
+    const WorldVector&
+    integrationOuterNormal (const FaceVector& local) const
     {
       integrationOuterNormal_ = outerNormal(local);
 
@@ -380,15 +380,15 @@ namespace Dune {
     }
 
     //! return outer normal
-    const FieldVector<UGCtype, dimworld>&
-    unitOuterNormal (const FieldVector<UGCtype, dim-1>& local) const {
+    const WorldVector&
+    unitOuterNormal (const FaceVector& local) const {
       unitOuterNormal_ = outerNormal(local);
       unitOuterNormal_ /= unitOuterNormal_.two_norm();
       return unitOuterNormal_;
     }
 
     //! return outer normal
-    const FieldVector<UGCtype, dimworld>&
+    const WorldVector&
     centerUnitOuterNormal () const
     {
       GeometryType type = geometry().type();
@@ -421,9 +421,9 @@ namespace Dune {
     void constructLeafSubfaces();
 
     //! vector storing the outer normal
-    mutable FieldVector<UGCtype, dimworld> outerNormal_;
-    mutable FieldVector<UGCtype, dimworld> integrationOuterNormal_;
-    mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
+    mutable WorldVector outerNormal_;
+    mutable WorldVector integrationOuterNormal_;
+    mutable WorldVector unitOuterNormal_;
 
     //! pointer to global and local intersection geometries
     mutable std::shared_ptr<GeometryImpl>      geometry_;
