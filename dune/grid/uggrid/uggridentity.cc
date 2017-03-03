@@ -242,8 +242,9 @@ UGGridEntity < 0, dim ,GridImp >::hend(int maxlevel) const
 }
 
 template<int dim, class GridImp>
-typename UGGridEntity<0,dim,GridImp>::LocalGeometry
+auto
 UGGridEntity < 0, dim, GridImp>::geometryInFather () const
+  -> LocalGeometry
 {
   // we need to have a father element
   typename UG_NS<dim>::Element* fatherElement = UG_NS<dim>::EFather(target_);
