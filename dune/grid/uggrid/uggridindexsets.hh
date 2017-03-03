@@ -480,7 +480,7 @@ namespace Dune {
 
       // If there is no father element then we know there is no father face
       /** \bug This is not true when doing vertical load balancing. */
-      if (resultFace.first == NULL)
+      if (resultFace.first == nullptr)
         return resultFace;
 
       // Get all corners of the face
@@ -507,7 +507,7 @@ namespace Dune {
       }
 
       // No father face found
-      resultFace.first = NULL;
+      resultFace.first = nullptr;
       return resultFace;
     }
 

@@ -203,7 +203,7 @@ int UGGridLevelIntersection<GridImp>::indexInOutside () const
   const typename UG_NS<dim>::Element *other;
 
   // Look for a neighbor on this level
-  if ((other = UG_NS<dim>::NbElem(center_, neighborCount_)) == NULL)
+  if ((other = UG_NS<dim>::NbElem(center_, neighborCount_)) == nullptr)
     DUNE_THROW(GridError,"There is no neighbor element!");
 
   // Find the corresponding side in the neighbor element
@@ -316,7 +316,7 @@ UGGridLeafIntersection< GridImp >::geometryInInside () const
 {
   if (!geometryInInside_) {
 
-    if (leafSubFaces_[0].first == NULL       // boundary intersection
+    if (leafSubFaces_[0].first == nullptr       // boundary intersection
         // or if this face is the intersection
         || UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) <= UG_NS<dim>::myLevel(center_)
         || (UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) > UG_NS<dim>::myLevel(center_)
@@ -385,7 +385,7 @@ UGGridLeafIntersection< GridImp >::geometry () const
 {
   if (!geometry_) {
 
-    if (leafSubFaces_[0].first == NULL       // boundary intersection
+    if (leafSubFaces_[0].first == nullptr       // boundary intersection
         // or if this face is the intersection
         || UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) <= UG_NS<dim>::myLevel(center_)
         || (UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) > UG_NS<dim>::myLevel(center_)
@@ -451,7 +451,7 @@ UGGridLeafIntersection< GridImp >::geometryInOutside () const
 {
   if (!geometryInOutside_) {
 
-    if (leafSubFaces_[0].first == NULL)
+    if (leafSubFaces_[0].first == nullptr)
       DUNE_THROW(GridError, "There is no neighbor!");
 
     if ( // if this face is the intersection
@@ -517,7 +517,7 @@ UGGridLeafIntersection< GridImp >::geometryInOutside () const
 template< class GridImp>
 int UGGridLeafIntersection<GridImp>::indexInOutside () const
 {
-  if (leafSubFaces_[subNeighborCount_].first == NULL)
+  if (leafSubFaces_[subNeighborCount_].first == nullptr)
     DUNE_THROW(GridError,"There is no neighbor!");
 
 #ifndef NDEBUG
@@ -653,7 +653,7 @@ void UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
   typename UG_NS<dim>::Element* levelNeighbor = UG_NS<dim>::NbElem(center_, neighborCount_);
 
   // If the level neighbor exists and is leaf, then there is only a single leaf intersection
-  if (levelNeighbor != NULL && UG_NS<dim>::isLeaf(levelNeighbor)) {
+  if (levelNeighbor != nullptr && UG_NS<dim>::isLeaf(levelNeighbor)) {
     leafSubFaces_.resize(1);
     leafSubFaces_[0] = Face(levelNeighbor, numberInNeighbor(center_, levelNeighbor));
   }
@@ -661,16 +661,16 @@ void UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
   // If the level neighbor does not exist, then leaf intersections exist only with neighbors
   // on lower levels, if they exist at all.  Therefore we descend in the hierarchy towards
   // the coarsest grid until we have found a level neighbor.
-  else if (levelNeighbor == NULL) {
+  else if (levelNeighbor == nullptr) {
 
     leafSubFaces_.resize(1);
-    leafSubFaces_[0] = Face( (typename UG_NS<dim>::Element*)NULL, 0);
+    leafSubFaces_[0] = Face( (typename UG_NS<dim>::Element*)nullptr, 0);
 
     // I am a leaf and the neighbor does not exist: go down
     Face currentFace(center_, neighborCount_);
     const typename UG_NS<dim>::Element* father = UG_NS<GridImp::dimensionworld>::EFather(center_);
 
-    while (father != NULL
+    while (father != nullptr
 #ifdef ModelP
            && !UG_NS<dim>::isGhost(father)
 #endif
@@ -769,7 +769,7 @@ void UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
   if (leafSubFaces_.empty())
   {
     leafSubFaces_.resize(1);
-    leafSubFaces_[0] = Face( (typename UG_NS<dim>::Element*)NULL, 0);
+    leafSubFaces_[0] = Face( (typename UG_NS<dim>::Element*)nullptr, 0);
   }
 }
 

@@ -33,7 +33,7 @@ template<> unsigned int UGGrid<3>::heapSize_ = 500;
 
 template <int dim>
 UGGrid < dim >::UGGrid()
-  : multigrid_(NULL),
+  : multigrid_(nullptr),
     leafIndexSet_(*this),
     idSet_(*this),
     refinementType_(LOCAL),
@@ -83,8 +83,8 @@ UGGrid < dim >::UGGrid()
   }
 
   // Create a dummy problem
-  typename UG_NS<dim>::CoeffProcPtr coeffs[1] = {NULL};
-  typename UG_NS<dim>::UserProcPtr upp[1] = {NULL};
+  typename UG_NS<dim>::CoeffProcPtr coeffs[1] = {nullptr};
+  typename UG_NS<dim>::UserProcPtr upp[1] = {nullptr};
 
   // Create unique problem name
   std::stringstream numberAsAscii;
@@ -93,7 +93,7 @@ UGGrid < dim >::UGGrid()
 
   std::string problemName = name_ + "_Problem";
 
-  if (UG_NS<dim>::CreateBoundaryValueProblem(problemName.c_str(), 1,coeffs,1,upp) == NULL)
+  if (UG_NS<dim>::CreateBoundaryValueProblem(problemName.c_str(), 1,coeffs,1,upp) == nullptr)
     DUNE_THROW(GridError, "UG" << dim << "d::CreateBoundaryValueProblem() returned an error code!");
 
   if (numOfUGGrids==0) {
@@ -310,7 +310,7 @@ bool UGGrid < dim >::adapt()
     DUNE_THROW(GridError, "UG::adapt() returned with error code " << rv);
 
   // Renumber everything
-  setIndices(false, NULL);
+  setIndices(false, nullptr);
 
   // Return true iff the grid hierarchy changed
   //return !(bool)multigrid_->status;
@@ -452,7 +452,7 @@ bool UGGrid < dim >::loadBalance(int minlevel)
   // Renumber everything.
   // Note: this must not be called when on a single process, because it renumbers the zero-level
   // elements and vertices.
-  setIndices(true, NULL);
+  setIndices(true, nullptr);
 
   return true;
 }
@@ -535,7 +535,7 @@ bool UGGrid < dim >::loadBalance(const std::vector<Rank>& targetProcessors, unsi
   // Renumber everything.
   // Note: this must not be called when on a single process, because it renumbers the zero-level
   // elements and vertices.
-  setIndices(true, NULL);
+  setIndices(true, nullptr);
 
   return true;
 }
@@ -608,7 +608,7 @@ void UGGrid<dim>::loadState(const std::string& filename)
                                                                          );
   }
 
-  if (multigrid_==NULL)
+  if (multigrid_==nullptr)
     DUNE_THROW(GridError, "In loadState()");
 }
 

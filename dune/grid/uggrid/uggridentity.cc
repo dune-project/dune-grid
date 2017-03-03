@@ -86,7 +86,7 @@ bool UGGridEntity < 0, dim ,GridImp >::mightVanish () const
     UG_NS<dim>::GetSons(father_,sons_);
     for (int i = 0; i < UG_NS<dim>::MAX_SONS; ++i)
     {
-      if (sons_[i] == NULL) // last son visited
+      if (sons_[i] == nullptr) // last son visited
         break;
       if (!UG_NS<dim>::isRegular(sons_[i]) || UG_NS<dim>::ReadCW(sons_[i], UG_NS<dim>::COARSEN_CE))
         return true;
@@ -221,7 +221,7 @@ UGGridEntity < 0, dim ,GridImp >::hbegin(int maxlevel) const
       it.elementStack_.push(sonList[i]);
 
     it.virtualEntity_.setToTarget( (it.elementStack_.empty())
-                                   ? NULL
+                                   ? nullptr
                                    : it.elementStack_.top(),
                                    gridImp_
                                    );

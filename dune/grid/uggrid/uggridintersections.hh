@@ -84,7 +84,7 @@ namespace Dune {
 
     //! return true if across the edge an neighbor on this level exists
     bool neighbor () const {
-      return UG_NS<dim>::NbElem(center_, neighborCount_) != NULL;
+      return UG_NS<dim>::NbElem(center_, neighborCount_) != nullptr;
     }
 
     /** \brief return index of the corresponding coarse grid boundary segment */
@@ -269,7 +269,7 @@ namespace Dune {
 
     //! return true if a neighbor element exists across this intersection
     bool neighbor () const {
-      return leafSubFaces_[subNeighborCount_].first != NULL;
+      return leafSubFaces_[subNeighborCount_].first != nullptr;
     }
 
     /** \brief Return index of corresponding coarse grid boundary segment */
@@ -287,7 +287,7 @@ namespace Dune {
 
       const typename UG_NS<dim>::Element* outside = leafSubFaces_[subNeighborCount_].first;
 
-      if (outside == NULL         // boundary intersection
+      if (outside == nullptr         // boundary intersection
           // inside and outside are on the same level
           || UG_NS<dim>::myLevel(outside) == UG_NS<dim>::myLevel(center_)
           // outside is on a higher level, but there is only one intersection
