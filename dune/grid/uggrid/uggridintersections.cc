@@ -13,7 +13,7 @@ namespace Dune {
 template<class GridImp>
 const typename UGGridLevelIntersection<GridImp>::WorldVector&
 UGGridLevelIntersection<GridImp>::outerNormal
-  (const typename UGGridLevelIntersection<GridImp>::FaceVector& local) const
+  (const FaceVector& local) const
 {
   // //////////////////////////////////////////////////////
   //   Implementation for 3D
@@ -226,7 +226,7 @@ int UGGridLevelIntersection<GridImp>::indexInOutside () const
 template<class GridImp>
 const typename UGGridLeafIntersection<GridImp>::WorldVector&
 UGGridLeafIntersection<GridImp>::outerNormal
-  (const typename UGGridLeafIntersection<GridImp>::FaceVector& local) const
+  (const FaceVector& local) const
 {
   /////////////////////////////////////////////////////////
   //   Implementation for 3D
