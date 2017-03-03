@@ -476,24 +476,18 @@ bool UGGrid < dim >::loadBalance(const std::vector<Rank>& targetProcessors, unsi
   // If the element is a leaf, take its target rank from the input targetProcessors array.
   // If it is not, assign it to the processor most of its children are assigned to.
   for (int i=maxLevel(); i>=0; i--) {
+    for (const auto& element : elements(this->levelGridView(i), Partitions::interior)) {
 
-    typename Base::LevelGridView levelGridView = this->levelGridView(i);
-    typedef typename Base::LevelGridView::template Codim<0>::template Partition<Interior_Partition>::Iterator LevelElementIterator;
+      if (element.isLeaf()) {
 
-    for (LevelElementIterator it = levelGridView.template begin<0, Interior_Partition>();
-         it != levelGridView.template end<0, Interior_Partition>();
-         ++it) {
-
-      if (it->isLeaf()) {
-
-        auto targetRank = targetProcessors[elementMapper.index(*it)];
+        auto targetRank = targetProcessors[elementMapper.index(element)];
 
         // sanity check
         if (targetRank >= comm().size())
           DUNE_THROW(GridError, "Requesting target processor " << targetRank <<
                      ", but only " << comm().size() << " processors are available.");
 
-        UG_NS<dim>::Partition(this->getRealImplementation(*it).target_) = targetRank;
+        UG_NS<dim>::Partition(this->getRealImplementation(element).target_) = targetRank;
       } else {
 
         std::map<Rank,unsigned int> rank;
@@ -501,11 +495,9 @@ bool UGGrid < dim >::loadBalance(const std::vector<Rank>& targetProcessors, unsi
         unsigned int mostFrequentCount = 0;   // how often did it occur?
 
         // Loop over all children and collect the ranks they are assigned to
-        typename Base::LevelGridView::template Codim<0>::Entity::HierarchicIterator child    = it->hbegin(it->level()+1);
-        typename Base::LevelGridView::template Codim<0>::Entity::HierarchicIterator endChild = it->hend(it->level()+1);
-        for (; child !=  endChild; ++child) {
+        for (const auto& child : descendantElements(element, element.level() + 1)) {
 
-          auto childRank = UG_NS<dim>::Partition(this->getRealImplementation(*child).target_);
+          auto childRank = UG_NS<dim>::Partition(this->getRealImplementation(child).target_);
 
           if (rank.find(childRank) == rank.end())
             rank[childRank] = 1;
@@ -520,7 +512,7 @@ bool UGGrid < dim >::loadBalance(const std::vector<Rank>& targetProcessors, unsi
         }
 
         // Assign rank that occurred most often
-        UG_NS<dim>::Partition(this->getRealImplementation(*it).target_) = mostFrequentRank;
+        UG_NS<dim>::Partition(this->getRealImplementation(element).target_) = mostFrequentRank;
 
       }
     }
