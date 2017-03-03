@@ -220,7 +220,7 @@ UGGridEntity < 0, dim ,GridImp >::hbegin(int maxlevel) const
     for (int i=0; i<UG_NS<dim>::nSons(target_); i++)
       it.elementStack_.push(sonList[i]);
 
-    it.virtualEntity_.setToTarget( (it.elementStack_.empty())
+    it.virtualEntity_.setToTarget( it.elementStack_.empty()
                                    ? nullptr
                                    : it.elementStack_.top(),
                                    gridImp_
