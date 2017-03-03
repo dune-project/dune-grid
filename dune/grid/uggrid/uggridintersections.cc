@@ -11,9 +11,10 @@
 namespace Dune {
 
 template<class GridImp>
-const typename UGGridLevelIntersection<GridImp>::WorldVector&
+auto
 UGGridLevelIntersection<GridImp>::outerNormal
   (const FaceVector& local) const
+  -> const WorldVector&
 {
   // //////////////////////////////////////////////////////
   //   Implementation for 3D
@@ -92,8 +93,9 @@ UGGridLevelIntersection<GridImp>::outerNormal
 }
 
 template< class GridImp>
-typename UGGridLevelIntersection<GridImp>::LocalGeometry
+auto
 UGGridLevelIntersection<GridImp>::geometryInInside () const
+  -> LocalGeometry
 {
   if (!geometryInInside_) {
 
@@ -120,8 +122,9 @@ UGGridLevelIntersection<GridImp>::geometryInInside () const
 }
 
 template< class GridImp>
-typename UGGridLevelIntersection<GridImp>::Geometry
+auto
 UGGridLevelIntersection<GridImp>::geometry () const
+  -> Geometry
 {
   if (!geometry_) {
 
@@ -148,8 +151,9 @@ UGGridLevelIntersection<GridImp>::geometry () const
 }
 
 template<class GridImp>
-typename UGGridLevelIntersection<GridImp>::LocalGeometry
+auto
 UGGridLevelIntersection<GridImp>::geometryInOutside () const
+  -> LocalGeometry
 {
   if (!geometryInOutside_) {
 
@@ -224,9 +228,10 @@ int UGGridLevelIntersection<GridImp>::indexInOutside () const
    If the face is flat this doesn't matter.
  */
 template<class GridImp>
-const typename UGGridLeafIntersection<GridImp>::WorldVector&
+auto
 UGGridLeafIntersection<GridImp>::outerNormal
   (const FaceVector& local) const
+  -> const WorldVector&
 {
   /////////////////////////////////////////////////////////
   //   Implementation for 3D
@@ -305,8 +310,9 @@ UGGridLeafIntersection<GridImp>::outerNormal
 }
 
 template< class GridImp>
-typename UGGridLeafIntersection<GridImp>::LocalGeometry
+auto
 UGGridLeafIntersection< GridImp >::geometryInInside () const
+  -> LocalGeometry
 {
   if (!geometryInInside_) {
 
@@ -373,8 +379,9 @@ UGGridLeafIntersection< GridImp >::geometryInInside () const
 }
 
 template< class GridImp>
-typename UGGridLeafIntersection<GridImp>::Geometry
+auto
 UGGridLeafIntersection< GridImp >::geometry () const
+  -> Geometry
 {
   if (!geometry_) {
 
@@ -438,8 +445,9 @@ UGGridLeafIntersection< GridImp >::geometry () const
 
 /** \todo Needs to be checked for the nonconforming case */
 template< class GridImp>
-typename UGGridLeafIntersection<GridImp>::LocalGeometry
+auto
 UGGridLeafIntersection< GridImp >::geometryInOutside () const
+  -> LocalGeometry
 {
   if (!geometryInOutside_) {
 
