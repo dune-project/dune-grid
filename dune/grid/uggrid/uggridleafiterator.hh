@@ -104,7 +104,7 @@ namespace Dune {
     bool isLeaf(const typename UG_NS<dim>::Node* theNode)
     {
       // in the case of nodes: only visit the uppermost entity if more than one is leaf
-      if (theNode->son != NULL)
+      if (theNode->son != nullptr)
         return false;
 
       return UG_NS<dim>::isLeaf(theNode);

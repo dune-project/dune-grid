@@ -773,7 +773,7 @@ protected:
     //! returns true if father entity exists
     bool hasFather () const
     {
-      return UG_NS<dim>::EFather(target_) != NULL;
+      return UG_NS<dim>::EFather(target_) != nullptr;
     }
 
     /*! Location of this element relative to the reference element element of the father.
