@@ -11,8 +11,7 @@
 #include <dune/grid/uggrid/uggridfactory.hh>
 #include "boundaryextractor.hh"
 
-
-using namespace Dune;
+namespace Dune {
 
 /* The following three methods are the ones that UG calls to know about the geometry
    of the boundary.  UG expects one static method for each coarse grid boundary segment.
@@ -71,10 +70,10 @@ static int boundarySegmentWrapper3dQuad(void *data, double *param, double *resul
 
 
 template <int dimworld>
-Dune::GridFactory<Dune::UGGrid<dimworld> >::
+GridFactory<UGGrid<dimworld> >::
 GridFactory()
 {
-  grid_ = new Dune::UGGrid<dimworld>;
+  grid_ = new UGGrid<dimworld>;
 
   factoryOwnsGrid_ = true;
 
@@ -82,7 +81,7 @@ GridFactory()
 }
 
 template <int dimworld>
-Dune::GridFactory<Dune::UGGrid<dimworld> >::
+GridFactory<UGGrid<dimworld> >::
 GridFactory(UGGrid<dimworld>* grid)
 {
   grid_ = grid;
@@ -93,7 +92,7 @@ GridFactory(UGGrid<dimworld>* grid)
 }
 
 template <int dimworld>
-Dune::GridFactory<Dune::UGGrid<dimworld> >::
+GridFactory<UGGrid<dimworld> >::
 ~GridFactory()
 {
   if (grid_ && factoryOwnsGrid_)
@@ -101,14 +100,14 @@ Dune::GridFactory<Dune::UGGrid<dimworld> >::
 }
 
 template <int dimworld>
-void Dune::GridFactory<Dune::UGGrid<dimworld> >::
-insertVertex(const Dune::FieldVector<typename Dune::GridFactory<Dune::UGGrid<dimworld> >::ctype,dimworld>& pos)
+void GridFactory<UGGrid<dimworld> >::
+insertVertex(const FieldVector<typename GridFactory<UGGrid<dimworld> >::ctype,dimworld>& pos)
 {
   vertexPositions_.push_back(pos);
 }
 
 template <int dimworld>
-void Dune::GridFactory<Dune::UGGrid<dimworld> >::
+void GridFactory<UGGrid<dimworld> >::
 insertElement(const GeometryType& type,
               const std::vector<unsigned int>& vertices)
 {
@@ -180,14 +179,14 @@ insertElement(const GeometryType& type,
 }
 
 template <int dimworld>
-void Dune::GridFactory<Dune::UGGrid<dimworld> >::
+void GridFactory<UGGrid<dimworld> >::
 insertBoundarySegment(const std::vector<unsigned int>& vertices)
 {
   insertBoundarySegment(vertices, std::shared_ptr<BoundarySegment<dimworld> >());
 }
 
 template <int dimworld>
-void Dune::GridFactory<Dune::UGGrid<dimworld> >::
+void GridFactory<UGGrid<dimworld> >::
 insertBoundarySegment(const std::vector<unsigned int>& vertices,
                       const std::shared_ptr<BoundarySegment<dimworld> > &boundarySegment)
 {
@@ -213,7 +212,7 @@ insertBoundarySegment(const std::vector<unsigned int>& vertices,
 }
 
 template <int dimworld>
-Dune::UGGrid<dimworld>* Dune::GridFactory<Dune::UGGrid<dimworld> >::
+UGGrid<dimworld>* GridFactory<UGGrid<dimworld> >::
 createGrid()
 {
   // Prevent a crash when this method is called twice in a row
@@ -501,7 +500,7 @@ createGrid()
     // hand over the grid and delete the member pointer
     // ///////////////////////////////////////////////////
 
-    Dune::UGGrid<dimworld>* tmp = grid_;
+    UGGrid<dimworld>* tmp = grid_;
     grid_ = NULL;
     return tmp;
   }
@@ -564,13 +563,13 @@ createGrid()
   // hand over the grid and delete the member pointer
   // ///////////////////////////////////////////////////
 
-  Dune::UGGrid<dimworld>* tmp = grid_;
+  UGGrid<dimworld>* tmp = grid_;
   grid_ = NULL;
   return tmp;
 }
 
 template <int dimworld>
-void Dune::GridFactory<Dune::UGGrid<dimworld> >::
+void GridFactory<UGGrid<dimworld> >::
 createBegin()
 {
   // ///////////////////////////////////////////////////////
@@ -614,5 +613,7 @@ createBegin()
 
 
 // Explicit template instatiation
-template class Dune::GridFactory<Dune::UGGrid<2> >;
-template class Dune::GridFactory<Dune::UGGrid<3> >;
+template class GridFactory<UGGrid<2> >;
+template class GridFactory<UGGrid<3> >;
+
+} /* namespace Dune */

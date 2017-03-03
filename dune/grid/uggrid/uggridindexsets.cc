@@ -5,8 +5,10 @@
 #include <dune/grid/uggrid.hh>
 #include <dune/grid/uggrid/uggridindexsets.hh>
 
+namespace Dune {
+
 template <class GridImp>
-void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, std::vector<unsigned int>* nodePermutation) {
+void UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, std::vector<unsigned int>* nodePermutation) {
 
   // Commit the index set to a specific level of a specific grid
   grid_ = &grid;
@@ -146,7 +148,7 @@ void Dune::UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, 
 }
 
 template <class GridImp>
-void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePermutation) {
+void UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePermutation) {
 
   // //////////////////////////////////////////////////////
   // Handle codim 1 and dim-1: levelwise from top to bottom
@@ -364,8 +366,10 @@ void Dune::UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePe
 
 // Explicit template instantiations to compile the stuff in this file
 
-template class Dune::UGGridLevelIndexSet<const Dune::UGGrid<2> >;
-template class Dune::UGGridLevelIndexSet<const Dune::UGGrid<3> >;
+template class UGGridLevelIndexSet<const UGGrid<2> >;
+template class UGGridLevelIndexSet<const UGGrid<3> >;
 
-template class Dune::UGGridLeafIndexSet<const Dune::UGGrid<2> >;
-template class Dune::UGGridLeafIndexSet<const Dune::UGGrid<3> >;
+template class UGGridLeafIndexSet<const UGGrid<2> >;
+template class UGGridLeafIndexSet<const UGGrid<3> >;
+
+} /* namespace Dune */

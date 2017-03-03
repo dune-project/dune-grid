@@ -5,6 +5,8 @@
 #include <dune/grid/uggrid.hh>
 #include <dune/grid/uggrid/uggridhieriterator.hh>
 
+namespace Dune {
+
 //***************************************************************
 //
 //  --UGGridHierarchicIterator
@@ -13,7 +15,7 @@
 //***************************************************************
 
 template<class GridImp>
-void Dune::UGGridHierarchicIterator<GridImp>::increment()
+void UGGridHierarchicIterator<GridImp>::increment()
 {
   if (elementStack_.empty())
     return;
@@ -46,5 +48,7 @@ void Dune::UGGridHierarchicIterator<GridImp>::increment()
 //   Explicit template instantiations
 /////////////////////////////////////////////////////////////////////////////////
 
-template class Dune::UGGridHierarchicIterator<const Dune::UGGrid<2> >;
-template class Dune::UGGridHierarchicIterator<const Dune::UGGrid<3> >;
+template class UGGridHierarchicIterator<const UGGrid<2> >;
+template class UGGridHierarchicIterator<const UGGrid<3> >;
+
+} /* namespace Dune */

@@ -7,6 +7,8 @@
 #include <dune/grid/uggrid.hh>
 #include <dune/grid/uggrid/uggridgeometry.hh>
 
+namespace Dune {
+
 ///////////////////////////////////////////////////////////////////////
 //
 // General implementation of UGGridGeometry mydim-> coorddim
@@ -15,7 +17,7 @@
 
 
 template< int mydim, int coorddim, class GridImp>
-Dune::GeometryType Dune::UGGridGeometry<mydim,coorddim,GridImp>::type() const
+GeometryType UGGridGeometry<mydim,coorddim,GridImp>::type() const
 {
   switch (mydim)
   {
@@ -55,12 +57,12 @@ Dune::GeometryType Dune::UGGridGeometry<mydim,coorddim,GridImp>::type() const
 
 
 template<int mydim, int coorddim, class GridImp>
-Dune::FieldVector<typename GridImp::ctype, coorddim> Dune::UGGridGeometry<mydim,coorddim,GridImp>::
+FieldVector<typename GridImp::ctype, coorddim> UGGridGeometry<mydim,coorddim,GridImp>::
 corner(int i) const
 {
   // This geometry is a vertex
   if (mydim==0) {
-    Dune::FieldVector<typename GridImp::ctype, coorddim> result;
+    FieldVector<typename GridImp::ctype, coorddim> result;
     for (size_t j=0; j<coorddim; j++)
       // The cast is here to make the code compile even when target_ is not a node
       result[j] = ((typename UG_NS<coorddim>::Node*)target_)->myvertex->iv.x[j];
@@ -74,7 +76,7 @@ corner(int i) const
 
   i = UGGridRenumberer<mydim>::verticesDUNEtoUG(i,type());
 
-  Dune::FieldVector<typename GridImp::ctype, coorddim> result;
+  FieldVector<typename GridImp::ctype, coorddim> result;
   for (size_t j=0; j<coorddim; j++)
     // The cast is here to make the code compile even when target_ is not an element
     result[j] = UG_NS<coorddim>::Corner(((typename UG_NS<coorddim>::Element*)target_),i)->myvertex->iv.x[j];
@@ -82,7 +84,7 @@ corner(int i) const
 }
 
 template< int mydim, int coorddim, class GridImp>
-Dune::FieldVector<typename GridImp::ctype, coorddim> Dune::UGGridGeometry<mydim,coorddim,GridImp>::
+FieldVector<typename GridImp::ctype, coorddim> UGGridGeometry<mydim,coorddim,GridImp>::
 global(const FieldVector<UGCtype, mydim>& local) const
 {
   FieldVector<UGCtype, coorddim> globalCoord(0.0);
@@ -102,8 +104,8 @@ global(const FieldVector<UGCtype, mydim>& local) const
 // Maps a global coordinate within the element to a
 // local coordinate in its reference element
 template< int mydim, int coorddim, class GridImp>
-Dune::FieldVector<typename GridImp::ctype, mydim> Dune::UGGridGeometry<mydim,coorddim, GridImp>::
-local (const Dune::FieldVector<typename GridImp::ctype, coorddim>& global) const
+FieldVector<typename GridImp::ctype, mydim> UGGridGeometry<mydim,coorddim, GridImp>::
+local (const FieldVector<typename GridImp::ctype, coorddim>& global) const
 {
   FieldVector<UGCtype, mydim> result;
 
@@ -124,8 +126,8 @@ local (const Dune::FieldVector<typename GridImp::ctype, coorddim>& global) const
 
 
 template< int mydim, int coorddim, class GridImp>
-typename GridImp::ctype Dune::UGGridGeometry<mydim,coorddim,GridImp>::
-integrationElement (const Dune::FieldVector<typename GridImp::ctype, mydim>& local) const
+typename GridImp::ctype UGGridGeometry<mydim,coorddim,GridImp>::
+integrationElement (const FieldVector<typename GridImp::ctype, mydim>& local) const
 {
   if (mydim==0)
     return 1;
@@ -136,8 +138,8 @@ integrationElement (const Dune::FieldVector<typename GridImp::ctype, mydim>& loc
 
 
 template< int mydim, int coorddim, class GridImp>
-Dune::FieldMatrix<typename GridImp::ctype, coorddim,mydim> Dune::UGGridGeometry<mydim,coorddim, GridImp>::
-jacobianInverseTransposed (const Dune::FieldVector<typename GridImp::ctype, mydim>& local) const
+FieldMatrix<typename GridImp::ctype, coorddim,mydim> UGGridGeometry<mydim,coorddim, GridImp>::
+jacobianInverseTransposed (const FieldVector<typename GridImp::ctype, mydim>& local) const
 {
   FieldMatrix<UGCtype,coorddim,mydim> jIT;
 
@@ -152,8 +154,8 @@ jacobianInverseTransposed (const Dune::FieldVector<typename GridImp::ctype, mydi
   return jIT;
 }
 template< int mydim, int coorddim, class GridImp>
-Dune::FieldMatrix<typename GridImp::ctype, mydim,coorddim> Dune::UGGridGeometry<mydim,coorddim, GridImp>::
-jacobianTransposed (const Dune::FieldVector<typename GridImp::ctype, mydim>& local) const
+FieldMatrix<typename GridImp::ctype, mydim,coorddim> UGGridGeometry<mydim,coorddim, GridImp>::
+jacobianTransposed (const FieldVector<typename GridImp::ctype, mydim>& local) const
 {
   FieldMatrix<UGCtype,mydim,coorddim> jac;
 
@@ -173,8 +175,10 @@ jacobianTransposed (const Dune::FieldVector<typename GridImp::ctype, mydim>& loc
 //   Explicit template instantiations
 /////////////////////////////////////////////////////////////////////////////////
 
-template class Dune::UGGridGeometry<0,2, const Dune::UGGrid<2> >;
-template class Dune::UGGridGeometry<2,2, const Dune::UGGrid<2> >;
+template class UGGridGeometry<0,2, const UGGrid<2> >;
+template class UGGridGeometry<2,2, const UGGrid<2> >;
 
-template class Dune::UGGridGeometry<0,3, const Dune::UGGrid<3> >;
-template class Dune::UGGridGeometry<3,3, const Dune::UGGrid<3> >;
+template class UGGridGeometry<0,3, const UGGrid<3> >;
+template class UGGridGeometry<3,3, const UGGrid<3> >;
+
+} /* namespace Dune */
