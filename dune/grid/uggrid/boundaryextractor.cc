@@ -149,14 +149,10 @@ int BoundaryExtractor::detectBoundaryNodes(const std::set<UGGridBoundarySegment<
   for (int i=0; i<noOfNodes; i++)
     isBoundaryNode[i] = -1;
 
-  typename std::set<UGGridBoundarySegment<dim> >::const_iterator it = boundarySegments.begin();
-
-  for (; it!=boundarySegments.end(); ++it) {
-
+  for (const auto& bs : boundarySegments) {
     for (int j=0; j<(dim-1)*2; j++)
-      if ((*it)[j]!=-1 && isBoundaryNode[(*it)[j]] == -1)
-        isBoundaryNode[(*it)[j]] = 1;
-
+      if (bs[j]!=-1 && isBoundaryNode[bs[j]] == -1)
+        isBoundaryNode[bs[j]] = 1;
   }
 
   for (unsigned int i=0; i<isBoundaryNode.size(); i++)
