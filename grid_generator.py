@@ -13,17 +13,23 @@ def triangulation(grid, level=0):
     return Triangulation(x[:,0], x[:,1], triangles)
 
 
-def writeVTK(grid, name, celldata=[], pointdata=[], cellvector=[], pointvector=[], number=None, subsampling=None):
+def writeVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointvector=None, number=None, subsampling=None):
     vtk = grid.vtkWriter() if subsampling is None else grid.vtkWriter(subsampling)
 
-    for f in celldata:
-        f.addToVTKWriter(vtk, common.DataType.CellData)
-    for f in pointdata:
-        f.addToVTKWriter(vtk, common.DataType.PointData)
-    for f in cellvector:
-        f.addToVTKWriter(vtk, vtk.CellVectorData)
-    for f in pointvector:
-        f.addToVTKWriter(vtk, vtk.PointVectorData)
+    def addDataToVTKWriter(dataFunctions, dataName, dataTag):
+        if isinstance(dataFunctions, dict):
+            for n, f in dataFunctions.items():
+                f.addToVTKWriter(n, vtk, dataTag)
+        elif isinstance(dataFunctions, list):
+            for f in dataFunctions:
+                f.addToVTKWriter(f.name, vtk, dataTag)
+        elif dataFunctions is not None:
+            raise TypeError("Argument '" + dataName + "' must be a dict instance.")
+
+    addDataToVTKWriter(celldata, 'celldata', common.DataType.CellData)
+    addDataToVTKWriter(pointdata, 'pointdata', common.DataType.PointData)
+    addDataToVTKWriter(cellvector, 'cellvector', common.DataType.CellVector)
+    addDataToVTKWriter(pointvector, 'pointvector', common.DataType.PointVector)
 
     if number is None:
         vtk.write(name)
