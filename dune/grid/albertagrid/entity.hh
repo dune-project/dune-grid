@@ -242,18 +242,6 @@ namespace Dune
     //! obtain entity seed
     EntitySeed seed () const { return EntitySeed( AlbertaGridEntitySeed< 0, Grid >(elementInfo() )); }
 
-    /** obtain the number of subentities of a codimension
-     *
-     *  \tparam  codim  codimension
-     *
-     *  \returns the number of subentities of the given codimension
-     */
-    template< int codim >
-    int count () const
-    {
-      return Alberta::NumSubEntities< dimension, codim >::value;
-    }
-
     /** \brief Obtain the number of subentities of a given codimension
      *
      * That number is ((mydimension+1) over (dim-cd+1))
@@ -285,7 +273,7 @@ namespace Dune
      *
      *  \returns the subentity
      *
-     *  \note: The subentities are numbered 0, ..., count< codim >-1
+     *  \note: The subentities are numbered 0, ..., subEntities(codim)-1
      */
     template< int codim >
     typename Grid::template Codim< codim >::Entity subEntity ( int i ) const;

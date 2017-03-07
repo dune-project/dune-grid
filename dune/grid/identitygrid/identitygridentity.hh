@@ -160,14 +160,6 @@ namespace Dune {
       return hostEntity_.partitionType();
     }
 
-
-    /** Intra-element access to entities of codimension cc > codim. Return number of entities
-     * with codimension cc.
-     */
-    template<int cc> int count () const {
-      return hostEntity_.template count<cc>();
-    }
-
     /** \brief Return the number of subEntities of codimension codim.
      */
     unsigned int subEntities (unsigned int cc) const
@@ -320,15 +312,6 @@ namespace Dune {
     }
 
 
-    /** \brief Return the number of subEntities of codimension cc.
-     */
-    template<int cc>
-    int count () const
-    {
-      return hostEntity_.template count<cc>();
-    }
-
-
     /** \brief Return the number of subEntities of codimension codim.
      */
     unsigned int subEntities (unsigned int codim) const
@@ -338,7 +321,7 @@ namespace Dune {
 
 
     /** \brief Provide access to sub entity i of given codimension. Entities
-     *  are numbered 0 ... count<cc>()-1
+     *  are numbered 0 ... subEntities(cc)-1
      */
     template<int cc>
     typename GridImp::template Codim<cc>::Entity subEntity (int i) const {

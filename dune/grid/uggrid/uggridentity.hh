@@ -167,13 +167,6 @@ namespace Dune {
 
   public:
 
-
-    /*! Intra-element access to entities of codimension cc > codim. Return number of entities
-       with codimension cc.
-     */
-    //!< Default codim 1 Faces and codim == dim Vertices
-    template<int cc> int count () const;
-
     //! geometry of this entity
     Geometry geometry () const { return Geometry( geo_ ); }
 
@@ -301,12 +294,6 @@ namespace Dune {
         DUNE_THROW(GridError, "Unknown priority " << UG_NS<dim>::Priority(edge));
 #endif
     }
-
-    /*! Intra-element access to entities of codimension cc > codim. Return number of entities
-       with codimension cc.
-     */
-    //!< Default codim 1 Faces and codim == dim Vertices
-    template<int cc> int count () const;
 
     //! geometry of this entity
     Geometry geometry () const { return Geometry( *geo_ ); }
@@ -680,11 +667,6 @@ protected:
     /** \brief Get the seed corresponding to this entity */
     EntitySeed seed () const { return EntitySeed( *this ); }
 
-    /** \brief Return the number of subEntities of codimension cc.
-     */
-    template<int cc>
-    int count () const;
-
     /** \brief Return the number of subEntities of codimension codim.
      */
     unsigned int subEntities (unsigned int codim) const
@@ -717,13 +699,13 @@ protected:
         }
 
       }
-      DUNE_THROW(GridError, "You can't call UGGridEntity<0,dim>::count "
+      DUNE_THROW(GridError, "You can't call UGGridEntity<0,dim>::subEntities "
              << "with dim==" << dim << " and codim==" << codim << "!");
     }
 
 
     /** \brief Provide access to sub entity i of given codimension. Entities
-     *  are numbered 0 ... count<cc>()-1
+     *  are numbered 0 ... subEntities(cc)-1
      */
     template<int cc>
     typename GridImp::template Codim<cc>::Entity subEntity (int i) const;
