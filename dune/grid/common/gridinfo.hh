@@ -129,14 +129,14 @@ namespace Dune
                 << std::endl;
 
       std::cout << prefix << "codim " << dim << " subindex";
-      for (int i=0; i<it->template count<dim>(); i++)
+      for (int i=0; i<it->subEntities(dim); i++)
       {
         std::cout << " " << i << ":" << grid.levelIndexSet(level).subIndex(*it,i,dim);
       }
       std::cout << std::endl;
 
       std::cout << prefix << "codim " << dim-1 << " subindex";
-      for (int i=0; i<it->template count<dim-1>(); i++)
+      for (int i=0; i<it->subEntities(dim-1); i++)
       {
         std::cout << " " << i << ":" << grid.levelIndexSet(level).subIndex(*it,i,dim-1);
       }
@@ -213,14 +213,14 @@ namespace Dune
                 << std::endl;
 
       std::cout << prefix << "codim " << dim << " subindex";
-      for (int i=0; i<it->template count<dim>(); i++)
+      for (int i=0; i<it->subEntities(dim); i++)
       {
         std::cout << " " << i << ":" << grid.leafIndexSet().subIndex(*it,i,dim);
       }
       std::cout << std::endl;
 
       std::cout << prefix << "codim " << dim-1 << " subindex";
-      for (int i=0; i<it->template count<dim-1>(); i++)
+      for (int i=0; i<it->subEntities(dim-1); i++)
       {
         std::cout << " " << i << ":" << grid.leafIndexSet().subIndex(*it,i,dim-1);
       }
