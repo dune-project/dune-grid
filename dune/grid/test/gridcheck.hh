@@ -214,7 +214,7 @@ void zeroEntityConsistency (Grid &g)
       assert( false );
     }
 
-    // Entity::count<dim>() == Entity::geometry().corners();
+    // Entity::subEntities(dim) == Entity::geometry().corners();
     // Entity::geometry()[c] == Entity::entity<dim>.geometry()[0];
     const int numCorners = it->subEntities(dimGrid);
     if( numCorners != it->geometry().corners() )
