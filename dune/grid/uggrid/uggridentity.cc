@@ -22,17 +22,6 @@ namespace Dune {
 //*********************************************************************
 
 
-//*****************************************************************8
-// count
-template <int codim, int dim, class GridImp>
-template <int cc>
-int UGGridEntity<codim,dim,GridImp>::count () const
-{
-  DUNE_THROW(GridError, "UGGridEntity<" << codim << ", " << dim
-                                        << ">::count() not implemented yet!");
-  return -1;
-}
-
 template< int codim, int dim, class GridImp>
 GeometryType UGGridEntity<codim,dim,GridImp>::type() const
 {
@@ -97,50 +86,12 @@ bool UGGridEntity < 0, dim ,GridImp >::mightVanish () const
   return false;
 }
 
-//*****************************************************************8
-// count
-template <int dim, class GridImp>
-template <int cc>
-int UGGridEntity<0,dim,GridImp>::count() const
-{
-  if (dim==3) {
-
-    switch (cc) {
-    case 0 :
-      return 1;
-    case 1 :
-      return UG_NS<dim>::Sides_Of_Elem(target_);
-    case 2 :
-      return UG_NS<dim>::Edges_Of_Elem(target_);
-    case 3 :
-      return UG_NS<dim>::Corners_Of_Elem(target_);
-    }
-
-  } else {
-
-    switch (cc) {
-    case 0 :
-      return 1;
-    case 1 :
-      return UG_NS<dim>::Edges_Of_Elem(target_);
-    case 2 :
-      return UG_NS<dim>::Corners_Of_Elem(target_);
-    default :
-      // do nothing for cc = 3
-      break;
-    }
-
-  }
-  DUNE_THROW(GridError, "You can't call UGGridEntity<0,dim>::count<codim> "
-             << "with dim==" << dim << " and codim==" << cc << "!");
-}
-
 template <int dim, class GridImp>
 template <int cc>
 typename GridImp::template Codim<cc>::Entity
 UGGridEntity<0,dim,GridImp>::subEntity ( int i ) const
 {
-  assert(i>=0 && i<count<cc>());
+  assert(i>=0 && i < subEntities(cc));
 
   typename UG_NS<dim>::template Entity<cc>::T* subEntity;
 
@@ -432,16 +383,6 @@ template class UGGridEntity<0,3, const UGGrid<3> >;
 
 template class UGGridEntity<1,2, const UGGrid<2> >;
 template class UGGridEntity<2,3, const UGGrid<3> >;
-
-template int UGGridEntity<0, 2, const UGGrid<2> >::count<0>() const;
-template int UGGridEntity<0, 2, const UGGrid<2> >::count<1>() const;
-template int UGGridEntity<0, 2, const UGGrid<2> >::count<2>() const;
-
-template int UGGridEntity<0, 3, const UGGrid<3> >::count<0>() const;
-template int UGGridEntity<0, 3, const UGGrid<3> >::count<1>() const;
-template int UGGridEntity<0, 3, const UGGrid<3> >::count<2>() const;
-template int UGGridEntity<0, 3, const UGGrid<3> >::count<3>() const;
-
 
 template Grid<2, 2, double, UGGridFamily<2> >::Codim<0>::Entity
 UGGridEntity<0, 2, const UGGrid<2> >::subEntity<0>(int) const;
