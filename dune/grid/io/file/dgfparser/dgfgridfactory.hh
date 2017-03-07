@@ -106,7 +106,11 @@ namespace Dune
     template <class Intersection>
     int boundaryId(const Intersection &intersection) const
     {
+#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
       return intersection.boundaryId();
+#else
+      return (intersection.boundary()) ? int(intersection.indexInInside()+1) : int(0);
+#endif
     }
 
     template< int codim >
