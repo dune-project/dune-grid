@@ -19,6 +19,8 @@ dune_add_test(NAME test-geogrid-uggrid
                                   GRIDTYPE=Dune::UGGrid<2>
               CMAKE_GUARD UG_FOUND)
 
+dune_add_test(SOURCES test-gridinfo.cc)
+
 dune_add_test(SOURCES test-identitygrid.cc)
 
 dune_add_test(SOURCES test-oned.cc
