@@ -75,9 +75,6 @@ namespace Dune
       }
     }
     std::cout << ")" << std::endl;
-
-
-    return;
   }
 
 
@@ -143,8 +140,6 @@ namespace Dune
       std::cout << std::endl;
 
     }
-
-    return;
   }
 
 
@@ -227,8 +222,6 @@ namespace Dune
       std::cout << std::endl;
 
     }
-
-    return;
   }
 
 
