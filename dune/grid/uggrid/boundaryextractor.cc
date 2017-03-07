@@ -6,9 +6,11 @@
 
 #include "boundaryextractor.hh"
 
-void Dune::BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned char>& elementTypes,
-                                                     const std::vector<unsigned int>& elementVertices,
-                                                     std::set<UGGridBoundarySegment<2> >& boundarySegments)
+namespace Dune {
+
+void BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned char>& elementTypes,
+                                               const std::vector<unsigned int>& elementVertices,
+                                               std::set<UGGridBoundarySegment<2> >& boundarySegments)
 {
   // The vertices that form the edges of a triangle -- in UG numbering
   static const int triIdx[][2] = {
@@ -52,9 +54,9 @@ void Dune::BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned 
 
 }
 
-void Dune::BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned char>& elementTypes,
-                                                     const std::vector<unsigned int>& elementVertices,
-                                                     std::set<UGGridBoundarySegment<3> >& boundarySegments)
+void BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned char>& elementTypes,
+                                               const std::vector<unsigned int>& elementVertices,
+                                               std::set<UGGridBoundarySegment<3> >& boundarySegments)
 {
   int numElements = elementTypes.size();
 
@@ -136,9 +138,9 @@ void Dune::BoundaryExtractor::detectBoundarySegments(const std::vector<unsigned 
 }
 
 template<int dim>
-int Dune::BoundaryExtractor::detectBoundaryNodes(const std::set<UGGridBoundarySegment<dim> >& boundarySegments,
-                                                 int noOfNodes,
-                                                 std::vector<int>& isBoundaryNode)
+int BoundaryExtractor::detectBoundaryNodes(const std::set<UGGridBoundarySegment<dim> >& boundarySegments,
+                                           int noOfNodes,
+                                           std::vector<int>& isBoundaryNode)
 {
   isBoundaryNode.resize(noOfNodes);
 
@@ -147,14 +149,10 @@ int Dune::BoundaryExtractor::detectBoundaryNodes(const std::set<UGGridBoundarySe
   for (int i=0; i<noOfNodes; i++)
     isBoundaryNode[i] = -1;
 
-  typename std::set<UGGridBoundarySegment<dim> >::const_iterator it = boundarySegments.begin();
-
-  for (; it!=boundarySegments.end(); ++it) {
-
+  for (const auto& bs : boundarySegments) {
     for (int j=0; j<(dim-1)*2; j++)
-      if ((*it)[j]!=-1 && isBoundaryNode[(*it)[j]] == -1)
-        isBoundaryNode[(*it)[j]] = 1;
-
+      if (bs[j]!=-1 && isBoundaryNode[bs[j]] == -1)
+        isBoundaryNode[bs[j]] = 1;
   }
 
   for (unsigned int i=0; i<isBoundaryNode.size(); i++)
@@ -171,10 +169,12 @@ int Dune::BoundaryExtractor::detectBoundaryNodes(const std::set<UGGridBoundarySe
 //   can have in 2d and 3d, respectively.
 // //////////////////////////////////////////////////////////////////////////////
 
-template int Dune::BoundaryExtractor::detectBoundaryNodes<2>(const std::set<UGGridBoundarySegment<2> >& boundarySegments,
-                                                             int noOfNodes,
-                                                             std::vector<int>& isBoundaryNode);
+template int BoundaryExtractor::detectBoundaryNodes<2>(const std::set<UGGridBoundarySegment<2> >& boundarySegments,
+                                                       int noOfNodes,
+                                                       std::vector<int>& isBoundaryNode);
 
-template int Dune::BoundaryExtractor::detectBoundaryNodes<3>(const std::set<UGGridBoundarySegment<3> >& boundarySegments,
-                                                             int noOfNodes,
-                                                             std::vector<int>& isBoundaryNode);
+template int BoundaryExtractor::detectBoundaryNodes<3>(const std::set<UGGridBoundarySegment<3> >& boundarySegments,
+                                                       int noOfNodes,
+                                                       std::vector<int>& isBoundaryNode);
+
+} /* namespace Dune */

@@ -15,8 +15,7 @@
 #include <dune/common/stdstreams.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 
-
-using namespace Dune;
+namespace Dune {
 
 //***********************************************************************
 //
@@ -25,16 +24,16 @@ using namespace Dune;
 //
 //***********************************************************************
 
-template<> int Dune::UGGrid<2>::numOfUGGrids = 0;
-template<> int Dune::UGGrid<3>::numOfUGGrids = 0;
+template<> int UGGrid<2>::numOfUGGrids = 0;
+template<> int UGGrid<3>::numOfUGGrids = 0;
 
-template<> unsigned int Dune::UGGrid<2>::heapSize_ = 500;
-template<> unsigned int Dune::UGGrid<3>::heapSize_ = 500;
+template<> unsigned int UGGrid<2>::heapSize_ = 500;
+template<> unsigned int UGGrid<3>::heapSize_ = 500;
 
 
 template <int dim>
-Dune::UGGrid < dim >::UGGrid()
-  : multigrid_(NULL),
+UGGrid < dim >::UGGrid()
+  : multigrid_(nullptr),
     leafIndexSet_(*this),
     idSet_(*this),
     refinementType_(LOCAL),
@@ -84,8 +83,8 @@ Dune::UGGrid < dim >::UGGrid()
   }
 
   // Create a dummy problem
-  typename UG_NS<dim>::CoeffProcPtr coeffs[1] = {NULL};
-  typename UG_NS<dim>::UserProcPtr upp[1] = {NULL};
+  typename UG_NS<dim>::CoeffProcPtr coeffs[1] = {nullptr};
+  typename UG_NS<dim>::UserProcPtr upp[1] = {nullptr};
 
   // Create unique problem name
   std::stringstream numberAsAscii;
@@ -94,7 +93,7 @@ Dune::UGGrid < dim >::UGGrid()
 
   std::string problemName = name_ + "_Problem";
 
-  if (UG_NS<dim>::CreateBoundaryValueProblem(problemName.c_str(), 1,coeffs,1,upp) == NULL)
+  if (UG_NS<dim>::CreateBoundaryValueProblem(problemName.c_str(), 1,coeffs,1,upp) == nullptr)
     DUNE_THROW(GridError, "UG" << dim << "d::CreateBoundaryValueProblem() returned an error code!");
 
   if (numOfUGGrids==0) {
@@ -131,7 +130,7 @@ Dune::UGGrid < dim >::UGGrid()
 
 
 template < int dim >
-Dune::UGGrid < dim >::~UGGrid() noexcept(false)
+UGGrid < dim >::~UGGrid() noexcept(false)
 {
   // Delete the UG multigrid if there is one (== createEnd() has been called)
   if (multigrid_) {
@@ -166,7 +165,7 @@ Dune::UGGrid < dim >::~UGGrid() noexcept(false)
 }
 
 template < int dim >
-int Dune::UGGrid < dim >::maxLevel() const
+int UGGrid < dim >::maxLevel() const
 {
   if (!multigrid_)
     DUNE_THROW(GridError, "The grid has not been properly initialized!");
@@ -176,15 +175,15 @@ int Dune::UGGrid < dim >::maxLevel() const
 
 
 template < int dim >
-int Dune::UGGrid < dim >::size (int level, int codim) const
+int UGGrid < dim >::size (int level, int codim) const
 {
   return levelIndexSet(level).size(codim);
 }
 
 
 template < int dim >
-bool Dune::UGGrid < dim >::mark(int refCount,
-                                const typename Traits::template Codim<0>::Entity& e )
+bool UGGrid < dim >::mark(int refCount,
+                          const typename Traits::template Codim<0>::Entity& e )
 {
   typename UG_NS<dim>::Element* target = this->getRealImplementation(e).target_;
 
@@ -224,9 +223,9 @@ bool Dune::UGGrid < dim >::mark(int refCount,
 }
 
 template < int dim >
-bool Dune::UGGrid < dim >::mark(const typename Traits::template Codim<0>::Entity& e,
-                                typename UG_NS<dim>::RefinementRule rule,
-                                int side)
+bool UGGrid < dim >::mark(const typename Traits::template Codim<0>::Entity& e,
+                          typename UG_NS<dim>::RefinementRule rule,
+                          int side)
 {
   typename UG_NS<dim>::Element* target = this->getRealImplementation(e).target_;
 
@@ -240,7 +239,7 @@ bool Dune::UGGrid < dim >::mark(const typename Traits::template Codim<0>::Entity
 }
 
 template <int dim>
-int Dune::UGGrid<dim>::getMark(const typename Traits::template Codim<0>::Entity& e) const
+int UGGrid<dim>::getMark(const typename Traits::template Codim<0>::Entity& e) const
 {
   typename UG_NS<dim>::Element* target = this->getRealImplementation(e).target_;
 
@@ -264,7 +263,7 @@ int Dune::UGGrid<dim>::getMark(const typename Traits::template Codim<0>::Entity&
 }
 
 template <int dim>
-bool Dune::UGGrid <dim>::preAdapt()
+bool UGGrid <dim>::preAdapt()
 {
   if( closureType_ == GREEN )
   {
@@ -283,7 +282,7 @@ bool Dune::UGGrid <dim>::preAdapt()
 }
 
 template < int dim >
-bool Dune::UGGrid < dim >::adapt()
+bool UGGrid < dim >::adapt()
 {
   assert(multigrid_);
 
@@ -311,7 +310,7 @@ bool Dune::UGGrid < dim >::adapt()
     DUNE_THROW(GridError, "UG::adapt() returned with error code " << rv);
 
   // Renumber everything
-  setIndices(false, NULL);
+  setIndices(false, nullptr);
 
   // Return true iff the grid hierarchy changed
   //return !(bool)multigrid_->status;
@@ -321,7 +320,7 @@ bool Dune::UGGrid < dim >::adapt()
 }
 
 template <int dim>
-void Dune::UGGrid <dim>::postAdapt()
+void UGGrid <dim>::postAdapt()
 {
   for (int i=0; i<=maxLevel(); i++)
     for (const auto& element : elements(this->levelGridView(i)))
@@ -333,7 +332,7 @@ void Dune::UGGrid <dim>::postAdapt()
 }
 
 template < int dim >
-void Dune::UGGrid < dim >::globalRefine(int n)
+void UGGrid < dim >::globalRefine(int n)
 {
   for (int i=0; i<n; i++) {
 
@@ -351,11 +350,11 @@ void Dune::UGGrid < dim >::globalRefine(int n)
 }
 
 template <int dim>
-void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Codim<0>::Entity & e,
-                                             int elementSide,
-                                             int maxl,
-                                             std::vector<typename Traits::template Codim<0>::Entity>& childElements,
-                                             std::vector<unsigned char>& childElementSides) const
+void UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Codim<0>::Entity & e,
+                                       int elementSide,
+                                       int maxl,
+                                       std::vector<typename Traits::template Codim<0>::Entity>& childElements,
+                                       std::vector<unsigned char>& childElementSides) const
 {
 
   typedef std::pair<typename UG_NS<dim>::Element*,int> ListEntryType;
@@ -440,7 +439,7 @@ void Dune::UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Cod
 }
 
 template < int dim >
-bool Dune::UGGrid < dim >::loadBalance(int minlevel)
+bool UGGrid < dim >::loadBalance(int minlevel)
 {
   // Do nothing if we are on a single process
   if (comm().size()==1)
@@ -453,13 +452,13 @@ bool Dune::UGGrid < dim >::loadBalance(int minlevel)
   // Renumber everything.
   // Note: this must not be called when on a single process, because it renumbers the zero-level
   // elements and vertices.
-  setIndices(true, NULL);
+  setIndices(true, nullptr);
 
   return true;
 }
 
 template < int dim >
-bool Dune::UGGrid < dim >::loadBalance(const std::vector<Rank>& targetProcessors, unsigned int fromLevel)
+bool UGGrid < dim >::loadBalance(const std::vector<Rank>& targetProcessors, unsigned int fromLevel)
 {
   // Do nothing if we are on a single process
   if (comm().size()==1)
@@ -477,24 +476,18 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<Rank>& targetProcessors
   // If the element is a leaf, take its target rank from the input targetProcessors array.
   // If it is not, assign it to the processor most of its children are assigned to.
   for (int i=maxLevel(); i>=0; i--) {
+    for (const auto& element : elements(this->levelGridView(i), Partitions::interior)) {
 
-    typename Base::LevelGridView levelGridView = this->levelGridView(i);
-    typedef typename Base::LevelGridView::template Codim<0>::template Partition<Interior_Partition>::Iterator LevelElementIterator;
+      if (element.isLeaf()) {
 
-    for (LevelElementIterator it = levelGridView.template begin<0, Interior_Partition>();
-         it != levelGridView.template end<0, Interior_Partition>();
-         ++it) {
-
-      if (it->isLeaf()) {
-
-        auto targetRank = targetProcessors[elementMapper.index(*it)];
+        auto targetRank = targetProcessors[elementMapper.index(element)];
 
         // sanity check
         if (targetRank >= comm().size())
           DUNE_THROW(GridError, "Requesting target processor " << targetRank <<
                      ", but only " << comm().size() << " processors are available.");
 
-        UG_NS<dim>::Partition(this->getRealImplementation(*it).target_) = targetRank;
+        UG_NS<dim>::Partition(this->getRealImplementation(element).target_) = targetRank;
       } else {
 
         std::map<Rank,unsigned int> rank;
@@ -502,11 +495,9 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<Rank>& targetProcessors
         unsigned int mostFrequentCount = 0;   // how often did it occur?
 
         // Loop over all children and collect the ranks they are assigned to
-        typename Base::LevelGridView::template Codim<0>::Entity::HierarchicIterator child    = it->hbegin(it->level()+1);
-        typename Base::LevelGridView::template Codim<0>::Entity::HierarchicIterator endChild = it->hend(it->level()+1);
-        for (; child !=  endChild; ++child) {
+        for (const auto& child : descendantElements(element, element.level() + 1)) {
 
-          auto childRank = UG_NS<dim>::Partition(this->getRealImplementation(*child).target_);
+          auto childRank = UG_NS<dim>::Partition(this->getRealImplementation(child).target_);
 
           if (rank.find(childRank) == rank.end())
             rank[childRank] = 1;
@@ -521,7 +512,7 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<Rank>& targetProcessors
         }
 
         // Assign rank that occurred most often
-        UG_NS<dim>::Partition(this->getRealImplementation(*it).target_) = mostFrequentRank;
+        UG_NS<dim>::Partition(this->getRealImplementation(element).target_) = mostFrequentRank;
 
       }
     }
@@ -536,14 +527,14 @@ bool Dune::UGGrid < dim >::loadBalance(const std::vector<Rank>& targetProcessors
   // Renumber everything.
   // Note: this must not be called when on a single process, because it renumbers the zero-level
   // elements and vertices.
-  setIndices(true, NULL);
+  setIndices(true, nullptr);
 
   return true;
 }
 
 template < int dim >
-void Dune::UGGrid < dim >::setPosition(const typename Traits::template Codim<dim>::Entity& e,
-                                       const FieldVector<double, dim>& pos)
+void UGGrid < dim >::setPosition(const typename Traits::template Codim<dim>::Entity& e,
+                                 const FieldVector<double, dim>& pos)
 {
   typename UG_NS<dim>::Node* target = this->getRealImplementation(e).target_;
 
@@ -552,7 +543,7 @@ void Dune::UGGrid < dim >::setPosition(const typename Traits::template Codim<dim
 }
 
 template <int dim>
-void Dune::UGGrid<dim>::saveState(const std::string& filename) const
+void UGGrid<dim>::saveState(const std::string& filename) const
 {
   const char* type = "asc";
   const char* comment = "written by DUNE";
@@ -577,7 +568,7 @@ void Dune::UGGrid<dim>::saveState(const std::string& filename) const
 
 
 template <int dim>
-void Dune::UGGrid<dim>::loadState(const std::string& filename)
+void UGGrid<dim>::loadState(const std::string& filename)
 {
   const char* type = "asc";
   std::string problemName = name_ + "_Problem";
@@ -609,12 +600,12 @@ void Dune::UGGrid<dim>::loadState(const std::string& filename)
                                                                          );
   }
 
-  if (multigrid_==NULL)
+  if (multigrid_==nullptr)
     DUNE_THROW(GridError, "In loadState()");
 }
 
 template < int dim >
-void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
+void UGGrid < dim >::setIndices(bool setLevelZero,
                                       std::vector<unsigned int>* nodePermutation)
 {
   // Create new level index sets if necessary
@@ -641,5 +632,7 @@ void Dune::UGGrid < dim >::setIndices(bool setLevelZero,
 //   g++-4.0 wants them to be _after_ the method implementations.
 // /////////////////////////////////////////////////////////////////////////////////
 
-template class Dune::UGGrid<2>;
-template class Dune::UGGrid<3>;
+template class UGGrid<2>;
+template class UGGrid<3>;
+
+} /* namespace Dune */

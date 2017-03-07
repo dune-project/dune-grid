@@ -6,6 +6,8 @@
 #include <dune/grid/uggrid/uggridentity.hh>
 #include <dune/grid/uggrid/uggridrenumberer.hh>
 
+namespace Dune {
+
 //*************************************************************************
 //
 //  --UGGridEntity
@@ -24,7 +26,7 @@
 // count
 template <int codim, int dim, class GridImp>
 template <int cc>
-int Dune::UGGridEntity<codim,dim,GridImp>::count () const
+int UGGridEntity<codim,dim,GridImp>::count () const
 {
   DUNE_THROW(GridError, "UGGridEntity<" << codim << ", " << dim
                                         << ">::count() not implemented yet!");
@@ -32,7 +34,7 @@ int Dune::UGGridEntity<codim,dim,GridImp>::count () const
 }
 
 template< int codim, int dim, class GridImp>
-Dune::GeometryType Dune::UGGridEntity<codim,dim,GridImp>::type() const
+GeometryType UGGridEntity<codim,dim,GridImp>::type() const
 {
   static_assert(codim!=0, "The code for codim==0 is in the corresponding class specialization");
 
@@ -65,13 +67,13 @@ Dune::GeometryType Dune::UGGridEntity<codim,dim,GridImp>::type() const
 ////////////////////////////////////////////////////////////////////////////
 
 template< int dim, class GridImp>
-bool Dune::UGGridEntity < 0, dim ,GridImp >::isNew () const
+bool UGGridEntity < 0, dim ,GridImp >::isNew () const
 {
   return UG_NS<dim>::ReadCW(target_, UG_NS<dim>::NEWEL_CE);
 }
 
 template< int dim, class GridImp>
-bool Dune::UGGridEntity < 0, dim ,GridImp >::mightVanish () const
+bool UGGridEntity < 0, dim ,GridImp >::mightVanish () const
 {
   if ((!isRegular()) || (UG_NS<dim>::ReadCW(target_, UG_NS<dim>::COARSEN_CE)))
     return true;
@@ -84,7 +86,7 @@ bool Dune::UGGridEntity < 0, dim ,GridImp >::mightVanish () const
     UG_NS<dim>::GetSons(father_,sons_);
     for (int i = 0; i < UG_NS<dim>::MAX_SONS; ++i)
     {
-      if (sons_[i] == NULL) // last son visited
+      if (sons_[i] == nullptr) // last son visited
         break;
       if (!UG_NS<dim>::isRegular(sons_[i]) || UG_NS<dim>::ReadCW(sons_[i], UG_NS<dim>::COARSEN_CE))
         return true;
@@ -99,7 +101,7 @@ bool Dune::UGGridEntity < 0, dim ,GridImp >::mightVanish () const
 // count
 template <int dim, class GridImp>
 template <int cc>
-int Dune::UGGridEntity<0,dim,GridImp>::count() const
+int UGGridEntity<0,dim,GridImp>::count() const
 {
   if (dim==3) {
 
@@ -136,7 +138,7 @@ int Dune::UGGridEntity<0,dim,GridImp>::count() const
 template <int dim, class GridImp>
 template <int cc>
 typename GridImp::template Codim<cc>::Entity
-Dune::UGGridEntity<0,dim,GridImp>::subEntity ( int i ) const
+UGGridEntity<0,dim,GridImp>::subEntity ( int i ) const
 {
   assert(i>=0 && i<count<cc>());
 
@@ -153,11 +155,11 @@ Dune::UGGridEntity<0,dim,GridImp>::subEntity ( int i ) const
   else
     DUNE_THROW(GridError, "subEntity for nonexisting codimension requested!" );
 
-  return typename GridImp::template Codim<cc>::Entity(Dune::UGGridEntity<cc,dim,GridImp>((typename UG_NS<dim>::template Entity<cc>::T*)subEntity, gridImp_));
+  return typename GridImp::template Codim<cc>::Entity(UGGridEntity<cc,dim,GridImp>((typename UG_NS<dim>::template Entity<cc>::T*)subEntity, gridImp_));
 }
 
 template<int dim, class GridImp>
-Dune::GeometryType Dune::UGGridEntity<0,dim,GridImp>::type() const
+GeometryType UGGridEntity<0,dim,GridImp>::type() const
 {
   if (dim==2) {
 
@@ -195,7 +197,7 @@ Dune::GeometryType Dune::UGGridEntity<0,dim,GridImp>::type() const
 
 
 template<int dim, class GridImp>
-void Dune::UGGridEntity < 0, dim ,GridImp >::
+void UGGridEntity < 0, dim ,GridImp >::
 setToTarget(typename UG_NS<dim>::Element* target, const GridImp* gridImp)
 {
   target_ = target;
@@ -204,8 +206,8 @@ setToTarget(typename UG_NS<dim>::Element* target, const GridImp* gridImp)
 }
 
 template<int dim, class GridImp>
-Dune::UGGridHierarchicIterator<GridImp>
-Dune::UGGridEntity < 0, dim ,GridImp >::hbegin(int maxlevel) const
+UGGridHierarchicIterator<GridImp>
+UGGridEntity < 0, dim ,GridImp >::hbegin(int maxlevel) const
 {
   UGGridHierarchicIterator<GridImp> it(maxlevel,gridImp_);
 
@@ -218,8 +220,8 @@ Dune::UGGridEntity < 0, dim ,GridImp >::hbegin(int maxlevel) const
     for (int i=0; i<UG_NS<dim>::nSons(target_); i++)
       it.elementStack_.push(sonList[i]);
 
-    it.virtualEntity_.setToTarget( (it.elementStack_.empty())
-                                   ? NULL
+    it.virtualEntity_.setToTarget( it.elementStack_.empty()
+                                   ? nullptr
                                    : it.elementStack_.top(),
                                    gridImp_
                                    );
@@ -233,15 +235,16 @@ Dune::UGGridEntity < 0, dim ,GridImp >::hbegin(int maxlevel) const
 
 
 template< int dim, class GridImp>
-Dune::UGGridHierarchicIterator<GridImp>
-Dune::UGGridEntity < 0, dim ,GridImp >::hend(int maxlevel) const
+UGGridHierarchicIterator<GridImp>
+UGGridEntity < 0, dim ,GridImp >::hend(int maxlevel) const
 {
   return UGGridHierarchicIterator<GridImp>(maxlevel,gridImp_);
 }
 
 template<int dim, class GridImp>
-typename Dune::UGGridEntity<0,dim,GridImp>::LocalGeometry
-Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
+auto
+UGGridEntity < 0, dim, GridImp>::geometryInFather () const
+  -> LocalGeometry
 {
   // we need to have a father element
   typename UG_NS<dim>::Element* fatherElement = UG_NS<dim>::EFather(target_);
@@ -421,42 +424,44 @@ Dune::UGGridEntity < 0, dim, GridImp>::geometryInFather () const
   return LocalGeometry(LocalGeometryImpl(type(), cornerCoordinates));
 }
 
-template class Dune::UGGridEntity<2,2, const Dune::UGGrid<2> >;
-template class Dune::UGGridEntity<3,3, const Dune::UGGrid<3> >;
+template class UGGridEntity<2,2, const UGGrid<2> >;
+template class UGGridEntity<3,3, const UGGrid<3> >;
 
-template class Dune::UGGridEntity<0,2, const Dune::UGGrid<2> >;
-template class Dune::UGGridEntity<0,3, const Dune::UGGrid<3> >;
+template class UGGridEntity<0,2, const UGGrid<2> >;
+template class UGGridEntity<0,3, const UGGrid<3> >;
 
-template class Dune::UGGridEntity<1,2, const Dune::UGGrid<2> >;
-template class Dune::UGGridEntity<2,3, const Dune::UGGrid<3> >;
+template class UGGridEntity<1,2, const UGGrid<2> >;
+template class UGGridEntity<2,3, const UGGrid<3> >;
 
-template int Dune::UGGridEntity<0, 2, const Dune::UGGrid<2> >::count<0>() const;
-template int Dune::UGGridEntity<0, 2, const Dune::UGGrid<2> >::count<1>() const;
-template int Dune::UGGridEntity<0, 2, const Dune::UGGrid<2> >::count<2>() const;
+template int UGGridEntity<0, 2, const UGGrid<2> >::count<0>() const;
+template int UGGridEntity<0, 2, const UGGrid<2> >::count<1>() const;
+template int UGGridEntity<0, 2, const UGGrid<2> >::count<2>() const;
 
-template int Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::count<0>() const;
-template int Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::count<1>() const;
-template int Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::count<2>() const;
-template int Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::count<3>() const;
+template int UGGridEntity<0, 3, const UGGrid<3> >::count<0>() const;
+template int UGGridEntity<0, 3, const UGGrid<3> >::count<1>() const;
+template int UGGridEntity<0, 3, const UGGrid<3> >::count<2>() const;
+template int UGGridEntity<0, 3, const UGGrid<3> >::count<3>() const;
 
 
-template Dune::Grid<2, 2, double, Dune::UGGridFamily<2> >::Codim<0>::Entity
-Dune::UGGridEntity<0, 2, const Dune::UGGrid<2> >::subEntity<0>(int) const;
+template Grid<2, 2, double, UGGridFamily<2> >::Codim<0>::Entity
+UGGridEntity<0, 2, const UGGrid<2> >::subEntity<0>(int) const;
 
-template Dune::Grid<2, 2, double, Dune::UGGridFamily<2> >::Codim<1>::Entity
-Dune::UGGridEntity<0, 2, const Dune::UGGrid<2> >::subEntity<1>(int) const;
+template Grid<2, 2, double, UGGridFamily<2> >::Codim<1>::Entity
+UGGridEntity<0, 2, const UGGrid<2> >::subEntity<1>(int) const;
 
-template Dune::Grid<2, 2, double, Dune::UGGridFamily<2> >::Codim<2>::Entity
-Dune::UGGridEntity<0, 2, const Dune::UGGrid<2> >::subEntity<2>(int) const;
+template Grid<2, 2, double, UGGridFamily<2> >::Codim<2>::Entity
+UGGridEntity<0, 2, const UGGrid<2> >::subEntity<2>(int) const;
 
-template Dune::Grid<3, 3, double, Dune::UGGridFamily<3> >::Codim<0>::Entity
-Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::subEntity<0>(int) const;
+template Grid<3, 3, double, UGGridFamily<3> >::Codim<0>::Entity
+UGGridEntity<0, 3, const UGGrid<3> >::subEntity<0>(int) const;
 
-template Dune::Grid<3, 3, double, Dune::UGGridFamily<3> >::Codim<1>::Entity
-Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::subEntity<1>(int) const;
+template Grid<3, 3, double, UGGridFamily<3> >::Codim<1>::Entity
+UGGridEntity<0, 3, const UGGrid<3> >::subEntity<1>(int) const;
 
-template Dune::Grid<3, 3, double, Dune::UGGridFamily<3> >::Codim<2>::Entity
-Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::subEntity<2>(int) const;
+template Grid<3, 3, double, UGGridFamily<3> >::Codim<2>::Entity
+UGGridEntity<0, 3, const UGGrid<3> >::subEntity<2>(int) const;
 
-template Dune::Grid<3, 3, double, Dune::UGGridFamily<3> >::Codim<3>::Entity
-Dune::UGGridEntity<0, 3, const Dune::UGGrid<3> >::subEntity<3>(int) const;
+template Grid<3, 3, double, UGGridFamily<3> >::Codim<3>::Entity
+UGGridEntity<0, 3, const UGGrid<3> >::subEntity<3>(int) const;
+
+} /* namespace Dune */

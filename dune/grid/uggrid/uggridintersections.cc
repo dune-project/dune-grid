@@ -8,10 +8,17 @@
 #include <list>
 #include <set>
 
-template<class GridImp>
-const typename Dune::UGGridLevelIntersection<GridImp>::WorldVector&
-Dune::UGGridLevelIntersection<GridImp>::outerNormal
-  (const typename Dune::UGGridLevelIntersection<GridImp>::FaceVector& local) const
+namespace Dune {
+
+namespace {
+
+template<typename ctype, unsigned dim>
+void computeOuterNormal(
+  const typename UG_NS<dim>::Element* center,
+  const int neighborCount,
+  const FieldVector<ctype, dim-1>& local,
+  FieldVector<ctype, dim>& outerNormal
+  )
 {
   // //////////////////////////////////////////////////////
   //   Implementation for 3D
@@ -19,37 +26,37 @@ Dune::UGGridLevelIntersection<GridImp>::outerNormal
 
   if (dim == 3) {
 
-    if (UG_NS<dim>::Corners_Of_Side(center_, neighborCount_) == 3) {
+    if (UG_NS<dim>::Corners_Of_Side(center, neighborCount) == 3) {
 
       // A triangular intersection.  The normals are constant
-      const UGCtype* aPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 0))->myvertex->iv.x;
-      const UGCtype* bPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 1))->myvertex->iv.x;
-      const UGCtype* cPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 2))->myvertex->iv.x;
+      const ctype* aPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center, neighborCount, 0))->myvertex->iv.x;
+      const ctype* bPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center, neighborCount, 1))->myvertex->iv.x;
+      const ctype* cPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center, neighborCount, 2))->myvertex->iv.x;
 
-      FieldVector<UGCtype, 3> ba, ca;
+      FieldVector<ctype, 3> ba, ca;
 
       for (int i=0; i<3; i++) {
         ba[i] = bPos[i] - aPos[i];
         ca[i] = cPos[i] - aPos[i];
       }
 
-      outerNormal_[0] = ba[1]*ca[2] - ba[2]*ca[1];
-      outerNormal_[1] = ba[2]*ca[0] - ba[0]*ca[2];
-      outerNormal_[2] = ba[0]*ca[1] - ba[1]*ca[0];
+      outerNormal[0] = ba[1]*ca[2] - ba[2]*ca[1];
+      outerNormal[1] = ba[2]*ca[0] - ba[0]*ca[2];
+      outerNormal[2] = ba[0]*ca[1] - ba[1]*ca[0];
 
     } else {
 
       // A quadrilateral: compute the normal in each corner and do bilinear interpolation
       // The cornerNormals array uses UG corner numbering
-      FieldVector<UGCtype,3> cornerNormals[4];
+      FieldVector<ctype,3> cornerNormals[4];
       for (int i=0; i<4; i++) {
 
         // Compute the normal on the i-th corner
-        const UGCtype* aPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_,neighborCount_,i))->myvertex->iv.x;
-        const UGCtype* bPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_,neighborCount_,(i+1)%4))->myvertex->iv.x;
-        const UGCtype* cPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_,neighborCount_,(i+3)%4))->myvertex->iv.x;
+        const ctype* aPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center,neighborCount,i))->myvertex->iv.x;
+        const ctype* bPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center,neighborCount,(i+1)%4))->myvertex->iv.x;
+        const ctype* cPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center,neighborCount,(i+3)%4))->myvertex->iv.x;
 
-        FieldVector<UGCtype, 3> ba, ca;
+        FieldVector<ctype, 3> ba, ca;
 
         for (int j=0; j<3; j++) {
           ba[j] = bPos[j] - aPos[j];
@@ -63,10 +70,10 @@ Dune::UGGridLevelIntersection<GridImp>::outerNormal
 
       // Bilinear interpolation
       for (int i=0; i<3; i++)
-        outerNormal_[i] = (1-local[0])*(1-local[1])*cornerNormals[0][i]
-                          + local[0]     * (1-local[1]) * cornerNormals[1][i]
-                          + local[0]     * local[1]     * cornerNormals[2][i]
-                          + (1-local[0]) * local[1]     * cornerNormals[3][i];
+        outerNormal[i] = (1-local[0])*(1-local[1])*cornerNormals[0][i]
+                         + local[0]     * (1-local[1]) * cornerNormals[1][i]
+                         + local[0]     * local[1]     * cornerNormals[2][i]
+                         + (1-local[0]) * local[1]     * cornerNormals[3][i];
 
     }
 
@@ -77,21 +84,31 @@ Dune::UGGridLevelIntersection<GridImp>::outerNormal
     // //////////////////////////////////////////////////////
 
     // Get the vertices of this side.
-    const UGCtype* aPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 0))->myvertex->iv.x;
-    const UGCtype* bPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 1))->myvertex->iv.x;
+    const ctype* aPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center, neighborCount, 0))->myvertex->iv.x;
+    const ctype* bPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center, neighborCount, 1))->myvertex->iv.x;
 
     // compute normal
-    outerNormal_[0] = bPos[1] - aPos[1];
-    outerNormal_[1] = aPos[0] - bPos[0];
-
+    outerNormal[0] = bPos[1] - aPos[1];
+    outerNormal[1] = aPos[0] - bPos[0];
   }
+}
 
+} /* namespace */
+
+template<class GridImp>
+auto
+UGGridLevelIntersection<GridImp>::outerNormal
+  (const FaceVector& local) const
+  -> const WorldVector&
+{
+  computeOuterNormal<UGCtype, dim>(center_, neighborCount_, local, outerNormal_);
   return outerNormal_;
 }
 
 template< class GridImp>
-typename Dune::UGGridLevelIntersection<GridImp>::LocalGeometry
-Dune::UGGridLevelIntersection<GridImp>::geometryInInside () const
+auto
+UGGridLevelIntersection<GridImp>::geometryInInside () const
+  -> LocalGeometry
 {
   if (!geometryInInside_) {
 
@@ -118,8 +135,9 @@ Dune::UGGridLevelIntersection<GridImp>::geometryInInside () const
 }
 
 template< class GridImp>
-typename Dune::UGGridLevelIntersection<GridImp>::Geometry
-Dune::UGGridLevelIntersection<GridImp>::geometry () const
+auto
+UGGridLevelIntersection<GridImp>::geometry () const
+  -> Geometry
 {
   if (!geometry_) {
 
@@ -146,8 +164,9 @@ Dune::UGGridLevelIntersection<GridImp>::geometry () const
 }
 
 template<class GridImp>
-typename Dune::UGGridLevelIntersection<GridImp>::LocalGeometry
-Dune::UGGridLevelIntersection<GridImp>::geometryInOutside () const
+auto
+UGGridLevelIntersection<GridImp>::geometryInOutside () const
+  -> LocalGeometry
 {
   if (!geometryInOutside_) {
 
@@ -192,12 +211,12 @@ Dune::UGGridLevelIntersection<GridImp>::geometryInOutside () const
 }
 
 template< class GridImp>
-int Dune::UGGridLevelIntersection<GridImp>::indexInOutside () const
+int UGGridLevelIntersection<GridImp>::indexInOutside () const
 {
   const typename UG_NS<dim>::Element *other;
 
   // Look for a neighbor on this level
-  if ((other = UG_NS<dim>::NbElem(center_, neighborCount_)) == NULL)
+  if ((other = UG_NS<dim>::NbElem(center_, neighborCount_)) == nullptr)
     DUNE_THROW(GridError,"There is no neighbor element!");
 
   // Find the corresponding side in the neighbor element
@@ -222,93 +241,23 @@ int Dune::UGGridLevelIntersection<GridImp>::indexInOutside () const
    If the face is flat this doesn't matter.
  */
 template<class GridImp>
-const typename Dune::UGGridLeafIntersection<GridImp>::WorldVector&
-Dune::UGGridLeafIntersection<GridImp>::outerNormal
-  (const typename Dune::UGGridLeafIntersection<GridImp>::FaceVector& local) const
+auto
+UGGridLeafIntersection<GridImp>::outerNormal
+  (const FaceVector& local) const
+  -> const WorldVector&
 {
-  /////////////////////////////////////////////////////////
-  //   Implementation for 3D
-  /////////////////////////////////////////////////////////
-
-  if (dim == 3) {
-
-    if (UG_NS<dim>::Corners_Of_Side(center_, neighborCount_) == 3) {
-
-      // A triangular intersection.  The normals are constant
-      const UGCtype* aPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 0))->myvertex->iv.x;
-      const UGCtype* bPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 1))->myvertex->iv.x;
-      const UGCtype* cPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 2))->myvertex->iv.x;
-
-      FieldVector<UGCtype, 3> ba, ca;
-
-      for (int i=0; i<3; i++) {
-        ba[i] = bPos[i] - aPos[i];
-        ca[i] = cPos[i] - aPos[i];
-      }
-
-      outerNormal_[0] = ba[1]*ca[2] - ba[2]*ca[1];
-      outerNormal_[1] = ba[2]*ca[0] - ba[0]*ca[2];
-      outerNormal_[2] = ba[0]*ca[1] - ba[1]*ca[0];
-
-    } else {
-
-      // A quadrilateral: compute the normal in each corner and do bilinear interpolation
-      // The cornerNormals array uses UG corner numbering
-      FieldVector<UGCtype,3> cornerNormals[4];
-      for (int i=0; i<4; i++) {
-
-        // Compute the normal on the i-th corner
-        const UGCtype* aPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_,neighborCount_,i))->myvertex->iv.x;
-        const UGCtype* bPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_,neighborCount_,(i+1)%4))->myvertex->iv.x;
-        const UGCtype* cPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_,neighborCount_,(i+3)%4))->myvertex->iv.x;
-
-        FieldVector<UGCtype, 3> ba, ca;
-
-        for (int j=0; j<3; j++) {
-          ba[j] = bPos[j] - aPos[j];
-          ca[j] = cPos[j] - aPos[j];
-        }
-
-        cornerNormals[i][0] = ba[1]*ca[2] - ba[2]*ca[1];
-        cornerNormals[i][1] = ba[2]*ca[0] - ba[0]*ca[2];
-        cornerNormals[i][2] = ba[0]*ca[1] - ba[1]*ca[0];
-      }
-
-      // Bilinear interpolation
-      for (int i=0; i<3; i++)
-        outerNormal_[i] = (1-local[0])*(1-local[1])*cornerNormals[0][i]
-                          + local[0]     * (1-local[1]) * cornerNormals[1][i]
-                          + local[0]     * local[1]     * cornerNormals[2][i]
-                          + (1-local[0]) * local[1]     * cornerNormals[3][i];
-
-    }
-
-  } else {     // if (dim==3) ... else
-
-    // //////////////////////////////////////////////////////
-    //   Implementation for 2D
-    // //////////////////////////////////////////////////////
-
-    // Get the vertices of this side.
-    const UGCtype* aPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 0))->myvertex->iv.x;
-    const UGCtype* bPos = UG_NS<dim>::Corner(center_,UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, 1))->myvertex->iv.x;
-
-    // compute normal
-    outerNormal_[0] = bPos[1] - aPos[1];
-    outerNormal_[1] = aPos[0] - bPos[0];
-
-  }
-
+  computeOuterNormal<UGCtype, dim>(center_, neighborCount_, local, outerNormal_);
   return outerNormal_;
 }
 
 template< class GridImp>
-typename Dune::UGGridLeafIntersection<GridImp>::LocalGeometry
-Dune::UGGridLeafIntersection< GridImp >::geometryInInside () const
+auto
+UGGridLeafIntersection< GridImp >::geometryInInside () const
+  -> LocalGeometry
 {
   if (!geometryInInside_) {
 
-    if (leafSubFaces_[0].first == NULL       // boundary intersection
+    if (leafSubFaces_[0].first == nullptr       // boundary intersection
         // or if this face is the intersection
         || UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) <= UG_NS<dim>::myLevel(center_)
         || (UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) > UG_NS<dim>::myLevel(center_)
@@ -371,12 +320,13 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInInside () const
 }
 
 template< class GridImp>
-typename Dune::UGGridLeafIntersection<GridImp>::Geometry
-Dune::UGGridLeafIntersection< GridImp >::geometry () const
+auto
+UGGridLeafIntersection< GridImp >::geometry () const
+  -> Geometry
 {
   if (!geometry_) {
 
-    if (leafSubFaces_[0].first == NULL       // boundary intersection
+    if (leafSubFaces_[0].first == nullptr       // boundary intersection
         // or if this face is the intersection
         || UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) <= UG_NS<dim>::myLevel(center_)
         || (UG_NS<dim>::myLevel(leafSubFaces_[subNeighborCount_].first) > UG_NS<dim>::myLevel(center_)
@@ -436,12 +386,13 @@ Dune::UGGridLeafIntersection< GridImp >::geometry () const
 
 /** \todo Needs to be checked for the nonconforming case */
 template< class GridImp>
-typename Dune::UGGridLeafIntersection<GridImp>::LocalGeometry
-Dune::UGGridLeafIntersection< GridImp >::geometryInOutside () const
+auto
+UGGridLeafIntersection< GridImp >::geometryInOutside () const
+  -> LocalGeometry
 {
   if (!geometryInOutside_) {
 
-    if (leafSubFaces_[0].first == NULL)
+    if (leafSubFaces_[0].first == nullptr)
       DUNE_THROW(GridError, "There is no neighbor!");
 
     if ( // if this face is the intersection
@@ -505,9 +456,9 @@ Dune::UGGridLeafIntersection< GridImp >::geometryInOutside () const
 }
 
 template< class GridImp>
-int Dune::UGGridLeafIntersection<GridImp>::indexInOutside () const
+int UGGridLeafIntersection<GridImp>::indexInOutside () const
 {
-  if (leafSubFaces_[subNeighborCount_].first == NULL)
+  if (leafSubFaces_[subNeighborCount_].first == nullptr)
     DUNE_THROW(GridError,"There is no neighbor!");
 
 #ifndef NDEBUG
@@ -521,7 +472,7 @@ int Dune::UGGridLeafIntersection<GridImp>::indexInOutside () const
 }
 
 template <class GridImp>
-int Dune::UGGridLeafIntersection<GridImp>::getFatherSide(const Face& currentFace) const
+int UGGridLeafIntersection<GridImp>::getFatherSide(const Face& currentFace) const
 {
   const typename UG_NS<dim>::Element* father = UG_NS<dim>::EFather(currentFace.first);
 
@@ -614,13 +565,11 @@ int Dune::UGGridLeafIntersection<GridImp>::getFatherSide(const Face& currentFace
       DUNE_THROW(NotImplemented, "Anisotropic nonconforming grids are not fully implemented!");
 
     // Find the corresponding side on the father element
-    int i;
-    for (i=0; i<UG_NS<dim>::Sides_Of_Elem(father); i++) {
+    for (int i=0; i<UG_NS<dim>::Sides_Of_Elem(father); i++) {
       unsigned int found = 0;
-      typename std::set<const typename UG_NS<dim>::Node*>::iterator fNIt = fatherNodes.begin();
-      for (; fNIt != fatherNodes.end(); ++fNIt)
+      for (const auto& fn : fatherNodes)
         for (int k=0; k<UG_NS<dim>::Corners_Of_Side(father,i); k++)
-          if (*fNIt == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, k))) {
+          if (fn == UG_NS<dim>::Corner(father,UG_NS<dim>::Corner_Of_Side(father, i, k))) {
             found++;
             break;
           }
@@ -637,13 +586,13 @@ int Dune::UGGridLeafIntersection<GridImp>::getFatherSide(const Face& currentFace
 }
 
 template< class GridImp>
-void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
+void UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
 
   // Do nothing if level neighbor doesn't exit
   typename UG_NS<dim>::Element* levelNeighbor = UG_NS<dim>::NbElem(center_, neighborCount_);
 
   // If the level neighbor exists and is leaf, then there is only a single leaf intersection
-  if (levelNeighbor != NULL && UG_NS<dim>::isLeaf(levelNeighbor)) {
+  if (levelNeighbor != nullptr && UG_NS<dim>::isLeaf(levelNeighbor)) {
     leafSubFaces_.resize(1);
     leafSubFaces_[0] = Face(levelNeighbor, numberInNeighbor(center_, levelNeighbor));
   }
@@ -651,16 +600,16 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
   // If the level neighbor does not exist, then leaf intersections exist only with neighbors
   // on lower levels, if they exist at all.  Therefore we descend in the hierarchy towards
   // the coarsest grid until we have found a level neighbor.
-  else if (levelNeighbor == NULL) {
+  else if (levelNeighbor == nullptr) {
 
     leafSubFaces_.resize(1);
-    leafSubFaces_[0] = Face( (typename UG_NS<dim>::Element*)NULL, 0);
+    leafSubFaces_[0] = Face( (typename UG_NS<dim>::Element*)nullptr, 0);
 
     // I am a leaf and the neighbor does not exist: go down
     Face currentFace(center_, neighborCount_);
     const typename UG_NS<dim>::Element* father = UG_NS<GridImp::dimensionworld>::EFather(center_);
 
-    while (father != NULL
+    while (father != nullptr
 #ifdef ModelP
            && !UG_NS<dim>::isGhost(father)
 #endif
@@ -759,13 +708,15 @@ void Dune::UGGridLeafIntersection<GridImp>::constructLeafSubfaces() {
   if (leafSubFaces_.empty())
   {
     leafSubFaces_.resize(1);
-    leafSubFaces_[0] = Face( (typename UG_NS<dim>::Element*)NULL, 0);
+    leafSubFaces_[0] = Face( (typename UG_NS<dim>::Element*)nullptr, 0);
   }
 }
 
 // Explicit template instantiations to compile the stuff in this file
-template class Dune::UGGridLevelIntersection<const Dune::UGGrid<2> >;
-template class Dune::UGGridLevelIntersection<const Dune::UGGrid<3> >;
+template class UGGridLevelIntersection<const UGGrid<2> >;
+template class UGGridLevelIntersection<const UGGrid<3> >;
 
-template class Dune::UGGridLeafIntersection<const Dune::UGGrid<2> >;
-template class Dune::UGGridLeafIntersection<const Dune::UGGrid<3> >;
+template class UGGridLeafIntersection<const UGGrid<2> >;
+template class UGGridLeafIntersection<const UGGrid<3> >;
+
+} /* namespace Dune */

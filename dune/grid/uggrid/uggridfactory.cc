@@ -11,8 +11,7 @@
 #include <dune/grid/uggrid/uggridfactory.hh>
 #include "boundaryextractor.hh"
 
-
-using namespace Dune;
+namespace Dune {
 
 /* The following three methods are the ones that UG calls to know about the geometry
    of the boundary.  UG expects one static method for each coarse grid boundary segment.
@@ -71,10 +70,10 @@ static int boundarySegmentWrapper3dQuad(void *data, double *param, double *resul
 
 
 template <int dimworld>
-Dune::GridFactory<Dune::UGGrid<dimworld> >::
+GridFactory<UGGrid<dimworld> >::
 GridFactory()
 {
-  grid_ = new Dune::UGGrid<dimworld>;
+  grid_ = new UGGrid<dimworld>;
 
   factoryOwnsGrid_ = true;
 
@@ -82,7 +81,7 @@ GridFactory()
 }
 
 template <int dimworld>
-Dune::GridFactory<Dune::UGGrid<dimworld> >::
+GridFactory<UGGrid<dimworld> >::
 GridFactory(UGGrid<dimworld>* grid)
 {
   grid_ = grid;
@@ -93,7 +92,7 @@ GridFactory(UGGrid<dimworld>* grid)
 }
 
 template <int dimworld>
-Dune::GridFactory<Dune::UGGrid<dimworld> >::
+GridFactory<UGGrid<dimworld> >::
 ~GridFactory()
 {
   if (grid_ && factoryOwnsGrid_)
@@ -101,14 +100,14 @@ Dune::GridFactory<Dune::UGGrid<dimworld> >::
 }
 
 template <int dimworld>
-void Dune::GridFactory<Dune::UGGrid<dimworld> >::
-insertVertex(const Dune::FieldVector<typename Dune::GridFactory<Dune::UGGrid<dimworld> >::ctype,dimworld>& pos)
+void GridFactory<UGGrid<dimworld> >::
+insertVertex(const FieldVector<typename GridFactory<UGGrid<dimworld> >::ctype,dimworld>& pos)
 {
   vertexPositions_.push_back(pos);
 }
 
 template <int dimworld>
-void Dune::GridFactory<Dune::UGGrid<dimworld> >::
+void GridFactory<UGGrid<dimworld> >::
 insertElement(const GeometryType& type,
               const std::vector<unsigned int>& vertices)
 {
@@ -180,14 +179,14 @@ insertElement(const GeometryType& type,
 }
 
 template <int dimworld>
-void Dune::GridFactory<Dune::UGGrid<dimworld> >::
+void GridFactory<UGGrid<dimworld> >::
 insertBoundarySegment(const std::vector<unsigned int>& vertices)
 {
   insertBoundarySegment(vertices, std::shared_ptr<BoundarySegment<dimworld> >());
 }
 
 template <int dimworld>
-void Dune::GridFactory<Dune::UGGrid<dimworld> >::
+void GridFactory<UGGrid<dimworld> >::
 insertBoundarySegment(const std::vector<unsigned int>& vertices,
                       const std::shared_ptr<BoundarySegment<dimworld> > &boundarySegment)
 {
@@ -213,13 +212,13 @@ insertBoundarySegment(const std::vector<unsigned int>& vertices,
 }
 
 template <int dimworld>
-Dune::UGGrid<dimworld>* Dune::GridFactory<Dune::UGGrid<dimworld> >::
+UGGrid<dimworld>* GridFactory<UGGrid<dimworld> >::
 createGrid()
 {
   // Prevent a crash when this method is called twice in a row
   // You never know who may do this...
-  if (grid_==NULL)
-    return NULL;
+  if (grid_==nullptr)
+    return nullptr;
 
   // ///////////////////////////////////////////////////////////////////////////////
   //  Communicate the grid information from the master to all other processes
@@ -261,7 +260,7 @@ createGrid()
   typedef typename std::set<UGGridBoundarySegment<dimworld> >::iterator SetIterator;
 
   BoundaryExtractor::detectBoundarySegments(elementTypes_, elementVertices_, boundarySegments);
-  if (boundarySegments.size() == 0)
+  if (boundarySegments.empty())
     DUNE_THROW(GridError, "Couldn't extract grid boundary.");
 
   std::vector<int> isBoundaryNode;
@@ -305,7 +304,7 @@ createGrid()
 
   if (UG_NS<dimworld>::CreateDomain(domainName.c_str(),     // The domain name
                                     grid_->numBoundarySegments_,
-                                    noOfBNodes) == NULL)
+                                    noOfBNodes) == nullptr)
     DUNE_THROW(GridError, "Calling UG::" << dimworld << "d::CreateDomain failed!");
 
   // ///////////////////////////////////////////
@@ -356,7 +355,7 @@ createGrid()
                                                  alpha,
                                                  beta,
                                                  boundarySegmentWrapper,
-                                                 grid_->boundarySegments_[i].get())==NULL) {
+                                                 grid_->boundarySegments_[i].get())==nullptr) {
         DUNE_THROW(GridError, "Calling UG" << dimworld << "d::CreateBoundarySegment failed!");
       }
 
@@ -378,7 +377,7 @@ createGrid()
                                                numVertices,          // Number of corners
                                                vertices_c_style,
                                                segmentCoordinates
-                                               )==NULL)
+                                               )==nullptr)
         DUNE_THROW(IOError, "Error calling CreateLinearSegment");
 
     }
@@ -437,7 +436,7 @@ createGrid()
                                              thisSegment.numVertices(),   // Number of corners
                                              vertices_c_style,
                                              segmentCoordinates
-                                             )==NULL)
+                                             )==nullptr)
       DUNE_THROW(IOError, "Error calling CreateLinearSegment");
 
   }
@@ -501,8 +500,8 @@ createGrid()
     // hand over the grid and delete the member pointer
     // ///////////////////////////////////////////////////
 
-    Dune::UGGrid<dimworld>* tmp = grid_;
-    grid_ = NULL;
+    UGGrid<dimworld>* tmp = grid_;
+    grid_ = nullptr;
     return tmp;
   }
 
@@ -513,7 +512,7 @@ createGrid()
   for (size_t i=0; i<vertexPositions_.size(); i++) {
     if (isBoundaryNode[i] != -1)
       continue;
-    if (UG_NS<dimworld>::InsertInnerNode(grid_->multigrid_->grids[0], &((vertexPositions_[i])[0])) == NULL)
+    if (UG_NS<dimworld>::InsertInnerNode(grid_->multigrid_->grids[0], &((vertexPositions_[i])[0])) == nullptr)
       DUNE_THROW(GridError, "Inserting a vertex into UGGrid failed!");
 
     isBoundaryNode[i] = nodeCounter++;
@@ -526,7 +525,7 @@ createGrid()
   // ////////////////////////////////////////////////
 
   std::vector<typename UG_NS<dimworld>::Node*> nodePointers(isBoundaryNode.size());
-  for (typename UG_NS<dimworld>::Node* theNode=UG_NS<dimworld>::FirstNode(grid_->multigrid_->grids[0]); theNode!=NULL; theNode=theNode->succ)
+  for (typename UG_NS<dimworld>::Node* theNode=UG_NS<dimworld>::FirstNode(grid_->multigrid_->grids[0]); theNode!=nullptr; theNode=theNode->succ)
     nodePointers[theNode->id] = theNode;
 
   int idx = 0;
@@ -536,7 +535,7 @@ createGrid()
     for (size_t j=0; j<elementTypes_[i]; j++)
       vertices[j] = nodePointers[isBoundaryNode[elementVertices_[idx++]]];
 
-    if (InsertElement(grid_->multigrid_->grids[0], elementTypes_[i],&(vertices[0]),NULL,NULL,NULL)==NULL)
+    if (InsertElement(grid_->multigrid_->grids[0], elementTypes_[i],&(vertices[0]),nullptr,nullptr,nullptr)==nullptr)
       DUNE_THROW(GridError, "Inserting element into UGGrid failed!");
   }
 
@@ -564,13 +563,13 @@ createGrid()
   // hand over the grid and delete the member pointer
   // ///////////////////////////////////////////////////
 
-  Dune::UGGrid<dimworld>* tmp = grid_;
-  grid_ = NULL;
+  UGGrid<dimworld>* tmp = grid_;
+  grid_ = nullptr;
   return tmp;
 }
 
 template <int dimworld>
-void Dune::GridFactory<Dune::UGGrid<dimworld> >::
+void GridFactory<UGGrid<dimworld> >::
 createBegin()
 {
   // ///////////////////////////////////////////////////////
@@ -586,9 +585,9 @@ createBegin()
     //UG_NS<dim>::Set_Current_BVP(grid_->multigrid_->theBVP);
     // set the multigrid's bvp pointer to NULL to make sure the BVP
     // is not deleted
-    grid_->multigrid_->theBVP = NULL;
+    grid_->multigrid_->theBVP = nullptr;
     UG_NS<dimworld>::DisposeMultiGrid(grid_->multigrid_);
-    grid_->multigrid_ = NULL;
+    grid_->multigrid_ = nullptr;
   }
 
   // Delete levelIndexSets if there are any
@@ -614,5 +613,7 @@ createBegin()
 
 
 // Explicit template instatiation
-template class Dune::GridFactory<Dune::UGGrid<2> >;
-template class Dune::GridFactory<Dune::UGGrid<3> >;
+template class GridFactory<UGGrid<2> >;
+template class GridFactory<UGGrid<3> >;
+
+} /* namespace Dune */

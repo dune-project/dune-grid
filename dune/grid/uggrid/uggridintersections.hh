@@ -84,7 +84,7 @@ namespace Dune {
 
     //! return true if across the edge an neighbor on this level exists
     bool neighbor () const {
-      return UG_NS<dim>::NbElem(center_, neighborCount_) != NULL;
+      return UG_NS<dim>::NbElem(center_, neighborCount_) != nullptr;
     }
 
     /** \brief return index of the corresponding coarse grid boundary segment */
@@ -136,8 +136,8 @@ namespace Dune {
     outerNormal (const FaceVector& local) const;
 
     //! return outer normal
-    const FieldVector<UGCtype, dimworld>&
-    integrationOuterNormal (const FieldVector<UGCtype, dim-1>& local) const
+    const WorldVector&
+    integrationOuterNormal (const FaceVector& local) const
     {
       integrationOuterNormal_ = outerNormal(local);
 
@@ -148,8 +148,8 @@ namespace Dune {
     }
 
     //! return outer normal
-    const FieldVector<UGCtype, GridImp::dimensionworld>&
-    unitOuterNormal (const FieldVector<UGCtype, dim-1>& local) const
+    const WorldVector&
+    unitOuterNormal (const FaceVector& local) const
     {
       unitOuterNormal_ = outerNormal(local);
       unitOuterNormal_ /= unitOuterNormal_.two_norm();
@@ -157,7 +157,7 @@ namespace Dune {
     }
 
     //! return outer normal
-    const FieldVector<UGCtype, GridImp::dimensionworld>&
+    const WorldVector&
     centerUnitOuterNormal () const
     {
       GeometryType type = geometry().type();
@@ -169,9 +169,9 @@ namespace Dune {
   private:
 
     //! vector storing the outer normal
-    mutable FieldVector<UGCtype, dimworld> outerNormal_;
-    mutable FieldVector<UGCtype, dimworld> integrationOuterNormal_;
-    mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
+    mutable WorldVector outerNormal_;
+    mutable WorldVector integrationOuterNormal_;
+    mutable WorldVector unitOuterNormal_;
 
     //! pointers holding the global and local geometries
     mutable std::shared_ptr<GeometryImpl>      geometry_;
@@ -269,7 +269,7 @@ namespace Dune {
 
     //! return true if a neighbor element exists across this intersection
     bool neighbor () const {
-      return leafSubFaces_[subNeighborCount_].first != NULL;
+      return leafSubFaces_[subNeighborCount_].first != nullptr;
     }
 
     /** \brief Return index of corresponding coarse grid boundary segment */
@@ -287,7 +287,7 @@ namespace Dune {
 
       const typename UG_NS<dim>::Element* outside = leafSubFaces_[subNeighborCount_].first;
 
-      if (outside == NULL         // boundary intersection
+      if (outside == nullptr         // boundary intersection
           // inside and outside are on the same level
           || UG_NS<dim>::myLevel(outside) == UG_NS<dim>::myLevel(center_)
           // outside is on a higher level, but there is only one intersection
@@ -365,8 +365,8 @@ namespace Dune {
     outerNormal (const FaceVector& local) const;
 
     //! return outer normal
-    const FieldVector<UGCtype, dimworld>&
-    integrationOuterNormal (const FieldVector<UGCtype, dim-1>& local) const
+    const WorldVector&
+    integrationOuterNormal (const FaceVector& local) const
     {
       integrationOuterNormal_ = outerNormal(local);
 
@@ -380,15 +380,15 @@ namespace Dune {
     }
 
     //! return outer normal
-    const FieldVector<UGCtype, dimworld>&
-    unitOuterNormal (const FieldVector<UGCtype, dim-1>& local) const {
+    const WorldVector&
+    unitOuterNormal (const FaceVector& local) const {
       unitOuterNormal_ = outerNormal(local);
       unitOuterNormal_ /= unitOuterNormal_.two_norm();
       return unitOuterNormal_;
     }
 
     //! return outer normal
-    const FieldVector<UGCtype, dimworld>&
+    const WorldVector&
     centerUnitOuterNormal () const
     {
       GeometryType type = geometry().type();
@@ -421,9 +421,9 @@ namespace Dune {
     void constructLeafSubfaces();
 
     //! vector storing the outer normal
-    mutable FieldVector<UGCtype, dimworld> outerNormal_;
-    mutable FieldVector<UGCtype, dimworld> integrationOuterNormal_;
-    mutable FieldVector<UGCtype, dimworld> unitOuterNormal_;
+    mutable WorldVector outerNormal_;
+    mutable WorldVector integrationOuterNormal_;
+    mutable WorldVector unitOuterNormal_;
 
     //! pointer to global and local intersection geometries
     mutable std::shared_ptr<GeometryImpl>      geometry_;
