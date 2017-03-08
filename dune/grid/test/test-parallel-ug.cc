@@ -622,6 +622,14 @@ int main (int argc , char **argv) try
   // initialize MPI, finalize is done automatically on exit
   auto &mpiHelper = Dune::MPIHelper::instance(argc, argv);
 
+#if !defined(ModelP)
+  if (mpiHelper.size() > 1) {
+    if (mpiHelper.rank() == 0)
+      std::cout << "SKIPPED: test-parallel-ug requires a parallel version of UG\n";
+    return 77;
+  }
+#endif
+
   std::cout << "This is process "
             << mpiHelper.rank() + 1
             << " of "
