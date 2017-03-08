@@ -75,9 +75,6 @@ namespace Dune
       }
     }
     std::cout << ")" << std::endl;
-
-
-    return;
   }
 
 
@@ -91,11 +88,6 @@ namespace Dune
 
     // type used for coordinates in the grid
     typedef typename G::ctype ct;
-
-    // the grid has an iterator providing the access to
-    // all elements (better codim 0 entities) on a grid level
-    // Note the use of the typename and template keywords.
-    typedef typename G::Traits::template Codim<0>::LevelIterator LevelIterator;
 
     // print info about this level
     std::cout << prefix << "level=" << level
@@ -112,39 +104,36 @@ namespace Dune
     std::cout << ")" << std::endl;
 
     // print info about each element on given level
-    LevelIterator eendit = grid.levelGridView(level).template end<0>();
-    for (LevelIterator it = grid.levelGridView(level).template begin<0>();
-         it != eendit; ++it)
+    for (const auto& element : elements(levelGridView(grid, level)))
     {
-      std::cout << prefix << "level=" << it->level()
-                << " " << it->type() << "[" << dim << "]"
-                << " index=" << grid.levelIndexSet(level).index(*it)
-                << " gid=" << grid.globalIdSet().template id<0>(*it)
-                << " leaf=" << it->isLeaf()
-                << " partition=" << PartitionName(it->partitionType())
+      const auto& geometry = element.geometry();
+      std::cout << prefix << "level=" << element.level()
+                << " " << element.type() << "[" << dim << "]"
+                << " index=" << grid.levelIndexSet(level).index(element)
+                << " gid=" << grid.globalIdSet().template id<0>(element)
+                << " leaf=" << element.isLeaf()
+                << " partition=" << PartitionName(element.partitionType())
                 << " center=("
-                << it->geometry().global(Dune::ReferenceElements<ct,dim>::general(it->type()).position(0,0))
+                << geometry.global(Dune::ReferenceElements<ct,dim>::general(element.type()).position(0,0))
                 << ")"
-                << " first=(" << it->geometry().corner(0) << ")"
+                << " first=(" << geometry.corner(0) << ")"
                 << std::endl;
 
       std::cout << prefix << "codim " << dim << " subindex";
-      for (int i=0; i<it->template count<dim>(); i++)
+      for (int i=0; i < element.subEntities(dim); i++)
       {
-        std::cout << " " << i << ":" << grid.levelIndexSet(level).subIndex(*it,i,dim);
+        std::cout << " " << i << ":" << grid.levelIndexSet(level).subIndex(element,i,dim);
       }
       std::cout << std::endl;
 
       std::cout << prefix << "codim " << dim-1 << " subindex";
-      for (int i=0; i<it->template count<dim-1>(); i++)
+      for (int i=0; i < element.subEntities(dim-1); i++)
       {
-        std::cout << " " << i << ":" << grid.levelIndexSet(level).subIndex(*it,i,dim-1);
+        std::cout << " " << i << ":" << grid.levelIndexSet(level).subIndex(element,i,dim-1);
       }
       std::cout << std::endl;
 
     }
-
-    return;
   }
 
 
@@ -158,12 +147,6 @@ namespace Dune
 
     // type used for coordinates in the grid
     typedef typename G::ctype ct;
-
-    // the grid has an iterator providing the access to
-    // all elements (better codim 0 entities) on a grid level
-    // Note the use of the typename and template keywords.
-    typedef typename G::Traits::template Codim<0>::LeafIterator LeafIterator;
-    typedef typename G::Traits::template Codim<dim>::LeafIterator VLeafIterator;
 
     // print info about the leaf grid
     std::cout << prefix << "leaf"
@@ -184,51 +167,48 @@ namespace Dune
     std::cout << ")" << std::endl;
 
     // print info about nodes in leaf grid
-    VLeafIterator veendit = grid.template leafend<dim>();
-    for (VLeafIterator it = grid.template leafbegin<dim>(); it!=veendit; ++it)
+    for (const auto& vertex : vertices(leafGridView(grid)))
     {
-      std::cout << prefix << "level=" << it->level()
-                << " " << it->type() << "[" << dim << "]"
-                << " index=" << grid.leafIndexSet().index(*it)
-                << " gid=" << grid.globalIdSet().template id<dim>(*it)
-                << " partition=" << PartitionName(it->partitionType())
-                << " pos=(" << it->geometry().corner(0) << ")"
+      std::cout << prefix << "level=" << vertex.level()
+                << " " << vertex.type() << "[" << dim << "]"
+                << " index=" << grid.leafIndexSet().index(vertex)
+                << " gid=" << grid.globalIdSet().template id<dim>(vertex)
+                << " partition=" << PartitionName(vertex.partitionType())
+                << " pos=(" << vertex.geometry().corner(0) << ")"
                 << std::endl;
     }
 
     // print info about each element in leaf grid
-    LeafIterator eendit = grid.template leafend<0>();
-    for (LeafIterator it = grid.template leafbegin<0>(); it!=eendit; ++it)
+    for (const auto& element : elements(leafGridView(grid)))
     {
-      std::cout << prefix << "level=" << it->level()
-                << " " << it->type() << "[" << dim << "]"
-                << " index=" << grid.leafIndexSet().index(*it)
-                << " gid=" << grid.globalIdSet().template id<0>(*it)
-                << " leaf=" << it->isLeaf()
-                << " partition=" << PartitionName(it->partitionType())
+      const auto& geometry = element.geometry();
+      std::cout << prefix << "level=" << element.level()
+                << " " << element.type() << "[" << dim << "]"
+                << " index=" << grid.leafIndexSet().index(element)
+                << " gid=" << grid.globalIdSet().template id<0>(element)
+                << " leaf=" << element.isLeaf()
+                << " partition=" << PartitionName(element.partitionType())
                 << " center=("
-                << it->geometry().global(Dune::ReferenceElements<ct,dim>::general(it->type()).position(0,0))
+                << geometry.global(Dune::ReferenceElements<ct,dim>::general(element.type()).position(0,0))
                 << ")"
-                << " first=(" << it->geometry().corner(0) << ")"
+                << " first=(" << geometry.corner(0) << ")"
                 << std::endl;
 
       std::cout << prefix << "codim " << dim << " subindex";
-      for (int i=0; i<it->template count<dim>(); i++)
+      for (int i=0; i < element.subEntities(dim); i++)
       {
-        std::cout << " " << i << ":" << grid.leafIndexSet().subIndex(*it,i,dim);
+        std::cout << " " << i << ":" << grid.leafIndexSet().subIndex(element,i,dim);
       }
       std::cout << std::endl;
 
       std::cout << prefix << "codim " << dim-1 << " subindex";
-      for (int i=0; i<it->template count<dim-1>(); i++)
+      for (int i=0; i < element.subEntities(dim-1); i++)
       {
-        std::cout << " " << i << ":" << grid.leafIndexSet().subIndex(*it,i,dim-1);
+        std::cout << " " << i << ":" << grid.leafIndexSet().subIndex(element,i,dim-1);
       }
       std::cout << std::endl;
 
     }
-
-    return;
   }
 
 
