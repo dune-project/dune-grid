@@ -9,6 +9,7 @@
 
 
 from ..common import reader
+from dune.grid.map import MultipleCodimMultipleGeomTypeMapper as Mapper
 
 def cartesianDomain(lower,upper,division,**parameters):
     dgf = "DGF\n"
@@ -31,7 +32,7 @@ def string2dgf(dgf):
 class P1VTKFunction:
     def __init__(self, module, gridView, container):
         self.module = module
-        self.mapper = module.MultipleCodimMultipleGeomTypeMapper(gridView, lambda gt: gt.dim == 0)
+        self.mapper = Mapper(gridView, lambda gt: gt.dim == 0)
         self.v = container
     def evaluate(self, e, xi):
         dim = e.dimension
