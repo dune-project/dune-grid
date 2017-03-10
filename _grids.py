@@ -7,7 +7,7 @@ def albertaGrid(constructor, dimgrid):
     includes = ["dune/grid/albertagrid.hh", "dune/grid/albertagrid/dgfparser.hh"]
     gridModule = module(includes, typeName)
 
-    return gridModule.LeafGrid(gridModule.reader(constructor))
+    return gridModule.reader(constructor).leafView
 
 
 def onedGrid(constructor):
@@ -17,7 +17,7 @@ def onedGrid(constructor):
     includes = ["dune/grid/onedgrid.hh", "dune/grid/io/file/dgfparser/dgfoned.hh"]
     gridModule = module(includes, typeName)
 
-    return gridModule.LeafGrid(gridModule.reader(constructor))
+    return gridModule.reader(constructor).leafView
 
 
 def ugGrid(constructor, dimgrid, **parameters):
@@ -27,7 +27,7 @@ def ugGrid(constructor, dimgrid, **parameters):
     includes = ["dune/grid/uggrid.hh", "dune/grid/io/file/dgfparser/dgfug.hh"]
     gridModule = module(includes, typeName)
 
-    return gridModule.LeafGrid( gridModule.reader(constructor) )
+    return gridModule.reader(constructor).leafView
 
 
 def yaspGrid(constructor, dimgrid, coordinates="Dune::EquidistantCoordinates", ctype="double"):
@@ -42,7 +42,7 @@ def yaspGrid(constructor, dimgrid, coordinates="Dune::EquidistantCoordinates", c
     includes = ["dune/grid/yaspgrid.hh", "dune/grid/io/file/dgfparser/dgfyasp.hh"]
     gridModule = module(includes, typeName)
 
-    return gridModule.LeafGrid(gridModule.reader(constructor))
+    return gridModule.reader(constructor).leafView
 
 
 if __name__ == "__main__":

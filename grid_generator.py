@@ -43,16 +43,15 @@ def addAttr(module, cls):
     setattr(cls, "writeVTK", writeVTK)
 
 
-generator = SimpleGenerator("Grid", "Dune::CorePy", "LeafGrid")
-fileBase = "grid"
+generator = SimpleGenerator("HierarchicalGrid", "Dune::CorePy")
 
 
 def module(includes, typeName, constructors=None, methods=None):
-    typeName = typeName + "::LeafGridView"
-    includes = includes + ["dune/corepy/grid.hh"]
-    typeHash = fileBase + "_" + hashIt(typeName)
+    includes = includes + ["dune/corepy/grid/hierarchical.hh"]
+    typeHash = "hierarchicalgrid_" + hashIt(typeName)
     module = generator.load(includes, typeName, typeHash, constructors, methods)
-    addAttr(module, module.LeafGrid)
+    addAttr(module, module.HierarchicalGrid.LeafView)
+    addAttr(module, module.HierarchicalGrid.LevelView)
     return module
 
 
