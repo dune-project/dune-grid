@@ -669,9 +669,7 @@ namespace Dune
     /** \brief obtain mutable reference to the coordinate function. */
     CoordFunction &coordFunction () { return *coordFunction_; }
 
-    /** \} */
-
-  protected:
+    /** \brief obtain host entity. */
     template< int codim >
     static const typename HostGrid::template Codim< codim >::Entity &
     getHostEntity( const typename Codim< codim >::Entity &entity )
@@ -679,6 +677,9 @@ namespace Dune
       return getRealImplementation( entity ).hostEntity();
     }
 
+    /** \} */
+
+  protected:
     void *allocateStorage ( std::size_t size ) const
     {
       return storageAllocator_.allocate( size );
