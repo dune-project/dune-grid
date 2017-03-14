@@ -317,9 +317,9 @@ namespace Dune {
     }
 
   private:
-    /* EntityPointers (get automatically updated) */
-    YaspEntity<0,GridImp::dimension,GridImp> _inside;  //!< entitypointer to myself
-    YaspEntity<0,GridImp::dimension,GridImp> _outside; //!< outside entitypointer
+    /* The two entities that make up the intersection */
+    YaspEntity<0,GridImp::dimension,GridImp> _inside;  //!< entity from which the intersection was created from
+    YaspEntity<0,GridImp::dimension,GridImp> _outside; //!< outside entity
     /* current position */
     uint8_t _count;                                //!< valid neighbor count in 0 .. 2*dim-1
     uint8_t _dir;                                  //!< count/2
