@@ -1269,7 +1269,6 @@ namespace Dune {
 
 #include "geometry.hh"
 #include "entity.hh"
-#include "entitypointer.hh"
 #include "intersection.hh"
 #include "intersectioniterator.hh"
 #include "entityiterator.hh"

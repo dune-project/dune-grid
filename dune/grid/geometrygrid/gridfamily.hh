@@ -3,7 +3,6 @@
 #ifndef DUNE_GEOGRID_GRIDFAMILY_HH
 #define DUNE_GEOGRID_GRIDFAMILY_HH
 
-#include <dune/grid/common/entitypointer.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/geometrygrid/capabilities.hh>
 #include <dune/grid/geometrygrid/declaration.hh>
