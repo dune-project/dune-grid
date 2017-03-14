@@ -10,7 +10,6 @@
 
 #include <dune/geometry/referenceelements.hh>
 
-#include <dune/grid/common/entitypointer.hh>
 #include <dune/grid/geometrygrid/capabilities.hh>
 #include <dune/grid/geometrygrid/declaration.hh>
 #include <dune/grid/geometrygrid/entity.hh>
@@ -247,16 +246,6 @@ namespace Dune
         return Iterator( grid, std::move( hostEntityIterator ) );
       }
 
-      operator Dune::DefaultEntityPointer< Entity > () const
-      {
-        return Dune::DefaultEntityPointer< Entity >( dereference() );
-      }
-
-      bool equals ( const Dune::DefaultEntityPointer< Entity > &rhs ) const
-      {
-        return dereference() == rhs.dereference();
-      }
-
     private:
       const Grid *grid_;
       HostEntityIterator hostEntityIterator_;
@@ -366,16 +355,6 @@ namespace Dune
         return Iterator( grid, last, last, hostGridView.indexSet() );
       }
 
-      operator Dune::DefaultEntityPointer< Entity > () const
-      {
-        return Dune::DefaultEntityPointer< Entity >( dereference() );
-      }
-
-      bool equals ( const Dune::DefaultEntityPointer< Entity > &rhs ) const
-      {
-        return dereference() == rhs.dereference();
-      }
-
     private:
       const Grid *grid_;
       HostElementIterator hostElementIterator_, hostEnd_;
@@ -435,16 +414,6 @@ namespace Dune
       {
         assert( grid_ );
         return *grid_;
-      }
-
-      operator Dune::DefaultEntityPointer< Entity > () const
-      {
-        return Dune::DefaultEntityPointer< Entity >( dereference() );
-      }
-
-      bool equals ( const Dune::DefaultEntityPointer< Entity > &rhs ) const
-      {
-        return dereference() == rhs.dereference();
       }
 
     private:
