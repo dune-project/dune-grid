@@ -17,8 +17,6 @@
 /** \file
     \brief Wrapper and interface class for a static iterator (EntityPointer)
  */
-
-#define DUNE_ENTITYPOINTER_DEPRECATED_MSG  DUNE_DEPRECATED_MSG("EntityPointer is deprecated and will be removed after the release of dune-grid-2.4. Instead, you can copy and store entities directly now. Note, this might lead to a decreased performance until all grid implementations properly addressed this interface change.")
 namespace Dune
 {
 
@@ -177,17 +175,6 @@ namespace Dune
     EntityPointer()
     {}
 
-    /** \brief Templatized constructor from type of entity that
-        this entity pointer points to. This constructor can be used to
-        create an entity pointer from an entity in order to store an
-        entity. The implementation of EntityPointer has to have a
-        constructor taking a Dune::Entity.
-     */
-    DUNE_ENTITYPOINTER_DEPRECATED_MSG
-    EntityPointer(const Entity& entity)
-      : realIterator( entity.impl() )
-    {}
-
     /** \brief Constructor from type of entity implementation that
         this entity pointer points to. This constructor is only
         used in the EntityDefaultImplementation to implement the method
@@ -196,78 +183,6 @@ namespace Dune
     EntityPointer ( const typename Entity::Implementation &entityImp )
       : realIterator( entityImp )
     {}
-
-    template< class ItImp >
-    DUNE_ENTITYPOINTER_DEPRECATED_MSG
-    inline EntityPointer & operator= ( const EntityPointer< GridImp, ItImp > &ep )
-    {
-      realIterator = ep.realIterator;
-      return *this;
-    }
-
-    //@}
-
-    //===========================================================
-    /** @name Dereferencing
-     */
-    //@{
-    //===========================================================
-
-    // The behavior when dereferencing the EntityPointer facade depends on
-    // the way the grid implementation handles returning entities. The implementation
-    // may either return a reference to an entity stored inside the EntityPointer
-    // implementation or a temporary Entity object. This object has to be forwarded through
-    // the facade to the user, which requires a little trickery, especially for operator->().
-    //
-    // In order to avoid confusing users reading the Doxygen documentation, we provide "clean"
-    // function signatures to Doxygen and hide the actual implementations.
-
-#ifdef DOXYGEN
-
-    /** \brief Dereferencing operator. */
-    Entity operator*() const
-    DUNE_ENTITYPOINTER_DEPRECATED_MSG;
-
-
-    /** \brief Pointer operator. */
-    const Entity* operator->() const
-    DUNE_ENTITYPOINTER_DEPRECATED_MSG;
-
-#else // DOXYGEN
-
-    /** \brief Dereferencing operator. */
-    Reference
-    operator*() const
-    DUNE_ENTITYPOINTER_DEPRECATED_MSG
-    {
-      return realIterator.dereference();
-    }
-
-    /** \brief Pointer operator. */
-    decltype(handle_proxy_member_access(realIterator.dereference()))
-    operator->() const
-    DUNE_ENTITYPOINTER_DEPRECATED_MSG
-    {
-      return handle_proxy_member_access(realIterator.dereference());
-    }
-
-    template<typename T>
-    // this construction, where the deprecation warning is triggered by a separate function,
-    // is slightly convoluted, but I could not get the warning to trigger reliably when attached
-    // directly to the cast operator.
-    DUNE_DEPRECATED_MSG("The implicit cast from EntityPointer to an Entity reference is DANGEROUS. It's mainly there for writing backwards compatible code that doesn't trigger a deprecation warning for ported grids and must ONLY be used if the returned reference is used in an rvalue-like setting!")
-    void trigger_entity_cast_warning() const
-    {}
-
-    template<typename T, typename std::enable_if<std::is_same<T,Entity>::value,int>::type = 0>
-    operator const T&() const
-    {
-      static_assert(std::is_same<T,Entity>::value,"invalid cast");
-      trigger_entity_cast_warning<T>();
-      return realIterator.dereference();
-    }
-
-#endif // DOXYGEN
 
     //@}
 
@@ -298,52 +213,6 @@ namespace Dune
     {
       return !equals( rhs );
     }
-    //@}
-
-    /** \brief Compares an EntityPointer with an Entity for equality.
-     *
-     * \deprecated This method only exists for backwards compatibility during the 2.4
-     *             release cycle and will be removed after dune-grid-2.4 is released.
-     */
-    DUNE_ENTITYPOINTER_DEPRECATED_MSG
-    bool operator==(const Entity& rhs) const
-    {
-      return (**this) == rhs;
-    }
-
-    /** \brief Compares an EntityPointer with an Entity for inequality.
-     *
-     * \deprecated This method only exists for backwards compatibility during the 2.4
-     *             release cycle and will be removed after dune-grid-2.4 is released.
-     */
-    DUNE_ENTITYPOINTER_DEPRECATED_MSG
-    bool operator!=(const Entity& rhs) const
-    {
-      return (**this) != rhs;
-    }
-
-
-    //===========================================================
-    /** @name Query methods
-     */
-    //@{
-    //===========================================================
-
-    /** \brief Ask for level of entity.
-     *
-            This method is redundant and is only there for efficiency reasons.
-            It allows an implementation to return the level without actually
-            constructing the entity.
-
-       \deprecated Will be removed after the release of dune-grid-2.4. Use the
-                   method level() from the dereferenced Entity instead.
-     */
-    int level () const
-    DUNE_ENTITYPOINTER_DEPRECATED_MSG
-    {
-      return realIterator.level();
-    }
-
     //@}
 
 
@@ -632,6 +501,5 @@ namespace Dune
 #endif // #ifndef DOXYEN
 
 }
-#undef DUNE_ENTITYPOINTER_DEPRECATED_MSG
 
 #endif // DUNE_GRID_ENTITYPOINTER_HH

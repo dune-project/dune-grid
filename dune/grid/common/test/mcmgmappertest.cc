@@ -274,7 +274,7 @@ try
     std::unique_ptr<Grid> grid(make2DHybridTestGrid<Grid>());
 
     // create hybrid grid
-    grid->mark(1, grid->leafGridView().begin<0>());
+    grid->mark(1, *grid->leafGridView().begin<0>());
     grid->adapt();
     grid->globalRefine(1);
 
@@ -287,7 +287,7 @@ try
     std::unique_ptr<Grid> grid(make3DHybridTestGrid<Grid>());
 
     // create hybrid grid
-    grid->mark(1, grid->leafGridView().begin<0>());
+    grid->mark(1, *grid->leafGridView().begin<0>());
     grid->adapt();
     grid->globalRefine(1);
 
