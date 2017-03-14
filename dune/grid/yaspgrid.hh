@@ -77,7 +77,6 @@ namespace Dune {
 #include <dune/grid/yaspgrid/yaspgridintersectioniterator.hh>
 #include <dune/grid/yaspgrid/yaspgridhierarchiciterator.hh>
 #include <dune/grid/yaspgrid/yaspgridentityseed.hh>
-#include <dune/grid/yaspgrid/yaspgridentitypointer.hh>
 #include <dune/grid/yaspgrid/yaspgridleveliterator.hh>
 #include <dune/grid/yaspgrid/yaspgridindexsets.hh>
 #include <dune/grid/yaspgrid/yaspgrididset.hh>

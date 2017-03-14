@@ -13,8 +13,7 @@ namespace Dune {
   /** \brief Iterates over entities of one grid level
    */
   template<int codim, PartitionIteratorType pitype, class GridImp>
-  class YaspLevelIterator :
-    public YaspEntityPointer<codim,GridImp>
+  class YaspLevelIterator
   {
     //! know your own dimension
     enum { dim=GridImp::dimension };
@@ -31,18 +30,34 @@ namespace Dune {
     {}
 
     //! constructor
-    YaspLevelIterator (const YGLI & g, const I& it) :
-      YaspEntityPointer<codim,GridImp>(g,it) {}
+    YaspLevelIterator (const YGLI & g, const I& it)
+      : _entity(YaspEntity<codim, dim, GridImp>(g,it))
+    {}
 
     //! copy constructor
     YaspLevelIterator (const YaspLevelIterator& i) :
-      YaspEntityPointer<codim,GridImp>(i) {}
+      _entity(i._entity) {}
 
     //! increment
     void increment()
     {
-      ++(GridImp::getRealImplementation(this->_entity)._it);
+      ++(GridImp::getRealImplementation(_entity)._it);
     }
+
+    //! equality
+    bool equals (const YaspLevelIterator& rhs) const
+    {
+      return (_entity == rhs._entity);
+    }
+
+    //! dereferencing
+    const Entity& dereference() const
+    {
+      return _entity;
+    }
+
+  protected:
+    Entity _entity; //!< entity
   };
 
 }

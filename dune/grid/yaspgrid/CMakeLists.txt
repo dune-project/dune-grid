@@ -5,7 +5,6 @@ set(HEADERS
   structuredyaspgridfactory.hh
   torus.hh
   yaspgridentity.hh
-  yaspgridentitypointer.hh
   yaspgridentityseed.hh
   yaspgridgeometry.hh
   yaspgridhierarchiciterator.hh
