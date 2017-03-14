@@ -34,7 +34,7 @@ namespace Dune
   public:
     typedef typename Grid::template Codim< codim >::Entity Entity;
 
-    /** \brief Tpy of the reference used when derefencing the Ptr */
+    /** \brief Type of the reference used when derefencing the Ptr */
     typedef typename std::conditional<
       std::is_lvalue_reference<
         decltype(realIterator.dereference())
