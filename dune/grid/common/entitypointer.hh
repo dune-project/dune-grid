@@ -3,6 +3,8 @@
 #ifndef DUNE_GRID_ENTITYPOINTER_HH
 #define DUNE_GRID_ENTITYPOINTER_HH
 
+#warning EntityPointer is deprecated and will be removed before the release of dune-grid-2.6. Instead, you can copy and store entities directly now. Note, this might lead to a decreased performance until all grid implementations properly addressed this interface change.
+
 #include <utility>
 
 #include <dune/common/proxymemberaccess.hh>
