@@ -12,7 +12,6 @@
 #include <dune/geometry/referenceelements.hh>
 
 #include "grid.hh"
-#include "entitypointer.hh"
 #include "rangegenerators.hh"
 
 namespace Dune
@@ -224,12 +223,6 @@ namespace Dune
     Entity(EntityImp<cd,dim,GridImp> && e) : realEntity(std::move(e)) {}
 
     //@}
-
-  protected:
-
-    // need to make copy constructor of EntityPointer work for any iterator
-    template< class, class > friend class Dune::EntityPointer;
-
   };
 
   /**
@@ -544,11 +537,6 @@ namespace Dune
     Entity(EntityImp<0,dim,GridImp> && e) : realEntity(std::move(e)) {}
 
     //@}
-
-  protected:
-    // needed to make copy constructor from EntityPointer work for any iterator
-    template< class, class > friend class Dune::EntityPointer;
-
   };
 
 
