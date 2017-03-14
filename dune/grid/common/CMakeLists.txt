@@ -8,7 +8,6 @@ set(HEADERS
   defaultgridview.hh
   entity.hh
   entityiterator.hh
-  entitypointer.hh
   entityseed.hh
   exceptions.hh
   geometry.hh
