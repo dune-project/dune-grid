@@ -11,7 +11,6 @@
 #include <dune/common/parallel/collectivecommunication.hh>
 
 #include <dune/grid/common/entity.hh>
-#include <dune/grid/common/entitypointer.hh>
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/intersection.hh>
 #include <dune/grid/common/intersectioniterator.hh>
@@ -34,9 +33,6 @@ namespace Dune
 
   template< int codim, int dim, class GridImp >
   class AlbertaGridEntity;
-
-  template< int codim, class GridImp >
-  class AlbertaGridEntityPointer;
 
   template< int codim, class Grid >
   class AlbertaGridEntitySeed;

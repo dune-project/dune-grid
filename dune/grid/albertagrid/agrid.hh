@@ -50,7 +50,6 @@
 #include "indexsets.hh"
 #include "geometry.hh"
 #include "entity.hh"
-#include "entitypointer.hh"
 #include "hierarchiciterator.hh"
 #include "treeiterator.hh"
 #include "leveliterator.hh"
@@ -144,7 +143,6 @@ namespace Dune
     Base;
 
     template< int, int, class > friend class AlbertaGridEntity;
-    template< int, class > friend class AlbertaGridEntityPointer;
     template< class > friend class AlbertaLevelGridView;
     template< class > friend class AlbertaLeafGridView;
 
