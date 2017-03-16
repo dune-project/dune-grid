@@ -145,6 +145,7 @@ namespace Dune
     template< int, int, class > friend class AlbertaGridEntity;
     template< class > friend class AlbertaLevelGridView;
     template< class > friend class AlbertaLeafGridView;
+    template< int, class, bool > friend class AlbertaGridTreeIterator;
 
     friend class GridFactory< This >;
     friend struct DGFGridFactory< This >;
