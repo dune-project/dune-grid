@@ -48,6 +48,7 @@ namespace Dune
     friend class AlbertaGrid< dim, dimworld >;
     friend class AlbertaGridEntity< 0, dim, Grid >;
 
+    friend class AlbertaGridHierarchicIterator< Grid >;
     template< int, class, bool > friend class AlbertaGridTreeIterator;
 
   public:
