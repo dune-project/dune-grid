@@ -276,7 +276,7 @@ namespace Dune
     void goNext ( const std::integral_constant< int, cd > cdVariable,
                   ElementInfo &elementInfo );
 
-    mutable entity_;
+    mutable Entity entity_;
 
     //! current level
     int level_;

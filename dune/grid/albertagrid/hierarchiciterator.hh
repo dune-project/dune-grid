@@ -96,7 +96,7 @@ namespace Dune
   private:
     void increment ( ElementInfo elementInfo );
 
-    mutable entity_;
+    mutable  Entity entity_;
 
     // level on which the iterator was started
     int startLevel_;
@@ -131,7 +131,7 @@ namespace Dune
   template< class GridImp >
   inline AlbertaGridHierarchicIterator< GridImp >
   ::AlbertaGridHierarchicIterator( const This &other )
-    : entity_( other.entity_ )
+    : entity_( other.entity_ ),
       startLevel_( other.startLevel_ ),
       maxlevel_( other.maxlevel_ )
   {}
