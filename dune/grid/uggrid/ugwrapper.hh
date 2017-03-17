@@ -864,20 +864,6 @@ namespace Dune {
       return 0;
     }
 
-    /** \brief Compute the integration element on an element face
-        \param nc Number of corners of the element face
-        \param co_global Coordinates of the corners of the face
-        \param ip_local Local coordinates where integration element is to be evaluated
-     */
-    static UG::DOUBLE SurfaceElement(int nc,
-                                     const UG::DOUBLE co_global[MAX_CORNERS_OF_ELEM][ UG_DIM ],
-                                     const UG::DOUBLE ip_local[ UG_DIM ]) {
-      UG::DOUBLE result;
-      if (UG_NAMESPACE ::SurfaceElement(UG_DIM, nc, co_global, ip_local, &result))
-        DUNE_THROW(GridError, "UG_D" << UG_DIM << "::SurfaceElement returned error code!");
-      return result;
-    }
-
     //! Returns the i-th corner of a UG element
     static UG_NS< UG_DIM >::Node* Corner(const UG_NS< UG_DIM >::Element* theElement, int i) {
       using UG_NAMESPACE ::NODE;
