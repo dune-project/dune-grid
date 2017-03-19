@@ -56,7 +56,6 @@ namespace Dune {
   template<int dim, class Coordinates>                             class YaspGrid;
   template<int mydim, int cdim, class GridImp>  class YaspGeometry;
   template<int codim, int dim, class GridImp>   class YaspEntity;
-  template<int codim, class GridImp>            class YaspEntityPointer;
   template<int codim, class GridImp>            class YaspEntitySeed;
   template<int codim, PartitionIteratorType pitype, class GridImp> class YaspLevelIterator;
   template<class GridImp>            class YaspIntersectionIterator;
@@ -77,7 +76,6 @@ namespace Dune {
 #include <dune/grid/yaspgrid/yaspgridintersectioniterator.hh>
 #include <dune/grid/yaspgrid/yaspgridhierarchiciterator.hh>
 #include <dune/grid/yaspgrid/yaspgridentityseed.hh>
-#include <dune/grid/yaspgrid/yaspgridentitypointer.hh>
 #include <dune/grid/yaspgrid/yaspgridleveliterator.hh>
 #include <dune/grid/yaspgrid/yaspgridindexsets.hh>
 #include <dune/grid/yaspgrid/yaspgrididset.hh>
@@ -1609,9 +1607,6 @@ namespace Dune {
     friend class Dune::YaspIntersectionIterator<const Dune::YaspGrid<dim, Coordinates> >;
     friend class Dune::YaspIntersection<const Dune::YaspGrid<dim, Coordinates> >;
     friend class Dune::YaspEntity<0, dim, const Dune::YaspGrid<dim, Coordinates> >;
-
-    template <int codim_, class GridImp_>
-    friend class Dune::YaspEntityPointer;
 
     template<int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
     friend class Entity;

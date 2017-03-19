@@ -14,8 +14,7 @@ namespace Dune {
   /** \brief YaspHierarchicIterator enables iteration over son entities of codim 0
    */
   template<class GridImp>
-  class YaspHierarchicIterator :
-    public YaspEntityPointer<0,GridImp>
+  class YaspHierarchicIterator
   {
     enum { dim=GridImp::dimension };
 
@@ -29,7 +28,7 @@ namespace Dune {
 
     //! constructor
     YaspHierarchicIterator (const YGLI& g, const I& it, int maxlevel) :
-      YaspEntityPointer<0,GridImp>(g,it)
+      _entity(YaspEntity<0, dim, GridImp>(g,it))
     {
       // store reference to entity implementation for better readability
       YaspEntityImp& entity = entityImplementation();
@@ -54,7 +53,7 @@ namespace Dune {
 
     //! constructor
     YaspHierarchicIterator (const YaspHierarchicIterator& it) :
-      YaspEntityPointer<0,GridImp>(it),
+      _entity(it._entity),
       _maxlevel(it._maxlevel), stack(it.stack)
     {}
 
@@ -72,6 +71,18 @@ namespace Dune {
       pop_tos();
     }
 
+    //! equality
+    bool equals (const YaspHierarchicIterator& rhs) const
+    {
+      return (_entity == rhs._entity);
+    }
+
+    //! dereferencing
+    const Entity& dereference() const
+    {
+      return _entity;
+    }
+
     void print (std::ostream& s) const
     {
       // store reference to entity implementation for better readability
@@ -85,6 +96,8 @@ namespace Dune {
     }
 
   private:
+    Entity _entity; //!< entity
+
     int _maxlevel;       //!< maximum level of elements to be processed
 
     struct StackElem {

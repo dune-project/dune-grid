@@ -6,18 +6,14 @@
 #include <cstddef>
 #include <iterator>
 
-#include <dune/grid/common/entitypointer.hh>
-
 namespace Dune
 {
 
   /** \class EntityIterator
    *  \brief interface class for an iterator over grid entities
-   *  \ingroup GIEntityPointer
    *
    *  An entity iterator is an iterator over a subset of entities within a
-   *  hierarchical grid. It is an extension of the Dune::EntityPointer
-   *  interface.
+   *  hierarchical grid.
    *
    *  Examples of entity iterators are:
    *  - iterators over the leaf level (LeafGridView::Iterator)
@@ -25,23 +21,27 @@ namespace Dune
    *  - iterators over the children of an entity (Grid::HierarchicIterator)
    *  .
    *
-   *  See also the documentation of Dune::EntityPointer.
-   *
    *  \tparam  codim        codimension of entities this iterator walks over
    *  \tparam  Grid         type of the grid implementation
    *  \tparam  IteratorImp  type of the iterator implementation
    */
   template< int codim, class Grid, class IteratorImp >
   class EntityIterator
-    : public EntityPointer< Grid, IteratorImp >
   {
-    typedef EntityPointer< Grid, IteratorImp > Base;
-
   protected:
-    using Base::realIterator;
+    IteratorImp realIterator;
 
   public:
     typedef typename Grid::template Codim< codim >::Entity Entity;
+
+    /** \brief Type of the reference used when derefencing the Ptr */
+    typedef typename std::conditional<
+      std::is_lvalue_reference<
+        decltype(realIterator.dereference())
+        >::value,
+      const Entity&,
+      Entity
+      >::type Reference;
 
     /** \brief prefix increment operator */
     EntityIterator &operator++ ()
@@ -57,9 +57,6 @@ namespace Dune
       realIterator.increment();
       return tmp;
     }
-
-    // The dereferencing operators are overridden here to avoid calling
-    // the deprecated versions in the EntityPointer facade.
 
     // The behavior when dereferencing the EntityIterator facade depends on
     // the way the grid implementation handles returning entities. The implementation
@@ -127,7 +124,7 @@ namespace Dune
 
     /** \brief copy constructor from implementaton */
     EntityIterator ( const IteratorImp &imp )
-      : Base( imp )
+      : realIterator( imp )
     {}
 
     /** \} */
