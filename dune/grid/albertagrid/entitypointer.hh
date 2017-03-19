@@ -3,8 +3,6 @@
 #ifndef DUNE_ALBERTA_ENTITYPOINTER_HH
 #define DUNE_ALBERTA_ENTITYPOINTER_HH
 
-#include <dune/grid/common/entitypointer.hh>
-
 #include <dune/grid/albertagrid/elementinfo.hh>
 
 #if HAVE_ALBERTA
