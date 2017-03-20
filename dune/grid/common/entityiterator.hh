@@ -33,6 +33,7 @@ namespace Dune
 
   public:
     typedef typename Grid::template Codim< codim >::Entity Entity;
+    using Implementation = IteratorImp;
 
     /** \brief Type of the reference used when derefencing the Ptr */
     typedef typename std::conditional<
