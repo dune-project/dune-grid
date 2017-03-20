@@ -201,7 +201,7 @@ namespace Dune
         : dofVector_( dofVector )
       {}
 
-      operator bool () const
+      explicit operator bool () const
       {
         return (bool)dofVector_;
       }

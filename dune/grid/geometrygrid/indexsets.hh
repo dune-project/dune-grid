@@ -95,7 +95,7 @@ namespace Dune
         return hostIndexSet().geomTypes( codim );
       }
 
-      operator bool () const { return bool( hostIndexSet_ ); }
+      explicit operator bool () const { return bool( hostIndexSet_ ); }
 
     private:
       const HostIndexSet &hostIndexSet () const

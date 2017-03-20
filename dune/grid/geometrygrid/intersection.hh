@@ -65,7 +65,7 @@ namespace Dune
         return hostIntersection_ == other.hostIntersection_;
       }
 
-      operator bool () const { return bool( hostIntersection_ ); }
+      explicit operator bool () const { return bool( hostIntersection_ ); }
 
       Entity inside () const
       {

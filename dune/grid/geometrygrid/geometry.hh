@@ -180,7 +180,7 @@ namespace Dune
         return *this;
       }
 
-      operator bool () const { return bool( mapping_ ); }
+      explicit operator bool () const { return bool( mapping_ ); }
 
       bool affine () const { return mapping_->affine(); }
       GeometryType type () const { return mapping_->type(); }
