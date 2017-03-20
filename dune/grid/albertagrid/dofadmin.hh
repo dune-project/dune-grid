@@ -134,7 +134,7 @@ namespace Dune
         return (*this)( element.el(), codim, subEntity );
       }
 
-      operator bool () const
+      explicit operator bool () const
       {
         return (bool)mesh_;
       }

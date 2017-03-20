@@ -63,7 +63,7 @@ namespace Dune
         return hostIdSet().subId( Grid::template getHostEntity< 0 >( entity ), i, codim );
       }
 
-      operator bool () const { return bool( hostIdSet_ ); }
+      explicit operator bool () const { return bool( hostIdSet_ ); }
 
     private:
       const HostIdSet &hostIdSet () const
