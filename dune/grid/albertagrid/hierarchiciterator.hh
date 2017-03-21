@@ -3,9 +3,8 @@
 #ifndef DUNE_ALBERTA_HIERARCHICITERATOR_HH
 #define DUNE_ALBERTA_HIERARCHICITERATOR_HH
 
+#include <dune/grid/albertagrid/elementinfo.hh>
 #include <dune/grid/common/entityiterator.hh>
-
-#include <dune/grid/albertagrid/entitypointer.hh>
 
 #if HAVE_ALBERTA
 
@@ -25,10 +24,8 @@ namespace Dune
    */
   template< class GridImp >
   class AlbertaGridHierarchicIterator
-    : public AlbertaGridEntityPointer< 0, GridImp >
   {
     typedef AlbertaGridHierarchicIterator< GridImp > This;
-    typedef AlbertaGridEntityPointer< 0, GridImp > Base;
 
   public:
     typedef typename GridImp::template Codim<0>::Entity Entity;
@@ -37,7 +34,7 @@ namespace Dune
     typedef MakeableInterfaceObject< Entity > EntityObject;
     typedef typename EntityObject::ImplementationType EntityImp;
 
-    typedef typename Base::ElementInfo ElementInfo;
+    typedef typename EntityImp::ElementInfo ElementInfo;
 
     AlbertaGridHierarchicIterator ()
     {}
@@ -59,13 +56,47 @@ namespace Dune
     //! increment
     void increment();
 
-    using Base::level;
+    //! equality
+    bool equals ( const This &other ) const
+    {
+      return entityImp().equals( other.entityImp() );
+    }
+
+    //! dereferencing
+    Entity &dereference () const
+    {
+      return entity_;
+    }
+
+    //! ask for level of entities
+    int level () const
+    {
+      return entityImp().level();
+    }
 
   protected:
-    using Base::entityImp;
+    //! obtain reference to internal entity implementation
+    EntityImp &entityImp ()
+    {
+      return GridImp::getRealImplementation( entity_ );
+    }
+
+    //! obtain const reference to internal entity implementation
+    const EntityImp &entityImp () const
+    {
+      return GridImp::getRealImplementation( entity_ );
+    }
+
+    //! obtain a reference to the grid
+    const GridImp &grid () const
+    {
+      return entityImp().grid();
+    }
 
   private:
     void increment ( ElementInfo elementInfo );
+
+    mutable  Entity entity_;
 
     // level on which the iterator was started
     int startLevel_;
@@ -78,7 +109,7 @@ namespace Dune
   template< class GridImp >
   inline AlbertaGridHierarchicIterator< GridImp >
   ::AlbertaGridHierarchicIterator( const GridImp &grid, int actLevel, int maxLevel )
-    : Base( grid ),
+    : entity_( EntityImp( grid ) ),
       startLevel_( actLevel ),
       maxlevel_( maxLevel )
   {}
@@ -89,7 +120,7 @@ namespace Dune
   ::AlbertaGridHierarchicIterator ( const GridImp &grid,
                                     const ElementInfo &elementInfo,
                                     int maxLevel )
-    : Base( grid ),
+    : entity_( EntityImp( grid ) ),
       startLevel_( elementInfo.level() ),
       maxlevel_( maxLevel )
   {
@@ -100,7 +131,7 @@ namespace Dune
   template< class GridImp >
   inline AlbertaGridHierarchicIterator< GridImp >
   ::AlbertaGridHierarchicIterator( const This &other )
-    : Base( other ),
+    : entity_( other.entity_ ),
       startLevel_( other.startLevel_ ),
       maxlevel_( other.maxlevel_ )
   {}
@@ -110,8 +141,7 @@ namespace Dune
   inline typename AlbertaGridHierarchicIterator< GridImp >::This &
   AlbertaGridHierarchicIterator< GridImp >::operator= ( const This &other )
   {
-    Base::operator=( other );
-
+    entity_ = other.entity_;
     startLevel_ = other.startLevel_;
     maxlevel_ = other.maxlevel_;
     return *this;

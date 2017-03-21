@@ -8,8 +8,8 @@
 #include <dune/common/std/utility.hh>
 #include <dune/common/typetraits.hh>
 
+#include <dune/grid/albertagrid/elementinfo.hh>
 #include <dune/grid/albertagrid/meshpointer.hh>
-#include <dune/grid/albertagrid/entitypointer.hh>
 
 #if HAVE_ALBERTA
 
@@ -181,10 +181,8 @@ namespace Dune
    */
   template< int codim, class GridImp, bool leafIterator >
   class AlbertaGridTreeIterator
-    : public AlbertaGridEntityPointer< codim, GridImp >
   {
     typedef AlbertaGridTreeIterator< codim, GridImp, leafIterator > This;
-    typedef AlbertaGridEntityPointer< codim, GridImp > Base;
 
   public:
     static const int dimension = GridImp::dimension;
@@ -198,13 +196,13 @@ namespace Dune
       = Alberta::NumSubEntities< dimension, codimension >::value;
 
   public:
-    typedef typename Base::ElementInfo ElementInfo;
     typedef Alberta::MeshPointer< dimension > MeshPointer;
     typedef typename MeshPointer::MacroIterator MacroIterator;
 
     typedef typename GridImp::template Codim< codim >::Entity Entity;
     typedef MakeableInterfaceObject< Entity > EntityObject;
     typedef typename EntityObject::ImplementationType EntityImp;
+    typedef typename EntityImp::ElementInfo ElementInfo;
 
     typedef AlbertaMarkerVector< dimension, dimensionworld > MarkerVector;
 
@@ -224,12 +222,45 @@ namespace Dune
                               const MarkerVector *marker,
                               int travLevel );
 
+    //! equality
+    bool equals ( const This &other ) const
+    {
+      return entityImp().equals( other.entityImp() );
+    }
+
+    //! dereferencing
+    Entity &dereference () const
+    {
+      return entity_;
+    }
+
+    //! ask for level of entities
+    int level () const
+    {
+      return entityImp().level();
+    }
+
     //! increment
     void increment();
 
   protected:
-    using Base::entityImp;
-    using Base::grid;
+    //! obtain reference to internal entity implementation
+    EntityImp &entityImp ()
+    {
+      return GridImp::getRealImplementation( entity_ );
+    }
+
+    //! obtain const reference to internal entity implementation
+    const EntityImp &entityImp () const
+    {
+      return GridImp::getRealImplementation( entity_ );
+    }
+
+    //! obtain a reference to the grid
+    const GridImp &grid () const
+    {
+      return entityImp().grid();
+    }
 
   private:
     void nextElement ( ElementInfo &elementInfo );
@@ -244,6 +275,8 @@ namespace Dune
     template< int cd >
     void goNext ( const std::integral_constant< int, cd > cdVariable,
                   ElementInfo &elementInfo );
+
+    mutable Entity entity_;
 
     //! current level
     int level_;
@@ -314,7 +347,7 @@ namespace Dune
   template< int codim, class GridImp, bool leafIterator >
   inline AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::AlbertaGridTreeIterator ()
-    : Base(),
+    : entity_(),
       level_( -1 ),
       subEntity_( -1 ),
       macroIterator_(),
@@ -326,7 +359,7 @@ namespace Dune
   ::AlbertaGridTreeIterator ( const GridImp &grid,
                               const MarkerVector *marker,
                               int travLevel )
-    : Base( grid ),
+    : entity_( EntityImp( grid ) ),
       level_( travLevel ),
       subEntity_( (codim == 0 ? 0 : -1) ),
       macroIterator_( grid.meshPointer().begin() ),
@@ -346,7 +379,7 @@ namespace Dune
   inline AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::AlbertaGridTreeIterator ( const GridImp &grid,
                               int travLevel )
-    : Base( grid ),
+    : entity_( EntityImp( grid ) ),
       level_( travLevel ),
       subEntity_( -1 ),
       macroIterator_( grid.meshPointer().end() ),
@@ -358,7 +391,7 @@ namespace Dune
   template< int codim, class GridImp, bool leafIterator >
   inline AlbertaGridTreeIterator< codim, GridImp, leafIterator >
   ::AlbertaGridTreeIterator( const This &other )
-    : Base( other ),
+    : entity_( other.entity_ ),
       level_( other.level_ ),
       subEntity_( other.subEntity_ ),
       macroIterator_( other.macroIterator_ ),
@@ -371,8 +404,7 @@ namespace Dune
   inline typename AlbertaGridTreeIterator< codim, GridImp, leafIterator >::This &
   AlbertaGridTreeIterator< codim, GridImp, leafIterator >::operator= ( const This &other )
   {
-    Base::operator=( other );
-
+    entity_ = other.entity_;
     level_ = other.level_;
     subEntity_ =  other.subEntity_;
     macroIterator_ = other.macroIterator_;
