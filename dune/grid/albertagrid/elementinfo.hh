@@ -84,7 +84,7 @@ namespace Dune
       ElementInfo &operator= ( const ElementInfo &other );
       ElementInfo &operator= ( ElementInfo &&other );
 
-      operator bool () const { return (instance_ != null()); }
+      explicit operator bool () const { return (instance_ != null()); }
 
       bool operator== ( const ElementInfo &other ) const;
       bool operator!= ( const ElementInfo &other ) const;
