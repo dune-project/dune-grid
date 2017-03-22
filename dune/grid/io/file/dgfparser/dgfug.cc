@@ -96,50 +96,60 @@ namespace Dune
   {
     dgf_.element = DuneGridFormatParser::General;
 
-    if( !dgf_.readDuneGrid( input, dim, dim ) )
-      DUNE_THROW( DGFException, "Error: Failed to build grid");
-
-    dgf_.setOrientation( 0, 1 );
-
     // get grid parameter block
     dgf::UGGridParameterBlock gridParam( input );
 
-    // create grid here to set heap size
-    // create grid factory (passed grid is returned by createGrid method)
     if( gridParam.heapSize() > 0 )
       UGGrid< dim >::setDefaultHeapSize( gridParam.heapSize() );
 
-    for( int n = 0; n < dgf_.nofvtx; n++ )
-    {
-      FieldVector< double, dim > v;
-      for( int j = 0; j < dim; j++ )
-        v[ j ] = dgf_.vtx[ n ][ j ];
-      factory_.insertVertex( v );
-    }
-
-    std::vector< unsigned int > el;
-    for( int n = 0; n < dgf_.nofelements; n++ )
-    {
-      el.clear();
-      for( size_t j = 0; j < dgf_.elements[ n ].size(); ++j )
-        el.push_back( ( dgf_.elements[ n ][ j ] ) );
-
-      // simplices
-      if( el.size() == std::size_t( dim+1 ) )
-        factory_.insertElement( GeometryType( GeometryType::simplex, dim ), el );
-      // cubes
-      else if( el.size() == 1u << dim )
-        factory_.insertElement( GeometryType( GeometryType::cube, dim ), el );
-#ifdef EXPERIMENTAL_GRID_EXTENSIONS
-      // pyramid
-      else if( (dim == 3) && (el.size() == 5u) )
-        factory_.insertElement( GeometryType( GeometryType::pyramid, dim ), el );
-      // prisms
-      else if( (dim == 3) && (el.size() == 6u) )
-        factory_.insertElement( GeometryType( GeometryType::prism, dim ), el );
+    int rank = 0;
+#if HAVE_MPI
+    MPI_Comm_rank(comm_, &rank);
 #endif
-      else
-        DUNE_THROW( DGFException, "Invalid number of element vertices: " << el.size() );
+
+    if ( rank == 0 )
+    {
+      if( !dgf_.readDuneGrid( input, dim, dim ) )
+        DUNE_THROW( DGFException, "Error: Failed to build grid");
+
+      dgf_.setOrientation( 0, 1 );
+
+      // create grid here to set heap size
+      // create grid factory (passed grid is returned by createGrid method)
+
+      for( int n = 0; n < dgf_.nofvtx; n++ )
+      {
+        FieldVector< double, dim > v;
+        for( int j = 0; j < dim; j++ )
+          v[ j ] = dgf_.vtx[ n ][ j ];
+        factory_.insertVertex( v );
+      }
+
+      std::vector< unsigned int > el;
+      for( int n = 0; n < dgf_.nofelements; n++ )
+      {
+        el.clear();
+        for( size_t j = 0; j < dgf_.elements[ n ].size(); ++j )
+          el.push_back( ( dgf_.elements[ n ][ j ] ) );
+
+        // simplices
+        if( el.size() == std::size_t( dim+1 ) )
+          factory_.insertElement( GeometryType( GeometryType::simplex, dim ), el );
+        // cubes
+        else if( el.size() == 1u << dim )
+          factory_.insertElement( GeometryType( GeometryType::cube, dim ), el );
+#ifdef EXPERIMENTAL_GRID_EXTENSIONS
+        // pyramid
+        else if( (dim == 3) && (el.size() == 5u) )
+          factory_.insertElement( GeometryType( GeometryType::pyramid, dim ), el );
+        // prisms
+        else if( (dim == 3) && (el.size() == 6u) )
+          factory_.insertElement( GeometryType( GeometryType::prism, dim ), el );
+#endif
+        else
+          DUNE_THROW( DGFException, "Invalid number of element vertices: " << el.size() );
+      }
+
     }
 
     // create grid

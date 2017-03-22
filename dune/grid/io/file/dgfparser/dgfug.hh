@@ -90,7 +90,8 @@ namespace Dune
                               MPICommunicatorType comm = MPIHelper::getCommunicator() )
       : grid_( 0 ),
         factory_(),
-        dgf_( rank( comm ), size( comm ) )
+        dgf_( rank( comm ), size( comm ) ),
+        comm_( comm )
     {
       generate( input );
     }
@@ -100,7 +101,8 @@ namespace Dune
                               MPICommunicatorType comm = MPIHelper::getCommunicator() )
       : grid_( 0 ),
         factory_(),
-        dgf_( rank( comm ), size( comm ) )
+        dgf_( rank( comm ), size( comm ) ),
+        comm_( comm )
     {
       std::ifstream input( filename.c_str() );
       if ( !input )
@@ -228,6 +230,7 @@ namespace Dune
     Grid *grid_;
     GridFactory< UGGrid< dim > > factory_;
     DuneGridFormatParser dgf_;
+    MPICommunicatorType comm_;
   };
 #endif // #if ENABLE_UG
 
