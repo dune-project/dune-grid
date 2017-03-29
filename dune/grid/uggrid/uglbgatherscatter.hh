@@ -65,16 +65,18 @@ namespace Dune {
         LBMessageBuffer lbMessageBuffer;
         dataHandle.gather(lbMessageBuffer, entity);
 
-        char*& buffer = gridView.grid().getRealImplementation(entity).getTarget()->message_buffer;
+        auto ugEntity = gridView.grid().getRealImplementation(entity).getTarget();
+        auto& buffer_size = ugEntity->message_buffer_size;
+        char*& buffer = ugEntity->message_buffer;
         assert(not buffer);
 
         typedef typename DataHandle::DataType DataType;
-        buffer = (char*)malloc(sizeof(int) + numberOfParams*sizeof(DataType));
-        *((int*)buffer) = numberOfParams*sizeof(DataType);       // Size of the actual payload
+        buffer_size = numberOfParams * sizeof(DataType);
+        buffer = static_cast<char*>(std::malloc(buffer_size));
 
         for (int paramIdx = 0; paramIdx < numberOfParams; paramIdx++)
         {
-          DataType *dataPointer = (DataType*)(buffer + sizeof(int) + paramIdx*sizeof(DataType));
+          DataType *dataPointer = (DataType*)(buffer + paramIdx*sizeof(DataType));
           lbMessageBuffer.read(*dataPointer);
         }
       }
@@ -100,7 +102,8 @@ namespace Dune {
           continue;
 
         // get data from UG message buffer and write to DUNE message buffer
-        char*& buffer = gridView.grid().getRealImplementation(entity).getTarget()->message_buffer;
+        auto ugEntity = gridView.grid().getRealImplementation(entity).getTarget();
+        char*& buffer = ugEntity->message_buffer;
         assert(buffer);
 
         LBMessageBuffer lbMessageBuffer;
@@ -108,7 +111,7 @@ namespace Dune {
         for(int paramIdx = 0; paramIdx < numberOfParams; paramIdx++)
         {
           typedef typename DataHandle::DataType DataType;
-          DataType *dataPointer = (DataType*)(buffer + sizeof(int) + paramIdx*sizeof(DataType));
+          DataType *dataPointer = (DataType*)(buffer + paramIdx*sizeof(DataType));
           lbMessageBuffer.write(*dataPointer);
         }
 
@@ -116,7 +119,7 @@ namespace Dune {
         dataHandle.scatter(lbMessageBuffer, entity, numberOfParams);
 
         // free object's local message buffer
-        free (buffer);
+        std::free(buffer);
         buffer = nullptr;
       }
     }
