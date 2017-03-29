@@ -161,13 +161,35 @@ namespace Dune
   class Intersection
   {
   public:
-    //! type of underlying implementation
+    /**
+     * \brief Type of underlying implementation
+     *
+     * \note This code may change without prior warning
+     *
+     **/
     typedef IntersectionImp Implementation;
 
-    //! return reference to the real implementation
-    Implementation &impl () { return real; }
-    //! return reference to the real implementation
-    const Implementation &impl () const { return real; }
+    /**
+     * \brief Access to the underlying implementation
+     *
+     * \note This code may change without prior warning
+     *
+     **/
+    Implementation &impl ()
+    {
+      return real;
+    }
+
+    /**
+     * \brief Access to the underlying implementation
+     *
+     * \note This code may change without prior warning
+     *
+     **/
+    const Implementation &impl () const
+    {
+      return real;
+    }
 
   protected:
     Implementation real;

@@ -61,7 +61,12 @@ namespace Dune
     typedef GridView< ViewTraits > ThisType;
 
   public:
-    //! type of underlying implementation
+    /**
+     * \brief Type of underlying implementation
+     *
+     * \note This code may change without prior warning
+     *
+     **/
     typedef typename ViewTraits :: GridViewImp Implementation;
 
     typedef typename ViewTraits :: GridViewImp GridViewImp;
@@ -265,10 +270,27 @@ namespace Dune
       impl().communicate(data,iftype,dir);
     }
 
-    //! return reference to the real implementation
-    Implementation &impl () { return impl_; }
-    //! return reference to the real implementation
-    const Implementation &impl () const { return impl_; }
+    /**
+     * \brief Access to the underlying implementation
+     *
+     * \note This code may change without prior warning
+     *
+     **/
+    Implementation &impl ()
+    {
+      return impl_;
+    }
+
+    /**
+     * \brief Access to the underlying implementation
+     *
+     * \note This code may change without prior warning
+     *
+     **/
+    const Implementation &impl () const
+    {
+      return impl_;
+    }
 
   protected:
     Implementation impl_;
