@@ -130,14 +130,6 @@ namespace Dune
       // cubes
       else if( el.size() == 1u << dim )
         factory_.insertElement( GeometryTypes::cube( dim ), el );
-#ifdef EXPERIMENTAL_GRID_EXTENSIONS
-      // pyramid
-      else if( (dim == 3) && (el.size() == 5u) )
-        factory_.insertElement( GeometryTypes::pyramid, el );
-      // prisms
-      else if( (dim == 3) && (el.size() == 6u) )
-        factory_.insertElement( GeometryTypes::prism, el );
-#endif
       else
         DUNE_THROW( DGFException, "Invalid number of element vertices: " << el.size() );
     }

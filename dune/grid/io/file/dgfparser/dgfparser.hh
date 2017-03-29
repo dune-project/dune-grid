@@ -42,10 +42,6 @@
 #include <dune/grid/io/file/dgfparser/blocks/periodicfacetrans.hh>
 #include <dune/grid/io/file/dgfparser/blocks/simplexgeneration.hh>
 
-#ifdef EXPERIMENTAL_GRID_EXTENSIONS
-#include <dune/grid/io/file/dgfparser/blocks/general.hh>
-#endif
-
 namespace Dune {
 
   /*! @brief Some simple static information for a given GridType
