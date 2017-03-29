@@ -80,13 +80,35 @@ namespace Dune
   class IntersectionIterator
   {
   public:
-    //! type of underlying implementation
+    /**
+     * \brief Type of underlying implementation
+     *
+     * \note This code may change without prior warning
+     *
+     **/
     typedef IntersectionIteratorImp Implementation;
 
-    //! return reference to the real implementation
-    Implementation &impl () { return realIterator; }
-    //! return reference to the real implementation
-    const Implementation &impl () const { return realIterator; }
+    /**
+     * \brief Access to the underlying implementation
+     *
+     * \note This code may change without prior warning
+     *
+     **/
+    Implementation &impl ()
+    {
+      return realIterator;
+    }
+
+    /**
+     * \brief Access to the underlying implementation
+     *
+     * \note This code may change without prior warning
+     *
+     **/
+    const Implementation &impl () const
+    {
+      return realIterator;
+    }
 
   protected:
     Implementation realIterator;

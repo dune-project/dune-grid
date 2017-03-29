@@ -65,10 +65,20 @@ namespace Dune
   class Geometry
   {
   public:
-    //! type of underlying implementation
+    /**
+     * \brief Type of underlying implementation
+     *
+     * \note This code may change without prior warning
+     *
+     **/
     typedef GeometryImp< mydim, cdim, GridImp > Implementation;
 
-    //! return reference to the implementation
+    /**
+     * \brief Access to the underlying implementation
+     *
+     * \note This code may change without prior warning
+     *
+     **/
     const Implementation &impl () const { return realGeometry; }
 
     //! @brief export geometry dimension

@@ -63,7 +63,12 @@ namespace Dune
   class Entity
   {
   public:
-    //! type of underlying implementation
+    /**
+     * \brief Type of underlying implementation
+     *
+     * \note This code may change without prior warning
+     *
+     **/
     typedef EntityImp< cd, dim, GridImp > Implementation;
 
     //! Return reference to the real implementation
@@ -230,7 +235,12 @@ namespace Dune
   class Entity <0,dim,GridImp,EntityImp>
   {
   public:
-    //! type of underlying implementation
+    /**
+     * \brief Type of underlying implementation
+     *
+     * \note This code may change without prior warning
+     *
+     **/
     typedef EntityImp< 0, dim, GridImp > Implementation;
 
     //! Return reference to the real implementation
