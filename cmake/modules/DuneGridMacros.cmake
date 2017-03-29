@@ -21,7 +21,6 @@ find_package(Psurface)
 include(AddPsurfaceFlags)
 find_package(AmiraMesh)
 include(AddAmiraMeshFlags)
-include(CheckExperimentalGridExtensions)
 
 set(DEFAULT_DGF_GRIDDIM 1)
 set(DEFAULT_DGF_WORLDDIM 1)
