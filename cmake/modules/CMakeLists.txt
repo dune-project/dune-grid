@@ -4,7 +4,6 @@ install(FILES
   AddAlbertaFlags.cmake
   AddAmiraMeshFlags.cmake
   AddPsurfaceFlags.cmake
-  CheckExperimentalGridExtensions.cmake
   DuneGridMacros.cmake
   FindAlberta.cmake
   FindAmiraMesh.cmake
