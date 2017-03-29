@@ -103,12 +103,6 @@ namespace Dune {
       return hostIntersection_.neighbor();
     }
 
-
-    //! return information about the Boundary
-    int boundaryId () const {
-      return hostIntersection_.boundaryId();
-    }
-
     //! return the boundary segment index
     size_t boundarySegmentIndex() const {
       return hostIntersection_.boundarySegmentIndex();
@@ -267,12 +261,6 @@ namespace Dune {
     //! return true if across the edge an neighbor on this level exists
     bool neighbor () const {
       return hostIntersection_.neighbor();
-    }
-
-
-    //! return information about the Boundary
-    int boundaryId () const {
-      return hostIntersection_.boundaryId();
     }
 
     //! return the boundary segment index
