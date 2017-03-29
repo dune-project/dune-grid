@@ -248,48 +248,6 @@ namespace Dune
       gridout << "#" << std::endl;
     }
 
-    // write all boundaries to the "boundarysegments" block
-#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
-    gridout << std::endl << "BOUNDARYSEGMENTS" << std::endl;
-    for( ElementIterator it = gridView_.template begin< 0 >(); it != end; ++it )
-    {
-      const Element& element = *it ;
-      if( !it->hasBoundaryIntersections() )
-        continue;
-
-      const RefElement &refElement = RefElements::general( element.type() );
-
-      const IntersectionIterator iend = gridView_.iend( element ) ;
-      for( IntersectionIterator iit = gridView_.ibegin( element ); iit != iend; ++iit )
-      {
-        if( !iit->boundary() )
-          continue;
-
-        const int boundaryId = iit->boundaryId();
-        if( boundaryId <= 0 )
-        {
-          std::cerr << "Warning: Ignoring nonpositive boundary id: "
-                    << boundaryId << "." << std::endl;
-          continue;
-        }
-
-        const int faceNumber = iit->indexInInside();
-        const unsigned int faceSize = refElement.size( faceNumber, 1, dimGrid );
-        std::vector< Index > vertices( faceSize );
-        for( unsigned int i = 0; i < faceSize; ++i )
-        {
-          const int j = refElement.subEntity( faceNumber, 1, i, dimGrid );
-          vertices[ i ] = vertexIndex[ indexSet.subIndex( element, j, dimGrid ) ];
-        }
-        gridout << boundaryId << "   " << vertices[ 0 ];
-        for( unsigned int i = 1; i < faceSize; ++i )
-          gridout << " " << vertices[ i ];
-        gridout << std::endl;
-      }
-    }
-    gridout << "#" << std::endl << std::endl;
-#endif // #if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
-
     // add additional parameters given by the user
     gridout << addParams.str() << std::endl;
 

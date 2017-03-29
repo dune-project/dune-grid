@@ -228,28 +228,6 @@ namespace Dune
       return this->real.boundary();
     }
 
-#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
-    /**
-       \brief Identifier for boundary segment from macro grid.
-
-       One can attach a boundary Id to a boundary segment on the macro
-       grid. This Id will also be used for all fragments of these
-       boundary segments.
-
-       The numbering is defined as:
-       - Id==0 for all intersections without boundary()==false
-       - Id>=0 for all intersections without boundary()==true
-
-       The way the Identifiers are attached to the grid may differ
-       between the different grid implementations.
-
-     */
-    int boundaryId () const
-    {
-      return this->real.boundaryId();
-    }
-#endif
-
     /** \brief index of the boundary segment within the macro grid
      *
      *  In many applications, special data needs to be attached to the boundary
