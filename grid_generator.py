@@ -50,8 +50,8 @@ def module(includes, typeName, constructors=None, methods=None):
     includes = includes + ["dune/corepy/grid/hierarchical.hh"]
     typeHash = "hierarchicalgrid_" + hashIt(typeName)
     module = generator.load(includes, typeName, typeHash, constructors, methods)
-    addAttr(module, module.HierarchicalGrid.LeafView)
-    addAttr(module, module.HierarchicalGrid.LevelView)
+    addAttr(module, module.LeafGrid)
+    addAttr(module, module.LevelGrid)
     return module
 
 
