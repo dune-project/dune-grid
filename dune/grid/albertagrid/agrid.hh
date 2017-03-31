@@ -146,11 +146,10 @@ namespace Dune
     template< class > friend class AlbertaLevelGridView;
     template< class > friend class AlbertaLeafGridView;
     template< int, class, bool > friend class AlbertaGridTreeIterator;
+    template< class > friend class AlbertaGridHierarchicIterator;
 
     friend class GridFactory< This >;
     friend struct DGFGridFactory< This >;
-
-    friend class AlbertaGridHierarchicIterator< This >;
 
     friend class AlbertaGridIntersectionBase< const This >;
     friend class AlbertaGridLeafIntersection< const This >;
@@ -535,9 +534,9 @@ namespace Dune
     DUNE_DEPRECATED_MSG("Deprecated in Dune 3.0, use readGrid instead.")
     readGridXdr ( const std::string &filename, ctype &time );
 
+  private:
     using Base::getRealImplementation;
 
-  private:
     typedef std::vector<int> ArrayType;
 
     void setup ();
