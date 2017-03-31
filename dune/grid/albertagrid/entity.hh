@@ -17,9 +17,6 @@ namespace Dune
   // Forward Declarations
   // --------------------
 
-  template< int codim, class Grid >
-  class AlbertaGridEntityPointer;
-
   template< int codim, class Grid, bool leafIterator >
   class AlbertaGridTreeIterator;
 
@@ -51,8 +48,8 @@ namespace Dune
     friend class AlbertaGrid< dim, dimworld >;
     friend class AlbertaGridEntity< 0, dim, Grid >;
 
+    friend class AlbertaGridHierarchicIterator< Grid >;
     template< int, class, bool > friend class AlbertaGridTreeIterator;
-    friend class AlbertaGridEntityPointer< codim, Grid >;
 
   public:
     static const int dimension = dim;
@@ -192,7 +189,6 @@ namespace Dune
     friend class AlbertaGridLeafIntersection< Grid >;
     friend class AlbertaGridHierarchicIterator< Grid >;
     template< int, class, bool > friend class AlbertaGridTreeIterator;
-    friend class AlbertaGridEntityPointer< 0, Grid >;
 
   public:
     static const int dimension = dim;

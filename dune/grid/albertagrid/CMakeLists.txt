@@ -37,7 +37,6 @@ set(HEADERS
   undefine-3.0.hh
   entity.hh
   entity.cc
-  entitypointer.hh
   entityseed.hh
   hierarchiciterator.hh
   algebra.hh

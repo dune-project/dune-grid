@@ -50,7 +50,6 @@
 #include "indexsets.hh"
 #include "geometry.hh"
 #include "entity.hh"
-#include "entitypointer.hh"
 #include "hierarchiciterator.hh"
 #include "treeiterator.hh"
 #include "leveliterator.hh"
@@ -144,9 +143,9 @@ namespace Dune
     Base;
 
     template< int, int, class > friend class AlbertaGridEntity;
-    template< int, class > friend class AlbertaGridEntityPointer;
     template< class > friend class AlbertaLevelGridView;
     template< class > friend class AlbertaLeafGridView;
+    template< int, class, bool > friend class AlbertaGridTreeIterator;
 
     friend class GridFactory< This >;
     friend struct DGFGridFactory< This >;
@@ -288,11 +287,10 @@ namespace Dune
     typedef Alberta::HierarchyDofNumbering< dimension > DofNumbering;
     typedef AlbertaGridLevelProvider< dimension > LevelProvider;
 
-    // forbid copying and assignment
-    AlbertaGrid ( const This & );
-    This &operator= ( const This & );
-
   public:
+    AlbertaGrid ( const This & ) = delete;
+    This &operator= ( const This & ) = delete;
+
     /** \brief create an empty grid */
     AlbertaGrid ();
 
@@ -537,9 +535,9 @@ namespace Dune
     DUNE_DEPRECATED_MSG("Deprecated in Dune 3.0, use readGrid instead.")
     readGridXdr ( const std::string &filename, ctype &time );
 
-  private:
     using Base::getRealImplementation;
 
+  private:
     typedef std::vector<int> ArrayType;
 
     void setup ();
