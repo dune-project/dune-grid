@@ -66,8 +66,8 @@ namespace Dune {
         dataHandle.gather(lbMessageBuffer, entity);
 
         auto ugEntity = gridView.grid().getRealImplementation(entity).getTarget();
-        auto& buffer_size = ugEntity->message_buffer_size;
-        char*& buffer = ugEntity->message_buffer;
+        auto& buffer_size = ugEntity->message_buffer_size();
+        auto& buffer = ugEntity->message_buffer();
         assert(not buffer);
 
         typedef typename DataHandle::DataType DataType;
@@ -103,7 +103,8 @@ namespace Dune {
 
         // get data from UG message buffer and write to DUNE message buffer
         auto ugEntity = gridView.grid().getRealImplementation(entity).getTarget();
-        char*& buffer = ugEntity->message_buffer;
+        auto& buffer_size = ugEntity->message_buffer_size();
+        auto& buffer = ugEntity->message_buffer();
         assert(buffer);
 
         LBMessageBuffer lbMessageBuffer;
@@ -121,6 +122,7 @@ namespace Dune {
         // free object's local message buffer
         std::free(buffer);
         buffer = nullptr;
+        buffer_size = 0;
       }
     }
   };
