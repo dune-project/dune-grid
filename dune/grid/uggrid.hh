@@ -487,7 +487,8 @@ namespace Dune {
     {
 #ifdef ModelP
       // gather element data
-      //        UGLBGatherScatter::template gather<0>(this->leafGridView(), dataHandle);
+      if (dataHandle.contains(dim, 0))
+        UGLBGatherScatter::template gather<0>(this->leafGridView(), dataHandle);
 
       // gather node data
       if (dataHandle.contains(dim,dim))
@@ -500,7 +501,8 @@ namespace Dune {
 
 #ifdef ModelP
       // scatter element data
-      //        UGLBGatherScatter::template scatter<0>(this->leafGridView(), dataHandle);
+      if (dataHandle.contains(dim, 0))
+        UGLBGatherScatter::template scatter<0>(this->leafGridView(), dataHandle);
 
       // scatter node data
       if (dataHandle.contains(dim,dim))
