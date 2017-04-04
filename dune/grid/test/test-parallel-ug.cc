@@ -364,23 +364,57 @@ public:
   }
 };
 
+template<typename Grid>
 class LoadBalance
 {
-  template<class Grid, class Vector, int commCodim>
+  const static int dimension = Grid::dimension;
+  using ctype = typename Grid::ctype;
+  using Position = Dune::FieldVector<ctype, dimension>;
+
+  using Codims = std::bitset<dimension+1>;
+
+  /**
+   * Layout class for `Dune::MultipleCodimMultipleGeomTypeMapper`
+   */
+  template<int griddim>
+  class LBLayout
+  {
+    static_assert(griddim == dimension, "LBLayout is only usable for grid dimension");
+
+    const Codims codims_;
+  public:
+    LBLayout(const Codims& codims)
+      : codims_(codims)
+      { /* Nothing. */ }
+
+    bool contains(GeometryType gt) const
+      { return codims_.test(dimension - gt.dim()); }
+  };
+
+  using GridView = typename Grid::LeafGridView;
+  using Mapper = Dune::MultipleCodimMultipleGeomTypeMapper<GridView, LBLayout>;
+
+  template<class Vector>
   class LBDataHandle
-    : public Dune::CommDataHandleIF<LBDataHandle<Grid, Vector, commCodim>,
+    : public Dune::CommDataHandleIF<LBDataHandle<Vector>,
           typename Vector::value_type>
   {
   public:
     typedef typename Vector::value_type DataType;
-    typedef Dune::CommDataHandleIF<LBDataHandle<Grid, Vector, commCodim>,
-        DataType> ParentType;
+
+  public:
 
     bool contains (int dim, int codim) const
-    { return (codim == commCodim); }
+    {
+      assert(dim == dimension);
+      return codims_.test(codim);
+    }
 
     bool fixedSize (int dim, int codim) const
-    { return true; }
+    {
+      assert(dim == dimension);
+      return true;
+    }
 
     template<class Entity>
     size_t size (Entity& entity) const
@@ -391,64 +425,81 @@ class LoadBalance
     template<class MessageBuffer, class Entity>
     void gather (MessageBuffer& buff, const Entity& entity) const
     {
-      int index = grid_.leafGridView().indexSet().index(entity);
+      const auto index = mapper_.index(entity);
       buff.write(dataVector_[index]);
     }
 
     template<class MessageBuffer, class Entity>
     void scatter (MessageBuffer& buff, const Entity& entity, size_t n)
     {
-      if (dataVector_.size() != grid_.leafGridView().size(commCodim))
-        dataVector_.resize(grid_.leafGridView().size(commCodim));
+      if (dataVector_.size() != mapper_.size())
+        dataVector_.resize(mapper_.size());
 
-      int index = grid_.leafGridView().indexSet().index(entity);
+      const auto index = mapper_.index(entity);
       buff.read(dataVector_[index]);
     }
 
-    LBDataHandle (Grid& grid, Vector& dataVector)
-      : grid_(grid), dataVector_(dataVector)
+    void update() override final
+    {
+      mapper_.update();
+      dataVector_.resize(mapper_.size());
+    }
+
+    LBDataHandle (Mapper& mapper, Vector& dataVector, const Codims& codims)
+      : mapper_(mapper)
+      , dataVector_(dataVector)
+      , codims_(codims)
     {}
 
   private:
-    Grid& grid_;
+    Mapper& mapper_;
     Vector& dataVector_;
+    const Codims codims_;
   };
 
-public:
-  template <class Grid>
-  static void test(Grid& grid)
+  template<typename=void>
+  static Codims toBitset(Codims codims = {})
+    { return codims; }
+
+  template<int codim, int... codimensions, typename=void>
+  static Codims toBitset(Codims codims = {})
+    { return toBitset<codimensions...>(codims.set(codim)); }
+
+  template<typename=void>
+  static void fillVector(const GridView&, const Mapper&, std::vector<Position>&) {}
+
+  template<int codim, int... codimensions, typename=void>
+  static void fillVector(const GridView& gv, const Mapper& mapper, std::vector<Position>& dataVector)
   {
-    const int dim = Grid::dimension;
-    const int commCodim = dim;
-    typedef typename Grid::ctype ctype;
+    std::cout << "Filling vector for codim " << codim << "\n";
 
-    // define the vector containing the data to be balanced
-    typedef Dune::FieldVector<ctype, dim> Position;
-    std::vector<Position> dataVector(grid.leafGridView().size(commCodim));
-
-    // fill the data vector
-    const auto& gv = grid.leafGridView();
-    for (const auto& entity : entities(gv, Dune::Codim<commCodim>(),
+    for (const auto& entity : entities(gv, Dune::Codim<codim>(),
                                        Dune::Partitions::interiorBorder)) {
-      int index = gv.indexSet().index(entity);
+      const auto index = mapper.index(entity);
 
       // assign the position of the entity to the entry in the vector
       dataVector[index] = entity.geometry().center();
     }
 
-    // balance the grid and the data
-    LBDataHandle<Grid, std::vector<Position>, commCodim> dataHandle(grid, dataVector);
-    grid.loadBalance(dataHandle);
+    fillVector<codimensions...>(gv, mapper, dataVector);
+  }
 
-    // check for correctness
-    for (const auto& entity : entities(gv, Dune::Codim<commCodim>(),
+  template<typename=void>
+  static bool checkVector(const GridView&, const Mapper&, const std::vector<Position>&)
+    { return true; }
+
+  template<int codim, int... codimensions, typename=void>
+  static bool checkVector(const GridView& gv, const Mapper& mapper, const std::vector<Position>& dataVector)
+  {
+    std::cout << "Checking vector for codim " << codim << "\n";
+
+    for (const auto& entity : entities(gv, Dune::Codim<codim>(),
                                        Dune::Partitions::interiorBorder)) {
-      int index = gv.indexSet().index(entity);
-
+      const auto index = mapper.index(entity);
       const auto position = entity.geometry().center();
 
       // compare the position with the balanced data
-      for (int k = 0; k < dim; k++)
+      for (int k = 0; k < dimension; k++)
       {
         if (Dune::FloatCmp::ne(dataVector[index][k], position[k]))
         {
@@ -460,12 +511,64 @@ public:
       }
     }
 
+    return checkVector<codimensions...>(gv, mapper, dataVector);
+  }
+
+public:
+  template<int... codimensions>
+  static void test(Grid& grid)
+  {
+    const Codims codims = toBitset<codimensions...>();
+    const auto& gv = grid.leafGridView();
+    Mapper mapper{ gv, LBLayout<dimension>{codims} };
+
+    // define the vector containing the data to be balanced
+    std::vector<Position> dataVector(mapper.size());
+
+    using DataHandle = LBDataHandle< std::vector<Position> >;
+    DataHandle dataHandle(mapper, dataVector, codims);
+
+    // fill the data vector
+    fillVector<codimensions...>(gv, mapper, dataVector);
+
+    // balance the grid and the data
+    grid.loadBalance(dataHandle);
+
+    // check for correctness
+    checkVector<codimensions...>(gv, mapper, dataVector);
+
     std::cout << gv.comm().rank()
               << ": load balancing with data was successful." << std::endl;
   }
 };
 
-template <int dim>
+template<typename Grid>
+std::shared_ptr<Grid>
+setupGrid(bool simplexGrid, bool localRefinement, int refinementDim, bool refineUpperPart)
+{
+  const static int dim = Grid::dimension;
+  StructuredGridFactory<Grid> structuredGridFactory;
+
+  Dune::FieldVector<double,dim> lowerLeft(0);
+  Dune::FieldVector<double,dim> upperRight(1);
+  std::array<unsigned int, dim> numElements;
+  std::fill(numElements.begin(), numElements.end(), 4);
+  if (simplexGrid)
+    return structuredGridFactory.createSimplexGrid(lowerLeft, upperRight, numElements);
+  else
+    return structuredGridFactory.createCubeGrid(lowerLeft, upperRight, numElements);
+}
+
+template<int dim, int... codimensions>
+void testLoadBalance(bool simplexGrid, bool localRefinement, int refinementDim, bool refineUpperPart)
+{
+  using Grid = UGGrid<dim>;
+  auto grid = setupGrid<Grid>(simplexGrid, localRefinement, refinementDim, refineUpperPart);
+  LoadBalance<Grid>::template test<codimensions...>(*grid);
+  // LoadBalance<Grid>::template test<codimensions...>(*grid);
+}
+
+template<int dim>
 void testParallelUG(bool simplexGrid, bool localRefinement, int refinementDim, bool refineUpperPart)
 {
   std::cout << "Testing parallel UGGrid for " << dim << "D\n";
@@ -475,23 +578,12 @@ void testParallelUG(bool simplexGrid, bool localRefinement, int refinementDim, b
   ////////////////////////////////////////////////////////////
 
   typedef UGGrid<dim> GridType;
-
-  StructuredGridFactory<GridType> structuredGridFactory;
-
-  Dune::FieldVector<double,dim> lowerLeft(0);
-  Dune::FieldVector<double,dim> upperRight(1);
-  std::array<unsigned int, dim> numElements;
-  std::fill(numElements.begin(), numElements.end(), 4);
-  std::shared_ptr<GridType> grid;
-  if (simplexGrid)
-    grid = structuredGridFactory.createSimplexGrid(lowerLeft, upperRight, numElements);
-  else
-    grid = structuredGridFactory.createCubeGrid(lowerLeft, upperRight, numElements);
+  auto grid = setupGrid<GridType>(simplexGrid, localRefinement, refinementDim, refineUpperPart);
 
   //////////////////////////////////////////////////////
   // Distribute the grid
   //////////////////////////////////////////////////////
-  LoadBalance::test(*grid);
+  grid->loadBalance();
 
   std::cout << "Process " << grid->comm().rank() + 1
             << " has " << grid->size(0)
@@ -646,10 +738,20 @@ int main (int argc , char **argv) try
   for (const bool simplexGrid : {false, true}) {
     for (const bool localRefinement : {false, true}) {
       for (const bool refineUpperPart : {false, true}) {
-        for (const int refinementDim : {0,1})
+        for (const int refinementDim : {0,1}) {
           testParallelUG<2>(simplexGrid, localRefinement, refinementDim, refineUpperPart);
-        for (const int refinementDim : {0,1,2})
+          testLoadBalance<2>(simplexGrid, localRefinement, refinementDim, refineUpperPart);
+          testLoadBalance<2, 0>(simplexGrid, localRefinement, refinementDim, refineUpperPart);
+          testLoadBalance<2, 2>(simplexGrid, localRefinement, refinementDim, refineUpperPart);
+          testLoadBalance<2, 0, 2>(simplexGrid, localRefinement, refinementDim, refineUpperPart);
+        }
+        for (const int refinementDim : {0,1,2}) {
           testParallelUG<3>(simplexGrid, localRefinement, refinementDim, refineUpperPart);
+          testLoadBalance<3>(simplexGrid, localRefinement, refinementDim, refineUpperPart);
+          testLoadBalance<3, 0>(simplexGrid, localRefinement, refinementDim, refineUpperPart);
+          testLoadBalance<3, 3>(simplexGrid, localRefinement, refinementDim, refineUpperPart);
+          testLoadBalance<3, 0, 3>(simplexGrid, localRefinement, refinementDim, refineUpperPart);
+        }
       }
     }
   }
