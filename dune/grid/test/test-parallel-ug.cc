@@ -366,21 +366,52 @@ public:
 
 class LoadBalance
 {
-  template<class Grid, class Vector, int commCodim>
+  template<class Grid, class Vector>
   class LBDataHandle
-    : public Dune::CommDataHandleIF<LBDataHandle<Grid, Vector, commCodim>,
+    : public Dune::CommDataHandleIF<LBDataHandle<Grid, Vector>,
           typename Vector::value_type>
   {
-  public:
-    typedef typename Vector::value_type DataType;
-    typedef Dune::CommDataHandleIF<LBDataHandle<Grid, Vector, commCodim>,
-        DataType> ParentType;
+    using This = LBDataHandle<Grid, Vector>;
 
+  public:
+    const static int dimension = Grid::dimension;
+
+    typedef typename Vector::value_type DataType;
+    using Codims = std::bitset<dimension+1>;
+
+  private:
+    /**
+     * Layout class for `Dune::MultipleCodimMultipleGeomTypeMapper`
+     */
+    template<int griddim>
+    class LBLayout
+    {
+      static_assert(griddim == dimension, "LBLayout is only usable for grid dimension");
+
+      const Codims codims_;
+    public:
+      LBLayout(const Codims& codims)
+        : codims_(codims)
+        { /* Nothing. */ }
+
+      bool contains(GeometryType gt) const
+        { return codims_.test(dimension - gt.dim()); }
+    };
+
+    using Mapper = Dune::MultipleCodimMultipleGeomTypeMapper< typename Grid::LeafGridView, LBLayout >;
+
+  public:
     bool contains (int dim, int codim) const
-    { return (codim == commCodim); }
+    {
+      assert(dim == dimension);
+      return codims_.test(codim);
+    }
 
     bool fixedSize (int dim, int codim) const
-    { return true; }
+    {
+      assert(dim == dimension);
+      return true;
+    }
 
     template<class Entity>
     size_t size (Entity& entity) const
@@ -391,27 +422,35 @@ class LoadBalance
     template<class MessageBuffer, class Entity>
     void gather (MessageBuffer& buff, const Entity& entity) const
     {
-      int index = grid_.leafGridView().indexSet().index(entity);
+      const auto index = mapper_.index(entity);
       buff.write(dataVector_[index]);
     }
 
     template<class MessageBuffer, class Entity>
     void scatter (MessageBuffer& buff, const Entity& entity, size_t n)
     {
-      if (dataVector_.size() != grid_.leafGridView().size(commCodim))
-        dataVector_.resize(grid_.leafGridView().size(commCodim));
+      if (dataVector_.size() != mapper_.size())
+        dataVector_.resize(mapper_.size());
 
-      int index = grid_.leafGridView().indexSet().index(entity);
+      const auto index = mapper_.index(entity);
       buff.read(dataVector_[index]);
     }
 
-    LBDataHandle (Grid& grid, Vector& dataVector)
-      : grid_(grid), dataVector_(dataVector)
+    void update() override final
+      { mapper_.update(); }
+
+    LBDataHandle (Grid& grid, Vector& dataVector, const Codims& codims)
+      : grid_(grid)
+      , dataVector_(dataVector)
+      , codims_(codims)
+      , mapper_(grid.leafGridView(), LBLayout<dimension>{codims_})
     {}
 
   private:
     Grid& grid_;
     Vector& dataVector_;
+    const Codims codims_;
+    Mapper mapper_;
   };
 
 public:
@@ -437,7 +476,9 @@ public:
     }
 
     // balance the grid and the data
-    LBDataHandle<Grid, std::vector<Position>, commCodim> dataHandle(grid, dataVector);
+    using DataHandle = LBDataHandle< Grid, std::vector<Position> >;
+    typename DataHandle::Codims codims{ 1u << commCodim };
+    DataHandle dataHandle(grid, dataVector, codims);
     grid.loadBalance(dataHandle);
 
     // check for correctness
