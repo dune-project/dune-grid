@@ -165,6 +165,18 @@ namespace Dune
       CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().scatter(buffIF,e,n)));
     }
 
+    /**
+     * \brief update after grid changes
+     *
+     * This method is called during load balancing after `gather` and any
+     * grid changes and before `scatter`.  It should be used to update
+     * mappers so that data received during the `scatter` phase will be
+     * stored in the right location.
+     *
+     * The default implementation is a no-op.
+     */
+    virtual void update() {}
+
   private:
     //!  Barton-Nackman trick
     DataHandleImp& asImp () {return static_cast<DataHandleImp &> (*this);}
