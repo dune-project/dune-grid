@@ -498,6 +498,7 @@ namespace Dune {
       // the load balancing step now also attaches
       // the data to the entities and distributes it
       loadBalance();
+      dataHandle.update();
 
 #ifdef ModelP
       // scatter element data
