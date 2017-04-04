@@ -71,6 +71,11 @@ namespace Dune
         wrappedHandle_.scatter( buffer, entity, size );
       }
 
+      void update() override final
+      {
+        wrappedHandle_.update();
+      }
+
     private:
       static void assertHostEntity ( int dim, int codim )
       {
