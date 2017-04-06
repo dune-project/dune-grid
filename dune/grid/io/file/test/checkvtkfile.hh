@@ -11,7 +11,15 @@
 #include <sstream>
 #include <string>
 
+#if not defined( __MINGW32__ )
 #include <sys/wait.h>
+#else
+/* taken from ftp://ftp.ics.uci.edu/pub/centos0/ics-custom-build/BUILD/git-1.6.5.3/compat/mingw.h */
+#define WIFEXITED(x) ((unsigned)(x) < 259)	/* STILL_ACTIVE */
+#define WEXITSTATUS(x) ((x) & 0xff)
+#define WIFSIGNALED(x) ((unsigned)(x) > 259)
+#define WTERMSIG(x) SIGTERM
+#endif
 
 #include <dune/common/exceptions.hh>
 
