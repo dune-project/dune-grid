@@ -13,7 +13,9 @@
 #include <dune/common/timer.hh>
 
 #include <dune/common/poolallocator.hh>
+#ifdef HAVE_MPROTECT
 #include <dune/common/debugallocator.hh>
+#endif
 #ifdef GCCPOOL
 #include <ext/pool_allocator.h>
 #endif
@@ -76,7 +78,9 @@ typedef Dune::GeometryGrid< Grid, CoordFunction, Dune::PoolAllocator< char, 1638
 #ifdef GCCPOOL
 typedef Dune::GeometryGrid< Grid, CoordFunction, __gnu_cxx::__pool_alloc<char> > GeometryGridWithGCCPoolAllocator;
 #endif
+#ifdef HAVE_MPROTECT
 typedef Dune::GeometryGrid< Grid, CoordFunction, Dune::DebugAllocator<char> > GeometryGridWithDebugAllocator;
+#endif
 
 template <class GeometryGridType>
 void test(const std::string& gridfile)
@@ -154,9 +158,11 @@ try
   std::cout << "=== GeometryGridWithGCCPoolAllocator took " << watch.elapsed() << " seconds\n";
 #endif
 
+#ifdef HAVE_MPROTECT
   watch.reset();
   test<GeometryGridWithDebugAllocator>(gridfile);
   std::cout << "=== GeometryGridWithDebugAllocator took " << watch.elapsed() << " seconds\n";
+#endif
 
   return 0;
 }
