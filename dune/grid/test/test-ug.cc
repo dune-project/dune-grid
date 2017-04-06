@@ -57,6 +57,8 @@ void makeHalfCircleQuad(Dune::UGGrid<2>& grid, bool boundarySegments, bool param
 {
   Dune::GridFactory<Dune::UGGrid<2> > factory(&grid);
 
+  static const double pi = Dune::MathematicalConstants<double>::pi();
+
   // /////////////////////////////
   //   Create boundary segments
   // /////////////////////////////
@@ -70,13 +72,13 @@ void makeHalfCircleQuad(Dune::UGGrid<2>& grid, bool boundarySegments, bool param
     if (parametrization) {
 
       vertices[0] = 1;  vertices[1] = 2;
-      factory.insertBoundarySegment(vertices, std::shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI, M_PI*4/3)));
+      factory.insertBoundarySegment(vertices, std::shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, pi, pi*4/3)));
 
       vertices[0] = 2;  vertices[1] = 3;
-      factory.insertBoundarySegment(vertices, std::shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI*4/3, M_PI*5/3)));
+      factory.insertBoundarySegment(vertices, std::shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, pi*4/3, pi*5/3)));
 
       vertices[0] = 3;  vertices[1] = 0;
-      factory.insertBoundarySegment(vertices, std::shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI*5/3, M_PI*2)));
+      factory.insertBoundarySegment(vertices, std::shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, pi*5/3, pi*2)));
 
     } else {
 
