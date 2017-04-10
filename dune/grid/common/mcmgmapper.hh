@@ -145,7 +145,7 @@ namespace Dune
     {
       const GeometryType gt = e.type();
       assert(layout.contains(gt));
-      return is.index(e) + offset[GlobalGeometryTypeIndex::index(gt)];
+      return is.index(e) + offset(gt);
     }
 
     /** @brief Map subentity of codim 0 entity to array index.
@@ -163,7 +163,7 @@ namespace Dune
         ReferenceElements<double,GV::dimension>::general(eType).type(i,codim) ;
       //GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
       assert(layout.contains(gt));
-      return is.subIndex(e, i, codim) + offset[GlobalGeometryTypeIndex::index(gt)];
+      return is.subIndex(e, i, codim) + offset(gt);
     }
 
     /** @brief Return total number of entities in the entity set managed by the mapper.
@@ -214,7 +214,7 @@ namespace Dune
       //GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,cc);
       if (not layout.contains(gt))
         return false;
-      result = is.subIndex(e, i, cc) + offset[GlobalGeometryTypeIndex::index(gt)];
+      result = is.subIndex(e, i, cc) + offset(gt);
       return true;
     }
 
@@ -234,7 +234,7 @@ namespace Dune
           // if the geometry type is contained in the layout, increment offset
           if (layout.contains(*it))
           {
-            offset[GlobalGeometryTypeIndex::index(*it)] = n;
+            offsets[GlobalGeometryTypeIndex::index(*it)] = n;
             n += is.size(*it);
           }
         }
@@ -242,13 +242,16 @@ namespace Dune
     }
 
   private:
+    Index offset(GeometryType gt) const
+      { return offsets[GlobalGeometryTypeIndex::index(gt)]; }
+
     // number of data elements required
     unsigned int n;
     // GridView is needed to keep the IndexSet valid
     const GV gridView;
     const typename GV::IndexSet& is;
     // provide an array for the offsets
-    std::array<int, GlobalGeometryTypeIndex::size(GV::dimension)> offset;
+    std::array<Index, GlobalGeometryTypeIndex::size(GV::dimension)> offsets;
     mutable Layout<GV::dimension> layout;     // get layout object
   };
 
