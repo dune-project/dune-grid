@@ -231,12 +231,18 @@ namespace Dune
         GTV gtv = is.types(codim);
         for (typename GTV::const_iterator it = gtv.begin(); it != gtv.end(); ++it)
         {
+          Index offset;
+
           // if the geometry type is contained in the layout, increment offset
-          if (layout.contains(*it))
-          {
-            offsets[GlobalGeometryTypeIndex::index(*it)] = n;
+          if (layout.contains(*it)) {
+            offset = n;
             n += is.size(*it);
           }
+          else {
+            offset = invalidOffset;
+          }
+
+          offsets[GlobalGeometryTypeIndex::index(*it)] = offset;
         }
       }
     }
@@ -244,6 +250,8 @@ namespace Dune
   private:
     Index offset(GeometryType gt) const
       { return offsets[GlobalGeometryTypeIndex::index(gt)]; }
+
+    static const Index invalidOffset = std::numeric_limits<Index>::max();
 
     // number of data elements required
     unsigned int n;
