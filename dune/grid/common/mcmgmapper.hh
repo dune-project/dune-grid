@@ -144,7 +144,7 @@ namespace Dune
     Index index (const EntityType& e) const
     {
       const GeometryType gt = e.type();
-      assert(layout.contains(gt));
+      assert(offset(gt) != invalidOffset);
       return is.index(e) + offset(gt);
     }
 
@@ -162,7 +162,7 @@ namespace Dune
         GeometryType( GeometryType::none, GV::dimension - codim ) :
         ReferenceElements<double,GV::dimension>::general(eType).type(i,codim) ;
       //GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
-      assert(layout.contains(gt));
+      assert(offset(gt) != invalidOffset);
       return is.subIndex(e, i, codim) + offset(gt);
     }
 
@@ -188,7 +188,7 @@ namespace Dune
     template<class EntityType>
     bool contains (const EntityType& e, Index& result) const
     {
-      if(!is.contains(e) || !layout.contains(e.type()))
+      if(!is.contains(e) || offset(e.type()) == invalidOffset)
       {
         result = 0;
         return false;
@@ -212,7 +212,7 @@ namespace Dune
         GeometryType( GeometryType::none, GV::dimension - cc ) :
         ReferenceElements<double,GV::dimension>::general(eType).type(i,cc) ;
       //GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,cc);
-      if (not layout.contains(gt))
+      if (offset(gt) == invalidOffset)
         return false;
       result = is.subIndex(e, i, cc) + offset(gt);
       return true;
