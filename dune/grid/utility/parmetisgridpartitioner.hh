@@ -43,10 +43,6 @@ namespace Dune
     typedef float real_type;
 #endif // PARMETIS_MAJOR_VERSION > 3
 
-    typedef typename GridView::template Codim<0>::Iterator                                         ElementIterator;
-    typedef typename GridView::template Codim<0>::template Partition<Interior_Partition>::Iterator InteriorElementIterator;
-    typedef typename GridView::IntersectionIterator                                                IntersectionIterator;
-
     enum {
       dimension = GridView::dimension
     };
