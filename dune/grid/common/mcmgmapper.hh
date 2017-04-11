@@ -227,22 +227,19 @@ namespace Dune
       for (unsigned int codim = 0; codim <= GV::dimension; ++codim)
       {
         // walk over all geometry types in the codimension
-        typedef typename GV::IndexSet::Types GTV;
-        GTV gtv = is.types(codim);
-        for (typename GTV::const_iterator it = gtv.begin(); it != gtv.end(); ++it)
-        {
+        for (const GeometryType& gt : is.types(codim)) {
           Index offset;
 
           // if the geometry type is contained in the layout, increment offset
-          if (layout.contains(*it)) {
+          if (layout.contains(gt)) {
             offset = n;
-            n += is.size(*it);
+            n += is.size(gt);
           }
           else {
             offset = invalidOffset;
           }
 
-          offsets[GlobalGeometryTypeIndex::index(*it)] = offset;
+          offsets[GlobalGeometryTypeIndex::index(gt)] = offset;
         }
       }
     }
