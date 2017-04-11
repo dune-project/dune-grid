@@ -4,8 +4,10 @@
 #ifndef DUNE_GRID_COMMON_MCMGMAPPER_HH
 #define DUNE_GRID_COMMON_MCMGMAPPER_HH
 
+#include <functional>
 #include <iostream>
 
+#include <dune/common/exceptions.hh>
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/type.hh>
 #include <dune/geometry/typeindex.hh>
@@ -59,6 +61,37 @@ namespace Dune
     bool contains (Dune::GeometryType gt) const { return gt.dim()==0; }
   };
 
+  namespace Impl {
+
+    /*
+     * Dummy layout to be used as the default for
+     * `MultipleCodimMultipleGeomTypeMapper`.  It should never be used, but
+     * we need a default.
+     *
+     * This class can be removed once the `LayoutClass` template parameter
+     * of `MultipleCodimMultipleGeomTypeMapper` is removed.
+     */
+    template<int dimgrid>
+    struct MCMGFailLayout {
+      MCMGFailLayout()
+        { DUNE_THROW(Exception, "The default layout class cannot be used"); }
+      bool contains(GeometryType gt) const
+        { DUNE_THROW(Exception, "The default layout class cannot be used"); }
+    };
+
+  } /* namespace Impl */
+
+  /**
+   * \brief layout function for `MultipleCodimMultipleGeomTypeMapper`
+   *
+   * The layout function indicates which entity types are contained in the
+   * mapper.  It is called for each `GeometryType` and the grid dimension.
+   * A `true` value indicates the geometry type is part of the map; `false`
+   * that it is not.
+   *
+   * \see MultipleCodimMultipleGeomTypeMapper
+  using MCMGLayout = std::function<bool(GeometryType, int)>;
+
   //////////////////////////////////////////////////////////////////////
   //
   //  MultipleCodimMultipleGeomTypeMapper
@@ -72,8 +105,11 @@ namespace Dune
    * version is usually not used directly but is used to implement versions for leafwise and levelwise
    * entity sets.
    *
+   * The geometry types to be included in the mapper are selected using a
+   * layout functional (\ref MCMGLayout) that is passed to the constructor.
+   *
    * \tparam GV     A Dune GridView type.
-   * \tparam Layout A helper class template with a method contains(), that
+   * \tparam LayoutClass A helper class template with a method contains(), that
    *                returns true for all geometry types that are in the domain
    *                of the map.  The class should be of the following shape
      \code
@@ -87,19 +123,10 @@ namespace Dune
    *                The MultipleCodimMultipleGeomTypeMapper will always
    *                substitute the dimension of the grid for the template
    *                parameter dimgrid.
-   *
-   * If you don't want to use the default constructor of the LayoutClass you
-   * can construct it yourself and hand it to the respective constructor (with
-   * dimgrid=GV::%dimension).  In this case the layout class should be copy
-   * constructible.
-   *
-   * There are two predefined Layout class templates for the common cases that
-   * only elements or only vertices should be mapped: MCMGElementLayout and
-   * MCMGVertexLayout.
    */
-  template <typename GV, template<int> class Layout>
+  template <typename GV, template<int> class LayoutClass = Impl::MCMGFailLayout>
   class MultipleCodimMultipleGeomTypeMapper :
-    public Mapper<typename GV::Grid,MultipleCodimMultipleGeomTypeMapper<GV,Layout>, typename GV::IndexSet::IndexType >
+    public Mapper<typename GV::Grid,MultipleCodimMultipleGeomTypeMapper<GV,LayoutClass>, typename GV::IndexSet::IndexType >
   {
   public:
 
@@ -108,27 +135,28 @@ namespace Dune
 
     /** @brief Construct mapper from grid and one of its index sets.
      *
-     * Use this constructor to provide a custom layout object e.g. not
-     * using the default constructor.
-     *
      * \param gridView_ A Dune GridView object.
      * \param layout A layout object.
      */
-    MultipleCodimMultipleGeomTypeMapper (const GV& gridView_, const Layout<GV::dimension> layout)
-      : gridView(gridView_),
-        is(gridView.indexSet()),
-        layout(layout)
-    {
-      update();
-    }
+    MultipleCodimMultipleGeomTypeMapper(const GV& gridView_, const LayoutClass<GV::dimension> layout = {})
+      : MultipleCodimMultipleGeomTypeMapper(gridView_, wrapLayoutClass(layout))
+    {}
 
-    /** @brief Construct mapper from grid and one of its index sets.
+    /**
+     * \brief construct mapper from grid and layout description
      *
-     * \param gridView_ A Dune GridView object.
+     * The `layout` parameter is a functional describing entities of which
+     * geometry types are included in the mapper.  For commonly used cases,
+     * convenience functions are provided.  See the `MCMGLayout` type
+     * documentation for details.
+     *
+     * \param gridView grid view whose entities should be included in the mapper
+     * \param layout   functional describing which entities are included in the mapper
      */
-    MultipleCodimMultipleGeomTypeMapper (const GV& gridView_)
-      : gridView(gridView_),
-        is(gridView.indexSet())
+    MultipleCodimMultipleGeomTypeMapper(const GV& gridView, const MCMGLayout& layout)
+      : gridView(gridView)
+      , is(gridView.indexSet())
+      , layout(layout)
     {
       update();
     }
@@ -231,7 +259,7 @@ namespace Dune
           Index offset;
 
           // if the geometry type is contained in the layout, increment offset
-          if (layout.contains(gt)) {
+          if (layout(gt, GV::Grid::dimension)) {
             offset = n;
             n += is.size(gt);
           }
@@ -257,7 +285,19 @@ namespace Dune
     const typename GV::IndexSet& is;
     // provide an array for the offsets
     std::array<Index, GlobalGeometryTypeIndex::size(GV::dimension)> offsets;
-    mutable Layout<GV::dimension> layout;     // get layout object
+    const MCMGLayout layout;     // get layout object
+
+  protected:
+    /**
+     * \brief wrap legacy layout classes
+     */
+    static MCMGLayout wrapLayoutClass(const LayoutClass<GV::dimension>& layout)
+    {
+      /* `mutable` as the `contains()` method is not required to be const */
+      return [layout = layout](GeometryType gt, int) mutable {
+        return layout.contains(gt);
+      };
+    }
   };
 
   //////////////////////////////////////////////////////////////////////
@@ -270,37 +310,36 @@ namespace Dune
      This mapper uses all leaf entities of a certain codimension as its entity set.
 
      \tparam G      A %Dune grid type.
-     \tparam Layout A helper class template which determines which types of
+     \tparam LayoutClass A helper class template which determines which types of
                  entities are mapped by this mapper.  See
                  MultipleCodimMultipleGeomTypeMapper for how exactly this
                  template should look.
    */
-  template <typename G, template<int> class Layout>
+  template <typename G, template<int> class LayoutClass = Impl::MCMGFailLayout>
   class LeafMultipleCodimMultipleGeomTypeMapper
-    : public MultipleCodimMultipleGeomTypeMapper<typename G::LeafGridView,Layout>
+    : public MultipleCodimMultipleGeomTypeMapper<typename G::LeafGridView,LayoutClass>
   {
     typedef MultipleCodimMultipleGeomTypeMapper<typename G::LeafGridView,
-        Layout> Base;
+        LayoutClass> Base;
   public:
     /** @brief The constructor
-         @param grid A reference to a grid.
-     */
-    LeafMultipleCodimMultipleGeomTypeMapper (const G& grid)
-      : Base(grid.leafGridView())
-    {}
-
-    /** @brief The constructor
-     *
-     * Use this constructor to provide a custom layout object e.g. not
-     * using the default constructor.
      *
      * @param grid A reference to a grid.
      * @param layout A layout object
      */
-    LeafMultipleCodimMultipleGeomTypeMapper (const G& grid, const Layout<G::dimension> layout)
-      : Base(grid.leafGridView(),layout)
+    LeafMultipleCodimMultipleGeomTypeMapper (const G& grid, const LayoutClass<G::dimension> layout = {})
+      : LeafMultipleCodimMultipleGeomTypeMapper(grid, Base::wrapLayoutClass(layout))
     {}
 
+    /**
+     * \brief constructor
+     *
+     * \param grid   reference to the grid
+     * \param layout layout functional describing which geometry types to include in the map.
+     */
+    LeafMultipleCodimMultipleGeomTypeMapper (const G& grid, const MCMGLayout& layout)
+      : Base(grid.leafGridView(), layout)
+    {}
   };
 
   /** @brief Multiple codim and multiple geometry type mapper for entities of one level.
@@ -309,38 +348,37 @@ namespace Dune
      This mapper uses all entities of a certain codimension on a given level as its entity set.
 
      \tparam G      A %Dune grid type.
-     \tparam Layout A helper class template which determines which types of
+     \tparam LayoutClass A helper class template which determines which types of
                  entities are mapped by this mapper.  See
                  MultipleCodimMultipleGeomTypeMapper for how exactly this
                  template should look.
    */
-  template <typename G, template<int> class Layout>
+  template <typename G, template<int> class LayoutClass = Impl::MCMGFailLayout>
   class LevelMultipleCodimMultipleGeomTypeMapper
-    : public MultipleCodimMultipleGeomTypeMapper<typename G::LevelGridView,Layout> {
+    : public MultipleCodimMultipleGeomTypeMapper<typename G::LevelGridView,LayoutClass> {
     typedef MultipleCodimMultipleGeomTypeMapper<typename G::LevelGridView,
-        Layout> Base;
+        LayoutClass> Base;
   public:
     /** @brief The constructor
-         @param grid A reference to a grid.
-         @param level A valid level of the grid.
-     */
-    LevelMultipleCodimMultipleGeomTypeMapper (const G& grid, int level)
-      : Base(grid.levelGridView(level))
-    {}
-
-    /** @brief The constructor
-     *
-     * Use this constructor to provide a custom layout object e.g. not
-     * using the default constructor.
      *
      * @param grid A reference to a grid.
      * @param level A valid level of the grid.
      * @param layout A layout object
      */
-    LevelMultipleCodimMultipleGeomTypeMapper (const G& grid, int level, const Layout<G::dimension> layout)
-      : Base(grid.levelGridView(level),layout)
+    LevelMultipleCodimMultipleGeomTypeMapper (const G& grid, int level, const LayoutClass<G::dimension> layout = {})
+      : LevelMultipleCodimMultipleGeomTypeMapper(grid, level, Base::wrapLayoutClass(layout))
     {}
 
+    /**
+     * \brief constructor
+     *
+     * \param grid   reference to the grid
+     * \param level  valid level of the grid
+     * \param layout layout functional describing which geometry types to include in the map.
+     */
+    LevelMultipleCodimMultipleGeomTypeMapper (const G& grid, int level, const MCMGLayout& layout)
+      : Base(grid.levelGridView(level),layout)
+    {}
   };
 
   /** @} */
