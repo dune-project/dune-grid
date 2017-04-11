@@ -20,19 +20,6 @@
 
 using namespace Dune;
 
-//! a "flexible" layout where for which arbitrary codims can be
-//! specified
-template <int commCodim>
-struct LayoutWrapper
-{
-  template <int dim>
-  struct Layout
-  {
-    bool contains(Dune::GeometryType gt)
-    { return gt.dim() == dim - commCodim;  }
-  };
-};
-
 // A DataHandle class to exchange entries of a vector.
 template<class MapperT, int commCodim>
 class DataExchange
@@ -166,9 +153,8 @@ void checkMappers(const GridView &gridView)
                << " grid view: " << gridView.size(codim) << ")");
   }
 
-  typedef Dune::MultipleCodimMultipleGeomTypeMapper
-  <GridView, LayoutWrapper<codim>::template Layout> MapperType;
-  MapperType mapper(gridView);
+  typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView> MapperType;
+  MapperType mapper(gridView, mcmgLayout(Codim<codim>{}));
 
   // make sure no entity has two indices
   std::vector<int> indices(numEntities, -100);
@@ -227,9 +213,8 @@ void testCommunication(const GridView &gridView, bool isLeaf, bool printVTK=fals
   std::cout << gridView.comm().rank() + 1
             << ": Testing communication for codim " << commCodim << " entities\n";
 
-  typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView, LayoutWrapper<commCodim>::template Layout>
-  MapperType;
-  MapperType mapper(gridView);
+  typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView> MapperType;
+  MapperType mapper(gridView, mcmgLayout(Codim<commCodim>{}));
 
   std::cout << gridView.comm().rank() + 1
             << ": Index set has " << mapper.size() << " codim " << commCodim << " entities\n";
@@ -308,9 +293,8 @@ public:
     std::cout << gridView.comm().rank() + 1
               << ": Testing communication for codim " << commCodim << " entities\n";
 
-    typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView, LayoutWrapper<commCodim>::template Layout>
-    MapperType;
-    MapperType mapper(gridView);
+    typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView> MapperType;
+    MapperType mapper(gridView, mcmgLayout(Codim<commCodim>{}));
 
     std::cout << gridView.comm().rank()+1 << ": Index set has " << mapper.size() << " codim " << commCodim << " entities\n";
 

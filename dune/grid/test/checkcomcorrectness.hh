@@ -92,11 +92,10 @@ namespace Dune {
 
       };
 
-      template<int dim>
       struct CodimLayout
       {
 
-        bool contains(Dune::GeometryType gt) const
+        bool operator()(Dune::GeometryType gt, int dim) const
         {
           return gt.dim() == dim - _codim;
           }
@@ -179,7 +178,7 @@ namespace Dune {
         CommunicationTestDataHandle(GV gv, int codim, const std::unordered_set<Dune::PartitionType>& allowed_writes, const std::unordered_set<Dune::PartitionType>& allowed_reads, const std::vector<typename GV::template Codim<0>::Geometry::GlobalCoordinate>& coords)
           : _gv(gv)
           , _codim(codim)
-          , _mapper(gv,{_codim})
+          , _mapper(gv, CodimLayout{_codim})
           , _allowed_writes(allowed_writes)
           , _allowed_reads(allowed_reads)
           , _reads(_mapper.size(),0)
@@ -189,7 +188,7 @@ namespace Dune {
 
         GV _gv;
         const int _codim;
-        Dune::MultipleCodimMultipleGeomTypeMapper<GV,CodimLayout> _mapper;
+        Dune::MultipleCodimMultipleGeomTypeMapper<GV> _mapper;
         const std::unordered_set<Dune::PartitionType> _allowed_writes;
         const std::unordered_set<Dune::PartitionType> _allowed_reads;
         mutable std::vector<std::size_t> _reads;
@@ -208,7 +207,7 @@ namespace Dune {
 
         std::unordered_map<Dune::PartitionType,std::size_t> count;
 
-        Dune::MultipleCodimMultipleGeomTypeMapper<GV,CodimLayout> mapper(gv,{codim});
+        Dune::MultipleCodimMultipleGeomTypeMapper<GV> mapper(gv, CodimLayout{codim});
 
         std::vector<
           typename GV::template Codim<0>::Geometry::GlobalCoordinate
