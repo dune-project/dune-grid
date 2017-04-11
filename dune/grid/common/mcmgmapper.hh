@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include <dune/common/exceptions.hh>
+#include <dune/geometry/dimension.hh>
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/type.hh>
 #include <dune/geometry/typeindex.hh>
@@ -89,8 +90,69 @@ namespace Dune
    * A `true` value indicates the geometry type is part of the map; `false`
    * that it is not.
    *
+   * For commonly used layouts containing only entities of a fixed dimension
+   * or codimension, convenience functions returning a `MCMGLayout` are provided.
+   *
+   * The following example is equivalent to \ref mcmgElementLayout():
+     \code
+     MCMGLayout layout = [](GeometryType gt, int griddim) {
+       return gt.dim() == griddim;
+     };
+     \endcode
+   *
    * \see MultipleCodimMultipleGeomTypeMapper
+   * \see mcmgLayout(Codim<codim>)
+   * \see mcmgLayout(Dim<dim>)
+   * \see mcmgElementLayout()
+   * \see mcmgVertexLayout()
+   */
   using MCMGLayout = std::function<bool(GeometryType, int)>;
+
+  /**
+   * \brief layout for entities of codimension `codim`
+   *
+   * \see MultipleCodimMultipleGeomTypeMapper
+   */
+  template<int codim>
+  MCMGLayout mcmgLayout(Codim<codim>)
+  {
+    return [](GeometryType gt, int dimgrid) {
+      return dimgrid - gt.dim() == codim;
+    };
+  }
+
+  /**
+   * \brief layout for entities of dimension `dim`
+   *
+   * \see MultipleCodimMultipleGeomTypeMapper
+   */
+  template<int dim>
+  MCMGLayout mcmgLayout(Dim<dim>)
+  {
+    return [](GeometryType gt, int) {
+      return gt.dim() == dim;
+    };
+  }
+
+  /**
+   * \brief layout for elements (codim-0 entities)
+   *
+   * \see MultipleCodimMultipleGeomTypeMapper
+   */
+  inline MCMGLayout mcmgElementLayout()
+  {
+    return mcmgLayout(Codim<0>());
+  }
+
+  /**
+   * \brief layout for vertices (dim-0 entities)
+   *
+   * \see MultipleCodimMultipleGeomTypeMapper
+   */
+  inline MCMGLayout mcmgVertexLayout()
+  {
+    return mcmgLayout(Dim<0>());
+  }
 
   //////////////////////////////////////////////////////////////////////
   //
@@ -147,7 +209,7 @@ namespace Dune
      *
      * The `layout` parameter is a functional describing entities of which
      * geometry types are included in the mapper.  For commonly used cases,
-     * convenience functions are provided.  See the `MCMGLayout` type
+     * convenience functions are provided.  See the \ref MCMGLayout type
      * documentation for details.
      *
      * \param gridView grid view whose entities should be included in the mapper
