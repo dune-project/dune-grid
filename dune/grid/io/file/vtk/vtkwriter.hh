@@ -119,7 +119,7 @@ namespace Dune
     typedef typename GridView::template Codim< 0 >
     ::Entity::Geometry::LocalCoordinate Coordinate;
 
-    typedef MultipleCodimMultipleGeomTypeMapper< GridView, MCMGVertexLayout > VertexMapper;
+    typedef MultipleCodimMultipleGeomTypeMapper< GridView > VertexMapper;
 
     // return true if entity should be skipped in Vertex and Corner iterator
     static bool skipEntity( const PartitionType entityType )
@@ -1027,7 +1027,7 @@ namespace Dune
       VTK::VTUWriter writer(s, outputtype, fileType);
 
       // Grid characteristics
-      vertexmapper = new VertexMapper( gridView_ );
+      vertexmapper = new VertexMapper( gridView_, mcmgVertexLayout() );
       if (datamode == VTK::conforming)
       {
         number.resize(vertexmapper->size());

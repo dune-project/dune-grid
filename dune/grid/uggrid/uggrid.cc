@@ -469,8 +469,8 @@ bool UGGrid < dim >::loadBalance(const std::vector<Rank>& targetProcessors, unsi
     DUNE_THROW(Exception, "targetProcessors argument does not have the correct size");
 
   // Get unique consecutive index across different element types
-  typedef MultipleCodimMultipleGeomTypeMapper<typename Base::LeafGridView, MCMGElementLayout> ElementMapper;
-  ElementMapper elementMapper(this->leafGridView());
+  typedef MultipleCodimMultipleGeomTypeMapper<typename Base::LeafGridView> ElementMapper;
+  ElementMapper elementMapper(this->leafGridView(), mcmgElementLayout());
 
   // Loop over all elements of all level, in decreasing level number.
   // If the element is a leaf, take its target rank from the input targetProcessors array.
