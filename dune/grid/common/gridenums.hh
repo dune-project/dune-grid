@@ -16,9 +16,9 @@ namespace Dune {
 
   /** \brief Attributes used in the generic overlap model
    *
-   * \code
-   * #include <dune/grid/common/gridenums.hh>
-   * \endcode
+     \code
+     #include <dune/grid/common/gridenums.hh>
+     \endcode
    *
    * The values are ordered intentionally in order to be able to
    * define ranges of partition types.
@@ -35,9 +35,9 @@ namespace Dune {
 
   /** \brief Provide names for the partition types
    *
-   * \code
-   * #include <dune/grid/common/gridenums.hh>
-   * \endcode
+     \code
+     #include <dune/grid/common/gridenums.hh>
+     \endcode
    *
    * @ingroup GIRelatedTypes
    */
@@ -61,9 +61,9 @@ namespace Dune {
 
   //! write a PartitionType to a stream
   /**
-   * \code
-   * #include <dune/grid/common/gridenums.hh>
-   * \endcode
+     \code
+     #include <dune/grid/common/gridenums.hh>
+     \endcode
    *
    * @ingroup GIRelatedTypes
    */
@@ -75,9 +75,9 @@ namespace Dune {
 
   /** \brief Parameter to be used for the communication functions
    *
-   * \code
-   * #include <dune/grid/common/gridenums.hh>
-   * \endcode
+     \code
+     #include <dune/grid/common/gridenums.hh>
+     \endcode
    *
    * @ingroup GIRelatedTypes
    */
@@ -92,9 +92,9 @@ namespace Dune {
 
   //! write an InterfaceType to a stream
   /**
-   * \code
-   * #include <dune/grid/common/gridenums.hh>
-   * \endcode
+     \code
+     #include <dune/grid/common/gridenums.hh>
+     \endcode
    *
    * @ingroup GIRelatedTypes
    */
@@ -125,9 +125,9 @@ namespace Dune {
 
   /** \brief Parameter to be used for the parallel level- and leaf iterators
    *
-   * \code
-   * #include <dune/grid/common/gridenums.hh>
-   * \endcode
+     \code
+     #include <dune/grid/common/gridenums.hh>
+     \endcode
    *
    * @ingroup GIRelatedTypes
    */
@@ -143,9 +143,9 @@ namespace Dune {
 
   //! write a PartitionIteratorType to a stream
   /**
-   * \code
-   * #include <dune/grid/common/gridenums.hh>
-   * \endcode
+     \code
+     #include <dune/grid/common/gridenums.hh>
+     \endcode
    *
    * @ingroup GIRelatedTypes
    */
@@ -159,9 +159,9 @@ namespace Dune {
 
   /** \brief Define a type for communication direction parameter
    *
-   * \code
-   * #include <dune/grid/common/gridenums.hh>
-   * \endcode
+     \code
+     #include <dune/grid/common/gridenums.hh>
+     \endcode
    *
    * @ingroup GIRelatedTypes
    */

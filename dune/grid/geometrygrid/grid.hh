@@ -41,25 +41,25 @@ namespace Dune
    *  called host geometry) by a coordinate function.
    *
    *  An example of a coordinate function is given by the following code:
-   *  \code
-   *  class ExampleFunction
-   *  : public Dune :: AnalyticalCoordFunction< double, 2, 3, ExampleFunction >
-   *  {
-   *    typedef ExampleFunction This;
-   *    typedef Dune :: AnalyticalCoordFunction< double, 2, 3, This > Base;
-   *
-   *  public:
-   *    typedef Base :: DomainVector DomainVector;
-   *    typedef Base :: RangeVector RangeVector;
-   *
-   *    void evaluate ( const DomainVector &x, RangeVector &y ) const
-   *    {
-   *      y[ 0 ] = x[ 0 ];
-   *      y[ 1 ] = x[ 1 ];
-   *      y[ 2 ] = x[ 0 ] + x[ 1 ];
-   *    }
-   *  };
-   *  \endcode
+      \code
+      class ExampleFunction
+      : public Dune :: AnalyticalCoordFunction< double, 2, 3, ExampleFunction >
+      {
+        typedef ExampleFunction This;
+        typedef Dune :: AnalyticalCoordFunction< double, 2, 3, This > Base;
+
+      public:
+        typedef Base :: DomainVector DomainVector;
+        typedef Base :: RangeVector RangeVector;
+
+        void evaluate ( const DomainVector &x, RangeVector &y ) const
+        {
+          y[ 0 ] = x[ 0 ];
+          y[ 1 ] = x[ 1 ];
+          y[ 2 ] = x[ 0 ] + x[ 1 ];
+        }
+      };
+      \endcode
    *
    *  \note A dune-fem Function can be used as a coordinate function.
    *        The evaluation of discrete functions would be very expensive,
@@ -579,18 +579,18 @@ namespace Dune
      *  Therefore it is consistent to use an EntitySeed to rebuild an Entity after this kind of grid modification.
      *
      *  An example of this is given by the following code:
-     *  \code
-     *  // store seed of the first entity in the leaf view
-     *  const auto& gv = grid.leafGridView();
-     *  const auto& entity = (*(gv.template begin<0>()));
-     *  auto seed = entity.seed();
-     *
-     *  // perform a grid modification
-     *  grid.coordFunction().setTime(t);
-     *
-     *  // rebuild first entity from the seed
-     *  const auto& newEntity = grid.entity(seed);
-     *  \endcode
+        \code
+        // store seed of the first entity in the leaf view
+        const auto& gv = grid.leafGridView();
+        const auto& entity = (*(gv.template begin<0>()));
+        auto seed = entity.seed();
+
+        // perform a grid modification
+        grid.coordFunction().setTime(t);
+
+        // rebuild first entity from the seed
+        const auto& newEntity = grid.entity(seed);
+        \endcode
      */
     template< class EntitySeed >
     typename Traits::template Codim< EntitySeed::codimension >::Entity

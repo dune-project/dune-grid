@@ -33,9 +33,9 @@ namespace Dune
 
     //! How the bulk data should be stored in the file
     /**
-     * \code
-     * #include <dune/grid/io/file/vtk/common.hh>
-     * \endcode
+       \code
+       #include <dune/grid/io/file/vtk/common.hh>
+       \endcode
      */
     enum OutputType {
       //! Output to the file is in ascii.
@@ -53,9 +53,9 @@ namespace Dune
     };
     //! Whether to produce conforming or non-conforming output.
     /**
-     * \code
-     * #include <dune/grid/io/file/vtk/common.hh>
-     * \endcode
+       \code
+       #include <dune/grid/io/file/vtk/common.hh>
+       \endcode
      *
      * This applies to the conformity of the data; a non-conforming grid can
      * still be written in conforming data mode, and it is quite possible for
@@ -167,9 +167,9 @@ namespace Dune
 
     //! Type representing VTK's entity geometry types
     /**
-     * \code
-     * #include <dune/grid/io/file/vtk/common.hh>
-     * \endcode
+       \code
+       #include <dune/grid/io/file/vtk/common.hh>
+       \endcode
      *
      * Only the types which have a corresponding Dune::GeometryType have been
      * included here.  Dune-type names have been used, this mainly makes a
@@ -190,9 +190,9 @@ namespace Dune
 
     //! mapping from GeometryType to VTKGeometryType
     /**
-     * \code
-     * #include <dune/grid/io/file/vtk/common.hh>
-     * \endcode
+       \code
+       #include <dune/grid/io/file/vtk/common.hh>
+       \endcode
      */
     inline GeometryType geometryType(const Dune::GeometryType& t)
     {
@@ -222,9 +222,9 @@ namespace Dune
 
     //! renumber VTK <-> Dune
     /**
-     * \code
-     * #include <dune/grid/io/file/vtk/common.hh>
-     * \endcode
+       \code
+       #include <dune/grid/io/file/vtk/common.hh>
+       \endcode
      *
      * Since the renumbering never does anything more complex than exchanging
      * two indices, this method works both ways.
@@ -246,9 +246,9 @@ namespace Dune
 
     //! renumber VTK <-> Dune
     /**
-     * \code
-     * #include <dune/grid/io/file/vtk/common.hh>
-     * \endcode
+       \code
+       #include <dune/grid/io/file/vtk/common.hh>
+       \endcode
      *
      * This function is just a convenience shortcut function wrapping
      * renumber(const GeometryType&, int).
@@ -291,9 +291,9 @@ namespace Dune
 
     //! which type of VTK file to write
     /**
-     * \code
-     * #include <dune/grid/io/file/vtk/common.hh>
-     * \endcode
+       \code
+       #include <dune/grid/io/file/vtk/common.hh>
+       \endcode
      */
     enum FileType {
       //! for .vtp files (PolyData)

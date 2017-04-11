@@ -31,20 +31,20 @@
  *
  * This header contains a generic main() function.  To use it for your grid,
  * write a .cc file like this:
- * \code
- *#ifdef HAVE_CONFIG_H
- *#include "config.h"
- *#endif
+   \code
+   #ifdef HAVE_CONFIG_H
+   #include "config.h"
+   #endif
 
- *#include <string>
+   #include <string>
 
- *#include <dune/grid/mygrid.hh>
+   #include <dune/grid/mygrid.hh>
 
    const std::string programName = "dune-gridinfo-gmsh-mygrid-3d";
    typedef Dune::MyGrid<3> Grid;
 
- *#include <dune/grid/utility/gridinfo-gmsh-main.hh>
- * \endcode
+   #include <dune/grid/utility/gridinfo-gmsh-main.hh>
+   \endcode
  * Write an automake target for your program as usual.  No special libraries
  * are needed for you program, beyond what is needed for the grid in question.
  */

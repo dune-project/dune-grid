@@ -9,9 +9,9 @@
  *  globally. The leaf grid is then written back as a DGF file.
  *
  *  The program's usage is as follows:
- *  \code
- *  ./dgf2dgf <dgffile> [refinement level]
- *  \endcode
+    \code
+    ./dgf2dgf <dgffile> [refinement level]
+    \endcode
  *
  *  While the program may seem completely useless, it has the following usages:
  *  - Convert an interval block into a simplex or cube grid (depending on the

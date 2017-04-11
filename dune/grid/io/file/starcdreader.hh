@@ -22,15 +22,15 @@ namespace Dune {
    *
    *    Two files \a fileName.vrt and \a fileName.cel have to be present. The file fileName.vrt contains the
    *    coordinates of the nodes, each row having the format
-   *    \code
-   *    idx  x-coordinate  y-coordinate  z-coordinate
-   *    \endcode
+        \code
+        idx  x-coordinate  y-coordinate  z-coordinate
+        \endcode
    *
    *    The file fileName.cel contains the data of the volume and possibly the boundary elements, each
    *    row having the format
-   *    \code
-   *    idx  node1  node2  ...  node8  material/boundaryId  flag1 flag2
-   *    \endcode
+        \code
+        idx  node1  node2  ...  node8  material/boundaryId  flag1 flag2
+        \endcode
    *    The flags flag1 and flag2 appear to be always identical to 1 in case of a volume element
    *    and to 4 in case of a boundary element. The element types simplex, pyramid, prism, and
    *    cube are supported:
