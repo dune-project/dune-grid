@@ -42,7 +42,7 @@ namespace Dune
   template<int dimgrid> struct MCMGElementLayout {
     //! test whether entities of the given geometry type should be included in
     //! the map
-    bool contains (Dune::GeometryType gt) { return gt.dim()==dimgrid; }
+    bool contains (Dune::GeometryType gt) const { return gt.dim()==dimgrid; }
   };
 
   //! Layout template for vertices
@@ -56,7 +56,7 @@ namespace Dune
   template<int dim> struct MCMGVertexLayout {
     //! test whether entities of the given geometry type should be included in
     //! the map
-    bool contains (Dune::GeometryType gt) { return gt.dim()==0; }
+    bool contains (Dune::GeometryType gt) const { return gt.dim()==0; }
   };
 
   //////////////////////////////////////////////////////////////////////
