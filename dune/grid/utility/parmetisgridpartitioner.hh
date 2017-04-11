@@ -197,8 +197,8 @@ namespace Dune
       // b) Use the element index for the actual ordering.  Since there may be different types of elements,
       //    we cannot use the index set directly, but have to go through a Mapper.
 
-      typedef MultipleCodimMultipleGeomTypeMapper<GridView, MCMGElementLayout> ElementMapper;
-      ElementMapper elementMapper(gv);
+      typedef MultipleCodimMultipleGeomTypeMapper<GridView> ElementMapper;
+      ElementMapper elementMapper(gv, mcmgElementLayout());
 
       std::vector<unsigned int> part(gv.size(0));
       std::fill(part.begin(), part.end(), 0);

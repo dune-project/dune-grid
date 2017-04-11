@@ -90,7 +90,7 @@ namespace Dune {
      * boundary segment index.
      */
     void outputElements(std::ofstream& file, const std::vector<int>& physicalEntities, const std::vector<int>& physicalBoundaries) const {
-      MultipleCodimMultipleGeomTypeMapper<GridView, MCMGElementLayout> elementMapper(gv);
+      MultipleCodimMultipleGeomTypeMapper<GridView> elementMapper(gv, mcmgElementLayout());
       std::size_t counter(1);
       for (const auto& entity : elements(gv)) {
         // Check whether the type is compatible. If not, close file and rethrow exception.

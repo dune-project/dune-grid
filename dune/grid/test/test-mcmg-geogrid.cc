@@ -58,7 +58,7 @@ int main (int argc, char *argv[]) try
   DeformationFunction deformation;
   DeformedGridType defGrid(grid,deformation);
 
-  LeafMultipleCodimMultipleGeomTypeMapper<DeformedGridType,MCMGElementLayout > mapper(defGrid);
+  LeafMultipleCodimMultipleGeomTypeMapper<DeformedGridType> mapper(defGrid, mcmgElementLayout());
 
   //grid.globalRefine(1);
   //defGrid.update();
