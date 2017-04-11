@@ -8,9 +8,9 @@
  *  into any grid (selected by gridtype.hh) and writes it back as a DGF file.
  *
  *  The program's usage is as follows:
- *  \code
- *  ./gmsh2dgf <gmshfile>
- *  \endcode
+    \code
+    ./gmsh2dgf <gmshfile>
+    \endcode
  */
 
 #include <config.h>

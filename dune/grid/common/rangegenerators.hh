@@ -28,10 +28,10 @@ namespace Dune
    * A range-based for loop is a short-hand way of iterating over any object that provides the standard
    * begin() and end() methods. It looks like this:
    *
-   * \code
-   * for (const auto& i : vec)
-   *   i *= 2;
-   * \endcode
+     \code
+     for (auto& i : vec)
+       i *= 2;
+     \endcode
    *
    * This code will multiply all entries of `vec` by 2. The loop head always looks like `for (<type> <variable-name> : <container>)`.
    * You can also specify the exact type of the variable, but it is normally much easier to let the compiler
@@ -46,16 +46,16 @@ namespace Dune
    * For those interested in the technical details, the compiler has translated the loop into
    * something resembling this (not quite, but we'll forget about the minor details here):
    *
-   * \code
-   * for (auto it = vec.begin(),
-   *        end = vec.end();
-   *      it != end;
-   *      ++it)
-   * {
-   *   const auto& i = *it;
-   *   i *= 2;
-   * }
-   * \endcode
+     \code
+     for (auto it = vec.begin(),
+            end = vec.end();
+          it != end;
+          ++it)
+     {
+       auto& i = *it;
+       i *= 2;
+     }
+     \endcode
    *
    * For further details, see e.g. http://en.cppreference.com/w/cpp/language/range-for.
    *
@@ -67,20 +67,20 @@ namespace Dune
    * grid cells. The functions listed at the top of this page allow you to do just this. Assuming you have
    * a GridView `gv`, you can iterate over its cells and vertices like this:
    *
-   * \code
-   * // iterate over cells
-   * for (const auto& cell : elements(gv))
-   * {
-   *   std::cout << "Cell " << gv.indexSet().index(cell) << " is centered at "
-   *             << cell.geometry().center() << std::endl;
-   * }
-   * // iterate over vertices
-   * for (const auto& vertex : vertices(gv))
-   * {
-   *   std::cout << "Vertex " << gv.indexSet().index(vertex) << " at "
-   *             << vertex.geometry().center() << std::endl;
-   * }
-   * \endcode
+     \code
+     // iterate over cells
+     for (const auto& cell : elements(gv))
+     {
+       std::cout << "Cell " << gv.indexSet().index(cell) << " is centered at "
+                 << cell.geometry().center() << std::endl;
+     }
+     // iterate over vertices
+     for (const auto& vertex : vertices(gv))
+     {
+       std::cout << "Vertex " << gv.indexSet().index(vertex) << " at "
+                 << vertex.geometry().center() << std::endl;
+     }
+     \endcode
    *
    * \note As explained above, **always** use `const auto&` for the type of the Entity!
    *
@@ -95,18 +95,18 @@ namespace Dune
    * namespace Dune::Partitions. Using those objects, you can iterate over all interior and border vertices like
    * this:
    *
-   * \code
-   * // use prebuild PartitionSet
-   * for (const auto& vertex : vertices(gv,Dune::Partitions::interiorBorder))
-   * {
-   *    ...
-   * }
-   * // construct PartitionSet by combining partitions
-   * for (const auto& vertex : vertices(gv,Dune::Partitions::interior + Dune::Partitions::border))
-   * {
-   *    ...
-   * }
-   * \endcode
+     \code
+     // use prebuild PartitionSet
+     for (const auto& vertex : vertices(gv,Dune::Partitions::interiorBorder))
+     {
+        ...
+     }
+     // construct PartitionSet by combining partitions
+     for (const auto& vertex : vertices(gv,Dune::Partitions::interior + Dune::Partitions::border))
+     {
+        ...
+     }
+     \endcode
    *
    * <h2>Intersections</h2>
    *
@@ -118,17 +118,17 @@ namespace Dune
    * As an example, the following code counts the number of boundary intersections for a given GridView `gv`:
    *
    * \code
-   * std::size_t count = 0;
-   * for (const auto& e : elements(gv))
-   * {
-   *   do_stuff();
-   *   for (const auto& i : intersections(gv,e))
-   *   {
-   *     if (e.boundary())
-   *       ++count;
-   *   }
-   * }
-   * \endcode
+     std::size_t count = 0;
+     for (const auto& e : elements(gv))
+     {
+       do_stuff();
+       for (const auto& i : intersections(gv,e))
+       {
+         if (e.boundary())
+           ++count;
+       }
+     }
+     \endcode
    *
    * <h1>Information for grid implementors</h1>
    *
@@ -159,20 +159,20 @@ namespace Dune
    * of your GridView and / or Entity classes to make ADL work:
    *
    * \code
-   * namespace MyAweSomeGrid {
-   *
-   *   using Dune::entities;
-   *   using Dune::elements;
-   *   using Dune::facets;
-   *   using Dune::edges;
-   *   using Dune::vertices;
-   *   using Dune::descendantElements;
-   *   using Dune::intersections;
-   *
-   *   ...
-   *
-   * }
-   * \endcode
+     namespace MyAweSomeGrid {
+
+       using Dune::entities;
+       using Dune::elements;
+       using Dune::facets;
+       using Dune::edges;
+       using Dune::vertices;
+       using Dune::descendantElements;
+       using Dune::intersections;
+
+       ...
+
+     }
+     \endcode
    *
    * Of course, you can also reimplement all functions in your own namespace, but that's probably
    * a bad idea...
@@ -209,14 +209,14 @@ namespace Dune
    *
    * Example:
    *
-   * \code
-   * // iterate over all cells in the LeafGridView
-   * auto gv = grid.leafGridView();
-   * for (const auto& e : elements(gv))
-   * {
-   *   std::cout << e.geometry().center() << std::endl;
-   * }
-   * \endcode
+     \code
+     // iterate over all cells in the LeafGridView
+     auto gv = grid.leafGridView();
+     for (const auto& e : elements(gv))
+     {
+       std::cout << e.geometry().center() << std::endl;
+     }
+     \endcode
    *
    * \remark This is the default version of the elements() function. It will always iterate over all
    *         elements in the GridView, regardless of their Dune::PartitionType. If you are interested
@@ -243,14 +243,14 @@ namespace Dune
    *
    * Example:
    *
-   * \code
-   * // iterate over all facets in the LeafGridView
-   * auto gv = grid.leafGridView();
-   * for (const auto& e : facets(gv))
-   * {
-   *   std::cout << e.geometry().center() << std::endl;
-   * }
-   * \endcode
+     \code
+     // iterate over all facets in the LeafGridView
+     auto gv = grid.leafGridView();
+     for (const auto& e : facets(gv))
+     {
+       std::cout << e.geometry().center() << std::endl;
+     }
+     \endcode
    *
    * \remark This is the default version of the facets() function. It will always iterate over all
    *         elements in the GridView, regardless of their Dune::PartitionType. If you are interested
@@ -277,14 +277,14 @@ namespace Dune
    *
    * Example:
    *
-   * \code
-   * // iterate over all edges in the LeafGridView
-   * auto gv = grid.leafGridView();
-   * for (const auto& e : edges(gv))
-   * {
-   *   std::cout << e.geometry().center() << std::endl;
-   * }
-   * \endcode
+     \code
+     // iterate over all edges in the LeafGridView
+     auto gv = grid.leafGridView();
+     for (const auto& e : edges(gv))
+     {
+       std::cout << e.geometry().center() << std::endl;
+     }
+     \endcode
    *
    * \remark This is the default version of the edges() function. It will always iterate over all
    *         elements in the GridView, regardless of their Dune::PartitionType. If you are interested
@@ -311,14 +311,14 @@ namespace Dune
    *
    * Example:
    *
-   * \code
-   * // iterate over all vertices in the LeafGridView
-   * auto gv = grid.leafGridView();
-   * for (const auto& e : vertices(gv))
-   * {
-   *   std::cout << e.geometry().center() << std::endl;
-   * }
-   * \endcode
+     \code
+     // iterate over all vertices in the LeafGridView
+     auto gv = grid.leafGridView();
+     for (const auto& e : vertices(gv))
+     {
+       std::cout << e.geometry().center() << std::endl;
+     }
+     \endcode
    *
    * \remark This is the default version of the vertices() function. It will always iterate over all
    *         elements in the GridView, regardless of their Dune::PartitionType. If you are interested
@@ -351,15 +351,15 @@ namespace Dune
    * e with respect to the GridView gv. The main purpose of this function is to enable
    * iteration over those intersections by means of a range-based for loop:
    *
-   * \code
-   * // iterate over all intersections of an entity with respect to the LeafGridView
-   * auto gv = grid.leafGridView();
-   * const auto& entity = ...; // get an entity from somewhere
-   * for (const auto& i : intersections(gv,entity))
-   * {
-   *   std::cout << i.geometry().center() << std::endl;
-   * }
-   * \endcode
+     \code
+     // iterate over all intersections of an entity with respect to the LeafGridView
+     auto gv = grid.leafGridView();
+     const auto& entity = ...; // get an entity from somewhere
+     for (const auto& i : intersections(gv,entity))
+     {
+       std::cout << i.geometry().center() << std::endl;
+     }
+     \endcode
    *
    * \relates    GridView
    * \relates    Entity
@@ -388,14 +388,14 @@ namespace Dune
    * element (Entity with codimension 0) e. The main purpose of this function is to enable
    * iteration over those descendants by means of a range-based for loop:
    *
-   * \code
-   * // iterate over all descendants of an entity
-   * const auto& entity = ...; // get an entity from somewhere
-   * for (const auto& e : descendantElements(entity,grid.maxLevel()))
-   * {
-   *   std::cout << e.geometry().center() << std::endl;
-   * }
-   * \endcode
+     \code
+     // iterate over all descendants of an entity
+     const auto& entity = ...; // get an entity from somewhere
+     for (const auto& e : descendantElements(entity,grid.maxLevel()))
+     {
+       std::cout << e.geometry().center() << std::endl;
+     }
+     \endcode
    *
    * \note This function only works for elements (entities with codimension 0). Attempting to
    *       call this function with an entity of higher codimension will result in a compile
@@ -428,14 +428,14 @@ namespace Dune
    * cd contained in the GridView gv. The main purpose of this function is to enable iteration
    * over those entities by means of a range-based for loop:
    *
-   * \code
-   * // iterate over all cells in the LeafGridView
-   * auto gv = grid.leafGridView();
-   * for (const auto& e : entities(gv,Dune::Codim<0>()))
-   * {
-   *   std::cout << e.geometry().center() << std::endl;
-   * }
-   * \endcode
+     \code
+     // iterate over all cells in the LeafGridView
+     auto gv = grid.leafGridView();
+     for (const auto& e : entities(gv,Dune::Codim<0>()))
+     {
+       std::cout << e.geometry().center() << std::endl;
+     }
+     \endcode
    *
    * \remark This function allows you to write loops that are parameterized on the codimension of
    *         the entities. While this allows for extra flexibility (for e.g. some codimension-agnostic
@@ -473,14 +473,14 @@ namespace Dune
    *
    * Example:
    *
-   * \code
-   * // iterate over all edges in the LeafGridView
-   * auto gv = grid.leafGridView();
-   * for (const auto& e : entities(gv,Dune::Dim<1>()))
-   * {
-   *   std::cout << e.geometry().center() << std::endl;
-   * }
-   * \endcode
+     \code
+     // iterate over all edges in the LeafGridView
+     auto gv = grid.leafGridView();
+     for (const auto& e : entities(gv,Dune::Dim<1>()))
+     {
+       std::cout << e.geometry().center() << std::endl;
+     }
+     \endcode
 
    * \remark This function allows you to write loops that are parameterized on the codimension of
    *         the entities. While this allows for extra flexibility (for e.g. some codimension-agnostic
@@ -526,14 +526,14 @@ namespace Dune
    *
    * Example:
    *
-   * \code
-   * // iterate over all ghost cells in the LeafGridView
-   * auto gv = grid.leafGridView();
-   * for (const auto& e : elements(gv,Dune::Partitions::ghost))
-   * {
-   *   std::cout << e.geometry().center() << std::endl;
-   * }
-   * \endcode
+     \code
+     // iterate over all ghost cells in the LeafGridView
+     auto gv = grid.leafGridView();
+     for (const auto& e : elements(gv,Dune::Partitions::ghost))
+     {
+       std::cout << e.geometry().center() << std::endl;
+     }
+     \endcode
    *
    * \sa elements(const GV&)
    *
@@ -557,14 +557,14 @@ namespace Dune
    *
    * Example:
    *
-   * \code
-   * // iterate over all interior and border facets in the LeafGridView
-   * auto gv = grid.leafGridView();
-   * for (const auto& e : facets(gv,Dune::Partitions::interiorBorder))
-   * {
-   *   std::cout << e.geometry().center() << std::endl;
-   * }
-   * \endcode
+     \code
+     // iterate over all interior and border facets in the LeafGridView
+     auto gv = grid.leafGridView();
+     for (const auto& e : facets(gv,Dune::Partitions::interiorBorder))
+     {
+       std::cout << e.geometry().center() << std::endl;
+     }
+     \endcode
    *
    * \sa facets(const GV&)
    *
@@ -591,14 +591,14 @@ namespace Dune
    *
    * Example:
    *
-   * \code
-   * // iterate over all interior edges in the LeafGridView
-   * auto gv = grid.leafGridView();
-   * for (const auto& e : edges(gv,Dune::Partitions::interior))
-   * {
-   *   std::cout << e.geometry().center() << std::endl;
-   * }
-   * \endcode
+     \code
+     // iterate over all interior edges in the LeafGridView
+     auto gv = grid.leafGridView();
+     for (const auto& e : edges(gv,Dune::Partitions::interior))
+     {
+       std::cout << e.geometry().center() << std::endl;
+     }
+     \endcode
    *
    * \sa edges(const GV&)
    *
@@ -622,14 +622,14 @@ namespace Dune
    *
    * Example:
    *
-   * \code
-   * // iterate over all interior vertices in the LeafGridView
-   * auto gv = grid.leafGridView();
-   * for (const auto& e : vertices(gv,Dune::Partitions::interior))
-   * {
-   *   std::cout << e.geometry().center() << std::endl;
-   * }
-   * \endcode
+     \code
+     // iterate over all interior vertices in the LeafGridView
+     auto gv = grid.leafGridView();
+     for (const auto& e : vertices(gv,Dune::Partitions::interior))
+     {
+       std::cout << e.geometry().center() << std::endl;
+     }
+     \endcode
    *
    * \sa vertices(const GV&)
    *
@@ -659,14 +659,14 @@ namespace Dune
    * in the GridView gv which belong to the PartitionSet ps. The main purpose of this function is to
    * enable iteration over those entities by means of a range-based for loop:
    *
-   * \code
-   * // iterate over all interior and border cells in the LeafGridView
-   * auto gv = grid.leafGridView();
-   * for (const auto& e : entities(gv,Dune::Codim<0>(),Dune::Partitions::interiorBorder))
-   * {
-   *   std::cout << e.geometry().center() << std::endl;
-   * }
-   * \endcode
+     \code
+     // iterate over all interior and border cells in the LeafGridView
+     auto gv = grid.leafGridView();
+     for (const auto& e : entities(gv,Dune::Codim<0>(),Dune::Partitions::interiorBorder))
+     {
+       std::cout << e.geometry().center() << std::endl;
+     }
+     \endcode
    *
    * \remark This function allows you to write loops that are parameterized on the codimension of
    *         the entities. While this allows for extra flexibility (for e.g. some codimension-agnostic
@@ -700,14 +700,14 @@ namespace Dune
    * in the GridView gv which belong to the PartitionSet ps. The main purpose of this function is to
    * enable iteration over those entities by means of a range-based for loop:
    *
-   * \code
-   * // iterate over all interior and border edges in the LeafGridView
-   * auto gv = grid.leafGridView();
-   * for (const auto& e : entities(gv,Dune::Dim<1>(),Dune::Partitions::interiorBorder))
-   * {
-   *   std::cout << e.geometry().center() << std::endl;
-   * }
-   * \endcode
+     \code
+     // iterate over all interior and border edges in the LeafGridView
+     auto gv = grid.leafGridView();
+     for (const auto& e : entities(gv,Dune::Dim<1>(),Dune::Partitions::interiorBorder))
+     {
+       std::cout << e.geometry().center() << std::endl;
+     }
+     \endcode
    *
    * \remark This function allows you to write loops that are parameterized on the dimension of
    *         the entities. While this allows for extra flexibility (for e.g. some codimension-agnostic

@@ -137,9 +137,9 @@ namespace Dune
      *
      *  This method is for convenient access to the corners of the geometry. The
      *  same result could be achieved by calling
-     *  \code
-     *  global( referenceElement.position( i, mydimension ) )
-     *  \endcode
+        \code
+        global( referenceElement.position( i, mydimension ) )
+        \endcode
      *
      *  \param[in]  i  number of the corner (with respect to the reference element)
      *

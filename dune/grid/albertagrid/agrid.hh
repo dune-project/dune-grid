@@ -98,33 +98,33 @@ namespace Dune
    *
    *  If you use automake and want to compile a program maude, the following
    *  <tt>Makefile.am</tt> snippet might help:
-   *  \code
-   *  bin_PROGRAMS = maude
-   *
-   *  ALBERTA_DIM = 2
-   *
-   *  maude_SOURCES = maude.cc
-   *  maude_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS)
-   *  maude_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA_LDFLAGS) $(DUNE_LDFLAGS)
-   *  maude_LDADD = $(ALBERTA_LIBS) $(DUNE_LIBS)
-   *  \endcode
+      \code
+      bin_PROGRAMS = maude
+
+      ALBERTA_DIM = 2
+
+      maude_SOURCES = maude.cc
+      maude_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS)
+      maude_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA_LDFLAGS) $(DUNE_LDFLAGS)
+      maude_LDADD = $(ALBERTA_LIBS) $(DUNE_LIBS)
+      \endcode
    *  This will compile and link your program with the world dimension
    *  specified by <tt>WORLDDIM</tt>.
    *  If you want to use different world dimensions per program, you can use
    *  the following snippet in your <tt>Makefile.am</tt>:
-   *  \code
-   *  bin_PROGRAMS = maude2d maude3d
-   *
-   *  maude2d_SOURCES = maude.cc
-   *  maude2d_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA2D_CPPFLAGS)
-   *  maude2d_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA2D_LDFLAGS) $(DUNE_LDFLAGS)
-   *  maude2d_LDADD = $(ALBERTA2D_LIBS) $(DUNE_LIBS)
-   *
-   *  maude3d_SOURCES = maude.cc
-   *  maude3d_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA3D_CPPFLAGS)
-   *  maude3d_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA3D_LDFLAGS) $(DUNE_LDFLAGS)
-   *  maude3d_LDADD = $(ALBERTA3D_LIBS) $(DUNE_LIBS)
-   *  \endcode
+      \code
+      bin_PROGRAMS = maude2d maude3d
+
+      maude2d_SOURCES = maude.cc
+      maude2d_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA2D_CPPFLAGS)
+      maude2d_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA2D_LDFLAGS) $(DUNE_LDFLAGS)
+      maude2d_LDADD = $(ALBERTA2D_LIBS) $(DUNE_LIBS)
+
+      maude3d_SOURCES = maude.cc
+      maude3d_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA3D_CPPFLAGS)
+      maude3d_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA3D_LDFLAGS) $(DUNE_LDFLAGS)
+      maude3d_LDADD = $(ALBERTA3D_LIBS) $(DUNE_LIBS)
+      \endcode
    *
    *  In either case the preprocessor variables <tt>HAVE_ALBERTA</tt>, which
    *  tells you whether ALBERTA was found by configure, and <tt>ALBERTA_DIM</tt>
