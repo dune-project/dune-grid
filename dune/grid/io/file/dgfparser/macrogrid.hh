@@ -66,11 +66,11 @@ namespace Dune
      *  For each grid implementation to be used with the DGF parser, this class
      *  has to be specialized. It has to contain one static method of the
      *  following prototype:
-     *  \code
-     *  static GridType *
-     *  generate ( MacroGrid &macroGrid, const char *filename,
-     *             MPIHelper :: MPICommunicator comm = MPIHelper :: getCommunicator() );
-     *  \endcode
+        \code
+        static GridType *
+        generate ( MacroGrid &macroGrid, const char *filename,
+                   MPIHelper :: MPICommunicator comm = MPIHelper :: getCommunicator() );
+        \endcode
      */
     template< class GridType >
     struct Impl

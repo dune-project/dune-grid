@@ -61,32 +61,32 @@
  *          zero entity.
  *
  *  The approach taken is determined by the second template argument:
- *  \code
- *    GeometryGrid<HostGridType,CoordFunction> grid(hostGrid,coordFunction);
- *  \endcode
+    \code
+      GeometryGrid<HostGridType,CoordFunction> grid(hostGrid,coordFunction);
+    \endcode
  *  The class \c CoordFunction must either be derived from
  *  Dune::AnalyticalCoordFunction or from Dune::DiscreteCoordFunction.
  *  If you want to use the first approach derive from Dune::AnalyticalCoordFunction.
  *  An example of a analytical coordinate function is given by the following code:
- *  \code
- *  class ExampleFunction
- *  : public Dune :: AnalyticalCoordFunction< double, 2, 3, ExampleFunction >
- *  {
- *    typedef ExampleFunction This;
- *    typedef Dune :: AnalyticalCoordFunction< double, 2, 3, This > Base;
- *
- *  public:
- *    typedef Base :: DomainVector DomainVector;
- *    typedef Base :: RangeVector RangeVector;
- *
- *    void evaluate ( const DomainVector &x, RangeVector &y ) const
- *    {
- *      y[ 0 ] = x[ 0 ];
- *      y[ 1 ] = x[ 1 ];
- *      y[ 2 ] = x[ 0 ] + x[ 1 ];
- *    }
- *  };
- *  \endcode
+    \code
+    class ExampleFunction
+    : public Dune :: AnalyticalCoordFunction< double, 2, 3, ExampleFunction >
+    {
+      typedef ExampleFunction This;
+      typedef Dune :: AnalyticalCoordFunction< double, 2, 3, This > Base;
+
+    public:
+      typedef Base :: DomainVector DomainVector;
+      typedef Base :: RangeVector RangeVector;
+
+      void evaluate ( const DomainVector &x, RangeVector &y ) const
+      {
+        y[ 0 ] = x[ 0 ];
+        y[ 1 ] = x[ 1 ];
+        y[ 2 ] = x[ 0 ] + x[ 1 ];
+      }
+    };
+    \endcode
  *
  *  If you want to prescribe your geometry by a set of coordinates you have to write
  *  a deformation class and have it derive from Dune::DiscreteCoordFunction.
@@ -95,7 +95,7 @@
  *  position.  The second one accepts an element and a local corner number and
  *  computes the position of this corner.  It is trivial to implement this using the
  *  first evaluate method, and I don't know why it isn't done by default.
- *  \code
+    \code
    template <class GridView>
    class DeformationFunction
     : public Dune :: DiscreteCoordFunction< double, dim, DeformationFunction<GridView> >
@@ -142,7 +142,7 @@
     const double* deformedPosition_;
 
    };
- *  \endcode
+    \endcode
  *
  *
  */

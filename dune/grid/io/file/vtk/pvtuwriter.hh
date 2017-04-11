@@ -22,40 +22,40 @@ namespace Dune {
     //! Dump a .vtu/.vtp files contents to a stream
     /**
      * This will help generating a .vtu/.vtp file.  Typical use is like this:
-     * \code
-     * {
-     *   // create writer, writes begin tag
-     *   PVTUWriter writer(std::cout, polyData);
-     *
-     *   // start the main section
-     *   writer.beginMain();
-     *
-     *   // dump cell data (optional)
-     *   writer.beginCellData();
-     *   for(each cell data field)
-     *     writer.addArray<T>(field.name, field.ncomps);
-     *   writer.endCellData();
-     *
-     *   // dump point data (optional)
-     *   writer.beginPointData();
-     *   for(each point data field)
-     *     writer.addArray<T>(field.name, field.ncomps);
-     *   writer.endPointData();
-     *
-     *   // dump point coordinates
-     *   writer.beginPoints();
-     *   writer.addArray("Coordinates", 3);
-     *   writer.endPoints();
-     *
-     *   for(each serial piece)
-     *     writer.addPiece(piece.filename);
-     *
-     *   // finish main section
-     *   writer.endMain();
-     *
-     *   // end scope so the destructor gets called and the closing tag is written
-     * }
-     * \endcode
+       \code
+       {
+         // create writer, writes begin tag
+         PVTUWriter writer(std::cout, polyData);
+
+         // start the main section
+         writer.beginMain();
+
+         // dump cell data (optional)
+         writer.beginCellData();
+         for(each cell data field)
+           writer.addArray<T>(field.name, field.ncomps);
+         writer.endCellData();
+
+         // dump point data (optional)
+         writer.beginPointData();
+         for(each point data field)
+           writer.addArray<T>(field.name, field.ncomps);
+         writer.endPointData();
+
+         // dump point coordinates
+         writer.beginPoints();
+         writer.addArray("Coordinates", 3);
+         writer.endPoints();
+
+         for(each serial piece)
+           writer.addPiece(piece.filename);
+
+         // finish main section
+         writer.endMain();
+
+         // end scope so the destructor gets called and the closing tag is written
+       }
+       \endcode
      */
     class PVTUWriter {
       std::ostream& stream;
