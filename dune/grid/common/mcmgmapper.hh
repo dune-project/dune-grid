@@ -42,7 +42,7 @@ namespace Dune
   template<int dimgrid> struct MCMGElementLayout {
     //! test whether entities of the given geometry type should be included in
     //! the map
-    bool contains (Dune::GeometryType gt) { return gt.dim()==dimgrid; }
+    bool contains (Dune::GeometryType gt) const { return gt.dim()==dimgrid; }
   };
 
   //! Layout template for vertices
@@ -56,7 +56,7 @@ namespace Dune
   template<int dim> struct MCMGVertexLayout {
     //! test whether entities of the given geometry type should be included in
     //! the map
-    bool contains (Dune::GeometryType gt) { return gt.dim()==0; }
+    bool contains (Dune::GeometryType gt) const { return gt.dim()==0; }
   };
 
   //////////////////////////////////////////////////////////////////////
@@ -144,8 +144,8 @@ namespace Dune
     Index index (const EntityType& e) const
     {
       const GeometryType gt = e.type();
-      assert(layout.contains(gt));
-      return is.index(e) + offset[GlobalGeometryTypeIndex::index(gt)];
+      assert(offset(gt) != invalidOffset);
+      return is.index(e) + offset(gt);
     }
 
     /** @brief Map subentity of codim 0 entity to array index.
@@ -162,8 +162,8 @@ namespace Dune
         GeometryType( GeometryType::none, GV::dimension - codim ) :
         ReferenceElements<double,GV::dimension>::general(eType).type(i,codim) ;
       //GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
-      assert(layout.contains(gt));
-      return is.subIndex(e, i, codim) + offset[GlobalGeometryTypeIndex::index(gt)];
+      assert(offset(gt) != invalidOffset);
+      return is.subIndex(e, i, codim) + offset(gt);
     }
 
     /** @brief Return total number of entities in the entity set managed by the mapper.
@@ -188,7 +188,7 @@ namespace Dune
     template<class EntityType>
     bool contains (const EntityType& e, Index& result) const
     {
-      if(!is.contains(e) || !layout.contains(e.type()))
+      if(!is.contains(e) || offset(e.type()) == invalidOffset)
       {
         result = 0;
         return false;
@@ -212,9 +212,9 @@ namespace Dune
         GeometryType( GeometryType::none, GV::dimension - cc ) :
         ReferenceElements<double,GV::dimension>::general(eType).type(i,cc) ;
       //GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,cc);
-      if (not layout.contains(gt))
+      if (offset(gt) == invalidOffset)
         return false;
-      result = is.subIndex(e, i, cc) + offset[GlobalGeometryTypeIndex::index(gt)];
+      result = is.subIndex(e, i, cc) + offset(gt);
       return true;
     }
 
@@ -227,28 +227,36 @@ namespace Dune
       for (unsigned int codim = 0; codim <= GV::dimension; ++codim)
       {
         // walk over all geometry types in the codimension
-        typedef typename GV::IndexSet::Types GTV;
-        GTV gtv = is.types(codim);
-        for (typename GTV::const_iterator it = gtv.begin(); it != gtv.end(); ++it)
-        {
+        for (const GeometryType& gt : is.types(codim)) {
+          Index offset;
+
           // if the geometry type is contained in the layout, increment offset
-          if (layout.contains(*it))
-          {
-            offset[GlobalGeometryTypeIndex::index(*it)] = n;
-            n += is.size(*it);
+          if (layout.contains(gt)) {
+            offset = n;
+            n += is.size(gt);
           }
+          else {
+            offset = invalidOffset;
+          }
+
+          offsets[GlobalGeometryTypeIndex::index(gt)] = offset;
         }
       }
     }
 
   private:
+    Index offset(GeometryType gt) const
+      { return offsets[GlobalGeometryTypeIndex::index(gt)]; }
+
+    static const Index invalidOffset = std::numeric_limits<Index>::max();
+
     // number of data elements required
     unsigned int n;
     // GridView is needed to keep the IndexSet valid
     const GV gridView;
     const typename GV::IndexSet& is;
     // provide an array for the offsets
-    std::array<int, GlobalGeometryTypeIndex::size(GV::dimension)> offset;
+    std::array<Index, GlobalGeometryTypeIndex::size(GV::dimension)> offsets;
     mutable Layout<GV::dimension> layout;     // get layout object
   };
 

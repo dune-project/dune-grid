@@ -43,10 +43,6 @@ namespace Dune
     typedef float real_type;
 #endif // PARMETIS_MAJOR_VERSION > 3
 
-    typedef typename GridView::template Codim<0>::Iterator                                         ElementIterator;
-    typedef typename GridView::template Codim<0>::template Partition<Interior_Partition>::Iterator InteriorElementIterator;
-    typedef typename GridView::IntersectionIterator                                                IntersectionIterator;
-
     enum {
       dimension = GridView::dimension
     };
@@ -89,14 +85,14 @@ namespace Dune
       int numVertices = 0;
       eptr.push_back(numVertices);
 
-      for (InteriorElementIterator eIt = gv.template begin<0, Interior_Partition>(); eIt != gv.template end<0, Interior_Partition>(); ++eIt) {
-        const size_t curNumVertices = ReferenceElements<double, dimension>::general(eIt->type()).size(dimension);
+      for (const auto& element : elements(gv, Partitions::interior)) {
+        const size_t curNumVertices = ReferenceElements<double, dimension>::general(element.type()).size(dimension);
 
         numVertices += curNumVertices;
         eptr.push_back(numVertices);
 
         for (size_t k = 0; k < curNumVertices; ++k)
-          eind.push_back(gv.indexSet().subIndex(*eIt, k, dimension));
+          eind.push_back(gv.indexSet().subIndex(element, k, dimension));
       }
 
       // Partition mesh using ParMETIS
@@ -169,13 +165,12 @@ namespace Dune
       std::vector<idx_type> xadj, adjncy;
       xadj.push_back(0);
 
-      for (InteriorElementIterator eIt = gv.template begin<0, Interior_Partition>(); eIt != gv.template end<0, Interior_Partition>(); ++eIt)
-      {
+      for (const auto& element : elements(gv, Partitions::interior)) {
         size_t numNeighbors = 0;
 
-        for (IntersectionIterator iIt = gv.template ibegin(*eIt); iIt != gv.template iend(*eIt); ++iIt) {
-          if (iIt->neighbor()) {
-            adjncy.push_back(globalIndex.index(iIt->outside()));
+        for (const auto& in : intersections(gv, element)) {
+          if (in.neighbor()) {
+            adjncy.push_back(globalIndex.index(in.outside()));
 
             ++numNeighbors;
           }
@@ -208,12 +203,9 @@ namespace Dune
       std::vector<unsigned int> part(gv.size(0));
       std::fill(part.begin(), part.end(), 0);
       unsigned int c = 0;
-      for (InteriorElementIterator eIt = gv.template begin<0, Interior_Partition>();
-           eIt != gv.template end<0, Interior_Partition>();
-           ++eIt)
-      {
-        part[elementMapper.index(*eIt)] = interiorPart[c++];
-      }
+      for (const auto& element : elements(gv, Partitions::interior))
+        part[elementMapper.index(element)] = interiorPart[c++];
+
       return part;
     }
   };

@@ -44,18 +44,13 @@ struct MCMGElementEdgeLayout
 template <class Mapper, class GridView>
 void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
 {
-  typedef typename GridView::template Codim<0>::Iterator Iterator;
-
-  Iterator eIt    = gridView.template begin<0>();
-  Iterator eEndIt = gridView.template end<0>();
-
   size_t min = 1;
   size_t max = 0;
   std::set<int> indices;
 
-  for (; eIt!=eEndIt; ++eIt)
+  for (const auto& element : elements(gridView))
   {
-    size_t index = mapper.index(*eIt);
+    size_t index = mapper.index(element);
     min = std::min(min, index);
     max = std::max(max, index);
     std::pair<std::set<int>::iterator, bool> status = indices.insert(index);
@@ -79,21 +74,17 @@ template <class Mapper, class GridView>
 void checkVertexDataMapper(const Mapper& mapper, const GridView& gridView)
 {
   const size_t dim = GridView::dimension;
-  typedef typename GridView::template Codim<0>::Iterator Iterator;
-
-  Iterator eIt    = gridView.template begin<0>();
-  Iterator eEndIt = gridView.template end<0>();
 
   size_t min = 1;
   size_t max = 0;
   std::set<int> indices;
 
-  for (; eIt!=eEndIt; ++eIt)
+  for (const auto& element : elements(gridView))
   {
-    size_t numVertices = eIt->subEntities(dim);
+    size_t numVertices = element.subEntities(dim);
     for (size_t curVertex = 0; curVertex < numVertices; ++curVertex)
     {
-      size_t index = mapper.subIndex(*eIt, curVertex, dim);
+      size_t index = mapper.subIndex(element, curVertex, dim);
       min = std::min(min, index);
       max = std::max(max, index);
       indices.insert(index);
@@ -121,19 +112,15 @@ template <class Mapper, class GridView>
 void checkMixedDataMapper(const Mapper& mapper, const GridView& gridView)
 {
   const size_t dim = GridView::dimension;
-  typedef typename GridView::template Codim<0>::Iterator Iterator;
-
-  Iterator eIt    = gridView.template begin<0>();
-  Iterator eEndIt = gridView.template end<0>();
 
   size_t min = 1;
   size_t max = 0;
   std::set<int> indices;
 
-  for (; eIt!=eEndIt; ++eIt)
+  for (const auto& element : elements(gridView))
   {
     // handle elements
-    size_t index = mapper.index(*eIt);
+    size_t index = mapper.index(element);
     min = std::min(min, index);
     max = std::max(max, index);
     std::pair<std::set<int>::iterator, bool> status = indices.insert(index);
@@ -142,10 +129,10 @@ void checkMixedDataMapper(const Mapper& mapper, const GridView& gridView)
       DUNE_THROW(GridError, "Mapper mixed index is not unique for elements!");
 
     // handle edges
-    size_t numEdges = eIt->subEntities(dim-1);
+    size_t numEdges = element.subEntities(dim-1);
     for (size_t curEdge = 0; curEdge < numEdges; ++curEdge)
     {
-      index = mapper.subIndex(*eIt, curEdge, dim - 1);
+      index = mapper.subIndex(element, curEdge, dim - 1);
       min = std::min(min, index);
       max = std::max(max, index);
       indices.insert(index);
