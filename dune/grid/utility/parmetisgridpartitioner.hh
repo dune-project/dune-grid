@@ -15,6 +15,7 @@
 
 #include <dune/grid/utility/globalindexset.hh>
 #include <dune/grid/common/mcmgmapper.hh>
+#include <dune/grid/common/rangegenerators.hh>
 
 #if HAVE_PARMETIS
 
