@@ -286,7 +286,7 @@ namespace Dune {
     }
 
     YaspIntersection()
-      : _count(~uint8_t(0)) // Use as marker for invalid intersection
+      : _count(~std::uint8_t(0)) // Use as marker for invalid intersection
       , _dir(0)
       , _face(0)
     {}
@@ -333,9 +333,9 @@ namespace Dune {
     YaspEntity<0,GridImp::dimension,GridImp> _inside;  //!< entity from which the intersection was created from
     YaspEntity<0,GridImp::dimension,GridImp> _outside; //!< outside entity
     /* current position */
-    uint8_t _count;                                //!< valid neighbor count in 0 .. 2*dim-1
-    uint8_t _dir;                                  //!< count/2
-    uint8_t _face;                                 //!< count%2
+    std::uint8_t _count; //!< valid neighbor count in 0 .. 2*dim-1
+    std::uint8_t _dir; //!< count/2
+    std::uint8_t _face; //!< count%2
   };
 }   // namespace Dune
 
