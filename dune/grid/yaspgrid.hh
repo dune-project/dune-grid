@@ -3,18 +3,12 @@
 #ifndef DUNE_GRID_YASPGRID_HH
 #define DUNE_GRID_YASPGRID_HH
 
+#include <cstdint>
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <stack>
 #include <type_traits>
-
-// either include stdint.h or provide fallback for uint8_t
-#if HAVE_STDINT_H
-#include <stdint.h>
-#else
-typedef unsigned char uint8_t;
-#endif
 
 #include <dune/grid/common/backuprestore.hh>
 #include <dune/grid/common/grid.hh>     // the grid base classes
