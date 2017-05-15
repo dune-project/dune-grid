@@ -891,8 +891,8 @@ namespace Dune {
      *  @param lb pointer to an overloaded YLoadBalance instance
      */
     YaspGrid (Dune::FieldVector<ctype, dim> L,
-              std::array<int, dim> s,
-              std::bitset<dim> periodic = std::bitset<dim>(0ULL),
+              std::array<int, std::size_t{dim}> s,
+              std::bitset<std::size_t{dim}> periodic = std::bitset<std::size_t{dim}>{0ULL},
               int overlap = 1,
               CollectiveCommunicationType comm = CollectiveCommunicationType(),
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
@@ -964,8 +964,8 @@ namespace Dune {
      */
     YaspGrid (Dune::FieldVector<ctype, dim> lowerleft,
               Dune::FieldVector<ctype, dim> upperright,
-              std::array<int, dim> s,
-              std::bitset<dim> periodic = std::bitset<dim>(0ULL),
+              std::array<int, std::size_t{dim}> s,
+              std::bitset<std::size_t{dim}> periodic = std::bitset<std::size_t{dim}>(0ULL),
               int overlap = 1,
               CollectiveCommunicationType comm = CollectiveCommunicationType(),
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
@@ -1033,8 +1033,8 @@ namespace Dune {
      *  @param comm the collective communication object for this grid. An MPI communicator can be given here.
      *  @param lb pointer to an overloaded YLoadBalance instance
      */
-    YaspGrid (std::array<std::vector<ctype>, dim> coords,
-              std::bitset<dim> periodic = std::bitset<dim>(0ULL),
+    YaspGrid (std::array<std::vector<ctype>, std::size_t{dim}> coords,
+              std::bitset<std::size_t{dim}> periodic = std::bitset<std::size_t{dim}>(0ULL),
               int overlap = 1,
               CollectiveCommunicationType comm = CollectiveCommunicationType(),
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
@@ -1150,8 +1150,8 @@ namespace Dune {
      *           You can safely use it through BackupRestoreFacility. All other
      *           use is not supported for the moment.
      */
-    YaspGrid (std::array<std::vector<ctype>, dim> coords,
-              std::bitset<dim> periodic,
+    YaspGrid (std::array<std::vector<ctype>, std::size_t{dim}> coords,
+              std::bitset<std::size_t{dim}> periodic,
               int overlap,
               CollectiveCommunicationType comm,
               std::array<int,dim> coarseSize,
