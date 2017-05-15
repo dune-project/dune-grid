@@ -77,14 +77,16 @@ namespace Dune {
 
 namespace Dune {
 
+#if HAVE_MPI
+  using YaspCollectiveCommunication = CollectiveCommunication<MPI_Comm>;
+#else
+  using YaspCollectiveCommunication = CollectiveCommunication<No_Comm>;
+#endif
+
   template<int dim, class Coordinates>
   struct YaspGridFamily
   {
-#if HAVE_MPI
-    typedef CollectiveCommunication<MPI_Comm> CCType;
-#else
-    typedef CollectiveCommunication<No_Comm> CCType;
-#endif
+    typedef YaspCollectiveCommunication CCType;
 
     typedef GridTraits<dim,                                     // dimension of the grid
         dim,                                                    // dimension of the world space
@@ -169,11 +171,7 @@ namespace Dune {
   public:
     //! Type used for coordinates
     typedef typename Coordinates::ctype ctype;
-#if HAVE_MPI
-    typedef CollectiveCommunication<MPI_Comm> CollectiveCommunicationType;
-#else
-    typedef CollectiveCommunication<No_Comm> CollectiveCommunicationType;
-#endif
+    typedef YaspCollectiveCommunication CollectiveCommunicationType;
 
 #ifndef DOXYGEN
     typedef typename Dune::YGrid<Coordinates> YGrid;
