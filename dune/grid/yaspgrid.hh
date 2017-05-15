@@ -1695,6 +1695,36 @@ namespace Dune {
     bool adaptActive;
   };
 
+  // Class template deduction guides
+#if __cplusplus >= 201703L
+  template<typename ctype, int dim>
+  YaspGrid(FieldVector<ctype, std::size_t{dim}>,
+           std::array<int, std::size_t{dim}>,
+           std::bitset<std::size_t{dim}>,
+           int,
+           YaspCollectiveCommunication,
+           const YLoadBalance<dim>*)
+    -> YaspGrid<dim, EquidistantCoordinates<ctype, dim>>;
+
+  template<typename ctype, int dim>
+  YaspGrid(FieldVector<ctype, dim>,
+           FieldVector<ctype, dim>,
+           std::array<int, std::size_t{dim}>,
+           std::bitset<std::size_t{dim}>,
+           int,
+           YaspCollectiveCommunication,
+           const YLoadBalance<dim>*)
+    -> YaspGrid<dim, EquidistantOffsetCoordinates<ctype,dim>>;
+
+  template<typename ctype, int dim>
+  YaspGrid(std::array<std::vector<ctype>, dim>,
+           std::bitset<std::size_t{dim}>,
+           int,
+           YaspCollectiveCommunication,
+           const YLoadBalance<dim>*)
+    -> YaspGrid<dim, TensorProductCoordinates<ctype,dim>>;
+#endif
+
   //! Output operator for multigrids
 
   template <int d, class CC>
