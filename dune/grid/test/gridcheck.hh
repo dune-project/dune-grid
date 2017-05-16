@@ -362,6 +362,10 @@ void assertNeighbor (Grid &g)
 
         // check intersection copy ctor
         Intersection is2 = is;
+        if (is.type() != is2.type()) {
+          std::cerr << "Intersection type does not match after assignment.\n";
+          std::abort();
+        }
 
         // numbering
         const int numberInSelf = is.indexInInside();
