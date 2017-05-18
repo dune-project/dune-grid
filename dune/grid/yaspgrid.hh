@@ -1696,33 +1696,33 @@ namespace Dune {
   };
 
   // Class template deduction guides
-#if __cplusplus >= 201703L
+#if DUNE_HAVE_CXX_CLASS_TEMPLATE_ARGUMENT_DEDUCTION
   template<typename ctype, int dim>
-  YaspGrid(FieldVector<ctype, std::size_t{dim}>,
+  YaspGrid(FieldVector<ctype, dim>,
            std::array<int, std::size_t{dim}>,
-           std::bitset<std::size_t{dim}>,
-           int,
-           YaspCollectiveCommunication,
-           const YLoadBalance<dim>*)
-    -> YaspGrid<dim, EquidistantCoordinates<ctype, dim>>;
+           std::bitset<std::size_t{dim}> = std::bitset<std::size_t{dim}>{0ULL},
+           int = 1,
+           YaspCollectiveCommunication = YaspCollectiveCommunication(),
+           const YLoadBalance<dim>* = nullptr)
+    -> YaspGrid< dim, EquidistantCoordinates<ctype, dim> >;
 
   template<typename ctype, int dim>
   YaspGrid(FieldVector<ctype, dim>,
            FieldVector<ctype, dim>,
            std::array<int, std::size_t{dim}>,
-           std::bitset<std::size_t{dim}>,
-           int,
-           YaspCollectiveCommunication,
-           const YLoadBalance<dim>*)
-    -> YaspGrid<dim, EquidistantOffsetCoordinates<ctype,dim>>;
+           std::bitset<std::size_t{dim}> = std::bitset<std::size_t{dim}>{0ULL},
+           int = 1,
+           YaspCollectiveCommunication = YaspCollectiveCommunication(),
+           const YLoadBalance<dim>* = nullptr)
+    -> YaspGrid< dim, EquidistantOffsetCoordinates<ctype, dim> >;
 
-  template<typename ctype, int dim>
+  template<typename ctype, std::size_t dim>
   YaspGrid(std::array<std::vector<ctype>, dim>,
-           std::bitset<std::size_t{dim}>,
-           int,
-           YaspCollectiveCommunication,
-           const YLoadBalance<dim>*)
-    -> YaspGrid<dim, TensorProductCoordinates<ctype,dim>>;
+           std::bitset<dim> = std::bitset<dim>{0ULL},
+           int = 1,
+           YaspCollectiveCommunication = YaspCollectiveCommunication(),
+           const YLoadBalance<int{dim}>* = nullptr)
+    -> YaspGrid< int{dim}, TensorProductCoordinates<ctype, int{dim}> >;
 #endif
 
   //! Output operator for multigrids
