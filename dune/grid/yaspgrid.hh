@@ -864,7 +864,7 @@ namespace Dune {
      *  @param comm the collective communication object for this grid. An MPI communicator can be given here.
      *  @param lb pointer to an overloaded YLoadBalance instance
      */
-    YaspGrid (std::array<std::vector<ctype>, dim> coords,
+    YaspGrid (std::array<std::vector<ctype>, std::size_t{dim}> coords,
               std::bitset<std::size_t{dim}> periodic = std::bitset<std::size_t{dim}>(0ULL),
               int overlap = 1,
               CollectiveCommunicationType comm = CollectiveCommunicationType(),
