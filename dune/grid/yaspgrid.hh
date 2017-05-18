@@ -890,6 +890,7 @@ namespace Dune {
      *  @param comm the collective communication object for this grid. An MPI communicator can be given here.
      *  @param lb pointer to an overloaded YLoadBalance instance
      */
+    template<typename C=Coordinates, typename=typename std::enable_if< std::is_same<C, EquidistantCoordinates<ctype,dim> >::value >::type>
     YaspGrid (Dune::FieldVector<ctype, dim> L,
               std::array<int, std::size_t{dim}> s,
               std::bitset<std::size_t{dim}> periodic = std::bitset<std::size_t{dim}>{0ULL},
@@ -962,6 +963,7 @@ namespace Dune {
      *  @param comm the collective communication object for this grid. An MPI communicator can be given here.
      *  @param lb pointer to an overloaded YLoadBalance instance
      */
+    template<typename C=Coordinates, typename=typename std::enable_if< std::is_same<C, EquidistantOffsetCoordinates<ctype,dim> >::value >::type>
     YaspGrid (Dune::FieldVector<ctype, dim> lowerleft,
               Dune::FieldVector<ctype, dim> upperright,
               std::array<int, std::size_t{dim}> s,
@@ -1033,6 +1035,7 @@ namespace Dune {
      *  @param comm the collective communication object for this grid. An MPI communicator can be given here.
      *  @param lb pointer to an overloaded YLoadBalance instance
      */
+    template<typename C=Coordinates, typename=typename std::enable_if< std::is_same<C, TensorProductCoordinates<ctype,dim> >::value >::type>
     YaspGrid (std::array<std::vector<ctype>, std::size_t{dim}> coords,
               std::bitset<std::size_t{dim}> periodic = std::bitset<std::size_t{dim}>(0ULL),
               int overlap = 1,
