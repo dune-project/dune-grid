@@ -31,6 +31,19 @@ namespace Dune
   protected:
     IteratorImp realIterator;
 
+#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
+  public:
+#else
+    friend class GridDefaultImplementation< Grid::dimension, Grid::dimensionworld, typename Grid::ctype, typename Grid::GridFamily >;
+#endif
+    // type of underlying implementation, for internal use only
+    typedef IteratorImp Implementation;
+
+    //! Return reference to the real implementation
+    Implementation &impl () { return realIterator; }
+    //! Return const reference to the real implementation
+    const Implementation &impl () const { return realIterator; }
+
   public:
     typedef typename Grid::template Codim< codim >::Entity Entity;
 
