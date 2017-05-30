@@ -91,7 +91,7 @@ namespace Dune
     //! Base class
     typedef VTKFunction< GV > Base;
     //! Mapper for elements
-    typedef MultipleCodimMultipleGeomTypeMapper<GV, MCMGElementLayout> Mapper;
+    typedef MultipleCodimMultipleGeomTypeMapper<GV> Mapper;
 
     //! store a reference to the vector
     const V& v;
@@ -152,7 +152,7 @@ namespace Dune
         s( s_ ),
         ncomps_(ncomps),
         mycomp_(mycomp),
-        mapper( gv )
+        mapper( gv, mcmgElementLayout() )
     {
       if (v.size()!=(unsigned int)(mapper.size()*ncomps_))
         DUNE_THROW(IOError, "P0VTKFunction: size mismatch");
@@ -189,7 +189,7 @@ namespace Dune
     //! Base class
     typedef VTKFunction< GV > Base;
     //! Mapper for vertices
-    typedef MultipleCodimMultipleGeomTypeMapper<GV, MCMGVertexLayout> Mapper;
+    typedef MultipleCodimMultipleGeomTypeMapper<GV> Mapper;
 
     //! store a reference to the vector
     const V& v;
@@ -259,7 +259,7 @@ namespace Dune
         s( s_ ),
         ncomps_(ncomps),
         mycomp_(mycomp),
-        mapper( gv )
+        mapper( gv, mcmgVertexLayout() )
     {
       if (v.size()!=(unsigned int)(mapper.size()*ncomps_))
         DUNE_THROW(IOError,"P1VTKFunction: size mismatch");

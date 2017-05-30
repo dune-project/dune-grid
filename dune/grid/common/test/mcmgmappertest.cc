@@ -163,6 +163,7 @@ void checkGrid(const Grid& grid)
   static const unsigned dim = Grid::dimension;
   // check element mapper
   // check leafMCMGMapper
+  DUNE_NO_DEPRECATED_BEGIN
   {   // check constructor without layout class
     LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementLayout>
     leafMCMGMapper(grid);
@@ -173,10 +174,17 @@ void checkGrid(const Grid& grid)
     leafMCMGMapper(grid, MCMGElementLayout<dim>());
     checkElementDataMapper(leafMCMGMapper, grid.leafGridView());
   }
+  DUNE_NO_DEPRECATED_END
+  {
+    LeafMultipleCodimMultipleGeomTypeMapper<Grid>
+    leafMCMGMapper(grid, mcmgElementLayout());
+    checkElementDataMapper(leafMCMGMapper, grid.leafGridView());
+  }
 
   // check levelMCMGMapper
   for (int i = 2; i <= grid.maxLevel(); i++)
   {
+    DUNE_NO_DEPRECATED_BEGIN
     {     // check constructor without layout class
       LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementLayout>
       levelMCMGMapper(grid, i);
@@ -187,10 +195,17 @@ void checkGrid(const Grid& grid)
       levelMCMGMapper(grid, i, MCMGElementLayout<dim>());
       checkElementDataMapper(levelMCMGMapper, grid.levelGridView(i));
     }
+    DUNE_NO_DEPRECATED_END
+    {     // check constructor with layout class
+      LevelMultipleCodimMultipleGeomTypeMapper<Grid>
+      levelMCMGMapper(grid, i, mcmgElementLayout());
+      checkElementDataMapper(levelMCMGMapper, grid.levelGridView(i));
+    }
   }
 
   // check vertex mapper
   // check leafMCMGMapper
+  DUNE_NO_DEPRECATED_BEGIN
   {   // check constructor without layout class
     LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGVertexLayout>
     leafMCMGMapper(grid);
@@ -201,10 +216,17 @@ void checkGrid(const Grid& grid)
     leafMCMGMapper(grid, MCMGVertexLayout<dim>());
     checkVertexDataMapper(leafMCMGMapper, grid.leafGridView());
   }
+  DUNE_NO_DEPRECATED_END
+  {
+    LeafMultipleCodimMultipleGeomTypeMapper<Grid>
+    leafMCMGMapper(grid, mcmgVertexLayout());
+    checkVertexDataMapper(leafMCMGMapper, grid.leafGridView());
+  }
 
   // check levelMCMGMapper
   for (int i = 2; i <= grid.maxLevel(); i++)
   {
+    DUNE_NO_DEPRECATED_BEGIN
     {     // check constructor without layout class
       LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGVertexLayout>
       levelMCMGMapper(grid, i);
@@ -215,10 +237,20 @@ void checkGrid(const Grid& grid)
       levelMCMGMapper(grid, i, MCMGVertexLayout<dim>());
       checkVertexDataMapper(levelMCMGMapper, grid.levelGridView(i));
     }
+    DUNE_NO_DEPRECATED_END
+    {     // check constructor with layout class
+      LevelMultipleCodimMultipleGeomTypeMapper<Grid>
+      levelMCMGMapper(grid, i, mcmgVertexLayout());
+      checkVertexDataMapper(levelMCMGMapper, grid.levelGridView(i));
+    }
   }
 
   // check mixed element and vertex mapper
+  const auto elementEdgeLayout = [](GeometryType gt, int dimgrid) {
+    return gt.dim() == dimgrid or gt.dim() == 1;
+  };
   // check leafMCMGMapper
+  DUNE_NO_DEPRECATED_BEGIN
   {   // check constructor without layout class
     LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementEdgeLayout>
     leafMCMGMapper(grid);
@@ -229,10 +261,17 @@ void checkGrid(const Grid& grid)
     leafMCMGMapper(grid, MCMGElementEdgeLayout<dim>());
     checkMixedDataMapper(leafMCMGMapper, grid.leafGridView());
   }
+  DUNE_NO_DEPRECATED_END
+  {   // check constructor with layout class
+    LeafMultipleCodimMultipleGeomTypeMapper<Grid>
+    leafMCMGMapper(grid, elementEdgeLayout);
+    checkMixedDataMapper(leafMCMGMapper, grid.leafGridView());
+  }
 
   // check levelMCMGMapper
   for (int i = 2; i <= grid.maxLevel(); i++)
   {
+    DUNE_NO_DEPRECATED_BEGIN
     {     // check constructor without layout class
       LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementEdgeLayout>
       levelMCMGMapper(grid, i);
@@ -241,6 +280,12 @@ void checkGrid(const Grid& grid)
     {     // check constructor with layout class
       LevelMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementEdgeLayout>
       levelMCMGMapper(grid, i, MCMGElementEdgeLayout<dim>());
+      checkMixedDataMapper(levelMCMGMapper, grid.levelGridView(i));
+    }
+    DUNE_NO_DEPRECATED_END
+    {     // check constructor with layout class
+      LevelMultipleCodimMultipleGeomTypeMapper<Grid>
+      levelMCMGMapper(grid, i, elementEdgeLayout);
       checkMixedDataMapper(levelMCMGMapper, grid.levelGridView(i));
     }
   }

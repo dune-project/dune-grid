@@ -97,10 +97,9 @@ namespace Dune {
     const GV gv = grid.leafGridView();
 
     // Create mappers used to retrieve indices
-    typedef typename Dune::LeafMultipleCodimMultipleGeomTypeMapper<GridType, ElementDataLayout      > ElementMapper;
-    typedef typename Dune::LeafMultipleCodimMultipleGeomTypeMapper<GridType, NodeDataLayout         > NodeMapper;
-    ElementMapper elementmapper(grid);
-    NodeMapper nodemapper(grid);
+    typedef typename Dune::LeafMultipleCodimMultipleGeomTypeMapper<GridType> Mapper;
+    const Mapper elementmapper(grid, mcmgElementLayout());
+    const Mapper nodemapper(grid, mcmgVertexLayout());
 
     // Create iterators
     typedef typename GV::template Codim<0 >::Iterator LeafIterator;
