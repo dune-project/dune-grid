@@ -23,7 +23,10 @@ def cartesianDomain(lower,upper,division,**parameters):
         dgf += key + " " + str(parameters[key]) + "\n"
     dgf += "#\n"
     return (reader.dgfString, dgf)
-
+def structuredGrid(lower,upper,division,**parameters):
+    from ._grids import yaspGrid
+    domain = cartesianDomain(lower, upper, division, **parameters)
+    return yaspGrid(domain, dimgrid=len(lower))
 
 def string2dgf(dgf):
     return (reader.dgfString,"DGF\n" + dgf)
