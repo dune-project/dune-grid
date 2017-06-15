@@ -219,7 +219,7 @@ namespace Dune {
      to learn how to create UGGrid objects.
 
      Please send any questions, suggestions, or bug reports to the Dune mailing list
-     dune@dune-project.org
+     dune@lists.dune-project.org
 
      For installation instructions see http://www.dune-project.org/external_libraries/install_ug.html .
    */
