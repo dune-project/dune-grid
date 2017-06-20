@@ -361,7 +361,7 @@ void assertNeighbor (Grid &g)
         const Intersection& is = *it;
 
         // check intersection copy ctor
-        Intersection is2 = is;
+        Intersection DUNE_UNUSED is2 = is;
 
         // numbering
         const int numberInSelf = is.indexInInside();
