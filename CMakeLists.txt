@@ -6,5 +6,4 @@ add_python_targets(grid
   map
 )
 
-add_library(_grid SHARED _grid.cc)
-set_target_properties(_grid PROPERTIES PREFIX "")
+dune_add_pybind11_module(NAME _grid)
