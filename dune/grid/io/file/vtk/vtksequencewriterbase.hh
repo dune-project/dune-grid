@@ -55,8 +55,6 @@ namespace Dune {
         size_(size)
     {}
 
-    ~VTKSequenceWriterBase() {}
-
     /**
      * accessor for the underlying VTKWriter instance
      */

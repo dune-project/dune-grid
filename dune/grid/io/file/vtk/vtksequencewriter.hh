@@ -92,8 +92,6 @@ namespace Dune {
                                         name,path,extendpath,
                                         gridView.comm().rank(), gridView.comm().size())
     {}
-
-    ~VTKSequenceWriter() {}
   };
 
   /**
@@ -122,8 +120,6 @@ namespace Dune {
                                         name,path,extendpath,
                                         gridView.comm().rank(), gridView.comm().size())
     {}
-    ~SubsamplingVTKSequenceWriter() {}
-
   };
 
 } // end namespace Dune
