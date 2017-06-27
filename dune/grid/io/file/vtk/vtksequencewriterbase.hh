@@ -57,6 +57,14 @@ namespace Dune {
 
     ~VTKSequenceWriterBase() {}
 
+    /**
+     * accessor for the underlying VTKWriter instance
+     */
+    const std::shared_ptr< VTKWriter<GridView> >& vtkWriter() const
+    {
+      return vtkWriter_;
+    }
+
     /** \brief Adds a field of cell data to the VTK file */
     void addCellData (const std::shared_ptr<const typename VTKWriter<GridView>::VTKFunction> &p)
     {
