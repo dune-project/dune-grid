@@ -590,6 +590,9 @@ namespace Dune
       celldata.push_back(VTKLocalFunction(p));
     }
 
+    /**
+     * @brief Add a grid function that lives on the cells of the grid to the visualization.
+     */
     template<typename F>
     void addCellData(F&& f, VTK::FieldInfo vtkFieldInfo)
     {
@@ -634,6 +637,9 @@ namespace Dune
       vertexdata.push_back(VTKLocalFunction(p));
     }
 
+    /**
+     * @brief Add a grid function that lives on the vertices of the grid to the visualization.
+     */
     template<typename F>
     void addVertexData(F&& f, VTK::FieldInfo vtkFieldInfo)
     {
