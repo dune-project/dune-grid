@@ -35,6 +35,7 @@ def writeVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointve
         vtk.write(name)
     else:
         vtk.write(name, number)
+    return vtk
 
 
 def addAttr(module, cls):
