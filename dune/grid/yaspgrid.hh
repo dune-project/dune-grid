@@ -830,7 +830,7 @@ namespace Dune {
       for (int i=0; i<dim; i++)
       {
         // find out whether the grid is too small to
-        int toosmall = (s_interior[i] <= overlap) &&    // interior is very small
+        int toosmall = (s_interior[i] / 2 <= overlap) &&    // interior is very small
             (periodic[i] || (s_interior[i] != s[i]));    // there is an overlap in that direction
         // communicate the result to all those processes to have all processors error out if one process failed.
         int global = 0;
@@ -900,7 +900,7 @@ namespace Dune {
       for (int i=0; i<dim; i++)
       {
         // find out whether the grid is too small to
-        int toosmall = (s_interior[i] <= overlap) &&    // interior is very small
+        int toosmall = (s_interior[i] / 2 <= overlap) &&    // interior is very small
             (periodic[i] || (s_interior[i] != s[i]));    // there is an overlap in that direction
         // communicate the result to all those processes to have all processors error out if one process failed.
         int global = 0;
@@ -978,7 +978,7 @@ namespace Dune {
       for (int i=0; i<dim; i++)
       {
         // find out whether the grid is too small to
-        int toosmall = (s_interior[i] <= overlap) &&               // interior is very small
+        int toosmall = (s_interior[i] / 2 <= overlap) &&               // interior is very small
              (periodic[i] || (s_interior[i] != _coarseSize[i]));    // there is an overlap in that direction
         // communicate the result to all those processes to have all processors error out if one process failed.
         int global = 0;
