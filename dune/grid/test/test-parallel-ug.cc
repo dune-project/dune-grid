@@ -8,6 +8,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <bitset>
 
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/float_cmp.hh>
