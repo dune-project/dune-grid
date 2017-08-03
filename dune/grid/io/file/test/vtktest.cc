@@ -174,9 +174,9 @@ int main(int argc, char **argv)
     int result = 0; // pass by default
     using Dune::make_array;
 
-    acc(result, vtkCheck<1>(make_array(5), {1.0}));
-    acc(result, vtkCheck<2>(make_array(5,5), {1.0, 2.0}));
-    acc(result, vtkCheck<3>(make_array(5,5,5), {1.0, 2.0, 3.0}));
+    acc(result, vtkCheck<1>(make_array(8), {1.0}));
+    acc(result, vtkCheck<2>(make_array(8,4), {1.0, 2.0}));
+    acc(result, vtkCheck<3>(make_array(8,4,4), {1.0, 2.0, 3.0}));
 
     mpiHelper.getCollectiveCommunication().allreduce<Acc>(&result, 1);
 
