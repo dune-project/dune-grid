@@ -247,14 +247,15 @@ namespace Dune
       return asImp().contains(e);
     }
 
+  protected:
     // Must be explicitly defined although this class should get a default constructor.
-    IndexSet() {}
+    IndexSet() = default;
 
   private:
     //! Forbid the copy constructor
-    IndexSet(const IndexSet&);
+    IndexSet(const IndexSet&) = delete;
     //! Forbid the assignment operator
-    IndexSet& operator=(const IndexSet&);
+    IndexSet& operator=(const IndexSet&) = delete;
 
     //!  Barton-Nackman trick
     IndexSetImp& asImp () {return static_cast<IndexSetImp &> (*this);}
@@ -432,14 +433,15 @@ namespace Dune
       return asImp().subId(e,i,codim);
     }
 
+  protected:
     // Default constructor (is not provided automatically because copy constructor is private)
-    IdSet() {}
+    IdSet() = default;
 
   private:
     //! Forbid the copy constructor
-    IdSet(const IdSet&);
+    IdSet(const IdSet&) = delete;
     //! Forbid the assignment operator
-    IdSet& operator=(const IdSet&);
+    IdSet& operator=(const IdSet&) = delete;
 
     //!  Barton-Nackman trick
     IdSetImp& asImp () {return static_cast<IdSetImp &> (*this);}
