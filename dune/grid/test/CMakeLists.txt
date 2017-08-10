@@ -109,6 +109,7 @@ install(FILES basicunitcube.hh
               checkgeometry.hh
               checkgeometryinfather.hh
               checkgridfactory.hh
+              checkidset.hh
               checkindexset.hh
               checkintersectionit.hh
               checkintersectionlifetime.hh
