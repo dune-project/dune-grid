@@ -12,6 +12,8 @@
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/grid/io/file/vtk/subsamplingvtkwriter.hh>
 
+#include <dune/geometry/virtualrefinement.hh>
+
 namespace Dune {
 
   /**
@@ -104,7 +106,7 @@ namespace Dune {
    *
    * \deprecated Please use VTKSequenceWriter together with a SubsamplingVTKWriter instead!
    */
-  template< class GridView >
+  template< class GridView, class RefinementTag=Dune::VirtualRefinementTag::Level >
   class
   DUNE_DEPRECATED_MSG("Use VTKSequenceWriter together with a SubsamplingVTKWriter instead of SubsamplingVTKSequenceWriter!")
   SubsamplingVTKSequenceWriter :
@@ -116,7 +118,7 @@ namespace Dune {
                                             const std::string& name,
                                             const std::string& path,
                                             const std::string& extendpath)
-      : VTKSequenceWriterBase<GridView>(std::make_shared<SubsamplingVTKWriter<GridView> >(gridView,level_),
+      : VTKSequenceWriterBase<GridView>(std::make_shared<SubsamplingVTKWriter<GridView, RefinementTag> >(gridView,level_),
                                         name,path,extendpath,
                                         gridView.comm().rank(), gridView.comm().size())
     {}

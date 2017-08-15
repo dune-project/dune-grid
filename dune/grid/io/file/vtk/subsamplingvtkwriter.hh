@@ -32,7 +32,7 @@ namespace Dune
    * subsampling of the elements via VirtualRefinement.  The
    * SubSamplingVTKWriter always writes nonconforming data.
    */
-  template< class GridView, class RefinementTag >
+  template< class GridView, class RefinementTag=Dune::VirtualRefinementTag::Level >
   class SubsamplingVTKWriter
     : public VTKWriter<GridView>
   {
