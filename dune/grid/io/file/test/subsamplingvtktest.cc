@@ -88,7 +88,7 @@ int doWrite( const GridView &gridView, bool coerceToSimplex, RefinementTag tag)
 {
   enum { dim = GridView :: dimension };
 
-  Dune :: SubsamplingVTKWriter< GridView > vtk( gridView, 1, tag, coerceToSimplex);
+  Dune :: SubsamplingVTKWriter< GridView > vtk( gridView, tag, coerceToSimplex);
 
   // disabled due to FS#676:
   // const typename GridView :: IndexSet &is = gridView.indexSet();
@@ -132,7 +132,7 @@ int vtkCheck(const std::array<int, dim>& elements,
 
   int result = 0;
 
-  Dune::VirtualRefinementTag::Level levelTag;
+  Dune::VirtualRefinementTag::Levels levelTag{0};
   acc(result, doWrite( g.leafGridView(), false, levelTag));
   acc(result, doWrite( g.levelGridView( 0 ), false, levelTag));
   acc(result, doWrite( g.levelGridView( g.maxLevel() ), false, levelTag));
@@ -141,14 +141,14 @@ int vtkCheck(const std::array<int, dim>& elements,
   acc(result, doWrite( g.levelGridView( 0 ), true, levelTag));
   acc(result, doWrite( g.levelGridView( g.maxLevel() ), true, levelTag));
 
-  Dune::VirtualRefinementTag::PerAxis perAxisTag;
-  acc(result, doWrite( g.leafGridView(), false, perAxisTag));
-  acc(result, doWrite( g.levelGridView( 0 ), false, perAxisTag));
-  acc(result, doWrite( g.levelGridView( g.maxLevel() ), false, perAxisTag));
+  Dune::VirtualRefinementTag::Intervals intervalsTag{1};
+  acc(result, doWrite( g.leafGridView(), false, intervalsTag));
+  acc(result, doWrite( g.levelGridView( 0 ), false, intervalsTag));
+  acc(result, doWrite( g.levelGridView( g.maxLevel() ), false, intervalsTag));
 
-  acc(result, doWrite( g.leafGridView(), true, perAxisTag));
-  acc(result, doWrite( g.levelGridView( 0 ), true, perAxisTag));
-  acc(result, doWrite( g.levelGridView( g.maxLevel() ), true, perAxisTag));
+  acc(result, doWrite( g.leafGridView(), true, intervalsTag));
+  acc(result, doWrite( g.levelGridView( 0 ), true, intervalsTag));
+  acc(result, doWrite( g.levelGridView( g.maxLevel() ), true, intervalsTag));
 
   return result;
 }
