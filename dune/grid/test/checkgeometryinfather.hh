@@ -27,7 +27,6 @@ void checkGeometryInFather(const GridType& grid)
   unsigned int differentVertexCoords = 0;
 
   typedef typename GridType::Traits::LocalIdSet IdSet;
-  typedef typename GridType::ctype ctype;
 
   const IdSet &idSet = grid.localIdSet();
 
