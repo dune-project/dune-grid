@@ -7,6 +7,7 @@
 
 #include <dune/common/deprecated.hh>
 #include <dune/common/test/iteratortest.hh>
+#include <dune/common/unused.hh>
 
 #include <dune/geometry/quadraturerules.hh>
 #include <dune/geometry/referenceelements.hh>
@@ -113,10 +114,10 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
 #if !DISABLE_DEPRECATED_METHOD_CHECK
   DUNE_NO_DEPRECATED_BEGIN
-  const int dimension = Intersection::dimension;
+  DUNE_UNUSED const int dimension = Intersection::dimension;
   DUNE_NO_DEPRECATED_END
 #else
-  const int dimension = Entity::dimension;
+  DUNE_UNUSED const int dimension = Entity::dimension;
 #endif
   const int mydimension = Intersection::mydimension;
 
