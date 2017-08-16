@@ -81,6 +81,22 @@ namespace Dune
     const Implementation &impl () const { return realGeometry; }
 
   public:
+
+    //! Returns a reference element for the given grid geometry.
+    /**
+     * This function returns a reference element for the grid geometry
+     * `geo`. The type of that reference element can be obtained with
+     * `Dune::ReferenceElement<Geometry>`.
+     *
+     * \sa Dune::ReferenceElement
+     * \ingroup GeometryReferenceElements
+     * \relatedalso Geometry
+     */
+    friend auto referenceElement(const Geometry& geo)
+    {
+      return referenceElement(geo,geo.impl());
+    }
+
     //! @brief export geometry dimension
     enum { mydimension=mydim /*!< geometry dimension */ };
     //! @brief export coordinate dimension
@@ -398,6 +414,30 @@ namespace Dune
     GeometryImp<mydim,cdim,GridImp>& asImp () {return static_cast<GeometryImp<mydim,cdim,GridImp>&>(*this);}
     const GeometryImp<mydim,cdim,GridImp>& asImp () const {return static_cast<const GeometryImp<mydim,cdim,GridImp>&>(*this);}
   }; // end GeometryDefault
+
+
+  //! Second-level dispatch to select the correct reference element for a grid geometry.
+  /**
+   * This function is the default implementation of the second-level reference element dispatch
+   * performed by Geometry.
+   *
+   * \note This function is only important for grid implementors with geometries that do not have
+   *       a standard reference element.
+   *
+   * When referenceElement() is called with a Geometry, it will forward the call to
+   * `referenceElement(const Geometry&,const GeometryImplementation&)`. This default implementation
+   * will do the right thing as long as your geometry is based on a standard Dune ReferenceElement. If
+   * it is not and you want to supply your own reference element implementation, provide an override of
+   * this function for your specific geometry implementation.
+   *
+   * \related Geometry
+   */
+  template< int mydim, int cdim, class GridImp, template< int, int, class > class GeometryImp, typename Impl>
+  auto referenceElement(const Geometry<mydim,cdim,GridImp,GeometryImp>& geo, const Impl& impl)
+  {
+    using Geo = Geometry<mydim,cdim,GridImp,GeometryImp>;
+    return referenceElement<typename Geo::ctype,Geo::mydimension>(geo.type());
+  }
 
 } // namespace Dune
 
