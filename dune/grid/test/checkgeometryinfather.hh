@@ -156,8 +156,7 @@ void checkGeometryInFather(const GridType& grid)
           DUNE_THROW(GridError, "entity and geometryInFather have different number of corners!");
 
         // Compute the element center just to have an argument for the following methods
-        const Dune::ReferenceElement< ctype, Geometry::mydimension > &refElement
-          = Dune::ReferenceElements< ctype, Geometry::mydimension >::general( geometryInFather.type() );
+        auto refElement = referenceElement( geometryInFather );
 
         typename LocalGeometry::GlobalCoordinate center = refElement.position(0,0);
 

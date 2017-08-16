@@ -322,7 +322,7 @@ public:
           const auto geometry = element.geometry();
           const auto gt = geometry.type();
 
-          const auto& referenceElement = Dune::ReferenceElements<double, dim>::general(gt);
+          auto referenceElement = Dune::referenceElement<double, dim>(gt);
           const auto entityGlobal = geometry.global(referenceElement.position(k, commCodim));
           std::cout << gridView.comm().rank()+1 << ": border codim "
                     << commCodim << " entity "

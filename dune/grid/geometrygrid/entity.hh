@@ -516,8 +516,7 @@ namespace Dune
        */
       GeometryType type () const
       {
-        const ReferenceElement< ctype, dimension > &refElement
-          = ReferenceElements< ctype, dimension >::general( hostElement().type() );
+        auto refElement = referenceElement< ctype, dimension >( hostElement().type() );
         return refElement.type( subEntity_, codimension );
       }
 
@@ -530,8 +529,7 @@ namespace Dune
       /** \brief obtain the partition type of this entity */
       PartitionType partitionType () const
       {
-        const ReferenceElement< ctype, dimension > &refElement
-          = ReferenceElements< ctype, dimension >::general( hostElement().type() );
+        auto refElement = referenceElement< ctype, dimension >( hostElement().type() );
 
         PartitionType type = vertexPartitionType( refElement, 0 );
         if( (type != BorderEntity) && (type != FrontEntity) )
@@ -576,8 +574,7 @@ namespace Dune
 
       unsigned int subEntities ( unsigned int cc ) const
       {
-        const ReferenceElement< ctype, dimension > &refElement
-          = ReferenceElements< ctype, dimension >::general( hostElement().type() );
+        auto refElement = referenceElement< ctype, dimension >( hostElement().type() );
         return refElement.size( subEntity_, codimension, cc );
       }
 
@@ -637,8 +634,7 @@ namespace Dune
       typename HostIndexSet::IndexType
       subIndex ( const HostIndexSet &indexSet, int i, unsigned int cd ) const
       {
-        const ReferenceElement< ctype, dimension > &refElement
-          = ReferenceElements< ctype, dimension >::general( hostElement().type() );
+        auto refElement = referenceElement< ctype, dimension >( hostElement().type() );
         const int j = refElement.subEntity( subEntity_, codimension, i, codimension+cd );
         return indexSet.subIndex( hostElement(), j, codimension+cd );
       }
@@ -672,7 +668,7 @@ namespace Dune
 
     private:
       PartitionType
-      vertexPartitionType ( const ReferenceElement< ctype, dimension > &refElement, int i ) const
+      vertexPartitionType ( Dune::Transitional::ReferenceElement< ctype, Dim<dimension> > refElement, int i ) const
       {
         const int j = refElement.subEntity( subEntity_, codimension, i, dimension );
         return hostElement().template subEntity< dimension >( j ).partitionType();

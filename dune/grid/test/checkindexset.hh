@@ -73,8 +73,7 @@ namespace Dune
     if( type.isNone() )
       return;
 
-    const ReferenceElement< coordType, dim > &refElem
-      = ReferenceElements< coordType, dim >::general( type );
+    auto refElem = referenceElement( en.geometry() );
 
     // check whether the element has the number of codim-subentities mandated by the reference element
     if(int(en.subEntities(codim)) != refElem.size(0,0,codim))
@@ -407,10 +406,7 @@ namespace Dune
       Iterator refit = view.template begin< 0 >();
       assert( refit != refend );
 
-      GeometryType type = refit->type();
-
-      const ReferenceElement< coordType, dim > &refElem
-        = ReferenceElements< coordType, dim >::general( type );
+      auto refElem = referenceElement( refit->geometry() );
 
       // print dune reference element
       sout << "Dune reference element provides: \n";

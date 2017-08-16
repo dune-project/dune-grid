@@ -160,9 +160,7 @@ namespace Dune {
     const WorldVector&
     centerUnitOuterNormal () const
     {
-      GeometryType type = geometry().type();
-      const ReferenceElement<UGCtype, dim-1> & refElement =
-        ReferenceElements<UGCtype, dim-1>::general(type);
+      auto refElement = referenceElement(geometry());
       return unitOuterNormal(refElement.position(0,0));
     }
 
@@ -391,9 +389,7 @@ namespace Dune {
     const WorldVector&
     centerUnitOuterNormal () const
     {
-      GeometryType type = geometry().type();
-      const ReferenceElement<UGCtype, dim-1> & refElement =
-        ReferenceElements<UGCtype, dim-1>::general(type);
+      auto refElement = referenceElement(geometry());
       return unitOuterNormal(refElement.position(0,0));
     }
 
