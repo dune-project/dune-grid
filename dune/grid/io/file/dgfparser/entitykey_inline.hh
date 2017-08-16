@@ -116,8 +116,7 @@ namespace Dune
   ElementFaceUtil::generateCubeFace
     ( const std::vector< unsigned int > &element, int f )
   {
-    const ReferenceElement< double, dim > &refCube
-      = ReferenceElements< double, dim >::cube();
+    auto refCube = ReferenceElements< double, dim >::cube();
     const unsigned int size = refCube.size( f, 1, dim );
     std::vector< unsigned int > k( size );
     for( unsigned int i = 0; i < size; ++ i )
@@ -131,8 +130,7 @@ namespace Dune
   ElementFaceUtil :: generateSimplexFace
     ( const std :: vector< unsigned int > &element, int f )
   {
-    const ReferenceElement< double, dim > &refSimplex
-      = ReferenceElements< double, dim >::simplex();
+    auto refSimplex = ReferenceElements< double, dim >::simplex();
     const unsigned int size = refSimplex.size( f, 1, dim );
     std :: vector< unsigned int > k( size );
     for( unsigned int i = 0; i < size; ++i )

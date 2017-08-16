@@ -82,8 +82,7 @@ namespace Dune
 
       std::size_t size () const
       {
-        const Dune::ReferenceElement< ct, HostEntity::mydimension > &refElement
-          = Dune::ReferenceElements< ct, HostEntity::mydimension >::general( type() );
+        auto refElement = referenceElement< ct, HostEntity::mydimension >( type() );
         return refElement.size( HostEntity::mydimension );
       }
 

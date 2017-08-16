@@ -87,7 +87,7 @@ namespace Dune
       eptr.push_back(numVertices);
 
       for (const auto& element : elements(gv, Partitions::interior)) {
-        const size_t curNumVertices = ReferenceElements<double, dimension>::general(element.type()).size(dimension);
+        const size_t curNumVertices = referenceElement<double, dimension>(element.type()).size(dimension);
 
         numVertices += curNumVertices;
         eptr.push_back(numVertices);

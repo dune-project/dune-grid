@@ -548,8 +548,7 @@ void iterate(Grid &g)
 
     if( !geo.type().isNone() )
     {
-      origin = Dune::ReferenceElements<typename Geometry::ctype,
-                 Geometry::mydimension>::general(it->type()).position(0,0);
+      origin = referenceElement(geo).position(0,0);
 
       result = geo.local( geo.global( origin ) );
       typename Grid::ctype error = (result-origin).two_norm();
@@ -593,8 +592,7 @@ void iterate(Grid &g)
 
     if( !lit->type().isNone() )
     {
-      origin = Dune::ReferenceElements<typename Geometry::ctype,
-                 Geometry::mydimension>::general(lit->type()).position(0,0);
+      origin = referenceElement(lit->geometry()).position(0,0);
       result = lit->geometry().local(lit->geometry().global(origin));
       typename Grid::ctype error = (result-origin).two_norm();
       if(error >= factorEpsilon * std::numeric_limits<typename Grid::ctype>::epsilon())
@@ -707,8 +705,7 @@ void checkBoundarySegmentIndexProlongation ( const Grid &grid, const Entity &ent
   for( HierarchicIterator hit = entity.hbegin( entity.level()+1 ); hit != hend; ++hit )
   {
     GeometryInFather geoInFather = hit->geometryInFather();
-    const Dune::ReferenceElement< typename Grid::ctype, Grid::dimension > &refElement
-      = Dune::ReferenceElements< typename Grid::ctype, Grid::dimension >::general( geoInFather.type() );
+    auto refElement = referenceElement( geoInFather );
 
     const IntersectionIterator iend = gridView.iend( *hit );
     for( IntersectionIterator iit = gridView.ibegin( *hit ); iit != iend; ++iit )

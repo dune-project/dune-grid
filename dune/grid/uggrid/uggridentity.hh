@@ -177,7 +177,7 @@ namespace Dune {
      */
     unsigned int subEntities (unsigned int cd) const
     {
-      return ReferenceElements<UGCtype, dim-codim>::general(type()).size(cd-codim);
+      return referenceElement<UGCtype, dim-codim>(type()).size(cd-codim);
     }
 
     typename UG_NS<dim>::template Entity<codim>::T* getTarget() const
@@ -268,7 +268,7 @@ namespace Dune {
      */
     unsigned int subEntities (unsigned int cd) const
     {
-      return ReferenceElements<UGCtype, dim-codim>::general(type()).size(cd-codim);
+      return referenceElement<UGCtype, dim-codim>(type()).size(cd-codim);
     }
 
     /** \brief The partition type for parallel computing
@@ -529,7 +529,7 @@ namespace Dune {
      */
     unsigned int subEntities (unsigned int cd) const
     {
-      return ReferenceElements<UGCtype, dim-codim>::general(type()).size(cd-codim);
+      return referenceElement<UGCtype, dim-codim>(type()).size(cd-codim);
     }
 
     /** \brief Set to a UG side vector object

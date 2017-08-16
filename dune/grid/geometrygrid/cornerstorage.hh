@@ -96,8 +96,7 @@ namespace Dune
       void calculate ( std::array< Coordinate, size > (&corners) ) const
       {
         const GeometryType type = coordFunctionCaller_.type();
-        const ReferenceElement< ctype, dimension > &refElement
-          = ReferenceElements< ctype, dimension >::general( type );
+        auto refElement = referenceElement< ctype, dimension >( type );
         const std::size_t numCorners = refElement.size( subEntity_, codimension, dimension );
         assert( size >= numCorners );
         for( std::size_t i = 0; i < numCorners; ++i )

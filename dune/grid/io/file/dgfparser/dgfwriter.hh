@@ -50,8 +50,8 @@ namespace Dune
 
     typedef typename IndexSet::IndexType Index;
 
-    typedef ReferenceElement< typename Grid::ctype, dimGrid > RefElement;
     typedef ReferenceElements< typename Grid::ctype, dimGrid > RefElements;
+    typedef typename RefElements::ReferenceElement RefElement;
 
   public:
     /** \brief constructor

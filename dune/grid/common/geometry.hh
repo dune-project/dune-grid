@@ -330,8 +330,7 @@ namespace Dune
       GeometryType type = asImp().type();
 
       // get corresponding reference element
-      const ReferenceElement< ctype , mydim > & refElement =
-        ReferenceElements< ctype, mydim >::general(type);
+      auto refElement = referenceElement< ctype , mydim >(type);
 
       LocalCoordinate localBaryCenter ( 0 );
       // calculate local bary center
@@ -349,8 +348,7 @@ namespace Dune
       GeometryType type = asImp().type();
 
       // get corresponding reference element
-      const ReferenceElement< ctype , mydim > & refElement =
-        ReferenceElements< ctype, mydim >::general(type);
+      auto refElement = referenceElement< ctype , mydim >(type);
 
       // center is (for now) the centroid of the reference element mapped to
       // this geometry.

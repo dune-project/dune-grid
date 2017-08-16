@@ -46,13 +46,13 @@ bool test(GridType &grid)
     const EIterator &eend = view.template end<0>();
     for(EIterator eit = view.template begin<0>(); eit != eend; ++eit)
     {
-      ccontainer0[*eit] = container0[*eit] = eit->geometry().center();
-      const Dune::ReferenceElement< typename GridType::ctype, GridType::dimension > &refElement
-        = Dune::ReferenceElements< typename GridType::ctype, GridType::dimension >::general( eit->type() );
+      auto geometry = eit->geometry();
+      ccontainer0[*eit] = container0[*eit] = geometry.center();
+      auto refElement = referenceElement(geometry);
       for (unsigned int i=0; i<eit->subEntities(1); ++i)
-        ccontainer1(*eit,i) = container1(*eit,i) = eit->geometry().global( refElement.position(i,1) );
+        ccontainer1(*eit,i) = container1(*eit,i) = geometry.global( refElement.position(i,1) );
       for (unsigned int i=0; i<eit->subEntities(2); ++i)
-        container2(*eit,i) = eit->geometry().global( refElement.position(i,2) );
+        container2(*eit,i) = geometry.global( refElement.position(i,2) );
     }
   }
 
@@ -105,8 +105,7 @@ bool test(GridType &grid)
         ret = false;
         break;
       }
-      const Dune::ReferenceElement< typename GridType::ctype, GridType::dimension > &refElement
-        = Dune::ReferenceElements< typename GridType::ctype, GridType::dimension >::general( eit->type() );
+      auto refElement = Dune::referenceElement< typename GridType::ctype, GridType::dimension >( eit->type() );
       for (unsigned int i=0; i<eit->subEntities(1); ++i)
         if ( ( container1(up,i).coord - up.geometry().global( refElement.position(i,1) ) ).two_norm() > 1e-8 )
         {
