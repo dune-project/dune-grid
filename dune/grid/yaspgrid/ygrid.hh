@@ -10,6 +10,7 @@
 
 #include <dune/common/fvector.hh>
 #include <dune/common/power.hh>
+#include <dune/common/streamoperators.hh>
 
 /** \file
     \brief This provides a YGrid, the elemental component of the yaspgrid implementation
