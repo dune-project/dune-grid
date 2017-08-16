@@ -932,8 +932,7 @@ namespace Dune
     }
     else if (dimw==3)
     {
-      const ReferenceElement< double, 3 > &refElem
-        = ReferenceElements< double, 3 >::simplex();
+      auto refElem = ReferenceElements< double, 3 >::simplex();
       for (int i=0; i<nofelements; i++)
       {
         if (elements[i].size()!=size_t(dimw+1))

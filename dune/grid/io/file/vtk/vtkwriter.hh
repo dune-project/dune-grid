@@ -440,10 +440,10 @@ namespace Dune
         return cornerIndexDune;
       }
       //! position of vertex inside the entity
-      const FieldVector<DT,n> & position () const
+      FieldVector<DT,n> position () const
       {
-        return ReferenceElements<DT,n>::general(git->type())
-               .position(cornerIndexDune,n);
+        return referenceElement<DT,n>(git->type())
+          .position(cornerIndexDune,n);
       }
     };
 

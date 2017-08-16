@@ -91,8 +91,8 @@ namespace Dune
     const typename Entity::Geometry geoInside = inside().geometry();
 
     const int face = indexInInside();
-    const ReferenceElement< ctype, dimension > &refSimplex = ReferenceElements< ctype, dimension >::simplex();
-    const FieldVector< ctype, dimension > &refNormal = refSimplex.integrationOuterNormal( face );
+    auto refSimplex = ReferenceElements< ctype, dimension >::simplex();
+    FieldVector< ctype, dimension > refNormal = refSimplex.integrationOuterNormal( face );
 
     const typename Entity::Geometry::JacobianInverseTransposed &jInvT
       = Grid::getRealImplementation( geoInside ).jacobianInverseTransposed();

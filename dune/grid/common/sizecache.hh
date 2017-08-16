@@ -297,8 +297,8 @@ namespace Dune {
       typedef typename GridType :: LocalIdSet LocalIdSet ;
       typedef typename LocalIdSet :: IdType IdType ;
 
-      typedef ReferenceElement< ctype, dim > ReferenceElementType;
       typedef ReferenceElements< ctype, dim > ReferenceElementContainerType;
+      typedef typename ReferenceElementContainerType::ReferenceElement ReferenceElementType;
 
       typedef std::set< IdType > CodimIdSetType ;
 
@@ -318,7 +318,7 @@ namespace Dune {
         // get entity
         const ElementType& element = *it ;
         // get reference element
-        const ReferenceElementType& refElem =
+        ReferenceElementType refElem =
           ReferenceElementContainerType :: general( element.type() );
 
         // count all sub entities of codimension codim

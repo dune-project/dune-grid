@@ -271,8 +271,7 @@ class CheckCommunication
 
           const typename Intersection::LocalGeometry &geoInSelf = intersection.geometryInInside();
 
-          const Dune::ReferenceElement< ctype, dim-1 > &faceRefElement
-            = Dune::ReferenceElements< ctype, dim-1 > :: general( geoInSelf.type() );
+          auto faceRefElement = referenceElement( geoInSelf );
           const Dune::FieldVector< ctype, dim-1 > &bary = faceRefElement.position( 0, 0 );
 
           const CoordinateVector normal = intersection.integrationOuterNormal( bary );
@@ -284,8 +283,7 @@ class CheckCommunication
           const bool proceedAnyway = (level_ < 0 ? false : !intersection.neighbor());
           if( (calc > -1e-8) || intersection.boundary() || proceedAnyway )
           {
-            const Dune::ReferenceElement< ctype, dim > &insideRefElem
-              = Dune::ReferenceElements< ctype, dim >::general( entity.type() );
+            auto insideRefElem = referenceElement( entity.geometry() );
 
             const int indexInInside = intersection.indexInInside();
             for( int i = 0; i < insideRefElem.size( indexInInside, 1, cdim ); ++i )
@@ -313,8 +311,7 @@ class CheckCommunication
               assert( (level_ < 0) ? (neigh.isLeaf()) : 1);
               assert( (level_ < 0) ? 1 : (neigh.level() == level_) );
 
-              const Dune::ReferenceElement< ctype, dim > &outsideRefElem
-                = Dune::ReferenceElements< ctype, dim >::general( neigh.type() );
+              auto outsideRefElem = referenceElement( neigh.geometry() );
 
               const int indexInOutside = intersection.indexInOutside();
               for( int i = 0; i < outsideRefElem.size( indexInOutside, 1, cdim ); ++i )
@@ -417,8 +414,7 @@ class CheckCommunication
 
             for( int j = 0; j < numVertices; )
             {
-              const Dune::ReferenceElement< double, dim > &refElem
-                = Dune::ReferenceElements< double, dim >::general( entity.type() );
+              auto refElem = referenceElement ( entity.geometry() );
               const int vx = refElem.subEntity( i, cdim, j, dim );
 
               sout_ << "index: " << indexSet_.subIndex( entity, vx, dim )
