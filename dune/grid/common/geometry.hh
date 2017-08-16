@@ -23,6 +23,20 @@ namespace Dune
   template< int dim, int dimworld, class ct, class GridFamily >
   class GridDefaultImplementation;
 
+  namespace Impl {
+
+    template<typename Geometry>
+    struct GeometryImplExtractor
+    {
+      using Implementation = typename Geometry::Implementation;
+
+      static const Implementation& implementation(const Geometry& geo)
+      {
+        return geo.impl();
+      }
+    };
+
+  }
 
   //*****************************************************************************
   //
@@ -82,6 +96,12 @@ namespace Dune
 
   public:
 
+#if 1
+
+    friend struct Impl::GeometryImplExtractor<Geometry>;
+
+#else
+
     //! Returns a reference element for the given grid geometry.
     /**
      * This function returns a reference element for the grid geometry
@@ -92,10 +112,13 @@ namespace Dune
      * \ingroup GeometryReferenceElements
      * \relatedalso Geometry
      */
-    friend auto referenceElement(const Geometry& geo)
+    friend auto referenceElement(const Geometry& geo);
+      -> decltype(referenceElement(geo,geo.impl()))
     {
       return referenceElement(geo,geo.impl());
     }
+
+#endif
 
     //! @brief export geometry dimension
     enum { mydimension=mydim /*!< geometry dimension */ };
@@ -414,6 +437,17 @@ namespace Dune
   }; // end GeometryDefault
 
 
+#if 1
+
+  template< int mydim, int cdim, class GridImp, template< int, int, class > class GeometryImp>
+  auto referenceElement(const Geometry<mydim,cdim,GridImp,GeometryImp>& geo)
+    -> decltype(referenceElement(geo,Impl::GeometryImplExtractor<Geometry<mydim,cdim,GridImp,GeometryImp>>::implementation(geo)))
+  {
+    return referenceElement(geo,Impl::GeometryImplExtractor<Geometry<mydim,cdim,GridImp,GeometryImp>>::implementation(geo));
+  }
+
+#endif
+
   //! Second-level dispatch to select the correct reference element for a grid geometry.
   /**
    * This function is the default implementation of the second-level reference element dispatch
@@ -432,6 +466,7 @@ namespace Dune
    */
   template< int mydim, int cdim, class GridImp, template< int, int, class > class GeometryImp, typename Impl>
   auto referenceElement(const Geometry<mydim,cdim,GridImp,GeometryImp>& geo, const Impl& impl)
+    -> decltype(referenceElement<typename GridImp::ctype,mydim>(geo.type()))
   {
     using Geo = Geometry<mydim,cdim,GridImp,GeometryImp>;
     return referenceElement<typename Geo::ctype,Geo::mydimension>(geo.type());
