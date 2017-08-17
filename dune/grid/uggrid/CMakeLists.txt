@@ -1,4 +1,4 @@
-if(UG_FOUND)
+if(dune-uggrid_FOUND)
   dune_add_library("uggrid" OBJECT
     uggridintersections.cc
     uggrid.cc
@@ -9,7 +9,7 @@ if(UG_FOUND)
     uggridfactory.cc
     uggridgeometry.cc
     uggridhieriterator.cc)
-endif(UG_FOUND)
+endif()
 
 exclude_all_but_from_headercheck(
   boundaryextractor.hh
