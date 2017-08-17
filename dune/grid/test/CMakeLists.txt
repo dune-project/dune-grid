@@ -17,7 +17,7 @@ dune_add_test(NAME test-geogrid-uggrid
                                   CACHECOORDFUNCTION=0
                                   DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
                                   GRIDTYPE=Dune::UGGrid<2>
-              CMAKE_GUARD UG_FOUND)
+              CMAKE_GUARD dune-uggrid_FOUND)
 
 dune_add_test(SOURCES test-gridinfo.cc)
 
@@ -33,18 +33,18 @@ dune_add_test(SOURCES testiteratorranges.cc)
 dune_add_test(SOURCES test-hierarchicsearch.cc)
 
 dune_add_test(SOURCES test-ug.cc
-              CMAKE_GUARD UG_FOUND)
+              CMAKE_GUARD dune-uggrid_FOUND)
 
 dune_add_test(SOURCES test-parallel-ug.cc
-              CMAKE_GUARD UG_FOUND
+              CMAKE_GUARD dune-uggrid_FOUND
               MPI_RANKS 1 2 3 4 8
               TIMEOUT 300)
 
 dune_add_test(SOURCES test-loadbalancing.cc
-              CMAKE_GUARD UG_FOUND)
+              CMAKE_GUARD dune-uggrid_FOUND)
 
 dune_add_test(SOURCES issue-53-uggrid-intersections.cc
-              CMAKE_GUARD UG_FOUND)
+              CMAKE_GUARD dune-uggrid_FOUND)
 
 # The alberta tests are only alibi-ported, until the  grid and world dimension
 # are configuretime parameters and we can treat alberta just as any other grid manager

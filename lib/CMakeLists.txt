@@ -1,6 +1,6 @@
-if(UG_FOUND)
+if(dune-uggrid_FOUND)
   set(UGLIB _DUNE_TARGET_OBJECTS:uggrid_)
-endif(UG_FOUND)
+endif()
 
 # OBJECT is needed since CMake 3.0.0
 # but it conflicts with shared libs
