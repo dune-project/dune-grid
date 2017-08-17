@@ -62,32 +62,19 @@ void makeHalfCircleQuad(Dune::UGGrid<2>& grid, bool boundarySegments, bool param
   // /////////////////////////////
   if (boundarySegments) {
 
-    FieldVector<double,2> center(0);
-    center[1] = 15;
-
-    std::vector<unsigned int> vertices(2);
+    FieldVector<double,2> center = {0,15};
 
     if (parametrization) {
 
-      vertices[0] = 1;  vertices[1] = 2;
-      factory.insertBoundarySegment(vertices, std::shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI, M_PI*4/3)));
-
-      vertices[0] = 2;  vertices[1] = 3;
-      factory.insertBoundarySegment(vertices, std::shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI*4/3, M_PI*5/3)));
-
-      vertices[0] = 3;  vertices[1] = 0;
-      factory.insertBoundarySegment(vertices, std::shared_ptr<BoundarySegment<2,2> >(new ArcOfCircle(center, 15, M_PI*5/3, M_PI*2)));
+      factory.insertBoundarySegment({1,2}, std::make_shared<ArcOfCircle>(center, 15, M_PI, M_PI*4/3));
+      factory.insertBoundarySegment({2,3}, std::make_shared<ArcOfCircle>(center, 15, M_PI*4/3, M_PI*5/3));
+      factory.insertBoundarySegment({3,0}, std::make_shared<ArcOfCircle>(center, 15, M_PI*5/3, M_PI*2));
 
     } else {
 
-      vertices[0] = 1;  vertices[1] = 2;
-      factory.insertBoundarySegment(vertices);
-
-      vertices[0] = 2;  vertices[1] = 3;
-      factory.insertBoundarySegment(vertices);
-
-      vertices[0] = 3;  vertices[1] = 0;
-      factory.insertBoundarySegment(vertices);
+      factory.insertBoundarySegment({1,2});
+      factory.insertBoundarySegment({2,3});
+      factory.insertBoundarySegment({3,0});
 
     }
 
@@ -96,31 +83,17 @@ void makeHalfCircleQuad(Dune::UGGrid<2>& grid, bool boundarySegments, bool param
   // ///////////////////////
   //   Insert vertices
   // ///////////////////////
-  FieldVector<double,2> pos;
 
-  pos[0] = 15;  pos[1] = 15;
-  factory.insertVertex(pos);
-
-  pos[0] = -15; pos[1] = 15;
-  factory.insertVertex(pos);
-
-  pos[0] = -7.5; pos[1] = 2.00962;
-  factory.insertVertex(pos);
-
-  pos[0] = 7.5; pos[1] = 2.00962;
-  factory.insertVertex(pos);
+  factory.insertVertex({15,15});
+  factory.insertVertex({-15,15});
+  factory.insertVertex({-7.5,2.00962});
+  factory.insertVertex({7.5,2.00962});
 
   // /////////////////
   // Insert elements
   // /////////////////
 
-  std::vector<unsigned int> cornerIDs(4);
-  cornerIDs[0] = 0;
-  cornerIDs[1] = 1;
-  cornerIDs[2] = 3;
-  cornerIDs[3] = 2;
-
-  factory.insertElement(GeometryType(GeometryType::cube,2), cornerIDs);
+  factory.insertElement(GeometryType(GeometryType::cube,2), {0,1,3,2});
 
   // //////////////////////////////////////
   //   Finish initialization
@@ -290,10 +263,9 @@ int main (int argc , char **argv) try
   gridWithParametrization.globalRefine(1);
   gridWithoutParametrization.globalRefine(1);
 
-  typedef Dune::UGGrid<2>::Codim<0>::LevelIterator ElementIterator;
-  ElementIterator eIt    = gridWithParametrization.levelGridView(1).begin<0>();
-  ElementIterator eWoIt  = gridWithoutParametrization.levelGridView(1).begin<0>();
-  ElementIterator eEndIt = gridWithParametrization.levelGridView(1).end<0>();
+  auto eIt    = gridWithParametrization.levelGridView(1).begin<0>();
+  auto eWoIt  = gridWithoutParametrization.levelGridView(1).begin<0>();
+  auto eEndIt = gridWithParametrization.levelGridView(1).end<0>();
 
   for (; eIt!=eEndIt; ++eIt, ++eWoIt) {
 
