@@ -73,7 +73,7 @@ namespace Dune
      * The datamode is always nonconforming.
      */
     explicit SubsamplingVTKWriter (const GridView &gridView,
-                                   Dune::VirtualRefinementTag::Intervals tag_, bool coerceToSimplex_ = false)
+                                   Dune::RefinementIntervals tag_, bool coerceToSimplex_ = false)
         : Base(gridView, VTK::nonconforming)
         , tag(tag_.intervals()), coerceToSimplex(coerceToSimplex_)
     {
@@ -84,7 +84,7 @@ namespace Dune
     DUNE_DEPRECATED_MSG("SubsampligVTKWriter(GV,int,bool) is deprecated, use SubsamplingVTKWriter(GV,Dune::VirtualRefinementTag::{Intervals|Levels},bool)")
     explicit SubsamplingVTKWriter (const GridView &gridView,
                                    int level_,  bool coerceToSimplex_ = false)
-        : SubsamplingVTKWriter(gridView, Dune::VirtualRefinementTag::Intervals(1<<level_), coerceToSimplex_)
+        : SubsamplingVTKWriter(gridView, Dune::refinementIntervals(1<<level_), coerceToSimplex_)
     { }
 
   private:
@@ -99,22 +99,22 @@ namespace Dune
     struct IteratorSelector
     {};
 
-    SubElementIterator refinementBegin(const Refinement& refinement, Dune::VirtualRefinementTag::Intervals tag, IteratorSelector<SubElementIterator>)
+    SubElementIterator refinementBegin(const Refinement& refinement, Dune::RefinementIntervals tag, IteratorSelector<SubElementIterator>)
     {
       return refinement.eBegin(tag);
     }
 
-    SubVertexIterator refinementBegin(const Refinement& refinement, Dune::VirtualRefinementTag::Intervals tag, IteratorSelector<SubVertexIterator>)
+    SubVertexIterator refinementBegin(const Refinement& refinement, Dune::RefinementIntervals tag, IteratorSelector<SubVertexIterator>)
     {
       return refinement.vBegin(tag);
     }
 
-    SubElementIterator refinementEnd(const Refinement& refinement, Dune::VirtualRefinementTag::Intervals tag, IteratorSelector<SubElementIterator>)
+    SubElementIterator refinementEnd(const Refinement& refinement, Dune::RefinementIntervals tag, IteratorSelector<SubElementIterator>)
     {
       return refinement.eEnd(tag);
     }
 
-    SubVertexIterator refinementEnd(const Refinement& refinement, Dune::VirtualRefinementTag::Intervals tag, IteratorSelector<SubVertexIterator>)
+    SubVertexIterator refinementEnd(const Refinement& refinement, Dune::RefinementIntervals tag, IteratorSelector<SubVertexIterator>)
     {
       return refinement.vEnd(tag);
     }
@@ -199,7 +199,7 @@ namespace Dune
     template<class V>
     void addCellData (const V& v, const std::string &name, int ncomps=1);
 
-    Dune::VirtualRefinementTag::Intervals tag;
+    Dune::RefinementIntervals tag;
     bool coerceToSimplex;
   };
 
