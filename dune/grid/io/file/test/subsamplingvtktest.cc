@@ -83,8 +83,8 @@ struct Acc
   }
 };
 
-template< class GridView, class RefinementTag >
-int doWrite( const GridView &gridView, bool coerceToSimplex, RefinementTag tag)
+template< class GridView>
+int doWrite( const GridView &gridView, bool coerceToSimplex, Dune::RefinementIntervals tag)
 {
   enum { dim = GridView :: dimension };
 
@@ -132,16 +132,7 @@ int vtkCheck(const std::array<int, dim>& elements,
 
   int result = 0;
 
-  Dune::VirtualRefinementTag::Levels levelTag{0};
-  acc(result, doWrite( g.leafGridView(), false, levelTag));
-  acc(result, doWrite( g.levelGridView( 0 ), false, levelTag));
-  acc(result, doWrite( g.levelGridView( g.maxLevel() ), false, levelTag));
-
-  acc(result, doWrite( g.leafGridView(), true, levelTag));
-  acc(result, doWrite( g.levelGridView( 0 ), true, levelTag));
-  acc(result, doWrite( g.levelGridView( g.maxLevel() ), true, levelTag));
-
-  Dune::VirtualRefinementTag::Intervals intervalsTag{1};
+  Dune::RefinementIntervals intervalsTag = Dune::refinementIntervals(1);
   acc(result, doWrite( g.leafGridView(), false, intervalsTag));
   acc(result, doWrite( g.levelGridView( 0 ), false, intervalsTag));
   acc(result, doWrite( g.levelGridView( g.maxLevel() ), false, intervalsTag));
