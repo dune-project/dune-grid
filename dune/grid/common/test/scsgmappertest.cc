@@ -38,9 +38,9 @@ void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
   Index min = 1;
   Index max = 0;
   std::set<Index> indices;
-  int size = mapper.size();
+  typename Mapper::size_type size = mapper.size();
 
-  if (size != int(is.size(0)))
+  if (size != is.size(0))
     DUNE_THROW(GridError, "Mapper size does not agree with index set "
                "size!");
 
@@ -80,7 +80,7 @@ void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
       DUNE_THROW(GridError, "Mapper element index is not unique!");
   }
 
-  if (size!=int(indices.size()))
+  if (size!=indices.size())
     DUNE_THROW(GridError, "Mapper size does not agree with the number of "
                "elements counted by iteration.");
 
