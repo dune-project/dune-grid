@@ -134,13 +134,13 @@ namespace Dune {
   struct PartitionSet
   {
     //! \private The actual representation should not be used outside of the implementation.
-    static const unsigned int value = partitions;
+    static constexpr unsigned int value = partitions;
 
 
     //! Returns a new PartitionSet that also contains the partitions in set.
     template<unsigned int p>
     struct PartitionSet<partitions | p>
-    operator+(const PartitionSet<p>& set) const
+    constexpr operator+(const PartitionSet<p>& set) const
     {
       return PartitionSet<partitions | p>();
     }
@@ -148,7 +148,7 @@ namespace Dune {
     //! Returns a new PartitionSet that does not contain the partitions in set.
     template<unsigned int p>
     struct PartitionSet<partitions & ~p>
-    operator-(const PartitionSet<p>& set) const
+    constexpr operator-(const PartitionSet<p>& set) const
     {
       return PartitionSet<partitions & ~p>();
     }
