@@ -5,7 +5,12 @@
 
 #include <iostream>
 #include <map>
+
+#include <dune/common/deprecated.hh>
+
 #include "mapper.hh"
+
+#warning "<dune/grid/common/universalmapper.hh> is deprecated in DUNE 2.6"
 
 /**
  * @file
@@ -48,6 +53,7 @@ namespace Dune
        \param idset An IndexSet object of the grid.
 
      */
+    DUNE_DEPRECATED_MSG("UniversalMapper is deprecated in DUNE 2.6")
     UniversalMapper (const G& grid, const IDS& idset)
       : g(grid), ids(idset), index_()
     {
@@ -181,6 +187,7 @@ namespace Dune
     /* @brief The constructor
        @param grid A reference to a grid.
      */
+    DUNE_DEPRECATED_MSG("GlobalUniversalMapper is deprecated in DUNE 2.6")
     GlobalUniversalMapper (const G& grid)
       : UniversalMapper<G,typename G::Traits::GlobalIdSet>(grid,grid.globalIdSet())
     {}
@@ -200,6 +207,7 @@ namespace Dune
      * \brief The constructor
      * \param grid A reference to a grid.
      */
+    DUNE_DEPRECATED_MSG("LocalUniversalMapper is deprecated in DUNE 2.6")
     LocalUniversalMapper (const G& grid)
       : UniversalMapper<G,typename G::Traits::LocalIdSet>(grid,grid.localIdSet())
     {}
