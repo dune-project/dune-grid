@@ -146,7 +146,7 @@ namespace Dune
 
        \return Size of the entity set.
      */
-    int size () const
+    auto size () const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().size()));
       return asImp().size();
