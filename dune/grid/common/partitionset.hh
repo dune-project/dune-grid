@@ -266,31 +266,31 @@ namespace Dune {
 
 
     //! PartitionSet for the interior partition.
-    Interior interior;
+    constexpr Interior interior;
 
     //! PartitionSet for the border partition.
-    Border border;
+    constexpr Border border;
 
     //! PartitionSet for the overlap partition.
-    Overlap overlap;
+    constexpr Overlap overlap;
 
     //! PartitionSet for the front partition.
-    Front front;
+    constexpr Front front;
 
     //! PartitionSet for the ghost partition.
-    Ghost ghost;
+    constexpr Ghost ghost;
 
     //! PartitionSet for the interior and border partitions.
-    InteriorBorder interiorBorder;
+    constexpr InteriorBorder interiorBorder;
 
     //! PartitionSet for the interior, border and overlap partitions.
-    InteriorBorderOverlap interiorBorderOverlap;
+    constexpr InteriorBorderOverlap interiorBorderOverlap;
 
     //! PartitionSet for the interior, border, overlap and front partitions.
-    InteriorBorderOverlapFront interiorBorderOverlapFront;
+    constexpr InteriorBorderOverlapFront interiorBorderOverlapFront;
 
     //! PartitionSet for all partitions.
-     All all;
+    constexpr All all;
 
 #else // DOXYGEN
 
@@ -308,11 +308,11 @@ namespace Dune {
       // restricted to the current translation unit, making it easier for the compiler
       // to eliminate the actual objects and to avoid linking problems
 
-      const Interior interior = {};
-      const Border border = {};
-      const Overlap overlap = {};
-      const Front front = {};
-      const Ghost ghost = {};
+      constexpr Interior interior = {};
+      constexpr Border border = {};
+      constexpr Overlap overlap = {};
+      constexpr Front front = {};
+      constexpr Ghost ghost = {};
 
     }
 
@@ -327,10 +327,10 @@ namespace Dune {
 
       // again, place the global objects in an anonymous namespace
 
-      const InteriorBorder interiorBorder = {};
-      const InteriorBorderOverlap interiorBorderOverlap = {};
-      const InteriorBorderOverlapFront interiorBorderOverlapFront = {};
-      const All all = {};
+      constexpr InteriorBorder interiorBorder = {};
+      constexpr InteriorBorderOverlap interiorBorderOverlap = {};
+      constexpr InteriorBorderOverlapFront interiorBorderOverlapFront = {};
+      constexpr All all = {};
 
     }
 
