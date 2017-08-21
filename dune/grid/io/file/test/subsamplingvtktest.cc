@@ -121,6 +121,8 @@ template<int dim>
 int vtkCheck(Dune::VTKChecker& vtkChecker, const std::array<int, dim>& elements,
               const Dune::FieldVector<double, dim>& upperRight)
 {
+  using Dune::refinementIntervals;
+  using Dune::refinementLevels;
   Dune::YaspGrid<dim> g(upperRight, elements);
 
   if(g.comm().rank() == 0)
@@ -132,14 +134,13 @@ int vtkCheck(Dune::VTKChecker& vtkChecker, const std::array<int, dim>& elements,
 
   int result = 0;
 
-  Dune::RefinementIntervals intervalsTag = Dune::refinementIntervals(1);
-  acc(result, doWrite( g.leafGridView(), false, intervalsTag));
-  acc(result, doWrite( g.levelGridView( 0 ), false, intervalsTag));
-  acc(result, doWrite( g.levelGridView( g.maxLevel() ), false, intervalsTag));
+  acc(result, doWrite( g.leafGridView(), false, refinementIntervals(3)));
+  acc(result, doWrite( g.levelGridView( 0 ), false, refinementIntervals(3)));
+  acc(result, doWrite( g.levelGridView( g.maxLevel() ), false, refinementIntervals(3)));
 
-  acc(result, doWrite( g.leafGridView(), true, intervalsTag));
-  acc(result, doWrite( g.levelGridView( 0 ), true, intervalsTag));
-  acc(result, doWrite( g.levelGridView( g.maxLevel() ), true, intervalsTag));
+  acc(result, doWrite( g.leafGridView(), false, refinementLevels(1)));
+  acc(result, doWrite( g.levelGridView( 0 ), false, refinementLevels(1)));
+  acc(result, doWrite( g.levelGridView( g.maxLevel() ), false, refinementLevels(1)));
 
   return result;
 }
