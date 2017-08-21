@@ -12,8 +12,6 @@
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/grid/io/file/vtk/subsamplingvtkwriter.hh>
 
-#include <dune/geometry/virtualrefinement.hh>
-
 namespace Dune {
 
   /**

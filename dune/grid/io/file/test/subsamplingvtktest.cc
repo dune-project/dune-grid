@@ -83,7 +83,7 @@ struct Acc
   }
 };
 
-template< class GridView>
+template< class GridView >
 int doWrite( const GridView &gridView, bool coerceToSimplex, Dune::RefinementIntervals tag)
 {
   enum { dim = GridView :: dimension };
