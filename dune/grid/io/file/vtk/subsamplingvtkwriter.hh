@@ -32,7 +32,7 @@ namespace Dune
    * subsampling of the elements via VirtualRefinement.  The
    * SubSamplingVTKWriter always writes nonconforming data.
    */
-  template< class GridView>
+  template< class GridView >
   class SubsamplingVTKWriter
     : public VTKWriter<GridView>
   {
@@ -75,12 +75,12 @@ namespace Dune
      * The datamode is always nonconforming.
      */
     explicit SubsamplingVTKWriter (const GridView &gridView,
-                                   Dune::RefinementIntervals tag_, bool coerceToSimplex_ = false)
+                                   Dune::RefinementIntervals intervals_, bool coerceToSimplex_ = false)
         : Base(gridView, VTK::nonconforming)
-        , tag(tag_.intervals()), coerceToSimplex(coerceToSimplex_)
+        , tag(intervals_), coerceToSimplex(coerceToSimplex_)
     {
-      if(tag_.intervals() < 1) {
-        DUNE_THROW(Dune::IOError,"SubsamplingVTKWriter: Negative Subsampling " << tag_.intervals() << " must not be used!");
+      if(intervals_.intervals() < 1) {
+        DUNE_THROW(Dune::IOError,"SubsamplingVTKWriter: Negative Subsampling " << intervals_.intervals() << " must not be used!");
       }
     }
     /**
