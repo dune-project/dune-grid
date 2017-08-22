@@ -104,7 +104,7 @@ namespace Dune {
    *
    * \deprecated Please use VTKSequenceWriter together with a SubsamplingVTKWriter instead!
    */
-  template< class GridView>
+  template< class GridView >
   class
   DUNE_DEPRECATED_MSG("Use VTKSequenceWriter together with a SubsamplingVTKWriter instead of SubsamplingVTKSequenceWriter!")
   SubsamplingVTKSequenceWriter :
