@@ -84,11 +84,11 @@ struct Acc
 };
 
 template< class GridView >
-int doWrite( const GridView &gridView, bool coerceToSimplex, Dune::RefinementIntervals tag)
+int doWrite( const GridView &gridView, bool coerceToSimplex, Dune::RefinementIntervals intervals)
 {
   enum { dim = GridView :: dimension };
 
-  Dune :: SubsamplingVTKWriter< GridView > vtk( gridView, tag, coerceToSimplex);
+  Dune :: SubsamplingVTKWriter< GridView > vtk( gridView, intervals, coerceToSimplex);
 
   // disabled due to FS#676:
   // const typename GridView :: IndexSet &is = gridView.indexSet();
