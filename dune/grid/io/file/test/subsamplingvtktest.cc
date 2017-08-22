@@ -134,6 +134,14 @@ int vtkCheck(Dune::VTKChecker& vtkChecker, const std::array<int, dim>& elements,
 
   int result = 0;
 
+  acc(result, doWrite( g.leafGridView(), true, refinementIntervals(3)));
+  acc(result, doWrite( g.levelGridView( 0 ), true, refinementIntervals(3)));
+  acc(result, doWrite( g.levelGridView( g.maxLevel() ), true, refinementIntervals(3)));
+
+  acc(result, doWrite( g.leafGridView(), true, refinementLevels(1)));
+  acc(result, doWrite( g.levelGridView( 0 ), true, refinementLevels(1)));
+  acc(result, doWrite( g.levelGridView( g.maxLevel() ), true, refinementLevels(1)));
+
   acc(result, doWrite( g.leafGridView(), false, refinementIntervals(3)));
   acc(result, doWrite( g.levelGridView( 0 ), false, refinementIntervals(3)));
   acc(result, doWrite( g.levelGridView( g.maxLevel() ), false, refinementIntervals(3)));
