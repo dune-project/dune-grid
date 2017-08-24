@@ -787,16 +787,42 @@ namespace Dune {
     // /////////////////////////////////////////////
 
     //! Gets the index of a UG element
-    static unsigned int id(const UG_NS< UG_DIM >::Element* theElement) {
+    static auto id(const UG_NS< UG_DIM >::Element* theElement) {
+#if defined ModelP
+      return theElement->ge.ddd.gid;
+#else
       return theElement->ge.id;
+#endif
+    }
+
+    //! Gets the id of a UG facet
+    static auto id(const UG_NS< UG_DIM >::Vector* theVector) {
+#ifdef ModelP
+      return theVector->ddd.gid;
+#else
+      return theVector->id;
+#endif
+    }
+
+    //! Gets the id of a UG edge
+    static auto id(const UG_NS< UG_DIM >::Edge* theEdge) {
+#ifdef ModelP
+      return theEdge->ddd.gid;
+#else
+      return theEdge->id;
+#endif
     }
 
     //! Gets the index of a UG node
-    static unsigned int id(const UG_NS< UG_DIM >::Node* theNode) {
+    static auto id(const UG_NS< UG_DIM >::Node* theNode) {
+#ifdef ModelP
+      return theNode->myvertex->iv.ddd.gid;
+#else
 #if UG_DIM == 2
       return theNode->myvertex->iv.id | 0x80000000;
 #else
       return theNode->myvertex->iv.id | 0xC0000000;
+#endif
 #endif
     }
 

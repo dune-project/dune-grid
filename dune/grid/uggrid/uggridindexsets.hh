@@ -547,11 +547,7 @@ namespace Dune {
         while (UG_NS<dim>::EFather(ancestor) && UG_NS<dim>::hasCopy(UG_NS<dim>::EFather(ancestor)))
           ancestor = UG_NS<dim>::EFather(ancestor);
 
-#if defined ModelP
-        return ancestor->ge.ddd.gid;
-#else
         return UG_NS<dim>::id(ancestor);
-#endif
       }
 
       if (dim-cd==1) {
@@ -576,11 +572,7 @@ namespace Dune {
           fatherEdge = GetFatherEdge(edge);
         }
 
-#ifdef ModelP
-        return edge->ddd.gid;
-#else
-        return edge->id;
-#endif
+        return UG_NS<dim>::id(edge);
       }
 
 
@@ -588,11 +580,7 @@ namespace Dune {
         typename UG_NS<dim>::Node *node =
           reinterpret_cast<typename UG_NS<dim>::Node *>(grid_.getRealImplementation(e).getTarget());
 
-#ifdef ModelP
-        return node->myvertex->iv.ddd.gid;
-#else
         return UG_NS<dim>::id(node);
-#endif
       }
 
       DUNE_THROW(NotImplemented,
@@ -647,11 +635,7 @@ namespace Dune {
           fatherEdge = GetFatherEdge(edge);
         }
 
-#ifdef ModelP
-        return edge->ddd.gid;
-#else
-        return edge->id;
-#endif
+        return UG_NS<dim>::id(edge);
       }
 
       if (codim==1) {  // Faces
@@ -669,19 +653,11 @@ namespace Dune {
           fatherFace = getFatherFace(face);
         }
 
-#ifdef ModelP
-        return UG_NS<dim>::SideVector(face.first, face.second)->ddd.gid;
-#else
-        return UG_NS<dim>::SideVector(face.first, face.second)->id;
-#endif
+        return UG_NS<dim>::id(UG_NS<dim>::SideVector(face.first, face.second));
       }
 
       if (codim==dim) {
-#ifdef ModelP
-        return UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUG(i,type))->myvertex->iv.ddd.gid;
-#else
-        return UG_NS<dim>::id(UG_NS<dim>::Corner(target,UGGridRenumberer<dim>::verticesDUNEtoUG(i,type)));
-#endif
+        return UG_NS<dim>::id(UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUG(i,type)));
       }
 
       DUNE_THROW(GridError, "UGGrid<" << dim << ">::subId isn't implemented for codim==" << codim );
