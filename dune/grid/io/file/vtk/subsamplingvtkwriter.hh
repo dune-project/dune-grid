@@ -95,7 +95,7 @@ namespace Dune
      *
      * The datamode is always nonconforming.
      */
-    DUNE_DEPRECATED_MSG("SubsampligVTKWriter(GV,int,bool) is deprecated, use SubsamplingVTKWriter(GV,Dune::VirtualRefinementTag::{Intervals|Levels},bool)")
+    DUNE_DEPRECATED_MSG("SubsampligVTKWriter(GV,int,bool) is deprecated, use SubsamplingVTKWriter(GV,Dune::refinement{Intervals|Levels}(int),bool)")
     explicit SubsamplingVTKWriter (const GridView &gridView,
                                    int level_,  bool coerceToSimplex_ = false)
         : SubsamplingVTKWriter(gridView, Dune::refinementIntervals(1<<level_), coerceToSimplex_)
