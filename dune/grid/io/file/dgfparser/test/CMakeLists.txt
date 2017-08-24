@@ -28,4 +28,4 @@ endif(ALBERTA_FOUND)
 dune_add_test(NAME test-dgf-ug
               SOURCES test-dgf-ug.cc
               COMPILE_DEFINITIONS DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
-              CMAKE_GUARD UG_FOUND)
+              CMAKE_GUARD dune-uggrid_FOUND)
