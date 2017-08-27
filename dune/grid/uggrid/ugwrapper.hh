@@ -800,7 +800,12 @@ namespace Dune {
 #ifdef ModelP
       return theVector->ddd.gid;
 #else
-      return theVector->id;
+      auto id = theVector->id;
+
+      // In sequential UG, two entities of different codimension can have the same id,
+      // so let's encode the codimension in the id to make them differ.
+      constexpr unsigned int codim = 1;  //
+      return id | (codim << 30);
 #endif
     }
 
@@ -809,7 +814,12 @@ namespace Dune {
 #ifdef ModelP
       return theEdge->ddd.gid;
 #else
-      return theEdge->id;
+      auto id = theEdge->id;
+
+      // In sequential UG, two entities of different codimension can have the same id,
+      // so let's encode the codimension in the id to make them differ.
+      constexpr unsigned int codim = UG_DIM-1;  //
+      return id | (codim << 30);
 #endif
     }
 
@@ -818,11 +828,12 @@ namespace Dune {
 #ifdef ModelP
       return theNode->myvertex->iv.ddd.gid;
 #else
-#if UG_DIM == 2
-      return theNode->myvertex->iv.id | 0x80000000;
-#else
-      return theNode->myvertex->iv.id | 0xC0000000;
-#endif
+      auto id = theNode->myvertex->iv.id;
+
+      // In sequential UG, two entities of different codimension can have the same id,
+      // so let's encode the codimension in the id to make them differ.
+      constexpr unsigned int codim = UG_DIM;
+      return id | (codim << 30);
 #endif
     }
 
