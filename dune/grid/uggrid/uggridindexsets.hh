@@ -583,9 +583,16 @@ namespace Dune {
         return UG_NS<dim>::id(node);
       }
 
-      DUNE_THROW(NotImplemented,
-                 "Ids for faces are not implemented yet!");
+      // The entity must be a facet in a 3d grid
+      assert(cd==1 && dim==3);
 
+      // \bug The following code may fail on refined grids:  The code needs to check
+      // whether the father (or grandfather etc) facet is a copy, and return its
+      // id instead.
+      typename UG_NS<dim>::Vector *facet =
+          reinterpret_cast<typename UG_NS<dim>::Vector *>(grid_.getRealImplementation(e).getTarget());
+
+      return UG_NS<dim>::id(facet);
     }
 
     /** \brief Get id of subentity
