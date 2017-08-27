@@ -115,7 +115,7 @@ createGrid()
   grid_->entityImps_.resize(1);
   for (const auto& vtx : vertexPositions_)
   {
-    OneDEntityImp<0> newVertex(0, vtx.first, grid_->getNextFreeId(1));
+    OneDEntityImp<0> newVertex(0, vtx.first, grid_->getNextFreeId());
 
     newVertex.leafIndex_ = vtx.second;
     newVertex.levelIndex_ = vtx.second;
@@ -157,7 +157,7 @@ createGrid()
   // Looping over the vertices to get all elements assumes that the grid is connected
   for (size_t i=0; i<vertexPositions_.size()-1; i++, ++eIt)
   {
-    OneDEntityImp<1> newElement(0, grid_->getNextFreeId(0), grid_->reversedBoundarySegmentNumbering_);
+    OneDEntityImp<1> newElement(0, grid_->getNextFreeId(), grid_->reversedBoundarySegmentNumbering_);
     newElement.vertex_[0] = it;
     it = it->succ_;
     newElement.vertex_[1] = it;

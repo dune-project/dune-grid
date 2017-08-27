@@ -364,8 +364,11 @@ namespace Dune {
     /** \brief Update all indices and ids */
     void setIndices();
 
-    unsigned int getNextFreeId(int codim) {
-      return (codim==0) ? freeElementIdCounter_++ : freeVertexIdCounter_++;
+    /** \brief Produce an entity id that has not been used in this grid before.
+     */
+    unsigned int getNextFreeId()
+    {
+      return freeIdCounter_++;
     }
 
     //! The type of grid refinement currently in use
@@ -391,9 +394,9 @@ namespace Dune {
 
     OneDGridIdSet<const OneDGrid> idSet_;
 
-    unsigned int freeVertexIdCounter_;
-
-    unsigned int freeElementIdCounter_;
+    // Every entity gets a unique id, unless it is a copy of an entity on a coarser level.
+    // This is the counter that we use to create the unique id.
+    unsigned int freeIdCounter_;
 
     /** Since a OneDGrid is one-dimensional and connected, there can only be two possible numberings
         of the boundary segments.  Either the left one is '0' and the right one is '1' or the reverse.
