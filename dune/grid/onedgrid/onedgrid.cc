@@ -9,8 +9,7 @@ Dune::OneDGrid::OneDGrid()
   : refinementType_(LOCAL),
     leafIndexSet_(*this),
     idSet_(*this),
-    freeVertexIdCounter_(0),
-    freeElementIdCounter_(0),
+    freeIdCounter_(0),
     reversedBoundarySegmentNumbering_(false)
 {}
 
@@ -18,8 +17,7 @@ Dune::OneDGrid::OneDGrid(int numElements, const ctype& leftBoundary, const ctype
   : refinementType_(LOCAL),
     leafIndexSet_(*this),
     idSet_(*this),
-    freeVertexIdCounter_(0),
-    freeElementIdCounter_(0),
+    freeIdCounter_(0),
     reversedBoundarySegmentNumbering_(false)
 {
   if (numElements<1)
@@ -36,7 +34,7 @@ Dune::OneDGrid::OneDGrid(int numElements, const ctype& leftBoundary, const ctype
     ctype newCoord = leftBoundary + i*(rightBoundary-leftBoundary) / numElements;
 
     OneDEntityImp<0> newVertex(0, newCoord);
-    newVertex.id_ = getNextFreeId(1);
+    newVertex.id_ = getNextFreeId();
     vertices(0).push_back(newVertex);
 
   }
@@ -45,7 +43,7 @@ Dune::OneDGrid::OneDGrid(int numElements, const ctype& leftBoundary, const ctype
   OneDGridList<OneDEntityImp<0> >::iterator it = vertices(0).begin();
   for (int i=0; i<numElements; i++) {
 
-    OneDEntityImp<1> newElement(0, getNextFreeId(0), false);
+    OneDEntityImp<1> newElement(0, getNextFreeId(), false);
     newElement.vertex_[0] = it;
     it = it->succ_;
     newElement.vertex_[1] = it;
@@ -61,8 +59,7 @@ Dune::OneDGrid::OneDGrid(const std::vector<ctype>& coords)
   : refinementType_(LOCAL),
     leafIndexSet_(*this),
     idSet_(*this),
-    freeVertexIdCounter_(0),
-    freeElementIdCounter_(0),
+    freeIdCounter_(0),
     reversedBoundarySegmentNumbering_(false)
 {
   if (coords.size()<2)
@@ -73,7 +70,7 @@ Dune::OneDGrid::OneDGrid(const std::vector<ctype>& coords)
 
   // Init vertex set
   for (size_t i=0; i<coords.size(); i++) {
-    OneDEntityImp<0> newVertex(0, coords[i], getNextFreeId(1));
+    OneDEntityImp<0> newVertex(0, coords[i], getNextFreeId());
     vertices(0).push_back(newVertex);
   }
 
@@ -81,7 +78,7 @@ Dune::OneDGrid::OneDGrid(const std::vector<ctype>& coords)
   OneDGridList<OneDEntityImp<0> >::iterator it = vertices(0).begin();
   for (size_t i=0; i<coords.size()-1; i++) {
 
-    OneDEntityImp<1> newElement(0, getNextFreeId(0), false);
+    OneDEntityImp<1> newElement(0, getNextFreeId(), false);
     newElement.vertex_[0] = it;
     it = it->succ_;
     newElement.vertex_[1] = it;
@@ -322,7 +319,7 @@ bool Dune::OneDGrid::adapt()
 
         ctype p = 0.5*(eIt->vertex_[0]->pos_[0] + eIt->vertex_[1]->pos_[0]);
 
-        OneDEntityImp<0> centerVertex(i+1, p, getNextFreeId(1));
+        OneDEntityImp<0> centerVertex(i+1, p, getNextFreeId());
 
         OneDGridList<OneDEntityImp<0> >::iterator centerVertexIterator = vertices(i+1).insert(leftUpperVertex->succ_, centerVertex);
 
@@ -346,13 +343,13 @@ bool Dune::OneDGrid::adapt()
         // ///////////////////////
         // Create new elements
         // ///////////////////////
-        OneDEntityImp<1> newElement0(i+1, getNextFreeId(0), reversedBoundarySegmentNumbering_);
+        OneDEntityImp<1> newElement0(i+1, getNextFreeId(), reversedBoundarySegmentNumbering_);
         newElement0.vertex_[0] = leftUpperVertex;
         newElement0.vertex_[1] = centerVertexIterator;
         newElement0.father_ = eIt;
         newElement0.isNew_ = true;
 
-        OneDEntityImp<1> newElement1(i+1, getNextFreeId(0), reversedBoundarySegmentNumbering_);
+        OneDEntityImp<1> newElement1(i+1, getNextFreeId(), reversedBoundarySegmentNumbering_);
         newElement1.vertex_[0] = centerVertexIterator;
         newElement1.vertex_[1] = rightUpperVertex;
         newElement1.father_ = eIt;
