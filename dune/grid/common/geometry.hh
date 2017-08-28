@@ -14,6 +14,17 @@
 
 #include <dune/geometry/referenceelements.hh>
 
+// GCC 4.9 on Debian 8 has broken parsing - it trips over the
+// friend auto referenceElement(const Geometry&) in Geometry
+// This is kind of a brute force hack around the problem as I can't
+// be arsed to get local access to a Debian 8 just to cook up a test
+// Homebrew GCC 4.9 on my machine doesn't exhibit the problem
+#ifndef DOXYGEN
+#if (defined(__GNUC__) && (__GNUC__ < 5))
+#define USE_BROKEN_GCC_FRIEND_AUTO_WORKAROUND 1
+#endif
+#endif
+
 namespace Dune
 {
 
@@ -23,6 +34,24 @@ namespace Dune
   template< int dim, int dimworld, class ct, class GridFamily >
   class GridDefaultImplementation;
 
+#ifdef USE_BROKEN_GCC_FRIEND_AUTO_WORKAROUND
+
+  namespace Impl {
+
+    template<typename Geometry>
+    struct GeometryImplExtractor
+    {
+      using Implementation = typename Geometry::Implementation;
+
+      static const Implementation& implementation(const Geometry& geo)
+      {
+        return geo.impl();
+      }
+    };
+
+  }
+
+#endif // USE_BROKEN_GCC_FRIEND_AUTO_WORKAROUND
 
   //*****************************************************************************
   //
@@ -81,6 +110,30 @@ namespace Dune
     const Implementation &impl () const { return realGeometry; }
 
   public:
+
+#ifdef USE_BROKEN_GCC_FRIEND_AUTO_WORKAROUND
+
+    friend struct Impl::GeometryImplExtractor<Geometry>;
+
+#else
+
+    //! Returns a reference element for the given grid geometry.
+    /**
+     * This function returns a reference element for the grid geometry
+     * `geo`. The type of that reference element can be obtained with
+     * `Dune::ReferenceElement<Geometry>`.
+     *
+     * \sa Dune::ReferenceElement
+     * \ingroup GeometryReferenceElements
+     * \relatedalso Geometry
+     */
+    friend auto referenceElement(const Geometry& geo)
+    {
+      return referenceElement(geo,geo.impl());
+    }
+
+#endif
+
     //! @brief export geometry dimension
     enum { mydimension=mydim /*!< geometry dimension */ };
     //! @brief export coordinate dimension
@@ -314,8 +367,7 @@ namespace Dune
       GeometryType type = asImp().type();
 
       // get corresponding reference element
-      const ReferenceElement< ctype , mydim > & refElement =
-        ReferenceElements< ctype, mydim >::general(type);
+      auto refElement = referenceElement< ctype , mydim >(type);
 
       LocalCoordinate localBaryCenter ( 0 );
       // calculate local bary center
@@ -333,8 +385,7 @@ namespace Dune
       GeometryType type = asImp().type();
 
       // get corresponding reference element
-      const ReferenceElement< ctype , mydim > & refElement =
-        ReferenceElements< ctype, mydim >::general(type);
+      auto refElement = referenceElement< ctype , mydim >(type);
 
       // center is (for now) the centroid of the reference element mapped to
       // this geometry.
@@ -399,6 +450,47 @@ namespace Dune
     const GeometryImp<mydim,cdim,GridImp>& asImp () const {return static_cast<const GeometryImp<mydim,cdim,GridImp>&>(*this);}
   }; // end GeometryDefault
 
+
+#ifdef USE_BROKEN_GCC_FRIEND_AUTO_WORKAROUND
+
+  template< int mydim, int cdim, class GridImp, template< int, int, class > class GeometryImp>
+  auto referenceElement(const Geometry<mydim,cdim,GridImp,GeometryImp>& geo)
+    -> decltype(referenceElement(geo,Impl::GeometryImplExtractor<Geometry<mydim,cdim,GridImp,GeometryImp>>::implementation(geo)))
+  {
+    return referenceElement(geo,Impl::GeometryImplExtractor<Geometry<mydim,cdim,GridImp,GeometryImp>>::implementation(geo));
+  }
+
+#endif
+
+  //! Second-level dispatch to select the correct reference element for a grid geometry.
+  /**
+   * This function is the default implementation of the second-level reference element dispatch
+   * performed by Geometry.
+   *
+   * \note This function is only important for grid implementors with geometries that do not have
+   *       a standard reference element.
+   *
+   * When referenceElement() is called with a Geometry, it will forward the call to
+   * `referenceElement(const Geometry&,const GeometryImplementation&)`. This default implementation
+   * will do the right thing as long as your geometry is based on a standard Dune ReferenceElement. If
+   * it is not and you want to supply your own reference element implementation, provide an override of
+   * this function for your specific geometry implementation.
+   *
+   * \related Geometry
+   */
+  template< int mydim, int cdim, class GridImp, template< int, int, class > class GeometryImp, typename Impl>
+  auto referenceElement(const Geometry<mydim,cdim,GridImp,GeometryImp>& geo, const Impl& impl)
+    -> decltype(referenceElement<typename GridImp::ctype,mydim>(geo.type()))
+  {
+    using Geo = Geometry<mydim,cdim,GridImp,GeometryImp>;
+    return referenceElement<typename Geo::ctype,Geo::mydimension>(geo.type());
+  }
+
 } // namespace Dune
+
+// get rid of the helper define
+#ifdef USE_BROKEN_GCC_FRIEND_WORKAROUND
+#undef USE_BROKEN_GCC_FRIEND_WORKAROUND
+#endif
 
 #endif // DUNE_GRID_GEOMETRY_HH

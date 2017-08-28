@@ -15,6 +15,7 @@
 #endif
 
 #include <dune/common/binaryfunctions.hh>
+#include <dune/common/streamoperators.hh>
 #include <dune/grid/common/exceptions.hh>
 
 #include "partitioning.hh"

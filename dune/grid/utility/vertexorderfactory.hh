@@ -60,12 +60,8 @@ namespace Dune {
     template<typename Element>
     typename VertexOrder<Element::mydimension>::type
     make(const Element &e) const {
-      typedef ReferenceElements<
-          typename Element::Geometry::ctype,
-          Element::mydimension
-          > RefElems;
-      std::size_t size =
-        RefElems::general(e.type()).size(Element::mydimension);
+
+      std::size_t size = referenceElement(e.geometry()).size(Element::mydimension);
 
       std::vector<typename IdSet::IdType> ids(size);
       for(std::size_t i = 0; i < size; ++i)

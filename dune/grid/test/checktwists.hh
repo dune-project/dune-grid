@@ -37,8 +37,8 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
 
   typedef typename Intersection::LocalGeometry LocalGeometry;
 
-  typedef Dune::ReferenceElement< ctype, dimension > ReferenceElement;
   typedef Dune::ReferenceElements< ctype, dimension > ReferenceElements;
+  typedef typename ReferenceElements::ReferenceElement ReferenceElement;
 
   typedef Dune::FieldVector< typename Geometry::ctype, Geometry::coorddimension >
   WorldVector;
@@ -62,8 +62,8 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
   const int nIn = intersection.indexInInside();
   const int nOut = intersection.indexInOutside();
 
-  const ReferenceElement &refIn = ReferenceElements::general( geoIn.type() );
-  const ReferenceElement &refOut = ReferenceElements::general( geoOut.type() );
+  auto refIn = referenceElement( geoIn );
+  auto refOut = referenceElement( geoOut );
 
   const int numCorners = refIn.size( nIn, 1, dimension );
   assert( refOut.size( nOut, 1, dimension ) == numCorners );

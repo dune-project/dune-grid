@@ -174,7 +174,7 @@ namespace Dune {
     template<class Entity, class Mapper, class Visited, class RefElem>
     static void apply(const Entity &e, const Mapper &mapper, Visited &visited,
                       const typename Entity::Geometry &geo,
-                      const RefElem &refelem,
+                      RefElem refelem,
                       GridViewInfo<typename Entity::Geometry::ctype> &gridViewInfo)
     {
       typedef typename Entity::Geometry::ctype ctype;

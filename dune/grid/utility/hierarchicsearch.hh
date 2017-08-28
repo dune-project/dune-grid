@@ -83,10 +83,10 @@ namespace Dune
       for( HierarchicIterator it = entity.hbegin( childLevel ); it != end; ++it )
       {
         Entity child = *it;
-        const Geometry &geo = child.geometry();
+        Geometry geo = child.geometry();
 
         LocalCoordinate local = geo.local(global);
-        if (ReferenceElements<double, dim>::general( child.type() ).checkInside(local))
+        if (referenceElement( geo ).checkInside(local))
         {
           // return if we found the leaf, else search through the child entites
           if( indexSet_.contains( child ) )
@@ -151,10 +151,10 @@ namespace Dune
       for (LevelIterator it = gv.template begin<0, partition>(); it != end; ++it)
       {
         Entity entity = *it;
-        const Geometry &geo = entity.geometry();
+        Geometry geo = entity.geometry();
 
         LocalCoordinate local = geo.local( global );
-        if( !ReferenceElements< double, dim >::general( geo.type() ).checkInside( local ) )
+        if( !referenceElement( geo ).checkInside( local ) )
           continue;
 
         if( (int(dim) != int(dimw)) && ((geo.global( local ) - global).two_norm() > 1e-8) )

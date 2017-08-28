@@ -45,8 +45,7 @@ void testElementDim(const std::integral_constant<std::size_t, mydim>&,
 {
   static const std::size_t dim = VertexOrder::dimension;
   static const std::size_t codim = dim - mydim;
-  const Dune::ReferenceElement<double, dim> &refelem
-    = Dune::ReferenceElements<double, dim>::general(vo.type());
+  auto refelem = Dune::referenceElement<double, dim>(vo.type());
 
   std::vector<typename VertexOrder::Index> subOrder, tmp;
   for(int subentity = 0; subentity < refelem.size(codim); ++subentity)
@@ -78,15 +77,12 @@ void testElementInterdim(const std::integral_constant<std::size_t, mydim>&,
 
   static const std::size_t dim = VertexOrder::dimension;
   static const std::size_t codim = dim - mydim;
-  const Dune::ReferenceElement<double, dim> &refelem =
-    Dune::ReferenceElements<double, dim>::general(vo.type());
+  auto refelem = Dune::referenceElement<double, dim>(vo.type());
 
   std::vector<typename VertexOrder::Index> subOrder, tmp, subsubOrder;
   for(int subentity = 0; subentity < refelem.size(codim); ++subentity)
   {
-    const Dune::ReferenceElement<double, mydim> &subrefelem =
-      Dune::ReferenceElements<double, mydim>::
-      general(refelem.type(subentity, codim));
+    auto subrefelem = Dune::referenceElement<double, mydim>(refelem.type(subentity, codim));
 
     subOrder.assign(vo.begin(codim, subentity), vo.end(codim, subentity));
 
@@ -123,10 +119,8 @@ void testNeighborDim(const std::integral_constant<std::size_t, mydim>&,
 {
   static const std::size_t dim = VertexOrder::dimension;
   static const std::size_t codim = dim - mydim;
-  const Dune::ReferenceElement<double, dim> &refelem_s =
-    Dune::ReferenceElements<double, dim>::general(vo_s.type());
-  const Dune::ReferenceElement<double, dim> &refelem_n =
-    Dune::ReferenceElements<double, dim>::general(vo_n.type());
+  auto refelem_s = Dune::referenceElement<double, dim>(vo_s.type());
+  auto refelem_n = Dune::referenceElement<double, dim>(vo_n.type());
 
   std::size_t index_s = is.indexInInside();
   std::size_t index_n = is.indexInOutside();

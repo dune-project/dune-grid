@@ -86,8 +86,9 @@ namespace Dune {
           // Edge indices
           if (codim==1)
           {
-            auto a=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,0,dim);
-            auto b=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,1,dim);
+            auto ref_el = referenceElement<double,dim>(e.type());
+            auto a = ref_el.subEntity(i,dim-1,0,dim);
+            auto b = ref_el.subEntity(i,dim-1,1,dim);
             result = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_->getRealImplementation(id(e)).getTarget(),
                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
                                                               UG_NS<dim>::Corner(grid_->getRealImplementation(id(e)).getTarget(),
@@ -125,8 +126,9 @@ namespace Dune {
           // Edge indices
           if (codim==2)
           {
-            auto a=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,0,dim);
-            auto b=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,1,dim);
+            auto ref_el = referenceElement<double,dim>(e.type());
+            auto a = ref_el.subEntity(i,dim-1,0,dim);
+            auto b = ref_el.subEntity(i,dim-1,1,dim);
             result = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_->getRealImplementation(id(e)).getTarget(),
                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
                                                               UG_NS<dim>::Corner(grid_->getRealImplementation(id(e)).getTarget(),
@@ -308,8 +310,9 @@ namespace Dune {
           // Edge indices
           if (codim==1)
           {
-            auto a=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,0,dim);
-            auto b=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,1,dim);
+            auto ref_el = referenceElement<double,dim>(e.type());
+            auto a = ref_el.subEntity(i,dim-1,0,dim);
+            auto b = ref_el.subEntity(i,dim-1,1,dim);
             result = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_.getRealImplementation(id(e)).getTarget(),
                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
                                                               UG_NS<dim>::Corner(grid_.getRealImplementation(id(e)).getTarget(),
@@ -347,8 +350,9 @@ namespace Dune {
           // Edge indices
           if (codim==2)
           {
-            auto a=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,0,dim);
-            auto b=ReferenceElements<double,dim>::general(e.type()).subEntity(i,dim-1,1,dim);
+            auto ref_el = referenceElement<double,dim>(e.type());
+            auto a = ref_el.subEntity(i,dim-1,0,dim);
+            auto b = ref_el.subEntity(i,dim-1,1,dim);
             result = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(grid_.getRealImplementation(id(e)).getTarget(),
                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
                                                               UG_NS<dim>::Corner(grid_.getRealImplementation(id(e)).getTarget(),
@@ -619,8 +623,9 @@ namespace Dune {
 
       if (dim-codim==1) {
 
-        int a=ReferenceElements<double,dim>::general(type).subEntity(i,dim-1,0,dim);
-        int b=ReferenceElements<double,dim>::general(type).subEntity(i,dim-1,1,dim);
+        auto ref_el = referenceElement<double,dim>(type);
+        auto a = ref_el.subEntity(i,dim-1,0,dim);
+        auto b = ref_el.subEntity(i,dim-1,1,dim);
         const typename UG_NS<dim>::Edge* edge = UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUG(a,type)),
                                                                     UG_NS<dim>::Corner(target, UGGridRenumberer<dim>::verticesDUNEtoUG(b,type)));
 
