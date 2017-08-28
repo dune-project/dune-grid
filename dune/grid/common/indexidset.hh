@@ -354,6 +354,13 @@ namespace Dune
 
      - It is injective, i.e. for any \f$e,e^\prime\in E\f$
      we have \f$e\neq e^\prime \Rightarrow m(e)\neq m(e^\prime)\f$.
+
+     Note: In "Bastian et al.: A Generic Grid Interface for Adaptive and Parallel Scientific Computing.
+     Part I: Abstract Framework, Computing 82 (2-3), 2008, pp. 103-119" it is claimed that this
+     injectivity property should only hold for entities of the same codimension.  This is in
+     contrast to the actual Dune code: grid implementations are required to provide ids that are injective
+     even on sets of entities with different codimensions.
+
      - It is persistent with respect to grid modification, i.e. if there exists an entity \f$e\f$ with
      id \f$i\f$ before grid modification and an entity \f$e^\prime\f$ with id \f$i\f$ after mesh
      modification it is guaranteed that \f$e=e^\prime\f$.
