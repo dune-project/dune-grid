@@ -17,6 +17,10 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/test/testsuite.hh>
 
+namespace Dune {
+
+namespace Impl {
+
 // quote so the result can be used inside '...' in python
 // quotes not included in the result
 inline std::string pyq(const std::string &s)
@@ -111,7 +115,7 @@ inline std::string pythonVTKReader(const std::string& filename)
                   "Unknown vtk file extension: " << filename);
 }
 
-namespace Dune {
+} /* namespace Impl */
 
 class VTKChecker
 {
@@ -127,11 +131,11 @@ public:
 
   int check()
     {
-      if (!havePythonVTK()) {
+      if (not Impl::havePythonVTK()) {
         return 77;
       }
       else if (not files_.empty()) {
-        const int result = runPython(generatePythonCode());
+        const int result = Impl::runPython(generatePythonCode());
         testSuite_.check(result == 0);
       }
       return testSuite_.exit();
@@ -152,11 +156,11 @@ private:
            << "passed = True\n";
 
       for (const auto& file : files_) {
-        code << "reader = " << pythonVTKReader(file) << "()\n"
-             << "reader.SetFileName('" << pyq(file) << "')\n"
+        code << "reader = " << Impl::pythonVTKReader(file) << "()\n"
+             << "reader.SetFileName('" << Impl::pyq(file) << "')\n"
              << "reader.Update()\n"
              << "if (not (reader.GetOutput().GetNumberOfCells() > 0)):\n"
-             << "    print('ERROR in {}'.format('" << pyq(file) << "'))\n"
+             << "    print('ERROR in {}'.format('" << Impl::pyq(file) << "'))\n"
              << "    passed = False\n";
       }
 
