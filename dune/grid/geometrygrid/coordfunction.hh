@@ -70,10 +70,24 @@ namespace Dune
     //! evaluate method for global mapping
     void evaluate ( const DomainVector &x, RangeVector &y ) const
     {
-      return asImp().evaluate( x, y );
+      // Check whether the derived class implements operator().
+      if (&This::operator() != &Impl::operator())
+        // Use operator() if the derived class implements it
+        y = asImp()(x);
+      else
+        asImp().evaluate( x, y );
     }
 
   protected:
+
+    /** \brief Evaluate the global mapping
+     *
+     * This is a dummy method needed to make the compiler happy
+     * in case the derived Impl class does not implement operator() itself.
+     */
+    RangeVector operator() ( const DomainVector &x ) const
+    {}
+
     const Implementation &asImp () const
     {
       return static_cast< const Implementation & >( *this );
@@ -99,6 +113,8 @@ namespace Dune
     typedef AnalyticalCoordFunction< ct, dimD, dimR, Impl > This;
     typedef AnalyticalCoordFunctionInterface< ct, dimD, dimR, Impl > Base;
 
+    friend class AnalyticalCoordFunctionInterface< ct, dimD, dimR, Impl >;
+
   public:
     typedef typename Base :: DomainVector DomainVector;
     typedef typename Base :: RangeVector RangeVector;
@@ -112,7 +128,8 @@ namespace Dune
     This &operator= ( This && ) = default;
 
   private:
-    void evaluate ( const DomainVector &x, RangeVector &y ) const;
+    void evaluate ( const DomainVector &x, RangeVector &y ) const
+    {}
   };
 
 
