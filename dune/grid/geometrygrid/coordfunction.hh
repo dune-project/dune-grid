@@ -201,6 +201,9 @@ namespace Dune
      *  \param hostEntity an entity of the host grid
      *  \param corner the local number of the corner in the host entity
      *  \param y return value for the coordinate of this corner
+     *
+     * \note This method needs to work for entities of all codimensions,
+     *    not just for elements!
      **/
     template< class HostEntity >
     void evaluate ( const HostEntity &hostEntity, unsigned int corner,
