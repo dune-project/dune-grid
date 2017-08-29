@@ -8,12 +8,14 @@
 #include <ios>
 #include <iostream>
 #include <ostream>
+#include <set>
 #include <sstream>
 #include <string>
 
 #include <sys/wait.h>
 
 #include <dune/common/exceptions.hh>
+#include <dune/common/test/testsuite.hh>
 
 // quote so the result can be used inside '...' in python
 // quotes not included in the result
@@ -132,5 +134,65 @@ inline int checkVTKFile(const std::string &name)
   std::cout << (result == 0 ? "pass: " : "fail: ") << name << std::endl;
   return result;
 }
+
+namespace Dune {
+
+class VTKChecker
+{
+public:
+  void push(const std::string& file)
+    {
+      auto res = files_.insert(file);
+      if (not res.second) {
+        testSuite_.check(false, "VTKChecker")
+          << "'" << file << "' was added multiple times";
+      }
+    }
+
+  int check()
+    {
+      if (!havePythonVTK()) {
+        return 77;
+      }
+      else if (not files_.empty()) {
+        const int result = runPython(generatePythonCode());
+        testSuite_.check(result == 0);
+      }
+      return testSuite_.exit();
+    }
+
+  const TestSuite& testSuite() const
+    {
+      return testSuite_;
+    }
+
+private:
+  std::string generatePythonCode() const
+    {
+      std::stringstream code;
+
+      code << "from vtk import *\n"
+           << "import sys\n"
+           << "passed = True\n";
+
+      for (const auto& file : files_) {
+        code << "reader = " << pythonVTKReader(file) << "()\n"
+             << "reader.SetFileName('" << pyq(file) << "')\n"
+             << "reader.Update()\n"
+             << "if (not (reader.GetOutput().GetNumberOfCells() > 0)):\n"
+             << "    print('ERROR in {}'.format('" << pyq(file) << "'))\n"
+             << "    passed = False\n";
+      }
+
+      code << "sys.exit(0 if passed else 1)\n";
+
+      return code.str();
+    }
+
+  std::set< std::string > files_;
+  TestSuite testSuite_;
+};
+
+} /* namespace Dune */
 
 #endif // DUNE_GRID_IO_FILE_TEST_CHECKVTKFILE_HH
