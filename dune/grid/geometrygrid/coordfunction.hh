@@ -4,6 +4,7 @@
 #define DUNE_GEOGRID_COORDFUNCTION_HH
 
 #include <dune/common/fvector.hh>
+#include <dune/common/std/type_traits.hh>
 
 namespace Dune
 {
@@ -66,14 +67,41 @@ namespace Dune
     This &operator= ( const This & ) = default;
     This &operator= ( This && ) = default;
 
+    // helper for picking the correct version of evaluate further down
+    template<typename F, typename DV>
+    using has_operator_parentheses = decltype(std::declval<F>()(std::declval<DV>()));
+
   public:
+
+#ifdef DOXYGEN
+
     //! evaluate method for global mapping
-    void evaluate ( const DomainVector &x, RangeVector &y ) const
+    void evaluate ( const DomainVector &x, RangeVector &y ) const;
+
+#else
+
+    template<typename DV>
+    std::enable_if_t<
+      Std::is_detected<has_operator_parentheses,This,DV>::value
+      >
+    evaluate ( const DV &x, RangeVector &y ) const
     {
-      return asImp().evaluate( x, y );
+      y = asImp()(x);
     }
 
+    template<typename DV>
+    std::enable_if_t<
+      not Std::is_detected<has_operator_parentheses,This,DV>::value
+      >
+    evaluate ( const DV &x, RangeVector &y ) const
+    {
+      asImp().evaluate( x, y );
+    }
+
+#endif // DOXYGEN
+
   protected:
+
     const Implementation &asImp () const
     {
       return static_cast< const Implementation & >( *this );
@@ -99,6 +127,8 @@ namespace Dune
     typedef AnalyticalCoordFunction< ct, dimD, dimR, Impl > This;
     typedef AnalyticalCoordFunctionInterface< ct, dimD, dimR, Impl > Base;
 
+    friend class AnalyticalCoordFunctionInterface< ct, dimD, dimR, Impl >;
+
   public:
     typedef typename Base :: DomainVector DomainVector;
     typedef typename Base :: RangeVector RangeVector;
@@ -112,7 +142,8 @@ namespace Dune
     This &operator= ( This && ) = default;
 
   private:
-    void evaluate ( const DomainVector &x, RangeVector &y ) const;
+    void evaluate ( const DomainVector &x, RangeVector &y ) const
+    {}
   };
 
 
