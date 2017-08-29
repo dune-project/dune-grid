@@ -111,30 +111,6 @@ inline std::string pythonVTKReader(const std::string& filename)
                   "Unknown vtk file extension: " << filename);
 }
 
-inline int checkVTKFile(const std::string &name)
-{
-  if(!havePythonVTK())
-  {
-    std::cerr << "skip: " << name << std::endl;
-    return 77;
-  }
-
-  std::string reader = pythonVTKReader(name);
-
-  std::cout << "Loading " << name << " using python vtk" << std::endl;
-  std::string pycode =
-    "from vtk import *;"
-    "import sys;"
-    "reader = "+reader+"();"
-    "reader.SetFileName('"+pyq(name)+"');"
-    "reader.Update();"
-    // check that the number of of cells is > 0
-    "sys.exit(not (reader.GetOutput().GetNumberOfCells() > 0));";
-  int result = runPython(pycode);
-  std::cout << (result == 0 ? "pass: " : "fail: ") << name << std::endl;
-  return result;
-}
-
 namespace Dune {
 
 class VTKChecker
