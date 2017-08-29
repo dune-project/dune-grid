@@ -83,9 +83,9 @@ inline bool is_suffix(const std::string &s, const std::string &suffix)
     s.compare(s.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
 
-inline int checkVTKFile(const std::string &name)
+inline bool havePythonVTK()
 {
-  static const bool havePythonVTK = [] {
+  static const bool result = [] {
     // This check is invoked only once, even in a multithreading environment,
     // since it is invoked in the initializer of a static variable.
     if(runPython("from vtk import *") == 0)
@@ -95,19 +95,29 @@ inline int checkVTKFile(const std::string &name)
               << "vtk can read the files we wrote." << std::endl;
     return false;
   } ();
-  if(!havePythonVTK)
+
+  return result;
+}
+
+inline std::string pythonVTKReader(const std::string& filename)
+{
+  if     (is_suffix(filename, ".vtu"))  return "vtkXMLUnstructuredGridReader";
+  else if(is_suffix(filename, ".pvtu")) return "vtkXMLPUnstructuredGridReader";
+  else if(is_suffix(filename, ".vtp"))  return "vtkXMLPolyDataReader";
+  else if(is_suffix(filename, ".pvtp")) return "vtkXMLPPolyDataReader";
+  else DUNE_THROW(Dune::NotImplemented,
+                  "Unknown vtk file extension: " << filename);
+}
+
+inline int checkVTKFile(const std::string &name)
+{
+  if(!havePythonVTK())
   {
     std::cerr << "skip: " << name << std::endl;
     return 77;
   }
 
-  std::string reader;
-  if     (is_suffix(name, ".vtu"))  reader = "vtkXMLUnstructuredGridReader";
-  else if(is_suffix(name, ".pvtu")) reader = "vtkXMLPUnstructuredGridReader";
-  else if(is_suffix(name, ".vtp"))  reader = "vtkXMLPolyDataReader";
-  else if(is_suffix(name, ".pvtp")) reader = "vtkXMLPPolyDataReader";
-  else DUNE_THROW(Dune::NotImplemented,
-                  "Unknown vtk file extension: " << name);
+  std::string reader = pythonVTKReader(name);
 
   std::cout << "Loading " << name << " using python vtk" << std::endl;
   std::string pycode =
