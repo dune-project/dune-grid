@@ -84,7 +84,7 @@ struct Acc
 };
 
 template< class GridView >
-int doWrite( const GridView &gridView, bool coerceToSimplex)
+int doWrite( Dune::VTKChecker& vtkChecker, const std::string& gridViewName, const GridView &gridView, bool coerceToSimplex)
 {
   enum { dim = GridView :: dimension };
 
@@ -104,21 +104,21 @@ int doWrite( const GridView &gridView, bool coerceToSimplex)
   int result = 0;
   std::string name;
   std::ostringstream prefix;
-  prefix << "subsamplingvtktest-" << dim << "D-"
+  prefix << "subsamplingvtktest-" << dim << "D-" << gridViewName << "-"
          << (coerceToSimplex ? "simplex" : "natural");
   int rank = gridView.comm().rank();
 
   name = vtk.write(prefix.str() + "-ascii");
-  if(rank == 0) acc(result, checkVTKFile(name));
+  if(rank == 0) vtkChecker.push(name);
 
   name = vtk.write(prefix.str() + "-appendedraw", Dune::VTK::appendedraw);
-  if(rank == 0) acc(result, checkVTKFile(name));
+  if(rank == 0) vtkChecker.push(name);
 
   return result;
 }
 
 template<int dim>
-int vtkCheck(const std::array<int, dim>& elements,
+int vtkCheck(Dune::VTKChecker& vtkChecker, const std::array<int, dim>& elements,
               const Dune::FieldVector<double, dim>& upperRight)
 {
   Dune::YaspGrid<dim> g(upperRight, elements);
@@ -132,13 +132,13 @@ int vtkCheck(const std::array<int, dim>& elements,
 
   int result = 0;
 
-  acc(result, doWrite( g.leafGridView(), false));
-  acc(result, doWrite( g.levelGridView( 0 ), false));
-  acc(result, doWrite( g.levelGridView( g.maxLevel() ), false));
+  acc(result, doWrite( vtkChecker, "leafview", g.leafGridView(), false));
+  acc(result, doWrite( vtkChecker, "coarselevelview", g.levelGridView( 0 ), false));
+  acc(result, doWrite( vtkChecker, "finelevelview", g.levelGridView( g.maxLevel() ), false));
 
-  acc(result, doWrite( g.leafGridView(), true));
-  acc(result, doWrite( g.levelGridView( 0 ), true));
-  acc(result, doWrite( g.levelGridView( g.maxLevel() ), true));
+  acc(result, doWrite( vtkChecker, "leafview", g.leafGridView(), true));
+  acc(result, doWrite( vtkChecker, "coarselevelview", g.levelGridView( 0 ), true));
+  acc(result, doWrite( vtkChecker, "finelevelview", g.levelGridView( g.maxLevel() ), true));
 
   return result;
 }
@@ -156,9 +156,13 @@ int main(int argc, char **argv)
     int result = 0; // pass by default
     using Dune::make_array;
 
-    acc(result, vtkCheck<1>(make_array(5), {1.0}));
-    acc(result, vtkCheck<2>(make_array(5,5), {1.0, 2.0}));
-    acc(result, vtkCheck<3>(make_array(5,5,5), {1.0, 2.0, 3.0}));
+    Dune::VTKChecker vtkChecker;
+
+    acc(result, vtkCheck<1>(vtkChecker, make_array(5), {1.0}));
+    acc(result, vtkCheck<2>(vtkChecker, make_array(5,5), {1.0, 2.0}));
+    acc(result, vtkCheck<3>(vtkChecker, make_array(5,5,5), {1.0, 2.0, 3.0}));
+
+    acc(result, vtkChecker.check());
 
     mpiHelper.getCollectiveCommunication().allreduce<Acc>(&result, 1);
 
