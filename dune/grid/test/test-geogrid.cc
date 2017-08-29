@@ -78,6 +78,36 @@ typedef Dune::GeometryGrid< Grid, CoordFunction, __gnu_cxx::__pool_alloc<char> >
 #endif
 typedef Dune::GeometryGrid< Grid, CoordFunction, Dune::DebugAllocator<char> > GeometryGridWithDebugAllocator;
 
+template <class HostGridView>
+struct DeformationFunction
+  : public Dune::DiscreteCoordFunction< double, HostGridView::dimension, DeformationFunction<HostGridView> >
+{
+  static const int dim = HostGridView::dimension;
+
+  DeformationFunction(const HostGridView& gridView,
+                      const std::vector<Dune::FieldVector<double,dim> >& deformedPosition)
+    : indexSet_(gridView.indexSet()),
+      deformedPosition_(deformedPosition)
+  {}
+
+  /** \brief Evaluate the position at the corner of an entity
+   *
+   * \note This method needs to work for entities of all codimensions,
+   *    not just for elements!
+   */
+  template <class HostEntity>
+  void evaluate (const HostEntity& hostEntity, unsigned int corner,
+                 Dune::FieldVector<double,dim> &y ) const
+  {
+    auto idx = indexSet_.subIndex(hostEntity, corner,dim);
+    y = deformedPosition_[idx];
+  }
+
+private:
+  const typename HostGridView::IndexSet& indexSet_;
+  const std::vector< Dune::FieldVector<double,dim> > deformedPosition_;
+};
+
 template <class GeometryGridType>
 void test(const std::string& gridfile)
 {
@@ -157,6 +187,25 @@ try
   watch.reset();
   test<GeometryGridWithDebugAllocator>(gridfile);
   std::cout << "=== GeometryGridWithDebugAllocator took " << watch.elapsed() << " seconds\n";
+
+  // Check with a discrete coordinate function
+  Dune::GridPtr< Grid > hostGridPtr(gridfile);
+  auto& hostGrid = *hostGridPtr;
+  const int dim = Grid::dimension;
+
+  typedef Grid::LeafGridView HostGridView;
+  const HostGridView& hostGridView = hostGrid.leafGridView();
+
+  std::vector<Dune::FieldVector<double,dim> > vertexPositions(hostGridView.size(dim));
+
+  for (const auto& vertex : vertices(hostGridView))
+    vertexPositions[hostGridView.indexSet().index(vertex)] = vertex.geometry().corner(0);
+
+  typedef Dune::GeometryGrid<Grid, DeformationFunction<HostGridView> > DiscretelyTransformedGrid;
+  DeformationFunction<HostGridView> discreteTransformation(hostGridView, vertexPositions);
+  DiscretelyTransformedGrid discretelyTransformedGrid(hostGrid, discreteTransformation);
+
+  gridcheck(discretelyTransformedGrid);
 
   return 0;
 }
