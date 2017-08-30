@@ -133,8 +133,6 @@ namespace Dune
     typedef AnalyticalCoordFunction< ct, dimD, dimR, Impl > This;
     typedef AnalyticalCoordFunctionInterface< ct, dimD, dimR, Impl > Base;
 
-    friend class AnalyticalCoordFunctionInterface< ct, dimD, dimR, Impl >;
-
   public:
     typedef typename Base :: DomainVector DomainVector;
     typedef typename Base :: RangeVector RangeVector;
