@@ -24,10 +24,11 @@ namespace Dune
     IdenticalCoordFunction( Args&... )
     {}
 
-    void evaluate ( const DomainVector &x, RangeVector &y ) const
+    RangeVector operator()(const DomainVector& x) const
     {
-      y = x;
+      return x;
     }
+
   };
 
 }
