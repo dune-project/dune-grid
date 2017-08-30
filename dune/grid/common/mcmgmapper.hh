@@ -202,6 +202,12 @@ namespace Dune
     /** \brief Number type used for indices */
     typedef typename GV::IndexSet::IndexType Index;
 
+    /** \brief Number type used for the overall size (the return value of the 'size' method)
+     *
+     * The type used here is set to be the corresponding type used by the GridView's index set.
+     */
+    using size_type = decltype(std::declval<typename GV::IndexSet>().size(0));
+
     /** @brief Construct mapper from grid and one of its index sets.
      *
      * \param gridView_ A Dune GridView object.
@@ -274,7 +280,7 @@ namespace Dune
 
        \return Size of the entity set.
      */
-    int size () const
+    size_type size () const
     {
       return n;
     }

@@ -34,7 +34,9 @@ namespace Dune
 
     // check that corners are within the reference element of the given type
     assert( type.dim() == cdim );
-    const auto& refElement = ReferenceElements< typename Grid::ctype, cdim >::general( type );
+
+    // we can't get the reference element from the geometry here, because we need global coordinates
+    auto refElement = referenceElement< typename Grid::ctype, cdim >( type );
 
     const int numCorners = geometry.corners();
     for( int i = 0; i < numCorners; ++i )

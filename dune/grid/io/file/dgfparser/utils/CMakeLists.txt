@@ -8,7 +8,7 @@ foreach(exe ${EXTRA_PROGRAMS})
   target_link_libraries(${exe} dunegrid ${DUNE_LIBS})
 endforeach(exe ${EXTRA_PROGRAMS})
 
-if(UG_FOUND)
+if(dune-uggrid_FOUND)
   add_dgf_executable(gmsh2dgfugsimplex
     EXCLUDE_FROM_ALL
     gmsh2dgf.cc

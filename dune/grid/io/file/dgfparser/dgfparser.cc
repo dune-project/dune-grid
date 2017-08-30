@@ -444,6 +444,7 @@ namespace Dune
       generateSimplexGrid( gridin );
     }
     generateBoundaries( gridin, !interval.isactive() );
+
     if( nofelements<=0 )
     {
       std::cerr << "No suitable element block found in dgf file "
@@ -548,8 +549,9 @@ namespace Dune
           pos=facemap.find(key2);
           if(pos == facemap.end())
           {
-            facemap[key2].first=0;
-            facemap[key2].second = DGFBoundaryParameter::defaultValue();
+            auto& entry = facemap[key2];
+            entry.first  = 0;
+            entry.second = DGFBoundaryParameter::defaultValue();
           }
           else if (pos->second.first==0 ||
                    pos->first.origKeySet())
@@ -557,7 +559,7 @@ namespace Dune
             facemap.erase(pos);
           }
           else { // use original key as given in key2
-            BndParam value = pos->second;
+            const auto value = pos->second;
             facemap.erase(pos);
             facemap[key2] = value;
           }
@@ -892,8 +894,8 @@ namespace Dune
             if (params!=0)
             {
               facemap_t :: key_type key( p, false );
-              //DGFEntityKey< unsigned int > key( p, false );
-              facemap[key].first = params;
+              // read bnd id as positive value (tetgen uses negative values)
+              facemap[key].first = std::abs(params);
               facemap[key].second.clear();
             }
           }
@@ -930,8 +932,7 @@ namespace Dune
     }
     else if (dimw==3)
     {
-      const ReferenceElement< double, 3 > &refElem
-        = ReferenceElements< double, 3 >::simplex();
+      auto refElem = ReferenceElements< double, 3 >::simplex();
       for (int i=0; i<nofelements; i++)
       {
         if (elements[i].size()!=size_t(dimw+1))

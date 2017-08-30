@@ -66,8 +66,7 @@ namespace Dune
 
     for( const auto &entity : elements( grid.leafGridView() ) )
     {
-      const ReferenceElement< typename Grid::ctype, Grid::dimension > &refelement
-        = ReferenceElements< typename Grid::ctype, Grid::dimension >::general( entity.type() );
+      auto refelement = referenceElement< typename Grid::ctype, Grid::dimension >( entity.type() );
 
       for( const auto &intersection : intersections( grid.leafGridView(), entity ) )
         if( factory.wasInserted( intersection ) )

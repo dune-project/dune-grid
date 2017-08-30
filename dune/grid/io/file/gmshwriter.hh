@@ -131,7 +131,7 @@ namespace Dune {
 
           // Write boundaries
           if (!physicalBoundaries.empty()) {
-            const auto& refElement(ReferenceElements<typename GridView::ctype,dim>::general(entity.type()));
+            auto refElement = referenceElement<typename GridView::ctype,dim>(entity.type());
             for(const auto& intersection : intersections(gv, entity)) {
               if(intersection.boundary()) {
                 const auto faceLocalIndex(intersection.indexInInside());

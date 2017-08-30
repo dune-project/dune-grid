@@ -84,7 +84,10 @@ struct Acc
 };
 
 template< class GridView >
-int doWrite( const GridView &gridView, bool coerceToSimplex, Dune::RefinementIntervals intervals)
+int doWrite( Dune::VTKChecker& vtkChecker, const std::string& gridViewName,
+             const GridView &gridView, bool coerceToSimplex,
+             const std::string &refinementName,
+             Dune::RefinementIntervals intervals )
 {
   enum { dim = GridView :: dimension };
 
@@ -104,21 +107,21 @@ int doWrite( const GridView &gridView, bool coerceToSimplex, Dune::RefinementInt
   int result = 0;
   std::string name;
   std::ostringstream prefix;
-  prefix << "subsamplingvtktest-" << dim << "D-"
-         << (coerceToSimplex ? "simplex" : "natural");
+  prefix << "subsamplingvtktest-" << dim << "D-" << gridViewName << "-"
+         << (coerceToSimplex ? "simplex" : "natural") << "-" << refinementName;
   int rank = gridView.comm().rank();
 
   name = vtk.write(prefix.str() + "-ascii");
-  if(rank == 0) acc(result, checkVTKFile(name));
+  if(rank == 0) vtkChecker.push(name);
 
   name = vtk.write(prefix.str() + "-appendedraw", Dune::VTK::appendedraw);
-  if(rank == 0) acc(result, checkVTKFile(name));
+  if(rank == 0) vtkChecker.push(name);
 
   return result;
 }
 
 template<int dim>
-int vtkCheck(const std::array<int, dim>& elements,
+int vtkCheck(Dune::VTKChecker& vtkChecker, const std::array<int, dim>& elements,
               const Dune::FieldVector<double, dim>& upperRight)
 {
   using Dune::refinementIntervals;
@@ -134,21 +137,37 @@ int vtkCheck(const std::array<int, dim>& elements,
 
   int result = 0;
 
-  acc(result, doWrite( g.leafGridView(), true, refinementIntervals(3)));
-  acc(result, doWrite( g.levelGridView( 0 ), true, refinementIntervals(3)));
-  acc(result, doWrite( g.levelGridView( g.maxLevel() ), true, refinementIntervals(3)));
+  auto leafview = g.leafGridView();
+  auto coarselevelview = g.levelGridView( 0 );
+  auto finelevelview = g.levelGridView( g.maxLevel() );
 
-  acc(result, doWrite( g.leafGridView(), true, refinementLevels(1)));
-  acc(result, doWrite( g.levelGridView( 0 ), true, refinementLevels(1)));
-  acc(result, doWrite( g.levelGridView( g.maxLevel() ), true, refinementLevels(1)));
+  acc(result, doWrite( vtkChecker, "leafview",        leafview,        true,
+                       "intervals3", refinementIntervals(3)));
+  acc(result, doWrite( vtkChecker, "coarselevelview", coarselevelview, true,
+                       "intervals3", refinementIntervals(3)));
+  acc(result, doWrite( vtkChecker, "finelevelview",   finelevelview,   true,
+                       "intervals3", refinementIntervals(3)));
 
-  acc(result, doWrite( g.leafGridView(), false, refinementIntervals(3)));
-  acc(result, doWrite( g.levelGridView( 0 ), false, refinementIntervals(3)));
-  acc(result, doWrite( g.levelGridView( g.maxLevel() ), false, refinementIntervals(3)));
+  acc(result, doWrite( vtkChecker, "leafview",        leafview,        true,
+                       "levels1",    refinementLevels(1)));
+  acc(result, doWrite( vtkChecker, "coarselevelview", coarselevelview, true,
+                       "levels1",    refinementLevels(1)));
+  acc(result, doWrite( vtkChecker, "finelevelview",   finelevelview,   true,
+                       "levels1",    refinementLevels(1)));
 
-  acc(result, doWrite( g.leafGridView(), false, refinementLevels(1)));
-  acc(result, doWrite( g.levelGridView( 0 ), false, refinementLevels(1)));
-  acc(result, doWrite( g.levelGridView( g.maxLevel() ), false, refinementLevels(1)));
+  acc(result, doWrite( vtkChecker, "leafview",        leafview,        false,
+                       "intervals3", refinementIntervals(3)));
+  acc(result, doWrite( vtkChecker, "coarselevelview", coarselevelview, false,
+                       "intervals3", refinementIntervals(3)));
+  acc(result, doWrite( vtkChecker, "finelevelview",   finelevelview,   false,
+                       "intervals3", refinementIntervals(3)));
+
+  acc(result, doWrite( vtkChecker, "leafview",        leafview,        false,
+                       "levels1",    refinementLevels(1)));
+  acc(result, doWrite( vtkChecker, "coarselevelview", coarselevelview, false,
+                       "levels1",    refinementLevels(1)));
+  acc(result, doWrite( vtkChecker, "finelevelview",   finelevelview,   false,
+                       "levels1",    refinementLevels(1)));
 
   return result;
 }
@@ -166,9 +185,13 @@ int main(int argc, char **argv)
     int result = 0; // pass by default
     using Dune::make_array;
 
-    acc(result, vtkCheck<1>(make_array(5), {1.0}));
-    acc(result, vtkCheck<2>(make_array(5,5), {1.0, 2.0}));
-    acc(result, vtkCheck<3>(make_array(5,5,5), {1.0, 2.0, 3.0}));
+    Dune::VTKChecker vtkChecker;
+
+    acc(result, vtkCheck<1>(vtkChecker, make_array(5), {1.0}));
+    acc(result, vtkCheck<2>(vtkChecker, make_array(5,5), {1.0, 2.0}));
+    acc(result, vtkCheck<3>(vtkChecker, make_array(5,5,5), {1.0, 2.0, 3.0}));
+
+    acc(result, vtkChecker.check());
 
     mpiHelper.getCollectiveCommunication().allreduce<Acc>(&result, 1);
 

@@ -230,7 +230,7 @@ namespace Dune
 
     /** \brief determine whether an intersection was inserted
      *
-     *  This method allows checking wheter an intersection was actually
+     *  This method allows checking whether an intersection was actually
      *  inserted into the grid factory.
      *
      *  \note Not all boundary segments need to be inserted into the grid

@@ -24,8 +24,9 @@ void UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, std::v
     for (unsigned int i=0; i<element.subEntities(dim-1); i++)
     {
       GeometryType gt = element.type();
-      int a = ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);
-      int b = ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
+      auto ref_el = referenceElement<double,dim>(gt);
+      int a = ref_el.subEntity(i,dim-1,0,dim);
+      int b = ref_el.subEntity(i,dim-1,1,dim);
       int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(a,gt)),
                                                               UG_NS<dim>::Corner(target_,
@@ -72,8 +73,9 @@ void UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, std::v
     // codim dim-1 (edges)
     for (unsigned int i=0; i<element.subEntities(dim-1); i++)
     {
-      int a = ReferenceElements<double,dim>::general(eType).subEntity(i,dim-1,0,dim);
-      int b = ReferenceElements<double,dim>::general(eType).subEntity(i,dim-1,1,dim);
+      auto ref_el = referenceElement<double,dim>(eType);
+      int a = ref_el.subEntity(i,dim-1,0,dim);
+      int b = ref_el.subEntity(i,dim-1,1,dim);
       int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target,
                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(a,eType)),
                                                               UG_NS<dim>::Corner(target,
@@ -88,7 +90,7 @@ void UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, std::v
       {
         UG::UINT& index = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target,UGGridRenumberer<dim>::facesDUNEtoUG(i,eType)));
         if (index == std::numeric_limits<UG::UINT>::max()) {             // not visited yet
-          GeometryType gtType = ReferenceElements<double,dim>::general(eType).type(i,1);
+          GeometryType gtType = referenceElement<double,dim>(eType).type(i,1);
           if (gtType.isSimplex()) {
             index = numTriFaces_++;
           } else if (gtType.isCube()) {
@@ -166,8 +168,9 @@ void UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePermutat
       for (unsigned int i=0; i<element.subEntities(dim-1); i++)
       {
         GeometryType gt = element.type();
-        int a = ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);
-        int b = ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
+        auto ref_el = referenceElement<double,dim>(gt);
+        int a = ref_el.subEntity(i,dim-1,0,dim);
+        int b = ref_el.subEntity(i,dim-1,1,dim);
         int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
                                                                                   UGGridRenumberer<dim>::verticesDUNEtoUG(a,gt)),
                                                                UG_NS<dim>::Corner(target_,
@@ -223,8 +226,9 @@ void UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePermutat
       for (unsigned int i=0; i<element.subEntities(dim-1); i++)
       {
         GeometryType gt = element.type();
-        int a = ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);
-        int b = ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
+        auto ref_el = referenceElement<double,dim>(gt);
+        int a = ref_el.subEntity(i,dim-1,0,dim);
+        int b = ref_el.subEntity(i,dim-1,1,dim);
         int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
                                                                                   UGGridRenumberer<dim>::verticesDUNEtoUG(a,gt)),
                                                                UG_NS<dim>::Corner(target_,
@@ -256,7 +260,7 @@ void UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePermutat
           if (index==std::numeric_limits<UG::UINT>::max())                       // not visited yet
           {
             // get new index and assign
-            GeometryType gtType = ReferenceElements<double,dim>::general(gt).type(i,1);
+            GeometryType gtType = referenceElement<double,dim>(gt).type(i,1);
             if (gtType.isSimplex())
               index = numTriFaces_++;
             else if (gtType.isCube())

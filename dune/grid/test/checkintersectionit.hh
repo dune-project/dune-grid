@@ -7,6 +7,7 @@
 
 #include <dune/common/deprecated.hh>
 #include <dune/common/test/iteratortest.hh>
+#include <dune/common/unused.hh>
 
 #include <dune/geometry/quadraturerules.hh>
 #include <dune/geometry/referenceelements.hh>
@@ -113,10 +114,10 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
 #if !DISABLE_DEPRECATED_METHOD_CHECK
   DUNE_NO_DEPRECATED_BEGIN
-  const int dimension = Intersection::dimension;
+  DUNE_UNUSED const int dimension = Intersection::dimension;
   DUNE_NO_DEPRECATED_END
 #else
-  const int dimension = Entity::dimension;
+  DUNE_UNUSED const int dimension = Entity::dimension;
 #endif
   const int mydimension = Intersection::mydimension;
 
@@ -138,8 +139,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
   const Entity inside = intersection.inside();
 
   const typename Entity::Geometry insideGeometry = inside.geometry();
-  const Dune::ReferenceElement< ctype, dimension > &refElement
-    = Dune::ReferenceElements< ctype, dimension >::general( inside.type() );
+  auto refElement = referenceElement( insideGeometry );
 
   // check that boundary id has positive value and that intersection is conforming
 
@@ -388,8 +388,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
     // check center unit outer normal
 
-    const Dune::ReferenceElement< ctype, mydimension > &refFace
-      = Dune::ReferenceElements< ctype, mydimension >::general( intersection.type() );
+    auto refFace = referenceElement( geometry );
 
     if( (intersection.centerUnitOuterNormal() - intersection.unitOuterNormal( refFace.position( 0, 0 ) )).two_norm() > 1e-8 )
     {

@@ -9,9 +9,9 @@ add_subdirectory(uggrid)
 add_subdirectory(utility)
 add_subdirectory(yaspgrid)
 
-if(UG_FOUND)
+if(dune-uggrid_FOUND)
   set(UGLIB $<TARGET_OBJECTS:uggrid>)
-endif(UG_FOUND)
+endif()
 
 install(FILES
   albertagrid.hh

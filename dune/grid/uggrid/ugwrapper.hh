@@ -787,16 +787,53 @@ namespace Dune {
     // /////////////////////////////////////////////
 
     //! Gets the index of a UG element
-    static unsigned int id(const UG_NS< UG_DIM >::Element* theElement) {
+    static auto id(const UG_NS< UG_DIM >::Element* theElement) {
+#if defined ModelP
+      return theElement->ge.ddd.gid;
+#else
       return theElement->ge.id;
+#endif
+    }
+
+    //! Gets the id of a UG facet
+    static auto id(const UG_NS< UG_DIM >::Vector* theVector) {
+#ifdef ModelP
+      return theVector->ddd.gid;
+#else
+      auto id = theVector->id;
+
+      // In sequential UG, two entities of different codimension can have the same id,
+      // so let's encode the codimension in the id to make them differ.
+      constexpr unsigned int codim = 1;  //
+      return id | (codim << 30);
+#endif
+    }
+
+    //! Gets the id of a UG edge
+    static auto id(const UG_NS< UG_DIM >::Edge* theEdge) {
+#ifdef ModelP
+      return theEdge->ddd.gid;
+#else
+      auto id = theEdge->id;
+
+      // In sequential UG, two entities of different codimension can have the same id,
+      // so let's encode the codimension in the id to make them differ.
+      constexpr unsigned int codim = UG_DIM-1;  //
+      return id | (codim << 30);
+#endif
     }
 
     //! Gets the index of a UG node
-    static unsigned int id(const UG_NS< UG_DIM >::Node* theNode) {
-#if UG_DIM == 2
-      return theNode->myvertex->iv.id | 0x80000000;
+    static auto id(const UG_NS< UG_DIM >::Node* theNode) {
+#ifdef ModelP
+      return theNode->myvertex->iv.ddd.gid;
 #else
-      return theNode->myvertex->iv.id | 0xC0000000;
+      auto id = theNode->myvertex->iv.id;
+
+      // In sequential UG, two entities of different codimension can have the same id,
+      // so let's encode the codimension in the id to make them differ.
+      constexpr unsigned int codim = UG_DIM;
+      return id | (codim << 30);
 #endif
     }
 
