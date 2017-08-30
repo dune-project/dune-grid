@@ -142,8 +142,7 @@ namespace Dune
     This &operator= ( This && ) = default;
 
   private:
-    void evaluate ( const DomainVector &x, RangeVector &y ) const
-    {}
+
   };
 
 
