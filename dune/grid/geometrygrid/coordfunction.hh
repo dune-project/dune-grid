@@ -82,7 +82,7 @@ namespace Dune
 
     template<typename DV>
     std::enable_if_t<
-      Std::is_detected<has_operator_parentheses,This,DV>::value
+      Std::is_detected<has_operator_parentheses,Impl,DV>::value
       >
     evaluate ( const DV &x, RangeVector &y ) const
     {
@@ -91,7 +91,7 @@ namespace Dune
 
     template<typename DV>
     std::enable_if_t<
-      not Std::is_detected<has_operator_parentheses,This,DV>::value
+      not Std::is_detected<has_operator_parentheses,Impl,DV>::value
       >
     evaluate ( const DV &x, RangeVector &y ) const
     {
