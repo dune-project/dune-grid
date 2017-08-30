@@ -8,12 +8,18 @@
 #include <ios>
 #include <iostream>
 #include <ostream>
+#include <set>
 #include <sstream>
 #include <string>
 
 #include <sys/wait.h>
 
 #include <dune/common/exceptions.hh>
+#include <dune/common/test/testsuite.hh>
+
+namespace Dune {
+
+namespace Impl {
 
 // quote so the result can be used inside '...' in python
 // quotes not included in the result
@@ -83,9 +89,9 @@ inline bool is_suffix(const std::string &s, const std::string &suffix)
     s.compare(s.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
 
-inline int checkVTKFile(const std::string &name)
+inline bool havePythonVTK()
 {
-  static const bool havePythonVTK = [] {
+  static const bool result = [] {
     // This check is invoked only once, even in a multithreading environment,
     // since it is invoked in the initializer of a static variable.
     if(runPython("from vtk import *") == 0)
@@ -95,32 +101,78 @@ inline int checkVTKFile(const std::string &name)
               << "vtk can read the files we wrote." << std::endl;
     return false;
   } ();
-  if(!havePythonVTK)
-  {
-    std::cerr << "skip: " << name << std::endl;
-    return 77;
-  }
 
-  std::string reader;
-  if     (is_suffix(name, ".vtu"))  reader = "vtkXMLUnstructuredGridReader";
-  else if(is_suffix(name, ".pvtu")) reader = "vtkXMLPUnstructuredGridReader";
-  else if(is_suffix(name, ".vtp"))  reader = "vtkXMLPolyDataReader";
-  else if(is_suffix(name, ".pvtp")) reader = "vtkXMLPPolyDataReader";
-  else DUNE_THROW(Dune::NotImplemented,
-                  "Unknown vtk file extension: " << name);
-
-  std::cout << "Loading " << name << " using python vtk" << std::endl;
-  std::string pycode =
-    "from vtk import *;"
-    "import sys;"
-    "reader = "+reader+"();"
-    "reader.SetFileName('"+pyq(name)+"');"
-    "reader.Update();"
-    // check that the number of of cells is > 0
-    "sys.exit(not (reader.GetOutput().GetNumberOfCells() > 0));";
-  int result = runPython(pycode);
-  std::cout << (result == 0 ? "pass: " : "fail: ") << name << std::endl;
   return result;
 }
+
+inline std::string pythonVTKReader(const std::string& filename)
+{
+  if     (is_suffix(filename, ".vtu"))  return "vtkXMLUnstructuredGridReader";
+  else if(is_suffix(filename, ".pvtu")) return "vtkXMLPUnstructuredGridReader";
+  else if(is_suffix(filename, ".vtp"))  return "vtkXMLPolyDataReader";
+  else if(is_suffix(filename, ".pvtp")) return "vtkXMLPPolyDataReader";
+  else DUNE_THROW(Dune::NotImplemented,
+                  "Unknown vtk file extension: " << filename);
+}
+
+} /* namespace Impl */
+
+class VTKChecker
+{
+public:
+  void push(const std::string& file)
+    {
+      auto res = files_.insert(file);
+      if (not res.second) {
+        testSuite_.check(false, "VTKChecker")
+          << "'" << file << "' was added multiple times";
+      }
+    }
+
+  int check()
+    {
+      if (not Impl::havePythonVTK()) {
+        return 77;
+      }
+      else if (not files_.empty()) {
+        const int result = Impl::runPython(generatePythonCode());
+        testSuite_.check(result == 0);
+      }
+      return testSuite_.exit();
+    }
+
+  const TestSuite& testSuite() const
+    {
+      return testSuite_;
+    }
+
+private:
+  std::string generatePythonCode() const
+    {
+      std::stringstream code;
+
+      code << "from vtk import *\n"
+           << "import sys\n"
+           << "passed = True\n";
+
+      for (const auto& file : files_) {
+        code << "reader = " << Impl::pythonVTKReader(file) << "()\n"
+             << "reader.SetFileName('" << Impl::pyq(file) << "')\n"
+             << "reader.Update()\n"
+             << "if (not (reader.GetOutput().GetNumberOfCells() > 0)):\n"
+             << "    print('ERROR in {}'.format('" << Impl::pyq(file) << "'))\n"
+             << "    passed = False\n";
+      }
+
+      code << "sys.exit(0 if passed else 1)\n";
+
+      return code.str();
+    }
+
+  std::set< std::string > files_;
+  TestSuite testSuite_;
+};
+
+} /* namespace Dune */
 
 #endif // DUNE_GRID_IO_FILE_TEST_CHECKVTKFILE_HH
