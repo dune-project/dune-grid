@@ -79,7 +79,7 @@ typedef UGGrid<dim> GridType;
 typedef GridType::LeafGridView GV;
 
 
-int main(int argc, char** argv) try
+int main(int argc, char** argv)
 {
 #if ! (HAVE_PARMETIS && defined(PARMETIS_MAJOR_VERSION))
   // Skip test -- without ParMetis it doesn't do anything useful
@@ -133,9 +133,10 @@ int main(int argc, char** argv) try
       std::cout << "   Refining level " << k << " on " << mpihelper.rank() << " ..." << std::endl;
 
       // select elements that are close to the sphere for grid refinement
-      for (auto eIt = gv.begin<0, Interior_Partition>(); eIt != gv.end<0, Interior_Partition>(); ++eIt) {
-        if (ball.distanceTo(eIt->geometry().center()) < epsilon)
-          grid->mark(1, *eIt);
+      for (const auto& element : elements(gv, Partitions::interior))
+      {
+        if (ball.distanceTo(element.geometry().center()) < epsilon)
+          grid->mark(1, element);
       }
 
       // adapt grid
@@ -175,8 +176,8 @@ int main(int argc, char** argv) try
       for (int k = 0; k < levels; ++k) {
         std::cout << "   Coarsening level " << k << " on " << mpihelper.rank() << " ..." << std::endl;
 
-        for (auto eIt = gv.begin<0, Interior_Partition>(); eIt != gv.end<0, Interior_Partition>(); ++eIt)
-          grid->mark(-1, *eIt);
+        for (const auto& element : elements(gv, Partitions::interior))
+          grid->mark(-1, element);
 
         // adapt grid
         grid->adapt();
@@ -189,7 +190,4 @@ int main(int argc, char** argv) try
 
   return 0;
 #endif   // (HAVE_PARMETIS && defined(PARMETIS_MAJOR_VERSION))
-}
-catch (Exception &e){
-  std::cerr << "Exception: " << e << std::endl;
 }
