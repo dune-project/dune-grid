@@ -20,7 +20,7 @@
 // be arsed to get local access to a Debian 8 just to cook up a test
 // Homebrew GCC 4.9 on my machine doesn't exhibit the problem
 #ifndef DOXYGEN
-#if (defined(__GNUC__) && (__GNUC__ < 5))
+#if ( defined(__GNUC__) && ( (__GNUC__ < 5) || ( (__GNUC__ == 5) && (__GNUC_MINOR__ <= 4) ) ) )
 #define USE_BROKEN_GCC_FRIEND_AUTO_WORKAROUND 1
 #endif
 #endif
