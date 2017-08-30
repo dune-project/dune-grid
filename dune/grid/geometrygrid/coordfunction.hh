@@ -3,6 +3,8 @@
 #ifndef DUNE_GEOGRID_COORDFUNCTION_HH
 #define DUNE_GEOGRID_COORDFUNCTION_HH
 
+#include <cassert>
+
 #include <dune/common/fvector.hh>
 #include <dune/common/std/type_traits.hh>
 
@@ -95,6 +97,10 @@ namespace Dune
       >
     evaluate ( const DV &x, RangeVector &y ) const
     {
+      assert(
+        static_cast<void(This::*)(const DomainVector&, RangeVector&) const>(&This::evaluate) !=
+        static_cast<void(Impl::*)(const DomainVector&, RangeVector&) const>(&Impl::evaluate) &&
+        "You need to implement either operator() or evaluate() in your coordinate function!");
       asImp().evaluate( x, y );
     }
 
