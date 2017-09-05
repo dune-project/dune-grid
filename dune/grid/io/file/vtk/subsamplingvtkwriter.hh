@@ -65,7 +65,9 @@ namespace Dune
      *
      * @param gridView         The gridView the grid functions live
      *                         on. (E. g. a LevelGridView.)
-     * @param level_           The level for the subrefinement.
+     * @param intervals_             A wrapper for the number of refined intervals on one
+     *                         axis as returned by either refinementIntervals() or
+     *                         refinementLevels().
      * @param coerceToSimplex_ Set this to true to always triangulate elements
      *                         into simplices, even where it's not necessary
      *                         (i.e. for hypercubes).
@@ -73,14 +75,31 @@ namespace Dune
      * The datamode is always nonconforming.
      */
     explicit SubsamplingVTKWriter (const GridView &gridView,
-                                   int level_, bool coerceToSimplex_ = false)
-      : Base(gridView, VTK::nonconforming)
-        , level(level_), coerceToSimplex(coerceToSimplex_)
+                                   Dune::RefinementIntervals intervals_, bool coerceToSimplex_ = false)
+        : Base(gridView, VTK::nonconforming)
+        , intervals(intervals_), coerceToSimplex(coerceToSimplex_)
     {
-      if(level_ < 0) {
-        DUNE_THROW(Dune::IOError,"SubsamplingVTKWriter: Negative Subsampling " << level_ << " must not be used!");
+      if(intervals_.intervals() < 1) {
+        DUNE_THROW(Dune::IOError,"SubsamplingVTKWriter: Negative Subsampling " << intervals_.intervals() << " must not be used!");
       }
     }
+    /**
+     * @brief Construct a SubsamplingVTKWriter working on a specific GridView.
+     *
+     * @param gridView         The gridView the grid functions live
+     *                         on. (E. g. a LevelGridView.)
+     * @param level_           The level for the subrefinement.
+     * @param coerceToSimplex_ Set this to true to always triangulate elements
+     *                         into simplices, even where it's not necessary
+     *                         (i.e. for hypercubes).
+     *
+     * The datamode is always nonconforming.
+     */
+    DUNE_DEPRECATED_MSG("SubsampligVTKWriter(GV,int,bool) is deprecated, use SubsamplingVTKWriter(GV,Dune::refinement{Intervals|Levels}(int),bool)")
+    explicit SubsamplingVTKWriter (const GridView &gridView,
+                                   int level_,  bool coerceToSimplex_ = false)
+        : SubsamplingVTKWriter(gridView, Dune::refinementIntervals(1<<level_), coerceToSimplex_)
+    { }
 
   private:
     GeometryType subsampledGeometryType(GeometryType geometryType) {
@@ -94,24 +113,24 @@ namespace Dune
     struct IteratorSelector
     {};
 
-    SubElementIterator refinementBegin(const Refinement& refinement, int level, IteratorSelector<SubElementIterator>)
+    SubElementIterator refinementBegin(const Refinement& refinement, Dune::RefinementIntervals intervals, IteratorSelector<SubElementIterator>)
     {
-      return refinement.eBegin(level);
+      return refinement.eBegin(intervals);
     }
 
-    SubVertexIterator refinementBegin(const Refinement& refinement, int level, IteratorSelector<SubVertexIterator>)
+    SubVertexIterator refinementBegin(const Refinement& refinement, Dune::RefinementIntervals intervals, IteratorSelector<SubVertexIterator>)
     {
-      return refinement.vBegin(level);
+      return refinement.vBegin(intervals);
     }
 
-    SubElementIterator refinementEnd(const Refinement& refinement, int level, IteratorSelector<SubElementIterator>)
+    SubElementIterator refinementEnd(const Refinement& refinement, Dune::RefinementIntervals intervals, IteratorSelector<SubElementIterator>)
     {
-      return refinement.eEnd(level);
+      return refinement.eEnd(intervals);
     }
 
-    SubVertexIterator refinementEnd(const Refinement& refinement, int level, IteratorSelector<SubVertexIterator>)
+    SubVertexIterator refinementEnd(const Refinement& refinement, Dune::RefinementIntervals intervals, IteratorSelector<SubVertexIterator>)
     {
-      return refinement.vEnd(level);
+      return refinement.vEnd(intervals);
     }
 
     template<typename Data, typename Iterator, typename SubIterator>
@@ -149,8 +168,8 @@ namespace Dune
             Refinement &refinement =
               buildRefinement<dim, ctype>(eit->type(),
                                           subsampledGeometryType(eit->type()));
-            for(SubIterator sit = refinementBegin(refinement,level,sis),
-                  send = refinementEnd(refinement,level,sis);
+            for(SubIterator sit = refinementBegin(refinement,intervals,sis),
+                  send = refinementEnd(refinement,intervals,sis);
                 sit != send;
                 ++sit)
               {
@@ -194,7 +213,7 @@ namespace Dune
     template<class V>
     void addCellData (const V& v, const std::string &name, int ncomps=1);
 
-    int level;
+    Dune::RefinementIntervals intervals;
     bool coerceToSimplex;
   };
 
@@ -209,9 +228,9 @@ namespace Dune
     {
       Refinement &refinement = buildRefinement<dim, ctype>(it->type(), subsampledGeometryType(it->type()));
 
-      ncells += refinement.nElements(level);
-      nvertices += refinement.nVertices(level);
-      ncorners += refinement.nElements(level) * refinement.eBegin(level).vertexIndices().size();
+      ncells += refinement.nElements(intervals);
+      nvertices += refinement.nVertices(intervals);
+      ncorners += refinement.nElements(intervals) * refinement.eBegin(intervals).vertexIndices().size();
     }
   }
 
@@ -266,8 +285,8 @@ namespace Dune
         Refinement &refinement =
           buildRefinement<dim, ctype>(i->type(),
                                       subsampledGeometryType(i->type()));
-        for(SubVertexIterator sit = refinement.vBegin(level),
-            send = refinement.vEnd(level);
+        for(SubVertexIterator sit = refinement.vBegin(intervals),
+            send = refinement.vEnd(intervals);
             sit != send; ++sit)
         {
           FieldVector<ctype, dimw> coords = i->geometry().global(sit.coords());
@@ -301,15 +320,15 @@ namespace Dune
           GeometryType coercedToType = subsampledGeometryType(i->type());
           Refinement &refinement =
             buildRefinement<dim, ctype>(i->type(), coercedToType);
-          for(SubElementIterator sit = refinement.eBegin(level),
-              send = refinement.eEnd(level);
+          for(SubElementIterator sit = refinement.eBegin(intervals),
+              send = refinement.eEnd(intervals);
               sit != send; ++sit)
           {
             IndexVector indices = sit.vertexIndices();
             for(unsigned int ii = 0; ii < indices.size(); ++ii)
               p1->write(offset+indices[VTK::renumber(coercedToType, ii)]);
           }
-          offset += refinement.nVertices(level);
+          offset += refinement.nVertices(intervals);
         }
       }
     }
@@ -327,8 +346,8 @@ namespace Dune
             buildRefinement<dim, ctype>(i->type(),
                                         subsampledGeometryType(i->type()));
           unsigned int verticesPerCell =
-            refinement.eBegin(level).vertexIndices().size();
-          for(int element = 0; element < refinement.nElements(level);
+            refinement.eBegin(intervals).vertexIndices().size();
+          for(int element = 0; element < refinement.nElements(intervals);
               ++element)
           {
             offset += verticesPerCell;
@@ -350,7 +369,7 @@ namespace Dune
           Refinement &refinement =
             buildRefinement<dim, ctype>(it->type(), coerceTo);
           int vtktype = VTK::geometryType(coerceTo);
-          for(int i = 0; i < refinement.nElements(level); ++i)
+          for(int i = 0; i < refinement.nElements(intervals); ++i)
             p3->write(vtktype);
         }
     }

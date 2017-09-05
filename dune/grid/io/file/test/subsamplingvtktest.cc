@@ -84,11 +84,14 @@ struct Acc
 };
 
 template< class GridView >
-int doWrite( Dune::VTKChecker& vtkChecker, const std::string& gridViewName, const GridView &gridView, bool coerceToSimplex)
+int doWrite( Dune::VTKChecker& vtkChecker, const std::string& gridViewName,
+             const GridView &gridView, bool coerceToSimplex,
+             const std::string &refinementName,
+             Dune::RefinementIntervals intervals )
 {
   enum { dim = GridView :: dimension };
 
-  Dune :: SubsamplingVTKWriter< GridView > vtk( gridView, 1, coerceToSimplex);
+  Dune :: SubsamplingVTKWriter< GridView > vtk( gridView, intervals, coerceToSimplex);
 
   // disabled due to FS#676:
   // const typename GridView :: IndexSet &is = gridView.indexSet();
@@ -105,7 +108,7 @@ int doWrite( Dune::VTKChecker& vtkChecker, const std::string& gridViewName, cons
   std::string name;
   std::ostringstream prefix;
   prefix << "subsamplingvtktest-" << dim << "D-" << gridViewName << "-"
-         << (coerceToSimplex ? "simplex" : "natural");
+         << (coerceToSimplex ? "simplex" : "natural") << "-" << refinementName;
   int rank = gridView.comm().rank();
 
   name = vtk.write(prefix.str() + "-ascii");
@@ -121,6 +124,8 @@ template<int dim>
 int vtkCheck(Dune::VTKChecker& vtkChecker, const std::array<int, dim>& elements,
               const Dune::FieldVector<double, dim>& upperRight)
 {
+  using Dune::refinementIntervals;
+  using Dune::refinementLevels;
   Dune::YaspGrid<dim> g(upperRight, elements);
 
   if(g.comm().rank() == 0)
@@ -132,13 +137,37 @@ int vtkCheck(Dune::VTKChecker& vtkChecker, const std::array<int, dim>& elements,
 
   int result = 0;
 
-  acc(result, doWrite( vtkChecker, "leafview", g.leafGridView(), false));
-  acc(result, doWrite( vtkChecker, "coarselevelview", g.levelGridView( 0 ), false));
-  acc(result, doWrite( vtkChecker, "finelevelview", g.levelGridView( g.maxLevel() ), false));
+  auto leafview = g.leafGridView();
+  auto coarselevelview = g.levelGridView( 0 );
+  auto finelevelview = g.levelGridView( g.maxLevel() );
 
-  acc(result, doWrite( vtkChecker, "leafview", g.leafGridView(), true));
-  acc(result, doWrite( vtkChecker, "coarselevelview", g.levelGridView( 0 ), true));
-  acc(result, doWrite( vtkChecker, "finelevelview", g.levelGridView( g.maxLevel() ), true));
+  acc(result, doWrite( vtkChecker, "leafview",        leafview,        true,
+                       "intervals3", refinementIntervals(3)));
+  acc(result, doWrite( vtkChecker, "coarselevelview", coarselevelview, true,
+                       "intervals3", refinementIntervals(3)));
+  acc(result, doWrite( vtkChecker, "finelevelview",   finelevelview,   true,
+                       "intervals3", refinementIntervals(3)));
+
+  acc(result, doWrite( vtkChecker, "leafview",        leafview,        true,
+                       "levels1",    refinementLevels(1)));
+  acc(result, doWrite( vtkChecker, "coarselevelview", coarselevelview, true,
+                       "levels1",    refinementLevels(1)));
+  acc(result, doWrite( vtkChecker, "finelevelview",   finelevelview,   true,
+                       "levels1",    refinementLevels(1)));
+
+  acc(result, doWrite( vtkChecker, "leafview",        leafview,        false,
+                       "intervals3", refinementIntervals(3)));
+  acc(result, doWrite( vtkChecker, "coarselevelview", coarselevelview, false,
+                       "intervals3", refinementIntervals(3)));
+  acc(result, doWrite( vtkChecker, "finelevelview",   finelevelview,   false,
+                       "intervals3", refinementIntervals(3)));
+
+  acc(result, doWrite( vtkChecker, "leafview",        leafview,        false,
+                       "levels1",    refinementLevels(1)));
+  acc(result, doWrite( vtkChecker, "coarselevelview", coarselevelview, false,
+                       "levels1",    refinementLevels(1)));
+  acc(result, doWrite( vtkChecker, "finelevelview",   finelevelview,   false,
+                       "levels1",    refinementLevels(1)));
 
   return result;
 }
