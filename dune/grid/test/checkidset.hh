@@ -52,7 +52,7 @@ namespace Dune
               // have the same entity center.
               // CAVEAT: This last reasoning does not hold if the grid uses parametrized
               // elements or parametrized boundaries.
-              if (! FloatCmp::eq(entity.geometry().center(), idContainer[id]))
+              if (! FloatCmp::eq(entity.geometry().center(), idContainer[id], 1e-12 ))
                 DUNE_THROW(GridError, "IdSet is not injective");
             }
             else
