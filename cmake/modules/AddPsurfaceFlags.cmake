@@ -13,7 +13,7 @@
 function(add_dune_psurface_flags _targets)
   if(PSURFACE_FOUND)
     foreach(_target ${_targets})
-      target_link_libraries(${_target} ${PSURFACE_DUNE_LIBRARIES})
+      target_link_libraries(${_target} PUBLIC ${PSURFACE_DUNE_LIBRARIES})
       get_target_property(_props ${_target} COMPILE_FLAGS)
       string(REPLACE "_props-NOTFOUND" "" _props "${_props}")
       set_target_properties(${_target} PROPERTIES COMPILE_FLAGS

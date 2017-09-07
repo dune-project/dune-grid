@@ -44,9 +44,9 @@ function(add_dune_ug_flags)
       if(NOT ADD_UG_OBJECT)
         foreach(_target ${ADD_UG_UNPARSED_ARGUMENTS})
           if(NOT ADD_UG_NO_LINK_DUNEGRID)
-            target_link_libraries(${_target} dunegrid)
+            target_link_libraries(${_target} PUBLIC dunegrid)
           endif()
-          target_link_libraries(${_target}
+          target_link_libraries(${_target} PUBLIC
             ${UG_LIBRARIES} ${DUNE_LIBS})
         endforeach()
       endif()
