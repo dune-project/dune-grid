@@ -310,7 +310,7 @@ namespace Dune
       {
         DataHandle dh(*this);
         gridPtr_->loadBalance( dh.interface() );
-        gridPtr_->communicate( dh.interface(), InteriorBorder_All_Interface,ForwardCommunication);
+        gridPtr_->leafGridView().communicate( dh.interface(), InteriorBorder_All_Interface,ForwardCommunication);
       } else
       {
         gridPtr_->loadBalance();
