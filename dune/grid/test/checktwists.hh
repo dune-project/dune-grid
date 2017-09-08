@@ -28,17 +28,12 @@ struct NoMapTwist
 template< class Intersection, class MapTwist >
 int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist &mapTwist )
 {
-  typedef typename Intersection::ctype ctype;
-
   const int dimension = Intersection::dimension;
 
   typedef typename Intersection::Entity Entity;
   typedef typename Entity::Geometry Geometry;
 
   typedef typename Intersection::LocalGeometry LocalGeometry;
-
-  typedef Dune::ReferenceElements< ctype, dimension > ReferenceElements;
-  typedef typename ReferenceElements::ReferenceElement ReferenceElement;
 
   typedef Dune::FieldVector< typename Geometry::ctype, Geometry::coorddimension >
   WorldVector;
