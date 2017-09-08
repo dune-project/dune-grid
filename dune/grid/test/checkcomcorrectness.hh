@@ -97,8 +97,8 @@ namespace Dune {
 
         bool operator()(Dune::GeometryType gt, int dim) const
         {
-          return gt.dim() == dim - _codim;
-          }
+          return (static_cast< int >( gt.dim() ) == dim - _codim);
+        }
 
         int _codim;
 
