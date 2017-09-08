@@ -39,9 +39,8 @@ public:
 
 
     // insert elements
-    Dune::GeometryType type; type.makeTetrahedron();
     std::vector<unsigned int> vid(4);
-    vid[0] = 0; vid[1] = 1; vid[2] = 2; vid[3] = 3; gf.insertElement(type, vid);
+    vid[0] = 0; vid[1] = 1; vid[2] = 2; vid[3] = 3; gf.insertElement(Dune::GeometryTypes::tetrahedron, vid);
 
     return std::shared_ptr<Grid>(gf.createGrid());
   }
@@ -66,16 +65,13 @@ public:
     pos[0] = 0; pos[1] = 1; pos[2] = 1; gf.insertVertex(pos);
     pos[0] = 1; pos[1] = 1; pos[2] = 1; gf.insertVertex(pos);
 
-    Dune::GeometryType type;
-    type.makeTetrahedron();
     std::vector<unsigned int> vid(4);
-
-    vid[0] = 0; vid[1] = 1; vid[2] = 3; vid[3] = 7; gf.insertElement(type, vid);
-    vid[0] = 0; vid[1] = 2; vid[2] = 3; vid[3] = 7; gf.insertElement(type, vid);
-    vid[0] = 0; vid[1] = 2; vid[2] = 6; vid[3] = 7; gf.insertElement(type, vid);
-    vid[0] = 0; vid[1] = 4; vid[2] = 6; vid[3] = 7; gf.insertElement(type, vid);
-    vid[0] = 0; vid[1] = 4; vid[2] = 5; vid[3] = 7; gf.insertElement(type, vid);
-    vid[0] = 0; vid[1] = 1; vid[2] = 5; vid[3] = 7; gf.insertElement(type, vid);
+    vid[0] = 0; vid[1] = 1; vid[2] = 3; vid[3] = 7; gf.insertElement(Dune::GeometryTypes::tetrahedron, vid);
+    vid[0] = 0; vid[1] = 2; vid[2] = 3; vid[3] = 7; gf.insertElement(Dune::GeometryTypes::tetrahedron, vid);
+    vid[0] = 0; vid[1] = 2; vid[2] = 6; vid[3] = 7; gf.insertElement(Dune::GeometryTypes::tetrahedron, vid);
+    vid[0] = 0; vid[1] = 4; vid[2] = 6; vid[3] = 7; gf.insertElement(Dune::GeometryTypes::tetrahedron, vid);
+    vid[0] = 0; vid[1] = 4; vid[2] = 5; vid[3] = 7; gf.insertElement(Dune::GeometryTypes::tetrahedron, vid);
+    vid[0] = 0; vid[1] = 1; vid[2] = 5; vid[3] = 7; gf.insertElement(Dune::GeometryTypes::tetrahedron, vid);
 
     gf.markLongestEdge();
     return std::shared_ptr<Grid>(gf.createGrid());
@@ -101,20 +97,17 @@ public:
     pos[0] = 0; pos[1] = 1; pos[2] = 1; gf.insertVertex(pos);
     pos[0] = 1; pos[1] = 1; pos[2] = 1; gf.insertVertex(pos);
 
-    Dune::GeometryType type;
-    type.makeTetrahedron();
     std::vector<unsigned int> vid(4);
-
     // tet at vertex 0
-    vid[0] = 0; vid[1] = 1; vid[2] = 2; vid[3] = 4; gf.insertElement(type, vid);
+    vid[0] = 0; vid[1] = 1; vid[2] = 2; vid[3] = 4; gf.insertElement(Dune::GeometryTypes::tetrahedron, vid);
     // tet at vertex 3
-    vid[0] = 1; vid[1] = 2; vid[2] = 3; vid[3] = 7; gf.insertElement(type, vid);
+    vid[0] = 1; vid[1] = 2; vid[2] = 3; vid[3] = 7; gf.insertElement(Dune::GeometryTypes::tetrahedron, vid);
     // central tet
-    vid[0] = 1; vid[1] = 2; vid[2] = 4; vid[3] = 7; gf.insertElement(type, vid);
+    vid[0] = 1; vid[1] = 2; vid[2] = 4; vid[3] = 7; gf.insertElement(Dune::GeometryTypes::tetrahedron, vid);
     // tet at vertex 5
-    vid[0] = 1; vid[1] = 4; vid[2] = 5; vid[3] = 7; gf.insertElement(type, vid);
+    vid[0] = 1; vid[1] = 4; vid[2] = 5; vid[3] = 7; gf.insertElement(Dune::GeometryTypes::tetrahedron, vid);
     // tet at vertex 6
-    vid[0] = 2; vid[1] = 4; vid[2] = 6; vid[3] = 7; gf.insertElement(type, vid);
+    vid[0] = 2; vid[1] = 4; vid[2] = 6; vid[3] = 7; gf.insertElement(Dune::GeometryTypes::tetrahedron, vid);
 
     gf.markLongestEdge();
     return std::shared_ptr<Grid>(gf.createGrid());
