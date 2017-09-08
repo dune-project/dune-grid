@@ -120,14 +120,14 @@ namespace Dune
                 << std::endl;
 
       std::cout << prefix << "codim " << dim << " subindex";
-      for (int i=0; i < element.subEntities(dim); i++)
+      for (unsigned int i=0; i < element.subEntities(dim); i++)
       {
         std::cout << " " << i << ":" << grid.levelIndexSet(level).subIndex(element,i,dim);
       }
       std::cout << std::endl;
 
       std::cout << prefix << "codim " << dim-1 << " subindex";
-      for (int i=0; i < element.subEntities(dim-1); i++)
+      for (unsigned int i=0; i < element.subEntities(dim-1); i++)
       {
         std::cout << " " << i << ":" << grid.levelIndexSet(level).subIndex(element,i,dim-1);
       }
@@ -195,14 +195,14 @@ namespace Dune
                 << std::endl;
 
       std::cout << prefix << "codim " << dim << " subindex";
-      for (int i=0; i < element.subEntities(dim); i++)
+      for (unsigned int i=0; i < element.subEntities(dim); i++)
       {
         std::cout << " " << i << ":" << grid.leafIndexSet().subIndex(element,i,dim);
       }
       std::cout << std::endl;
 
       std::cout << prefix << "codim " << dim-1 << " subindex";
-      for (int i=0; i < element.subEntities(dim-1); i++)
+      for (unsigned int i=0; i < element.subEntities(dim-1); i++)
       {
         std::cout << " " << i << ":" << grid.leafIndexSet().subIndex(element,i,dim-1);
       }
