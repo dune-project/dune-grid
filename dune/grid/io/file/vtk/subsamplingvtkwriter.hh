@@ -102,12 +102,10 @@ namespace Dune
     { }
 
   private:
-    GeometryType subsampledGeometryType(GeometryType geometryType) {
-      if(geometryType.isCube() && !coerceToSimplex) { /* nothing */ }
-      else geometryType.makeSimplex(dim);
-      return geometryType;
+    GeometryType subsampledGeometryType(GeometryType geometryType)
+    {
+      return (geometryType.isCube() && !coerceToSimplex ? geometryType : GeometryTypes::simplex(dim));
     }
-
 
     template<typename SubIterator>
     struct IteratorSelector
