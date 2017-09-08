@@ -111,8 +111,7 @@ namespace Dune
   template< int codim, int dim, class Grid >
   inline GeometryType AlbertaGridEntity< codim, dim, Grid >::type () const
   {
-    typedef typename Impl::SimplexTopology< mydimension >::type Topology;
-    return GeometryType( Topology() );
+    return GeometryTypes::simplex( mydimension );
   }
 
 
@@ -267,8 +266,7 @@ namespace Dune
   template< int dim, class Grid >
   inline GeometryType AlbertaGridEntity< 0, dim, Grid>::type () const
   {
-    typedef typename Impl::SimplexTopology< mydimension >::type Topology;
-    return GeometryType( Topology() );
+    return GeometryTypes::simplex( mydimension );
   }
 
 

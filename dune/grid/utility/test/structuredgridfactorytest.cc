@@ -41,8 +41,8 @@ try {
                                                                                       FieldVector<double,1>(1),
                                                                                       elements1d);
 
-  assert(onedCubeGrid->size(1) == elements1d[0]+1);
-  assert(onedCubeGrid->size(0) == elements1d[0]);
+  assert(onedCubeGrid->size(1) == static_cast< int >(elements1d[0]+1));
+  assert(onedCubeGrid->size(0) == static_cast< int >(elements1d[0]));
 
   gridcheck(*onedCubeGrid);
 
@@ -52,8 +52,8 @@ try {
                                                                                             FieldVector<double,1>(1),
                                                                                             elements1d);
 
-  assert(onedCubeGrid->size(1) == elements1d[0]+1);
-  assert(onedCubeGrid->size(0) == elements1d[0]);
+  assert(onedCubeGrid->size(1) == static_cast< int >(elements1d[0]+1));
+  assert(onedCubeGrid->size(0) == static_cast< int >(elements1d[0]));
 
   gridcheck(*onedSimplexGrid);
 
@@ -63,8 +63,8 @@ try {
                                                         FieldVector<double,1>(1),
                                                         elements1d);
 
-  assert(yaspGrid1d->size(1) == elements1d[0]+1);
-  assert(yaspGrid1d->size(0) == elements1d[0]);
+  assert(yaspGrid1d->size(1) == static_cast< int >(elements1d[0]+1));
+  assert(yaspGrid1d->size(0) == static_cast< int >(elements1d[0]));
 
   gridcheck(*yaspGrid1d);
 
@@ -74,8 +74,8 @@ try {
                                                                 FieldVector<double,1>(1),
                                                                 elements1d);
 
-    assert(yaspGridOff1d->size(1) == elements1d[0]+1);
-    assert(yaspGridOff1d->size(0) == elements1d[0]);
+    assert(yaspGridOff1d->size(1) == static_cast< int >(elements1d[0]+1));
+    assert(yaspGridOff1d->size(0) == static_cast< int >(elements1d[0]));
 
     gridcheck(*yaspGridOff1d);
   }
@@ -95,8 +95,8 @@ try {
                                                           FieldVector<double,2>(1),
                                                           elements2d);
 
-  assert(yaspGrid2d->size(2) == numVertices2d);
-  assert(yaspGrid2d->size(0) == numCubes2d);
+  assert(yaspGrid2d->size(2) == static_cast< int >(numVertices2d));
+  assert(yaspGrid2d->size(0) == static_cast< int >(numCubes2d));
 
   gridcheck(*yaspGrid2d);
 
@@ -106,8 +106,8 @@ try {
                                                               FieldVector<double,2>(1),
                                                               elements2d);
 
-      assert(yaspGridOff2d->size(2) == numVertices2d);
-      assert(yaspGridOff2d->size(0) == numCubes2d);
+      assert(yaspGridOff2d->size(2) == static_cast< int >(numVertices2d));
+      assert(yaspGridOff2d->size(0) == static_cast< int >(numCubes2d));
 
       gridcheck(*yaspGridOff2d);
   }
