@@ -3,7 +3,10 @@
 #ifndef DUNE_GEOGRID_COORDFUNCTION_HH
 #define DUNE_GEOGRID_COORDFUNCTION_HH
 
+#include <cassert>
+
 #include <dune/common/fvector.hh>
+#include <dune/common/std/type_traits.hh>
 
 namespace Dune
 {
@@ -66,14 +69,45 @@ namespace Dune
     This &operator= ( const This & ) = default;
     This &operator= ( This && ) = default;
 
+    // helper for picking the correct version of evaluate further down
+    template<typename F, typename DV>
+    using has_operator_parentheses = decltype(std::declval<F>()(std::declval<DV>()));
+
   public:
+
+#ifdef DOXYGEN
+
     //! evaluate method for global mapping
-    void evaluate ( const DomainVector &x, RangeVector &y ) const
+    void evaluate ( const DomainVector &x, RangeVector &y ) const;
+
+#else
+
+    template<typename DV>
+    std::enable_if_t<
+      Std::is_detected<has_operator_parentheses,Impl,DV>::value
+      >
+    evaluate ( const DV &x, RangeVector &y ) const
     {
-      return asImp().evaluate( x, y );
+      y = asImp()(x);
     }
 
+    template<typename DV>
+    std::enable_if_t<
+      not Std::is_detected<has_operator_parentheses,Impl,DV>::value
+      >
+    evaluate ( const DV &x, RangeVector &y ) const
+    {
+      assert(
+        static_cast<void(This::*)(const DomainVector&, RangeVector&) const>(&This::evaluate) !=
+        static_cast<void(Impl::*)(const DomainVector&, RangeVector&) const>(&Impl::evaluate) &&
+        "You need to implement either operator() or evaluate() in your coordinate function!");
+      asImp().evaluate( x, y );
+    }
+
+#endif // DOXYGEN
+
   protected:
+
     const Implementation &asImp () const
     {
       return static_cast< const Implementation & >( *this );
@@ -112,7 +146,7 @@ namespace Dune
     This &operator= ( This && ) = default;
 
   private:
-    void evaluate ( const DomainVector &x, RangeVector &y ) const;
+
   };
 
 
