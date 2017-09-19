@@ -4,6 +4,7 @@ __metaclass__ = type
 import dune.common as common
 from ..generator.generator import SimpleGenerator
 from dune.common.hashit import hashIt
+from dune.deprecate import deprecated
 
 def getDimgrid(constructor):
     dimgrid = None
@@ -51,11 +52,19 @@ def writeVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointve
         vtk.write(name, number)
     return vtk
 
+@deprecated
+def globalGridFunction(gv, evaluator):
+    return gv.gridFunction(evaluator)
+@deprecated
+def localGridFunction(gv, evaluator):
+    return gv.gridFunction( lambda x: evaluator(x.entity,x.local) )
 
 def addAttr(module, cls):
     setattr(cls, "_module", module)
     setattr(cls, "triangulation", triangulation)
     setattr(cls, "writeVTK", writeVTK)
+    setattr(cls, "globalGridFunction", globalGridFunction)
+    setattr(cls, "localGridFunction", localGridFunction)
 
 
 generator = SimpleGenerator("HierarchicalGrid", "Dune::CorePy")
