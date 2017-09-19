@@ -408,7 +408,7 @@ struct GridViewInterface
     gv.grid();
 
     gv.size( 0 );
-    gv.size( Dune::GeometryType( Dune::GeometryType::cube, GridView::dimension ) );
+    gv.size( Dune::GeometryTypes::cube( GridView::dimension ) );
 
     gv.template begin< 0 >();
     gv.template end< 0 >();
@@ -499,9 +499,9 @@ struct GridInterface
     // number of leaf entities per codim in this process
     g.size(0);
     // number of entities per level and geometry type in this process
-    g.size(0, Dune::GeometryType(Dune::GeometryType::cube,Grid::dimension));
+    g.size(0, Dune::GeometryTypes::cube(Grid::dimension));
     // number of leaf entities per geometry type in this process
-    g.size(Dune::GeometryType(Dune::GeometryType::cube,Grid::dimension));
+    g.size(Dune::GeometryTypes::cube(Grid::dimension));
 
     DUNE_NO_DEPRECATED_BEGIN
     // Check overlap and ghost size on level 0
@@ -539,13 +539,13 @@ struct GridInterface
     }
 
     g.levelIndexSet(0).
-    size(Dune::GeometryType(Dune::GeometryType::simplex,Grid::dimension));
+      size(Dune::GeometryTypes::simplex(Grid::dimension));
     for( int codim = 0; codim < Grid::dimension; ++codim )
       g.levelIndexSet( 0 ).types( codim );
 
     /** \todo Test for subindex is missing, because I don't know yet
        how to test for the existence of certain codims */
-    g.leafIndexSet().size(Dune::GeometryType(Dune::GeometryType::simplex,Grid::dimension));
+    g.leafIndexSet().size(Dune::GeometryTypes::simplex(Grid::dimension));
     for( int codim = 0; codim < Grid::dimension; ++codim )
       g.leafIndexSet().types( codim );
 

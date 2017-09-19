@@ -26,7 +26,7 @@ std::unique_ptr<OneDGrid> testFactory()
     factory.insertVertex(pos);
 
   // Insert elements
-  GeometryType segment(GeometryType::simplex,1);
+  GeometryType segment = GeometryTypes::line;
   factory.insertElement(segment, {6,1});
   factory.insertElement(segment, {4,0});
   factory.insertElement(segment, {0,6});

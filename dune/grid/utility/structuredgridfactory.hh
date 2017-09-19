@@ -137,8 +137,7 @@ namespace Dune {
           for (size_t j=0; j<corners.size(); j++)
             corners[j] += base;
 
-          factory.insertElement
-            (GeometryType(GeometryType::cube, dim), corners);
+          factory.insertElement(GeometryTypes::cube(dim), corners);
 
         }
 
@@ -210,9 +209,7 @@ namespace Dune {
               corners[j+1] =
                 corners[j] + unitOffsets[permutation[j]];
 
-            factory.insertElement
-              (GeometryType(GeometryType::simplex, dim),
-              corners);
+            factory.insertElement (GeometryTypes::simplex(dim), corners);
 
           } while (std::next_permutation(permutation.begin(),
                                          permutation.end()));

@@ -105,7 +105,7 @@ namespace Dune
     // write all elements of type elementType
     void writeAllElements( const std::vector<ElementSeed>& elementSeeds,
                            const IndexSet& indexSet,
-                           const GeometryType& elementType,
+                           GeometryType elementType,
                            const std::vector< Index >& vertexIndex,
                            std::ostream &gridout ) const
     {
@@ -126,7 +126,7 @@ namespace Dune
     // write one element
     void writeElement( const Element& element,
                        const IndexSet& indexSet,
-                       const GeometryType& elementType,
+                       GeometryType elementType,
                        const std::vector< Index >& vertexIndex,
                        std::ostream &gridout ) const
     {
@@ -222,7 +222,7 @@ namespace Dune
     if( dimGrid > 1 )
     {
       // type of element to write
-      GeometryType simplex( GeometryType::simplex, dimGrid );
+      GeometryType simplex = GeometryTypes::simplex( dimGrid );
 
       // only write simplex block if grid view contains simplices
       if( indexSet.size( simplex ) > 0 )
@@ -240,7 +240,7 @@ namespace Dune
 
     {
       // cube geometry type
-      GeometryType cube( GeometryType::cube, dimGrid );
+      GeometryType cube = GeometryTypes::cube( dimGrid );
 
       // only write cube block if grid view contains cubes
       if( indexSet.size( cube ) > 0 )

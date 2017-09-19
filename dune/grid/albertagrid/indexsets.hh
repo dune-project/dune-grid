@@ -133,7 +133,7 @@ namespace Dune
     {
       assert( (codim >= 0) && (codim <= dimension) );
       std::array< GeometryType, 1 > types;
-      types[ 0 ] = GeometryType( GeometryType::simplex, dimension - codim );
+      types[ 0 ] = GeometryTypes::simplex( dimension - codim );
       return types;
     }
 
@@ -362,8 +362,7 @@ namespace Dune
       {
         indices_[ codim ] = 0;
 
-        const GeometryType type( GeometryType::simplex, dimension - codim );
-        geomTypes_[ codim ].push_back( type );
+        geomTypes_[ codim ].push_back( GeometryTypes::simplex( dimension - codim ) );
       }
     }
 
@@ -433,7 +432,7 @@ namespace Dune
     {
       assert( (codim >= 0) && (codim <= dimension) );
       std::array< GeometryType, 1 > types;
-      types[ 0 ] = GeometryType( GeometryType::simplex, dimension - codim );
+      types[ 0 ] = GeometryTypes::simplex( dimension - codim );
       return types;
     }
 

@@ -27,9 +27,9 @@ GeometryType UGGridGeometry<mydim,coorddim,GridImp>::type() const
 
     switch (UG_NS<coorddim>::Tag(target_)) {
     case UG::D2::TRIANGLE :
-      return GeometryType(GeometryType::simplex,2);
+      return GeometryTypes::triangle;
     case UG::D2::QUADRILATERAL :
-      return GeometryType(GeometryType::cube,2);
+      return GeometryTypes::quadrilateral;
     default :
       DUNE_THROW(GridError, "UGGridGeometry::type():  ERROR:  Unknown type "
                  << UG_NS<coorddim>::Tag(target_) << " found!");
@@ -39,13 +39,13 @@ GeometryType UGGridGeometry<mydim,coorddim,GridImp>::type() const
     switch (UG_NS<coorddim>::Tag(target_)) {
 
     case UG::D3::TETRAHEDRON :
-      return GeometryType(GeometryType::simplex,3);
+      return GeometryTypes::tetrahedron;
     case UG::D3::PYRAMID :
-      return GeometryType(GeometryType::pyramid,3);
+      return GeometryTypes::pyramid;
     case UG::D3::PRISM :
-      return GeometryType(GeometryType::prism,3);
+      return GeometryTypes::prism;
     case UG::D3::HEXAHEDRON :
-      return GeometryType(GeometryType::cube,3);
+      return GeometryTypes::tetrahedron;
     default :
       DUNE_THROW(GridError, "UGGridGeometry::type():  ERROR:  Unknown type "
                  << UG_NS<coorddim>::Tag(target_) << " found!");

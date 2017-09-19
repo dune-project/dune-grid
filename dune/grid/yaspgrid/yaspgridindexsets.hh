@@ -38,7 +38,7 @@ namespace Dune {
 
       // contains a single element type;
       for (int codim=0; codim<=GridImp::dimension; codim++)
-        mytypes[codim].push_back(GeometryType(GeometryType::cube,GridImp::dimension-codim));
+        mytypes[codim].push_back(GeometryTypes::cube(GridImp::dimension-codim));
     }
 
     /** \brief Level grid view constructor stores reference to a grid and level */
@@ -49,7 +49,7 @@ namespace Dune {
 
       // contains a single element type;
       for (int codim=0; codim<=GridImp::dimension; codim++)
-        mytypes[codim].push_back(GeometryType(GeometryType::cube,GridImp::dimension-codim));
+        mytypes[codim].push_back(GeometryTypes::cube(GridImp::dimension-codim));
     }
 
     //! get index of an entity

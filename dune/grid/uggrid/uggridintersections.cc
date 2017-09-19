@@ -114,7 +114,7 @@ UGGridLevelIntersection<GridImp>::geometryInInside () const
 
     int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
     std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
-    GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
+    GeometryType intersectionGeometryType =  (numCornersOfSide==4) ? GeometryTypes::cube(dim-1) : GeometryTypes::simplex(dim-1);
 
     for (int i=0; i<numCornersOfSide; i++) {
 
@@ -143,7 +143,7 @@ UGGridLevelIntersection<GridImp>::geometry () const
 
     int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
     std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
-    GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
+    GeometryType intersectionGeometryType = (numCornersOfSide==4) ? GeometryTypes::cube(dim-1) : GeometryTypes::simplex(dim-1);
 
     for (int i=0; i<numCornersOfSide; i++) {
 
@@ -182,7 +182,7 @@ UGGridLevelIntersection<GridImp>::geometryInOutside () const
     // ///////////////////////////////////////
     int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_,neighborCount_);
     std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
-    GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
+    GeometryType intersectionGeometryType = (numCornersOfSide==4) ? GeometryTypes::cube(dim-1) : GeometryTypes::simplex(dim-1);
 
     for (int i=0; i<numCornersOfSide; i++) {
 
@@ -270,7 +270,7 @@ UGGridLeafIntersection< GridImp >::geometryInInside () const
 
       int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
       std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
-      GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
+      GeometryType intersectionGeometryType = (numCornersOfSide==4) ? GeometryTypes::cube(dim-1) : GeometryTypes::simplex(dim-1);
 
       for (int i=0; i<numCornersOfSide; i++)
       {
@@ -290,7 +290,7 @@ UGGridLeafIntersection< GridImp >::geometryInInside () const
 
       int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(otherFace.first, otherFace.second);
       std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
-      GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
+      GeometryType intersectionGeometryType = (numCornersOfSide==4) ? GeometryTypes::cube(dim-1) : GeometryTypes::simplex(dim-1);
 
       for (int i=0; i<numCornersOfSide; i++) {
 
@@ -339,7 +339,7 @@ UGGridLeafIntersection< GridImp >::geometry () const
 
       int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
       std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
-      GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
+      GeometryType intersectionGeometryType = (numCornersOfSide==4) ? GeometryTypes::cube(dim-1) : GeometryTypes::simplex(dim-1);
 
       for (int i=0; i<numCornersOfSide; i++) {
 
@@ -359,7 +359,7 @@ UGGridLeafIntersection< GridImp >::geometry () const
 
       int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(otherFace.first, otherFace.second);
       std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
-      GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
+      GeometryType intersectionGeometryType = (numCornersOfSide==4) ? GeometryTypes::cube(dim-1) : GeometryTypes::simplex(dim-1);
 
       for (int i=0; i<numCornersOfSide; i++) {
 
@@ -405,7 +405,7 @@ UGGridLeafIntersection< GridImp >::geometryInOutside () const
 
       int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
       std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
-      GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
+      GeometryType intersectionGeometryType = (numCornersOfSide==4) ? GeometryTypes::cube(dim-1) : GeometryTypes::simplex(dim-1);
 
       for (int i=0; i<numCornersOfSide; i++) {
 
@@ -436,7 +436,7 @@ UGGridLeafIntersection< GridImp >::geometryInOutside () const
 
       int numCornersOfSide = UG_NS<dim>::Corners_Of_Side(otherFace.first, otherFace.second);
       std::vector<FieldVector<UGCtype,dim> > coordinates(numCornersOfSide);
-      GeometryType intersectionGeometryType( (numCornersOfSide==4) ? GeometryType::cube : GeometryType::simplex ,dim-1);
+      GeometryType intersectionGeometryType = (numCornersOfSide==4) ? GeometryTypes::cube(dim-1) : GeometryTypes::simplex(dim-1);
 
       for (int i=0; i<numCornersOfSide; i++) {
 

@@ -371,7 +371,7 @@ namespace Dune
           for (size_t j=0; j<corners.size(); j++)
             corners[j] += base;
 
-          fac.insertElement(GeometryType(GeometryType::cube, dim), corners);
+          fac.insertElement(GeometryTypes::cube(dim), corners);
         }
       }
 

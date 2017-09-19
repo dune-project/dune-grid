@@ -128,7 +128,7 @@ namespace Dune {
               for (int k = 0; k < 3; k++)
                 simplexVertices[k] = vertices[k] - 1;
               simplexVertices[3] = vertices[4] - 1;
-              factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim), simplexVertices);
+              factory.insertElement(Dune::GeometryTypes::simplex(dim), simplexVertices);
             }
             else {             // prism
               numberOfPrisms++;
@@ -137,7 +137,7 @@ namespace Dune {
                 prismVertices[k] = vertices[k] - 1;
               for (int k = 3; k < 6; k++)
                 prismVertices[k] = vertices[k+1] - 1;
-              factory.insertElement(Dune::GeometryType(Dune::GeometryType::prism,dim), prismVertices);
+              factory.insertElement(Dune::GeometryTypes::prism, prismVertices);
             }
           }
           else {           // cube or pyramid
@@ -146,7 +146,7 @@ namespace Dune {
               std::vector<unsigned int> pyramidVertices(5);
               for (int k = 0; k < 5; k++)
                 pyramidVertices[k] = vertices[k] - 1;
-              factory.insertElement(Dune::GeometryType(Dune::GeometryType::pyramid,dim), pyramidVertices);
+              factory.insertElement(Dune::GeometryTypes::pyramid, pyramidVertices);
             }
             else {             // cube
               numberOfCubes++;
@@ -155,7 +155,7 @@ namespace Dune {
                 cubeVertices[k] = vertices[k] - 1;
               std::swap(cubeVertices[2], cubeVertices[3]);
               std::swap(cubeVertices[6], cubeVertices[7]);
-              factory.insertElement(Dune::GeometryType(Dune::GeometryType::cube,dim), cubeVertices);
+              factory.insertElement(Dune::GeometryTypes::cube(dim), cubeVertices);
             }
           }
         }
