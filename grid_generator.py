@@ -5,6 +5,20 @@ import dune.common as common
 from ..generator.generator import SimpleGenerator
 from dune.common.hashit import hashIt
 
+def getDimgrid(constructor):
+    dimgrid = None
+    if not dimgrid:
+        try:
+            dimgrid = constructor.dimgrid
+        except AttributeError:
+            pass
+    if not dimgrid:
+        try:
+            dimgrid = len(constructor["vertices"][0])
+        except KeyError:
+            raise ValueError("Couldn't extract dimension of grid from constructor arguments, added dimgrid parameter") from None
+    return dimgrid
+
 def triangulation(grid, level=0):
     if grid.dimGrid != 2:
         raise Exception("Grid must be 2-dimensional for use as matplotlib triangulation.")

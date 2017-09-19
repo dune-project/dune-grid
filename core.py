@@ -11,25 +11,33 @@
 from ..common import reader
 from dune.grid.map import MultipleCodimMultipleGeomTypeMapper as Mapper
 
-def cartesianDomain(lower,upper,division,**parameters):
-    dgf = "DGF\n"
-    dgf += "INTERVAL\n"
-    dgf += " ".join([str(x) for x in lower]) + "\n"
-    dgf += " ".join([str(x) for x in upper]) + "\n"
-    dgf += " ".join([str(x) for x in division]) + "\n"
-    dgf += "#\n"
-    dgf += "GRIDPARAMETER\n"
-    for key in parameters:
-        dgf += key + " " + str(parameters[key]) + "\n"
-    dgf += "#\n"
-    return (reader.dgfString, dgf)
+class CartesianDomain(tuple):
+    def __new__ (cls, lower,upper,division,**parameters):
+        dgf = "DGF\n"
+        dgf += "INTERVAL\n"
+        dgf += " ".join([str(x) for x in lower]) + "\n"
+        dgf += " ".join([str(x) for x in upper]) + "\n"
+        dgf += " ".join([str(x) for x in division]) + "\n"
+        dgf += "#\n"
+        dgf += "GRIDPARAMETER\n"
+        for key in parameters:
+            dgf += key + " " + str(parameters[key]) + "\n"
+        dgf += "#\n"
+        return super(CartesianDomain, cls).__new__(cls,
+                       tuple( (reader.dgfString, dgf) ) )
+    def __init__(self,lower,upper,division,**parameters):
+        self.dimgrid = len(lower)
+    def dimgrid(self):
+        return self.dimgrid
+def cartesianDomain(lower, upper, division, **parameters):
+    return CartesianDomain(lower,upper,division,**parameters)
 def structuredGrid(lower,upper,division,**parameters):
     from ._grids import yaspGrid
     domain = cartesianDomain(lower, upper, division, **parameters)
     return yaspGrid(domain, dimgrid=len(lower))
 
 def string2dgf(dgf):
-    return (reader.dgfString,"DGF\n" + dgf)
+    return (reader.dgfString,"DGF\n" + dgf, None)
 
 
 class P1VTKFunction:
