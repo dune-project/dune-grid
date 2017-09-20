@@ -214,8 +214,7 @@ namespace Dune
     virtual void
     insertBoundarySegment ( const std::vector< unsigned int >& vertices )
     {
-      typedef typename Impl::SimplexTopology< dimension-1 >::type Topology;
-      insertBoundaryProjection( GeometryType( Topology() ), vertices, 0 );
+      insertBoundaryProjection( GeometryTypes::simplex( dimension-1 ), vertices, 0 );
     }
 
     /** \brief insert a shaped boundary segment into the macro grid

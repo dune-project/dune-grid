@@ -93,7 +93,7 @@ void makeHalfCircleQuad(Dune::UGGrid<2>& grid, bool boundarySegments, bool param
   // Insert elements
   // /////////////////
 
-  factory.insertElement(GeometryType(GeometryType::cube,2), {0,1,3,2});
+  factory.insertElement(GeometryTypes::quadrilateral, {0,1,3,2});
 
   // //////////////////////////////////////
   //   Finish initialization

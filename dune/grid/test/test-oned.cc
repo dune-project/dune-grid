@@ -26,13 +26,12 @@ std::unique_ptr<OneDGrid> testFactory()
     factory.insertVertex(pos);
 
   // Insert elements
-  GeometryType segment(GeometryType::simplex,1);
-  factory.insertElement(segment, {6,1});
-  factory.insertElement(segment, {4,0});
-  factory.insertElement(segment, {0,6});
-  factory.insertElement(segment, {5,4});
-  factory.insertElement(segment, {3,2});
-  factory.insertElement(segment, {2,5});
+  factory.insertElement(GeometryTypes::line, {6,1});
+  factory.insertElement(GeometryTypes::line, {4,0});
+  factory.insertElement(GeometryTypes::line, {0,6});
+  factory.insertElement(GeometryTypes::line, {5,4});
+  factory.insertElement(GeometryTypes::line, {3,2});
+  factory.insertElement(GeometryTypes::line, {2,5});
 
   // Insert boundary segments
   factory.insertBoundarySegment({1});
