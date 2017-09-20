@@ -132,9 +132,7 @@ namespace Dune
     Types types ( int codim ) const
     {
       assert( (codim >= 0) && (codim <= dimension) );
-      std::array< GeometryType, 1 > types;
-      types[ 0 ] = GeometryType( GeometryType::simplex, dimension - codim );
-      return types;
+      return {{ GeometryTypes::simplex( dimension - codim ) }};
     }
 
     //! return geometry types this set has indices for
@@ -361,9 +359,7 @@ namespace Dune
       for( int codim = 0; codim <= dimension; ++codim )
       {
         indices_[ codim ] = 0;
-
-        const GeometryType type( GeometryType::simplex, dimension - codim );
-        geomTypes_[ codim ].push_back( type );
+        geomTypes_[ codim ].push_back( GeometryTypes::simplex( dimension - codim ) );
       }
     }
 
@@ -432,9 +428,7 @@ namespace Dune
     Types types ( int codim ) const
     {
       assert( (codim >= 0) && (codim <= dimension) );
-      std::array< GeometryType, 1 > types;
-      types[ 0 ] = GeometryType( GeometryType::simplex, dimension - codim );
-      return types;
+      return {{ GeometryTypes::simplex( dimension - codim ) }};
     }
 
     const std::vector< GeometryType > &geomTypes( int codim ) const

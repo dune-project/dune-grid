@@ -59,7 +59,7 @@ namespace Dune {
       std::vector<unsigned int> cornerIDs(3);
       for (int j=0; j<3; j++)
         cornerIDs[j] = triangles[i][j];
-      factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,2),cornerIDs);
+      factory.insertElement(Dune::GeometryTypes::triangle,cornerIDs);
     }
 
     // Create the quadrilateral elements
@@ -78,7 +78,7 @@ namespace Dune {
       std::vector<unsigned int> cornerIDs(4);
       for (int j=0; j<4; j++)
         cornerIDs[j] = quadrilaterals[i][j];
-      factory.insertElement(Dune::GeometryType(Dune::GeometryType::cube,2),cornerIDs);
+      factory.insertElement(Dune::GeometryTypes::quadrilateral,cornerIDs);
     }
 
     // Finish initialization
@@ -231,7 +231,7 @@ namespace Dune {
       std::vector<unsigned int> cornerIDs(4);
       for (int j=0; j<4; j++)
         cornerIDs[j] = tetrahedra[i][j]-1;
-      factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,3),cornerIDs);
+      factory.insertElement(Dune::GeometryTypes::tetrahedron,cornerIDs);
     }
 
     // Create the pyramid elements
@@ -268,7 +268,7 @@ namespace Dune {
       std::vector<unsigned int> cornerIDs(5);
       for (int j=0; j<5; j++)
         cornerIDs[j] = pyramids[i][j]-1;
-      factory.insertElement(Dune::GeometryType(Dune::GeometryType::pyramid,3),cornerIDs);
+      factory.insertElement(Dune::GeometryTypes::pyramid,cornerIDs);
     }
 
     // Create the prism elements
@@ -287,7 +287,7 @@ namespace Dune {
       std::vector<unsigned int> cornerIDs(6);
       for (int j=0; j<6; j++)
         cornerIDs[j] = prisms[i][j]-1;
-      factory.insertElement(Dune::GeometryType(Dune::GeometryType::prism,3),cornerIDs);
+      factory.insertElement(Dune::GeometryTypes::prism,cornerIDs);
     }
 
     // Create the hexahedron elements
@@ -307,7 +307,7 @@ namespace Dune {
       std::vector<unsigned int> cornerIDs(8);
       for (int j=0; j<8; j++)
         cornerIDs[j] = hexahedra[i][j]-1;
-      factory.insertElement(Dune::GeometryType(Dune::GeometryType::cube,3),cornerIDs);
+      factory.insertElement(Dune::GeometryTypes::hexahedron,cornerIDs);
     }
 
     // Finish initialization

@@ -135,10 +135,7 @@ namespace Dune
     : dofNumbering_( dofNumbering )
   {
     for( int codim = 0; codim <= dimension; ++codim )
-    {
-      const GeometryType type( GeometryType::simplex, dimension - codim );
-      geomTypes_[ codim ].push_back( type );
-    }
+      geomTypes_[ codim ].push_back( GeometryTypes::simplex( dimension - codim ) );
   }
 
 

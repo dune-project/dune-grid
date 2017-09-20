@@ -29,21 +29,19 @@ struct BasicUnitCube< 1 >
   template< class Grid >
   static void insertSimplices ( Dune::GridFactory< Grid > &factory )
   {
-    const Dune::GeometryType type( Dune::GeometryType::simplex, 1 );
     std::vector< unsigned int > cornerIDs( 2 );
 
     cornerIDs[0] = 0;  cornerIDs[1] = 1;
-    factory.insertElement( type, cornerIDs );
+    factory.insertElement( Dune::GeometryTypes::simplex( 1 ), cornerIDs );
   }
 
   template< class Grid >
   static void insertCubes ( Dune::GridFactory< Grid > &factory )
   {
-    const Dune::GeometryType type( Dune::GeometryType::cube, 1 );
     std::vector< unsigned int > cornerIDs( 2 );
 
     cornerIDs[0] = 0;  cornerIDs[1] = 1;
-    factory.insertElement( type, cornerIDs );
+    factory.insertElement( Dune::GeometryTypes::cube( 1 ), cornerIDs );
   }
 };
 
@@ -72,24 +70,22 @@ struct BasicUnitCube< 2 >
   template< class Grid >
   static void insertSimplices ( Dune::GridFactory< Grid > &factory )
   {
-    const Dune::GeometryType type( Dune::GeometryType::simplex, 2 );
     std::vector< unsigned int > cornerIDs( 3 );
 
     cornerIDs[0] = 0;  cornerIDs[1] = 1;  cornerIDs[2] = 2;
-    factory.insertElement( type, cornerIDs );          /*@\label{uc:ie}@*/
+    factory.insertElement( Dune::GeometryTypes::simplex( 2 ), cornerIDs );          /*@\label{uc:ie}@*/
 
     cornerIDs[0] = 2;  cornerIDs[1] = 1;  cornerIDs[2] = 3;
-    factory.insertElement( type, cornerIDs );
+    factory.insertElement( Dune::GeometryTypes::simplex( 2 ), cornerIDs );
   }
 
   template< class Grid >
   static void insertCubes ( Dune::GridFactory< Grid > &factory )
   {
-    const Dune::GeometryType type( Dune::GeometryType::cube, 2 );
     std::vector< unsigned int > cornerIDs( 4 );
     for( int i = 0; i < 4; ++i )
       cornerIDs[ i ] = i;
-    factory.insertElement( type, cornerIDs );
+    factory.insertElement( Dune::GeometryTypes::cube( 2 ), cornerIDs );
   }
 };
 
@@ -115,33 +111,31 @@ struct BasicUnitCube< 3 >
   template< class Grid >
   static void insertSimplices ( Dune::GridFactory< Grid > &factory )
   {
-    const Dune::GeometryType type( Dune::GeometryType::simplex, 3 );
     std::vector< unsigned int > cornerIDs( 4 );
 
     cornerIDs[0] = 0;  cornerIDs[1] = 1;  cornerIDs[2] = 2;  cornerIDs[3] = 4;
-    factory.insertElement( type, cornerIDs );
+    factory.insertElement( Dune::GeometryTypes::simplex( 3 ), cornerIDs );
 
     cornerIDs[0] = 1;  cornerIDs[1] = 3;  cornerIDs[2] = 2;  cornerIDs[3] = 7;
-    factory.insertElement( type, cornerIDs );
+    factory.insertElement( Dune::GeometryTypes::simplex( 3 ), cornerIDs );
 
     cornerIDs[0] = 1;  cornerIDs[1] = 7;  cornerIDs[2] = 2;  cornerIDs[3] = 4;
-    factory.insertElement( type, cornerIDs );
+    factory.insertElement( Dune::GeometryTypes::simplex( 3 ), cornerIDs );
 
     cornerIDs[0] = 1;  cornerIDs[1] = 7;  cornerIDs[2] = 4;  cornerIDs[3] = 5;
-    factory.insertElement( type, cornerIDs );
+    factory.insertElement( Dune::GeometryTypes::simplex( 3 ), cornerIDs );
 
     cornerIDs[0] = 4;  cornerIDs[1] = 7;  cornerIDs[2] = 2;  cornerIDs[3] = 6;
-    factory.insertElement( type, cornerIDs );
+    factory.insertElement( Dune::GeometryTypes::simplex( 3 ), cornerIDs );
   }
 
   template< class Grid >
   static void insertCubes ( Dune::GridFactory< Grid > &factory )
   {
-    const Dune::GeometryType type( Dune::GeometryType::cube, 3 );
     std::vector< unsigned int > cornerIDs( 8 );
     for( int i = 0; i < 8; ++i )
       cornerIDs[ i ] = i;
-    factory.insertElement( type, cornerIDs );
+    factory.insertElement( Dune::GeometryTypes::cube( 3 ), cornerIDs );
   }
 };
 

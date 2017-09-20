@@ -389,12 +389,12 @@ namespace Dune
       sout << "Checking size of vertices "
            << count
            << " equals all found vertices "
-           << (unsigned int)lset.size(Dune::GeometryType(0))
+           << (unsigned int)lset.size(Dune::GeometryTypes::vertex)
            << "\n";
       // assertion goes wrong:
       // - for parallel grid since no iteration over ghost subentities
       // - if there are vertices with geometry type 'none'
-      //assert( count == (unsigned int)lset.size(Dune::GeometryType(0)) );
+      //assert( count == (unsigned int)lset.size(Dune::GeometryTypes::vertex) );
     }
 
     {

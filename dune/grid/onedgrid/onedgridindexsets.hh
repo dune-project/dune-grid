@@ -98,13 +98,13 @@ namespace Dune {
       // ///////////////////////////////////////////////
       if (numElements_>0) {
         myTypes_[0].resize(1);
-        myTypes_[0][0] = GeometryType(1);
+        myTypes_[0][0] = GeometryTypes::line;
       } else
         myTypes_[0].resize(0);
 
       if (numVertices_>0) {
         myTypes_[1].resize(1);
-        myTypes_[1][0] = GeometryType(0);
+        myTypes_[1][0] = GeometryTypes::vertex;
       } else
         myTypes_[1].resize(0);
 
@@ -244,13 +244,13 @@ namespace Dune {
       // ///////////////////////////////////////////////
       if (numElements_>0) {
         myTypes_[0].resize(1);
-        myTypes_[0][0] = GeometryType(1);
+        myTypes_[0][0] = GeometryTypes::line;
       } else
         myTypes_[0].resize(0);
 
       if (numVertices_>0) {
         myTypes_[1].resize(1);
-        myTypes_[1][0] = GeometryType(0);
+        myTypes_[1][0] = GeometryTypes::vertex;
       } else
         myTypes_[1].resize(0);
 

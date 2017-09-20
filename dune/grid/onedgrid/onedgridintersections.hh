@@ -181,7 +181,7 @@ namespace Dune {
     /** \brief obtain the type of reference element for this intersection */
     GeometryType type () const
     {
-      return GeometryType( 0 );
+      return GeometryTypes::vertex;
     }
 
     //! local index of codim 1 entity in self where intersection is contained in
@@ -444,7 +444,7 @@ namespace Dune {
     /** \brief obtain the type of reference element for this intersection */
     GeometryType type () const
     {
-      return GeometryType( 0 );
+      return GeometryTypes::vertex;
     }
 
     //! local index of codim 1 entity in self where intersection is contained in
