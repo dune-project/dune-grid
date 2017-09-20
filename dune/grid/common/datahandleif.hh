@@ -49,9 +49,12 @@ namespace Dune
        which reads the data of type T from the buffer by using the
        assigment operator of T
        @param val reference to object that is read
+
+       The method is not const, because calling it advances the iterator
+       to the current data of the MessageBufferImp member.
      */
     template <class T>
-    void read(T & val) const
+    void read(T & val)
     {
       buff_.read(val);
     }
@@ -154,7 +157,9 @@ namespace Dune
     }
 
     /*! \brief unpack data from message buffer to user.
-        @param buff message buffer provided by the grid
+        @param buff message buffer provided by the grid.  This is not const,
+          because the buffer has an internal iterator that gets advanced
+          when reading from the buffer.
         @param e entity for which date should be unpacked from buffer
         @param n number of data written to buffer for this entity before
      */
