@@ -228,7 +228,7 @@ namespace Dune {
 
   public:
     //! return the element type identifier (segment)
-    GeometryType type () const {return GeometryType(0);}
+    GeometryType type () const {return GeometryTypes::point;}
 
     /** \brief Return the number of subentities of codimension codim.
      */
@@ -345,7 +345,7 @@ namespace Dune {
     EntitySeed seed () const { return EntitySeed( *this ); }
 
     //! return the element type identifier (segment)
-    GeometryType type () const {return GeometryType(1);}
+    GeometryType type () const {return GeometryTypes::line;}
 
     /** \brief Return the number of subentities of codimension codim.
      */

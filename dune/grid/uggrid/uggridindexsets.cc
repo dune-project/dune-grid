@@ -106,23 +106,23 @@ void UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, std::v
   // Update the list of geometry types present
   myTypes_[0].resize(0);
   if (numSimplices_ > 0)
-    myTypes_[0].push_back(GeometryType(GeometryType::simplex,dim));
+    myTypes_[0].push_back(GeometryTypes::simplex(dim));
   if (numPyramids_ > 0)
-    myTypes_[0].push_back(GeometryType(GeometryType::pyramid,dim));
+    myTypes_[0].push_back(GeometryTypes::pyramid);
   if (numPrisms_ > 0)
-    myTypes_[0].push_back(GeometryType(GeometryType::prism,dim));
+    myTypes_[0].push_back(GeometryTypes::prism);
   if (numCubes_ > 0)
-    myTypes_[0].push_back(GeometryType(GeometryType::cube,dim));
+    myTypes_[0].push_back(GeometryTypes::cube(dim));
 
   myTypes_[dim-1].resize(0);
-  myTypes_[dim-1].push_back(GeometryType(1));
+  myTypes_[dim-1].push_back(GeometryTypes::line);
 
   if (dim==3) {
     myTypes_[1].resize(0);
     if (numTriFaces_ > 0)
-      myTypes_[1].push_back(GeometryType(GeometryType::simplex,dim-1));
+      myTypes_[1].push_back(GeometryTypes::triangle);
     if (numQuadFaces_ > 0)
-      myTypes_[1].push_back(GeometryType(GeometryType::cube,dim-1));
+      myTypes_[1].push_back(GeometryTypes::quadrilateral);
   }
 
   // //////////////////////////////
@@ -146,7 +146,7 @@ void UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, std::v
           UG_NS<dim>::levelIndex(grid_->getRealImplementation(*vIt).target_) = numVertices_++;*/
 
   myTypes_[dim].resize(0);
-  myTypes_[dim].push_back(GeometryType(GeometryType::cube,0));
+  myTypes_[dim].push_back(GeometryTypes::point);
 }
 
 template <class GridImp>
@@ -296,15 +296,15 @@ void UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePermutat
 
   // Update the list of geometry types present
   myTypes_[dim-1].resize(0);
-  myTypes_[dim-1].push_back(GeometryType(GeometryType::cube,1));
+  myTypes_[dim-1].push_back(GeometryTypes::line);
 
   if (dim==3) {
 
     myTypes_[1].resize(0);
     if (numTriFaces_ > 0)
-      myTypes_[1].push_back(GeometryType(GeometryType::simplex,dim-1));
+      myTypes_[1].push_back(GeometryTypes::triangle);
     if (numQuadFaces_ > 0)
-      myTypes_[1].push_back(GeometryType(GeometryType::cube,dim-1));
+      myTypes_[1].push_back(GeometryTypes::quadrilateral);
 
   }
 
@@ -337,13 +337,13 @@ void UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePermutat
   // Update the list of geometry types present
   myTypes_[0].resize(0);
   if (numSimplices_ > 0)
-    myTypes_[0].push_back(GeometryType(GeometryType::simplex,dim));
+    myTypes_[0].push_back(GeometryTypes::simplex(dim));
   if (numPyramids_ > 0)
-    myTypes_[0].push_back(GeometryType(GeometryType::pyramid,dim));
+    myTypes_[0].push_back(GeometryTypes::pyramid);
   if (numPrisms_ > 0)
-    myTypes_[0].push_back(GeometryType(GeometryType::prism,dim));
+    myTypes_[0].push_back(GeometryTypes::prism);
   if (numCubes_ > 0)
-    myTypes_[0].push_back(GeometryType(GeometryType::cube,dim));
+    myTypes_[0].push_back(GeometryTypes::cube(dim));
 
 
   // //////////////////////////////
@@ -364,7 +364,7 @@ void UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePermutat
   }
 
   myTypes_[dim].resize(0);
-  myTypes_[dim].push_back(GeometryType(0));
+  myTypes_[dim].push_back(GeometryTypes::point);
 
 }
 
