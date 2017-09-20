@@ -15,8 +15,6 @@ def albertaGrid(constructor, dimgrid=None):
 def onedGrid(constructor):
     from .grid_generator import module, getDimgrid
 
-    if not dimgrid:
-        dimgrid = getDimgrid(constructor)
     typeName = "Dune::OneDGrid"
     includes = ["dune/grid/onedgrid.hh", "dune/grid/io/file/dgfparser/dgfoned.hh"]
     gridModule = module(includes, typeName)
