@@ -78,7 +78,7 @@ void Dune::AmiraMeshWriter<GridView>::addGrid(const GridView& gridView,
   const GeomTypes& geomTypes = indexSet.types(0);
 
   if (splitAll) {
-    Dune::GeometryType coerceTo(Dune::GeometryType::simplex,dim);
+    Dune::GeometryType coerceTo = Dune::GeometryTypes::simplex(dim);
     noOfElements = 0;
     int count=0;
 
@@ -364,7 +364,7 @@ void Dune::AmiraMeshWriter<GridView>::addCellData(const DataContainer& data,
   {
     if (gridSplitUp || containsOnlyTetrahedra)
     {
-      Dune::GeometryType coerceTo(Dune::GeometryType::simplex,dim);
+      Dune::GeometryType coerceTo = Dune::GeometryTypes::simplex(dim);
       int noOfElements = 0;
       int count;
 
@@ -417,7 +417,7 @@ void Dune::AmiraMeshWriter<GridView>::addCellData(const DataContainer& data,
   if (gridSplitUp)
   {
     ElementIterator eIt    = gridView.template begin<0>();
-    Dune::GeometryType coerceTo(Dune::GeometryType::simplex,dim);
+    Dune::GeometryType coerceTo = Dune::GeometryTypes::simplex(dim);
 
     for (; dit!=ditend; ++dit)
     {

@@ -261,7 +261,7 @@ namespace Dune {
     /** \brief Return the entity type identifier */
     GeometryType type() const
     {
-      return GeometryType(1);
+      return GeometryTypes::line;
     }
 
     /** \brief Return the number of subEntities of codimension codim.
@@ -459,17 +459,13 @@ namespace Dune {
       switch (UG_NS<dim>::Tag(center)) {
 
       case UG::D3::TETRAHEDRON :
-        return GeometryType(GeometryType::simplex,2);
+        return GeometryTypes::triangle;
       case UG::D3::PYRAMID :
-        return (side==0)
-               ? GeometryType(GeometryType::cube,2)
-               : GeometryType(GeometryType::simplex,2);
+        return (side==0 ? GeometryTypes::quadrilateral : GeometryTypes::triangle);
       case UG::D3::PRISM :
-        return (side==0 or side==4)
-               ? GeometryType(GeometryType::simplex,2)
-               : GeometryType(GeometryType::cube,2);
+        return (side==0 or side==4 ? GeometryTypes::triangle : GeometryTypes::quadrilateral);
       case UG::D3::HEXAHEDRON :
-        return GeometryType(GeometryType::cube,2);
+        return GeometryTypes::quadrilateral;
       default :
         DUNE_THROW(GridError, "UGFaceEntity::type():  ERROR:  Unknown type "
                    << UG_NS<dim>::Tag(center) << " found!");
