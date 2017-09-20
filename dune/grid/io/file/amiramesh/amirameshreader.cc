@@ -406,7 +406,7 @@ void Dune::AmiraMeshReader<GridType>::build2dGrid(GridFactory<GridType>& factory
       cornerIDs[1] = elemData[3*i+1]-1;
       cornerIDs[2] = elemData[3*i+2]-1;
 
-      factory.insertElement(GeometryType(GeometryType::simplex,2), cornerIDs);
+      factory.insertElement(GeometryTypes::triangle, cornerIDs);
 
     } else {
 
@@ -419,7 +419,7 @@ void Dune::AmiraMeshReader<GridType>::build2dGrid(GridFactory<GridType>& factory
         cornerIDs[1] = elemData[4*i+1]-1;
         cornerIDs[2] = elemData[4*i+2]-1;
 
-        factory.insertElement(GeometryType(GeometryType::simplex,2), cornerIDs);
+        factory.insertElement(GeometryTypes::triangle, cornerIDs);
 
       } else {
 
@@ -431,7 +431,7 @@ void Dune::AmiraMeshReader<GridType>::build2dGrid(GridFactory<GridType>& factory
         cornerIDs[2] = elemData[4*i+3]-1;
         cornerIDs[3] = elemData[4*i+2]-1;
 
-        factory.insertElement(GeometryType(GeometryType::cube,2), cornerIDs);
+        factory.insertElement(GeometryTypes::quadrilateral, cornerIDs);
 
       }
 
@@ -519,7 +519,7 @@ void Dune::AmiraMeshReader<GridType>::buildGrid(Dune::GridFactory<GridType>& fac
       for (int j=0; j<numberOfCorners; j++)
         cornerIDs[j] = elemData[numberOfCorners*i+j]-1;
 
-      factory.insertElement(GeometryType(GeometryType::simplex,3), cornerIDs);
+      factory.insertElement(GeometryTypes::tetrahedron, cornerIDs);
 
     } else {
 
@@ -536,7 +536,7 @@ void Dune::AmiraMeshReader<GridType>::buildGrid(Dune::GridFactory<GridType>& fac
         cornerIDs[2] = thisElem[2]-1;
         cornerIDs[3] = thisElem[4]-1;
 
-        factory.insertElement(GeometryType(GeometryType::simplex,3), cornerIDs);
+        factory.insertElement(GeometryTypes::tetrahedron, cornerIDs);
 
       }else if (thisElem[4]==thisElem[5] && thisElem[5]==thisElem[6]
                 && thisElem[6]==thisElem[7]) {
@@ -550,7 +550,7 @@ void Dune::AmiraMeshReader<GridType>::buildGrid(Dune::GridFactory<GridType>& fac
         cornerIDs[3] = thisElem[3]-1;
         cornerIDs[4] = thisElem[4]-1;
 
-        factory.insertElement(GeometryType(GeometryType::pyramid,3), cornerIDs);
+        factory.insertElement(GeometryTypes::pyramid, cornerIDs);
 
       } else if (thisElem[1]==thisElem[2] && thisElem[5]==thisElem[6]) {
 
@@ -564,7 +564,7 @@ void Dune::AmiraMeshReader<GridType>::buildGrid(Dune::GridFactory<GridType>& fac
         cornerIDs[4] = thisElem[5]-1;
         cornerIDs[5] = thisElem[7]-1;
 
-        factory.insertElement(GeometryType(GeometryType::prism,3), cornerIDs);
+        factory.insertElement(GeometryTypes::prism, cornerIDs);
 
       } else if (thisElem[2]==thisElem[3] && thisElem[6]==thisElem[7]) {
 
@@ -577,7 +577,7 @@ void Dune::AmiraMeshReader<GridType>::buildGrid(Dune::GridFactory<GridType>& fac
         cornerIDs[4] = thisElem[5]-1;
         cornerIDs[5] = thisElem[6]-1;
 
-        factory.insertElement(GeometryType(GeometryType::prism,3), cornerIDs);
+        factory.insertElement(GeometryTypes::prism, cornerIDs);
 
       } else {
 
@@ -593,7 +593,7 @@ void Dune::AmiraMeshReader<GridType>::buildGrid(Dune::GridFactory<GridType>& fac
         cornerIDs[6] = elemData[numberOfCorners*i+7]-1;
         cornerIDs[7] = elemData[numberOfCorners*i+6]-1;
 
-        factory.insertElement(GeometryType(GeometryType::cube,3), cornerIDs);
+        factory.insertElement(GeometryTypes::hexahedron, cornerIDs);
 
       }
 

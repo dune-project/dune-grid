@@ -52,15 +52,8 @@ namespace Dune
 
   namespace TestGrids
   {
-    static const GeometryType line( GeometryType::simplex, 1 );
 
-    static const GeometryType triangle( GeometryType::simplex, 2 );
-    static const GeometryType quadrilateral( GeometryType::cube, 2 );
-
-    static const GeometryType tetrahedron( GeometryType::simplex, 3 );
-    static const GeometryType hexahedron( GeometryType::cube, 3 );
-    static const GeometryType pyramid( GeometryType::pyramid, 3 );
-    static const GeometryType prism( GeometryType::prism, 3 );
+    using namespace GeometryTypes;
 
     // line grids
 

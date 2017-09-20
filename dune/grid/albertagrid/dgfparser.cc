@@ -54,8 +54,7 @@ namespace Dune
           elementId[ i ] = dgf_.elements[ n ][ i ];
       }
 
-      typedef typename Impl::SimplexTopology< dimension >::type Topology;
-      factory_.insertElement( GeometryType( Topology() ), elementId );
+      factory_.insertElement( GeometryTypes::simplex( dimension ), elementId );
 
       // look for bounaries and insert them
       for( int face = 0; face <= dimension; ++face )
@@ -103,8 +102,7 @@ namespace Dune
       const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
       const DuneBoundaryProjection< dimworld > *projection
         = projectionBlock.template boundaryProjection< dimworld >( i );
-      typedef typename Impl::SimplexTopology< dimension-1 >::type Topology;
-      factory_.insertBoundaryProjection( GeometryType( Topology() ), vertices, projection );
+      factory_.insertBoundaryProjection( GeometryTypes::simplex( dimension-1 ), vertices, projection );
     }
 
     dgf::GridParameterBlock parameter( input );

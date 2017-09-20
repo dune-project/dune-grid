@@ -265,7 +265,7 @@ namespace Dune
     {
       const GeometryType eType = e.type();
       GeometryType gt = eType.isNone() ?
-        GeometryType( GeometryType::none, GV::dimension - codim ) :
+        GeometryTypes::none( GV::dimension - codim ) :
         ReferenceElements<double,GV::dimension>::general(eType).type(i,codim) ;
       //GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
       assert(offset(gt) != invalidOffset);
@@ -315,7 +315,7 @@ namespace Dune
     {
       const GeometryType eType = e.type();
       const GeometryType gt = eType.isNone() ?
-        GeometryType( GeometryType::none, GV::dimension - cc ) :
+        GeometryTypes::none( GV::dimension - cc ) :
         ReferenceElements<double,GV::dimension>::general(eType).type(i,cc) ;
       //GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,cc);
       if (offset(gt) == invalidOffset)

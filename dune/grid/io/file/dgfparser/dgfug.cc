@@ -126,17 +126,17 @@ namespace Dune
 
       // simplices
       if( el.size() == std::size_t( dim+1 ) )
-        factory_.insertElement( GeometryType( GeometryType::simplex, dim ), el );
+        factory_.insertElement( GeometryTypes::simplex( dim ), el );
       // cubes
       else if( el.size() == 1u << dim )
-        factory_.insertElement( GeometryType( GeometryType::cube, dim ), el );
+        factory_.insertElement( GeometryTypes::cube( dim ), el );
 #ifdef EXPERIMENTAL_GRID_EXTENSIONS
       // pyramid
       else if( (dim == 3) && (el.size() == 5u) )
-        factory_.insertElement( GeometryType( GeometryType::pyramid, dim ), el );
+        factory_.insertElement( GeometryTypes::pyramid, el );
       // prisms
       else if( (dim == 3) && (el.size() == 6u) )
-        factory_.insertElement( GeometryType( GeometryType::prism, dim ), el );
+        factory_.insertElement( GeometryTypes::prism, el );
 #endif
       else
         DUNE_THROW( DGFException, "Invalid number of element vertices: " << el.size() );

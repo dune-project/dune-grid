@@ -558,31 +558,31 @@ namespace Dune
         switch (elm_type)
         {
         case 1 :            // 2-node line
-          factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
+          factory.insertElement(Dune::GeometryTypes::line,vertices);
           break;
         case 2 :            // 3-node triangle
-          factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
+          factory.insertElement(Dune::GeometryTypes::triangle,vertices);
           break;
         case 3 :            // 4-node quadrilateral
-          factory.insertElement(Dune::GeometryType(Dune::GeometryType::cube,dim),vertices);
+          factory.insertElement(Dune::GeometryTypes::quadrilateral,vertices);
           break;
         case 4 :            // 4-node tetrahedron
-          factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
+          factory.insertElement(Dune::GeometryTypes::tetrahedron,vertices);
           break;
         case 5 :            // 8-node hexahedron
-          factory.insertElement(Dune::GeometryType(Dune::GeometryType::cube,dim),vertices);
+          factory.insertElement(Dune::GeometryTypes::hexahedron,vertices);
           break;
         case 6 :            // 6-node prism
-          factory.insertElement(Dune::GeometryType(Dune::GeometryType::prism,dim),vertices);
+          factory.insertElement(Dune::GeometryTypes::prism,vertices);
           break;
         case 7 :            // 5-node pyramid
-          factory.insertElement(Dune::GeometryType(Dune::GeometryType::pyramid,dim),vertices);
+          factory.insertElement(Dune::GeometryTypes::pyramid,vertices);
           break;
         case 9 :            // 6-node triangle
-          factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
+          factory.insertElement(Dune::GeometryTypes::triangle,vertices);
           break;
         case 11 :            // 10-node tetrahedron
-          factory.insertElement(Dune::GeometryType(Dune::GeometryType::simplex,dim),vertices);
+          factory.insertElement(Dune::GeometryTypes::tetrahedron,vertices);
           break;
         }
 

@@ -67,8 +67,7 @@ namespace Dune
         const typename MacroData::ElementId &id = macroData_.element( i );
         for( int j = 0; j <= dimension; ++j )
           vertices[ j ] = id[ j ];
-        typedef typename Impl::SimplexTopology< dimension >::type Topology;
-        factory.insertElement( GeometryType( Topology() ), vertices );
+        factory.insertElement( GeometryTypes::simplex( dimension ), vertices );
       }
 
       // release ALBERTA macro data
