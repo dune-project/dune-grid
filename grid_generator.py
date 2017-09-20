@@ -34,12 +34,16 @@ def writeVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointve
     def addDataToVTKWriter(dataFunctions, dataName, dataTag):
         if isinstance(dataFunctions, dict):
             for n, f in dataFunctions.items():
-                f.addToVTKWriter(n, vtk, dataTag)
+                try:
+                    f.addToVTKWriter(n, vtk, dataTag)
+                except AttributeError:
+                    gf = grid.gridFunction(f)
+                    gf.addToVTKWriter(n, vtk, dataTag)
         elif isinstance(dataFunctions, list):
             for f in dataFunctions:
                 f.addToVTKWriter(f.name, vtk, dataTag)
         elif dataFunctions is not None:
-            raise TypeError("Argument '" + dataName + "' must be a dict instance.")
+            raise TypeError("Argument '" + dataName + "' must be a dict or list instance.")
 
     addDataToVTKWriter(celldata, 'celldata', common.DataType.CellData)
     addDataToVTKWriter(pointdata, 'pointdata', common.DataType.PointData)
