@@ -16,7 +16,7 @@ def getDimgrid(constructor):
         try:
             dimgrid = len(constructor["vertices"][0])
         except KeyError:
-            raise ValueError("Couldn't extract dimension of grid from constructor arguments, added dimgrid parameter") from None
+            raise ValueError("Couldn't extract dimension of grid from constructor arguments, added dimgrid parameter")
     return dimgrid
 
 def triangulation(grid, level=0):
