@@ -3,9 +3,6 @@
 
 #include <dune/corepy/pybind11/pybind11.h>
 
-PYBIND11_PLUGIN( _grid )
+PYBIND11_MODULE( _grid, module )
 {
-  pybind11::module module( "_grid" );
-
-  return module.ptr();
 }
