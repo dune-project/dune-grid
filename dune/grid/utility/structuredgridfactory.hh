@@ -86,7 +86,7 @@ namespace Dune {
         \param upperRight Upper right corner of the grid
         \param elements Number of elements in each coordinate direction
      */
-    static std::shared_ptr<GridType> createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
+    static std::unique_ptr<GridType> createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
                                                const FieldVector<ctype,dimworld>& upperRight,
                                                const std::array<unsigned int,dim>& elements)
     {
@@ -144,7 +144,7 @@ namespace Dune {
       }       // if(rank == 0)
 
       // Create the grid and hand it to the calling method
-      return std::shared_ptr<GridType>(factory.createGrid());
+      return std::unique_ptr<GridType>(factory.createGrid());
 
     }
 
@@ -161,7 +161,7 @@ namespace Dune {
         \param upperRight Upper right corner of the grid
         \param elements Number of elements in each coordinate direction
      */
-    static std::shared_ptr<GridType> createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
+    static std::unique_ptr<GridType> createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
                                                   const FieldVector<ctype,dimworld>& upperRight,
                                                   const std::array<unsigned int,dim>& elements)
     {
@@ -219,7 +219,7 @@ namespace Dune {
       }       // if(rank == 0)
 
       // Create the grid and hand it to the calling method
-      return std::shared_ptr<GridType>(factory.createGrid());
+      return std::unique_ptr<GridType>(factory.createGrid());
     }
 
   };
