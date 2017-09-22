@@ -74,10 +74,10 @@ def addAttr(module, cls):
 generator = SimpleGenerator("HierarchicalGrid", "Dune::CorePy")
 
 
-def module(includes, typeName, constructors=None, methods=None):
+def module(includes, typeName, *args):
     includes = includes + ["dune/corepy/grid/hierarchical.hh"]
     typeHash = "hierarchicalgrid_" + hashIt(typeName)
-    module = generator.load(includes, typeName, typeHash, constructors, methods)
+    module = generator.load(includes, typeName, typeHash, *args)
     addAttr(module, module.LeafGrid)
     addAttr(module, module.LevelGrid)
     return module
