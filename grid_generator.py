@@ -37,7 +37,7 @@ def writeVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointve
                 try:
                     f.addToVTKWriter(n, vtk, dataTag)
                 except AttributeError:
-                    gf = grid.gridFunction(f)
+                    gf = grid.function(f)
                     gf.addToVTKWriter(n, vtk, dataTag)
         elif isinstance(dataFunctions, list):
             for f in dataFunctions:
@@ -58,10 +58,10 @@ def writeVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointve
 
 @deprecated
 def globalGridFunction(gv, evaluator):
-    return gv.gridFunction(evaluator)
+    return gv.function(evaluator)
 @deprecated
 def localGridFunction(gv, evaluator):
-    return gv.gridFunction( lambda x: evaluator(x.entity,x.local) )
+    return gv.function( lambda x: evaluator(x.entity,x.local) )
 
 def addAttr(module, cls):
     setattr(cls, "_module", module)
