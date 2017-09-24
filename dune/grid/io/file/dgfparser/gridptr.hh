@@ -4,11 +4,14 @@
 #define DUNE_DGF_GRIDPTR_HH
 
 #include <cassert>
+
+#include <array>
 #include <iostream>
-#include <string>
-#include <vector>
 #include <map>
 #include <memory>
+#include <string>
+#include <type_traits>
+#include <vector>
 
 //- Dune includes
 #include <dune/common/parallel/mpihelper.hh>
@@ -17,6 +20,8 @@
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/intersection.hh>
+#include <dune/grid/common/partitionset.hh>
+#include <dune/grid/common/rangegenerators.hh>
 
 #include <dune/grid/io/file/dgfparser/dgfexception.hh>
 #include <dune/grid/io/file/dgfparser/entitykey.hh>
@@ -299,81 +304,97 @@ namespace Dune
       return bndParam_[ intersection.boundarySegmentIndex() ];
     }
 
-    void loadBalance()
+    void communicate ()
     {
-      if ( gridPtr_->comm().size() == 1 )
-        return;
-      int nofParams = nofElParam_ + nofVtxParam_;
-      if ( haveBndParam_ )
-        nofParams++;
-      if ( gridPtr_->comm().max( nofParams ) > 0 )
+      if( gridPtr_->comm().size() > 1 )
+      {
+        DataHandle dh(*this);
+        gridPtr_->levelGridView( 0 ).communicate( dh.interface(), InteriorBorder_All_Interface,ForwardCommunication );
+      }
+    }
+
+    void loadBalance ()
+    {
+      if( gridPtr_->comm().size() > 1 )
       {
         DataHandle dh(*this);
         gridPtr_->loadBalance( dh.interface() );
-        gridPtr_->leafGridView().communicate( dh.interface(), InteriorBorder_All_Interface,ForwardCommunication);
-      } else
-      {
-        gridPtr_->loadBalance();
+        gridPtr_->levelGridView( 0 ).communicate( dh.interface(), InteriorBorder_All_Interface,ForwardCommunication );
       }
     }
 
   protected:
+    template< class Range >
+    static bool isEmpty ( Range &&range )
+    {
+      return range.begin() == range.end();
+    }
+
     void initialize ( DGFGridFactory< GridType > &dgfFactory )
     {
       gridPtr_ = mygrid_ptr( dgfFactory.grid() );
 
-      typedef typename GridType::LevelGridView GridView;
-      GridView gridView = gridPtr_->levelGridView( 0 );
-      const typename GridView::IndexSet &indexSet = gridView.indexSet();
+      const auto gridView = gridPtr_->levelGridView( 0 );
+      const auto &indexSet = gridView.indexSet();
 
       nofElParam_ = dgfFactory.template numParameters< 0 >();
       nofVtxParam_ = dgfFactory.template numParameters< dimension >();
       haveBndParam_ = dgfFactory.haveBoundaryParameters();
 
-      if ( nofElParam_ > 0 )
-        elParam_.resize( indexSet.size(0) );
-      if ( nofVtxParam_ > 0 )
-        vtxParam_.resize( indexSet.size(dimension) );
-      bndId_.resize( indexSet.size(1) );
-      if ( haveBndParam_ )
+      std::array< int, 3 > nofParams = {{ nofElParam_, nofVtxParam_, static_cast< int >( haveBndParam_ ) }};
+      gridView.comm().max( nofParams.data(), nofParams.size() );
+
+      // empty grids have no parameters associated
+      if( isEmpty( elements( gridView, Partitions::interiorBorder ) ) )
+      {
+        nofElParam_ = nofParams[ 0 ];
+        nofVtxParam_ = nofParams[ 1 ];
+      }
+
+      // boundary parameters may be empty
+      haveBndParam_ = static_cast< bool >( nofParams[ 2 ] );
+
+      if( (nofElParam_ != nofParams[ 0 ]) || (nofVtxParam_ != nofParams[ 1 ]) )
+        DUNE_THROW( DGFException, "Number of parameters differs between processes" );
+
+      elParam_.resize( nofElParam_ > 0 ? indexSet.size( 0 ) : 0 );
+      vtxParam_.resize( nofVtxParam_ > 0 ? indexSet.size( dimension ) : 0 );
+
+      bndId_.resize( indexSet.size( 1 ) );
+      if( haveBndParam_ )
         bndParam_.resize( gridPtr_->numBoundarySegments() );
 
-      const PartitionIteratorType partType = Interior_Partition;
-      typedef typename GridView::template Codim< 0 >::template Partition< partType >::Iterator Iterator;
-      const Iterator enditer = gridView.template end< 0, partType >();
-      for( Iterator iter = gridView.template begin< 0, partType >(); iter != enditer; ++iter )
+      for( const auto &element : elements( gridView, Partitions::interiorBorder ) )
       {
-        const typename Iterator::Entity &el = *iter;
-        if ( nofElParam_ > 0 ) {
-          std::swap( elParam_[ indexSet.index(el) ], dgfFactory.parameter(el) );
-          assert( elParam_[ indexSet.index(el) ].size()  == (size_t)nofElParam_ );
-        }
-        if ( nofVtxParam_ > 0 )
+        if( nofElParam_ > 0 )
         {
-          const unsigned int subEntities = el.subEntities(dimension);
-          for ( unsigned int v = 0; v < subEntities; ++v)
+          std::swap( elParam_[ indexSet.index( element ) ], dgfFactory.parameter( element ) );
+          assert( elParam_[ indexSet.index( element ) ].size() == static_cast< std::size_t >( nofElParam_ ) );
+        }
+
+        if( nofVtxParam_ > 0 )
+        {
+          for( unsigned int v = 0, n = element.subEntities( dimension ); v < n; ++v )
           {
-            typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
-            if ( vtxParam_[ index ].empty() )
-              std::swap( vtxParam_[ index ], dgfFactory.parameter(el.template subEntity<dimension>(v) ) );
-            assert( vtxParam_[ index ].size()  == (size_t)nofVtxParam_ );
+            const auto index = indexSet.subIndex( element, v, dimension );
+            if( vtxParam_[ index ].empty() )
+              std::swap( vtxParam_[ index ], dgfFactory.parameter( element.template subEntity< dimension >( v ) ) );
+            assert( vtxParam_[ index ].size() == static_cast< std::size_t >( nofVtxParam_ ) );
           }
         }
-        if ( el.hasBoundaryIntersections() )
+
+        if( element.hasBoundaryIntersections() )
         {
-          typedef typename GridView::IntersectionIterator IntersectionIterator;
-          const IntersectionIterator iend = gridView.iend(el);
-          for( IntersectionIterator iiter = gridView.ibegin(el); iiter != iend; ++iiter )
+          for( const auto &intersection : intersections( gridView, element ) )
           {
-            const typename IntersectionIterator::Intersection &inter = *iiter;
             // dirty hack: check for "none" to make corner point grid work
-            if ( inter.boundary() && !inter.type().isNone() )
-            {
-              const int k = indexSet.subIndex(el,inter.indexInInside(),1);
-              bndId_[ k ] = dgfFactory.boundaryId( inter );
-              if ( haveBndParam_ )
-                bndParam_[ inter.boundarySegmentIndex() ] = dgfFactory.boundaryParameter( inter );
-            }
+            if( !intersection.boundary() || intersection.type().isNone() )
+              continue;
+
+            const auto k = indexSet.subIndex( element, intersection.indexInInside(), 1 );
+            bndId_[ k ] = dgfFactory.boundaryId( intersection );
+            if( haveBndParam_ )
+              bndParam_[ intersection.boundarySegmentIndex() ] = dgfFactory.boundaryParameter( intersection );
           }
         }
       }
@@ -382,8 +403,7 @@ namespace Dune
     template <class Entity>
     std::vector< double > &params ( const Entity &entity )
     {
-      typedef typename GridType::LevelGridView GridView;
-      GridView gridView = gridPtr_->levelGridView( 0 );
+      const auto gridView = gridPtr_->levelGridView( 0 );
       switch( (int)Entity::codimension )
       {
       case 0 :
@@ -412,117 +432,257 @@ namespace Dune
       }
     }
 
-    struct DataHandle : public CommDataHandleIF<DataHandle,double>
+    struct DataHandle
+      : public CommDataHandleIF< DataHandle, char >
     {
-      DataHandle( GridPtr& gridPtr) :
-        gridPtr_(gridPtr),
-        idSet_(gridPtr->localIdSet())
+      explicit DataHandle ( GridPtr &gridPtr )
+        : gridPtr_( gridPtr ), idSet_( gridPtr->localIdSet() )
       {
-        typedef typename GridType::LevelGridView GridView;
-        GridView gridView = gridPtr_->levelGridView( 0 );
-        const typename GridView::IndexSet &indexSet = gridView.indexSet();
+        const auto gridView = gridPtr_->levelGridView( 0 );
+        const auto &indexSet = gridView.indexSet();
 
-        const PartitionIteratorType partType = Interior_Partition;
-        typedef typename GridView::template Codim< 0 >::template Partition< partType >::Iterator Iterator;
-        const Iterator enditer = gridView.template end< 0, partType >();
-        for( Iterator iter = gridView.template begin< 0, partType >(); iter != enditer; ++iter )
+        for( const auto &element : elements( gridView, Partitions::interiorBorder ) )
         {
-          const typename Iterator::Entity &el = *iter;
-          if ( gridPtr_.nofElParam_ > 0 )
-            std::swap( gridPtr_.elParam_[ indexSet.index(el) ], elData_[ idSet_.id(el) ] );
-          if ( gridPtr_.nofVtxParam_ > 0 )
+          if( gridPtr_.nofElParam_ > 0 )
+            std::swap( gridPtr_.elParam_[ indexSet.index( element ) ], elData_[ idSet_.id( element ) ] );
+
+          if( gridPtr_.nofVtxParam_ > 0 )
           {
-            for ( unsigned int v = 0; v < el.subEntities(dimension); ++v)
+            for( unsigned int v = 0, n = element.subEntities( dimension ); v < n; ++v )
             {
-              typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
-              if ( ! gridPtr_.vtxParam_[ index ].empty() )
-                std::swap( gridPtr_.vtxParam_[ index ], vtxData_[ idSet_.subId(el,v,dimension) ] );
+              const auto index = indexSet.subIndex( element, v, dimension );
+              if ( !gridPtr_.vtxParam_[ index ].empty() )
+                std::swap( gridPtr_.vtxParam_[ index ], vtxData_[ idSet_.subId( element, v, dimension ) ] );
+            }
+          }
+
+          if( element.hasBoundaryIntersections() )
+          {
+            for( const auto &intersection : intersections( gridView, element ) )
+            {
+              // dirty hack: check for "none" to make corner point grid work
+              if( !intersection.boundary() || intersection.type().isNone() )
+                continue;
+
+              const int i = intersection.indexInInside();
+              auto &bndData = bndData_[ idSet_.subId( element, i, 1 ) ];
+              bndData.first = gridPtr_.bndId_[ indexSet.subIndex( element, i, 1 ) ];
+              if( gridPtr_.haveBndParam_ )
+                std::swap( bndData.second, gridPtr_.bndParam_[ intersection.boundarySegmentIndex() ] );
             }
           }
         }
       }
 
-      ~DataHandle()
+      DataHandle ( const DataHandle & ) = delete;
+      DataHandle ( DataHandle && ) = delete;
+
+      ~DataHandle ()
       {
-        typedef typename GridType::LevelGridView GridView;
-        GridView gridView = gridPtr_->levelGridView( 0 );
-        const typename GridView::IndexSet &indexSet = gridView.indexSet();
+        const auto gridView = gridPtr_->levelGridView( 0 );
+        const auto &indexSet = gridView.indexSet();
 
-        if ( gridPtr_.nofElParam_ > 0 )
-          gridPtr_.elParam_.resize( indexSet.size(0) );
-        if ( gridPtr_.nofVtxParam_ > 0 )
-          gridPtr_.vtxParam_.resize( indexSet.size(dimension) );
+        if( gridPtr_.nofElParam_ > 0 )
+          gridPtr_.elParam_.resize( indexSet.size( 0 ) );
+        if( gridPtr_.nofVtxParam_ > 0 )
+          gridPtr_.vtxParam_.resize( indexSet.size( dimension ) );
 
-        const PartitionIteratorType partType = All_Partition;
-        typedef typename GridView::template Codim< 0 >::template Partition< partType >::Iterator Iterator;
-        const Iterator enditer = gridView.template end< 0, partType >();
-        for( Iterator iter = gridView.template begin< 0, partType >(); iter != enditer; ++iter )
+        for( const auto &element : elements( gridView, Partitions::all ) )
         {
-          const typename Iterator::Entity &el = *iter;
-          if ( gridPtr_.nofElParam_ > 0 )
+          if( gridPtr_.nofElParam_ > 0 )
           {
-            std::swap( gridPtr_.elParam_[ indexSet.index(el) ], elData_[ idSet_.id(el) ] );
-            assert( gridPtr_.elParam_[ indexSet.index(el) ].size() == (unsigned int)gridPtr_.nofElParam_ );
+            std::swap( gridPtr_.elParam_[ indexSet.index( element ) ], elData_[ idSet_.id( element ) ] );
+            assert( gridPtr_.elParam_[ indexSet.index( element ) ].size() == static_cast< std::size_t >( gridPtr_.nofElParam_ ) );
           }
-          if ( gridPtr_.nofVtxParam_ > 0 )
+
+          if( gridPtr_.nofVtxParam_ > 0 )
           {
-            for ( unsigned int v = 0; v < el.subEntities(dimension); ++v)
+            for( unsigned int v = 0; v < element.subEntities( dimension ); ++v )
             {
-              typename GridView::IndexSet::IndexType index = indexSet.subIndex(el,v,dimension);
-              if ( gridPtr_.vtxParam_[ index ].empty() )
-                std::swap( gridPtr_.vtxParam_[ index ], vtxData_[ idSet_.subId(el,v,dimension) ] );
-              assert( gridPtr_.vtxParam_[ index ].size() == (unsigned int)gridPtr_.nofVtxParam_ );
+              const auto index = indexSet.subIndex( element, v, dimension );
+              if( gridPtr_.vtxParam_[ index ].empty() )
+                std::swap( gridPtr_.vtxParam_[ index ], vtxData_[ idSet_.subId( element, v, dimension ) ] );
+              assert( gridPtr_.vtxParam_[ index ].size() == static_cast< std::size_t >( gridPtr_.nofVtxParam_ ) );
+            }
+          }
+
+          if( element.hasBoundaryIntersections() )
+          {
+            for( const auto &intersection : intersections( gridView, element ) )
+            {
+              // dirty hack: check for "none" to make corner point grid work
+              if( !intersection.boundary() || intersection.type().isNone() )
+                continue;
+
+              const int i = intersection.indexInInside();
+              auto &bndData = bndData_[ idSet_.subId( element, i, 1 ) ];
+              gridPtr_.bndId_[ indexSet.subIndex( element, i, 1 ) ] = bndData.first;
+              if( gridPtr_.haveBndParam_ )
+                std::swap( bndData.second, gridPtr_.bndParam_[ intersection.boundarySegmentIndex() ] );
             }
           }
         }
       }
 
-      CommDataHandleIF<DataHandle,double> &interface()
+      CommDataHandleIF< DataHandle, char > &interface () { return *this; }
+
+      bool contains ( int dim, int codim ) const
       {
-        return *this;
+        assert( dim == dimension );
+        // do not use a switch statement, because dimension == 1 is possible
+        return (codim == 1) || ((codim == dimension) && (gridPtr_.nofVtxParam_ > 0)) || ((codim == 0) && (gridPtr_.nofElParam_ > 0));
       }
 
-      bool contains (int dim, int codim) const
+      bool fixedSize (int dim, int codim) const { return false; }
+
+      template< class Entity >
+      std::size_t size ( const Entity &entity ) const
       {
-        return (codim==dim || codim==0);
+        std::size_t size = 0;
+
+        // do not use a switch statement, because dimension == 1 is possible
+        if( (Entity::codimension == 0) && (gridPtr_.nofElParam_ > 0) )
+        {
+          assert( elData_[ idSet_.id( entity ) ].size() == static_cast< std::size_t >( gridPtr_.nofElParam_ ) );
+          for( double &v : elData_[ idSet_.id( entity ) ] )
+            size += dataSize( v );
+        }
+
+        if( (Entity::codimension == dimension) && (gridPtr_.nofVtxParam_ > 0) )
+        {
+          assert( vtxData_[ idSet_.id( entity ) ].size() == static_cast< std::size_t >( gridPtr_.nofVtxParam_ ) );
+          for( double &v : vtxData_[ idSet_.id( entity ) ] )
+            size += dataSize( v );
+        }
+
+        if( Entity::codimension == 1 )
+        {
+          const auto bndData = bndData_.find( idSet_.id( entity ) );
+          if( bndData != bndData_.end() )
+            size += dataSize( bndData->second.first ) + dataSize( bndData->second.second );
+        }
+
+        return size;
       }
 
-      bool fixedSize (int dim, int codim) const
+      template< class Buffer, class Entity >
+      void gather ( Buffer &buffer, const Entity &entity ) const
       {
-        return false;
+        // do not use a switch statement, because dimension == 1 is possible
+        if( (Entity::codimension == 0) && (gridPtr_.nofElParam_ > 0) )
+        {
+          assert( elData_[ idSet_.id( entity ) ].size() == static_cast< std::size_t >( gridPtr_.nofElParam_ ) );
+          for( double &v : elData_[ idSet_.id( entity ) ] )
+            write( buffer, v );
+        }
+
+        if( (Entity::codimension == dimension) && (gridPtr_.nofVtxParam_ > 0) )
+        {
+          assert( vtxData_[ idSet_.id( entity ) ].size() == static_cast< std::size_t >( gridPtr_.nofVtxParam_ ) );
+          for( double &v : vtxData_[ idSet_.id( entity ) ] )
+            write( buffer, v );
+        }
+
+        if( Entity::codimension == 1 )
+        {
+          const auto bndData = bndData_.find( idSet_.id( entity ) );
+          if( bndData != bndData_.end() )
+          {
+            write( buffer, bndData->second.first );
+            write( buffer, bndData->second.second );
+          }
+        }
       }
 
-      template<class EntityType>
-      size_t size (const EntityType& e) const
+      template< class Buffer, class Entity >
+      void scatter ( Buffer &buffer, const Entity &entity, std::size_t n )
       {
-        return gridPtr_.nofParameters( (int) e.codimension);
-      }
+        // do not use a switch statement, because dimension == 1 is possible
+        if( (Entity::codimension == 0) && (gridPtr_.nofElParam_ > 0) )
+        {
+          auto &p = elData_[ idSet_.id( entity ) ];
+          p.resize( gridPtr_.nofElParam_ );
+          for( double &v : p )
+            read( buffer, v, n );
+        }
 
-      template<class MessageBufferImp, class EntityType>
-      void gather (MessageBufferImp& buff, const EntityType& e) const
-      {
-        const std::vector<double> &v = (e.codimension==0) ? elData_[idSet_.id(e)] : vtxData_[idSet_.id(e)];
-        const size_t s = v.size();
-        for (size_t i=0; i<s; ++i)
-          buff.write( v[i] );
-        assert( s == (size_t)gridPtr_.nofParameters(e.codimension) );
-      }
+        if( (Entity::codimension == dimension) && (gridPtr_.nofVtxParam_ > 0) )
+        {
+          auto &p = vtxData_[ idSet_.id( entity ) ];
+          p.resize( gridPtr_.nofVtxParam_ );
+          for( double &v : p )
+            read( buffer, v, n );
+        }
 
-      template<class MessageBufferImp, class EntityType>
-      void scatter (MessageBufferImp& buff, const EntityType& e, size_t n)
-      {
-        std::vector<double> &v = (e.codimension==0) ? elData_[idSet_.id(e)] : vtxData_[idSet_.id(e)];
-        v.resize( n );
-        gridPtr_.setNofParams( e.codimension, n );
-        for (size_t i=0; i<n; ++i)
-          buff.read( v[i] );
+        if( (Entity::codimension == 1) && (n > 0) )
+        {
+          auto &bndData = bndData_[ idSet_.id( entity ) ];
+          read( buffer, bndData.first, n );
+          read( buffer, bndData.second, n );
+        }
+
+        assert( n == 0 );
       }
 
     private:
-      typedef typename GridType::LocalIdSet IdSet;
+      template< class T >
+      static std::enable_if_t< std::is_trivially_copyable< T >::value, std::size_t > dataSize ( const T &value )
+      {
+        return sizeof( T );
+      }
+
+      static std::size_t dataSize ( const std::string &s )
+      {
+        return dataSize( s.size() ) + s.size();
+      }
+
+      template< class Buffer, class T >
+      static std::enable_if_t< std::is_trivially_copyable< T >::value > write ( Buffer &buffer, const T &value )
+      {
+        std::array< char, sizeof( T ) > bytes;
+        std::memcpy( bytes.data(), &value, sizeof( T ) );
+        for( char &b : bytes )
+          buffer.write( b );
+      }
+
+      template< class Buffer >
+      static void write ( Buffer &buffer, const std::string &s )
+      {
+        write( buffer, s.size() );
+        for( const char &c : s )
+          buffer.write( c );
+      }
+
+      template< class Buffer, class T >
+      static std::enable_if_t< std::is_trivially_copyable< T >::value > read ( Buffer &buffer, T &value, std::size_t &n )
+      {
+        assert( n >= sizeof( T ) );
+        n -= sizeof( T );
+
+        std::array< char, sizeof( T ) > bytes;
+        for( char &b : bytes )
+          buffer.read( b );
+        std::memcpy( &value, bytes.data(), sizeof( T ) );
+      }
+
+      template< class Buffer >
+      static void read ( Buffer &buffer, std::string &s, std::size_t &n )
+      {
+        std::size_t size;
+        read( buffer, size, n );
+        s.resize( size );
+
+        assert( n >= size );
+        n -= size;
+
+        for( char &c : s )
+          buffer.read( c );
+      }
+
       GridPtr &gridPtr_;
-      const IdSet &idSet_;
-      mutable std::map< typename IdSet::IdType, std::vector<double> > elData_, vtxData_;
+      const typename GridType::LocalIdSet &idSet_;
+      mutable std::map< typename GridType::LocalIdSet::IdType, std::vector< double > > elData_, vtxData_;
+      mutable std::map< typename GridType::LocalIdSet::IdType, std::pair< int, DGFBoundaryParameter::type > > bndData_;
     };
 
     // grid auto pointer
@@ -532,7 +692,7 @@ namespace Dune
     std::vector< std::vector< double > > vtxParam_;
     std::vector< DGFBoundaryParameter::type > bndParam_;
     std::vector< int > bndId_;
-    std::vector < double > emptyParam_;
+    std::vector< double > emptyParam_;
 
     int nofElParam_;
     int nofVtxParam_;
