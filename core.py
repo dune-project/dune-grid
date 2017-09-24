@@ -37,7 +37,7 @@ def structuredGrid(lower,upper,division,**parameters):
     return yaspGrid(domain, dimgrid=len(lower))
 
 def string2dgf(dgf):
-    return (reader.dgfString,"DGF\n" + dgf, None)
+    return (reader.dgfString,"DGF\n" + dgf)
 
 
 class P1VTKFunction:
