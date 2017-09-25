@@ -4,12 +4,8 @@ from .core import *
 from ._grids import *
 
 registry = dict()
-registry["grid"] = {
-        "Alberta"    : albertaGrid,
-        "OneD"       : onedGrid,
-        "UG"         : ugGrid,
-        "Yasp"       : yaspGrid,
-    }
+
+registry["grid"] = grid_registry
 
 def leafGrid(*args, **kwargs):
     return create(*args, **kwargs)
