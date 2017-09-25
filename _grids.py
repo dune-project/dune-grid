@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from dune.common.checkconfiguration import have
+from dune.common.checkconfiguration import have, ConfigurationError
 
 def onedGrid(constructor):
     from .grid_generator import module, getDimgrid
@@ -32,33 +32,38 @@ grid_registry = {
         "Yasp"       : yaspGrid,
     }
 
-if have("ALBERTA",fail=False):
-  def albertaGrid(constructor, dimgrid=None):
-      from .grid_generator import module, getDimgrid
+try:
+    have("ALBERTA")
+    def albertaGrid(constructor, dimgrid=None):
+        from .grid_generator import module, getDimgrid
 
-      if not dimgrid:
-          dimgrid = getDimgrid(constructor)
-      typeName = "Dune::AlbertaGrid< " + str(dimgrid) + " >"
-      includes = ["dune/grid/albertagrid.hh", "dune/grid/albertagrid/dgfparser.hh"]
-      gridModule = module(includes, typeName)
+        if not dimgrid:
+            dimgrid = getDimgrid(constructor)
+        typeName = "Dune::AlbertaGrid< " + str(dimgrid) + " >"
+        includes = ["dune/grid/albertagrid.hh", "dune/grid/albertagrid/dgfparser.hh"]
+        gridModule = module(includes, typeName)
 
-      return gridModule.reader(constructor).leafView
+        return gridModule.reader(constructor).leafView
+    grid_registry["Alberta"] = albertaGrid
+except ConfigurationError:
+    pass
 
-  grid_registry["Alberta"] = albertaGrid
 
-if have("HAVE_DUNE_UGGRID", fail=False):
-  def ugGrid(constructor, dimgrid=None, **parameters):
-      from .grid_generator import module, getDimgrid
+try:
+    have("HAVE_DUNE_UGGRID")
+    def ugGrid(constructor, dimgrid=None, **parameters):
+        from .grid_generator import module, getDimgrid
 
-      if not dimgrid:
-          dimgrid = getDimgrid(constructor)
-      typeName = "Dune::UGGrid< " + str(dimgrid) + " >"
-      includes = ["dune/grid/uggrid.hh", "dune/grid/io/file/dgfparser/dgfug.hh"]
-      gridModule = module(includes, typeName)
+        if not dimgrid:
+            dimgrid = getDimgrid(constructor)
+        typeName = "Dune::UGGrid< " + str(dimgrid) + " >"
+        includes = ["dune/grid/uggrid.hh", "dune/grid/io/file/dgfparser/dgfug.hh"]
+        gridModule = module(includes, typeName)
 
-      return gridModule.reader(constructor).leafView
-
-  grid_registry["UG"] = ugGrid
+        return gridModule.reader(constructor).leafView
+    grid_registry["UG"] = ugGrid
+except ConfigurationError:
+    pass
 
 if __name__ == "__main__":
     import doctest
