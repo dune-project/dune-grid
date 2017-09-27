@@ -50,4 +50,4 @@ class P1VTKFunction:
         nVertices = e.subEntities(dim)
         cornerValues = [self.v[self.mapper.subIndex(e, i, dim)] for i in range(nVertices)]
         interpolation = self.module.MultiLinearGeometry(e.type, cornerValues)
-        return interpolation.globalPosition(xi)
+        return interpolation.position(xi)
