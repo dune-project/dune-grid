@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from dune.common.checkconfiguration import have, ConfigurationError
+from dune.common.checkconfiguration import assertHave, ConfigurationError
 
 def onedGrid(constructor):
     from .grid_generator import module, getDimgrid
@@ -33,7 +33,7 @@ grid_registry = {
     }
 
 try:
-    have("ALBERTA")
+    assertHave("ALBERTA")
     def albertaGrid(constructor, dimgrid=None):
         from .grid_generator import module, getDimgrid
 
@@ -50,7 +50,7 @@ except ConfigurationError:
 
 
 try:
-    have("HAVE_DUNE_UGGRID")
+    assertHave("HAVE_DUNE_UGGRID")
     def ugGrid(constructor, dimgrid=None, **parameters):
         from .grid_generator import module, getDimgrid
 
