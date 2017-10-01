@@ -149,8 +149,8 @@ void checkMixedDataMapper(const Mapper& mapper, const GridView& gridView)
       index = block.first;
       min = std::min(min, index);
       max = std::max(max, index+edgeBlockSize-1);
-      for (Index i=0;i<edgeBlockSize;++i)
-        indices.insert(index+i);
+      for (Index i : mapper.blockRange(element,curEdge,dim-1))
+        indices.insert(i);
     }
   }
 

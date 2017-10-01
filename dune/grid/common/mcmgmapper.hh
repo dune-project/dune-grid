@@ -9,6 +9,7 @@
 
 #include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
+#include <dune/common/rangeutilities.hh>
 #include <dune/geometry/dimension.hh>
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/type.hh>
@@ -323,6 +324,50 @@ namespace Dune
         return {0,0};
       else
         return {is.subIndex(e, i, cc)*blockSize(gt) + offset(gt), blockSize(gt)};
+    }
+
+    /** @brief Returns a pair with the starting point in the dof vector
+     *         and the number of degrees of freedom if the entity is contained in the index set
+     *         otherwise {0,0} is returned
+
+       \param e Reference to entity
+       \param result integer reference to the start of the block
+       \return pair with first entry equal to index for that entity and the second entry
+               the number of degrees of freedom (zero if entity is not in entity set of the mapper)
+     */
+    template<class EntityType>
+    IntegralRange<Index> blockRange (const EntityType& e) const
+    {
+      if(!is.contains(e) || offset(e.type()) == invalidOffset)
+        return {0,0};
+      Index start = index(e);
+      return {start, start+blockSize(e.type())};
+    }
+
+    /** @brief Returns a pair with the starting point in the dof vector
+     *         and the number of degrees of freedom if the entity is contained in the index set
+     *         otherwise {0,0} is returned
+
+       \param e Reference to codim 0 entity
+       \param i subentity number
+       \param cc subentity codim
+       \param result integer reference to the start of the block
+       \return pair with first entry equal to index for that entity and the second entry
+               the number of degrees of freedom (zero if sub entity is not in entity set of the mapper)
+     */
+    IntegralRange<Index> blockRange (const typename GV::template Codim<0>::Entity& e, int i, int cc) const
+    {
+      const GeometryType eType = e.type();
+      const GeometryType gt = eType.isNone() ?
+        GeometryType( GeometryType::none, GV::dimension - cc ) :
+        ReferenceElements<double,GV::dimension>::general(eType).type(i,cc) ;
+      if (offset(gt) == invalidOffset)
+        return {0,0};
+      else
+      {
+        Index start = subIndex(e,i,cc);
+        return {start, start+blockSize(gt)};
+      }
     }
 
     /** @brief Returns true if the entity is contained in the index set
