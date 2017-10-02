@@ -296,47 +296,7 @@ namespace Dune
                the number of degrees of freedom (zero if entity is not in entity set of the mapper)
      */
     template<class EntityType>
-    std::pair<Index,Index> block (const EntityType& e) const
-    {
-      if(!is.contains(e) || offset(e.type()) == invalidOffset)
-        return {0,0};
-      return {index(e), blockSize(e.type())};
-    }
-
-    /** @brief Returns a pair with the starting point in the dof vector
-     *         and the number of degrees of freedom if the entity is contained in the index set
-     *         otherwise {0,0} is returned
-
-       \param e Reference to codim 0 entity
-       \param i subentity number
-       \param cc subentity codim
-       \param result integer reference to the start of the block
-       \return pair with first entry equal to index for that entity and the second entry
-               the number of degrees of freedom (zero if sub entity is not in entity set of the mapper)
-     */
-    std::pair<Index,Index> block (const typename GV::template Codim<0>::Entity& e, int i, int cc) const
-    {
-      const GeometryType eType = e.type();
-      const GeometryType gt = eType.isNone() ?
-        GeometryType( GeometryType::none, GV::dimension - cc ) :
-        ReferenceElements<double,GV::dimension>::general(eType).type(i,cc) ;
-      if (offset(gt) == invalidOffset)
-        return {0,0};
-      else
-        return {is.subIndex(e, i, cc)*blockSize(gt) + offset(gt), blockSize(gt)};
-    }
-
-    /** @brief Returns a pair with the starting point in the dof vector
-     *         and the number of degrees of freedom if the entity is contained in the index set
-     *         otherwise {0,0} is returned
-
-       \param e Reference to entity
-       \param result integer reference to the start of the block
-       \return pair with first entry equal to index for that entity and the second entry
-               the number of degrees of freedom (zero if entity is not in entity set of the mapper)
-     */
-    template<class EntityType>
-    IntegralRange<Index> blockRange (const EntityType& e) const
+    IntegralRange<Index> indices (const EntityType& e) const
     {
       if(!is.contains(e) || offset(e.type()) == invalidOffset)
         return {0,0};
@@ -355,7 +315,7 @@ namespace Dune
        \return pair with first entry equal to index for that entity and the second entry
                the number of degrees of freedom (zero if sub entity is not in entity set of the mapper)
      */
-    IntegralRange<Index> blockRange (const typename GV::template Codim<0>::Entity& e, int i, int cc) const
+    IntegralRange<Index> indices (const typename GV::template Codim<0>::Entity& e, int i, int cc) const
     {
       const GeometryType eType = e.type();
       const GeometryType gt = eType.isNone() ?

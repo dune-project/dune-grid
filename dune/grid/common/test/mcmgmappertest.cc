@@ -123,16 +123,18 @@ void checkMixedDataMapper(const Mapper& mapper, const GridView& gridView)
 
   for (const auto& element : elements(gridView))
   {
-    if (elementBlockSize == 0) elementBlockSize = mapper.block(element).second;
-    if (elementBlockSize != mapper.block(element).second)
+    auto block = mapper.indices(element);
+    if (block.empty())
+      DUNE_THROW(GridError, "Mapper mixed index does not have element indices");
+    if (elementBlockSize == 0) elementBlockSize = block.size();
+    if (elementBlockSize != block.size())
       DUNE_THROW(GridError, "Mapper mixed index does not have the same block size on all elements");
     // handle elements
-    index = mapper.index(element);
-    min = std::min(min, index);
-    max = std::max(max, index+elementBlockSize-1);
-    for (Index i=0;i<elementBlockSize;++i)
+    min = std::min(min, *(block.begin()));
+    max = std::max(max, *(block.end())-1);
+    for (Index i : block)
     {
-      std::pair<std::set<int>::iterator, bool> status = indices.insert(index+i);
+      std::pair<std::set<int>::iterator, bool> status = indices.insert(i);
 
       if (!status.second)       // not inserted because already existing
         DUNE_THROW(GridError, "Mapper mixed index is not unique for elements!");
@@ -142,14 +144,15 @@ void checkMixedDataMapper(const Mapper& mapper, const GridView& gridView)
     size_t numEdges = element.subEntities(dim-1);
     for (size_t curEdge = 0; curEdge < numEdges; ++curEdge)
     {
-      auto block = mapper.block(element,curEdge,dim-1);
-      if (edgeBlockSize == 0) edgeBlockSize = block.second;
-      else if (edgeBlockSize != block.second)
+      auto block = mapper.indices(element,curEdge,dim-1);
+      if (block.empty())
+        DUNE_THROW(GridError, "Mapper mixed index does not have edges indices");
+      if (edgeBlockSize == 0) edgeBlockSize = block.size();
+      else if (edgeBlockSize != block.size())
         DUNE_THROW(GridError, "Mapper mixed index does not have the same block size on all edges");
-      index = block.first;
-      min = std::min(min, index);
-      max = std::max(max, index+edgeBlockSize-1);
-      for (Index i : mapper.blockRange(element,curEdge,dim-1))
+      min = std::min(min, *(block.begin()));
+      max = std::max(max, *(block.end())-1);
+      for (Index i : block)
         indices.insert(i);
     }
   }
