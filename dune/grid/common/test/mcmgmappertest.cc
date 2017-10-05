@@ -123,12 +123,19 @@ void checkMixedDataMapper(const Mapper& mapper, const GridView& gridView)
 
   for (const auto& element : elements(gridView))
   {
+    const auto &gts = mapper.types(0);
+    if (std::find(gts.begin(),gts.end(),element.type()) == gts.end())
+      DUNE_THROW(GridError, "Mapper mixed index does not have correct geometry type information");
+
     auto block = mapper.indices(element);
     if (block.empty())
       DUNE_THROW(GridError, "Mapper mixed index does not have element indices");
     if (elementBlockSize == 0) elementBlockSize = block.size();
     if (elementBlockSize != block.size())
       DUNE_THROW(GridError, "Mapper mixed index does not have the same block size on all elements");
+    if ( block.size() != mapper.size(element.type()) )
+      DUNE_THROW(GridError, "Mapper mixed index does not return correct size for given geometry type ");
+
     // handle elements
     min = std::min(min, *(block.begin()));
     max = std::max(max, *(block.end())-1);
