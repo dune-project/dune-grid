@@ -286,6 +286,18 @@ namespace Dune
       return n;
     }
 
+    /** @brief return number of entries for a given geometry type **/
+    size_type size(GeometryType gt) const
+    {
+      return blockSize(gt);
+    }
+
+    /** @brief return the geometry types with entries **/
+    const std::vector< GeometryType >& types ( int codim ) const
+    {
+      return myTypes_[ codim ];
+    }
+
     /** @brief Returns a pair with the starting point in the dof vector
      *         and the number of degrees of freedom if the entity is contained in the index set
      *         otherwise {0,0} is returned
@@ -375,6 +387,9 @@ namespace Dune
     {
       n = 0;
 
+      std::fill(offsets.begin(),offsets.end(),Index(0));
+      std::fill(blocks.begin(),blocks.end(),Index(0));
+
       for (unsigned int codim = 0; codim <= GV::dimension; ++codim)
       {
         // walk over all geometry types in the codimension
@@ -383,9 +398,11 @@ namespace Dune
           size_t block = layout()(gt, GV::Grid::dimension);
 
           // if the geometry type is contained in the layout, increment offset
+          // and store geometry type
           if (block) {
             offset = n;
             n += is.size(gt) * block;
+            myTypes_[codim].push_back(gt);
           }
           else {
             offset = invalidOffset;
@@ -416,6 +433,7 @@ namespace Dune
     std::array<Index, GlobalGeometryTypeIndex::size(GV::dimension)> offsets;
     std::array<Index, GlobalGeometryTypeIndex::size(GV::dimension)> blocks;
     const MCMGLayout layout_;     // get layout object
+    std::vector<GeometryType> myTypes_[GV::dimension+1];
 
   protected:
     /**
