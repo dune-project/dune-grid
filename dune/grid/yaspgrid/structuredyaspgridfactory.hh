@@ -39,7 +39,7 @@ namespace Dune
               Use YaspGrid<dim, EquidistantOffsetCoordinates<ctype,dim> > instead
               for non-trivial origin.
      */
-    static std::shared_ptr<GridType>
+    static std::unique_ptr<GridType>
     createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
                    const FieldVector<ctype,dimworld>& upperRight,
                    const std::array<unsigned int,dim>& elements)
@@ -56,9 +56,8 @@ namespace Dune
       std::array<int, dim> elem;
       std::copy(elements.begin(), elements.end(), elem.begin());
 
-      return std::shared_ptr<GridType>
-               (new GridType(upperRight, elem,
-                             std::bitset<dim>(), 0));  // default constructor of bitset sets to zero
+      return std::make_unique<GridType>(upperRight, elem,
+                             std::bitset<dim>(), 0);  // default constructor of bitset sets to zero
     }
 
     /** \brief Create a structured simplex grid
@@ -66,7 +65,7 @@ namespace Dune
         \note Simplices are not supported in YaspGrid, so this functions
               unconditionally throws a GridError.
      */
-    static std::shared_ptr<GridType>
+    static std::unique_ptr<GridType>
     createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
                       const FieldVector<ctype,dimworld>& upperRight,
                       const std::array<unsigned int,dim>& elements)
@@ -97,7 +96,7 @@ namespace Dune
         \param upperRight Upper right corner of the grid
         \param elements   Number of elements in each coordinate direction
      */
-    static std::shared_ptr<GridType>
+    static std::unique_ptr<GridType>
     createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
                    const FieldVector<ctype,dimworld>& upperRight,
                    const std::array<unsigned int,dim>& elements)
@@ -106,9 +105,8 @@ namespace Dune
       std::array<int, dim> elem;
       std::copy(elements.begin(), elements.end(), elem.begin());
 
-      return std::shared_ptr<GridType>
-               (new GridType(lowerLeft, upperRight, elem,
-                             std::bitset<dim>(), 0));  // default constructor of bitset sets to zero
+      return std::make_unique<GridType>(lowerLeft, upperRight, elem,
+                             std::bitset<dim>(), 0);  // default constructor of bitset sets to zero
     }
 
     /** \brief Create a structured simplex grid
@@ -116,7 +114,7 @@ namespace Dune
         \note Simplices are not supported in YaspGrid, so this functions
               unconditionally throws a GridError.
      */
-    static std::shared_ptr<GridType>
+    static std::unique_ptr<GridType>
     createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
                       const FieldVector<ctype,dimworld>& upperRight,
                       const std::array<unsigned int,dim>& elements)
