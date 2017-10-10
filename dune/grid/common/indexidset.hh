@@ -334,44 +334,29 @@ namespace Dune
      <H3>Overview</H3>
 
      An id set provides a map \f[ m : E \to \mathbf{I}\f] where
-     \f$E\f$ is a subset of the entities of a grid and \f$\mathbf{I}\f$ is a discrete
-     set of ids. These ids need not be consecutive nor positive.
-     However, the ids must be usable as keys for STL associative containers
-     (e.g., <tt>std::map</tt>). For debugging purposes, it must also be possible
-     to write them into standard C++ streams.
-     More precisely, for such a type <tt>Id</tt>, at least the following operators
-     have to be provided:
-     \code
-     bool operator== ( const Id &, const Id & );
-     bool operator!= ( const Id &, const Id & );
-     bool operator<  ( const Id &, const Id & );
-
-     template< class C, class T >
-     std::basic_ostream< C, T > &operator<< ( std::basic_ostream< C, T > &, const Id & );
-     \endcode
-
-     The index map \f$m\f$ has the following properties:
-
-     - It is injective, i.e. for any \f$e,e^\prime\in E\f$
-     we have \f$e\neq e^\prime \Rightarrow m(e)\neq m(e^\prime)\f$.
-
-     Note: In "Bastian et al.: A Generic Grid Interface for Adaptive and Parallel Scientific Computing.
-     Part I: Abstract Framework, Computing 82 (2-3), 2008, pp. 103-119" it is claimed that this
-     injectivity property should only hold for entities of the same codimension.  This is in
-     contrast to the actual Dune code: grid implementations are required to provide ids that are injective
-     even on sets of entities with different codimensions.
-
-     - It is persistent with respect to grid modification, i.e. if there exists an entity \f$e\f$ with
-     id \f$i\f$ before grid modification and an entity \f$e^\prime\f$ with id \f$i\f$ after mesh
+     \f$E\f$ is a subset of the entities of a grid and \f$\mathbf{I}\f$ is a finite
+     set of indices.  These indices  are persistent under grid
+     modifications, i.e. if there exists an entity \f$e\f$ with index \f$i\f$
+     before grid modification and an entity \f$e^\prime\f$ with index \f$i\f$ after grid
      modification it is guaranteed that \f$e=e^\prime\f$.
 
-     The set of ids \f$ \mathbf{I} = \{i\ |\ \exists e\in E : m(e)=i\}\f$ used by the
-     id set is not necessarily consecutive. In practice the numbers can be quite large, especially
-     in a parallel implementation. Therefore the type used to represent the id can be chosen
-     by the application.
+     In the terminology of the Dune grid interface, these indices
+     are called 'ids'.  Ids are typically numbers, but may be other things, too.
+     If they are numbers, the ids used in a grid are not necessarily positive,
+     and they are usually not consecutive.
+     However, the ids must be usable as keys for STL associative containers,
+     like a <tt>std::map</tt> or a <tt>std::unordered_map</tt>.  As ids are persistent,
+     they are used to keep data on a grid that undergoes modifications.
 
-     <H3>Ids and leaf entities</H3>
+     <H3>Injectivity properties</H3>
 
+     The id map \f$m\f$ is injective on the entire set of entities of a hierarchical
+     grid.  More formally, we have:
+
+     - For any \f$e,e^\prime\in E\f$ we have \f$e\neq e^\prime \Rightarrow m(e)\neq m(e^\prime)\f$.
+
+     An exception to this rule holds for entities that are copies of entities on a lower refinement
+     level.
      An element is a copy of its father element if it is the only son. This
      concept can be transferred to all higher codimensions because in a nested grid
      structure the entities of any codimension form a set of trees. However, the roots
@@ -383,25 +368,71 @@ namespace Dune
      \image html  idlocalref.png "Sharing of ids."
      \image latex idlocalref.eps "Sharing of ids." width=\textwidth
 
-     The copy relation can be trivially extended to be an equivalence relation.
-     With respect to ids we define that <EM> all copies of an entity share the same id.</EM>
+     The copy relation is an equivalence relation.
+     We define that <EM> all copies of an entity share the same id.</EM>
      In the example of the figure the vertices v and w would have the same id.
+     This definition is useful to transfer data on the leaf grid during grid modification.
 
-     This definition is useful to transfer data related to the leaf grid during grid modification.
+     <b>Note:</b> In "Bastian et al.: A Generic Grid Interface for Adaptive and Parallel Scientific Computing.
+     Part I: Abstract Framework, Computing 82 (2-3), 2008, pp. 103-119" it is claimed that the
+     id map should be injective only for entities of the same codimension.  This is in
+     contrast to the actual %Dune code: in the code, grid implementations are required to provide
+     ids that are injective even on sets of entities with different codimensions.
 
-     <H3>Global id set</H3>
+     <H3>Properties of the <tt>IdTypeImp</tt> type</H3>
 
-     A global id set provides ids that are unique over all processes over which the
-     grid is distributed.
-     All grid implementations provide a global id set.
+     The type <tt>IdTypeImp</tt> used for ids will be specified by the grid implementation.
+     Conceptually, it can be pretty much anything, but we require that it is
+     usable as <tt>key</tt> for the <tt>std::map</tt> and <tt>std::unordered_map</tt>
+     containers of the standard library.  In particular, for <tt>std::map</tt> this means
+     that <tt>IdTypeImp</tt> implements
+     \code
+     bool operator<  ( const IdTypeImp &, const IdTypeImp & );
+     \endcode
+     and that this operator implements a strict weak ordering.  For use with <tt>std::unordered_map</tt>,
+     we additionally require
+     \code
+     bool operator== ( const IdTypeImp &, const IdTypeImp & );
+     \endcode
+     and that <tt>std::hash<IdType></tt> fulfills the requirements of an stl hash object.
 
-     <H3>Local id set</H3>
+     For convenience we further require that
+     \code
+     bool operator!= ( const IdTypeImp &, const IdTypeImp & );
+     \endcode
+     is implemented and returns the negation of <tt>operator==</tt>.
 
-     A local id set provides ids that are unique within one process but two entities
+     The <tt>IdTypeImp</tt> must be
+     <ul>
+      <li> default-constructible </li>
+      <li> copy-constructible </li>
+      <li> copy-assignable </li>
+     </ul>
+
+     Finally, for debugging purposes it must be possible to write objects of type
+     <tt>IdTypeImp</tt> into standard C++ streams.  Therefore
+     \code
+     template< class C, class T >
+     std::basic_ostream< C, T > &operator<< ( std::basic_ostream< C, T > &, const IdTypeImp & );
+     \endcode
+     has to exist and do something reasonable.
+
+     <H3>Global and local id sets</H3>
+
+     Grids are required to provide two types of id sets.  These differ only of the
+     grid is distributed over several processes:
+
+     <ul>
+      <li>
+       A global id set provides ids that are unique over all processes over which the
+       grid is distributed.
+      </li>
+      <li>
+     A local id set provides ids that are unique within one process, but two entities
      in different processes may have the same id. Obviously, a global id set is also
-     a local id set. A grid implementation may provide an extra local id set for efficiency reasons.
-     In sequential grids local and global id set are identical.
-     All grid implementations provide a local id set.
+     a local id set, but a dedicated local id set implementation may be more efficient.
+      </li>
+     </ul>
 
      @ingroup IndexIdSets
    */
@@ -420,7 +451,7 @@ namespace Dune
       return asImp().template id<cc>(e);
     }
 
-    //! Get id of an entity of codim cc. Unhandy because template parameter must be supplied explicitely.
+    //! Get id of an entity of codim cc. Unhandy because template parameter must be supplied explicitly.
     /*
        We use the remove_const to extract the Type from the mutable class,
        because the const class is not instantiated yet.
