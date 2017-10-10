@@ -16,6 +16,47 @@
 
 namespace Dune
 {
+  // Check the type used for ids
+  template <class Grid, class IdSet>
+  void checkIdType(const Grid& grid, const IdSet& idSet)
+  {
+    // Get some entity for testing
+    auto entity = *grid.leafGridView().template begin<0>();
+
+    // The IdSet class exports a type IdSet, and this is the type actually
+    // used for return values of the id class
+    static_assert(std::is_same<typename IdSet::IdType, decltype(idSet.id(entity))>::value,
+                  "IdSet::IdType does not match the return value of idSet.id()");
+    static_assert(std::is_same<typename IdSet::IdType, decltype(idSet.subId(entity,0,0))>::value,
+                  "IdSet::IdType does not match the return value of idSet.subId()");
+
+    // Get some id for testing
+    auto id = idSet.id(entity);
+
+    // Test for operator<
+    if (id<id)
+      DUNE_THROW(GridError, "operator< does not implement an ordering");
+
+    // Test for operator==
+    if (!(id==id))
+      DUNE_THROW(GridError, "operator== is not symmetric");
+
+    // Test for operator!=
+    if (id!=id)
+      DUNE_THROW(GridError, "operator!= is not the negation of operator==");
+
+    // Test for the default constructor
+    typename IdSet::IdType someId;
+
+    // Test for the copy constructor
+    typename IdSet::IdType someOtherId(idSet.id(entity));
+
+    // copy assignment
+    someId = someOtherId;
+
+    // Output operator
+    std::cout << someId << std::endl;
+  }
 
   template <class Grid, class IdSet>
   void checkInjectivity(const Grid& grid, const IdSet& idSet)
@@ -70,6 +111,7 @@ namespace Dune
   template <class Grid, class IdSet>
   void checkIdSet ( const Grid &grid, const IdSet& idSet)
   {
+    checkIdType(grid,idSet);
     checkInjectivity(grid, idSet);
   }
 
