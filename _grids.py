@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from dune.common.checkconfiguration import assertHave, ConfigurationError
+from dune.common import generateTypeName
 
 def onedGrid(constructor):
     from .grid_generator import module, getDimgrid
@@ -20,8 +21,10 @@ def yaspGrid(constructor, dimgrid=None, coordinates="Dune::EquidistantCoordinate
         coordinates = "Dune::EquidistantCoordinates"
     elif coordinates == "tensorproduct":
         coordinates = "Dune::TensorProductCoordinates"
-
-    typeName = "Dune::YaspGrid< " + str(dimgrid) + ", " + coordinates + "< " + ctype + ", " + str(dimgrid) + " > >"
+    coordinates, _ = generateTypeName(coordinates, ctype, dimgrid)
+    typeName, includes = generateTypeName("Dune::YaspGrid", dimgrid, coordinates)
+    includes += ["dune/grid/yaspgrid.hh", "dune/grid/io/file/dgfparser/dgfyasp.hh"]
+    # typeName = "Dune::YaspGrid< " + str(dimgrid) + ", " + coordinates + "< " + ctype + ", " + str(dimgrid) + " > >"
     includes = ["dune/grid/yaspgrid.hh", "dune/grid/io/file/dgfparser/dgfyasp.hh"]
     gridModule = module(includes, typeName)
 
