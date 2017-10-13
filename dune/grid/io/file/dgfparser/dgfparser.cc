@@ -378,9 +378,7 @@ namespace Dune
 
       dgf :: SimplexBlock bsimplex( gridin, nofvtx, vtxoffset, dimgrid );
       dgf :: CubeBlock bcube( gridin, nofvtx, vtxoffset, dimgrid );
-#ifdef EXPERIMENTAL_GRID_EXTENSIONS
       dgf :: GeneralBlock bgeneral( gridin, nofvtx, vtxoffset, dimgrid );
-#endif
 
       if( bcube.isactive() && (element != Simplex) )
       {
@@ -401,13 +399,11 @@ namespace Dune
           }
         }
       }
-#ifdef EXPERIMENTAL_GRID_EXTENSIONS
       else if( bgeneral.isactive() )
       {
         info->block(bgeneral);
         nofelements += bgeneral.get( elements, elParams, nofelparams );
       }
-#endif
       else
       {
         simplexgrid = true;
