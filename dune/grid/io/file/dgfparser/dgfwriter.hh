@@ -1,18 +1,31 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_DGFWRITER_HH
-#define DUNE_DGFWRITER_HH
+#ifndef DUNE_GRID_IO_FILE_DGFPARSER_DGFWRITER_HH
+#define DUNE_GRID_IO_FILE_DGFPARSER_DGFWRITER_HH
 
 /** \file
  *  \brief write a GridView to a DGF file
  *  \author Martin Nolte
  */
 
+#include <cassert>
+#include <cstddef>
+
+#include <algorithm>
 #include <fstream>
+#include <string>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
-#include <dune/grid/common/grid.hh>
+#include <dune/common/rangeutilities.hh>
+#include <dune/common/typeutilities.hh>
+
 #include <dune/geometry/referenceelements.hh>
+#include <dune/geometry/type.hh>
+
+#include <dune/grid/common/grid.hh>
+#include <dune/grid/common/rangegenerators.hh>
 
 namespace Dune
 {
@@ -42,16 +55,12 @@ namespace Dune
 
   private:
     typedef typename GridView::IndexSet IndexSet;
-    typedef typename GridView::template Codim< 0 >::Iterator ElementIterator;
-    typedef typename GridView::IntersectionIterator IntersectionIterator;
+    typedef typename GridView::template Codim< 0 >::Entity Element;
+    typedef typename GridView::Intersection Intersection;
 
-    typedef typename ElementIterator :: Entity Element ;
-    typedef typename Element :: EntitySeed ElementSeed ;
+    typedef typename Element::EntitySeed ElementSeed;
 
     typedef typename IndexSet::IndexType Index;
-
-    typedef ReferenceElements< typename Grid::ctype, dimGrid > RefElements;
-    typedef typename RefElements::ReferenceElement RefElement;
 
   public:
     /** \brief constructor
@@ -62,97 +71,153 @@ namespace Dune
       : gridView_( gridView )
     {}
 
-    /** \brief write the GridView into a std::ostream
+    /**
+     * \brief write the GridView into a std::ostream
      *
-     *  \param  gridout       std::ostream to write the grid to
-     *  \param  newElemOrder  vector providing a new ordering for the elements in the given GridView
-     *  \param  addParams     additional data to write to dgf file, such as projections
-     *                        etc. (defaults to an emoty data stream)
-     */
-    void write ( std::ostream &gridout,
-                 const std::vector< Index >& newElemOrder,
-                 const std::stringstream& addParams = std::stringstream() ) const;
+     * \param      gridout       std::ostream to write the grid to
+     * \param[in]  newElemOrder  vector providing a new ordering for the elements in the given GridView
+     * \param[in]  boundaryData  callable attaching boundary data to each intersection
+     * \param[in]  addParams     additional data to write to dgf file, such as projections etc.
+     *                           (defaults to an emoty data stream)
+     **/
+    template< class BoundaryData >
+    void write ( std::ostream &gridout, const std::vector< Index > &newElemOrder, BoundaryData &&boundaryData, const std::stringstream &addParams = std::stringstream() ) const;
 
-    /** \brief write the GridView into a std::ostream
+    /**
+     * \brief write the GridView to a file
      *
-     *  \param  gridout    std::ostream to write the grid to
-     */
-    void write ( std::ostream &gridout ) const;
+     * \param      gridout       std::ostream to write the grid to
+     * \param[in]  boundaryData  callable attaching boundary data to each intersection
+     * \param[in]  addParams     additional data to write to dgf file, such as projections, etc.
+     *                           (defaults to an empty data stream)
+     **/
+    template< class BoundaryData >
+    void write ( std::ostream &gridout, BoundaryData &&boundaryData, const std::stringstream &addParams = std::stringstream() ) const;
 
-    /** \brief write the GridView into a std::ostream
+    /**
+     * \brief write the GridView into a std::ostream
      *
-     *  \param  gridout    std::ostream to write the grid to
-     *  \param  addParams  additional data to write to dgf file, such as projections
-     *                     etc. (defaults to an emoty data stream)
-     */
-    void write ( std::ostream &gridout,
-                 const std::stringstream& addParams ) const;
+     * \param      gridout       std::ostream to write the grid to
+     * \param[in]  newElemOrder  vector providing a new ordering for the elements in the given GridView
+     * \param[in]  addParams     additional data to write to dgf file, such as projections etc.
+     *                           (defaults to an emoty data stream)
+     **/
+    void write ( std::ostream &gridout, const std::vector< Index > &newElemOrder, const std::stringstream &addParams = std::stringstream() ) const
+    {
+      write( gridout, newElemOrder, [] ( const Intersection &i ) -> int { return boundaryId( i ); }, addParams );
+    }
 
-    /** \brief write the GridView to a file
+    /**
+     * \brief write the GridView into a std::ostream
      *
-     *  \param[in] fileName  name of the write to write the grid to
-     */
-    void write ( const std::string &fileName ) const;
+     * \param      gridout       std::ostream to write the grid to
+     * \param[in]  addParams     additional data to write to dgf file, such as projections, etc.
+     *                           (defaults to an empty data stream)
+     **/
+    void write ( std::ostream &gridout, const std::stringstream &addParams = std::stringstream() ) const
+    {
+      write( gridout, [] ( const Intersection &i ) -> int { return boundaryId( i ); }, addParams );
+    }
+
+    /**
+     * \brief write the GridView to a file
+     *
+     * \param[in]  fileName  name of the write to write the grid to
+     * \param[in]  args      arguments for the write method with istream
+     **/
+    template< class... Args >
+    auto write ( const std::string &fileName, Args &&... args ) const
+      -> void_t< decltype( this->write( std::declval< std::ostream & >(), std::declval< Args >()... ) ) >
+    {
+      std::ofstream gridout( fileName );
+      if( gridout )
+        write( gridout, std::forward< Args >( args )... );
+      else
+        std::cerr << "Couldn't open file `"<< fileName << "'!"<< std::endl;
+    }
+
+  protected:
+    auto elementsSeeds ( const std::vector< Index > &newElemOrder ) const
+      -> std::vector< ElementSeed >;
+
+    void writeHeader ( std::ostream &gridout ) const;
+    void writeFooter ( std::ostream &gridout ) const;
+
+    auto writeVertices ( std::ostream &gridout ) const
+      -> std::vector< Index >;
+
+    void writeElement ( std::ostream &gridout, const std::vector< Index > &dgfIndices, const Element &element, const GeometryType &elementType ) const;
+
+    void writeSimplices ( std::ostream &gridout, const std::vector< Index > &dgfIndices ) const;
+    void writeSimplices ( std::ostream &gridout, const std::vector< Index > &dgfIndices, const std::vector< ElementSeed > &elementSeeds ) const;
+
+    void writeCubes ( std::ostream &gridout, const std::vector< Index > &dgfIndices ) const;
+    void writeCubes ( std::ostream &gridout, const std::vector< Index > &dgfIndices, const std::vector< ElementSeed > &elementSeeds ) const;
+
+    template< class... Args >
+    void writeElements ( std::ostream &gridout, const std::vector< Index > &dgfIndices, const Args &... args ) const;
+
+  private:
+    template< class I >
+    static auto boundaryId ( const I &i, PriorityTag< 1 > )
+      -> std::enable_if_t< std::is_convertible< std::decay_t< decltype( i.impl().boundaryId() ) >, int >::value, int >
+    {
+      return i.impl().boundaryId();
+    }
+
+    template< class I >
+    static int boundaryId ( const I &i, PriorityTag< 0 > )
+    {
+      return 1;
+    }
+
+  protected:
+    static int boundaryId ( const Intersection &i ) { return boundaryId( i, PriorityTag< 42 >() ); }
+
+  private:
+    static int boundaryId ( const Intersection &, int bndId ) { return bndId; }
+    static int boundaryId ( const Intersection &i, const std::string & ) { return boundaryId( i ); }
+    static int boundaryId ( const Intersection &i, const std::pair< int, std::string > &data ) { return boundrayId( i, data.first ); }
+
+    static void appendBoundaryData ( std::ostream &gridout, int ) { gridout << std::endl; }
+    static void appendBoundaryData ( std::ostream &gridout, std::pair< int, std::string > &data ) { appendBoundaryData( gridout, data.second ); }
+    static void appendBoundaryData ( std::ostream &gridout, const std::string &s ) { gridout << " : " << s << std::endl; }
+
+  protected:
+    template< class BoundaryData >
+    void writeBoundaries ( std::ostream &gridout, const std::vector< Index > &dgfIndices, BoundaryData &&boundaryData ) const;
+
+    void writeBoundaries ( std::ostream &gridout, const std::vector< Index > &dgfIndices ) const
+    {
+      writeBoundaries( gridout, dgfIndices, [] ( const Intersection &i ) -> int { return boundaryId( i ); } );
+    }
 
   protected:
     GridView gridView_;
-
-  protected:
-    /////////////////////////////////////////////
-    //  helper methods
-    /////////////////////////////////////////////
-
-    // write all elements of type elementType
-    void writeAllElements( const std::vector<ElementSeed>& elementSeeds,
-                           const IndexSet& indexSet,
-                           const GeometryType& elementType,
-                           const std::vector< Index >& vertexIndex,
-                           std::ostream &gridout ) const
-    {
-      if (!elementSeeds.empty()) {
-        // perform grid traversal based on new element ordering
-        for (const auto& seed : elementSeeds) {
-          const Element element = gridView_.grid().entity(seed);
-          writeElement(element, indexSet, elementType, vertexIndex, gridout);
-        }
-      }
-      else {
-        // perform default grid traversal
-        for (const auto& element : elements(gridView_))
-          writeElement(element, indexSet, elementType, vertexIndex, gridout);
-      }
-    }
-
-    // write one element
-    void writeElement( const Element& element,
-                       const IndexSet& indexSet,
-                       const GeometryType& elementType,
-                       const std::vector< Index >& vertexIndex,
-                       std::ostream &gridout ) const
-    {
-      // if element's type is not the same as the type to write the return
-      if( element.type() != elementType )
-        return ;
-
-      // get vertex numbers of the element
-      const size_t vxSize = element.subEntities( Element::dimension );
-      std::vector<Index> vertices(vxSize);
-      for( size_t i = 0; i < vxSize; ++i )
-        vertices[ i ] = vertexIndex[ indexSet.subIndex( element, i, dimGrid ) ];
-
-      gridout << vertices[ 0 ];
-      for( size_t i = 1; i < vxSize; ++i )
-        gridout << " " << vertices[ i ];
-      gridout << std::endl;
-    }
   };
 
 
   template< class GV >
-  inline void DGFWriter< GV >::
-  write ( std::ostream &gridout,
-          const std::vector< Index >& newElemOrder,
-          const std::stringstream& addParams ) const
+  inline auto DGFWriter< GV >::elementsSeeds ( const std::vector< Index > &newElemOrder ) const
+    -> std::vector< ElementSeed >
+  {
+    const IndexSet &indexSet = gridView_.indexSet();
+
+    const std::size_t orderSize = newElemOrder.size() ;
+    std::vector< ElementSeed > elementSeeds( orderSize );
+
+    for( const Element &element : elements( gridView_ ) )
+    {
+      assert( newElemOrder[ indexSet.index( element ) ] < orderSize );
+      elementSeeds[ newElemOrder[ indexSet.index( element ) ] ] = element.seed();
+    }
+
+    return elementSeeds;
+  }
+
+
+  template< class GV >
+  inline void DGFWriter< GV >::writeHeader ( std::ostream &gridout ) const
   {
     // set the stream to full double precision
     gridout.setf( std::ios_base::scientific, std::ios_base::floatfield );
@@ -160,171 +225,208 @@ namespace Dune
 
     const IndexSet &indexSet = gridView_.indexSet();
 
-    // vector containing entity seed (only needed if new ordering is given)
-    std::vector< ElementSeed > elementSeeds;
-
-    // if ordering was provided
-    const size_t orderSize = newElemOrder.size() ;
-    if( orderSize == indexSet.size( 0 ) )
-    {
-      const ElementIterator end = gridView_.template end< 0 >();
-      ElementIterator it = gridView_.template begin< 0 >();
-
-      if( it != end )
-      {
-        elementSeeds.resize( orderSize, (*it).seed() ) ;
-        size_t countElements = 0 ;
-        for( ; it != end; ++it, ++countElements )
-        {
-          const Element& element = *it ;
-          assert( newElemOrder[ indexSet.index( element ) ] < orderSize );
-          elementSeeds[ newElemOrder[ indexSet.index( element ) ] ] = element.seed();
-        }
-
-        // make sure that the size of the index set is equal
-        // to the number of counted elements
-        if( countElements != orderSize )
-          DUNE_THROW(InvalidStateException,"DGFWriter::write: IndexSet not consecutive");
-      }
-    }
-
     // write DGF header
     gridout << "DGF" << std::endl;
+    gridout << "%" << " Elements = " << indexSet.size( 0 ) << "  |  Vertices = " << indexSet.size( dimGrid ) << std::endl;
+  }
+
+
+  template< class GV >
+  inline void DGFWriter< GV >::writeFooter ( std::ostream &gridout ) const
+  {
+    gridout << std::endl << "#" << std::endl;
+  }
+
+
+  template< class GV >
+  inline auto DGFWriter< GV >::writeVertices ( std::ostream &gridout ) const
+    -> std::vector< Index >
+  {
+    const IndexSet &indexSet = gridView_.indexSet();
 
     const Index vxSize = indexSet.size( dimGrid );
-    std::vector< Index > vertexIndex( vxSize, vxSize );
-
-    gridout << "%" << " Elements = " << indexSet.size( 0 ) << "  |  Vertices = " << vxSize << std::endl;
+    std::vector< Index > dgfIndices( vxSize, vxSize );
 
     // write all vertices into the "vertex" block
     gridout << std::endl << "VERTEX" << std::endl;
     Index vertexCount = 0;
-    const ElementIterator end = gridView_.template end< 0 >();
-    for( ElementIterator it = gridView_.template begin< 0 >(); it != end; ++it )
+    for( const Element &element : elements( gridView_ ) )
     {
-      const Element& element = *it ;
-      const int numCorners = element.subEntities( dimGrid );
-      for( int i=0; i<numCorners; ++i )
+      for( auto i : range( element.subEntities( dimGrid ) ) )
       {
         const Index vxIndex = indexSet.subIndex( element, i, dimGrid );
         assert( vxIndex < vxSize );
-        if( vertexIndex[ vxIndex ] == vxSize )
+        if( dgfIndices[ vxIndex ] < vxSize )
         {
-          vertexIndex[ vxIndex ] = vertexCount++;
+          dgfIndices[ vxIndex ] = vertexCount++;
           gridout << element.geometry().corner( i ) << std::endl;
         }
       }
     }
     gridout << "#" << std::endl;
+
     if( vertexCount != vxSize )
       DUNE_THROW( GridError, "Index set reports wrong number of vertices." );
+    return dgfIndices;
+  }
 
-    if( dimGrid > 1 )
-    {
-      // only write simplex block if grid view contains simplices
-      if( indexSet.size( GeometryTypes::simplex( dimGrid ) ) > 0 )
-      {
-        // write all simplices to the "simplex" block
-        gridout << std::endl << "SIMPLEX" << std::endl;
 
-        // write all simplex elements
-        writeAllElements( elementSeeds, indexSet, GeometryTypes::simplex( dimGrid ), vertexIndex, gridout );
+  template< class GV >
+  inline void DGFWriter< GV >::writeElement ( std::ostream &gridout, const std::vector< Index > &dgfIndices, const Element &element, const GeometryType &elementType ) const
+  {
+    // if element's type is not the same as the type to write the return
+    if( element.type() != elementType )
+      return;
 
-        // write end marker for block
-        gridout << "#" << std::endl;
-      }
-    }
+    // write vertex numbers of the element
+    const IndexSet &indexSet = gridView_.indexSet();
+    for( auto i : range( element.subEntities( Element::dimension ) ) )
+      gridout << (i > 0 ? " " : "") << dgfIndices[ indexSet.subIndex( element, i, dimGrid ) ];
+    gridout << std::endl;
+  }
 
-    // only write cube block if grid view contains cubes
+
+  template< class GV >
+  inline void DGFWriter< GV >::writeSimplices ( std::ostream &gridout, const std::vector< Index > &dgfIndices ) const
+  {
+    // write all simplices to the "simplex" block
+    gridout << std::endl << "SIMPLEX" << std::endl;
+
+    // write all simplex elements
+    for( const Element &element : elements( gridView_ ) )
+      writeElement( gridout, dgfIndices, element, GeometryTypes::simplex( dimGrid ) );
+
+    // write end marker for block
+    gridout << "#" << std::endl;
+  }
+
+
+  template< class GV >
+  inline void DGFWriter< GV >::writeSimplices ( std::ostream &gridout, const std::vector< Index > &dgfIndices, const std::vector< ElementSeed > &elementSeeds ) const
+  {
+    // write all simplices to the "simplex" block
+    gridout << std::endl << "SIMPLEX" << std::endl;
+
+    // write all simplex elements
+    for( const ElementSeed &seed : elementSeeds )
+      writeElement( gridout, dgfIndices, gridView_.grid().entity( seed ), GeometryTypes::simplex( dimGrid ) );
+
+    // write end marker for block
+    gridout << "#" << std::endl;
+  }
+
+
+  template< class GV >
+  inline void DGFWriter< GV >::writeCubes ( std::ostream &gridout, const std::vector< Index > &dgfIndices ) const
+  {
+    // write all cubes to the "cube" block
+    gridout << std::endl << "CUBE" << std::endl;
+
+    // write all cube elements
+    for( const Element &element : elements( gridView_ ) )
+      writeElement( gridout, dgfIndices, element, GeometryTypes::cube( dimGrid ) );
+
+    // write end marker for block
+    gridout << "#" << std::endl;
+  }
+
+
+  template< class GV >
+  inline void DGFWriter< GV >::writeCubes ( std::ostream &gridout, const std::vector< Index > &dgfIndices, const std::vector< ElementSeed > &elementSeeds ) const
+  {
+    const IndexSet &indexSet = gridView_.indexSet();
+
+    // write all cubes to the "cube" block
+    gridout << std::endl << "CUBE" << std::endl;
+
+    // write all cube elements
+    for( const ElementSeed &seed : elementSeeds )
+      writeElement( gridout, dgfIndices, gridView_.grid().entity( seed ), GeometryTypes::cube( dimGrid ) );
+
+    // write end marker for block
+    gridout << "#" << std::endl;
+  }
+
+
+  template< class GV >
+  template< class... Args >
+  inline void DGFWriter< GV >::writeElements ( std::ostream &gridout, const std::vector< Index > &dgfIndices, const Args &... args ) const
+  {
+    const IndexSet &indexSet = gridView_.indexSet();
+
+    if( (dimGrid > 1) && (indexSet.size( GeometryTypes::simplex( dimGrid ) ) > 0) )
+      writeSimplices( gridout, dgfIndices, args... );
+
     if( indexSet.size( GeometryTypes::cube( dimGrid ) ) > 0 )
-    {
-      // write all cubes to the "cube" block
-      gridout << std::endl << "CUBE" << std::endl;
+      writeCubes( gridout, dgfIndices, args... );
+  }
 
-      // write all simplex elements
-      writeAllElements( elementSeeds, indexSet, GeometryTypes::cube( dimGrid ), vertexIndex, gridout );
 
-      // write end marker for block
-      gridout << "#" << std::endl;
-    }
+  template< class GV >
+  template< class BoundaryData >
+  inline void DGFWriter< GV >::writeBoundaries ( std::ostream &gridout, const std::vector< Index > &dgfIndices, BoundaryData &&boundaryData ) const
+  {
+    using std::max;
+
+    const IndexSet &indexSet = gridView_.indexSet();
 
     // write all boundaries to the "boundarysegments" block
-#if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
     gridout << std::endl << "BOUNDARYSEGMENTS" << std::endl;
-    for( ElementIterator it = gridView_.template begin< 0 >(); it != end; ++it )
+
+    for( const Element &element : elements( gridView_ ) )
     {
-      const Element& element = *it ;
-      if( !it->hasBoundaryIntersections() )
+      if( !element.hasBoundaryIntersections() )
         continue;
 
-      const RefElement &refElement = RefElements::general( element.type() );
-
-      const IntersectionIterator iend = gridView_.iend( element ) ;
-      for( IntersectionIterator iit = gridView_.ibegin( element ); iit != iend; ++iit )
+      const auto &refElement = ReferenceElements< typename Grid::ctype, dimGrid >::general( element.type() );
+      for( const Intersection &intersection : intersections( gridView_, element ) )
       {
-        if( !iit->boundary() )
+        if( !intersection.boundary() )
           continue;
 
-        const int boundaryId = iit->boundaryId();
-        if( boundaryId <= 0 )
-        {
-          std::cerr << "Warning: Ignoring nonpositive boundary id: "
-                    << boundaryId << "." << std::endl;
-          continue;
-        }
+        const auto data = boundaryData( intersection );
+        const int bndId = max( boundaryId( intersection, data ), 1 );
 
-        const int faceNumber = iit->indexInInside();
+        const int faceNumber = intersection.indexInInside();
         const unsigned int faceSize = refElement.size( faceNumber, 1, dimGrid );
-        std::vector< Index > vertices( faceSize );
-        for( unsigned int i = 0; i < faceSize; ++i )
+        gridout << bndId << "  ";
+        for( auto i : range( faceSize ) )
         {
           const int j = refElement.subEntity( faceNumber, 1, i, dimGrid );
-          vertices[ i ] = vertexIndex[ indexSet.subIndex( element, j, dimGrid ) ];
+          gridout << " " << dgfIndices[ indexSet.subIndex( element, j, dimGrid ) ];
         }
-        gridout << boundaryId << "   " << vertices[ 0 ];
-        for( unsigned int i = 1; i < faceSize; ++i )
-          gridout << " " << vertices[ i ];
-        gridout << std::endl;
+        appendBoundaryData( gridout, data );
       }
     }
-    gridout << "#" << std::endl << std::endl;
-#endif // #if DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS
-
-    // add additional parameters given by the user
-    gridout << addParams.str() << std::endl;
-
-    gridout << std::endl << "#" << std::endl;
+    gridout << "#" << std::endl;
   }
+
 
   template< class GV >
-  inline void DGFWriter< GV >::
-  write ( std::ostream &gridout) const
+  template< class BoundaryData >
+  inline void DGFWriter< GV >::write ( std::ostream &gridout, const std::vector< Index > &newElemOrder, BoundaryData &&boundaryData, const std::stringstream &addParams ) const
   {
-    // empty vector means no new ordering
-    std::vector< Index > noNewOrdering ;
-    std::stringstream addParams;
-    write( gridout, noNewOrdering, addParams );
+    writeHeader( gridout );
+    auto dgfIndices = writeVertices( gridout );
+    writeElements( gridout, dgfIndices, elementSeeds( newElemOrder ) );
+    writeBoundaries( gridout, dgfIndices, std::forward< BoundaryData >( boundaryData ) );
+    gridout << std::endl << addParams.str() << std::endl;
+    writeFooter( gridout );
   }
+
 
   template< class GV >
-  inline void DGFWriter< GV >::
-  write ( std::ostream &gridout, const std::stringstream& addParams ) const
+  template< class BoundaryData >
+  inline void DGFWriter< GV >::write ( std::ostream &gridout, BoundaryData &&boundaryData, const std::stringstream &addParams ) const
   {
-    // empty vector means no new ordering
-    std::vector< Index > noNewOrdering ;
-    write( gridout, noNewOrdering, addParams );
+    writeHeader( gridout );
+    auto dgfIndices = writeVertices( gridout );
+    writeElements( gridout, dgfIndices );
+    writeBoundaries( gridout, dgfIndices, std::forward< BoundaryData >( boundaryData ) );
+    gridout << std::endl << addParams.str() << std::endl;
+    writeFooter( gridout );
   }
 
-  template< class GV >
-  inline void DGFWriter< GV >::write ( const std::string &fileName ) const
-  {
-    std::ofstream gridout( fileName.c_str() );
-    if( gridout )
-      write( gridout );
-    else
-      std::cerr << "Couldn't open file `"<< fileName << "'!"<< std::endl;
-  }
+} // namespace Dune
 
-}
-
-#endif // #ifndef DUNE_DGFWRITER_HH
+#endif // #ifndef DUNE_GRID_IO_FILE_DGFPARSER_DGFWRITER_HH
