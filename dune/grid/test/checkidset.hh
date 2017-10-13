@@ -20,8 +20,15 @@ namespace Dune
   template <class Grid, class IdSet>
   void checkIdType(const Grid& grid, const IdSet& idSet)
   {
+    auto gridView = grid.leafGridView();
+    auto begin = gridView.template begin<0>();
+
+    // skip test for empty grids
+    if( begin == gridView.template end<0>() )
+      return ;
+
     // Get some entity for testing
-    auto entity = *grid.leafGridView().template begin<0>();
+    auto entity = *begin;
 
     // The IdSet class exports a type IdSet, and this is the type actually
     // used for return values of the id class
