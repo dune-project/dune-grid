@@ -29,22 +29,18 @@
 #include <dune/grid/io/file/dgfparser/macrogrid.hh>
 #include <dune/grid/io/file/dgfparser/dgfgridfactory.hh>
 
-
 #include <dune/grid/io/file/dgfparser/blocks/basic.hh>
-#include <dune/grid/io/file/dgfparser/blocks/cube.hh>
-#include <dune/grid/io/file/dgfparser/blocks/gridparameter.hh>
-#include <dune/grid/io/file/dgfparser/blocks/vertex.hh>
 #include <dune/grid/io/file/dgfparser/blocks/boundarydom.hh>
-#include <dune/grid/io/file/dgfparser/blocks/dim.hh>
-#include <dune/grid/io/file/dgfparser/blocks/interval.hh>
-#include <dune/grid/io/file/dgfparser/blocks/simplex.hh>
 #include <dune/grid/io/file/dgfparser/blocks/boundaryseg.hh>
-#include <dune/grid/io/file/dgfparser/blocks/periodicfacetrans.hh>
-#include <dune/grid/io/file/dgfparser/blocks/simplexgeneration.hh>
-
-#ifdef EXPERIMENTAL_GRID_EXTENSIONS
+#include <dune/grid/io/file/dgfparser/blocks/cube.hh>
+#include <dune/grid/io/file/dgfparser/blocks/dim.hh>
 #include <dune/grid/io/file/dgfparser/blocks/general.hh>
-#endif
+#include <dune/grid/io/file/dgfparser/blocks/gridparameter.hh>
+#include <dune/grid/io/file/dgfparser/blocks/interval.hh>
+#include <dune/grid/io/file/dgfparser/blocks/periodicfacetrans.hh>
+#include <dune/grid/io/file/dgfparser/blocks/simplex.hh>
+#include <dune/grid/io/file/dgfparser/blocks/simplexgeneration.hh>
+#include <dune/grid/io/file/dgfparser/blocks/vertex.hh>
 
 namespace Dune {
 

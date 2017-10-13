@@ -10,7 +10,6 @@ namespace Dune
   namespace dgf
   {
 
-#ifdef EXPERIMENTAL_GRID_EXTENSIONS
     // GeneralBlock
     // ---------
 
@@ -164,7 +163,6 @@ namespace Dune
       }
       return (goodline = true);
     }
-#endif
 
   } // end namespace dgf
 
