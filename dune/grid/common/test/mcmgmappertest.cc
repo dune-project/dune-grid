@@ -111,38 +111,64 @@ void checkVertexDataMapper(const Mapper& mapper, const GridView& gridView)
 template <class Mapper, class GridView>
 void checkMixedDataMapper(const Mapper& mapper, const GridView& gridView)
 {
+  typedef typename Mapper::Index Index;
   const size_t dim = GridView::dimension;
 
-  size_t min = 1;
-  size_t max = 0;
+  Index min = 1;
+  Index max = 0;
   std::set<int> indices;
+
+  Index elementBlockSize = 0, edgeBlockSize = 0;
+  Index index;
 
   for (const auto& element : elements(gridView))
   {
-    // handle elements
-    size_t index = mapper.index(element);
-    min = std::min(min, index);
-    max = std::max(max, index);
-    std::pair<std::set<int>::iterator, bool> status = indices.insert(index);
+    const auto &gts = mapper.types(0);
+    if (std::find(gts.begin(),gts.end(),element.type()) == gts.end())
+      DUNE_THROW(GridError, "Mapper mixed index does not have correct geometry type information");
 
-    if (!status.second)       // not inserted because already existing
-      DUNE_THROW(GridError, "Mapper mixed index is not unique for elements!");
+    auto block = mapper.indices(element);
+    if (block.empty())
+      DUNE_THROW(GridError, "Mapper mixed index does not have element indices");
+    if (elementBlockSize == 0) elementBlockSize = block.size();
+    if (elementBlockSize != block.size())
+      DUNE_THROW(GridError, "Mapper mixed index does not have the same block size on all elements");
+    if ( block.size() != mapper.size(element.type()) )
+      DUNE_THROW(GridError, "Mapper mixed index does not return correct size for given geometry type ");
+
+    // handle elements
+    min = std::min(min, *(block.begin()));
+    max = std::max(max, *(block.end())-1);
+    for (Index i : block)
+    {
+      std::pair<std::set<int>::iterator, bool> status = indices.insert(i);
+
+      if (!status.second)       // not inserted because already existing
+        DUNE_THROW(GridError, "Mapper mixed index is not unique for elements!");
+    }
 
     // handle edges
     size_t numEdges = element.subEntities(dim-1);
     for (size_t curEdge = 0; curEdge < numEdges; ++curEdge)
     {
-      index = mapper.subIndex(element, curEdge, dim - 1);
-      min = std::min(min, index);
-      max = std::max(max, index);
-      indices.insert(index);
+      auto block = mapper.indices(element,curEdge,dim-1);
+      if (block.empty())
+        DUNE_THROW(GridError, "Mapper mixed index does not have edges indices");
+      if (edgeBlockSize == 0) edgeBlockSize = block.size();
+      else if (edgeBlockSize != block.size())
+        DUNE_THROW(GridError, "Mapper mixed index does not have the same block size on all edges");
+      min = std::min(min, *(block.begin()));
+      max = std::max(max, *(block.end())-1);
+      for (Index i : block)
+        indices.insert(i);
     }
   }
 
   if (min != 0)
     DUNE_THROW(GridError, "Mapper mixed index is not starting from zero!");
 
-  if (max != gridView.indexSet().size(0) + gridView.indexSet().size(dim - 1) - 1)
+  if (max != gridView.indexSet().size(0)*elementBlockSize +
+             gridView.indexSet().size(dim - 1)*edgeBlockSize - 1)
     DUNE_THROW(GridError, "Mapper mixed index is not consecutive!");
 
   for (size_t i = 0; i < max; ++i)
@@ -245,9 +271,9 @@ void checkGrid(const Grid& grid)
     }
   }
 
-  // check mixed element and vertex mapper
+  // check mixed element and edge mapper
   const auto elementEdgeLayout = [](GeometryType gt, int dimgrid) {
-    return gt.dim() == dimgrid or gt.dim() == 1;
+    return (gt.dim() == dimgrid)? 3 : (gt.dim() == 1? 2 : 0);
   };
   // check leafMCMGMapper
   DUNE_NO_DEPRECATED_BEGIN

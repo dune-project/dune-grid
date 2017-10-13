@@ -9,6 +9,7 @@
 
 #include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
+#include <dune/common/rangeutilities.hh>
 #include <dune/geometry/dimension.hh>
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/type.hh>
@@ -113,7 +114,7 @@ namespace Dune
    * \see mcmgElementLayout()
    * \see mcmgVertexLayout()
    */
-  using MCMGLayout = std::function<bool(GeometryType, int)>;
+  using MCMGLayout = std::function<size_t(GeometryType, int)>;
 
   /**
    * \brief layout for entities of codimension `codim`
@@ -229,7 +230,7 @@ namespace Dune
      * documentation for details.
      *
      * \param gridView grid view whose entities should be included in the mapper
-     * \param layout   functional describing which entities are included in the mapper
+     * \param layout   functional describing how many dof to store on each entity (fixed per geometry type)
      */
     MultipleCodimMultipleGeomTypeMapper(const GV& gridView, const MCMGLayout& layout)
       : gridView(gridView)
@@ -240,21 +241,21 @@ namespace Dune
     }
 
     /*!
-     * \brief Map entity to array index.
+     * \brief Map entity to starting index in array for dof block
      *
      * \tparam EntityType
      * \param e Reference to codim \a EntityType entity.
-     * \return An index in the range 0 ... Max number of entities in set - 1.
+     * \return An index in the range 0 ... (Max number of entities in set)*blockSize - 1.
      */
     template<class EntityType>
     Index index (const EntityType& e) const
     {
       const GeometryType gt = e.type();
       assert(offset(gt) != invalidOffset);
-      return is.index(e) + offset(gt);
+      return is.index(e)*blockSize(gt) + offset(gt);
     }
 
-    /** @brief Map subentity of codim 0 entity to array index.
+    /** @brief Map subentity of codim 0 entity to starting index in array for dof block
 
        \param e Reference to codim 0 entity.
        \param i Number of subentity of e
@@ -269,7 +270,7 @@ namespace Dune
         ReferenceElements<double,GV::dimension>::general(eType).type(i,codim) ;
       //GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
       assert(offset(gt) != invalidOffset);
-      return is.subIndex(e, i, codim) + offset(gt);
+      return is.subIndex(e, i, codim)*blockSize(gt) + offset(gt);
     }
 
     /** @brief Return total number of entities in the entity set managed by the mapper.
@@ -283,6 +284,62 @@ namespace Dune
     size_type size () const
     {
       return n;
+    }
+
+    /** @brief return number of entries for a given geometry type **/
+    size_type size(GeometryType gt) const
+    {
+      return blockSize(gt);
+    }
+
+    /** @brief return the geometry types with entries **/
+    const std::vector< GeometryType >& types ( int codim ) const
+    {
+      return myTypes_[ codim ];
+    }
+
+    /** @brief Returns a pair with the starting point in the dof vector
+     *         and the number of degrees of freedom if the entity is contained in the index set
+     *         otherwise {0,0} is returned
+
+       \param e Reference to entity
+       \param result integer reference to the start of the block
+       \return pair with first entry equal to index for that entity and the second entry
+               the number of degrees of freedom (zero if entity is not in entity set of the mapper)
+     */
+    template<class EntityType>
+    IntegralRange<Index> indices (const EntityType& e) const
+    {
+      if(!is.contains(e) || offset(e.type()) == invalidOffset)
+        return {0,0};
+      Index start = index(e);
+      return {start, start+blockSize(e.type())};
+    }
+
+    /** @brief Returns a pair with the starting point in the dof vector
+     *         and the number of degrees of freedom if the entity is contained in the index set
+     *         otherwise {0,0} is returned
+
+       \param e Reference to codim 0 entity
+       \param i subentity number
+       \param cc subentity codim
+       \param result integer reference to the start of the block
+       \return pair with first entry equal to index for that entity and the second entry
+               the number of degrees of freedom (zero if sub entity is not in entity set of the mapper)
+     */
+    IntegralRange<Index> indices (const typename GV::template Codim<0>::Entity& e, int i, int cc) const
+    {
+      const GeometryType eType = e.type();
+      const GeometryType gt = eType.isNone() ?
+        GeometryType( GeometryType::none, GV::dimension - cc ) :
+        ReferenceElements<double,GV::dimension>::general(eType).type(i,cc) ;
+      if (offset(gt) == invalidOffset)
+        return {0,0};
+      else
+      {
+        Index start = subIndex(e,i,cc);
+        return {start, start+blockSize(gt)};
+      }
     }
 
     /** @brief Returns true if the entity is contained in the index set
@@ -330,22 +387,29 @@ namespace Dune
     {
       n = 0;
 
+      std::fill(offsets.begin(),offsets.end(),Index(0));
+      std::fill(blocks.begin(),blocks.end(),Index(0));
+
       for (unsigned int codim = 0; codim <= GV::dimension; ++codim)
       {
         // walk over all geometry types in the codimension
         for (const GeometryType& gt : is.types(codim)) {
           Index offset;
+          size_t block = layout()(gt, GV::Grid::dimension);
 
           // if the geometry type is contained in the layout, increment offset
-          if (layout()(gt, GV::Grid::dimension)) {
+          // and store geometry type
+          if (block) {
             offset = n;
-            n += is.size(gt);
+            n += is.size(gt) * block;
+            myTypes_[codim].push_back(gt);
           }
           else {
             offset = invalidOffset;
           }
 
           offsets[GlobalGeometryTypeIndex::index(gt)] = offset;
+          blocks[GlobalGeometryTypeIndex::index(gt)] = block;
         }
       }
     }
@@ -355,6 +419,8 @@ namespace Dune
   private:
     Index offset(GeometryType gt) const
       { return offsets[GlobalGeometryTypeIndex::index(gt)]; }
+    Index blockSize(GeometryType gt) const
+      { return blocks[GlobalGeometryTypeIndex::index(gt)]; }
 
     static const Index invalidOffset = std::numeric_limits<Index>::max();
 
@@ -365,7 +431,9 @@ namespace Dune
     const typename GV::IndexSet& is;
     // provide an array for the offsets
     std::array<Index, GlobalGeometryTypeIndex::size(GV::dimension)> offsets;
+    std::array<Index, GlobalGeometryTypeIndex::size(GV::dimension)> blocks;
     const MCMGLayout layout_;     // get layout object
+    std::vector<GeometryType> myTypes_[GV::dimension+1];
 
   protected:
     /**
