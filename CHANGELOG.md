@@ -32,6 +32,6 @@
   ```
 - Two new method were added to the MCMGMapper:
   `size_type size(GeometryType)` and
-  `const std::vector< GeometryType >&` types (int codim)`
+  `const std::vector< GeometryType >& types (int codim)`
   returning the number of dofs attached to the geometry type and a vector
   with all geometry types on which dofs are attached, respectively.
