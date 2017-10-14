@@ -39,9 +39,8 @@
 /* Define to the revision of dune-grid */
 #define DUNE_GRID_VERSION_REVISION ${DUNE_GRID_VERSION_REVISION}
 
-/* If this is set, public access to the implementation of facades like Entity,
-   Geometry, etc. is granted. */
-#cmakedefine DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS 1
+/* If this is set, public access to the implementation of facades like Entity, Geometry, etc. is granted. (deprecated) */
+#define DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS 1
 
 /* Define to 1 if psurface library is found */
 #cmakedefine HAVE_PSURFACE 1

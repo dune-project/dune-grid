@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_DGF_GENERALBLOCK_HH
-#define DUNE_DGF_GENERALBLOCK_HH
+#ifndef DUNE_GRID_IO_FILE_DGFPARSER_BLOCKS_GENERAL_HH
+#define DUNE_GRID_IO_FILE_DGFPARSER_BLOCKS_GENERAL_HH
 
 #include <iostream>
 #include <vector>
@@ -14,7 +14,7 @@ namespace Dune
 
   namespace dgf
   {
-#ifdef EXPERIMENTAL_GRID_EXTENSIONS
+
     // GeneralBlock
     // ---------
 
@@ -53,10 +53,9 @@ namespace Dune
       bool next ( std :: vector< unsigned int > &simplex,
                   std :: vector< double > &param );
     };
-#endif
 
   } // end namespace dgf
 
 } // end namespace Dune
 
-#endif
+#endif // #ifndef DUNE_GRID_IO_FILE_DGFPARSER_BLOCKS_GENERAL_HH

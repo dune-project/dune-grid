@@ -2,6 +2,8 @@
 // vi: set et ts=4 sw=2 sts=2:
 #include <config.h>
 
+#include <dune/geometry/utility/typefromvertexcount.hh>
+
 #include <dune/grid/io/file/dgfparser/dgfug.hh>
 
 namespace Dune
@@ -123,23 +125,7 @@ namespace Dune
       el.clear();
       for( size_t j = 0; j < dgf_.elements[ n ].size(); ++j )
         el.push_back( ( dgf_.elements[ n ][ j ] ) );
-
-      // simplices
-      if( el.size() == std::size_t( dim+1 ) )
-        factory_.insertElement( GeometryTypes::simplex( dim ), el );
-      // cubes
-      else if( el.size() == 1u << dim )
-        factory_.insertElement( GeometryTypes::cube( dim ), el );
-#ifdef EXPERIMENTAL_GRID_EXTENSIONS
-      // pyramid
-      else if( (dim == 3) && (el.size() == 5u) )
-        factory_.insertElement( GeometryTypes::pyramid, el );
-      // prisms
-      else if( (dim == 3) && (el.size() == 6u) )
-        factory_.insertElement( GeometryTypes::prism, el );
-#endif
-      else
-        DUNE_THROW( DGFException, "Invalid number of element vertices: " << el.size() );
+      factory_.insertElement( geometryTypeFromVertexCount( dim, el.size() ), el );
     }
 
     // create grid
