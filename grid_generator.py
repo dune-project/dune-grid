@@ -56,6 +56,17 @@ def writeVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointve
         vtk.write(name, number)
     return vtk
 
+def plot(self, function=None, *args, **kwargs):
+    import dune.plotting
+    if not function:
+        dune.plotting.plotGrid(self, *args, **kwargs)
+    else:
+        try:
+            grid = function.grid
+            dune.plotting.plotPointData(solution=function,*args,**kwargs)
+        except AttributeError:
+            dune.plotting.plotPointData(solution=self.function(function),*args,**kwargs)
+
 @deprecated
 def globalGridFunction(gv, evaluator):
     return gv.function(evaluator)
@@ -67,6 +78,7 @@ def addAttr(module, cls):
     setattr(cls, "_module", module)
     setattr(cls, "triangulation", triangulation)
     setattr(cls, "writeVTK", writeVTK)
+    setattr(cls, "plot", plot)
     setattr(cls, "globalGridFunction", globalGridFunction)
     setattr(cls, "localGridFunction", localGridFunction)
 
