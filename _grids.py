@@ -23,9 +23,7 @@ def yaspGrid(constructor, dimgrid=None, coordinates="Dune::EquidistantCoordinate
         coordinates = "Dune::TensorProductCoordinates"
     coordinates, _ = generateTypeName(coordinates, ctype, dimgrid)
     typeName, includes = generateTypeName("Dune::YaspGrid", dimgrid, coordinates)
-    # includes += ["dune/grid/yaspgrid.hh", "dune/grid/io/file/dgfparser/dgfyasp.hh"]
-    # typeName = "Dune::YaspGrid< " + str(dimgrid) + ", " + coordinates + "< " + ctype + ", " + str(dimgrid) + " > >"
-    includes = ["dune/grid/yaspgrid.hh", "dune/grid/io/file/dgfparser/dgfyasp.hh"]
+    includes += ["dune/grid/yaspgrid.hh", "dune/grid/io/file/dgfparser/dgfyasp.hh"]
     gridModule = module(includes, typeName)
 
     return gridModule.reader(constructor).leafView
