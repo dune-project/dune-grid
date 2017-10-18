@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from dune.common.checkconfiguration import assertHave, ConfigurationError
-from dune.common import generateTypeName
+from dune.typeregistry import generateTypeName
 
 def onedGrid(constructor):
     from .grid_generator import module, getDimgrid
