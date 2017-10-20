@@ -92,7 +92,7 @@ generator = SimpleGenerator("HierarchicalGrid", "Dune::CorePy")
 
 
 def module(includes, typeName, *args):
-    includes = includes + ["dune/corepy/grid/hierarchical.hh"]
+    includes = includes + ["dune/python/grid/hierarchical.hh"]
     typeHash = "hierarchicalgrid_" + hashIt(typeName)
     module = generator.load(includes, typeName, typeHash, *args)
     addAttr(module, module.LeafGrid)
