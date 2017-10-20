@@ -16,7 +16,7 @@
 
 namespace Dune
 {
-  namespace CorePy
+  namespace Python
   {
 
     // registerMemberFunctions
@@ -100,7 +100,7 @@ namespace Dune
       return cls;
     }
 
-  } // namespace CorePy
+  } // namespace Python
 
 } // namespace Dune
 

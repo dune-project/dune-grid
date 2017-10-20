@@ -36,7 +36,7 @@
 namespace Dune
 {
 
-  namespace CorePy
+  namespace Python
   {
 
     // GridModificationListener
@@ -329,7 +329,7 @@ namespace Dune
       cls.def_property_readonly( "comm", [] ( const Grid &grid ) { return grid.comm(); } );
     }
 
-  } // namespace CorePy
+  } // namespace Python
 
 } // namespace Dune
 

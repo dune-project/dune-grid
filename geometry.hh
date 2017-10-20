@@ -22,7 +22,7 @@
 namespace Dune
 {
 
-  namespace CorePy
+  namespace Python
   {
 
     // PyCornerRange
@@ -147,7 +147,7 @@ namespace Dune
       return entry.first;
     }
 
-  } // namespace CorePy
+  } // namespace Python
 
 } // namespace Dune
 

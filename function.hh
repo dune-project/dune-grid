@@ -26,7 +26,7 @@
 namespace Dune
 {
 
-  namespace CorePy
+  namespace Python
   {
 
     // GridFunctionTraits
@@ -128,13 +128,13 @@ namespace Dune
       {
         typedef PyGridFunctionEvaluator<GridView,dimRange> Evaluator;
         typedef SimpleGridFunction< GridView, Evaluator > GridFunction;
-        addToTypeRegistry<Evaluator>(GenerateTypeName("Dune::CorePy::detail::PyGridFunctionEvaluator",
+        addToTypeRegistry<Evaluator>(GenerateTypeName("Dune::Python::detail::PyGridFunctionEvaluator",
                                             MetaType<GridView>(),dimRange),
                          IncludeFiles{"dune/python/grid/function.hh"});
 
         std::string clsName = name + std::to_string( dimRange );
         auto gf = insertClass< GridFunction >( scope, clsName,
-                  GenerateTypeName("Dune::CorePy::SimpleGridFunction",
+                  GenerateTypeName("Dune::Python::SimpleGridFunction",
                                       MetaType<GridView>(), Dune::MetaType<Evaluator>()),
             IncludeFiles{"dune/python/grid/function.hh"}).first;
         registerGridFunction( scope, gf );
@@ -198,7 +198,7 @@ namespace Dune
         };
     }
 
-  } // namespace CorePy
+  } // namespace Python
 
 } // namespace Dune
 

@@ -13,7 +13,7 @@
 namespace Dune
 {
 
-  namespace CorePy
+  namespace Python
   {
 
     // PyIterator
@@ -69,7 +69,7 @@ namespace Dune
       cls.def("__next__", &Iterator::next);
     }
 
-  } // namespace CorePy
+  } // namespace Python
 
 } // namespace Dune
 

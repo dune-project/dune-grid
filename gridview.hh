@@ -34,7 +34,7 @@
 namespace Dune
 {
 
-  namespace CorePy
+  namespace Python
   {
 
     // registerPyGridViewIterators
@@ -351,10 +351,10 @@ namespace Dune
             }, "entity"_a );
         } );
 
-      cls.def( "function", Dune::CorePy::defGridFunction< GridView >( cls, "GridFunction", std::make_integer_sequence< int, 11 >() ) );
+      cls.def( "function", Dune::Python::defGridFunction< GridView >( cls, "GridFunction", std::make_integer_sequence< int, 11 >() ) );
     }
 
-  } // namespace CorePy
+  } // namespace Python
 
 } // namespace Dune
 

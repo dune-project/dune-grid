@@ -19,7 +19,7 @@
 namespace Dune
 {
 
-  namespace CorePy
+  namespace Python
   {
 
     // PyHierarchicIterator
@@ -290,7 +290,7 @@ namespace Dune
       return registerGridEntities< Grid >( scope, std::make_integer_sequence< int, Grid::dimension+1 >() );
     }
 
-  } // namespace CorePy
+  } // namespace Python
 
 } // namespace Dune
 

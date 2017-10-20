@@ -10,7 +10,7 @@
 namespace Dune
 {
 
-  namespace CorePy
+  namespace Python
   {
 
     namespace detail
@@ -84,7 +84,7 @@ namespace Dune
       cls.def( "unbind", [ &registry ] ( pybind11::handle self ) { registry.unbind( self ); } );
     }
 
-  } // namespace CorePy
+  } // namespace Python
 
 } // namespace Dune
 

@@ -19,7 +19,7 @@
 namespace Dune
 {
 
-  namespace CorePy
+  namespace Python
   {
 
     // External Forward Declarations
@@ -120,7 +120,7 @@ namespace Dune
       }
     }
 
-  } // namespace CorePy
+  } // namespace Python
 
 } // namespace Dune
 

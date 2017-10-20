@@ -11,7 +11,7 @@
 namespace Dune
 {
 
-  namespace CorePy
+  namespace Python
   {
 
     namespace detail
@@ -102,7 +102,7 @@ namespace Dune
       return registerGridViewIndexSet< GridView >( scope, std::make_integer_sequence< int, GridView::dimension+1 >() );
     };
 
-  } // namespace CorePy
+  } // namespace Python
 
 } // namespace Dune
 

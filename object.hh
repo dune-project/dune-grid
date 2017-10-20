@@ -9,7 +9,7 @@
 namespace Dune
 {
 
-  namespace CorePy
+  namespace Python
   {
 
     namespace detail
@@ -58,7 +58,7 @@ namespace Dune
       namespace GridObjectTraits
       {
 
-        using Dune::CorePy::gridView;
+        using Dune::Python::gridView;
 
 
         template< class GridObject >
@@ -95,7 +95,7 @@ namespace Dune
       typedef decltype( detail::GridObjectTraits::localCoordinate( std::declval< const GridObject & >(), PriorityTag< 42 >() ) ) LocalCoordinate;
     };
 
-  } // namespace CorePy
+  } // namespace Python
 
 } // namespace Dune
 

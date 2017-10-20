@@ -26,7 +26,7 @@
 namespace Dune
 {
 
-  namespace CorePy
+  namespace Python
   {
 
     // External Forward Declarations
@@ -241,7 +241,7 @@ namespace Dune
         lf.unbind();
       }
 
-      return CorePy::makeNumPyArray< typename FieldTraits< Range >::field_type >( values, { values.size(), GetDimension<Range>::value } );
+      return Python::makeNumPyArray< typename FieldTraits< Range >::field_type >( values, { values.size(), GetDimension<Range>::value } );
     }
 
     template< class GridFunction, unsigned int partitions >
@@ -283,7 +283,7 @@ namespace Dune
         lf.unbind();
       }
 
-      return CorePy::makeNumPyArray< typename FieldTraits< Range >::field_type >( values, { values.size(), GetDimension<Range>::value } );
+      return Python::makeNumPyArray< typename FieldTraits< Range >::field_type >( values, { values.size(), GetDimension<Range>::value } );
     }
 
     template< class GridFunction, unsigned int partitions >

@@ -19,7 +19,7 @@ namespace Dune
 
 
 
-  namespace CorePy
+  namespace Python
   {
 
     namespace Capabilities
@@ -64,7 +64,7 @@ namespace Dune
 
     } // namespace Capabilities
 
-  } // namespace CorePy
+  } // namespace Python
 
 } // namespace Dune
 

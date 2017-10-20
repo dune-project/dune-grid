@@ -31,7 +31,7 @@
 namespace Dune
 {
 
-  namespace CorePy
+  namespace Python
   {
 
     // BoundarySegment
@@ -249,7 +249,7 @@ namespace Dune
       }
     }
 
-  } // namespace CorePy
+  } // namespace Python
 
 } // namespace Dune
 
