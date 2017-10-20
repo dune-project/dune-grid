@@ -88,7 +88,7 @@ def addAttr(module, cls):
     setattr(cls, "localGridFunction", localGridFunction)
 
 
-generator = SimpleGenerator("HierarchicalGrid", "Dune::CorePy")
+generator = SimpleGenerator("HierarchicalGrid", "Dune::Python")
 
 
 def module(includes, typeName, *args):
