@@ -314,6 +314,8 @@ namespace Dune
 
       cls.def_property_readonly( "dimension", [] ( const GridView &_ ) { return static_cast< int >( GridView::dimension ); } );
       cls.def_property_readonly( "dimensionworld", [] ( const GridView &_ ) { return static_cast< int >( GridView::dimensionworld ); } );
+      cls.def_property_readonly_static( "dimension", [] ( pybind11::object ) { return int(GridView::dimension); } );
+      cls.def_property_readonly_static( "dimensionworld", [] ( pybind11::object ) { return int(GridView::dimensionworld); } );
 
       cls.def_property_readonly( "conforming", [] ( const GridView &_ ) { return static_cast< bool >( GridView::conforming ); } );
 

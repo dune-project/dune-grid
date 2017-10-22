@@ -324,7 +324,9 @@ namespace Dune
             listener.second->postModification( grid );
         } );
 
-      cls.def_property_readonly( "refineStepsForHalf", [] ( const Grid & ) { return DGFGridInfo< Grid >::refineStepsForHalf(); } );
+      cls.def_property_readonly_static( "dimension", [] ( pybind11::object ) { return int(Grid::dimension); } );
+      cls.def_property_readonly_static( "dimensionworld", [] ( pybind11::object ) { return int(Grid::dimensionworld); } );
+      cls.def_property_readonly_static( "refineStepsForHalf", [] ( pybind11::object ) { return DGFGridInfo< Grid >::refineStepsForHalf(); } );
 
       cls.def_property_readonly( "comm", [] ( const Grid &grid ) { return grid.comm(); } );
     }
