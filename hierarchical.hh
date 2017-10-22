@@ -27,6 +27,7 @@
 #include <dune/python/grid/capabilities.hh>
 #include <dune/python/grid/factory.hh>
 #include <dune/python/grid/gridview.hh>
+#include <dune/python/grid/idset.hh>
 
 #include <dune/python/pybind11/functional.h>
 #include <dune/python/pybind11/numpy.h>
@@ -280,6 +281,8 @@ namespace Dune
       module.def( "reader", [] ( const pybind11::dict &args ) { return reader< Grid >( args ); } );
 
       registerHierarchicalGridPicklingSupport( cls );
+
+      registerHierarchicalGridIdSets( cls );
 
       cls.def_property_readonly( "leafView", pybind11::cpp_function( [] ( const Grid &self ) { return self.leafGridView(); }, pybind11::keep_alive< 0, 1 >() ) );
       cls.def( "levelView", [] ( const Grid &self, int level ) { return self.levelGridView( level ); }, pybind11::keep_alive< 0, 1 >() );
