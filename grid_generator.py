@@ -80,10 +80,16 @@ def localGridFunction(gv, evaluator):
 
 def addAttr(module, cls):
     setattr(cls, "_module", module)
-    setattr(cls, "triangulation", triangulation)
     setattr(cls, "writeVTK", writeVTK)
-    setattr(cls, "plot", plot)
     setattr(cls, "mapper", mapper)
+
+    if cls.dimension == 2:
+        setattr(cls, "plot", plot)
+        setattr(cls, "triangulation", triangulation)
+    else:
+        setattr(cls, "plot", lambda *arg,**kwarg: common._raise(AttributeError("plot only implemented on 2D grids")))
+        setattr(cls, "triangulation", lambda *arg,**kwarg: common._raise(AttributeError("triangulation only implemented on 2d grid")))
+
     setattr(cls, "globalGridFunction", globalGridFunction)
     setattr(cls, "localGridFunction", localGridFunction)
 
