@@ -62,7 +62,6 @@ namespace Dune
 
       cls.def("__call__", [] ( const Mapper &mapper, const typename GridView::template Codim<0>::Entity &element ) {
             // need a cache gt(cdim=0) -> nof indices then we could store directly in retArray
-            std::size_t length = 0;
             std::vector<typename Mapper::Index> indices;
             for ( int c=0; c <= GridView::dimension; ++c )
               for ( auto se : range(element.subEntities(c)) )
