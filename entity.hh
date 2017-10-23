@@ -59,19 +59,19 @@ namespace Dune
       typedef typename Entity::Geometry::LocalCoordinate LocalCoordinate;
       typedef typename Entity::Geometry::GlobalCoordinate GlobalCoordinate;
 
-      FVCoordinateWrapper ( Entity entity, const LocalCoordinate &local )
-        : GlobalCoordinate( entity.geometry().global( local ) ),
+      FVCoordinateWrapper ( Entity entity, const LocalCoordinate &localPosition )
+        : GlobalCoordinate( entity.geometry().global( localPosition ) ),
           entity_( std::move( entity ) ),
-          local_( local )
+          localPosition_( localPosition )
       {}
 
       const Entity &entity () const { return entity_; }
-      const LocalCoordinate &local () const { return local_; }
-      const GlobalCoordinate &global () const { return static_cast< const GlobalCoordinate & >( *this ); }
+      const LocalCoordinate &localPosition () const { return localPosition_; }
+      const GlobalCoordinate &position () const { return static_cast< const GlobalCoordinate & >( *this ); }
 
     private:
       Entity entity_;
-      LocalCoordinate local_;
+      LocalCoordinate localPosition_;
     };
 
 
@@ -89,47 +89,47 @@ namespace Dune
       static const size_t dimensionworld = Entity::Geometry::coorddimension;
       static const size_t dimensiongrid = Entity::dimension;
 
-      CoordinateWrapper ( Entity entity, pybind11::array_t< ctype > &local )
-        : entity_( std::move( entity ) ), local_( local )
+      CoordinateWrapper ( Entity entity, pybind11::array_t< ctype > &localPosition )
+        : entity_( std::move( entity ) ), localPosition_( localPosition )
       {
-        auto buffer = local.request(true);
+        auto buffer = localPosition.request(true);
         if( (buffer.ndim != 2) || (buffer.shape[ 0 ] != LocalCoordinate::dimension) )
-          throw pybind11::value_error( "local must be of shape (" + std::to_string( LocalCoordinate::dimension ) + ", *)" );
+          throw pybind11::value_error( "localPosition must be of shape (" + std::to_string( LocalCoordinate::dimension ) + ", *)" );
       }
 
       const Entity &entity () const { return entity_; }
-      const pybind11::array_t< ctype > &local () const { return local_; }
+      const pybind11::array_t< ctype > &localPosition () const { return localPosition_; }
 
-      const pybind11::array_t< ctype > &global () const
+      const pybind11::array_t< ctype > &position () const
       {
-        if( global_.shape()[0]==0 )
+        if( position_.shape()[0]==0 )
         {
-          auto local = local_.template unchecked< 2 >();
+          auto localPosition = localPosition_.template unchecked< 2 >();
 
-          global_ = pybind11::array_t< ctype >(
-              { static_cast< ssize_t >( GlobalCoordinate::dimension ), local.shape( 1 ) },
-              { static_cast< ssize_t >( local.shape( 1 ) * sizeof( ctype ) ), static_cast< ssize_t >( sizeof( ctype ) ) }
+          position_ = pybind11::array_t< ctype >(
+              { static_cast< ssize_t >( GlobalCoordinate::dimension ), localPosition.shape( 1 ) },
+              { static_cast< ssize_t >( localPosition.shape( 1 ) * sizeof( ctype ) ), static_cast< ssize_t >( sizeof( ctype ) ) }
             );
-          auto global = global_.template mutable_unchecked< 2 >();
+          auto position = position_.template mutable_unchecked< 2 >();
 
           const auto geometry = entity().geometry();
-          for( auto idx : range( local.shape( 1 ) ) )
+          for( auto idx : range( localPosition.shape( 1 ) ) )
           {
             LocalCoordinate xLocal;
             for( auto i : range( static_cast< int >( LocalCoordinate::dimension ) ) )
-              xLocal[ i ] = local( i, idx );
+              xLocal[ i ] = localPosition( i, idx );
             GlobalCoordinate xGlobal = geometry.global( xLocal );
             for( auto i : range( static_cast< int >( GlobalCoordinate::dimension ) ) )
-              global( i, idx ) = xGlobal[ i ];
+              position( i, idx ) = xGlobal[ i ];
           }
         }
-        return global_;
+        return position_;
       }
 
     private:
       Entity entity_;
-      pybind11::array_t< ctype > local_;
-      mutable pybind11::array_t< ctype > global_;
+      pybind11::array_t< ctype > localPosition_;
+      mutable pybind11::array_t< ctype > position_;
     };
 
 
@@ -235,17 +235,17 @@ namespace Dune
                GenerateTypeName("FVCoordinateWrapper",cls),
                IncludeFiles{"dune/python/grid/entity.hh"} ).first;
         coordinatefvCls.def_property_readonly( "entity", [] ( const FVCoordinate &self ) { return self.entity(); } );
-        coordinatefvCls.def_property_readonly( "local", [] ( const FVCoordinate &self ) { return self.local(); } );
-        coordinatefvCls.def_property_readonly( "globals", [] ( const FVCoordinate &self ) { return self.global(); } );
+        coordinatefvCls.def_property_readonly( "localPosition", [] ( const FVCoordinate &self ) { return self.localPosition(); } );
+        coordinatefvCls.def_property_readonly( "position", [] ( const FVCoordinate &self ) { return self.position(); } );
 
         typedef CoordinateWrapper< Entity > Coordinate;
         auto coordinateCls = insertClass< Coordinate >( cls, "Coordinate",
             GenerateTypeName("CoordinateWrapper", cls),
             IncludeFiles{"dune/python/grid/entity.hh"} ).first;
         coordinateCls.def_property_readonly( "entity", [] ( const Coordinate &self ) { return self.entity(); } );
-        coordinateCls.def_property_readonly( "local", [] ( const Coordinate &self ) { return self.local(); } );
-        coordinateCls.def_property_readonly( "globals", [] ( const Coordinate &self ) { return self.global(); } );
-        coordinateCls.def( "__getitem__", [] ( const Coordinate &self, pybind11::object index ) { return self.global()[ index ]; } );
+        coordinateCls.def_property_readonly( "localPosition", [] ( const Coordinate &self ) { return self.localPosition(); } );
+        coordinateCls.def_property_readonly( "position", [] ( const Coordinate &self ) { return self.position(); } );
+        coordinateCls.def( "__getitem__", [] ( const Coordinate &self, pybind11::object index ) { return self.position()[ index ]; } );
 
         cls.def( "__call__", [] ( const Entity &self, const LocalCoordinate &x ) { return FVCoordinate( self, x ); } );
         cls.def( "__call__", [] ( const Entity &self, pybind11::array_t< ctype > &x ) { return Coordinate( self, x ); } );
