@@ -107,7 +107,7 @@ namespace Dune
       {
         typedef SubsamplingVTKWriter< GridView > Writer;
 
-        auto cls = insertClass<Writer>(scope, "SubsamplingVTKWriter", pybind11::base< VTKWriter< GridView > >(),
+        auto cls = insertClass< Writer, VTKWriter<GridView> >(scope, "SubsamplingVTKWriter",
             GenerateTypeName("SubsamplingVTKWriter", MetaType<GridView>()) ).first;
 
         cls.def( "write", [] ( Writer &writer, const std::string &name ) { writer.write( name ); } );
