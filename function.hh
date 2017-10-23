@@ -185,7 +185,7 @@ namespace Dune
             {
               pybind11::error_already_set(); // .clear(); //????
               // we have to assume it's a double so we test for that
-              double tmp = v.template cast<double>();
+              (void) v.template cast<double>();
               dimR = 0;
             }
           }
