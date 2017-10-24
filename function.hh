@@ -9,10 +9,12 @@
 #include <type_traits>
 #include <utility>
 
+#include <dune/common/ftraits.hh>
 #include <dune/common/visibility.hh>
 
 #include <dune/python/common/dimrange.hh>
 #include <dune/python/common/typeregistry.hh>
+#include <dune/python/common/vector.hh>
 #include <dune/python/function/simplegridfunction.hh>
 #include <dune/python/grid/localview.hh>
 #include <dune/python/grid/entity.hh>
@@ -45,6 +47,51 @@ namespace Dune
 
 
 
+    namespace detail
+    {
+
+      template< class LocalCoordinate, class LocalFunction, class X >
+      inline static auto callLocalFunction ( LocalFunction &&f, const X &x, PriorityTag< 1 > )
+        -> decltype( pybind11::cast( f( x ) ) )
+      {
+        return pybind11::cast( f( x ) );
+      }
+
+      template< class LocalCoordinate, class LocalFunction >
+      inline static pybind11::object callLocalFunction ( LocalFunction &&f, pybind11::array_t< typename FieldTraits< LocalCoordinate >::field_type > x, PriorityTag< 0 > )
+      {
+        return vectorize( [ &f ] ( const LocalCoordinate &x ) { return f( x ); }, x );
+      }
+
+      template< class LocalCoordinate, class LocalFunction, class Element >
+      inline static pybind11::object callLocalFunction ( LocalFunction &&f, const CoordinateWrapper< Element > &x, PriorityTag< 0 > )
+      {
+        f.bind( x.entity() );
+        pybind11::object result = vectorize( [ &f ] ( const LocalCoordinate &x ) { return f( x ); }, x.localPosition() );
+        f.unbind();
+        return result;
+      }
+
+      template< class LocalCoordinate, class LocalFunction, class Element >
+      inline static pybind11::object callLocalFunction ( const LocalFunction &&f, const FVCoordinateWrapper< Element > &x, PriorityTag< 0 > )
+      {
+        f.bind( x.entity() );
+        auto result = f( x.localPosition() );
+        f.unbind();
+        return pybind11::cast( result );
+      }
+
+      template< class LocalCoordinate, class LocalFunction, class X >
+      inline static auto callLocalFunction ( LocalFunction &&f, const X &x )
+        -> std::enable_if_t< !std::is_const< LocalFunction >::value, pybind11::object >
+      {
+        return callLocalFunction< LocalCoordinate >( std::forward< LocalFunction >( f ), x, PriorityTag< 42 >() );
+      }
+
+    } // namespace detail
+
+
+
     // registerGridFunction
     // --------------------
 
@@ -58,13 +105,17 @@ namespace Dune
       typedef typename GridFunctionTraits< GridFunction >::LocalFunction LocalFunction;
       typedef typename GridFunctionTraits< GridFunction >::Range Range;
 
-      typedef CoordinateWrapper<Element> Coordinate;
+      typedef pybind11::array_t< typename FieldTraits< LocalCoordinate >::field_type > Array;
 
       // TODO subclassing from a non registered traits class not covered by TypeRegistry
       pybind11::class_< LocalFunction > clsLocalFunction( cls, "LocalFunction" );
       registerLocalView< Element >( clsLocalFunction );
-      clsLocalFunction.def( "__call__", [] ( const LocalFunction &self, const Coordinate &point ) { return self( point ); }, "point"_a );
-      clsLocalFunction.def( "__call__", [] ( const LocalFunction &self, const LocalCoordinate &x ) { return self( x ); }, "x"_a );
+      clsLocalFunction.def( "__call__", [] ( const LocalFunction &self, const LocalCoordinate &x ) {
+          return detail::callLocalFunction< LocalCoordinate >( self, x );
+        }, "x"_a );
+      clsLocalFunction.def( "__call__", [] ( const LocalFunction &self, Array x ) {
+          return detail::callLocalFunction< LocalCoordinate >( self, x );
+        }, "x"_a );
       clsLocalFunction.def_property_readonly( "dimRange", [] ( pybind11::object self ) { return pybind11::int_( DimRange< Range >::value ); } );
 
       cls.def_property_readonly( "grid", [] ( const GridFunction &self ) { return gridView( self ); } );
@@ -76,14 +127,15 @@ namespace Dune
 
       cls.def( "cellData", [] ( const GridFunction &self, int level ) { return cellData( self, level ); }, "level"_a = 0 );
       cls.def( "pointData", [] ( const GridFunction &self, int level ) { return pointData( self, level ); }, "level"_a = 0 );
-      cls.def( "__call__", [] ( const GridFunction &self, const Coordinate &point )
-          { auto lf=localFunction(self);
-            lf.bind(point.entity());
-            auto ret=lf( point );
-            lf.unbind();
-            return ret;
-          }, "point"_a );
+
+      cls.def( "__call__", [] ( const GridFunction &self, const FVCoordinateWrapper< Element > &x ) {
+          return detail::callLocalFunction< LocalCoordinate >( localFunction( self ), x );
+        }, "x"_a );
+      cls.def( "__call__", [] ( const GridFunction &self, const CoordinateWrapper< Element > &x ) {
+          return detail::callLocalFunction< LocalCoordinate >( localFunction( self ), x );
+        }, "x"_a );
     }
+
 
 
     namespace detail
