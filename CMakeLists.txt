@@ -11,6 +11,7 @@ set(HEADERS
   vtk.hh
   function.hh
   gridview.hh
+  idset.hh
   indexset.hh
   mapper.hh
   range.hh
