@@ -99,6 +99,7 @@ namespace Dune
         cls.def_property_readonly( "corners", [] ( pybind11::object geo ) {
             return PyCorners< Geometry >( geo.cast< const Geometry & >(), geo );
           } );
+        cls.def( "corner", [] (const Geometry &self, int i) { return self.corner(i); } );
 
         cls.def_property_readonly( "center", &Geometry::center );
         cls.def_property_readonly( "volume", &Geometry::volume );
