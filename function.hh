@@ -134,6 +134,20 @@ namespace Dune
       cls.def( "__call__", [] ( const GridFunction &self, const CoordinateWrapper< Element > &x ) {
           return detail::callLocalFunction< LocalCoordinate >( localFunction( self ), x );
         }, "x"_a );
+      cls.def( "__call__", [] ( const GridFunction &self, const Element &element, LocalCoordinate &x ) {
+          auto lf = localFunction(self);
+          lf.bind(element);
+          auto y = detail::callLocalFunction< LocalCoordinate >( lf, x );
+          lf.unbind();
+          return y;
+        }, "element"_a, "x"_a );
+      cls.def( "__call__", [] ( const GridFunction &self, const Element &element, Array x ) {
+          auto lf = localFunction(self);
+          lf.bind(element);
+          auto y = detail::callLocalFunction< LocalCoordinate >( lf, x );
+          lf.unbind();
+          return y;
+        }, "element"_a, "x"_a );
     }
 
 
