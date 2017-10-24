@@ -266,15 +266,12 @@ namespace Dune
     {
       pybind11::module::import( "dune.geometry" );
 
-      auto clsLevelView =
-        insertClass<typename Grid::LevelGridView>
-        ( module, "LevelGrid", GenerateTypeName(Dune::MetaType<Grid>(), "LevelGridView") );
-      if (clsLevelView.second)
+      auto clsLevelView = insertClass< typename Grid::LevelGridView >( module, "LevelGrid", GenerateTypeName( cls, "LevelGridView" ) );
+      if( clsLevelView.second )
         registerGridView( module, clsLevelView.first );
 
-      auto clsLeafView = insertClass<typename Grid::LeafGridView>
-        ( module, "LeafGrid", GenerateTypeName(Dune::MetaType<Grid>(), "LeafGridView") );
-      if (clsLeafView.second)
+      auto clsLeafView = insertClass< typename Grid::LeafGridView >( module, "LeafGrid", GenerateTypeName( cls, "LeafGridView" ) );
+      if( clsLeafView.second )
         registerGridView( module, clsLeafView.first );
 
       module.def( "reader", [] ( const std::tuple< Reader, std::string > &args ) { return reader< Grid >( args ); } );
