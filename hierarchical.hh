@@ -23,6 +23,8 @@
 #include <dune/grid/utility/structuredgridfactory.hh>
 
 #include <dune/python/common/common.hh>
+#include <dune/python/common/mpihelper.hh>
+#include <dune/python/common/typeregistry.hh>
 
 #include <dune/python/grid/capabilities.hh>
 #include <dune/python/grid/factory.hh>
@@ -327,6 +329,10 @@ namespace Dune
       cls.def_property_readonly_static( "dimension", [] ( pybind11::object ) { return int(Grid::dimension); } );
       cls.def_property_readonly_static( "dimensionworld", [] ( pybind11::object ) { return int(Grid::dimensionworld); } );
       cls.def_property_readonly_static( "refineStepsForHalf", [] ( pybind11::object ) { return DGFGridInfo< Grid >::refineStepsForHalf(); } );
+
+      auto clsComm = insertClass< typename Grid::CollectiveCommunication >( cls, "CollectiveCommunication", GenerateTypeName( cls, "CollectiveCommunication" ) );
+      if( clsComm.second )
+        registerCollectiveCommunication( clsComm.first );
 
       cls.def_property_readonly( "comm", [] ( const Grid &grid ) { return grid.comm(); } );
     }
