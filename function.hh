@@ -63,24 +63,6 @@ namespace Dune
         return vectorize( [ &f ] ( const LocalCoordinate &x ) { return f( x ); }, x );
       }
 
-      template< class LocalCoordinate, class LocalFunction, class Element >
-      inline static pybind11::object callLocalFunction ( LocalFunction &&f, const CoordinateWrapper< Element > &x, PriorityTag< 0 > )
-      {
-        f.bind( x.entity() );
-        pybind11::object result = vectorize( [ &f ] ( const LocalCoordinate &x ) { return f( x ); }, x.localPosition() );
-        f.unbind();
-        return result;
-      }
-
-      template< class LocalCoordinate, class LocalFunction, class Element >
-      inline static pybind11::object callLocalFunction ( LocalFunction &&f, const FVCoordinateWrapper< Element > &x, PriorityTag< 0 > )
-      {
-        f.bind( x.entity() );
-        auto result = f( x.localPosition() );
-        f.unbind();
-        return pybind11::cast( result );
-      }
-
       template< class LocalCoordinate, class LocalFunction, class X >
       inline static auto callLocalFunction ( LocalFunction &&f, const X &x )
         -> std::enable_if_t< !std::is_const< std::remove_reference_t< LocalFunction > >::value, pybind11::object >
@@ -128,12 +110,6 @@ namespace Dune
       cls.def( "cellData", [] ( const GridFunction &self, int level ) { return cellData( self, level ); }, "level"_a = 0 );
       cls.def( "pointData", [] ( const GridFunction &self, int level ) { return pointData( self, level ); }, "level"_a = 0 );
 
-      cls.def( "__call__", [] ( const GridFunction &self, const FVCoordinateWrapper< Element > &x ) {
-          return detail::callLocalFunction< LocalCoordinate >( localFunction( self ), x );
-        }, "x"_a );
-      cls.def( "__call__", [] ( const GridFunction &self, const CoordinateWrapper< Element > &x ) {
-          return detail::callLocalFunction< LocalCoordinate >( localFunction( self ), x );
-        }, "x"_a );
       cls.def( "__call__", [] ( const GridFunction &self, const Element &element, LocalCoordinate &x ) {
           auto lf = localFunction(self);
           lf.bind(element);
@@ -173,13 +149,13 @@ namespace Dune
         Value operator() ( const Entity &entity, const Coordinate &x ) const
         {
           pybind11::gil_scoped_acquire acq;
-          return pybind11::cast< Value >( evaluate_( FVCoordinateWrapper< Entity >( entity, x ) ) );
+          return pybind11::cast< Value >( evaluate_( entity, x ) );
         }
 
-        pybind11::array_t< double > operator() ( const Entity &entity, const CoordinateWrapper< Entity > &x ) const
+        pybind11::array_t< double > operator() ( const Entity &entity, const pybind11::array_t<double> x ) const
         {
           pybind11::gil_scoped_acquire acq;
-          return pybind11::cast< pybind11::array_t< double > >( evaluate_( x ) );
+          return pybind11::cast< pybind11::array_t< double > >( evaluate_( entity, x ) );
         }
 
       private:
@@ -200,6 +176,7 @@ namespace Dune
 
         std::string clsName = name + std::to_string( dimRange );
         auto gf = insertClass< GridFunction >( scope, clsName,
+                  pybind11::dynamic_attr(),
                   GenerateTypeName("Dune::Python::SimpleGridFunction",
                                       MetaType<GridView>(), Dune::MetaType<Evaluator>()),
             IncludeFiles{"dune/python/grid/function.hh"}).first;
@@ -242,7 +219,7 @@ namespace Dune
             typedef typename GridView::template Codim< 0 >::Entity Entity;
             typename Entity::Geometry::LocalCoordinate x( 0 );
             pybind11::gil_scoped_acquire acq;
-            pybind11::object v( evaluate( FVCoordinateWrapper< Entity >( *gridView.template begin< 0 >(), x ) ) );
+            pybind11::object v( evaluate( *gridView.template begin< 0 >(), x ) );
             try
             {
               dimR = len( v );

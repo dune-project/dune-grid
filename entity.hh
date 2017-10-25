@@ -48,92 +48,6 @@ namespace Dune
     };
 
 
-
-    // FVCoordinateWrapper
-    // -------------------
-
-    template< class Entity >
-    struct FVCoordinateWrapper
-      : public Entity::Geometry::GlobalCoordinate
-    {
-      typedef typename Entity::Geometry::LocalCoordinate LocalCoordinate;
-      typedef typename Entity::Geometry::GlobalCoordinate GlobalCoordinate;
-
-      FVCoordinateWrapper ( Entity entity, const LocalCoordinate &localPosition )
-        : GlobalCoordinate( entity.geometry().global( localPosition ) ),
-          entity_( std::move( entity ) ),
-          localPosition_( localPosition )
-      {}
-
-      const Entity &entity () const { return entity_; }
-      const LocalCoordinate &localPosition () const { return localPosition_; }
-      const GlobalCoordinate &position () const { return static_cast< const GlobalCoordinate & >( *this ); }
-
-    private:
-      Entity entity_;
-      LocalCoordinate localPosition_;
-    };
-
-
-
-    // CoordinateWrapper
-    // -----------------
-
-    template< class Entity >
-    struct DUNE_PRIVATE CoordinateWrapper
-    {
-      typedef typename Entity::Geometry::ctype ctype;
-      typedef typename Entity::Geometry::LocalCoordinate LocalCoordinate;
-      typedef typename Entity::Geometry::GlobalCoordinate GlobalCoordinate;
-
-      static const size_t dimensionworld = Entity::Geometry::coorddimension;
-      static const size_t dimensiongrid = Entity::dimension;
-
-      CoordinateWrapper ( Entity entity, pybind11::array_t< ctype > &localPosition )
-        : entity_( std::move( entity ) ), localPosition_( localPosition )
-      {
-        auto buffer = localPosition.request(true);
-        if( (buffer.ndim != 2) || (buffer.shape[ 0 ] != LocalCoordinate::dimension) )
-          throw pybind11::value_error( "localPosition must be of shape (" + std::to_string( LocalCoordinate::dimension ) + ", *)" );
-      }
-
-      const Entity &entity () const { return entity_; }
-      const pybind11::array_t< ctype > &localPosition () const { return localPosition_; }
-
-      const pybind11::array_t< ctype > &position () const
-      {
-        if( position_.shape()[0]==0 )
-        {
-          auto localPosition = localPosition_.template unchecked< 2 >();
-
-          position_ = pybind11::array_t< ctype >(
-              { static_cast< ssize_t >( GlobalCoordinate::dimension ), localPosition.shape( 1 ) },
-              { static_cast< ssize_t >( localPosition.shape( 1 ) * sizeof( ctype ) ), static_cast< ssize_t >( sizeof( ctype ) ) }
-            );
-          auto position = position_.template mutable_unchecked< 2 >();
-
-          const auto geometry = entity().geometry();
-          for( auto idx : range( localPosition.shape( 1 ) ) )
-          {
-            LocalCoordinate xLocal;
-            for( auto i : range( static_cast< int >( LocalCoordinate::dimension ) ) )
-              xLocal[ i ] = localPosition( i, idx );
-            GlobalCoordinate xGlobal = geometry.global( xLocal );
-            for( auto i : range( static_cast< int >( GlobalCoordinate::dimension ) ) )
-              position( i, idx ) = xGlobal[ i ];
-          }
-        }
-        return position_;
-      }
-
-    private:
-      Entity entity_;
-      pybind11::array_t< ctype > localPosition_;
-      mutable pybind11::array_t< ctype > position_;
-    };
-
-
-
     // registerPyHierarchicIterator
     // ----------------------------
 
@@ -225,30 +139,11 @@ namespace Dune
         cls.def_property_readonly( "level", &Entity::level );
         cls.def_property_readonly( "type", &Entity::type );
         cls.def_property_readonly( "partitionType", &Entity::partitionType );
+        cls.def_property_readonly( "domain", [](Entity &self) { return referenceElement<double,self.dimension>(self.type()); },
+            pybind11::keep_alive<0,1>() );
 
         cls.def( pybind11::self == pybind11::self );
         cls.def( pybind11::self != pybind11::self );
-
-        typedef FVCoordinateWrapper< Entity > FVCoordinate;
-        auto coordinatefvCls = insertClass< FVCoordinate, typename FVCoordinate::GlobalCoordinate >
-             ( cls, "FVCoordinate",
-               GenerateTypeName("FVCoordinateWrapper",cls),
-               IncludeFiles{"dune/python/grid/entity.hh"} ).first;
-        coordinatefvCls.def_property_readonly( "entity", [] ( const FVCoordinate &self ) { return self.entity(); } );
-        coordinatefvCls.def_property_readonly( "localPosition", [] ( const FVCoordinate &self ) { return self.localPosition(); } );
-        coordinatefvCls.def_property_readonly( "position", [] ( const FVCoordinate &self ) { return self.position(); } );
-
-        typedef CoordinateWrapper< Entity > Coordinate;
-        auto coordinateCls = insertClass< Coordinate >( cls, "Coordinate",
-            GenerateTypeName("CoordinateWrapper", cls),
-            IncludeFiles{"dune/python/grid/entity.hh"} ).first;
-        coordinateCls.def_property_readonly( "entity", [] ( const Coordinate &self ) { return self.entity(); } );
-        coordinateCls.def_property_readonly( "localPosition", [] ( const Coordinate &self ) { return self.localPosition(); } );
-        coordinateCls.def_property_readonly( "position", [] ( const Coordinate &self ) { return self.position(); } );
-        coordinateCls.def( "__getitem__", [] ( const Coordinate &self, pybind11::object index ) { return self.position()[ index ]; } );
-
-        cls.def( "__call__", [] ( const Entity &self, const LocalCoordinate &x ) { return FVCoordinate( self, x ); } );
-        cls.def( "__call__", [] ( const Entity &self, pybind11::array_t< ctype > &x ) { return Coordinate( self, x ); } );
 
         registerExtendedEntityInterface( cls );
       }
