@@ -5,6 +5,7 @@ import dune.common as common
 from ..generator.generator import SimpleGenerator
 from dune.common.hashit import hashIt
 from dune.deprecate import deprecated
+from dune.grid import gridFunction
 
 def getDimgrid(constructor):
     dimgrid = None
@@ -37,8 +38,10 @@ def writeVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointve
                 try:
                     f.addToVTKWriter(n, vtk, dataTag)
                 except AttributeError:
-                    gf = grid.function(f)
-                    gf.addToVTKWriter(n, vtk, dataTag)
+                    @gridFunction(grid)
+                    def f_(*args,**kwargs):
+                        return f(*args,**kwargs)
+                    f_.addToVTKWriter(n, vtk, dataTag)
         elif isinstance(dataFunctions, list):
             for f in dataFunctions:
                 f.addToVTKWriter(f.name, vtk, dataTag)
