@@ -4,6 +4,7 @@ add_python_targets(grid
   grid_generator
   core
   map
+  datahandle
 )
 
 dune_add_pybind11_module(NAME _grid)
