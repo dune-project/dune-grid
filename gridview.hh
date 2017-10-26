@@ -340,7 +340,7 @@ namespace Dune
       cls.def_property_readonly( "comm", [] ( const GridView &gridView ) { return gridView.grid().comm(); } );
 
       cls.def( "communicate", [] ( const GridView &gridView,
-                                   NumPyCommDataHandle<MCMGMapper,double,pybind11::function> &dataHandle, InterfaceType iftype, CommunicationDirection dir ) {
+                                   NumPyCommDataHandle<MCMGMapper,double,std::function<double(double,double)>> &dataHandle, InterfaceType iftype, CommunicationDirection dir ) {
             gridView.communicate( dataHandle, iftype, dir );
           });
       cls.def( "communicate", [] ( const GridView &gridView, pybind11::object dataHandle, InterfaceType iftype, CommunicationDirection dir ) {
