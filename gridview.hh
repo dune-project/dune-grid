@@ -26,6 +26,7 @@
 #include <dune/python/grid/range.hh>
 #include <dune/python/grid/vtk.hh>
 #include <dune/python/grid/capabilities.hh>
+#include <dune/python/utility/numpycommdatahandle.hh>
 
 #include <dune/python/pybind11/pybind11.h>
 
@@ -338,6 +339,10 @@ namespace Dune
 
       cls.def_property_readonly( "comm", [] ( const GridView &gridView ) { return gridView.grid().comm(); } );
 
+      cls.def( "communicate", [] ( const GridView &gridView,
+                                   NumPyCommDataHandle<MCMGMapper,double,pybind11::function> &dataHandle, InterfaceType iftype, CommunicationDirection dir ) {
+            gridView.communicate( dataHandle, iftype, dir );
+          });
       cls.def( "communicate", [] ( const GridView &gridView, pybind11::object dataHandle, InterfaceType iftype, CommunicationDirection dir ) {
             ProxyDataHandle proxyDataHandle( std::move( dataHandle ) );
             gridView.communicate( proxyDataHandle, iftype, dir );
