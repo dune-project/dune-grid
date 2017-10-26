@@ -73,7 +73,7 @@ namespace Dune
       }
 
       template< class LocalCoordinate, class LocalFunction, class Element >
-      inline static pybind11::object callLocalFunction ( const LocalFunction &&f, const FVCoordinateWrapper< Element > &x, PriorityTag< 0 > )
+      inline static pybind11::object callLocalFunction ( LocalFunction &&f, const FVCoordinateWrapper< Element > &x, PriorityTag< 0 > )
       {
         f.bind( x.entity() );
         auto result = f( x.localPosition() );
@@ -83,7 +83,7 @@ namespace Dune
 
       template< class LocalCoordinate, class LocalFunction, class X >
       inline static auto callLocalFunction ( LocalFunction &&f, const X &x )
-        -> std::enable_if_t< !std::is_const< LocalFunction >::value, pybind11::object >
+        -> std::enable_if_t< !std::is_const< std::remove_reference_t< LocalFunction > >::value, pybind11::object >
       {
         return callLocalFunction< LocalCoordinate >( std::forward< LocalFunction >( f ), x, PriorityTag< 42 >() );
       }
@@ -110,10 +110,10 @@ namespace Dune
       // TODO subclassing from a non registered traits class not covered by TypeRegistry
       pybind11::class_< LocalFunction > clsLocalFunction( cls, "LocalFunction" );
       registerLocalView< Element >( clsLocalFunction );
-      clsLocalFunction.def( "__call__", [] ( const LocalFunction &self, const LocalCoordinate &x ) {
+      clsLocalFunction.def( "__call__", [] ( LocalFunction &self, const LocalCoordinate &x ) {
           return detail::callLocalFunction< LocalCoordinate >( self, x );
         }, "x"_a );
-      clsLocalFunction.def( "__call__", [] ( const LocalFunction &self, Array x ) {
+      clsLocalFunction.def( "__call__", [] ( LocalFunction &self, Array x ) {
           return detail::callLocalFunction< LocalCoordinate >( self, x );
         }, "x"_a );
       clsLocalFunction.def_property_readonly( "dimRange", [] ( pybind11::object self ) { return pybind11::int_( DimRange< Range >::value ); } );
