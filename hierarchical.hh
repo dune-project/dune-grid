@@ -11,6 +11,7 @@
 #include <sstream>
 #include <type_traits>
 
+#include <dune/common/hybridutilities.hh>
 #include <dune/common/iteratorrange.hh>
 
 #include <dune/geometry/referenceelements.hh>
@@ -329,6 +330,25 @@ namespace Dune
       cls.def_property_readonly_static( "dimension", [] ( pybind11::object ) { return int(Grid::dimension); } );
       cls.def_property_readonly_static( "dimensionworld", [] ( pybind11::object ) { return int(Grid::dimensionworld); } );
       cls.def_property_readonly_static( "refineStepsForHalf", [] ( pybind11::object ) { return DGFGridInfo< Grid >::refineStepsForHalf(); } );
+
+      // export grid capabilities
+
+      if( Capabilities::hasSingleGeometryType< Grid >::v )
+        cls.def_property_readonly_static( "type", [] ( pybind11::object ) {
+            return GeometryType( Capabilities::hasSingleGeometryType< Grid >::topologyId, Grid::dimension );
+          } );
+
+      cls.def_property_readonly_static( "isCartesian", [] ( pybind11::object ) { return Capabilities::isCartesian< Grid >::v; } );
+      cls.def_property_readonly_static( "canCommunicate", [] ( pybind11::object ) {
+          pybind11::tuple canCommunicate( Grid::dimension+1 );
+          Hybrid::forEach( std::make_integer_sequence< int, Grid::dimension+1 >(), [ &canCommunicate ] ( auto &&codim ) {
+              canCommunicate[ codim ] = pybind11::cast( bool( Capabilities::canCommunicate< Grid, codim >::v ) );
+            } );
+          return canCommunicate;
+        } );
+
+      cls.def_property_readonly_static( "threadSafe", [] ( pybind11::object ) { return Capabilities::threadSafe< Grid >::v; } );
+      cls.def_property_readonly_static( "viewThreadSafe", [] ( pybind11::object ) { return Capabilities::viewThreadSafe< Grid >::v; } );
 
       auto clsComm = insertClass< typename Grid::CollectiveCommunication >( cls, "CollectiveCommunication", GenerateTypeName( cls, "CollectiveCommunication" ) );
       if( clsComm.second )
