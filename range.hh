@@ -1,12 +1,14 @@
 // -*- tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-
 #ifndef DUNE_PYTHON_GRID_RANGE_HH
 #define DUNE_PYTHON_GRID_RANGE_HH
 
 #include <string>
 #include <utility>
 
+#include <dune/common/hybridutilities.hh>
+
+#include <dune/python/common/logger.hh>
 #include <dune/python/pybind11/extensions.h>
 #include <dune/python/pybind11/pybind11.h>
 
@@ -40,33 +42,305 @@ namespace Dune
       Iterator it_, end_;
     };
 
-    template<typename GridView, int codim>
-    using PyGridViewIterator =
-      PyIterator<
-        typename GridView::template Codim<codim>::Iterator,
-        typename GridView::template Codim<codim>::Entity >;
 
-    template<typename GridView, int codim, int partition>
-    using PyGridViewParIterator =
-      PyIterator<
-        typename GridView::template Codim<codim>::
-          template Partition< static_cast<Dune::PartitionIteratorType>(partition) >::Iterator,
-        typename GridView::template Codim<codim>::Entity >;
-
-    template<typename GridView>
-    using PyIntersectionIterator =
-      PyIterator<
-        typename GridView::IntersectionIterator,
-        typename GridView::Intersection >;
 
     // registerPyIterator
     // ------------------
 
-    template<typename Iterator>
-    void registerPyIterator(pybind11::handle scope, pybind11::class_<Iterator> cls)
+    template< class Iterator >
+    void registerPyIterator( pybind11::handle scope, pybind11::class_< Iterator > cls )
     {
-      cls.def("__iter__", [] (Iterator& it) -> Iterator& { return it; });
-      cls.def("__next__", &Iterator::next);
+      cls.def( "__iter__", [] ( Iterator &self ) -> Iterator & { return self; } );
+      cls.def( "__next__", [] ( Iterator &self ) { return self.next(); } );
+    }
+
+
+
+    // PyBoundarySegmentIterator
+    // -------------------------
+
+    template< class GridView, class PyElementIterator >
+    struct PyBoundarySegmentIterator
+    {
+      typedef typename GridView::Intersection Intersection;
+
+      PyBoundarySegmentIterator ( const GridView &gridView, PyElementIterator it )
+        : gridView_( std::move( gridView ) ), elementIt_( std::move( it ) )
+      {}
+
+      Intersection next ()
+      {
+        while( true )
+        {
+          if( intersectionIt_ != intersectionEnd_ )
+          {
+            Intersection intersection = *intersectionIt_;
+            ++intersectionIt_;
+            if( intersection.boundary() )
+              return intersection;
+          }
+          else
+          {
+            auto element = elementIt_.next();
+            while( !element.hasBoundaryIntersections() )
+              element = elementIt_.next();
+
+            intersectionIt_ = gridView_.ibegin( element );
+            intersectionEnd_ = gridView_.iend( element );
+          }
+        }
+      }
+
+    private:
+      const GridView &gridView_;
+      PyElementIterator elementIt_;
+      typename GridView::IntersectionIterator intersectionIt_, intersectionEnd_;
+    };
+
+
+
+    // PyGridViewIterator
+    // ------------------
+
+    template< class GridView, int codim >
+    using PyGridViewIterator = PyIterator< typename GridView::template Codim< codim >::Iterator, typename GridView::template Codim< codim >::Entity >;
+
+
+
+    // PyGridViewPartitionIterator
+    // ---------------------------
+
+    template< class GridView, int codim, PartitionIteratorType partition >
+    using PyGridViewPartitionIterator = PyIterator< typename GridView::template Codim< codim >::template Partition< partition >::Iterator, typename GridView::template Codim< codim >::Entity >;
+
+    template< class GridView >
+    using PyIntersectionIterator = PyIterator< typename GridView::IntersectionIterator, typename GridView::Intersection >;
+
+
+
+    // registerPyGridViewIterator
+    // --------------------------
+
+    template< class GridView, int codim >
+    inline static auto registerPyGridViewIterator ( pybind11::handle scope, PriorityTag< 1 > )
+      -> std::enable_if_t< Capabilities::canIterate< typename GridView::Grid, codim >::value >
+    {
+      typedef PyGridViewIterator< GridView, codim > Iterator;
+      auto typeName = GenerateTypeName( "PyGridViewIterator", MetaType< GridView >(), codim );
+      auto entry = insertClass< Iterator >( scope, "EntityIterator", typeName, IncludeFiles{ "dune/python/grid/range.hh" } );
+      if( entry.second )
+      {
+        registerPyIterator( scope, entry.first );
+        Logger logger( "dune.grid" );
+        entry.first.def( "__call__", [ logger ] ( pybind11::object self ) {
+            logger.warning( "The methods elements, facets, edges, and vertices have been converted to properties." );
+            logger.warning( "Please remove the trailing parentesis." );
+            return self;
+          } );
+        entry.first.def( "__call__", [ logger ] ( pybind11::object self, PartitionIteratorType pitype ) {
+            logger.error( "The methods elements, facets, edges, and vertices have been converted to properties." );
+            switch( pitype )
+            {
+            case Interior_Partition:
+              logger.error( "The parallel versions can be obtained from the corresponding partition, i.e., interiorPartition." );
+              break;
+
+            case InteriorBorder_Partition:
+              logger.error( "The parallel versions can be obtained from the corresponding partition, i.e., interiorBorderPartition." );
+              break;
+
+            case Overlap_Partition:
+              logger.error( "The parallel versions can be obtained from the corresponding partition, i.e., overlapPartition." );
+              break;
+
+            case OverlapFront_Partition:
+              logger.error( "The parallel versions can be obtained from the corresponding partition, i.e., overlapFrontPartition." );
+              break;
+
+            case All_Partition:
+              logger.error( "The parallel versions can be obtained from the corresponding partition, i.e., allPartition." );
+              break;
+
+            case Ghost_Partition:
+              logger.error( "The parallel versions can be obtained from the corresponding partition, i.e., ghostPartition." );
+              break;
+            }
+            throw pybind11::value_error( "The methods elements, facets, edges, and vertices have been converted to properties." );
+          } );
+      }
+    }
+
+    template< class GridView, int codim >
+    inline static void registerPyGridViewIterator ( pybind11::handle scope, PriorityTag< 0 > )
+    {}
+
+    template< class GridView, int codim >
+    inline static void registerPyGridViewIterator ( pybind11::handle scope = {} )
+    {
+      return registerPyGridViewIterator< GridView, codim >( scope, PriorityTag< 42 >() );
+    }
+
+
+
+    // makePyGridViewIterator
+    // ----------------------
+
+    template< class GridView, int codim >
+    inline static auto makePyGridViewIterator ( pybind11::object obj )
+      -> std::enable_if_t< Capabilities::canIterate< typename GridView::Grid, codim >::value, pybind11::object >
+    {
+      const GridView &gridView = pybind11::cast< const GridView & >( obj );
+      pybind11::object iterator = pybind11::cast( new PyGridViewIterator< GridView, codim >( gridView.template begin< codim >(), gridView.template end< codim >() ) );
+      pybind11::detail::keep_alive_impl( iterator, obj );
+      return iterator;
+    }
+
+    template< class GridView, int codim >
+    inline static auto makePyGridViewIterator ( pybind11::object )
+      -> std::enable_if_t< !Capabilities::canIterate< typename GridView::Grid, codim >::value, pybind11::object >
+    {
+      throw pybind11::value_error( "Iterators for codimension " + std::to_string( codim ) + " are not implemented." );
+    }
+
+
+
+    // registerPyIntersectionIterator
+    // ------------------------------
+
+    template< class GridView >
+    inline static void registerPyIntersectionIterator ( pybind11::handle scope = {} )
+    {
+      typedef PyIntersectionIterator< GridView > Iterator;
+      auto typeName = GenerateTypeName( "Dune::Python::PyBoundarySegmentIterator", MetaType< GridView >() );
+      auto entry = insertClass< Iterator >( scope, "IntersectionIterator", typeName, IncludeFiles{ "dune/python/range.hh" } );
+      if( entry.second )
+        registerPyIterator< Iterator >( scope, entry.first );
+    }
+
+
+
+    // registerPyBoundarySegmentIterator
+    // ---------------------------------
+
+    template< class GridView, class PyElementIterator >
+    inline static void registerPyBoundarySegmentIterator ( pybind11::handle scope = {} )
+    {
+      typedef PyBoundarySegmentIterator< GridView, PyElementIterator > Iterator;
+      auto typeName = GenerateTypeName( "Dune::Python::PyIntersectionIterator", MetaType< GridView >(), MetaType< PyElementIterator >() );
+      auto entry = insertClass< Iterator >( scope, "BoundarySegmentIterator", typeName, IncludeFiles{ "dune/python/range.hh" } );
+      if( entry.second )
+        registerPyIterator< Iterator >( scope, entry.first );
+    }
+
+
+
+    // GridViewPartition
+    // -----------------
+
+    template< class GridView, PartitionIteratorType partition >
+    struct GridViewPartition
+    {
+      explicit GridViewPartition ( pybind11::object o )
+        : gridView( pybind11::cast< const GridView & >( o ) ), obj( std::move( o ) )
+      {}
+
+      const GridView &gridView;
+      pybind11::object obj;
+    };
+
+
+
+    // registerPyGridViewPartitionIterator
+    // -----------------------------------
+
+    template< class GridView, int codim, PartitionIteratorType partition >
+    inline static auto registerPyGridViewPartitionIterator ( pybind11::handle scope, PriorityTag< 1 > )
+      -> std::enable_if_t< Capabilities::canIterate< typename GridView::Grid, codim >::value >
+    {
+      typedef PyGridViewPartitionIterator< GridView, codim, partition > Iterator;
+      auto typeName = GenerateTypeName( "Dune::Python::PyGridViewPartitionIterator", MetaType< GridView >(), codim, static_cast< int >( partition ) );
+      auto entry = insertClass< Iterator >( scope, "EntityIterator", typeName, IncludeFiles{ "dune/python/grid/range.hh" } );
+      if( entry.second )
+        registerPyIterator( scope, entry.first );
+    }
+
+    template< class GridView, int codim, PartitionIteratorType partition >
+    inline static void registerPyGridViewPartitionIterator ( pybind11::handle scope, PriorityTag< 0 > )
+    {}
+
+    template< class GridView, int codim, PartitionIteratorType partition >
+    inline static void registerPyGridViewPartitionIterator ( pybind11::handle scope = {} )
+    {
+      return registerPyGridViewPartitionIterator< GridView, codim, partition >( scope, PriorityTag< 42 >() );
+    }
+
+
+
+    // makePyGridViewPartitionIterator
+    // -------------------------------
+
+    template< class GridView, int codim, PartitionIteratorType partition >
+    inline static auto makePyGridViewPartitionIterator ( pybind11::object obj )
+      -> std::enable_if_t< Capabilities::canIterate< typename GridView::Grid, codim >::value, pybind11::object >
+    {
+      typedef GridViewPartition< GridView, partition > Partition;
+      const GridView &gridView = pybind11::cast< const Partition & >( obj ).gridView;
+      pybind11::object iterator = pybind11::cast( new PyGridViewPartitionIterator< GridView, codim, partition >( gridView.template begin< codim, partition >(), gridView.template end< codim, partition >() ) );
+      pybind11::detail::keep_alive_impl( iterator, obj );
+      return iterator;
+    }
+
+    template< class GridView, int codim, PartitionIteratorType partition >
+    inline static auto makePyGridViewPartitionIterator ( pybind11::object )
+      -> std::enable_if_t< !Capabilities::canIterate< typename GridView::Grid, codim >::value, pybind11::object >
+    {
+      throw pybind11::value_error( "Iterators for codimension " + std::to_string( codim ) + " are not implemented." );
+    }
+
+
+
+    // registerGridViewPartition
+    // -------------------------
+
+    template< class GridView, PartitionIteratorType partition >
+    inline static void registerGridViewPartition ( pybind11::handle scope = {} )
+    {
+      typedef GridViewPartition< GridView, partition > Partition;
+      typedef typename GridView::Grid Grid;
+      typedef PyGridViewPartitionIterator< GridView, 0, partition > PyElementIterator;
+
+      using pybind11::operator""_a;
+
+      Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [] ( auto &&codim ) {
+          registerPyGridViewPartitionIterator< GridView, codim, partition >();
+        } );
+
+      pybind11::class_< Partition > cls( scope, "Partition" );
+
+      if( Capabilities::canIterate< Grid, 0 >::value )
+        cls.def_property_readonly( "elements", [] ( pybind11::object self ) { return makePyGridViewPartitionIterator< GridView, 0, partition >( self ); } );
+      if( Capabilities::canIterate< Grid, 1 >::value )
+        cls.def_property_readonly( "facets", [] ( pybind11::object self ) { return makePyGridViewPartitionIterator< GridView, 1, partition >( self ); } );
+      if( Capabilities::canIterate< Grid, GridView::dimension-1 >::value )
+        cls.def_property_readonly( "edges", [] ( pybind11::object self ) { return makePyGridViewPartitionIterator< GridView, GridView::dimension-1, partition >( self ); } );
+      if( Capabilities::canIterate< Grid, GridView::dimension >::value )
+        cls.def_property_readonly( "vertices", [] ( pybind11::object self ) { return makePyGridViewPartitionIterator< GridView, GridView::dimension, partition >( self ); } );
+
+      std::array< pybind11::object (*) ( pybind11::object ), GridView::dimension+1 > makePyIterators;
+      Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [ &makePyIterators ] ( auto &&codim ) {
+          makePyIterators[ codim ] = makePyGridViewPartitionIterator< GridView, codim, partition >;
+        } );
+      cls.def( "entities", [ makePyIterators ] ( pybind11::object self, int codim ) {
+          if( (codim < 0) || (codim > GridView::dimension) )
+            throw pybind11::value_error( "Invalid codimension: " + std::to_string( codim ) + " (must be in [0, " + std::to_string( GridView::dimension ) + "])." );
+          return makePyIterators[ codim ]( self );
+        }, "codim"_a );
+
+      registerPyBoundarySegmentIterator< GridView, PyElementIterator >();
+      cls.def_property_readonly( "boundarySegments", [] ( const Partition &self ) {
+          const GridView &gv = self.gridView;
+          return PyBoundarySegmentIterator< GridView, PyElementIterator >( gv, PyElementIterator( gv.template begin< 0, partition >(), gv.template end< 0, partition >() ) );
+        }, pybind11::keep_alive< 0, 1 >() );
     }
 
   } // namespace Python

@@ -17,6 +17,7 @@
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 
+#include <dune/python/common/logger.hh>
 #include <dune/python/grid/entity.hh>
 #include <dune/python/grid/function.hh>
 #include <dune/python/grid/indexset.hh>
@@ -36,109 +37,6 @@ namespace Dune
 
   namespace Python
   {
-
-    // registerPyGridViewIterators
-    // ---------------------------
-
-    template< class GridView, int codim >
-    inline static auto registerPyGridViewIterator ( pybind11::handle scope, PriorityTag< 1 > )
-      -> std::enable_if_t< Capabilities::canIterate< typename GridView::Grid, codim >::value, std::function< pybind11::object ( const GridView & ) > >
-    {
-      typedef PyGridViewIterator<GridView,codim> Iterator;
-      auto entry = insertClass<Iterator>(scope, "EntityIterator_"+std::to_string(codim),
-           GenerateTypeName("PyGridViewIterator",MetaType<GridView>(),codim),
-           IncludeFiles{"dune/python/grid/range.hh"} );
-      if (entry.second)
-        registerPyIterator( scope, entry.first );
-
-      return [] ( const GridView &gridView ) -> pybind11::object {
-          return pybind11::cast( Iterator( gridView.template begin< codim >(), gridView.template end< codim >() ) );
-        };
-    }
-
-    template< class GridView, int codim >
-    inline static std::function< pybind11::object ( const GridView & ) > registerPyGridViewIterator ( pybind11::handle scope, PriorityTag< 0 > )
-    {
-      return [] ( const GridView &gridView ) -> pybind11::object {
-          throw std::invalid_argument( "Iterators for codimension " + std::to_string( codim ) + " are not implemented." );
-        };
-    }
-
-    template< class GridView, int codim >
-    inline static std::function< pybind11::object ( const GridView & ) > registerPyGridViewIterator ( pybind11::handle scope )
-    {
-      return registerPyGridViewIterator< GridView, codim >( scope, PriorityTag< 42 >() );
-    }
-
-    template< class GridView, int... codim >
-    inline static std::array< std::function< pybind11::object( const GridView & ) >, sizeof...( codim ) >
-    registerPyGridViewIterators( pybind11::handle scope, std::integer_sequence< int, codim... > )
-    {
-      return { registerPyGridViewIterator< GridView, codim >( scope )... };
-    }
-
-
-
-    // registerPyGridViewParIterator
-    // -----------------------------
-
-    template< class GridView, int codim, int partition >
-    inline static auto registerPyGridViewParIterator( pybind11::handle scope, PriorityTag< 1 > )
-      -> std::enable_if_t< Capabilities::canIterate< typename GridView::Grid, codim >::value, std::function< pybind11::object ( const GridView & ) > >
-    {
-      typedef PyGridViewParIterator< GridView, codim, partition > Iterator;
-      auto entry = insertClass<Iterator>(scope, "EntityIterator_"+std::to_string(codim)+std::to_string((int)partition),
-           GenerateTypeName("PyGridViewParIterator",MetaType<GridView>(),codim,partition),
-           IncludeFiles{"dune/python/grid/range.hh"} );
-      if (entry.second)
-        registerPyIterator< Iterator >( scope, entry.first );
-      return [] ( const GridView &gridView ) -> pybind11::object {
-          auto begin = gridView.template begin<codim, static_cast<Dune::PartitionIteratorType>(partition)>();
-          auto end   = gridView.template end  <codim, static_cast<Dune::PartitionIteratorType>(partition)>();
-          return pybind11::cast(PyGridViewParIterator<GridView, codim, partition>(begin, end));
-      };
-    }
-
-    template< class GridView, int codim, int partition >
-    inline static std::function< pybind11::object ( const GridView & ) > registerPyGridViewParIterator( pybind11::handle scope, PriorityTag< 0 > )
-    {
-      return [] ( const GridView &gridView ) -> pybind11::object {
-          throw std::invalid_argument( "Iterators for codimension " + std::to_string( codim ) + " are not implemented." );
-        };
-    }
-
-    template< class GridView, int codim, int partition >
-    inline static std::function< pybind11::object ( const GridView & ) > registerPyGridViewParIterator( pybind11::handle scope )
-    {
-      return registerPyGridViewParIterator< GridView, codim, partition >( scope, PriorityTag< 42 >() );
-    }
-
-    template<class GridView, int codim, int... partitions>
-    auto registerPyGridViewParIterators_(pybind11::handle scope, std::integer_sequence<int, partitions...>)
-    {
-      std::array<std::function<pybind11::object(const GridView&)>, sizeof...(partitions)>
-        pyGridViewParIterators =
-          {registerPyGridViewParIterator<GridView, codim, partitions>(scope)...};
-
-      return pyGridViewParIterators;
-    }
-
-    template<class GridView, int... codim>
-    auto registerPyGridViewParIterators(pybind11::handle scope, std::integer_sequence<int, codim...>)
-    {
-      constexpr unsigned int nPartitionType = 6; // see Dune::PartitionIteratorType enum
-
-      std::array<
-        std::array< std::function<pybind11::object(const GridView&)>, nPartitionType >,
-        sizeof...(codim)
-      >
-        pyGridViewParIterators =
-          {registerPyGridViewParIterators_<GridView, codim>(scope, std::make_integer_sequence<int, nPartitionType>())...};
-
-      return pyGridViewParIterators;
-    }
-
-
 
     // ProxyDataHandle for parallel communication
     // ------------------------------------------
@@ -230,6 +128,8 @@ namespace Dune
       using pybind11::operator""_a;
 
       typedef typename GridView::Grid Grid;
+      typedef PyGridViewIterator< GridView, 0 > PyElementIterator;
+
       const int dim = GridView::dimension;
 
       detail::registerGridViewConstructorFromGrid( cls, PriorityTag< 42 >() );
@@ -242,68 +142,119 @@ namespace Dune
 
       registerGridViewIndexSet< GridView >( cls );
       registerMultipleCodimMultipleGeomTypeMapper< GridView >( cls );
-      typedef MultipleCodimMultipleGeomTypeMapper<GridView> MCMGMapper;
-      cls.def("mapper", [](GridView &self, pybind11::function contains)
-          { return MCMGMapper(self,
-                  [contains](Dune::GeometryType gt, int griddim)
-                  { return (unsigned)(contains(gt).cast<int>()); } ); },
-          pybind11::keep_alive<0,1>() );
 
-      // STATIC, needed? - visibility problem?
-      static const auto pyGridViewIterators = registerPyGridViewIterators< GridView >(cls, std::make_integer_sequence<int, dim+1>() );
+      typedef MultipleCodimMultipleGeomTypeMapper< GridView > MCMGMapper;
+      cls.def( "mapper", [] ( GridView &self, pybind11::function contains ) {
+          return new MCMGMapper( self, [ contains ] ( Dune::GeometryType gt, int griddim ) { return static_cast< unsigned int >( pybind11::cast< int >( contains( gt ) )); } );
+        }, pybind11::keep_alive< 0, 1 >(), "contains"_a );
 
-      cls.def( "elements", [] ( const GridView &self ) {
-            return pyGridViewIterators[ 0 ]( self );
-          }, pybind11::keep_alive< 0, 1 >() );
+      // register iterators
 
-      cls.def( "facets", [] ( const GridView &self ) {
-            return pyGridViewIterators[ 1 ]( self );
-          }, pybind11::keep_alive< 0, 1 >() );
+      Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [ &cls ] ( auto &&codim ) {
+          registerPyGridViewIterator< GridView, codim >();
+        } );
 
-      cls.def( "edges", [] ( const GridView &self ) {
-            return pyGridViewIterators[ dim-1 ]( self );
-          }, pybind11::keep_alive< 0, 1 >() );
+      if( Capabilities::canIterate< Grid, 0 >::value )
+        cls.def_property_readonly( "elements", [] ( pybind11::object self ) { return makePyGridViewIterator< GridView, 0 >( self ); } );
+      if( Capabilities::canIterate< Grid, 1 >::value )
+        cls.def_property_readonly( "facets", [] ( pybind11::object self ) { return makePyGridViewIterator< GridView, 1 >( self ); } );
+      if( Capabilities::canIterate< Grid, GridView::dimension-1 >::value )
+        cls.def_property_readonly( "edges", [] ( pybind11::object self ) { return makePyGridViewIterator< GridView, GridView::dimension-1 >( self ); } );
+      if( Capabilities::canIterate< Grid, GridView::dimension >::value )
+        cls.def_property_readonly( "vertices", [] ( pybind11::object self ) { return makePyGridViewIterator< GridView, GridView::dimension >( self ); } );
 
-      cls.def( "vertices", [] ( const GridView &self ) {
-            return pyGridViewIterators[ dim ]( self );
-          }, pybind11::keep_alive< 0, 1 >() );
+      std::array< pybind11::object (*) ( pybind11::object ), GridView::dimension+1 > makePyGridViewIterators;
+      Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [ &makePyGridViewIterators ] ( auto &&codim ) {
+          makePyGridViewIterators[ codim ] = makePyGridViewIterator< GridView, codim >;
+        } );
+      cls.def( "entities", [ makePyGridViewIterators ] ( pybind11::object self, int codim ) {
+          if( (codim < 0) || (codim > GridView::dimension) )
+            throw pybind11::value_error( "Invalid codimension: " + std::to_string( codim ) + " (must be in [0, " + std::to_string( GridView::dimension ) + "])." );
+          return makePyGridViewIterators[ codim ]( self );
+        }, "codim"_a );
+      Logger logger( "dune.grid" );
+      cls.def( "entities", [ logger ] ( pybind11::object self, int codim, PartitionIteratorType pitype ) {
+          if( (codim < 0) || (codim > GridView::dimension) )
+            throw pybind11::value_error( "Invalid codimension: " + std::to_string( codim ) + " (must be in [0, " + std::to_string( GridView::dimension ) + "])." );
+          logger.error( "The entities no longer has a partition type argument." );
+          switch( pitype )
+          {
+          case Interior_Partition:
+            logger.error( "The parallel versions can be obtained from the corresponding partition, i.e., interiorPartition." );
+            break;
 
-      cls.def( "entities", [] ( const GridView &self, int codim ) {
-            return pyGridViewIterators[ codim ]( self );
-          }, pybind11::keep_alive< 0, 1 >() );
+          case InteriorBorder_Partition:
+            logger.error( "The parallel versions can be obtained from the corresponding partition, i.e., interiorBorderPartition." );
+            break;
 
-      // STATIC needed? - visibility needed?
-      static const auto pyGridViewParIterators = registerPyGridViewParIterators< GridView >( cls, std::make_integer_sequence<int, dim+1>() );
+          case Overlap_Partition:
+            logger.error( "The parallel versions can be obtained from the corresponding partition, i.e., overlapPartition." );
+            break;
 
-      cls.def( "elements", [] ( const GridView &self, Dune::PartitionIteratorType p ) {
-            return pyGridViewParIterators[ 0 ][ static_cast< std::size_t >( p ) ]( self );
-          }, pybind11::keep_alive< 0, 1 >() );
+          case OverlapFront_Partition:
+            logger.error( "The parallel versions can be obtained from the corresponding partition, i.e., overlapFrontPartition." );
+            break;
 
-      cls.def( "facets", [] ( const GridView &self, Dune::PartitionIteratorType p ) {
-            return pyGridViewParIterators[ 1 ][ static_cast< std::size_t >( p ) ]( self );
-          }, pybind11::keep_alive< 0, 1 >() );
+          case All_Partition:
+            logger.error( "The parallel versions can be obtained from the corresponding partition, i.e., allPartition." );
+            break;
 
-      cls.def( "edges", [] ( const GridView &self, Dune::PartitionIteratorType p ) {
-            return pyGridViewParIterators[ dim-1 ][ static_cast< std::size_t >( p ) ]( self );
-          }, pybind11::keep_alive< 0, 1 >() );
+          case Ghost_Partition:
+            logger.error( "The parallel versions can be obtained from the corresponding partition, i.e., ghostPartition." );
+            break;
+          }
+          throw pybind11::value_error( "The entities no longer has a partition type argument." );
+        } );
 
-      cls.def( "vertices", [] ( const GridView &self, Dune::PartitionIteratorType p ) {
-            return pyGridViewParIterators[ dim ][ static_cast< std::size_t >( p ) ]( self );
-          }, pybind11::keep_alive< 0, 1 >() );
-
-      cls.def( "entities", [] ( const GridView &self, std::size_t codim, Dune::PartitionIteratorType p ) {
-            return pyGridViewParIterators[ codim ][ static_cast< std::size_t >( p ) ]( self );
-          }, pybind11::keep_alive< 0, 1 >() );
-
-      // TODO
-      auto entry = insertClass< PyIntersectionIterator<GridView> >( cls, "IntersectionIterator",
-          GenerateTypeName("PyIntersectionIterator", cls),
-          IncludeFiles{"dune/python/range.hh"} );
-      if (entry.second)
-        registerPyIterator< PyIntersectionIterator< GridView > >( cls, entry.first );
+      registerPyIntersectionIterator< GridView >();
       cls.def( "intersections", [] ( const GridView &self, const typename GridView::template Codim< 0 >::Entity &e ) {
-            return PyIntersectionIterator< GridView >( self.ibegin( e ), self.iend( e ) );
-          }, pybind11::keep_alive< 0, 1 >() );
+          return PyIntersectionIterator< GridView >( self.ibegin( e ), self.iend( e ) );
+        }, pybind11::keep_alive< 0, 1 >() );
+
+      registerPyBoundarySegmentIterator< GridView, PyElementIterator >();
+      cls.def_property_readonly( "boundarySegments", [] ( const GridView &self ) {
+          return PyBoundarySegmentIterator< GridView, PyElementIterator >( self, PyElementIterator( self.template begin< 0 >(), self.template end< 0 >() ) );
+        }, pybind11::keep_alive< 0, 1 >() );
+
+      // register partitions
+
+      registerGridViewPartition< GridView, Interior_Partition >();
+      registerGridViewPartition< GridView, InteriorBorder_Partition >();
+      registerGridViewPartition< GridView, Overlap_Partition >();
+      registerGridViewPartition< GridView, OverlapFront_Partition >();
+      registerGridViewPartition< GridView, All_Partition >();
+      registerGridViewPartition< GridView, Ghost_Partition >();
+
+      cls.def_property_readonly( "interiorPartition", [] ( pybind11::object self ) {
+          return GridViewPartition< GridView, Interior_Partition >( self );
+        }, R"doc(
+          Partition containing only interior entities.
+        )doc" );
+      cls.def_property_readonly( "interiorBorderPartition", [] ( pybind11::object self ) {
+          return GridViewPartition< GridView, InteriorBorder_Partition >( self );
+        }, R"doc(
+          Partition containing only interior and border entities.
+        )doc" );
+      cls.def_property_readonly( "overlapPartition", [] ( pybind11::object self ) {
+          return GridViewPartition< GridView, Overlap_Partition >( self );
+        }, R"doc(
+          Partition containing only interior, border and overlap entities.
+        )doc" );
+      cls.def_property_readonly( "overlapFrontPartition", [] ( pybind11::object self ) {
+          return GridViewPartition< GridView, OverlapFront_Partition >( self );
+        }, R"doc(
+          Partition containing only interior, border, overlap, and front entities.
+        )doc" );
+      cls.def_property_readonly( "allPartition", [] ( pybind11::object self ) {
+          return GridViewPartition< GridView, All_Partition >( self );
+        }, R"doc(
+          Partition containing all entities.
+        )doc" );
+      cls.def_property_readonly( "ghostPartition", [] ( pybind11::object self ) {
+          return GridViewPartition< GridView, Ghost_Partition >( self );
+        }, R"doc(
+          Partition containing only ghost entities.
+        )doc" );
 
       cls.def("__repr__",
           [] (const GridView &gridView) -> std::string {
@@ -312,8 +263,6 @@ namespace Dune
 
       cls.def_property_readonly( "hierarchicalGrid", [] ( const GridView &self ) -> const Grid & { return self.grid(); } );
 
-      //cls.def_property_readonly( "dimension", [] ( const GridView &_ ) { return static_cast< int >( GridView::dimension ); } );
-      //cls.def_property_readonly( "dimensionworld", [] ( const GridView &_ ) { return static_cast< int >( GridView::dimensionworld ); } );
       cls.def_property_readonly_static( "dimension", [] ( pybind11::object ) { return int(GridView::dimension); } );
       cls.def_property_readonly_static( "dimensionworld", [] ( pybind11::object ) { return int(GridView::dimensionworld); } );
 
