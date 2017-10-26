@@ -4,7 +4,9 @@
 #define DUNE_PYTHON_GRID_IDSET_HH
 
 #include <functional>
+#include <tuple>
 #include <type_traits>
+#include <utility>
 
 #include <dune/common/typeutilities.hh>
 
@@ -114,6 +116,23 @@ namespace Dune
 
 
 
+      // idSetSubId
+      // ----------
+
+      template< class IdSet, class Entity >
+      inline static typename IdSet::IdType idSetSubId ( const IdSet &idSet, const Entity &entity, int i, int c )
+      {
+        if( (c < Entity::codimension) || (c > Entity::dimension) )
+          throw pybind11::value_error( "Invalid codimension: " + std::to_string( c ) + " (must be in [" + std::to_string( Entity::codimension ) + ", " + std::to_string( Entity::dimension ) + "])" );
+        const int size = entity.subEntities( c );
+        if( (i < 0) || (i >= size) )
+          throw pybind11::value_error( "Invalid index: " + std::to_string( i ) + " (must be in [0, " + std::to_string( size ) + "))." );
+        return idSet.subId( entity, i, c );
+      }
+
+
+
+
       // registerSubId
       // -------------
 
@@ -121,11 +140,27 @@ namespace Dune
       inline static auto registerSubId ( pybind11::class_< IdSet, options... > cls, PriorityTag< 1 > )
         -> std::enable_if_t< Entity::codimension == 0 >
       {
-        cls.def( "subId", [] ( const IdSet &idSet, const Entity &entity, int i, int codim ) {
-            if( (codim < Entity::codimension) || (codim > Entity::dimension) )
-              throw pybind11::value_error( "Invalid codimension: " + std::to_string( codim ) + " (must be in [" + std::to_string( Entity::codimension ) + ", " + std::to_string( Entity::dimension ) + "])" );
-            return idSet.subId( entity, i, codim );
+        using pybind11::operator""_a;
+
+        pybind11::options opts;
+        opts.disable_function_signatures();
+
+        cls.def( "subId", [] ( const IdSet &self, const Entity &entity, int i, int codim ) {
+            return detail::idSetSubId( self, entity, i, codim );
           } );
+        cls.def( "subId", [] ( const IdSet &self, const Entity &entity, std::tuple< int, int > e ) {
+            return detail::idSetSubId( self, entity, std::get< 0 >( e ), std::get< 1 >( e ) );
+          } );
+
+        cls.def( "subIds", [] ( const IdSet &self, const Entity &entity, int c ) {
+            if( (c < Entity::codimension) || (c > Entity::dimension) )
+              throw pybind11::value_error( "Invalid codimension: " + std::to_string( c ) + " (must be in [" + std::to_string( Entity::codimension ) + ", " + std::to_string( Entity::dimension ) + "])" );
+            const int size = entity.subEntities( c );
+            pybind11::tuple subIds( size );
+            for( int i = 0; i < size; ++i )
+              subIds[ i ] = pybind11::cast( self.subId( entity, i, c ) );
+            return subIds;
+          }, "entity"_a, "codim"_a );
       }
 
       template< class Entity, class IdSet, class... options >
@@ -152,6 +187,9 @@ namespace Dune
       auto id = insertClass< Id >( cls, "Id", GenerateTypeName( "Dune::Python::detail::GridId", GenerateTypeName( cls, "IdType" ) ) );
       if( id.second )
       {
+        pybind11::options opts;
+        opts.disable_function_signatures();
+
         id.first.def( pybind11::self == pybind11::self );
         id.first.def( pybind11::self != pybind11::self );
 
@@ -170,6 +208,9 @@ namespace Dune
 
           using pybind11::operator""_a;
 
+          pybind11::options opts;
+          opts.disable_function_signatures();
+
           cls.def( "id", [] ( const IdSet &self, const Entity &entity ) { return self.id( entity ); }, "entity"_a );
           detail::registerSubId< Entity >( cls );
         } );
@@ -183,6 +224,9 @@ namespace Dune
     template< class Grid, class... options >
     inline static void registerHierarchicalGridIdSets ( pybind11::class_< Grid, options... > cls )
     {
+      pybind11::options opts;
+      opts.disable_function_signatures();
+
       typedef typename Grid::LocalIdSet LocalIdSet;
       auto local = insertClass< LocalIdSet >( cls, "LocalIdSet", GenerateTypeName( cls, "LocalIdSet" ) );
       if( local.second )
