@@ -35,14 +35,12 @@ def globalGridFunction(view,GFClass,func):
         else:
             return func(element.geometry.position(point))
     GFClass = gf.__class__
-    subclass = type(GFClass.__name__, (GFClass,), {})
-    setattr(subclass, "__call__", feval)
+    subclass = type(GFClass.__name__, (GFClass,), {"__call__": feval})
     return subclass(view,f)
 def localGridFunction(view,GFClass,func):
     def feval(self,element,point):
         return func(element,point)
-    subclass = type(GFClass.__name__, (GFClass,), {})
-    setattr(subclass, "__call__", feval)
+    subclass = type(GFClass.__name__, (GFClass,), {"__call__": feval})
     return subclass(view,func)
 def gridFunction(view,dimRange=None,isGlobal=None):
     def gridFunction_decorator(func):
