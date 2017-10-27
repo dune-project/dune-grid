@@ -210,9 +210,9 @@ namespace Dune
           return PyIntersectionIterator< GridView >( self.ibegin( e ), self.iend( e ) );
         }, pybind11::keep_alive< 0, 1 >() );
 
-      registerPyBoundarySegmentIterator< GridView, PyElementIterator >();
-      cls.def_property_readonly( "boundarySegments", [] ( const GridView &self ) {
-          return PyBoundarySegmentIterator< GridView, PyElementIterator >( self, PyElementIterator( self.template begin< 0 >(), self.template end< 0 >() ) );
+      registerPyBoundaryIntersectionIterator< GridView, PyElementIterator >();
+      cls.def_property_readonly( "boundaryIntersections", [] ( const GridView &self ) {
+          return PyBoundaryIntersectionIterator< GridView, PyElementIterator >( self, PyElementIterator( self.template begin< 0 >(), self.template end< 0 >() ) );
         }, pybind11::keep_alive< 0, 1 >() );
 
       // register partitions

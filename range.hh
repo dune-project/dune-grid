@@ -57,15 +57,15 @@ namespace Dune
 
 
 
-    // PyBoundarySegmentIterator
-    // -------------------------
+    // PyBoundaryIntersectionIterator
+    // ------------------------------
 
     template< class GridView, class PyElementIterator >
-    struct PyBoundarySegmentIterator
+    struct PyBoundaryIntersectionIterator
     {
       typedef typename GridView::Intersection Intersection;
 
-      PyBoundarySegmentIterator ( const GridView &gridView, PyElementIterator it )
+      PyBoundaryIntersectionIterator ( const GridView &gridView, PyElementIterator it )
         : gridView_( std::move( gridView ) ), elementIt_( std::move( it ) )
       {}
 
@@ -212,7 +212,7 @@ namespace Dune
     inline static void registerPyIntersectionIterator ( pybind11::handle scope = {} )
     {
       typedef PyIntersectionIterator< GridView > Iterator;
-      auto typeName = GenerateTypeName( "Dune::Python::PyBoundarySegmentIterator", MetaType< GridView >() );
+      auto typeName = GenerateTypeName( "Dune::Python::PyBoundaryIntersectionIterator", MetaType< GridView >() );
       auto entry = insertClass< Iterator >( scope, "IntersectionIterator", typeName, IncludeFiles{ "dune/python/range.hh" } );
       if( entry.second )
         registerPyIterator< Iterator >( scope, entry.first );
@@ -220,15 +220,15 @@ namespace Dune
 
 
 
-    // registerPyBoundarySegmentIterator
-    // ---------------------------------
+    // registerPyBoundaryIntersectionIterator
+    // --------------------------------------
 
     template< class GridView, class PyElementIterator >
-    inline static void registerPyBoundarySegmentIterator ( pybind11::handle scope = {} )
+    inline static void registerPyBoundaryIntersectionIterator ( pybind11::handle scope = {} )
     {
-      typedef PyBoundarySegmentIterator< GridView, PyElementIterator > Iterator;
+      typedef PyBoundaryIntersectionIterator< GridView, PyElementIterator > Iterator;
       auto typeName = GenerateTypeName( "Dune::Python::PyIntersectionIterator", MetaType< GridView >(), MetaType< PyElementIterator >() );
-      auto entry = insertClass< Iterator >( scope, "BoundarySegmentIterator", typeName, IncludeFiles{ "dune/python/range.hh" } );
+      auto entry = insertClass< Iterator >( scope, "BoundaryIntersectionIterator", typeName, IncludeFiles{ "dune/python/range.hh" } );
       if( entry.second )
         registerPyIterator< Iterator >( scope, entry.first );
     }
@@ -337,10 +337,10 @@ namespace Dune
           return makePyIterators[ codim ]( self );
         }, "codim"_a );
 
-      registerPyBoundarySegmentIterator< GridView, PyElementIterator >();
-      cls.def_property_readonly( "boundarySegments", [] ( const Partition &self ) {
+      registerPyBoundaryIntersectionIterator< GridView, PyElementIterator >();
+      cls.def_property_readonly( "boundaryIntersections", [] ( const Partition &self ) {
           const GridView &gv = self.gridView;
-          return PyBoundarySegmentIterator< GridView, PyElementIterator >( gv, PyElementIterator( gv.template begin< 0, partition >(), gv.template end< 0, partition >() ) );
+          return PyBoundaryIntersectionIterator< GridView, PyElementIterator >( gv, PyElementIterator( gv.template begin< 0, partition >(), gv.template end< 0, partition >() ) );
         }, pybind11::keep_alive< 0, 1 >() );
     }
 
