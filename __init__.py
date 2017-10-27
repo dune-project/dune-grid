@@ -13,40 +13,58 @@ registry["grid"] = grid_registry
 def leafGrid(*args, **kwargs):
     return create(*args, **kwargs)
 
-def globalGridFunction(view):
-    def gridFunction_decorator(func):
-        def f(element,x):
-            return func(element.geometry.position(x))
-        gf = view.function(f)
-        def feval(self,element,point=None):
-            if point is None:
-                return func(element)
-            else:
-                return func(element.geometry.position(point))
-        GFClass = gf.__class__
-        subclass = type(GFClass.__name__, (GFClass,), {})
-        setattr(subclass, "__call__", feval)
-        gf.__class__ = subclass
-        return gf
-    return gridFunction_decorator
-def localGridFunction(view):
-    def gridFunction_decorator(func):
-        gf = view.function(func)
-        def feval(self,element,point):
-            return func(element,point)
-        GFClass = gf.__class__
-        subclass = type(GFClass.__name__, (GFClass,), {})
-        setattr(subclass, "__call__", feval)
-        gf.__class__ = subclass
-        return gf
-    return gridFunction_decorator
-def gridFunction(view):
-    def gridFunction_decorator(func):
+def _getGridFunction(view,y,dimRange):
+    if dimRange is None:
         try:
-            func( FieldVector( [0,]*view.dimension ) )
-            return globalGridFunction(view)(func)
+            dimR = len(y)
         except TypeError:
-            return localGridFunction(view)(func)
+            dimR = 0
+    try:
+        GFClass = getattr(view, "GridFunction"+str(dimR))
+    except AttributeError:
+        raise AttributeError("dune-python not configured to support GridFunctions of dimension "+str(dimR))
+    return GFClass
+
+def globalGridFunction(view,GFClass,func):
+    def f(element,x):
+        return func(element.geometry.position(x))
+    gf = view.function(f)
+    def feval(self,element,point=None):
+        if point is None:
+            return func(element)
+        else:
+            return func(element.geometry.position(point))
+    GFClass = gf.__class__
+    subclass = type(GFClass.__name__, (GFClass,), {})
+    setattr(subclass, "__call__", feval)
+    return subclass(view,f)
+def localGridFunction(view,GFClass,func):
+    def feval(self,element,point):
+        return func(element,point)
+    subclass = type(GFClass.__name__, (GFClass,), {})
+    setattr(subclass, "__call__", feval)
+    return subclass(view,func)
+def gridFunction(view,dimRange=None,isGlobal=None):
+    def gridFunction_decorator(func):
+        if isinstance(isGlobal,bool):
+            assert not dimRange is None
+            GFClass = _getGridFunction(view,None,dimRange)
+        else:
+            try:
+                y = func( FieldVector( [0,]*view.dimension ) )
+                _isGlobal = True
+            except TypeError:
+                try:
+                    e = view.elements().__next__()
+                except AttributeError:
+                    e = view.elements().next()
+                y = func( e, FieldVector( [0,]*view.dimension ) )
+                _isGlobal = False
+        GFClass = _getGridFunction(view,y,dimRange)
+        if _isGlobal:
+            return globalGridFunction(view,GFClass,func)
+        else:
+            return localGridFunction(view,GFClass,func)
     return gridFunction_decorator
 
 def LocalGridFunction(view):
