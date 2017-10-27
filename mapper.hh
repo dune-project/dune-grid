@@ -1,6 +1,5 @@
 // -*- tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-
 #ifndef DUNE_PYTHON_GRID_MAPPER_HH
 #define DUNE_PYTHON_GRID_MAPPER_HH
 
@@ -16,49 +15,104 @@
 
 namespace Dune
 {
+
   namespace Python
   {
 
-    // registerMemberFunctions
-    // -----------------------
-
-    template<class GridView, class Mapper, int codim>
-    void registerMemberFunctions_(pybind11::class_<Mapper>& cls)
+    namespace detail
     {
-      cls.def("index", &Mapper::template index<typename GridView::template Codim<codim>::Entity>);
 
-      cls.def("contains",
-        [] (const Mapper& mapper, const typename GridView::template Codim<codim>::Entity& e) {
-          typename Mapper::Index index;
-          unsigned res = mapper.contains(e, index);
+      // mapperSubIndex
+      // --------------
 
-          return pybind11::make_tuple(res, index);
-        });
-    }
+      template< class Mapper, class Entity >
+      inline static pybind11::object mapperSubIndex ( const Mapper &mapper, const Entity &entity, int i, int c )
+      {
+        if( (c < Entity::codimension) || (c > Entity::dimension) )
+          throw pybind11::value_error( "Invalid codimension: " + std::to_string( c ) + " (must be in [" + std::to_string( Entity::codimension ) + ", " + std::to_string( Entity::dimension ) + "])" );
+        const int size = entity.subEntities( c );
+        if( (i < 0) || (i >= size) )
+          throw pybind11::value_error( "Invalid index: " + std::to_string( i ) + " (must be in [0, " + std::to_string( size ) + "))." );
+        typename Mapper::Index index;
+        return (mapper.contains( entity, i, c, index ) ? pybind11::cast( index ) : pybind11::none());
+      }
 
-    template<class GridView, class Mapper, int... codim>
-    void registerMemberFunctions(pybind11::class_<Mapper>& cls, std::integer_sequence<int, codim...>)
-    {
-      std::ignore = std::make_tuple((registerMemberFunctions_<GridView, Mapper, codim>(cls), 0)...);
-    }
+
+
+      // registerMapperSubIndex
+      // ----------------------
+
+      template< class Entity, class Mapper, class... options >
+      inline static std::enable_if_t< Entity::codimension == 0 >
+      registerMapperSubIndex ( pybind11::class_< Mapper, options... > cls, PriorityTag< 1 > )
+      {
+        using pybind11::operator""_a;
+
+        pybind11::options opts;
+        opts.disable_function_signatures();
+
+        cls.def( "subIndex", [] ( const Mapper &self, const Entity &entity, int i, int c ) {
+            return detail::mapperSubIndex( self, entity, i, c );
+          } );
+        cls.def( "subIndex", [] ( const Mapper &self, const Entity &entity, std::tuple< int, int > e ) {
+            return detail::mapperSubIndex( self, entity, std::get< 0 >( e ), std::get< 1 >( e ) );
+          } );
+
+        cls.def( "subIndices", [] ( const Mapper &self, const Entity &entity, int c ) {
+            if( (c < Entity::codimension) || (c > Entity::dimension) )
+              throw pybind11::value_error( "Invalid codimension: " + std::to_string( c ) + " (must be in [" + std::to_string( Entity::codimension ) + ", " + std::to_string( Entity::dimension ) + "])" );
+            const int size = entity.subEntities( c );
+            pybind11::tuple subIndices( size );
+            for( int i = 0; i < size; ++i )
+            {
+              typename Mapper::Index index;
+              subIndices[ i ] = (self.contains( entity, i, c, index ) ? pybind11::cast( index ) : pybind11::none());
+            }
+            return subIndices;
+          }, "entity"_a, "codim"_a );
+      }
+
+      template< class Entity, class Mapper, class... options >
+      inline static void registerMapperSubIndex ( pybind11::class_< Mapper, options... > cls, PriorityTag< 0 > )
+      {}
+
+      template< class Entity, class Mapper, class... options >
+      inline static void registerMapperSubIndex ( pybind11::class_< Mapper, options... > cls )
+      {
+        registerMapperSubIndex< Entity >( cls, PriorityTag< 42 >() );
+      }
+
+    } // namespace detail
+
 
 
     // registerMapper
     // --------------
 
-    template<class GridView, class Mapper>
-    void registerMapper(pybind11::class_<Mapper> cls)
+    template< class GridView, class Mapper, class... options >
+    inline static void registerMapper ( pybind11::class_< Mapper, options... > cls )
     {
-      // typedef typename Mapper::GridView GridView;
       cls.def( "__len__", [] ( const Mapper &self ) { return self.size(); } );
-      cls.def("subIndex", &Mapper::subIndex);
-      cls.def("contains",
-          [] (Mapper& instance, const typename GridView::template Codim<0>::Entity& e, int i, int cc) {
-            typename Mapper::Index index;
-            unsigned res = instance.contains(e, i, cc, index);
+      cls.def_property_readonly( "size", [] ( const Mapper &self ) { return self.size(); } );
 
-            return pybind11::make_tuple(res, index);
-          });
+      Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [ &cls ] ( auto &&codim ) {
+          typedef typename GridView::template Codim< codim >::Entity Entity;
+
+          using pybind11::operator""_a;
+
+          cls.def( "index", [] ( const Mapper &self, const Entity &e ) -> pybind11::object {
+              typename Mapper::Index index;
+              if( self.contains( e, index ) )
+                return pybind11::cast( index );
+              else
+                return pybind11::none();
+            }, "entity"_a );
+          cls.def( "contains", [] ( const Mapper &self, const Entity &e ) {
+              typename Mapper::Index index;
+              return self.contains( e, index );
+            }, "entity"_a );
+          detail::registerMapperSubIndex< Entity >( cls );
+        } );
 
       cls.def("__call__", [] ( const Mapper &mapper, const typename GridView::template Codim<0>::Entity &element ) {
             // need a cache gt(cdim=0) -> nof indices then we could store directly in retArray
@@ -74,9 +128,6 @@ namespace Dune
               y[idx++] = i;
             return retArray;
           } );
-
-      registerMemberFunctions<GridView, Mapper>(
-          cls, std::make_integer_sequence<int, GridView::dimension+1>());
     }
 
     // registerMultipleCodimMultipleGeomTypeMapper
