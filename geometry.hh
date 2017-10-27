@@ -124,6 +124,8 @@ namespace Dune
         cls.def_property_readonly( "volume", &Geometry::volume );
 
         cls.def_property_readonly( "affine", &Geometry::affine );
+        cls.def_property_readonly( "domain", []( const Geometry &self) { return referenceElement<double,mydimension>(self.type()); },
+            pybind11::keep_alive<0,1>() );
 
         cls.def( "position", [] ( const Geometry &self, const LocalCoordinate &x ) { return self.global( x ); } );
         cls.def( "position", [] ( const Geometry &self, Array x ) {

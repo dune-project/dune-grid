@@ -131,8 +131,6 @@ namespace Dune
       typedef typename GridView::Grid Grid;
       typedef PyGridViewIterator< GridView, 0 > PyElementIterator;
 
-      const int dim = GridView::dimension;
-
       detail::registerGridViewConstructorFromGrid( cls, PriorityTag< 42 >() );
 
       cls.attr( "dimGrid" ) = pybind11::int_( static_cast< int >( GridView::dimension ) );
@@ -277,7 +275,8 @@ namespace Dune
           return new VTKWriter< GridView >( self );
         }, pybind11::keep_alive< 0, 1 >() );
       cls.def( "vtkWriter", [] ( const GridView &self, int subsampling ) {
-            return new SubsamplingVTKWriter< GridView >( self, subsampling );
+            return new SubsamplingVTKWriter< GridView >( self,
+                  Dune::refinementIntervals(1<<subsampling) );
           }, pybind11::keep_alive< 0, 1 >(), "subsampling"_a );
 
       cls.def("overlapSize", &GridView::overlapSize);

@@ -6,6 +6,7 @@
 #include <string>
 #include <utility>
 
+#include <dune/common/visibility.hh>
 #include <dune/common/hybridutilities.hh>
 
 #include <dune/python/common/logger.hh>
@@ -238,7 +239,7 @@ namespace Dune
     // -----------------
 
     template< class GridView, PartitionIteratorType partition >
-    struct GridViewPartition
+    struct DUNE_PRIVATE GridViewPartition
     {
       explicit GridViewPartition ( pybind11::object o )
         : gridView( pybind11::cast< const GridView & >( o ) ), obj( std::move( o ) )

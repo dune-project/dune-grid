@@ -9,6 +9,8 @@
 
 #include <dune/common/visibility.hh>
 
+#include <dune/geometry/referenceelements.hh>
+
 #include <dune/python/common/typeregistry.hh>
 #include <dune/python/grid/geometry.hh>
 
@@ -136,7 +138,7 @@ namespace Dune
         cls.def_property_readonly( "level", &Entity::level );
         cls.def_property_readonly( "type", &Entity::type );
         cls.def_property_readonly( "partitionType", &Entity::partitionType );
-        cls.def_property_readonly( "domain", [](Entity &self) { return referenceElement<double,self.dimension>(self.type()); },
+        cls.def_property_readonly( "domain", []( const Entity &self) { return referenceElement<double,self.dimension>(self.type()); },
             pybind11::keep_alive<0,1>() );
 
         cls.def( pybind11::self == pybind11::self );
