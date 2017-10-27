@@ -168,6 +168,8 @@ namespace Dune
       template< class GridView, int dimRange >
       auto registerPyGridFunction ( pybind11::handle scope, const std::string &name, std::integral_constant< int, dimRange > )
       {
+        using pybind11::operator""_a;
+
         typedef PyGridFunctionEvaluator<GridView,dimRange> Evaluator;
         typedef SimpleGridFunction< GridView, Evaluator > GridFunction;
         addToTypeRegistry<Evaluator>(GenerateTypeName("Dune::Python::detail::PyGridFunctionEvaluator",
@@ -180,6 +182,11 @@ namespace Dune
                   GenerateTypeName("Dune::Python::SimpleGridFunction",
                                       MetaType<GridView>(), Dune::MetaType<Evaluator>()),
             IncludeFiles{"dune/python/grid/function.hh"}).first;
+        gf.def(pybind11::init([](GridView &gridView, pybind11::function callable) {
+              return new GridFunction( gridView,
+                         PyGridFunctionEvaluator<GridView,dimRange>(callable) );
+              }), "gridView"_a, "callable"_a, pybind11::keep_alive<1,2>() );
+
         registerGridFunction( scope, gf );
         return gf;
       }
