@@ -128,9 +128,6 @@ namespace Dune
       inline static void registerGridEntity ( pybind11::handle scope,
           pybind11::class_< Entity, options... > cls )
       {
-        typedef typename Entity::Geometry::ctype ctype;
-        typedef typename Entity::Geometry::LocalCoordinate LocalCoordinate;
-
         cls.def_property_readonly( "codimension", [] ( const Entity &e) -> int { return e.codimension; } );
         cls.def_property_readonly( "dimension", [] ( const Entity &e ) -> int { return e.dimension; } );
         cls.def_property_readonly( "mydimension", [] ( const Entity &e ) -> int { return e.mydimension; } );
