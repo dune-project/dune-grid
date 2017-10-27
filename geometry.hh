@@ -25,47 +25,6 @@ namespace Dune
   namespace Python
   {
 
-    // PyCornerRange
-    // -------------
-
-    template<class Geometry>
-    struct PyCorners
-    {
-      PyCorners(const Geometry &geometry, pybind11::object ref)
-        : geometry_(geometry), ref_(ref)
-      {}
-
-      const Geometry& geometry() { return geometry_; }
-
-    private:
-      const Geometry &geometry_;
-      pybind11::object ref_;
-    };
-
-
-    // PyCornerIterator
-    // ----------------
-
-    template<class Geometry>
-    struct PyCornerIterator
-    {
-      PyCornerIterator(const PyCorners<Geometry> corners) : corners_(corners) {}
-
-      typename Geometry::GlobalCoordinate next()
-      {
-        if(index_ == corners_.geometry().corners())
-          throw pybind11::stop_iteration();
-
-        return corners_.geometry().corner(index_++);
-      }
-
-    private:
-      PyCorners<Geometry> corners_;
-      int index_ = 0;
-    };
-
-
-
     namespace detail
     {
 
@@ -89,18 +48,6 @@ namespace Dune
 
         using pybind11::operator""_a;
 
-        auto itCls = insertClass< PyCornerIterator< Geometry > > ( cls, "CornerIterator",
-            GenerateTypeName("PyCornerIterator", cls) ).first;
-        itCls.def( "__iter__", [] ( PyCornerIterator< Geometry > &it ) -> PyCornerIterator< Geometry > & { return it; } );
-        itCls.def( "__next__", &PyCornerIterator< Geometry >::next );
-
-        auto cCls = insertClass< PyCorners< Geometry > > ( cls, "Corners",
-            GenerateTypeName("PyCorners",cls) ).first;
-        cCls.def( "__iter__", [] ( const PyCorners< Geometry > &c ) { return PyCornerIterator< Geometry >( c ); } );
-
-        cls.def_property_readonly( "corners", [] ( pybind11::object geo ) {
-            return PyCorners< Geometry >( geo.cast< const Geometry & >(), geo );
-          } );
         cls.def( "corner", [] ( const Geometry &self, int i ) {
             const int size = self.corners();
             if( (i < 0) || (i >= size) )
@@ -119,6 +66,14 @@ namespace Dune
             }
             return cornersArray;
           } );
+        cls.def_property_readonly( "corners", [] ( const Geometry &self ) {
+            const int size = self.corners();
+            pybind11::tuple corners( size );
+            for( int i = 0; i < size; ++i )
+              corners[ i ] = pybind11::cast( self.corner( i ) );
+            return corners;
+          } );
+
 
         cls.def_property_readonly( "center", &Geometry::center );
         cls.def_property_readonly( "volume", &Geometry::volume );
@@ -159,13 +114,17 @@ namespace Dune
 
     } // namespace detail
 
+
+
+    // registerGridGeometry
+    // --------------------
+
     template< class Base, class Geometry = typename Base::Geometry >
-    pybind11::class_<Geometry> registerGridGeometry ( pybind11::handle scope )
+    inline static pybind11::class_< Geometry > registerGridGeometry ( pybind11::handle scope )
     {
-      auto entry = insertClass<Geometry>(scope, "Geometry",
-         GenerateTypeName(scope, "Geometry"));
+      auto entry = insertClass< Geometry >( scope, "Geometry", GenerateTypeName( scope, "Geometry" ) );
       if ( entry.second )
-        detail::registerGridGeometry(scope,entry.first);
+        detail::registerGridGeometry( scope, entry.first );
       return entry.first;
     }
 
