@@ -87,6 +87,8 @@ namespace Dune
 
         typedef pybind11::array_t< ctype > Array;
 
+        using pybind11::operator""_a;
+
         auto itCls = insertClass< PyCornerIterator< Geometry > > ( cls, "CornerIterator",
             GenerateTypeName("PyCornerIterator", cls) ).first;
         itCls.def( "__iter__", [] ( PyCornerIterator< Geometry > &it ) -> PyCornerIterator< Geometry > & { return it; } );
@@ -99,7 +101,24 @@ namespace Dune
         cls.def_property_readonly( "corners", [] ( pybind11::object geo ) {
             return PyCorners< Geometry >( geo.cast< const Geometry & >(), geo );
           } );
-        cls.def( "corner", [] (const Geometry &self, int i) { return self.corner(i); } );
+        cls.def( "corner", [] ( const Geometry &self, int i ) {
+            const int size = self.corners();
+            if( (i < 0) || (i >= size) )
+              throw pybind11::value_error( "Invalid index: " + std::to_string( i ) + " (must be in [0, " + std::to_string( size ) + "))." );
+            return self.corner( i );
+          }, "index"_a );
+        cls.def( "corner", [] ( const Geometry &self ) {
+            const int size = self.corners();
+            pybind11::array_t< ctype > cornersArray( { static_cast< ssize_t >( coorddimension ), static_cast< ssize_t >( size ) } );
+            auto corners = cornersArray.template mutable_unchecked< 2 >();
+            for( int i = 0; i < size; ++i )
+            {
+              const auto corner = self.corner( i );
+              for( int j = 0; j < coorddimension; ++j )
+                corners( j, i ) = corner[ j ];
+            }
+            return cornersArray;
+          } );
 
         cls.def_property_readonly( "center", &Geometry::center );
         cls.def_property_readonly( "volume", &Geometry::volume );
