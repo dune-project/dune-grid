@@ -92,8 +92,20 @@ namespace Dune
     template< class GridView, class Mapper, class... options >
     inline static void registerMapper ( pybind11::class_< Mapper, options... > cls )
     {
+      using pybind11::operator""_a;
+
+      pybind11::options opts;
+      opts.disable_function_signatures();
+
       cls.def( "__len__", [] ( const Mapper &self ) { return self.size(); } );
       cls.def_property_readonly( "size", [] ( const Mapper &self ) { return self.size(); } );
+
+      cls.def( "types", [] ( const Mapper &self, int codim ) {
+          pybind11::list types;
+          for( GeometryType type : self.types( codim ) )
+            types.append( pybind11::cast( type ) );
+          return types;
+        }, "codim"_a );
 
       Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [ &cls ] ( auto &&codim ) {
           typedef typename GridView::template Codim< codim >::Entity Entity;
@@ -114,20 +126,24 @@ namespace Dune
           detail::registerMapperSubIndex< Entity >( cls );
         } );
 
-      cls.def("__call__", [] ( const Mapper &mapper, const typename GridView::template Codim<0>::Entity &element ) {
-            // need a cache gt(cdim=0) -> nof indices then we could store directly in retArray
-            std::vector<typename Mapper::Index> indices;
-            for ( int c=0; c <= GridView::dimension; ++c )
-              for ( auto se : range(element.subEntities(c)) )
-                for ( auto i : mapper.indices(element, se, c) )
-                  indices.push_back(i);
-            pybind11::array_t< std::size_t > retArray( indices.size() );
-            auto y = retArray.template mutable_unchecked< 1 >();
-            std::size_t idx = 0;
-            for ( auto i : indices )
-              y[idx++] = i;
-            return retArray;
-          } );
+      cls.def( "update", [] ( Mapper &self ) { self.update(); } );
+
+      cls.def( "__call__", [] ( const Mapper &self, const typename GridView::template Codim< 0 >::Entity &element ) {
+          // need a cache gt(cdim=0) -> nof indices then we could store directly in retArray
+          std::vector< typename Mapper::Index > indices;
+          for( int c = 0; c <= GridView::dimension; ++c )
+            for( auto se : range( element.subEntities( c ) ) )
+            {
+              const auto &i = self.indices( element, se, c );
+              indices.insert( indices.end(), i.begin(), i.end() );
+            }
+          pybind11::array_t< std::size_t > retArray( indices.size() );
+          auto y = retArray.template mutable_unchecked< 1 >();
+          std::size_t idx = 0;
+          for ( auto i : indices )
+            y[idx++] = i;
+          return retArray;
+        }, "entity"_a );
     }
 
     // registerMultipleCodimMultipleGeomTypeMapper
