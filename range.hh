@@ -135,8 +135,8 @@ namespace Dune
       typedef typename GridView::Intersection Intersection;
 
       PyGridViewPartitionIntersectionIterator ( const GridView &gridView )
-        : gridView_( gridView ), mapper_( gridView, mcmgElementLayout() ),
-          elementIt_( gridView.template begin< 0, partition >(), gridView.template end< 0, partition >() )
+        : gridView_( gridView ), mapper_( gridView_, mcmgElementLayout() ),
+          elementIt_( gridView_.template begin< 0, partition >(), gridView_.template end< 0, partition >() )
       {}
 
       Intersection next ()
