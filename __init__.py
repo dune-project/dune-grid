@@ -51,9 +51,9 @@ def gridFunction(view,dimRange=None,isGlobal=None):
                 _isGlobal = True
             except TypeError:
                 try:
-                    e = view.elements().__next__()
+                    e = view.elements.__next__()
                 except AttributeError:
-                    e = view.elements().next()
+                    e = view.elements.next()
                 y = func( e, FieldVector( [0,]*view.dimension ) )
                 _isGlobal = False
         GFClass = _getGridFunction(view,y,dimRange)
