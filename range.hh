@@ -9,6 +9,8 @@
 #include <dune/common/visibility.hh>
 #include <dune/common/hybridutilities.hh>
 
+#include <dune/grid/common/mcmgmapper.hh>
+
 #include <dune/python/common/logger.hh>
 #include <dune/python/pybind11/extensions.h>
 #include <dune/python/pybind11/pybind11.h>
@@ -57,6 +59,30 @@ namespace Dune
 
 
 
+    // PyGridViewIterator
+    // ------------------
+
+    template< class GridView, int codim >
+    using PyGridViewIterator = PyIterator< typename GridView::template Codim< codim >::Iterator, typename GridView::template Codim< codim >::Entity >;
+
+
+
+    // PyGridViewPartitionIterator
+    // ---------------------------
+
+    template< class GridView, int codim, PartitionIteratorType partition >
+    using PyGridViewPartitionIterator = PyIterator< typename GridView::template Codim< codim >::template Partition< partition >::Iterator, typename GridView::template Codim< codim >::Entity >;
+
+
+
+    // PyIntersectionIterator
+    // ----------------------
+
+    template< class GridView >
+    using PyIntersectionIterator = PyIterator< typename GridView::IntersectionIterator, typename GridView::Intersection >;
+
+
+
     // PyBoundaryIntersectionIterator
     // ------------------------------
 
@@ -66,7 +92,7 @@ namespace Dune
       typedef typename GridView::Intersection Intersection;
 
       PyBoundaryIntersectionIterator ( const GridView &gridView, PyElementIterator it )
-        : gridView_( std::move( gridView ) ), elementIt_( std::move( it ) )
+        : gridView_( gridView ), elementIt_( std::move( it ) )
       {}
 
       Intersection next ()
@@ -100,22 +126,54 @@ namespace Dune
 
 
 
-    // PyGridViewIterator
-    // ------------------
+    // PyGridViewPartitionIntersectionIterator
+    // ---------------------------------------
 
-    template< class GridView, int codim >
-    using PyGridViewIterator = PyIterator< typename GridView::template Codim< codim >::Iterator, typename GridView::template Codim< codim >::Entity >;
+    template< class GridView, PartitionIteratorType partition >
+    struct PyGridViewPartitionIntersectionIterator
+    {
+      typedef typename GridView::Intersection Intersection;
 
+      PyGridViewPartitionIntersectionIterator ( const GridView &gridView )
+        : gridView_( gridView ), mapper_( gridView, mcmgElementLayout() ),
+          elementIt_( gridView.template begin< 0, partition >(), gridView.template end< 0, partition >() )
+      {}
 
+      Intersection next ()
+      {
+        while( true )
+        {
+          if( intersectionIt_ != intersectionEnd_ )
+          {
+            Intersection intersection = *intersectionIt_;
+            ++intersectionIt_;
+            if( !intersection.neighbor() )
+              return intersection;
 
-    // PyGridViewPartitionIterator
-    // ---------------------------
+            auto outside = intersection.outside();
+            if( !partitionSet< partition >().contains( outside.partitionType() ) || (insideIndex_ < mapper_.index( outside )) )
+              return intersection;
+          }
+          else
+          {
+            auto element = elementIt_.next();
+            insideIndex_ = mapper_.index( element );
+            intersectionIt_ = gridView_.ibegin( element );
+            intersectionEnd_ = gridView_.iend( element );
+          }
+        }
+      }
 
-    template< class GridView, int codim, PartitionIteratorType partition >
-    using PyGridViewPartitionIterator = PyIterator< typename GridView::template Codim< codim >::template Partition< partition >::Iterator, typename GridView::template Codim< codim >::Entity >;
+    private:
+      typedef MultipleCodimMultipleGeomTypeMapper< GridView > Mapper;
 
-    template< class GridView >
-    using PyIntersectionIterator = PyIterator< typename GridView::IntersectionIterator, typename GridView::Intersection >;
+      const GridView &gridView_;
+      Mapper mapper_;
+      PyGridViewPartitionIterator< GridView, 0, partition > elementIt_;
+      typename Mapper::Index insideIndex_;
+      typename GridView::IntersectionIterator intersectionIt_, intersectionEnd_;
+    };
+
 
 
 
@@ -212,7 +270,7 @@ namespace Dune
     inline static void registerPyIntersectionIterator ( pybind11::handle scope = {} )
     {
       typedef PyIntersectionIterator< GridView > Iterator;
-      auto typeName = GenerateTypeName( "Dune::Python::PyBoundaryIntersectionIterator", MetaType< GridView >() );
+      auto typeName = GenerateTypeName( "Dune::Python::PyIntersectionIterator", MetaType< GridView >() );
       auto entry = insertClass< Iterator >( scope, "IntersectionIterator", typeName, IncludeFiles{ "dune/python/range.hh" } );
       if( entry.second )
         registerPyIterator< Iterator >( scope, entry.first );
@@ -227,8 +285,23 @@ namespace Dune
     inline static void registerPyBoundaryIntersectionIterator ( pybind11::handle scope = {} )
     {
       typedef PyBoundaryIntersectionIterator< GridView, PyElementIterator > Iterator;
-      auto typeName = GenerateTypeName( "Dune::Python::PyIntersectionIterator", MetaType< GridView >(), MetaType< PyElementIterator >() );
+      auto typeName = GenerateTypeName( "Dune::Python::PyBoundaryIntersectionIterator", MetaType< GridView >(), MetaType< PyElementIterator >() );
       auto entry = insertClass< Iterator >( scope, "BoundaryIntersectionIterator", typeName, IncludeFiles{ "dune/python/range.hh" } );
+      if( entry.second )
+        registerPyIterator< Iterator >( scope, entry.first );
+    }
+
+
+
+    // registerPyGridViewPartitionIntersectionIterator
+    // -----------------------------------------------
+
+    template< class GridView, PartitionIteratorType partition >
+    inline static void registerPyGridViewPartitionIntersectionIterator ( pybind11::handle scope = {} )
+    {
+      typedef PyGridViewPartitionIntersectionIterator< GridView, partition > Iterator;
+      auto typeName = GenerateTypeName( "Dune::Python::PyGridViewPartitionIntersectionIterator", MetaType< GridView >(), static_cast< int >( partition ) );
+      auto entry = insertClass< Iterator >( scope, "PartitionIntersectionIterator", typeName, IncludeFiles{ "dune/python/range.hh" } );
       if( entry.second )
         registerPyIterator< Iterator >( scope, entry.first );
     }
@@ -341,6 +414,11 @@ namespace Dune
       cls.def_property_readonly( "boundaryIntersections", [] ( const Partition &self ) {
           const GridView &gv = self.gridView;
           return PyBoundaryIntersectionIterator< GridView, PyElementIterator >( gv, PyElementIterator( gv.template begin< 0, partition >(), gv.template end< 0, partition >() ) );
+        }, pybind11::keep_alive< 0, 1 >() );
+
+      registerPyGridViewPartitionIntersectionIterator< GridView, partition >();
+      cls.def_property_readonly( "intersections", [] ( const Partition &self ) {
+          return PyGridViewPartitionIntersectionIterator< GridView, partition >( self.gridView );
         }, pybind11::keep_alive< 0, 1 >() );
     }
 
