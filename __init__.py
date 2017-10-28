@@ -41,6 +41,7 @@ def localGridFunction(view,GFClass,func):
     subclass = type(GFClass.__name__, (GFClass,), {"__call__": feval})
     return subclass(view,func)
 def gridFunction(view,dimRange=None,isGlobal=None):
+    assert hasattr(view, "dimension"), "did you forget to pass in the grid view to the gridFunction decorator"
     def gridFunction_decorator(func):
         if isinstance(isGlobal,bool):
             assert not dimRange is None

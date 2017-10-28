@@ -13,8 +13,3 @@ def dataHandle(mapper,array,function):
     typeName = "Dune::Python::NumPyCommDataHandle< " + mapper._typeName + ", double, std::function<double(double,double)> >"
     includes = mapper._includes
     return load(includes, typeName).DataHandle(mapper,array,function)
-
-def dataHandleSum(mapper,array):
-    return dataHandle(mapper,array,lambda local,remote:local+remote)
-def dataHandleSet(mapper,array):
-    return dataHandle(mapper,array,lambda local,remote:remote)

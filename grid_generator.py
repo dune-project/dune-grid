@@ -106,6 +106,11 @@ def module(includes, typeName, *args):
     module = generator.load(includes, typeName, typeHash, *args)
     addAttr(module, module.LeafGrid)
     addAttr(module, module.LevelGrid)
+
+    # register reference element for this grid
+    import dune.geometry
+    dune.geometry.module(module.LeafGrid.dimension)
+
     return module
 
 
