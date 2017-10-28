@@ -28,13 +28,11 @@ def _getGridFunction(view,y,dimRange):
 def globalGridFunction(view,GFClass,func):
     def f(element,x):
         return func(element.geometry.position(x))
-    gf = view.function(f)
     def feval(self,element,point=None):
         if point is None:
             return func(element)
         else:
             return func(element.geometry.position(point))
-    GFClass = gf.__class__
     subclass = type(GFClass.__name__, (GFClass,), {"__call__": feval})
     return subclass(view,f)
 def localGridFunction(view,GFClass,func):
