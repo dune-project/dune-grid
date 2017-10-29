@@ -5,9 +5,10 @@
 
 #include <string>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 
-#include <dune/common/visibility.hh>
+#include <dune/common/typeutilities.hh>
 
 #include <dune/geometry/referenceelements.hh>
 
@@ -70,56 +71,98 @@ namespace Dune
     namespace detail
     {
 
+      // makeSubEntity
+      // -------------
+
       template< class Entity, int codim >
-      auto registerEntitySubEntity_()
+      inline static auto makeSubEntity ( const Entity &entity, int i )
+        -> pybind11::object
       {
-        return [](const Entity& entity, int i) {
-          return pybind11::cast(entity.template subEntity<codim>(i));
-        };
+        const int size = entity.subEntities( codim );
+        if( (i < 0) || (i >= size) )
+          throw pybind11::value_error( "Invalid index: " + std::to_string( i ) + " (must be in [0, " + std::to_string( size ) + "))." );
+        return pybind11::cast( entity.template subEntity< codim >( i ) );
       }
 
-      template< class Entity, int... codim >
-      std::array<std::function<pybind11::object(const Entity& e, int i)>, sizeof...(codim)>
-      registerEntitySubEntity(std::integer_sequence<int, codim...>)
+
+
+      // makeSubEntities
+      // ---------------
+
+      template< class Entity, int codim >
+      inline static auto makeSubEntities ( const Entity &entity )
+        -> pybind11::tuple
       {
-        return { {(registerEntitySubEntity_<Entity, codim>())...} };
+        const int size = entity.subEntities( codim );
+        pybind11::tuple subEntities( size );
+        for( int i = 0; i < size; ++i )
+          subEntities[ i ] = pybind11::cast( entity.template subEntity< codim >( i ) );
+        return subEntities;
       }
+
+
 
       // registerExtendedEntityInterface
       // -------------------------------
 
-      template< class Entity, std::enable_if_t< Entity::codimension == 0, int > = 0 >
-      inline static void registerExtendedEntityInterface ( pybind11::class_< Entity > &cls )
+      template< class Entity, class... options >
+      inline static auto registerExtendedEntityInterface ( pybind11::class_< Entity, options... > cls, PriorityTag< 1 > )
+        -> std::enable_if_t< Entity::codimension == 0 >
       {
+        using pybind11::operator""_a;
+
         cls.def_property_readonly( "father", [] ( const Entity &self ) {
             return (self.hasFather() ? pybind11::cast( self.father() ) : pybind11::none());
           } );
 
-        cls.def_property_readonly( "geometryInFather", &Entity::geometryInFather );
+        cls.def_property_readonly( "geometryInFather", [] ( const Entity &self ) {
+            return (self.hasFather() ? pybind11::cast( self.geometryInFather() ) : pybind11::none());
+          } );
 
         cls.def( "subEntities", &Entity::subEntities );
-        cls.def( "isLeaf", &Entity::isLeaf );
-        cls.def( "isRegular", &Entity::isRegular );
-        cls.def( "isNew", &Entity::isNew );
-        cls.def( "mightVanish", &Entity::mightVanish );
-        cls.def( "hasBoundaryIntersections", &Entity::hasBoundaryIntersections );
+        cls.def_property_readonly( "isLeaf", [] ( const Entity &self ) { return self.isLeaf(); } );
+        cls.def_property_readonly( "isRegular", [] ( const Entity &self ) { return self.isRegular(); } );
+        cls.def_property_readonly( "isNew", [] ( const Entity &self ) { return self.isNew(); } );
+        cls.def_property_readonly( "mightVanish", [] ( const Entity &self ) { return self.mightVanish(); } );
+        cls.def( "hasBoundaryIntersections", [] ( const Entity &self ) { return self.hasBoundaryIntersections(); } );
 
         registerPyHierarchicIterator< Entity >( cls );
-        cls.def( "descendants", [] ( const Entity &e, int maxLevel ) {
-            return PyHierarchicIterator< Entity >( e, maxLevel );
+        cls.def( "descendants", [] ( const Entity &self, int maxLevel ) {
+            return PyHierarchicIterator< Entity >( self, maxLevel );
           }, pybind11::keep_alive< 0, 1 >() );
 
-        // STATIC variable needed? - visibiility problems?
-        static const auto subEntity
-          = registerEntitySubEntity<Entity>(std::make_integer_sequence<int, Entity::dimension+1>{});
-        cls.def( "subEntity",
-                 [](const Entity& e, int i, int codim) { return subEntity.at(codim)(e, i); },
-                 pybind11::arg("i"), pybind11::arg("codim") );
+        std::array< pybind11::object (*) ( const Entity &, int ), Entity::dimension+1 > makeSubEntity;
+        std::array< pybind11::tuple (*) ( const Entity & ), Entity::dimension+1 > makeSubEntities;
+        Hybrid::forEach( std::make_integer_sequence< int, Entity::dimension+1 >(), [ &makeSubEntity, &makeSubEntities ] ( auto &&codim ) {
+            makeSubEntity[ codim ] = detail::makeSubEntity< Entity, codim >;
+            makeSubEntities[ codim ] = detail::makeSubEntities< Entity, codim >;
+          } );
+        cls.def( "subEntity", [ makeSubEntity ] ( const Entity &self, int i, int c ) {
+            if( (c < Entity::codimension) || (c > Entity::dimension) )
+              throw pybind11::value_error( "Invalid codimension: " + std::to_string( c ) + " (must be in [" + std::to_string( Entity::codimension ) + ", " + std::to_string( Entity::dimension ) + "])" );
+            return makeSubEntity[ c ]( self, i );
+          }, "index"_a, "codim"_a );
+        cls.def( "subEntity", [ makeSubEntity ] ( const Entity &self, std::tuple< int, int > e ) {
+            if( (std::get< 1 >( e ) < Entity::codimension) || (std::get< 1 >( e ) > Entity::dimension) )
+              throw pybind11::value_error( "Invalid codimension: " + std::to_string( std::get< 1 >( e ) ) + " (must be in [" + std::to_string( Entity::codimension ) + ", " + std::to_string( Entity::dimension ) + "])" );
+            return makeSubEntity[ std::get< 1 >( e ) ]( self, std::get< 0 >( e ) );
+          } );
+        cls.def( "subEntities", [ makeSubEntities ] ( const Entity &self, int c ) {
+            if( (c < Entity::codimension) || (c > Entity::dimension) )
+              throw pybind11::value_error( "Invalid codimension: " + std::to_string( c ) + " (must be in [" + std::to_string( Entity::codimension ) + ", " + std::to_string( Entity::dimension ) + "])" );
+            return makeSubEntities[ c ]( self );
+          }, "codim"_a );
       }
 
-      template< class Cls >
-      inline static void registerExtendedEntityInterface ( Cls &cls )
+      template< class Entity, class... options >
+      inline static void registerExtendedEntityInterface ( pybind11::class_< Entity, options... > cls, PriorityTag< 0 > )
       {}
+
+      template< class Entity, class... options >
+      inline static void registerExtendedEntityInterface ( pybind11::class_< Entity, options... > cls )
+      {
+        return registerExtendedEntityInterface( cls, PriorityTag< 42 >() );
+      }
 
 
 
@@ -127,19 +170,17 @@ namespace Dune
       // ------------------
 
       template< class Entity, class... options >
-      inline static void registerGridEntity ( pybind11::handle scope,
-          pybind11::class_< Entity, options... > cls )
+      inline static void registerGridEntity ( pybind11::handle scope, pybind11::class_< Entity, options... > cls )
       {
-        cls.def_property_readonly( "codimension", [] ( const Entity &e) -> int { return e.codimension; } );
-        cls.def_property_readonly( "dimension", [] ( const Entity &e ) -> int { return e.dimension; } );
-        cls.def_property_readonly( "mydimension", [] ( const Entity &e ) -> int { return e.mydimension; } );
+        cls.def_property_readonly_static( "codimension", [] ( pybind11::object ) -> int { return Entity::codimension; } );
+        cls.def_property_readonly_static( "dimension", [] ( pybind11::object ) -> int { return Entity::dimension; } );
+        cls.def_property_readonly_static( "mydimension", [] ( pybind11::object ) -> int { return Entity::mydimension; } );
 
-        cls.def_property_readonly( "geometry", &Entity::geometry );
-        cls.def_property_readonly( "level", &Entity::level );
-        cls.def_property_readonly( "type", &Entity::type );
-        cls.def_property_readonly( "partitionType", &Entity::partitionType );
-        cls.def_property_readonly( "domain", []( const Entity &self) { return referenceElement<double,self.dimension>(self.type()); },
-            pybind11::keep_alive<0,1>() );
+        cls.def_property_readonly( "geometry", [] ( const Entity &self ) { return self.geometry(); } );
+        cls.def_property_readonly( "level", [] ( const Entity &self ) { return self.level(); } );
+        cls.def_property_readonly( "type", [] ( const Entity &self ) { return self.type(); } );
+        cls.def_property_readonly( "partitionType", [] ( const Entity &self ) { return self.partitionType(); } );
+        cls.def_property_readonly( "domain", [] ( const Entity &self ) { return referenceElement< double, Entity::dimension >( self.type() ); }, pybind11::keep_alive< 0, 1 >() );
 
         cls.def( pybind11::self == pybind11::self );
         cls.def( pybind11::self != pybind11::self );
