@@ -51,20 +51,20 @@ namespace Dune
     {
 
       template< class LocalCoordinate, class LocalFunction, class X >
-      inline static auto callLocalFunction ( LocalFunction &&f, const X &x, PriorityTag< 1 > )
-        -> decltype( pybind11::cast( f( x ) ) )
+      inline static auto callLocalFunction ( LocalFunction &&f, const X &x, PriorityTag< 2 > )
+        -> decltype( f( x ) )
       {
-        return pybind11::cast( f( x ) );
+        return f( x );
       }
 
       template< class LocalCoordinate, class LocalFunction >
-      inline static pybind11::object callLocalFunction ( LocalFunction &&f, pybind11::array_t< typename FieldTraits< LocalCoordinate >::field_type > x, PriorityTag< 0 > )
+      inline static pybind11::object callLocalFunction ( LocalFunction &&f, pybind11::array_t< typename FieldTraits< LocalCoordinate >::field_type > x, PriorityTag< 1 > )
       {
         return vectorize( [ &f ] ( const LocalCoordinate &x ) { return f( x ); }, x );
       }
 
       template< class LocalCoordinate, class LocalFunction, class X >
-      inline static auto callLocalFunction ( LocalFunction &&f, const X &x )
+      inline static auto callLocalFunction ( LocalFunction &&f, const X &x, PriorityTag<0> )
         -> std::enable_if_t< !std::is_const< std::remove_reference_t< LocalFunction > >::value, pybind11::object >
       {
         return callLocalFunction< LocalCoordinate >( std::forward< LocalFunction >( f ), x, PriorityTag< 42 >() );
@@ -93,10 +93,10 @@ namespace Dune
       pybind11::class_< LocalFunction > clsLocalFunction( cls, "LocalFunction" );
       registerLocalView< Element >( clsLocalFunction );
       clsLocalFunction.def( "__call__", [] ( LocalFunction &self, const LocalCoordinate &x ) {
-          return detail::callLocalFunction< LocalCoordinate >( self, x );
+          return detail::callLocalFunction< LocalCoordinate >( self, x, PriorityTag<2>() );
         }, "x"_a );
       clsLocalFunction.def( "__call__", [] ( LocalFunction &self, Array x ) {
-          return detail::callLocalFunction< LocalCoordinate >( self, x );
+          return detail::callLocalFunction< LocalCoordinate >( self, x, PriorityTag<2>() );
         }, "x"_a );
       clsLocalFunction.def_property_readonly( "dimRange", [] ( pybind11::object self ) { return pybind11::int_( DimRange< Range >::value ); } );
 
@@ -113,14 +113,14 @@ namespace Dune
       cls.def( "__call__", [] ( const GridFunction &self, const Element &element, LocalCoordinate &x ) {
           auto lf = localFunction(self);
           lf.bind(element);
-          auto y = detail::callLocalFunction< LocalCoordinate >( lf, x );
+          auto y = detail::callLocalFunction< LocalCoordinate >( lf, x, PriorityTag<2>() );
           lf.unbind();
           return y;
         }, "element"_a, "x"_a );
       cls.def( "__call__", [] ( const GridFunction &self, const Element &element, Array x ) {
           auto lf = localFunction(self);
           lf.bind(element);
-          auto y = detail::callLocalFunction< LocalCoordinate >( lf, x );
+          auto y = detail::callLocalFunction< LocalCoordinate >( lf, x, PriorityTag<2>() );
           lf.unbind();
           return y;
         }, "element"_a, "x"_a );
