@@ -265,10 +265,16 @@ namespace Dune
       cls.def_property_readonly_static( "dimension", [] ( pybind11::object ) { return int(GridView::dimension); } );
       cls.def_property_readonly_static( "dimensionworld", [] ( pybind11::object ) { return int(GridView::dimensionworld); } );
 
-      cls.def_property_readonly( "conforming", [] ( const GridView &_ ) { return static_cast< bool >( GridView::conforming ); } );
-
-      cls.def( "size", [] ( const GridView &self, int codim ) { return self.size( codim ); } );
-      cls.def( "size", [] ( const GridView &self, Dune::GeometryType gt ) { return self.size( gt ); } );
+      cls.def( "size", [] ( const GridView &self, int codim ) {
+          if( (codim < 0) || (codim > GridView::dimension) )
+            throw pybind11::value_error( "Invalid codimension: " + std::to_string( codim ) + " (must be in [0, " + std::to_string( GridView::dimension ) + "])." );
+          return self.size( codim );
+        } );
+      cls.def( "size", [] ( const GridView &self, Dune::GeometryType gt ) {
+          if( (gt.dim() < 0) || (gt.dim() > GridView::dimension) )
+            throw pybind11::value_error( "Invalid geometry type (dimension must be in [0, " + std::to_string( GridView::dimension ) + "])." );
+          return self.size( gt );
+        } );
 
       registerVTKWriter< GridView >( cls );
       cls.def( "vtkWriter", [] ( const GridView &self ) {
@@ -279,8 +285,16 @@ namespace Dune
                   Dune::refinementIntervals(1<<subsampling) );
           }, pybind11::keep_alive< 0, 1 >(), "subsampling"_a );
 
-      cls.def("overlapSize", &GridView::overlapSize);
-      cls.def("ghostSize", &GridView::ghostSize);
+      cls.def( "overlapSize", [] ( const GridView &self, int codim ) {
+          if( (codim < 0) || (codim > GridView::dimension) )
+            throw pybind11::value_error( "Invalid codimension: " + std::to_string( codim ) + " (must be in [0, " + std::to_string( GridView::dimension ) + "])." );
+          return self.overlapSize( codim );
+        }, "codim"_a );
+      cls.def( "ghostSize", [] ( const GridView &self, int codim ) {
+          if( (codim < 0) || (codim > GridView::dimension) )
+            throw pybind11::value_error( "Invalid codimension: " + std::to_string( codim ) + " (must be in [0, " + std::to_string( GridView::dimension ) + "])." );
+          return self.ghostSize( codim );
+        }, "codim"_a );
 
       cls.def_property_readonly("indexSet", &GridView::indexSet,
           pybind11::return_value_policy::reference_internal);
@@ -297,6 +311,8 @@ namespace Dune
           });
 
       // export grid capabilities
+
+      cls.def_property_readonly( "conforming", [] ( pybind11::object ) { return static_cast< bool >( GridView::conforming ); } );
 
       if( Capabilities::hasSingleGeometryType< Grid >::v )
         cls.def_property_readonly_static( "type", [] ( pybind11::object ) {
