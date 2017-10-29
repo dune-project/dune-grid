@@ -200,6 +200,9 @@ namespace Dune
   {
   public:
 
+    /** \brief Underlying GridView */
+    typedef GV GridView;
+
     /** \brief Number type used for indices */
     typedef typename GV::IndexSet::IndexType Index;
 
@@ -211,14 +214,14 @@ namespace Dune
 
     /** @brief Construct mapper from grid and one of its index sets.
      *
-     * \param gridView_ A Dune GridView object.
+     * \param gridView A Dune GridView object.
      * \param layout A layout object.
      *
      * \deprecated Use the constructor taking a \ref MCMGLayout instead.
      */
-    MultipleCodimMultipleGeomTypeMapper(const GV& gridView_, const LayoutClass<GV::dimension> layout = {})
+    MultipleCodimMultipleGeomTypeMapper(const GV& gridView, const LayoutClass<GV::dimension> layout = {})
       DUNE_DEPRECATED_MSG("Use the constructor taking a `MCMGLayout` functional instead")
-      : MultipleCodimMultipleGeomTypeMapper(gridView_, wrapLayoutClass(layout))
+      : MultipleCodimMultipleGeomTypeMapper(gridView, wrapLayoutClass(layout))
     {}
 
     /**
@@ -233,8 +236,8 @@ namespace Dune
      * \param layout   functional describing how many dof to store on each entity (fixed per geometry type)
      */
     MultipleCodimMultipleGeomTypeMapper(const GV& gridView, const MCMGLayout& layout)
-      : gridView(gridView)
-      , is(gridView.indexSet())
+      : gridView_(gridView)
+      , is(gridView_.indexSet())
       , layout_(layout)
     {
       update();
@@ -415,6 +418,7 @@ namespace Dune
     }
 
     const MCMGLayout &layout () const { return layout_; }
+    const GridView &gridView () const { return gridView_; }
 
   private:
     Index offset(GeometryType gt) const
@@ -427,7 +431,7 @@ namespace Dune
     // number of data elements required
     unsigned int n;
     // GridView is needed to keep the IndexSet valid
-    const GV gridView;
+    const GV gridView_;
     const typename GV::IndexSet& is;
     // provide an array for the offsets
     std::array<Index, GlobalGeometryTypeIndex::size(GV::dimension)> offsets;
