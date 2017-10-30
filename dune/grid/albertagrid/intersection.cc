@@ -351,39 +351,6 @@ namespace Dune
   // ---------------------------
 
   template< class GridImp >
-  inline AlbertaGridLeafIntersection< GridImp >
-  ::AlbertaGridLeafIntersection ( const EntityImp &entity, const int n )
-    : Base( entity, n ),
-      neighborInfo_()
-  {}
-
-
-  template< class GridImp >
-  inline AlbertaGridLeafIntersection< GridImp >
-  ::AlbertaGridLeafIntersection ( const This &other )
-    : Base( other ),
-      neighborInfo_()
-  {}
-
-
-  template< class GridImp >
-  inline AlbertaGridLeafIntersection< GridImp > &
-  AlbertaGridLeafIntersection< GridImp >::operator= ( const This &other )
-  {
-    *((Base *)this) = other;
-    neighborInfo_ = ElementInfo();
-    return *this;
-  }
-
-
-  template< class GridImp >
-  inline bool
-  AlbertaGridLeafIntersection< GridImp >::operator== ( const This &other ) const
-  {
-    return ((elementInfo() == other.elementInfo()) && (oppVertex_ == other.oppVertex_));
-  }
-
-  template< class GridImp >
   inline void AlbertaGridLeafIntersection<GridImp>::next ()
   {
     assert( oppVertex_ <= dimension );
@@ -407,12 +374,6 @@ namespace Dune
     assert( !neighborInfo_ == false );
     assert( neighborInfo_.el() != NULL );
     return EntityImp( grid(), neighborInfo_, 0 );
-  }
-
-  template< class GridImp >
-  inline bool AlbertaGridLeafIntersection<GridImp>::conforming() const
-  {
-    return true;
   }
 
   template< class GridImp >
@@ -466,22 +427,6 @@ namespace Dune
     const int oppVertex = elInfo.opp_vertex[ oppVertex_ ];
     const int face = (dimension > 1 ? oppVertex : 1-oppVertex);
     return grid().alberta2generic( 1, face );
-  }
-
-
-  template< class GridImp >
-  inline int
-  AlbertaGridLeafIntersection< GridImp >::twistInInside () const
-  {
-    return elementInfo().template twist< 1 >( oppVertex_ );
-  }
-
-
-  template< class GridImp >
-  inline int
-  AlbertaGridLeafIntersection< GridImp >::twistInOutside () const
-  {
-    return elementInfo().twistInNeighbor( oppVertex_ );
   }
 
 } // namespace Dune
