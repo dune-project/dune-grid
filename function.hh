@@ -162,6 +162,8 @@ namespace Dune
         pybind11::function evaluate_;
       };
 
+
+
       // registerPyGridFunction
       // ----------------------
 
@@ -187,7 +189,7 @@ namespace Dune
                          PyGridFunctionEvaluator<GridView,dimRange>(callable) );
               }), "gridView"_a, "callable"_a, pybind11::keep_alive<1,2>() );
 
-        registerGridFunction( scope, gf );
+        Dune::Python::registerGridFunction( scope, gf );
         return gf;
       }
 
