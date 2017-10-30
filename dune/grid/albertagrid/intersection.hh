@@ -137,30 +137,31 @@ namespace Dune
 
     using Base::inside;
 
-    AlbertaGridLeafIntersection ()
-    {}
+    AlbertaGridLeafIntersection () = default;
 
-    AlbertaGridLeafIntersection ( const EntityImp &entity, const int n );
+    AlbertaGridLeafIntersection ( const EntityImp &entity, int n ) : Base( entity, n ) {}
 
-    AlbertaGridLeafIntersection ( const This &other );
+    AlbertaGridLeafIntersection ( const This &other ) : Base( other ) {}
 
-    bool equals( const AlbertaGridLeafIntersection& other ) const
+    This &operator= ( const This &other )
     {
-      return (*this) == other;
+      *static_cast< Base * >( this ) = other;
+      neighborInfo_ = ElementInfo();
+      return *this;
     }
 
-    This &operator= ( const This &other );
+    bool operator== ( const This &other ) const { return (oppVertex_ == other.oppVertex_) && (elementInfo_ == other.elementInfo_); }
+    bool operator!= ( const This &other ) const { return (oppVertex_ != other.oppVertex_) || (elementInfo_ != other.elementInfo_); }
 
-    bool operator== ( const This &other ) const;
+    bool equals ( const AlbertaGridLeafIntersection& other ) const { return (*this) == other; }
 
     void next ();
 
-    typename GridImp::template Codim< 0 >::Entity
-    outside () const;
+    typename GridImp::template Codim< 0 >::Entity outside () const;
 
     bool neighbor () const;
 
-    bool conforming () const;
+    bool conforming () const { return true; }
 
     LocalGeometry geometryInInside () const;
     LocalGeometry geometryInOutside () const;
@@ -169,11 +170,11 @@ namespace Dune
 
     int indexInOutside () const;
 
-
-    int twistInInside () const;
-    int twistInOutside () const;
+    int twistInInside () const { return elementInfo().template twist< 1 >( oppVertex_ ); }
+    int twistInOutside () const { return elementInfo().twistInNeighbor( oppVertex_ ); }
 
   protected:
+    using Base::elementInfo_;
     using Base::oppVertex_;
 
   private:
