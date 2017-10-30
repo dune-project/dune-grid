@@ -124,7 +124,7 @@ namespace Dune
     // ----------------
 
     template< class GridView, class... options >
-    void registerGridView ( pybind11::handle scope, pybind11::class_< GridView, options... > cls )
+    inline static void registerGridView ( pybind11::handle scope, pybind11::class_< GridView, options... > cls )
     {
       using pybind11::operator""_a;
 
