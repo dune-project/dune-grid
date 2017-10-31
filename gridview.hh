@@ -143,9 +143,21 @@ namespace Dune
       registerMultipleCodimMultipleGeomTypeMapper< GridView >( cls );
 
       typedef MultipleCodimMultipleGeomTypeMapper< GridView > MCMGMapper;
-      cls.def( "mapper", [] ( GridView &self, pybind11::function contains ) {
-          return new MCMGMapper( self, [ contains ] ( Dune::GeometryType gt, int griddim ) { return static_cast< unsigned int >( pybind11::cast< int >( contains( gt ) )); } );
-        }, pybind11::keep_alive< 0, 1 >(), "contains"_a );
+      cls.def( "mapper", [] ( GridView &self, pybind11::function layout ) {
+          return new MCMGMapper( self, [ layout ] ( Dune::GeometryType gt, int griddim ) { return static_cast< unsigned int >( pybind11::cast< int >( layout( gt ) )); } );
+        }, pybind11::keep_alive< 0, 1 >(), "layout"_a,
+        R"doc(
+          Set up a mapper to attach data to the given grid. The layout argument
+          defines the set of subentities (given by geometry type)
+          to attach the data to and how many degrees of freedom to use per subentity.
+
+          Args:
+              layout:     function taken a geometry type and returning the number
+                          of dof to attach to the entities of that geometry type.
+                          0 or `False`: do not attach any, `True` can be used instead of 1.
+
+          Returns:   the mapper
+        )doc" );
 
       // register iterators
 
@@ -269,12 +281,22 @@ namespace Dune
           if( (codim < 0) || (codim > GridView::dimension) )
             throw pybind11::value_error( "Invalid codimension: " + std::to_string( codim ) + " (must be in [0, " + std::to_string( GridView::dimension ) + "])." );
           return self.size( codim );
-        } );
+        }, "codim"_a,
+        R"doc(
+          Args:
+              codim:     required codimension
+          Returns:       number of subentities of codimension `codim`
+        )doc" );
       cls.def( "size", [] ( const GridView &self, Dune::GeometryType gt ) {
           if( (gt.dim() < 0) || (gt.dim() > GridView::dimension) )
             throw pybind11::value_error( "Invalid geometry type (dimension must be in [0, " + std::to_string( GridView::dimension ) + "])." );
           return self.size( gt );
-        } );
+        }, "gt"_a,
+        R"doc(
+          Args:
+              gt:        a geometry type
+          Returns:       number of subentities of the given geometry type
+        )doc" );
 
       registerVTKWriter< GridView >( cls );
       cls.def( "vtkWriter", [] ( const GridView &self ) {
@@ -332,9 +354,33 @@ namespace Dune
 
       // export utility methods
 
-      cls.def( "coordinates", [] ( const GridView &self ) { return coordinates( self ); } );
-      cls.def( "tesselate", [] ( const GridView &self, int level ) { return tesselate( self, level ); }, "level"_a = 0 );
-      cls.def( "polygons", [] ( const GridView &self ) { return polygons( self ); } );
+      cls.def( "coordinates", [] ( const GridView &self ) { return coordinates( self ); },
+        R"doc(
+          Returns: `numpy` array with the coordinates of all vertices in the grid in
+                   the format `[ [x_1,y_1], [x_2,y_2], ..., [x_N,y_N] ]` for example
+                   in 2d.
+        )doc" );
+      cls.def( "tesselate", [] ( const GridView &self, int level ) { return tesselate( self, level ); }, "level"_a = 0,
+        R"doc(
+          Generated a possibly refined tesselation using only simplices.
+
+          Args:
+              level: virtual refinement level to use to generate the tesselation
+
+          Returns: (coordinates,simplices) where coordinates is a `numpy` array
+                   of the vertex coodinates
+                   (e.g. in 2d `[ [x_1,y_1], [x_2,y_2], ..., [x_N,y_N] ]` )
+                   and simplices is a `numpy` array of the vertices of the simplices
+                   (e.g. in 2d `[s_11,s_12,s_13], [s_21,s_22,s_23], ..., [s_N1,s_N2,s_N3] ]` )
+
+        )doc" );
+      cls.def( "polygons", [] ( const GridView &self ) { return polygons( self ); },
+        R"doc(
+          Store the grid in numpy arrays.
+
+          Returns: coordinate array storing the vertex coordinate of each polygon
+                   in the grid.
+        )doc" );
 
       Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [ &cls ] ( auto codim ) {
           cls.def( "contains", [] ( GridView &self, const typename GridView::template Codim< decltype( codim )::value >::Entity &entity ) -> bool {
