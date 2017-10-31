@@ -1,7 +1,12 @@
 # Release 2.6
 
+- The deprecated `EntityPointer` has been removed completely and `EntityIterator`
+  no longer inherits from it.
+  As a consequence, the dimension `EntityIterator::dimension`,
+  `EntityIterator::codimension`, and `EntityIterator::mydimension` are gone.
+
 - Experimental grid extensions are now always enabled:
- 
+
     See core/dune-grid!155
 
   - The method `impl` and the type `Implementation` on the facade classes are
@@ -21,7 +26,7 @@
   entity:
 
     See core/dune-grid!177
-  
+
   - the Layout is passed into the constructor and
     returns the number of dofs to attach to the given geometry type
     ```
