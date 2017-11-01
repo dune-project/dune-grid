@@ -96,20 +96,21 @@ namespace Dune {
       // the macro index and scatter it
       for (const auto entity : entities(gridView, Codim<codim>()))
       {
-        int numberOfParams = dataHandle.size(entity);
+        // get data from UG message buffer and write to DUNE message buffer
+        auto ugEntity = gridView.grid().getRealImplementation(entity).getTarget();
+
+        typedef typename DataHandle::DataType DataType;
+        auto numberOfParams = ugEntity->message_buffer_size() / sizeof(DataType);
         if (!numberOfParams)
           continue;
 
-        // get data from UG message buffer and write to DUNE message buffer
-        auto ugEntity = gridView.grid().getRealImplementation(entity).getTarget();
         auto buffer = ugEntity->message_buffer();
         assert(buffer);
 
         LBMessageBuffer lbMessageBuffer;
 
-        for(int paramIdx = 0; paramIdx < numberOfParams; paramIdx++)
+        for (std::size_t paramIdx = 0; paramIdx < numberOfParams; paramIdx++)
         {
-          typedef typename DataHandle::DataType DataType;
           DataType *dataPointer = (DataType*)(buffer + paramIdx*sizeof(DataType));
           lbMessageBuffer.write(*dataPointer);
         }
