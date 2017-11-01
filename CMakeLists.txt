@@ -1,5 +1,6 @@
 set(HEADERS
   capabilities.hh
+  commops.hh
   entity.hh
   factory.hh
   geometry.hh
