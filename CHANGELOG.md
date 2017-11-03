@@ -35,3 +35,32 @@
   `const std::vector< GeometryType >& types (int codim)`
   returning the number of dofs attached to the geometry type and a vector
   with all geometry types on which dofs are attached, respectively.
+
+- `UGGrid` now supports transferring element data during load balancing.
+  [dune-grid!172][]
+
+  [dune-grid!172]: https://gitlab.dune-project.org/core/dune-grid/merge_requests/172
+
+- `MultipleCodimMultipleGeomTypeMapper`: The `Layout` template parameter has
+  been deprecated in favor of a function object that indicates which geometry
+  types to include in the mapping ([dune-grid!177][]).  The layout function
+  object is passed in the constructor, so instead of
+  ```c++
+  MultipleCodimMultipleGeomTypeMapper<GV, MCMGElementLayout> mapper1(gv);
+  MultipleCodimMultipleGeomTypeMapper<GV, MCMGVertexLayout> mapper2(gv);
+  ```
+  please write
+  ```c++
+  MultipleCodimMultipleGeomTypeMapper<GV> mapper1(gv, mcmgElementLayout());
+  MultipleCodimMultipleGeomTypeMapper<GV> mapper2(gv, mcmgVertexLayout());
+  ```
+  See the doxygen documentation for custom layouts.
+
+  [dune-grid!177]: https://gitlab.dune-project.org/core/dune-grid/merge_requests/177
+
+- The `StructuredGridFactory` now returns a `unique_ptr` instead of a
+  `shared_ptr` ([dune-grid!212][]).  Code that relies on a `shared_ptr`
+  needs to explicitly assign the return value to a `shared_ptr`
+  variable.
+
+  [dune-grid!212]: https://gitlab.dune-project.org/core/dune-grid/merge_requests/212
