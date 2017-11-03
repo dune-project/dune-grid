@@ -18,6 +18,7 @@ typedef unsigned char uint8_t;
 #include <dune/grid/common/backuprestore.hh>
 #include <dune/grid/common/grid.hh>     // the grid base classes
 #include <dune/grid/common/capabilities.hh> // the capabilities
+#include <dune/common/hybridutilities.hh>
 #include <dune/common/power.hh>
 #include <dune/common/bigunsignedint.hh>
 #include <dune/common/typetraits.hh>
@@ -676,9 +677,11 @@ namespace Dune {
 
     void init()
     {
-      Yasp::BinomialTable<dim>::init();
-      Yasp::EntityShiftTable<Yasp::calculate_entity_shift<dim>,dim>::init();
-      Yasp::EntityShiftTable<Yasp::calculate_entity_move<dim>,dim>::init();
+      Hybrid::forEach( std::make_integer_sequence<int,dim+1>(), [] ( auto &&d ) {
+          Yasp::BinomialTable<d>::init();
+          Yasp::EntityShiftTable<Yasp::calculate_entity_shift<d>,d>::init();
+          Yasp::EntityShiftTable<Yasp::calculate_entity_move<d>,d>::init();
+        } );
       indexsets.push_back( std::make_shared< YaspIndexSet<const YaspGrid<dim, Coordinates>, false > >(*this,0) );
       boundarysegmentssize();
     }

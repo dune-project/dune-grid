@@ -360,27 +360,19 @@ namespace Dune {
     {
       // get the shift of the entity and the subentity
       // the subentity shift is only available in the space spanned by the entity
-      std::bitset<dim> ent_shift = _it.shift();
-      std::bitset<dim-codim> subent_shift = Dune::Yasp::entityShift<dim-codim>(i,cc);
-      std::bitset<dim-codim> subent_move = Dune::Yasp::entityMove<dim-codim>(i,cc);
-      // combine the shifts to get the global shift of the subentity
-      std::bitset<dim> shift,move;
-      for (int curDim=0,j=0; curDim < dim; curDim++)
-        if (ent_shift[curDim])
-        {
-          shift[curDim] = subent_shift[j];
-          move[curDim] = subent_move[j];
-          j++;
-        }
+      std::bitset<dim-codim> subent_shift = Dune::Yasp::entityShift<dim-codim>(i,cc-codim);
+      std::bitset<dim-codim> subent_move = Dune::Yasp::entityMove<dim-codim>(i,cc-codim);
 
-      std::array<int, dim> size = _g->mg->levelSize(_g->level());
+      std::bitset<dim> shift = _it.shift();
       std::array<int, dim> coord = _it.coord();
-      for (int j=0; j<dim; j++)
+      for (int j=0, k=0; j<dim; j++)
       {
         if (!shift[j])
-          size[j]++;
-        if (move[j])
-          coord[j]++;
+          continue;
+
+        coord[j] += subent_move[k];
+        shift[j] = subent_shift[k];
+        k++;
       }
 
       int which = _g->overlapfront[cc].shiftmapping(shift);
@@ -756,14 +748,9 @@ namespace Dune {
       std::bitset<dim> shift = Dune::Yasp::entityShift<dim>(i,cc);
       std::bitset<dim> move = Dune::Yasp::entityMove<dim>(i,cc);
 
-      std::array<int,dim> size = _g->mg->levelSize(_g->level());
       std::array<int, dim> coord = _it.coord();
       for (int j=0; j<dim; j++)
-      {
-
-        size[j] += !shift[j];
         coord[j] += move[j];
-      }
 
       int which = _g->overlapfront[cc].shiftmapping(shift);
       return _g->overlapfront[cc].superindex(coord,which);
