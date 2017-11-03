@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-#include <dune/common/array.hh>
+#include <dune/common/std/make_array.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
                 << std::endl;
 
     int result = 0; // pass by default
-    using Dune::make_array;
+    using Dune::Std::make_array;
 
     Dune::VTKChecker vtkChecker;
 
