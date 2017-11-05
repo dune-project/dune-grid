@@ -985,6 +985,26 @@ namespace Dune {
       static const bool v = true;
     };
 
+    /**
+     * \brief UGGrid can iterate over codim=0 entities (elements)
+     * \ingroup UGGrid
+     **/
+    template<int dim>
+    struct hasEntityIterator<UGGrid<dim>, 0>
+    {
+      static const bool v = true;
+    };
+
+    /**
+     * \brief UGGrid can iterate over codim=dim entities (vertices)
+     * \ingroup UGGrid
+     **/
+    template<int dim>
+    struct hasEntityIterator<UGGrid<dim>, dim>
+    {
+      static const bool v = true;
+    };
+
     /** \brief UGGrid is levelwise conforming
        \ingroup UGGrid
      */
