@@ -31,6 +31,39 @@ namespace Dune
       // registerGridGeometry
       // --------------------
 
+      template <class Geometry, class Array>
+      pybind11::array_t<double> pushForwardGradients( const Geometry &geo, Array xVec,
+                                pybind11::array_t<double> gVec )
+      {
+        // x = (localCoord,nofQuad)
+        auto x = xVec.unchecked();
+        // g = (dimRange,localCoord,nofQuad)
+        auto g = gVec.unchecked();
+        // ret = (dimRange,globalCoord,nofQuad)
+        pybind11::array_t<double> ret( std::vector<size_t>{g.shape(0),(size_t)Geometry::GlobalCoordinate::size(),g.shape(2)} );
+        auto y = ret.template mutable_unchecked< 3 >();
+        if (x.shape(1) != g.shape(2))
+          std::cout << x.shape(1) << " " << g.shape(2) << std::endl;
+        if (x.shape(0) != Geometry::LocalCoordinate::size())
+          std::cout << x.shape(0) << " " << Geometry::LocalCoordinate::size() << std::endl;
+
+        for (size_t p=0;p<g.shape(2);++p)
+        {
+          typename Geometry::LocalCoordinate loc;
+          for (size_t l=0;l<loc.size();++l)
+            loc[l] = x(l,p);
+          auto jit = geo.jacobianInverseTransposed( loc );
+          for (size_t range=0;range<g.shape(0);++range)
+            for (size_t r=0;r<Geometry::GlobalCoordinate::size();++r)
+            {
+              y(range,r,p) = 0;
+              for (size_t c=0;c<Geometry::LocalCoordinate::size();++c)
+                y(range,r,p) += jit[r][c]*g(range,c,p);
+            }
+        }
+        return ret;
+      }
+
       template< class Geometry, class... options >
       void registerGridGeometry ( pybind11::handle scope,
            pybind11::class_<Geometry, options...> cls )
@@ -109,6 +142,10 @@ namespace Dune
           } );
         cls.def( "jacobianInverseTransposed", [] ( const Geometry &self, Array x ) {
             return vectorize( [ &self ] ( const LocalCoordinate &x ) { return static_cast< JacobianInverseTransposed >( self.jacobianInverseTransposed( x ) ); }, x );
+          } );
+
+        cls.def( "pushForwardGradients", [] ( const Geometry &self, Array x, pybind11::array_t<double> g ) {
+            return pushForwardGradients(self,x,g);
           } );
       }
 
