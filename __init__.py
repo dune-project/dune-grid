@@ -93,10 +93,12 @@ def GlobalGridFunction(view):
     return GlobalGridFunction_decorator
 def GridFunction(view):
     def GridFunction_decorator(cls):
+        if not hasattr(cls,"__call__"):
+            raise TypeError("Class has no need method")
         if getNumberOfParameters(cls.__call__) == 2: # global case
             return GlobalGridFunction(view)(cls)
         elif getNumberOfParameters(cls.__call__) == 3: # local case
             return LocalGridFunction(view)(cls)
         else:
-            TypeError("Can't determin correct decorator")
+            raise TypeError("__call__ method needed with 2 or 3 arguments, not %d " %getNumberOfParameters(cls.__call__))
     return GridFunction_decorator
