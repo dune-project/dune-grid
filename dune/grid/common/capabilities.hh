@@ -57,6 +57,22 @@ namespace Dune
       static const bool v = false;
     };
 
+    /**
+     * \brief specialize with 'true' for all codims that a grid provides an iterator for (default=false)
+     *
+     * \note Being able to iterate over a codimension implies that the grid
+     *       provides entities for that codimension.
+     * \note Any fully conforming DUNE grid implementation must be able to
+     *       iterate over all codim 0 entities (i.e., elements).
+     *
+     * \ingroup GICapabilities
+     **/
+    template< class Grid, int codim >
+    struct hasEntityIterator
+    {
+      static const bool v = false;
+    };
+
     /** \brief Specialize with 'false' for all codims that a grid does not
       implement geometries for. (default=true)
         \ingroup GICapabilities
@@ -177,6 +193,12 @@ namespace Dune
     struct hasEntity<const Grid, codim>
     {
       static const bool v = Dune::Capabilities::hasEntity<Grid,codim>::v;
+    };
+
+    template< class Grid, int codim >
+    struct hasEntityIterator< const Grid, codim >
+    {
+      static const bool v = Dune::Capabilities::hasEntityIterator< Grid, codim >::v;
     };
 
     template< class Grid, int codim >

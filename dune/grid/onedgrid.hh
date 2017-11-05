@@ -435,6 +435,16 @@ namespace Dune {
       static const bool v = true;
     };
 
+    /**
+     * \brief OneDGrid can iterate over all codimensions
+     * \ingroup OneDGrid
+     **/
+    template<int codim>
+    struct hasEntityIterator<OneDGrid, codim>
+    {
+      static const bool v = false;
+    };
+
     /** \brief OneDGrid is levelwise conforming
        \ingroup OneDGrid
      */
