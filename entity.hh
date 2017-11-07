@@ -119,7 +119,6 @@ namespace Dune
             return (self.hasFather() ? pybind11::cast( self.geometryInFather() ) : pybind11::none());
           } );
 
-        cls.def( "subEntities", &Entity::subEntities );
         cls.def_property_readonly( "isLeaf", [] ( const Entity &self ) { return self.isLeaf(); } );
         cls.def_property_readonly( "isRegular", [] ( const Entity &self ) { return self.isRegular(); } );
         cls.def_property_readonly( "isNew", [] ( const Entity &self ) { return self.isNew(); } );
@@ -152,6 +151,13 @@ namespace Dune
               throw pybind11::value_error( "Invalid codimension: " + std::to_string( c ) + " (must be in [" + std::to_string( Entity::codimension ) + ", " + std::to_string( Entity::dimension ) + "])" );
             return makeSubEntities[ c ]( self );
           }, "codim"_a );
+
+        cls.def_property_readonly( "vertices", [] ( const Entity &self ) { return detail::makeSubEntities< Entity, Entity::dimension >( self ); } );
+        if( Entity::mydimension < Entity::dimension )
+        {
+          cls.def_property_readonly( "edges", [] ( const Entity &self ) { return detail::makeSubEntities< Entity, (Entity::mydimension < Entity::dimension ? Entity::dimension-1 : Entity::dimension) >( self ); } );
+          cls.def_property_readonly( "facets", [] ( const Entity &self ) { return detail::makeSubEntities< Entity, (Entity::mydimension < Entity::dimension ? Entity::mydimension+1 : Entity::dimension) >( self ); } );
+        }
       }
 
       template< class Entity, class... options >
