@@ -13,8 +13,8 @@ registry["grid"] = grid_registry
 def leafGrid(*args, **kwargs):
     return create(*args, **kwargs)
 
-def _getGridFunction(view,y,dimRange):
-    if dimRange is None:
+def _getGridFunction(view,y,dimR):
+    if dimR is None:
         try:
             dimR = len(y)
         except TypeError:
@@ -46,6 +46,7 @@ def gridFunction(view,dimRange=None,isGlobal=None):
         if isinstance(isGlobal,bool):
             assert not dimRange is None
             GFClass = _getGridFunction(view,None,dimRange)
+            _isGlobal = isGlobal
         else:
             try:
                 y = func( FieldVector( [0,]*view.dimension ) )
@@ -57,7 +58,7 @@ def gridFunction(view,dimRange=None,isGlobal=None):
                     e = view.elements.next()
                 y = func( e, FieldVector( [0,]*view.dimension ) )
                 _isGlobal = False
-        GFClass = _getGridFunction(view,y,dimRange)
+            GFClass = _getGridFunction(view,y,dimRange)
         if _isGlobal:
             return globalGridFunction(view,GFClass,func)
         else:
