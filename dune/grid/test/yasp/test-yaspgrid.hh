@@ -32,10 +32,8 @@ struct YaspFactory<dim, Dune::EquidistantCoordinates<double,dim> >
 
     Dune::FieldVector<double,dim> Len(1.0);
     std::array<int,dim> s;
-    if (dim < 3)
-      std::fill(s.begin(), s.end(), 8);
-    else
-      std::fill(s.begin(), s.end(), 4);
+    std::fill(s.begin(), s.end(), 4);
+    s[0] = 8;
     std::bitset<dim> p(0);
     p[0] = periodic;
     int overlap = 1;
@@ -58,10 +56,8 @@ struct YaspFactory<dim, Dune::EquidistantOffsetCoordinates<double,dim> >
     Dune::FieldVector<double,dim> lowerleft(-1.0);
     Dune::FieldVector<double,dim> upperright(1.0);
     std::array<int,dim> s;
-    if (dim < 3)
-      std::fill(s.begin(), s.end(), 8);
-    else
-      std::fill(s.begin(), s.end(), 4);
+    std::fill(s.begin(), s.end(), 4);
+    s[0] = 8;
     std::bitset<dim> p(0);
     p[0] = periodic;
     int overlap = 1;
@@ -86,32 +82,24 @@ struct YaspFactory<dim, Dune::TensorProductCoordinates<double,dim> >
     int overlap = 1;
 
     std::array<std::vector<double>,dim> coords;
-    if (dim < 3) {
-      for (int i=0; i<dim; i++)
-      {
-        coords[i].resize(9);
-        coords[i][0] = -1.0;
-        coords[i][1] = -0.5;
-        coords[i][2] = -0.25;
-        coords[i][3] = -0.125;
-        coords[i][4] =  0.0;
-        coords[i][5] =  0.125;
-        coords[i][6] =  0.25;
-        coords[i][7] =  0.5;
-        coords[i][8] =  1.0;
-      }
-    } else {
-      for (int i=0; i<dim; i++)
-      {
-        coords[i].resize(7);
-        coords[i][0] = -1.0;
-        coords[i][1] = -0.5;
-        coords[i][2] = -0.25;
-        coords[i][3] =  0.0;
-        coords[i][4] =  0.25;
-        coords[i][5] =  0.5;
-        coords[i][6] =  1.0;
-      }
+    coords[0].resize(9);
+    coords[0][0] = -1.0;
+    coords[0][1] = -0.5;
+    coords[0][2] = -0.25;
+    coords[0][3] = -0.125;
+    coords[0][4] =  0.0;
+    coords[0][5] =  0.125;
+    coords[0][6] =  0.25;
+    coords[0][7] =  0.5;
+    coords[0][8] =  1.0;
+    for (int i=1; i<dim; i++)
+    {
+      coords[i].resize(5);
+      coords[i][0] = -1.0;
+      coords[i][1] = -0.5;
+      coords[i][2] = 0.0;
+      coords[i][3] = 0.5;
+      coords[i][4] =  1.0;
     }
 
     auto grid = new Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >(coords,p,overlap);
