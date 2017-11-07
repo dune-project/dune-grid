@@ -120,6 +120,8 @@ namespace Dune
                   geometryChecker.checkGeometryStatic(subGeo);
                   break;
                 }
+              default:
+                break;
               }
           }
       }
