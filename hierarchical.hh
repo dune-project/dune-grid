@@ -267,6 +267,8 @@ namespace Dune
     {
       pybind11::module::import( "dune.geometry" );
 
+      using pybind11::operator""_a;
+
       auto clsLevelView = insertClass< typename Grid::LevelGridView >( module, "LevelGrid", GenerateTypeName( cls, "LevelGridView" ) );
       if( clsLevelView.second )
         registerGridView( module, clsLevelView.first );
@@ -284,48 +286,79 @@ namespace Dune
 
       registerHierarchicalGridIdSets( cls );
 
-      cls.def_property_readonly( "leafView", pybind11::cpp_function( [] ( const Grid &self ) { return self.leafGridView(); }, pybind11::keep_alive< 0, 1 >() ) );
-      cls.def( "levelView", [] ( const Grid &self, int level ) { return self.levelGridView( level ); }, pybind11::keep_alive< 0, 1 >() );
+      cls.def_property_readonly( "leafView", pybind11::cpp_function( [] ( const Grid &self ) {
+          return self.leafGridView();
+        }, pybind11::keep_alive< 0, 1 >() ),
+        R"doc(
+          Obtain leaf view of the grid
+
+          Returns:  leaf grid view
+        )doc" );
+      cls.def( "levelView", [] ( const Grid &self, int level ) {
+          return self.levelGridView( level );
+        }, pybind11::keep_alive< 0, 1 >(), "level"_a,
+        R"doc(
+          Obtain level view of the grid
+
+          Args:
+              level:    level to obtain view for (defaults to 1)
+
+          Returns:  level grid view
+        )doc" );
 
       typedef typename Grid::template Codim< 0 >::Entity Element;
 
-      cls.def( "mark", [] ( Grid &grid, const std::function< Marker( const Element &e ) > &marking ) {
+      cls.def( "mark", [] ( Grid &self, const std::function< Marker( const Element &e ) > &marking ) {
           std::pair< int, int > marked;
-          for( const Element &element : elements( grid.leafGridView() ) )
+          for( const Element &element : elements( self.leafGridView() ) )
           {
             Marker marker = marking( element );
             marked.first += static_cast< int >( marker == Marker::Refine );
             marked.second += static_cast< int >( marker == Marker::Coarsen );
-            grid.mark( static_cast< int >( marker ), element );
+            self.mark( static_cast< int >( marker ), element );
           }
           return marked;
+        }, "marking"_a );
+
+      cls.def( "adapt", [] ( Grid &self ) {
+          for( const auto &listener : detail::gridModificationListeners( self ) )
+            listener.second->preModification( self );
+          self.preAdapt();
+          self.adapt();
+          self.postAdapt();
+          for( const auto &listener : detail::gridModificationListeners( self ) )
+            listener.second->postModification( self );
         } );
 
-      cls.def( "adapt", [] ( Grid &grid ) {
-          for( const auto &listener : detail::gridModificationListeners( grid ) )
-            listener.second->preModification( grid );
-          grid.preAdapt();
-          grid.adapt();
-          grid.postAdapt();
-          for( const auto &listener : detail::gridModificationListeners( grid ) )
-            listener.second->postModification( grid );
-        } );
+      cls.def( "globalRefine", [] ( Grid &self, int level ) {
+          for( const auto &listener : detail::gridModificationListeners( self ) )
+            listener.second->preModification( self );
+          self.globalRefine( level );
+          for( const auto &listener : detail::gridModificationListeners( self ) )
+            listener.second->postModification( self );
+        }, "iterations"_a = 1,
+        R"doc(
+          Refine each leaf element of the grid.
 
-      cls.def( "globalRefine", [] ( Grid &grid, int level ) {
-          for( const auto &listener : detail::gridModificationListeners( grid ) )
-            listener.second->preModification( grid );
-          grid.globalRefine( level );
-          for( const auto &listener : detail::gridModificationListeners( grid ) )
-            listener.second->postModification( grid );
-        } );
+          Note: The grid implementation defines the rule by which each leaf
+                element is split.
 
-      cls.def( "loadBalance", [] ( Grid &grid ) {
-          for( const auto &listener : detail::gridModificationListeners( grid ) )
-            listener.second->preModification( grid );
-          grid.loadBalance();
-          for( const auto &listener : detail::gridModificationListeners( grid ) )
-            listener.second->postModification( grid );
-        } );
+          Args:
+              iterations:   Number of global refinement iterations to perform
+        )doc" );
+
+      cls.def( "loadBalance", [] ( Grid &self ) {
+          for( const auto &listener : detail::gridModificationListeners( self ) )
+            listener.second->preModification( self );
+          self.loadBalance();
+          for( const auto &listener : detail::gridModificationListeners( self ) )
+            listener.second->postModification( self );
+        },
+        R"doc(
+          Redistribute the grid to equilibrate the work load on each process.
+
+          Note: The redistribution strategy is chosen by the grid implementation.
+        )doc" );
 
       cls.def_property_readonly_static( "dimension", [] ( pybind11::object ) { return int(Grid::dimension); } );
       cls.def_property_readonly_static( "dimensionworld", [] ( pybind11::object ) { return int(Grid::dimensionworld); } );
