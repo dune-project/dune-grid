@@ -269,6 +269,9 @@ namespace Dune
 
       using pybind11::operator""_a;
 
+      pybind11::options opts;
+      opts.disable_function_signatures();
+
       auto clsLevelView = insertClass< typename Grid::LevelGridView >( module, "LevelGrid", GenerateTypeName( cls, "LevelGridView" ) );
       if( clsLevelView.second )
         registerGridView( module, clsLevelView.first );
@@ -301,7 +304,7 @@ namespace Dune
           Obtain level view of the grid
 
           Args:
-              level:    level to obtain view for (defaults to 1)
+              level:    level to obtain view for
 
           Returns:  level grid view
         )doc" );
@@ -318,7 +321,14 @@ namespace Dune
             self.mark( static_cast< int >( marker ), element );
           }
           return marked;
-        }, "marking"_a );
+        }, "marking"_a,
+        R"doc(
+          Set the grid's adaptation markers
+
+          Args:
+              marking:    callback returning a dune.grid.Marker for each leaf
+                          element in the grid
+        )doc" );
 
       cls.def( "adapt", [] ( Grid &self ) {
           for( const auto &listener : detail::gridModificationListeners( self ) )
@@ -328,7 +338,19 @@ namespace Dune
           self.postAdapt();
           for( const auto &listener : detail::gridModificationListeners( self ) )
             listener.second->postModification( self );
-        } );
+        },
+        R"doc(
+          Refine or coarsen the hierarchical grid to match the current marking
+
+          All elements marked for refinement will be refined by this operation.
+          However, due to closure rules, additional elements might be refined.
+          Similarly, not all elements marked for coarsening are necessarily
+          coarsened.
+
+          Note:
+          - This is a collective operation.
+          - The grid implementation defines the rule by which elements are split.
+        )doc" );
 
       cls.def( "globalRefine", [] ( Grid &self, int level ) {
           for( const auto &listener : detail::gridModificationListeners( self ) )
@@ -340,11 +362,12 @@ namespace Dune
         R"doc(
           Refine each leaf element of the grid.
 
-          Note: The grid implementation defines the rule by which each leaf
-                element is split.
-
           Args:
-              iterations:   Number of global refinement iterations to perform
+              iterations:   Number of global refinement iterations to perform (defaults to 1)
+
+          Note:
+          - This is a collective operation.
+          - The grid implementation defines the rule by which elements are split.
         )doc" );
 
       cls.def( "loadBalance", [] ( Grid &self ) {
@@ -357,7 +380,9 @@ namespace Dune
         R"doc(
           Redistribute the grid to equilibrate the work load on each process.
 
-          Note: The redistribution strategy is chosen by the grid implementation.
+          Note:
+          - This is a collective operation.
+          - The redistribution strategy is chosen by the grid implementation.
         )doc" );
 
       cls.def_property_readonly_static( "dimension", [] ( pybind11::object ) { return int(Grid::dimension); } );
@@ -367,9 +392,14 @@ namespace Dune
       // export grid capabilities
 
       if( Capabilities::hasSingleGeometryType< Grid >::v )
+      {
         cls.def_property_readonly_static( "type", [] ( pybind11::object ) {
             return GeometryType( Capabilities::hasSingleGeometryType< Grid >::topologyId, Grid::dimension );
-          } );
+          },
+          R"doc(
+            "All elements in this grid have this geometry type"
+          )doc" );
+      }
 
       cls.def_property_readonly_static( "isCartesian", [] ( pybind11::object ) { return Capabilities::isCartesian< Grid >::v; } );
       cls.def_property_readonly_static( "canCommunicate", [] ( pybind11::object ) {
@@ -387,7 +417,15 @@ namespace Dune
       if( clsComm.second )
         registerCollectiveCommunication( clsComm.first );
 
-      cls.def_property_readonly( "comm", [] ( const Grid &grid ) { return grid.comm(); } );
+      cls.def_property_readonly( "comm", [] ( const Grid &grid ) -> const typename Grid::CollectiveCommunication & {
+          return grid.comm();
+        }, pybind11::return_value_policy::reference, pybind11::keep_alive< 0, 1 >(),
+        R"doc(
+          collective communication for the grid
+
+          Note: For collective (or global) operations, all processes in this
+                collective communication must call the corresponding method.
+        )doc" );
     }
 
   } // namespace Python
