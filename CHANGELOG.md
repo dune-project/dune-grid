@@ -50,3 +50,12 @@
   variable.
 
   [dune-grid!212]: https://gitlab.dune-project.org/core/dune-grid/merge_requests/212
+
+- `SubsamplingVTKWriter` now supports arbitrary refinements, not just powers
+  of two.  The old constructor taking a parameter `int levels` has been
+  deprecated, you should now pass a parameter `RefinementIntervals intervals`
+  instead.  There are convenience functions `refinementIntervals(int
+  intervals)` and `refinementLevels(int levels)` to construct parameters of
+  type `RefinementIntervals` in dune-geometry.
+
+  [dune-grid!193]: https://gitlab.dune-project.org/core/dune-grid/merge_requests/193
