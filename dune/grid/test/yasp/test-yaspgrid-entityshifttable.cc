@@ -46,7 +46,6 @@ TestSuite testEntityShiftTable(std::vector<unsigned long long> const* reference 
   TestSuite t;
 
   using Table = Dune::Yasp::EntityShiftTable<F, dim>;
-  Table::init();
 
   if (!reference)
     std::cerr << "W: No reference given!\n";
@@ -59,7 +58,7 @@ TestSuite testEntityShiftTable(std::vector<unsigned long long> const* reference 
     for (int j = 0; j < Dune::Yasp::subEnt<dim>(dim, codim); ++j, ++i) {
       const auto value = Table::evaluate(j, codim);
 
-      t.check(value == F()(j, codim));
+      t.check(value == F::evaluate(j, codim));
       if (reference)
         t.check(value.to_ullong() == reference->at(i));
 
