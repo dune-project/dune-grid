@@ -65,8 +65,7 @@ namespace Dune
       }
 
       template< class Geometry, class... options >
-      void registerGridGeometry ( pybind11::handle scope,
-           pybind11::class_<Geometry, options...> cls )
+      void registerGridGeometry ( pybind11::handle scope, pybind11::class_<Geometry, options...> cls )
       {
         const int mydimension = Geometry::mydimension;
         const int coorddimension = Geometry::coorddimension;
@@ -81,12 +80,41 @@ namespace Dune
 
         using pybind11::operator""_a;
 
+        pybind11::options opts;
+        opts.disable_function_signatures();
+
+        cls.doc() = R"doc(
+            A geometry describes a map from the reference domain into a
+            Euclidian space, where the reference domain is given by the
+            reference element.
+            The mapping is required to be one-to-one.
+
+            We refer to points within the reference domain as "local" points.
+            The image of a local point is called its (global) position.
+
+            Note: The image of the mapping may be a submanifold of the
+                  Euclidian space.
+          )doc";
+
         cls.def( "corner", [] ( const Geometry &self, int i ) {
             const int size = self.corners();
             if( (i < 0) || (i >= size) )
               throw pybind11::value_error( "Invalid index: " + std::to_string( i ) + " (must be in [0, " + std::to_string( size ) + "))." );
             return self.corner( i );
-          }, "index"_a );
+          }, "index"_a,
+          R"doc(
+            get global position a reference corner
+
+            Args:
+                index:    index of the reference corner
+
+            Returns:
+                global position of the reference corner
+
+            Note: If the argument "index" is omitted, this method returns a
+                  NumPy array containing the global position of all corners.
+                  This version may be used to vectorize the code.
+          )doc" );
         cls.def( "corner", [] ( const Geometry &self ) {
             const int size = self.corners();
             pybind11::array_t< ctype > cornersArray( { static_cast< ssize_t >( coorddimension ), static_cast< ssize_t >( size ) } );
@@ -105,41 +133,145 @@ namespace Dune
             for( int i = 0; i < size; ++i )
               corners[ i ] = pybind11::cast( self.corner( i ) );
             return corners;
-          } );
+          },
+          R"doc(
+            get global positions of all reference corners
+
+            Note:
+                This function differs from the vectorized version of 'corner'
+                in the way the corners are returned. This method returns a
+                tuple of global positions of type FieldVector.
+
+            Returns:
+                tuple of global positions, in the order given by the reference element
+          )doc" );
 
 
-        cls.def_property_readonly( "center", &Geometry::center );
-        cls.def_property_readonly( "volume", &Geometry::volume );
+        cls.def_property_readonly( "center", [] ( const Geometry &self ) { return self.center(); },
+          R"doc(
+            global position of the barycenter of the reference element
+          )doc" );
+        cls.def_property_readonly( "volume", [] ( const Geometry &self ) { return self.volume(); },
+          R"doc(
+            volume of the map's image
 
-        cls.def_property_readonly( "affine", &Geometry::affine );
-        cls.def_property_readonly( "domain", []( const Geometry &self) { return referenceElement<double,mydimension>(self.type()); },
-            pybind11::keep_alive<0,1>() );
+            The volume is measured using the Hausdorff measure of the corresponding dimension.
+          )doc" );
 
-        cls.def( "position", [] ( const Geometry &self, const LocalCoordinate &x ) { return self.global( x ); } );
+        cls.def_property_readonly( "affine", [] ( const Geometry &self ) { return self.affine(); },
+          R"doc(
+            True, if the map is affine-linear, False otherwise
+          )doc" );
+        cls.def_property_readonly( "domain", []( const Geometry &self ) {
+            return referenceElement< double, mydimension >( self.type() );
+          }, pybind11::keep_alive< 0, 1 >(),
+          R"doc(
+            corresponding reference element, describing the domain of the map
+          )doc" );
+
+        cls.def( "position", [] ( const Geometry &self, const LocalCoordinate &x ) { return self.global( x ); }, "x"_a,
+          R"doc(
+            obtain global position of a local point
+
+            Args:
+                x:    local point
+
+            Returns:
+                global position of x
+
+            Note: This method may be used in vectorized form by passing in a
+                  NumPy array for 'x'.
+          )doc" );
         cls.def( "position", [] ( const Geometry &self, Array x ) {
             return vectorize( [ &self ] ( const LocalCoordinate &x ) { return self.global( x ); }, x );
           } );
 
-        cls.def( "localPosition", [] ( const Geometry &self, const GlobalCoordinate &y ) { return self.local( y ); } );
+        cls.def( "localPosition", [] ( const Geometry &self, const GlobalCoordinate &y ) { return self.local( y ); }, "y"_a,
+          R"doc(
+            obtain local point mapped to a global position
+
+            Args:
+                y:    global position
+
+            Returns:
+                local point mapped to y
+
+            Note: This method may be used in vectorized form by passing in a
+                  NumPy array for 'y'.
+          )doc" );
         cls.def( "localPosition", [] ( const Geometry &self, Array y ) {
             return vectorize( [ &self ] ( const GlobalCoordinate &y ) { return self.local( y ); }, y );
           } );
 
-        cls.def( "integrationElement", [] ( const Geometry &self, const LocalCoordinate &x ) { return self.integrationElement( x ); } );
+        cls.def( "integrationElement", [] ( const Geometry &self, const LocalCoordinate &x ) { return self.integrationElement( x ); }, "x"_a,
+          R"doc(
+            obtain integration element in a local point
+
+            The integration element is the factor appearing in the integral
+            transformation formula.
+            It describes the weight factor when transforming a quadrature rule
+            on the reference element into a quadrature rule on the image of this
+            map.
+
+            Args:
+                x:    local point
+
+            Returns:
+                integration element in x
+
+            Note: This method may be used in vectorized form by passing in a
+                  NumPy array for 'x'.
+          )doc" );
         cls.def( "integrationElement", [] ( const Geometry &self, Array x ) {
             return vectorize( [ &self ] ( const LocalCoordinate &x ) { return self.integrationElement( x ); }, x );
           } );
 
         cls.def( "jacobianTransposed", [] ( const Geometry &self, const LocalCoordinate &x ) {
             return static_cast< JacobianTransposed >( self.jacobianTransposed( x ) );
-          } );
+          }, "x"_a,
+          R"doc(
+            obtain transposed of the Jacobian of this mapping in a local point
+
+            The rows of the returned matrix describe the tangential vectors in
+            the global position of the local point.
+
+            The Jacobian itself describes the push-forward for tangential
+            vectors from the reference domain to the image of this map.
+
+            Args:
+                x:    local point
+
+            Returns:
+                transposed of the Jacobian matrix in x
+
+            Note: This method may be used in vectorized form by passing in a
+                  NumPy array for 'x'.
+          )doc" );
         cls.def( "jacobianTransposed", [] ( const Geometry &self, Array x ) {
             return vectorize( [ &self ] ( const LocalCoordinate &x ) { return static_cast< JacobianTransposed >( self.jacobianTransposed( x ) ); }, x );
           } );
 
         cls.def( "jacobianInverseTransposed", [] ( const Geometry &self, const LocalCoordinate &x ) {
             return static_cast< JacobianInverseTransposed >( self.jacobianInverseTransposed( x ) );
-          } );
+          }, "x"_a,
+          R"doc(
+            obtain transposed of the inverse Jacobian of this mapping in a local point
+
+            This matrix describes the push-forward for local function gradients
+            to the image of this map.
+
+            The inverse Jacobian itself describes the push-forward of cotangential
+            vectors from the reference domain to the image of this map.
+
+            Args:
+                x:    local point
+
+            Returns:
+                transposed of the Jacobian matrix in x
+
+            Note: This method may be used in vectorized form by passing in a
+                  NumPy array for 'x'.
+          )doc" );
         cls.def( "jacobianInverseTransposed", [] ( const Geometry &self, Array x ) {
             return vectorize( [ &self ] ( const LocalCoordinate &x ) { return static_cast< JacobianInverseTransposed >( self.jacobianInverseTransposed( x ) ); }, x );
           } );
