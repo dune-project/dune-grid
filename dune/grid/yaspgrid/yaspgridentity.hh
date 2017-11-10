@@ -98,7 +98,7 @@ namespace Dune {
      *  That number is d choose c times 2^c.
      */
     template<int dimworld>
-    int subEnt(int d, int c)
+    constexpr int subEnt(int d, int c)
     {
       return (d < c ? 0 : BinomialTable<dimworld>::evaluate(d,c) << c);
     }
@@ -108,23 +108,7 @@ namespace Dune {
     template<typename F, int dim>
     struct EntityShiftTable
     {
-
       typedef std::bitset<dim> value_type;
-
-      static void init()
-      {
-        if (_initialized)
-          return;
-        F f;
-        int offset = 0;
-        for (int codim = 0; codim <= dim; ++codim)
-          {
-            _offsets[codim] = offset;
-            for (int i = 0; i < subEnt<dim>(dim,codim); ++i, ++offset)
-              _values[offset] = static_cast<unsigned char>(f(i,codim).to_ulong());
-          }
-        _initialized = true;
-      }
 
       static value_type evaluate(int i, int codim)
       {
@@ -134,34 +118,73 @@ namespace Dune {
     private:
 
       // prevent construction
-      EntityShiftTable();
+      EntityShiftTable() = delete;
 
-      static bool _initialized;
-      static std::array<int,dim+1> _offsets;
-      static std::array<unsigned char,StaticPower<3,dim>::power> _values;
+      // compute offset of codimension `codim` entities and advance `offset`
+      static constexpr int nextOffset(int& offset, int codim)
+        {
+          if (codim == 0) {
+            offset = 0;
+            return 0;
+          }
+
+          offset += subEnt<dim>(dim, codim-1);
+          return offset;
+        }
+
+      template<std::size_t... I>
+      static constexpr std::array<int, sizeof...(I)> computeOffsets(std::index_sequence<I...>)
+        {
+          int offset = 0;
+          return { (nextOffset(offset, I))... };
+        }
+
+      // compute shift table entry for (`codim`, `i`) and advance `codim`, `i`
+      static constexpr unsigned char nextValue(int& codim, int& i)
+        {
+          const auto result = F::evaluate(i, codim);
+
+          i += 1;
+          if (i >= subEnt<dim>(dim, codim)) {
+            codim += 1;
+            i = 0;
+          }
+
+          return result;
+        }
+
+      template<std::size_t... I>
+      static constexpr std::array<unsigned char, sizeof...(I)> computeValues(std::index_sequence<I...>)
+        {
+          int codim = 0, i = 0;
+          return { ((void)I, nextValue(codim, i))... };
+        }
+
+      static constexpr std::array<int,dim+1> _offsets = computeOffsets(std::make_index_sequence<dim+1>{});
+      static constexpr std::array<unsigned char,StaticPower<3,dim>::power> _values = computeValues(std::make_index_sequence<StaticPower<3,dim>::power>{});
 
     };
 
+#if __cplusplus < 201703L
     template<typename F, int dim>
-    bool EntityShiftTable<F,dim>::_initialized = false;
+    constexpr std::array<int,dim+1> EntityShiftTable<F, dim>::_offsets;
     template<typename F, int dim>
-    std::array<int,dim+1> EntityShiftTable<F,dim>::_offsets;
-    template<typename F, int dim>
-    std::array<unsigned char,StaticPower<3,dim>::power> EntityShiftTable<F,dim>::_values;
+    constexpr std::array<unsigned char,StaticPower<3,dim>::power> EntityShiftTable<F, dim>::_values;
+#endif
 
     // functor for doing the actual entity shift calculation
     template<int dim>
     struct calculate_entity_shift
     {
-      std::bitset<dim> operator()(int index, int cc) const
+      static constexpr unsigned long long evaluate(int index, int cc)
       {
-        std::bitset<dim> result(0ull);
+        auto result = 0ull;
         for (int d = dim; d>0; d--)
           {
             if (cc == d)
               return result;
             if (index < subEnt<dim>(d-1,cc))
-              result[d-1]=true;
+              result |= 1ull << (d-1);
             else
               {
                 index = (index - subEnt<dim>(d-1, cc)) % subEnt<dim>(d-1,cc-1);
@@ -190,21 +213,24 @@ namespace Dune {
     template<int dim>
     struct calculate_entity_move
     {
-      std::bitset<dim> operator()(int index, int cc) const
+      static constexpr unsigned long long evaluate(int index, int cc)
       {
-        std::bitset<dim> result(0ull);
+        auto result = 0ull;
         for (int d = dim; d>0; d--)
           {
             if (d == cc)
               {
-                result[d-1] = index & (1<<(d-1));
+                // result[d-1] = index & (1<<(d-1));
+                result &= ~(1ull << (d-1));
+                result |= index & (1ull << (d-1));
+
                 index &= ~(1<<(d-1));
               }
             if (index >= subEnt<dim>(d-1,cc))
               {
                 if ((index - subEnt<dim>(d-1,cc)) / subEnt<dim>(d-1,cc-1) == 1)
                   {
-                    result[d-1] = true;
+                    result |= 1ull << (d-1);
                   }
                 index = (index - subEnt<dim>(d-1, cc)) % subEnt<dim>(d-1,cc-1);
                 cc--;
