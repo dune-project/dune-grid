@@ -43,7 +43,7 @@ namespace Dune
     typedef typename Grid::ctype ctype;
     static const int dim = Grid::dimension;
 
-    std::shared_ptr<Grid> createGrid(Comm comm = Comm())
+    std::unique_ptr<Grid> createGrid(Comm comm = Comm())
     {
       TensorGridFactoryCreator<Grid> creator(*this);
       return creator.createGrid(comm);
@@ -309,7 +309,7 @@ namespace Dune
 
     TensorGridFactoryCreator(const TensorGridFactory<Grid>& factory) : _factory(factory) {}
 
-    std::shared_ptr<Grid> createGrid(Comm comm)
+    std::unique_ptr<Grid> createGrid(Comm comm)
     {
       // The grid factory
       GridFactory<Grid> fac;
@@ -375,7 +375,7 @@ namespace Dune
         }
       }
 
-      return std::shared_ptr<Grid>(fac.createGrid());
+      return std::unique_ptr<Grid>(fac.createGrid());
     }
 
   private:
@@ -391,9 +391,9 @@ namespace Dune
 
     TensorGridFactoryCreator(const TensorGridFactory<Grid>& factory) : _factory(factory) {}
 
-    std::shared_ptr<Grid> createGrid(Comm comm)
+    std::unique_ptr<Grid> createGrid(Comm comm)
     {
-      return std::make_shared<Grid>(_factory.coords(), std::bitset<dim>(0ULL), 1, comm);
+      return std::make_unique<Grid>(_factory.coords(), std::bitset<dim>(0ULL), 1, comm);
     }
   private:
     const TensorGridFactory<Grid>& _factory;
