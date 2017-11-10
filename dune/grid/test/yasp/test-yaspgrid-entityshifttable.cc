@@ -13,7 +13,6 @@ TestSuite testBinomialTable(std::vector<int> const* reference = nullptr, bool du
   TestSuite t;
 
   using Table = Dune::Yasp::BinomialTable<n>;
-  Table::init();
 
   if (!reference)
     std::cerr << "W: No reference given!\n";

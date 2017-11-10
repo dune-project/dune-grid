@@ -31,39 +31,15 @@ namespace Dune {
     template<int n>
     struct BinomialTable
     {
-      static void init()
-      {
-        if (_initialized)
-          return;
-        int offset = 0;
-        for (int d = 0; d <= n; ++d)
-          {
-            _offsets[d] = offset;
-            for (int c = 0; c <= d; ++c, ++offset)
-              _values[offset] = binomial(d,c);
-          }
-        _initialized = true;
-      }
-
       // evaluation - note that in general d!=n, n is only the
       // maximum value of d (in our case dimworld)
-      static int evaluate(int d, int c)
+      static constexpr int evaluate(int d, int c)
       {
         return _values[_offsets[d] + c];
       }
 
-    private:
-      // prevent construction
-      BinomialTable();
-
-      static bool _initialized;
-      static std::array<int,(n+1)*(n+2)/2> _values;
-      static std::array<int,n+1> _offsets;
-
-    public:
-
       // the actual implementation
-      static int binomial(int d, int c)
+      static constexpr int binomial(int d, int c)
       {
         long binomial=1;
         for (int i=d-c+1; i<=d; i++)
@@ -72,14 +48,46 @@ namespace Dune {
           binomial /= i;
         return binomial;
       }
+
+    private:
+      // prevent construction
+      BinomialTable() = delete;
+
+      // compute binomial(r, c) and advance row `r` and column `c`
+      static constexpr int nextValue(int& r, int& c)
+        {
+          const auto result = binomial(r, c);
+
+          c += 1;
+          if (c > r) {
+            r += 1;
+            c = 0;
+          }
+
+          return result;
+        }
+
+      template<std::size_t... I>
+      static constexpr std::array<int, sizeof...(I)> computeValues(std::index_sequence<I...>)
+        {
+          int r = 0, c = 0;
+          return { ((void)I, nextValue(r, c))... };
+        }
+
+      template<std::size_t... I>
+      static constexpr std::array<int, sizeof...(I)> computeOffsets(std::index_sequence<I...>)
+        { return { (I*(I+1)/2)... }; }
+
+      static constexpr std::array<int,(n+1)*(n+2)/2> _values = computeValues(std::make_index_sequence<(n+1)*(n+2)/2>{});
+      static constexpr std::array<int,n+1> _offsets = computeOffsets(std::make_index_sequence<n+1>{});
     };
 
+#if __cplusplus < 201703L
     template<int n>
-    bool BinomialTable<n>::_initialized = false;
+    constexpr std::array<int,(n+1)*(n+2)/2> BinomialTable<n>::_values;
     template<int n>
-    std::array<int,(n+1)*(n+2)/2> BinomialTable<n>::_values;
-    template<int n>
-    std::array<int,n+1> BinomialTable<n>::_offsets;
+    constexpr std::array<int,n+1> BinomialTable<n>::_offsets;
+#endif
 
     /** \returns number of subentities of given codim in a cube of dimension dim
      *  \tparam dimworld the maximum dimension the table holds entries for
@@ -143,11 +151,6 @@ namespace Dune {
     template<int dim>
     struct calculate_entity_shift
     {
-      calculate_entity_shift()
-      {
-        BinomialTable<dim>::init();
-      }
-
       std::bitset<dim> operator()(int index, int cc) const
       {
         std::bitset<dim> result(0ull);
@@ -185,12 +188,6 @@ namespace Dune {
     template<int dim>
     struct calculate_entity_move
     {
-
-      calculate_entity_move()
-      {
-        BinomialTable<dim>::init();
-      }
-
       std::bitset<dim> operator()(int index, int cc) const
       {
         std::bitset<dim> result(0ull);
