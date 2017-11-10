@@ -46,7 +46,6 @@ TestSuite testEntityShiftTable(std::vector<unsigned long long> const* reference 
   TestSuite t;
 
   using Table = Dune::Yasp::EntityShiftTable<F, dim>;
-  Table::init();
 
   if (!reference)
     std::cerr << "W: No reference given!\n";
