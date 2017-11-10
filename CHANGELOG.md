@@ -1,4 +1,4 @@
-# master (will become 2.6)
+# Release 2.6
 
 - Experimental grid extensions are now always enabled.
 - The method `impl` and the type `Implementation` on the facade classes are
