@@ -1824,6 +1824,16 @@ namespace Dune {
       static const bool v = true;
     };
 
+    /**
+     * \brief YaspGrid can iterate over all codimensions
+     * \ingroup YaspGrid
+     **/
+    template<int dim, class Coordinates, int codim>
+    struct hasEntityIterator<YaspGrid<dim, Coordinates>, codim>
+    {
+      static const bool v = true;
+    };
+
     /** \brief YaspGrid can communicate on all codimensions
      *  \ingroup YaspGrid
      */

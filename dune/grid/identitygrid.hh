@@ -491,6 +491,12 @@ namespace Dune
       static const bool v = hasEntity<HostGrid,codim>::v;
     };
 
+    template<class HostGrid, int codim>
+    struct hasEntityIterator<IdentityGrid<HostGrid>, codim>
+    {
+      static const bool v = hasEntityIterator<HostGrid, codim>::v;
+    };
+
     /** \brief has conforming level grids when host grid has
      * \ingroup IdentityGrid
      */
