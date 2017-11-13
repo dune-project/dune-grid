@@ -678,11 +678,6 @@ namespace Dune {
 
     void init()
     {
-      Hybrid::forEach( std::make_integer_sequence<int,dim+1>(), [] ( auto d ) {
-          Yasp::BinomialTable<d>::init();
-          Yasp::EntityShiftTable<Yasp::calculate_entity_shift<d>,d>::init();
-          Yasp::EntityShiftTable<Yasp::calculate_entity_move<d>,d>::init();
-        } );
       indexsets.push_back( std::make_shared< YaspIndexSet<const YaspGrid<dim, Coordinates>, false > >(*this,0) );
       boundarysegmentssize();
     }
