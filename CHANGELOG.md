@@ -22,10 +22,25 @@
     the DGFWriter will always write a boundary id and can write user-defined
     boundary data, now.
 
+- `MultipleCodimMultipleGeomTypeMapper`: The `Layout` template parameter has
+  been deprecated in favor of a function object that indicates which geometry
+  types to include in the mapping.  The layout function
+  object is passed in the constructor, so instead of
+  ```c++
+  MultipleCodimMultipleGeomTypeMapper<GV, MCMGElementLayout> mapper1(gv);
+  MultipleCodimMultipleGeomTypeMapper<GV, MCMGVertexLayout> mapper2(gv);
+  ```
+  please write
+  ```c++
+  MultipleCodimMultipleGeomTypeMapper<GV> mapper1(gv, mcmgElementLayout());
+  MultipleCodimMultipleGeomTypeMapper<GV> mapper2(gv, mcmgVertexLayout());
+  ```
+  See the doxygen documentation for custom layouts and core/dune-grid!177
+
 - The `MCMGMapper` can now be used to attach multiple dofs to each
   entity:
 
-    See core/dune-grid!177
+    See core/dune-grid!215
 
   - the Layout is passed into the constructor and
     returns the number of dofs to attach to the given geometry type
@@ -35,6 +50,7 @@
        };
        MCMGMapper mapper(grid,layout);
     ```
+    Note: the layout can still return a `bool` with `true` leading to a single dof being attached.
   - The new method `MCMGMapper::indices(entity)` returns an iterable range
     (instance of `IntegralRange<Index>`)
     with the indices of dofs attached to the given entity:
@@ -49,7 +65,7 @@
   returning the number of dofs attached to the geometry type and a vector
   with all geometry types on which dofs are attached, respectively.
 
-    See core/dune-grid!177
+    See core/dune-grid!215
 
 - The `StructuredGridFactory` now returns a `unique_ptr` instead of a
   `shared_ptr`.  Code that relies on a `shared_ptr`
@@ -66,3 +82,7 @@
   type `RefinementIntervals` in dune-geometry.
 
     See core/dune-grid!193
+    
+- `UGGrid` now supports transferring element data during load balancing.
+   
+    See core/dune-grid!172
