@@ -48,19 +48,20 @@
 namespace Dune
 {
 
-  namespace detail {
+  namespace Impl
+  {
 
-    template<typename F, typename = int>
-    struct _has_local_context
-      : public std::false_type
+    template< class F, class E, class = void >
+    struct IsBindable
+      : std::false_type
     {};
 
-    template<typename T>
-    struct _has_local_context<T,typename std::enable_if<(sizeof(std::declval<T>().localContext()) > 0),int>::type>
-      : public std::true_type
+    template< class F, class E >
+    struct IsBindable< F, E, void_t< decltype( std::declval< F & >().bind( std::declval< const E & >() ) ), decltype( std::declval< F & >().unbind() ) > >
+      : std::true_type
     {};
 
-  }
+  } // namespace Impl
 
   namespace VTKWriteTypeTraits {
     template<typename T>
@@ -253,17 +254,15 @@ namespace Dune
       };
 
       //! Construct a VTKLocalFunction for a dune-functions style LocalFunction
-      template<typename F>
-      VTKLocalFunction(F&& f, VTK::FieldInfo fieldInfo,
-        typename std::enable_if<detail::_has_local_context<F>::value,int>::type dummy = 0)
+      template<typename F, std::enable_if_t<Impl::IsBindable<F, Entity>::value, int> = 0>
+      VTKLocalFunction(F&& f, VTK::FieldInfo fieldInfo)
         : _f(Dune::Std::make_unique<FunctionWrapper<F> >(std::forward<F>(f)))
         , _fieldInfo(fieldInfo)
       {}
 
       //! Construct a VTKLocalFunction for a dune-functions style Function
-      template<typename F>
-      VTKLocalFunction(F&& f, VTK::FieldInfo fieldInfo,
-        typename std::enable_if<not detail::_has_local_context<F>::value,int>::type dummy = 0)
+      template<typename F, std::enable_if_t<not Impl::IsBindable<F, Entity>::value, int> = 0>
+      VTKLocalFunction(F&& f, VTK::FieldInfo fieldInfo)
         : _f(Dune::Std::make_unique< FunctionWrapper<
           typename std::decay<decltype(localFunction(std::forward<F>(f)))>::type
           > >(localFunction(std::forward<F>(f))))
