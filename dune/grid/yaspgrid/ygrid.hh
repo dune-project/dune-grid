@@ -296,7 +296,7 @@ namespace Dune {
     class Iterator {
     public:
       // default constructor
-      Iterator () {}
+      Iterator () = default;
 
       //! Make iterator pointing to first cell in a grid.
       Iterator (const YGridComponent<Coordinates>& r) : _grid(&r)
@@ -461,9 +461,9 @@ namespace Dune {
       }
 
     protected:
-      iTupel _coord;       //!< current position in index set
-      int _superindex;        //!< consecutive index in enclosing grid
-      const YGridComponent<Coordinates>* _grid;
+      iTupel _coord;              //!< current position in index set
+      int _superindex = 0;        //!< consecutive index in enclosing grid
+      const YGridComponent<Coordinates>* _grid = nullptr;
     };
 
 
@@ -593,8 +593,7 @@ namespace Dune {
       public:
 
       //! default constructor
-      Iterator ()
-      {}
+      Iterator () = default;
 
       //! construct an iterator from coordinates and component
       Iterator (const YGrid<Coordinates>& yg, const std::array<int,dim>& coords, int which = 0)
@@ -737,8 +736,8 @@ namespace Dune {
 
 
       private:
-      unsigned int _which;
-      const YGrid<Coordinates>* _yg;
+      unsigned int _which = 0;
+      const YGrid<Coordinates>* _yg = nullptr;
       typename YGridComponent<Coordinates>::Iterator _it;
     };
 
