@@ -593,8 +593,7 @@ namespace Dune {
       public:
 
       //! default constructor
-      Iterator ()
-      {}
+      Iterator () = default;
 
       //! construct an iterator from coordinates and component
       Iterator (const YGrid<Coordinates>& yg, const std::array<int,dim>& coords, int which = 0)
@@ -737,8 +736,8 @@ namespace Dune {
 
 
       private:
-      unsigned int _which;
-      const YGrid<Coordinates>* _yg;
+      unsigned int _which = 0;
+      const YGrid<Coordinates>* _yg = nullptr;
       typename YGridComponent<Coordinates>::Iterator _it;
     };
 
