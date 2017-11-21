@@ -49,7 +49,7 @@ def _writeVTK(vtk,grid,f,name,dataTag):
             return f(*args,**kwargs)
         f_.addToVTKWriter(name, vtk, dataTag)
 
-def writeVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointvector=None, number=None, subsampling=None):
+def writeVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointvector=None, number=None, subsampling=None, write=True):
     vtk = grid.vtkWriter() if subsampling is None else grid.vtkWriter(subsampling)
 
     def addDataToVTKWriter(dataFunctions, dataName, dataTag):
@@ -67,11 +67,25 @@ def writeVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointve
     addDataToVTKWriter(cellvector, 'cellvector', common.DataType.CellVector)
     addDataToVTKWriter(pointvector, 'pointvector', common.DataType.PointVector)
 
-    if number is None:
-        vtk.write(name)
+    if write:
+        if number is None:
+            vtk.write(name)
+        else:
+            vtk.write(name, number)
     else:
-        vtk.write(name, number)
-    return vtk
+        return vtk
+
+class SequencedVTK:
+    def __init__(self, grid, name, number, celldata, pointdata, cellvector, pointvector, subsampling):
+        self.number = number
+        self.name = name
+        self.vtk = grid.writeVTK(name,celldata=celldata,pointdata=pointdata,cellvector=cellvector,pointvector=pointvector,subsampling=subsampling,write=False)
+    def __call__(self):
+        self.vtk.write(self.name, self.number)
+        self.number += 1
+
+def sequencedVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointvector=None, number=0, subsampling=None):
+    return SequencedVTK(grid,name,number,celldata=celldata,pointdata=pointdata,cellvector=cellvector,pointvector=pointvector,subsampling=subsampling)
 
 def plot(self, function=None, *args, **kwargs):
     import dune.plotting
@@ -98,6 +112,7 @@ def localGridFunction(gv, evaluator):
 def addAttr(module, cls):
     setattr(cls, "_module", module)
     setattr(cls, "writeVTK", writeVTK)
+    setattr(cls, "sequencedVTK", sequencedVTK)
     setattr(cls, "mapper", mapper)
 
     if cls.dimension == 2:
