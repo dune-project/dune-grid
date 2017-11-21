@@ -28,6 +28,26 @@ def triangulation(grid, level=0):
     x, triangles = grid.tesselate(level)
     return Triangulation(x[:,0], x[:,1], triangles)
 
+_writeVTKDispatcher = []
+def _writeVTK(vtk,grid,f,name,dataTag):
+    done = False
+    try:
+        f.addToVTKWriter(name, vtk, dataTag)
+        done = True
+    except AttributeError:
+        pass
+    if not done:
+        for dispatch in _writeVTKDispatcher:
+            func = dispatch(grid,f)
+            if func is not None:
+                func.addToVTKWriter(name,vtk,dataTag)
+                done = True
+                break
+    if not done:
+        @gridFunction(grid)
+        def f_(*args,**kwargs):
+            return f(*args,**kwargs)
+        f_.addToVTKWriter(name, vtk, dataTag)
 
 def writeVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointvector=None, number=None, subsampling=None):
     vtk = grid.vtkWriter() if subsampling is None else grid.vtkWriter(subsampling)
@@ -35,16 +55,10 @@ def writeVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointve
     def addDataToVTKWriter(dataFunctions, dataName, dataTag):
         if isinstance(dataFunctions, dict):
             for n, f in dataFunctions.items():
-                try:
-                    f.addToVTKWriter(n, vtk, dataTag)
-                except AttributeError:
-                    @gridFunction(grid)
-                    def f_(*args,**kwargs):
-                        return f(*args,**kwargs)
-                    f_.addToVTKWriter(n, vtk, dataTag)
+                _writeVTK(vtk,grid,f,n,dataTag)
         elif isinstance(dataFunctions, list):
             for f in dataFunctions:
-                f.addToVTKWriter(f.name, vtk, dataTag)
+                _writeVTK(vtk,grid,f,f.name,dataTag)
         elif dataFunctions is not None:
             raise TypeError("Argument '" + dataName + "' must be a dict or list instance.")
 
