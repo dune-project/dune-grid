@@ -211,16 +211,10 @@ namespace Dune
     }
 
     /** \brief Return size of the overlap region for a given codim on the grid view.  */
-    int overlapSize(int codim) const
-    {
-      return grid().overlapSize(level_, codim);
-    }
+    int overlapSize ( int codim ) const { return 0; }
 
     /** \brief Return size of the ghost region for a given codim on the grid view.  */
-    int ghostSize(int codim) const
-    {
-      return grid().ghostSize(level_, codim);
-    }
+    int ghostSize ( int codim ) const { return 0; }
 
     /** communicate data on this view */
     template< class DataHandleImp, class DataType >
@@ -425,16 +419,10 @@ namespace Dune
     }
 
     /** \brief Return size of the overlap region for a given codim on the grid view.  */
-    int overlapSize(int codim) const
-    {
-      return grid().overlapSize(codim);
-    }
+    int overlapSize ( int codim ) const { return 0; }
 
     /** \brief Return size of the ghost region for a given codim on the grid view.  */
-    int ghostSize(int codim) const
-    {
-      return grid().ghostSize(codim);
-    }
+    int ghostSize ( int codim ) const { return 0; }
 
     /** communicate data on this view */
     template< class DataHandleImp, class DataType >
