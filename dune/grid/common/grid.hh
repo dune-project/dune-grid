@@ -722,71 +722,6 @@ namespace Dune {
     //@{
     //===========================================================
 
-    //! Return size of overlap for a given codim on a given level
-    DUNE_DEPRECATED_MSG("overlapSize() is deprecated. Use the method on the LevelGridView instead.")
-    int overlapSize (int level, int codim) const
-    {
-      return levelGridView(level).overlapSize(codim);
-    }
-
-    //! Return size of overlap region for a given codim on the leaf grid
-    DUNE_DEPRECATED_MSG("overlapSize() is deprecated. Use the method on the LeafGridView instead.")
-    int overlapSize (int codim) const
-    {
-      return leafGridView().overlapSize(codim);
-    }
-
-    //! Return size of ghost region for a given codim on a given level
-    DUNE_DEPRECATED_MSG("ghostSize() is deprecated. Use the method on the LevelGridView instead.")
-    int ghostSize (int level, int codim) const
-    {
-      return levelGridView(level).ghostSize(codim);
-    }
-
-    //! Return size of ghost region for a given codim on the leaf grid
-    DUNE_DEPRECATED_MSG("ghostSize() is deprecated. Use the method on the LeafGridView instead.")
-    int ghostSize (int codim) const
-    {
-      return leafGridView().ghostSize(codim);
-    }
-
-    /**
-     * \brief Communicate information on distributed entities on a given level
-     * Template parameter is a model of Dune::CommDataHandleIF
-     * \param data A data handle telling the method what data is communicated
-     * and how this should be done.
-     * \param interface The communication interface to use.
-     * \param dir The direction of the communication along the interface (forward
-     * or backward.
-     * \param level The index of the grid level where the communication should
-     * happen.
-     */
-    template<class DataHandleImp, class DataTypeImp>
-    DUNE_DEPRECATED_MSG("communicate() is deprecated. Use the method on the LevelGridView instead.")
-    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, InterfaceType iftype, CommunicationDirection dir, int level) const
-    {
-      CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir,level)));
-      return;
-    }
-
-    /**
-     * \brief Communicate information on distributed entities on the leaf grid
-     * Template parameter is a model of Dune::CommDataHandleIF
-     *
-     * \param data A data handle telling the method what data is communicated
-     * and how this should be done.
-     * \param interface The communication interface to use.
-     * \param dir The direction of the communication along the interface
-     * (forward or backward).
-     */
-    template<class DataHandleImp, class DataTypeImp>
-    DUNE_DEPRECATED_MSG("communicate() is deprecated. Use the method on the LeafGridView instead.")
-    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, InterfaceType iftype, CommunicationDirection dir) const
-    {
-      CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().template communicate<DataHandleImp,DataTypeImp>(data,iftype,dir)));
-      return;
-    }
-
     //! return const reference to a collective communication object. The return type is a model of Dune::CollectiveCommunication.
     const CollectiveCommunication &comm () const
     {
@@ -1001,30 +936,6 @@ namespace Dune {
 
     //! clean up some markers
     void postAdapt() {}
-
-    /** \brief ghostSize is zero by default */
-    int ghostSize (int level, int codim) const { return 0; }
-
-    /** \brief overlapSize is zero by default */
-    int overlapSize (int level, int codim) const { return 0; }
-
-    /** \brief ghostSize is zero by default */
-    int ghostSize (int codim) const { return 0; }
-
-    /** \brief overlapSize is zero by default */
-    int overlapSize (int codim) const { return 0; }
-
-    /** dummy communicate, doing nothing  */
-    template<class DataHandleImp, class DataTypeImp>
-    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data,
-                      InterfaceType iftype, CommunicationDirection dir, int level) const
-    {}
-
-    /** dummy communicate, doing nothing  */
-    template<class DataHandleImp, class DataTypeImp>
-    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data,
-                      InterfaceType iftype, CommunicationDirection dir) const
-    {}
 
     /*! \brief default implementation of load balance does nothing and returns false */
     bool loadBalance()

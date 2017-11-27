@@ -455,26 +455,6 @@ namespace Dune {
     void postAdapt();
     /*@}*/
 
-    /** \brief Size of the overlap on the leaf level */
-    unsigned int overlapSize(int codim) const {
-      return 0;
-    }
-
-    /** \brief Size of the ghost cell layer on the leaf level */
-    unsigned int ghostSize(int codim) const {
-      return (codim==0) ? 1 : 0;
-    }
-
-    /** \brief Size of the overlap on a given level */
-    unsigned int overlapSize(int level, int codim) const {
-      return 0;
-    }
-
-    /** \brief Size of the ghost cell layer on a given level */
-    unsigned int ghostSize(int level, int codim) const {
-      return (codim==0) ? 1 : 0;
-    }
-
     /** \brief Distributes the grid and some data over the available nodes in a distributed machine
 
         \tparam DataHandle works like the data handle for the communicate
@@ -585,78 +565,6 @@ namespace Dune {
 #endif
 
       return true;
-    }
-
-
-    /** \brief The communication interface for all codims on a given level
-       @param dataHandle type used to gather/scatter data in and out of the message buffer
-       @param iftype one of the predefined interface types, throws error if it is not implemented
-       @param dir choose between forward and backward communication
-       @param level communicate for entities on the given level
-
-       Implements a generic communication function sending an object of type P for each entity
-       in the intersection of two processors. P has two methods gather and scatter that implement
-       the protocol. Therefore P is called the "protocol class".
-     */
-    template<class DataHandle>
-    void communicate (DataHandle& dataHandle, InterfaceType iftype, CommunicationDirection dir, int level) const
-    {
-#ifdef ModelP
-      typedef typename UGGrid::LevelGridView LevelGridView;
-
-      for (int curCodim = 0; curCodim <= dim; ++curCodim) {
-        if (!dataHandle.contains(dim, curCodim))
-          continue;
-
-        if (curCodim == 0)
-          communicateUG_<LevelGridView, DataHandle, 0>(this->levelGridView(level), level, dataHandle, iftype, dir);
-        else if (curCodim == dim)
-          communicateUG_<LevelGridView, DataHandle, dim>(this->levelGridView(level), level, dataHandle, iftype, dir);
-        else if (curCodim == dim - 1)
-          communicateUG_<LevelGridView, DataHandle, dim-1>(this->levelGridView(level), level, dataHandle, iftype, dir);
-        else if (curCodim == 1)
-          communicateUG_<LevelGridView, DataHandle, 1>(this->levelGridView(level), level, dataHandle, iftype, dir);
-        else
-          DUNE_THROW(NotImplemented,
-                     className(*this) << "::communicate(): Not "
-                     "supported for dim " << dim << " and codim " << curCodim);
-      }
-#endif // ModelP
-    }
-
-    /** \brief The communication interface for all codims on the leaf level
-       @param dataHandle type used to gather/scatter data in and out of the message buffer
-       @param iftype one of the predefined interface types, throws error if it is not implemented
-       @param dir choose between forward and backward communication
-
-       Implements a generic communication function sending an object of type P for each entity
-       in the intersection of two processors. P has two methods gather and scatter that implement
-       the protocol. Therefore P is called the "protocol class".
-     */
-    template<class DataHandle>
-    void communicate(DataHandle& dataHandle, InterfaceType iftype, CommunicationDirection dir) const
-    {
-#ifdef ModelP
-      typedef typename UGGrid::LeafGridView LeafGridView;
-
-      for (int curCodim = 0; curCodim <= dim; ++curCodim) {
-        if (!dataHandle.contains(dim, curCodim))
-          continue;
-        int level = -1;
-        if (curCodim == 0)
-          communicateUG_<LeafGridView, DataHandle, 0>(this->leafGridView(), level, dataHandle, iftype, dir);
-        else if (curCodim == dim)
-          communicateUG_<LeafGridView, DataHandle, dim>(this->leafGridView(), level, dataHandle, iftype, dir);
-        else if (curCodim == dim - 1)
-          communicateUG_<LeafGridView, DataHandle, dim-1>(this->leafGridView(), level, dataHandle, iftype, dir);
-        else if (curCodim == 1)
-          communicateUG_<LeafGridView, DataHandle, 1>(this->leafGridView(), level, dataHandle, iftype, dir);
-        else
-          DUNE_THROW(NotImplemented,
-                     className(*this) << "::communicate(): Not "
-                     "supported for dim " << dim << " and codim " << curCodim);
-      }
-#endif // ModelP
     }
 
     /** the collective communication */
