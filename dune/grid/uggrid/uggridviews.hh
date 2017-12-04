@@ -72,6 +72,8 @@ namespace Dune
     template< class GridImp>
     class UGGridLevelGridView
     {
+      typedef UGGridLevelGridView<GridImp> This;
+
     public:
       typedef UGGridLevelGridViewTraits<GridImp> Traits;
 
@@ -201,12 +203,28 @@ namespace Dune
 
       /** communicate data on this view */
       template< class DataHandleImp, class DataType >
-      void communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
-                         InterfaceType iftype,
-                         CommunicationDirection dir ) const
-                         {
-                           return grid().communicate( data, iftype, dir, level_ );
-                         }
+      void communicate ( CommDataHandleIF< DataHandleImp, DataType > &dataHandle, InterfaceType iftype, CommunicationDirection dir ) const
+      {
+        typedef CommDataHandleIF< DataHandleImp, DataType > DataHandle;
+
+#ifdef ModelP
+        for (int curCodim = 0; curCodim <= Grid::dimension; ++curCodim) {
+          if (!dataHandle.contains(Grid::dimension, curCodim))
+            continue;
+
+          if (curCodim == 0)
+            grid().template communicateUG_<This, DataHandle, 0>(*this, level_, dataHandle, iftype, dir);
+          else if (curCodim == Grid::dimension)
+            grid().template communicateUG_<This, DataHandle, Grid::dimension>(*this, level_, dataHandle, iftype, dir);
+          else if (curCodim == Grid::dimension - 1)
+            grid().template communicateUG_<This, DataHandle, Grid::dimension-1>(*this, level_, dataHandle, iftype, dir);
+          else if (curCodim == 1)
+            grid().template communicateUG_<This, DataHandle, 1>(*this, level_, dataHandle, iftype, dir);
+          else
+            DUNE_THROW(NotImplemented, className(*this) << "::communicate(): Not " "supported for dim " << Grid::dimension << " and codim " << curCodim);
+        }
+#endif // ModelP
+      }
 
     private:
       const Grid *grid_;
@@ -266,6 +284,8 @@ namespace Dune
     template< class GridImp >
     class UGGridLeafGridView
     {
+      typedef UGGridLeafGridView<GridImp> This;
+
     public:
       typedef UGGridLeafGridViewTraits<GridImp> Traits;
 
@@ -382,12 +402,28 @@ namespace Dune
 
       /** communicate data on this view */
       template< class DataHandleImp, class DataType >
-      void communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
-                         InterfaceType iftype,
-                         CommunicationDirection dir ) const
-                         {
-                           return grid().communicate( data, iftype, dir );
-                         }
+      void communicate ( CommDataHandleIF< DataHandleImp, DataType > &dataHandle, InterfaceType iftype, CommunicationDirection dir ) const
+      {
+        typedef CommDataHandleIF< DataHandleImp, DataType > DataHandle;
+
+#ifdef ModelP
+        for (int curCodim = 0; curCodim <= Grid::dimension; ++curCodim) {
+          if (!dataHandle.contains(Grid::dimension, curCodim))
+            continue;
+          int level = -1;
+          if (curCodim == 0)
+            grid().template communicateUG_<This, DataHandle, 0>(*this, level, dataHandle, iftype, dir);
+          else if (curCodim == Grid::dimension)
+            grid().template communicateUG_<This, DataHandle, Grid::dimension>(*this, level, dataHandle, iftype, dir);
+          else if (curCodim == Grid::dimension - 1)
+            grid().template communicateUG_<This, DataHandle, Grid::dimension-1>(*this, level, dataHandle, iftype, dir);
+          else if (curCodim == 1)
+            grid().template communicateUG_<This, DataHandle, 1>(*this, level, dataHandle, iftype, dir);
+          else
+            DUNE_THROW(NotImplemented, className(*this) << "::communicate(): Not " "supported for dim " << Grid::dimension << " and codim " << curCodim);
+        }
+#endif // ModelP
+      }
 
     private:
       const Grid *grid_;
