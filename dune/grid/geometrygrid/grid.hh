@@ -390,7 +390,7 @@ namespace Dune
     const LeafIndexSet &leafIndexSet () const
     {
       if( !leafIndexSet_ )
-        leafIndexSet_ = LeafIndexSet( hostGrid().leafIndexSet() );
+        leafIndexSet_.reset( hostGrid().leafIndexSet() );
       assert( leafIndexSet_ );
       return leafIndexSet_;
     }

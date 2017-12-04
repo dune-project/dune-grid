@@ -39,23 +39,18 @@ namespace Dune
 
       typedef typename Base::Types Types;
 
-      IndexSet ()
-        : hostIndexSet_( 0 )
-      {}
+      IndexSet () = default;
 
       explicit IndexSet ( const HostIndexSet &hostIndexSet )
         : hostIndexSet_( &hostIndexSet )
       {}
 
-      IndexSet ( const This &other )
-        : hostIndexSet_( other.hostIndexSet_ )
-      {}
+      // The index set contains a pointer to the host index set, so copying or assigning this can be dangerous.
+      IndexSet ( const This & ) = delete;
+      IndexSet ( This && ) = delete;
 
-      const This &operator= ( const This &other )
-      {
-        hostIndexSet_ = other.hostIndexSet_;
-        return *this;
-      }
+      IndexSet &operator= ( const This & ) = delete;
+      IndexSet &operator= ( This && ) = delete;
 
       using Base::index;
       using Base::subIndex;
@@ -97,6 +92,9 @@ namespace Dune
 
       explicit operator bool () const { return bool( hostIndexSet_ ); }
 
+      void reset () { hostIndexSet_ = nullptr; }
+      void reset ( const HostIndexSet &hostIndexSet ) { hostIndexSet_ = &hostIndexSet; }
+
     private:
       const HostIndexSet &hostIndexSet () const
       {
@@ -104,7 +102,7 @@ namespace Dune
         return *hostIndexSet_;
       }
 
-      const HostIndexSet *hostIndexSet_;
+      const HostIndexSet *hostIndexSet_ = nullptr;
     };
 
   } // namespace GeoGrid
