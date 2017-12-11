@@ -205,9 +205,9 @@ namespace Dune
       template< class DataHandleImp, class DataType >
       void communicate ( CommDataHandleIF< DataHandleImp, DataType > &dataHandle, InterfaceType iftype, CommunicationDirection dir ) const
       {
+#ifdef ModelP
         typedef CommDataHandleIF< DataHandleImp, DataType > DataHandle;
 
-#ifdef ModelP
         for (int curCodim = 0; curCodim <= Grid::dimension; ++curCodim) {
           if (!dataHandle.contains(Grid::dimension, curCodim))
             continue;
@@ -404,9 +404,9 @@ namespace Dune
       template< class DataHandleImp, class DataType >
       void communicate ( CommDataHandleIF< DataHandleImp, DataType > &dataHandle, InterfaceType iftype, CommunicationDirection dir ) const
       {
+#ifdef ModelP
         typedef CommDataHandleIF< DataHandleImp, DataType > DataHandle;
 
-#ifdef ModelP
         for (int curCodim = 0; curCodim <= Grid::dimension; ++curCodim) {
           if (!dataHandle.contains(Grid::dimension, curCodim))
             continue;
