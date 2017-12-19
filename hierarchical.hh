@@ -311,6 +311,10 @@ namespace Dune
 
       typedef typename Grid::template Codim< 0 >::Entity Element;
 
+      cls.def( "mark", [] ( Grid &self, const Element &element, Marker marker ) {
+            self.mark( static_cast< int >( marker ), element );
+          }, "element"_a, "marker"_a,
+          R"doc()doc" );
       cls.def( "mark", [] ( Grid &self, const std::function< Marker( const Element &e ) > &marking ) {
           std::pair< int, int > marked;
           for( const Element &element : elements( self.leafGridView() ) )
