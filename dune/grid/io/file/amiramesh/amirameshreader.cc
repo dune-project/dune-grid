@@ -45,7 +45,7 @@ void Dune::AmiraMeshReader<GridType>::readFunction(DiscFuncType& f, const std::s
     if (am_ValueData) {
       datafound = true;
 
-      if (f.size()<am->nElements("Nodes"))
+      if ((int) f.size() < am->nElements("Nodes"))
         DUNE_THROW(IOError, "When reading data from a surface field the "
                    << "array you provide has to have at least the size of the surface!");
 
@@ -62,7 +62,7 @@ void Dune::AmiraMeshReader<GridType>::readFunction(DiscFuncType& f, const std::s
       if (am_ValueData) {
         datafound = true;
 
-        if (f.size()<am->nElements("Nodes"))
+        if ((int) f.size() < am->nElements("Nodes"))
           DUNE_THROW(IOError, "When reading data from a surface field your the "
                      << "array you provide has to have at least the size of the surface!");
 
