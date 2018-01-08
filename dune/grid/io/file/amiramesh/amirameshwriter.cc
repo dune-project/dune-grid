@@ -91,7 +91,7 @@ void Dune::AmiraMeshWriter<GridView>::addGrid(const GridView& gridView,
         count=1;
       else {
         Refinement & refinement = Dune::buildRefinement<dim,ct>(*gt,coerceTo);
-        count = refinement.nElements(0);
+        count = refinement.nElements(Dune::refinementLevels(0));
       }
 
       noOfElements += count * indexSet.size(*gt);
@@ -128,18 +128,19 @@ void Dune::AmiraMeshWriter<GridView>::addGrid(const GridView& gridView,
 
         Refinement & refinement = Dune::buildRefinement<dim, ct>(eIt->type(),coerceTo);
 
-        eIterator eSubEnd = refinement.eEnd(0);
-        eIterator eSubIt = refinement.eBegin(0);
+        auto&& refInterval = Dune::refinementLevels(0);
+        eIterator eSubEnd = refinement.eEnd(refInterval);
+        eIterator eSubIt = refinement.eBegin(refInterval);
         IndexVector vertexIds;
 
         //Have to do this, because Refinement indices of corners don't match indexSet indices of the corners of that entity
         //So we have to check equality of two indices by checking equality of the coordinates of the corners
 
         //coordinates of nodes using refinement indices
-        std::vector<Coordinate> vertices(refinement.nVertices(0));
+        std::vector<Coordinate> vertices(refinement.nVertices(refInterval));
 
-        vIterator vEnd = refinement.vEnd(0);
-        for(vIterator vIt = refinement.vBegin(0); vIt != vEnd; ++vIt)
+        vIterator vEnd = refinement.vEnd(refInterval);
+        for(vIterator vIt = refinement.vBegin(refInterval); vIt != vEnd; ++vIt)
           vertices[vIt.index()]=(eIt->geometry().global(vIt.coords()));
 
         for( ; eSubIt != eSubEnd; ++eSubIt) {
@@ -379,7 +380,7 @@ void Dune::AmiraMeshWriter<GridView>::addCellData(const DataContainer& data,
         else
         {
           Refinement & refinement = Dune::buildRefinement<dim, ct>(*gt,coerceTo);
-          count = refinement.nElements(0);
+          count = refinement.nElements(Dune::refinementLevels(0));
         }
 
         noOfElements += count * indexSet.size(*gt);
@@ -422,7 +423,7 @@ void Dune::AmiraMeshWriter<GridView>::addCellData(const DataContainer& data,
     for (; dit!=ditend; ++dit)
     {
       Refinement & refinement = Dune::buildRefinement<dim, ct>(eIt->type(),coerceTo);
-      int num_subsimplices=refinement.nElements(0);
+      int num_subsimplices=refinement.nElements(Dune::refinementLevels(0));
 
       //Have to copy data if gridSplitUp because number_elements != number_data;
       for(int k=0; k<num_subsimplices; k++)
