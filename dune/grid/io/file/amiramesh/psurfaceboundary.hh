@@ -34,7 +34,7 @@ namespace Dune {
    * \note The dimension 'dim' must be 1 or 2, the psurface library doesn't implement
    *    anything else.
    */
-  template <int dim>
+  template <int dim, class field_type = double>
   class PSurfaceBoundary
   {
     static_assert((dim==1 or dim==2), "PSurfaceBoundaries can only have dimensions 1 or 2!");
@@ -51,7 +51,7 @@ namespace Dune {
        * \param psurfaceBoundary The psurface object that implements the segment
        * \param segment The number of the boundary segment in the psurface object
        */
-      PSurfaceBoundarySegment(const std::shared_ptr<PSurfaceBoundary<dim> >& psurfaceBoundary, int segment)
+      PSurfaceBoundarySegment(const std::shared_ptr<PSurfaceBoundary<dim, field_type> >& psurfaceBoundary, int segment)
         : psurfaceBoundary_(psurfaceBoundary),
           segment_(segment)
       {}
@@ -62,7 +62,7 @@ namespace Dune {
         Dune::FieldVector<double, dim+1> result;
 
         // Transform local to barycentric coordinates
-        psurface::StaticVector<float,dim> barCoords;
+        psurface::StaticVector<field_type, dim> barCoords;
 
         if (dim==2) {
           barCoords[0] = 1 - local[0] - local[1];
@@ -71,7 +71,7 @@ namespace Dune {
           barCoords[0] = 1 - local[0];
         }
 
-        psurface::StaticVector<float,dim+1> r;
+        psurface::StaticVector<field_type,dim+1> r;
 
         if (!psurfaceBoundary_->getPSurfaceObject()->positionMap(segment_, barCoords, r))
           DUNE_THROW(Dune::GridError, "psurface::positionMap returned error code");
@@ -82,14 +82,14 @@ namespace Dune {
         return result;
       }
 
-      std::shared_ptr<PSurfaceBoundary<dim> > psurfaceBoundary_;
+      std::shared_ptr<PSurfaceBoundary<dim, field_type> > psurfaceBoundary_;
       int segment_;
     };
 
 
 
     /** \brief Constructor from a given PSurface object */
-    PSurfaceBoundary(psurface::PSurface<dim,float>* psurface)
+    PSurfaceBoundary(psurface::PSurface<dim, field_type>* psurface)
       : psurface_(psurface)
     {}
 
@@ -100,7 +100,7 @@ namespace Dune {
      * This class retains control over the memory management.  Do not
      * delete the object you receive.
      */
-    psurface::PSurface<dim,float>* getPSurfaceObject()
+    psurface::PSurface<dim, field_type>* getPSurfaceObject()
     {
       return psurface_.get();
     }
@@ -112,16 +112,16 @@ namespace Dune {
      * The format is determined by the filename suffix.  If it is .h5, then the file
      * is assumed to be hdf5.  Otherwise it is assumed to be AmiraMesh.
      */
-    static std::shared_ptr<PSurfaceBoundary<dim> > read(const std::string& filename)
+    static std::shared_ptr<PSurfaceBoundary<dim, field_type> > read(const std::string& filename)
     {
-      psurface::PSurface<dim,float>* newDomain;
+      psurface::PSurface<dim, field_type>* newDomain;
 
 #if HAVE_PSURFACE_2_0
       // Try to read the file as an hdf5 file
       if (filename.find(".h5")==filename.length()-3) {
-        newDomain = psurface::Hdf5IO<float,dim>::read(filename);
+        newDomain = psurface::Hdf5IO<field_type,dim>::read(filename);
         if (newDomain)
-          return std::make_shared<PSurfaceBoundary<dim> >(newDomain);
+          return std::make_shared<PSurfaceBoundary<dim, field_type> >(newDomain);
       }
 #endif
 
@@ -132,12 +132,12 @@ namespace Dune {
         DUNE_THROW(IOError, "An error has occurred while reading " << filename);
 
       newDomain
-        = (psurface::PSurface<dim,float>*) psurface::AmiraMeshIO<float>::readAmiraMesh(am.get(), filename.c_str());
+        = (psurface::PSurface<dim, field_type>*) psurface::AmiraMeshIO<field_type>::readAmiraMesh(am.get(), filename.c_str());
 
       if (!newDomain)
         DUNE_THROW(IOError, "An error has occurred while reading " << filename);
 
-      return std::make_shared<PSurfaceBoundary<dim> >(newDomain);
+      return std::make_shared<PSurfaceBoundary<dim, field_type> >(newDomain);
 #else
       DUNE_THROW(IOError, "The given file is not in a supported format!");
 #endif
@@ -145,7 +145,7 @@ namespace Dune {
 
   private:
 
-    std::unique_ptr<psurface::PSurface<dim,float> > psurface_;
+    std::unique_ptr<psurface::PSurface<dim, field_type> > psurface_;
 
   };
 
