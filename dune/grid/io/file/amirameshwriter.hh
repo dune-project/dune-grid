@@ -206,7 +206,7 @@ namespace Dune {
                                  const std::string& filename,
                                  bool GridSplitUp = false) {
       LeafAmiraMeshWriter amiramesh;
-      if (f.size()==grid.size(GridType::dimension))
+      if ((int) f.size() == grid.size(GridType::dimension))
         amiramesh.addVertexData(f, grid.leafGridView(),GridSplitUp);
       else
         amiramesh.addCellData(f, grid.leafGridView(),GridSplitUp);
