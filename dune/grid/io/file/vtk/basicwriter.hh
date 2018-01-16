@@ -359,6 +359,7 @@ namespace Dune
         case polyData :         return concatPaths(path, name+".vtp");
         case unstructuredGrid : return concatPaths(path, name+".vtu");
         }
+        return concatPaths(path, name); // unknown fileType
       }
 
       //////////////////////////////////////////////////////////////////////
