@@ -11,6 +11,8 @@
 #include <dune/common/hybridutilities.hh>
 #include <dune/common/typeutilities.hh>
 
+#include <dune/geometry/referenceelements.hh>
+
 #include <dune/python/common/typeregistry.hh>
 #include <dune/python/pybind11/pybind11.h>
 
@@ -116,6 +118,73 @@ namespace Dune
             Args:
                 entity:   entity containing the subentities
                 codim:    codimension of the subentities (wrt. the grid dimension)
+
+            Returns:  Tuple of indices, in the order given by the reference element
+          )doc" );
+      }
+
+      cls.def( "subIndices", [] ( const IndexSet &self, const Entity &entity, int i, int c, int cc ) {
+            if( !self.contains( entity ) )
+              pybind11::value_error( "Entity not contained in index set." );
+            if( (c < Entity::codimension) || (c > Entity::dimension) )
+              throw pybind11::value_error( "Invalid codimension: " + std::to_string( c ) + " (must be in [" + std::to_string( Entity::codimension ) + ", " + std::to_string( Entity::dimension ) + "])" );
+            if( (cc < c) || (cc > Entity::dimension) )
+              throw pybind11::value_error( "Invalid codimension: " + std::to_string( cc ) + " (must be in [" + std::to_string( c ) + ", " + std::to_string( Entity::dimension ) + "])" );
+            const auto reference = referenceElement< double, Entity::dimension >( Entity.type() );
+            const int size = reference.size( i, c, cc );
+            pybind11::tuple subIndices( size );
+            for( int ii = 0; ii < size; ++ii )
+              subIndices[ ii ] = pybind11::cast( self.subIndex( entity, reference.subEntity(i, c, ii, cc), cc ) );
+            return subIndices;
+          }, "entity"_a, "index"_a, "codim"_a, "codim"_a,
+          R"doc(
+            get indices of all subentities in a codimension
+
+            Numerical codes frequently require all subindices of a subentity of a codimension,
+            e.g., all vertex indices of a edge.
+            This convenience method provides them in a single call.
+
+            Note: This method is implemented even if the grid does not implement
+                  entities of the corresponding codimension.
+
+            Args:
+                entity:   entity containing the subentities
+                index:    index of the subentity of entity
+                codim:    codimension of the subentity of entity
+                codim:    codimension of the subentities (wrt. the grid dimension)
+
+            Returns:  Tuple of indices, in the order given by the reference element
+          )doc" );
+      }
+
+      cls.def( "subIndices", [] ( const IndexSet &self, const Entity &entity, std::tuple< int, int >, int c ) {
+            if( !self.contains( entity ) )
+              pybind11::value_error( "Entity not contained in index set." );
+            if( (c < Entity::codimension) || (c > Entity::dimension) )
+              throw pybind11::value_error( "Invalid codimension: " + std::to_string( c ) + " (must be in [" + std::to_string( Entity::codimension ) + ", " + std::to_string( Entity::dimension ) + "])" );
+            if( (cc < c) || (cc > Entity::dimension) )
+              throw pybind11::value_error( "Invalid codimension: " + std::to_string( cc ) + " (must be in [" + std::to_string( c ) + ", " + std::to_string( Entity::dimension ) + "])" );
+            const auto reference = referenceElement< double, Entity::dimension >( Entity.type() );
+            const int size = reference.size( i, c, cc );
+            pybind11::tuple subIndices( size );
+            for( int ii = 0; ii < size; ++ii )
+              subIndices[ ii ] = pybind11::cast( self.subIndex( entity, reference.subEntity(i, c, ii, cc), cc ) );
+            return subIndices;
+          }, "entity"_a, "subentity"_a, "codim"_a,
+          R"doc(
+            get indices of all subentities in a codimension
+
+            Numerical codes frequently require all subindices of a subentity of a codimension,
+            e.g., all vertex indices of a edge.
+            This convenience method provides them in a single call.
+
+            Note: This method is implemented even if the grid does not implement
+                  entities of the corresponding codimension.
+
+            Args:
+                entity:       entity containing the subentities
+                subentity:    (index, codim) tuple
+                codim:        codimension of the subentities (wrt. the grid dimension)
 
             Returns:  Tuple of indices, in the order given by the reference element
           )doc" );
