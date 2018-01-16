@@ -46,6 +46,17 @@ namespace Dune
       static const bool v = true;
     };
 
+    /**
+     * \brief AlbertaGrid can iterate over all codimensions
+     *
+     * \ingroup AlbertaGrid
+     **/
+    template< int dim, int dimworld, int codim >
+    struct hasEntityIterator< AlbertaGrid< dim, dimworld >, codim >
+    {
+      static const bool v = true;
+    };
+
     /** \brief   AlbertaGrid is not levelwise conforming
      *           (since it uses bisection)
      *  \ingroup AlbertaGrid

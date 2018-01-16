@@ -2,7 +2,7 @@
 project("dune-grid" C CXX)
 
 # general stuff
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.1)
 
 if(NOT (dune-common_DIR OR dune-common_ROOT OR
         "${CMAKE_PREFIX_PATH}" MATCHES ".*dune-common.*"))

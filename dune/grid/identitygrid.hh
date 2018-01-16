@@ -344,25 +344,25 @@ namespace Dune
 
     /** \brief Size of the overlap on the leaf level */
     unsigned int overlapSize(int codim) const {
-      return hostgrid_->overlapSize(codim);
+      return hostgrid_->leafGridView().overlapSize(codim);
     }
 
 
     /** \brief Size of the ghost cell layer on the leaf level */
     unsigned int ghostSize(int codim) const {
-      return hostgrid_->ghostSize(codim);
+      return hostgrid_->leafGridView().ghostSize(codim);
     }
 
 
     /** \brief Size of the overlap on a given level */
     unsigned int overlapSize(int level, int codim) const {
-      return hostgrid_->overlapSize(level,codim);
+      return hostgrid_->levelGridView(level).overlapSize(codim);
     }
 
 
     /** \brief Size of the ghost cell layer on a given level */
     unsigned int ghostSize(int level, int codim) const {
-      return hostgrid_->ghostSize(level,codim);
+      return hostgrid_->levelGridView(level).ghostSize(codim);
     }
 
 
@@ -375,32 +375,6 @@ namespace Dune
     void loadBalance(int strategy, int minlevel, int depth, int maxlevel, int minelement){
       DUNE_THROW(NotImplemented, "IdentityGrid::loadBalance()");
     }
-
-    /** \brief The communication interface
-     *  @param T: array class holding data associated with the entities
-     *  @param P: type used to gather/scatter data in and out of the message buffer
-     *  @param codim: communicate entites of given codim
-     *  @param if: one of the predifined interface types, throws error if it is not implemented
-     *  @param level: communicate for entities on the given level
-     *
-     *  Implements a generic communication function sending an object of type P for each entity
-     *  in the intersection of two processors. P has two methods gather and scatter that implement
-     *  the protocol. Therefore P is called the "protocol class".
-     */
-    template<class T, template<class> class P, int codim>
-    void communicate (T& t, InterfaceType iftype, CommunicationDirection dir, int level);
-
-    /*! The new communication interface
-
-       communicate objects for all codims on a given level
-     */
-    template<class DataHandle>
-    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
-    {}
-
-    template<class DataHandle>
-    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const
-    {}
 #endif
 
 
@@ -489,6 +463,12 @@ namespace Dune
     struct hasEntity<IdentityGrid<HostGrid>, codim>
     {
       static const bool v = hasEntity<HostGrid,codim>::v;
+    };
+
+    template<class HostGrid, int codim>
+    struct hasEntityIterator<IdentityGrid<HostGrid>, codim>
+    {
+      static const bool v = hasEntityIterator<HostGrid, codim>::v;
     };
 
     /** \brief has conforming level grids when host grid has

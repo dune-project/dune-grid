@@ -210,34 +210,6 @@ namespace Dune {
       return 2;
     }
 
-    /** \brief The processor overlap for parallel computing.  Always zero because
-        this is a strictly sequential grid */
-    DUNE_DEPRECATED_MSG("overlapSize() is deprecated. Use the method on the LeafGridView instead.")
-    int overlapSize(int codim) const {
-      return 0;
-    }
-
-    /** \brief The processor ghost overlap for parallel computing.  Always zero because
-        this is a strictly sequential grid */
-    DUNE_DEPRECATED_MSG("ghostSize() is deprecated. Use the method on the LeafGridView instead.")
-    int ghostSize(int codim) const {
-      return 0;
-    }
-
-    /** \brief The processor overlap for parallel computing.  Always zero because
-        this is a strictly sequential grid */
-    DUNE_DEPRECATED_MSG("overlapSize() is deprecated. Use the method on the LevelGridView instead.")
-    int overlapSize(int level, int codim) const {
-      return 0;
-    }
-
-    /** \brief The processor ghost overlap for parallel computing.  Always zero because
-        this is a strictly sequential grid */
-    DUNE_DEPRECATED_MSG("ghostSize() is deprecated. Use the method on the LevelGridView instead.")
-    int ghostSize(int level, int codim) const {
-      return 0;
-    }
-
     /** \brief Get the set of global ids */
     const Traits::GlobalIdSet& globalIdSet() const
     {
@@ -320,16 +292,6 @@ namespace Dune {
     void globalRefine(int refCount);
 
     // dummy parallel functions
-
-    template<class DataHandle>
-    DUNE_DEPRECATED_MSG("communicate() is deprecated. Use the method on the LevelGridView instead.")
-    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
-    {}
-
-    template<class DataHandle>
-    DUNE_DEPRECATED_MSG("communicate() is deprecated. Use the method on the LeafGridView instead.")
-    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const
-    {}
 
     const CollectiveCommunication &comm () const
     {
@@ -433,6 +395,16 @@ namespace Dune {
     struct hasEntity< OneDGrid, cdim >
     {
       static const bool v = true;
+    };
+
+    /**
+     * \brief OneDGrid can iterate over all codimensions
+     * \ingroup OneDGrid
+     **/
+    template<int codim>
+    struct hasEntityIterator<OneDGrid, codim>
+    {
+      static const bool v = false;
     };
 
     /** \brief OneDGrid is levelwise conforming
