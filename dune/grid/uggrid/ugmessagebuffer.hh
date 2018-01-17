@@ -57,11 +57,10 @@ namespace Dune {
     static int ugGather_(typename UG_NS<dim>::DDD_OBJ obj, void* data)
     {
       // cast the DDD object to a UG entity pointer
-      typedef typename Dune::UG_NS<dim>::template Entity<codim>::T* UGEntityPointer;
-      UGEntityPointer ugEP = reinterpret_cast<typename Dune::UG_NS<dim>::template Entity<codim>::T*>(obj);
+      auto ugEP = reinterpret_cast<typename Dune::UG_NS<dim>::template Entity<codim>::T*>(obj);
 
       // construct a DUNE makeable entity from the UG entity pointer
-      /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
+      /** \bug The nullptr argument should actually be the UGGrid object.  But that is hard to obtain here,
        * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
       typedef UGMakeableEntity<codim, dim, UGGrid<dim> > DuneMakeableEntity;
       DuneMakeableEntity entity(ugEP, nullptr);
@@ -83,8 +82,7 @@ namespace Dune {
     static int ugScatter_(typename UG_NS<dim>::DDD_OBJ obj, void* data)
     {
       // cast the DDD object to a UG entity pointer
-      typedef typename Dune::UG_NS<dim>::template Entity<codim>::T* UGEntityPointer;
-      UGEntityPointer ugEP = reinterpret_cast<typename Dune::UG_NS<dim>::template Entity<codim>::T*>(obj);
+      auto ugEP = reinterpret_cast<typename Dune::UG_NS<dim>::template Entity<codim>::T*>(obj);
 
       // construct a DUNE makeable entity from the UG entity pointer
       /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
@@ -141,16 +139,10 @@ namespace Dune {
       // iterate over all entities, find the maximum size for
       // the current rank
       int maxSize = 0;
-      typedef typename
-      GridView
-      ::template Codim<codim>
-      ::template Partition<Dune::All_Partition>
-      ::Iterator Iterator;
-      Iterator it = gv.template begin<codim, Dune::All_Partition>();
-      const Iterator endIt = gv.template end<codim, Dune::All_Partition>();
-      for (; it != endIt; ++it) {
+      for (const auto& entity : entities(gv, Codim<codim>(), Dune::Partitions::all))
+      {
         maxSize = std::max((int) maxSize,
-                           (int) Base::duneDataHandle_->size(*it));
+                           (int) Base::duneDataHandle_->size(entity));
       }
 
       // find maximum size for all ranks
@@ -184,8 +176,7 @@ namespace Dune {
     static unsigned ugBufferSize_(const GridView &gv)
     {
       if (Base::duneDataHandle_->fixedSize(dim, codim)) {
-        typedef typename GridView::template Codim<0>::template Partition<InteriorBorder_Partition>::Iterator ElementIterator;
-        ElementIterator element = gv.template begin<0, InteriorBorder_Partition>();
+        auto element = gv.template begin<0, InteriorBorder_Partition>();
         return sizeof(DataType)
                * Base::duneDataHandle_->size(element->template subEntity<codim>(0));
       }
@@ -193,20 +184,12 @@ namespace Dune {
       // iterate over all entities, find the maximum size for
       // the current rank
       int maxSize = 0;
-      typedef typename
-      GridView
-      ::template Codim<0>
-      ::template Partition<Dune::All_Partition>
-      ::Iterator Iterator;
-      Iterator it = gv.template begin<0, Dune::All_Partition>();
-      const Iterator endIt = gv.template end<0, Dune::All_Partition>();
-      for (; it != endIt; ++it) {
-        int numberOfSubentities = it->subEntities(codim);
+      for (const auto& element : elements(gv, Dune::Partitions::all))
+      {
+        int numberOfSubentities = element.subEntities(codim);
         for (int k = 0; k < numberOfSubentities; k++)
         {
-          typedef typename GridView::template Codim<0>::Entity Element;
-          typedef typename Element::template Codim<codim>::Entity SubEntity;
-          const SubEntity subEntity(it->template subEntity<codim>(k));
+          const auto subEntity = element.template subEntity<codim>(k);
 
           maxSize = std::max((int) maxSize,
                              (int) Base::duneDataHandle_->size(subEntity));
