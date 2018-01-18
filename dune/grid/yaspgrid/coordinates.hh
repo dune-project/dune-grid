@@ -92,7 +92,7 @@ namespace Dune
             news[i] -= overlap;
         }
 
-        newh[i] = _h[i] / 2.;
+        newh[i] = _h[i] / ct(2.);
       }
       return EquidistantCoordinates<ct,dim>(newh,news);
     }
@@ -199,7 +199,7 @@ namespace Dune
              news[i] -= overlap;
          }
 
-         newh[i] = _h[i] / 2.;
+         newh[i] = _h[i] / ct(2.);
        }
        return EquidistantOffsetCoordinates<ct,dim>(_origin,newh,news);
      }
@@ -314,7 +314,7 @@ namespace Dune
           {
             it += overlap/2;
             if (overlap%2)
-              *(++iit) = (*it + *(++it)) / 2.;
+              *(++iit) = (*it + *(++it)) / ct(2.);
           }
           if (ovlp_up[i])
             end -= overlap/2;
@@ -323,7 +323,7 @@ namespace Dune
         for (;it!=end;)
         {
           *(++iit) = *it;
-          *(++iit) = (*it + *(++it)) / 2.;
+          *(++iit) = (*it + *(++it)) / ct(2.);
         }
 
         if (++iit != newcoords[i].end())
