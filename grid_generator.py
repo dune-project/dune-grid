@@ -58,7 +58,10 @@ def writeVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointve
                 _writeVTK(vtk,grid,f,n,dataTag)
         elif isinstance(dataFunctions, list):
             for f in dataFunctions:
-                _writeVTK(vtk,grid,f,f.name,dataTag)
+                try:
+                    _writeVTK(vtk,grid,f,f.name,dataTag)
+                except AttributeError:
+                    _writeVTK(vtk,grid,f[0],f[1],dataTag)
         elif dataFunctions is not None:
             raise TypeError("Argument '" + dataName + "' must be a dict or list instance.")
 
