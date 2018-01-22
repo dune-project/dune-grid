@@ -402,7 +402,7 @@ namespace Dune {
     }
 
     /** \brief Returns pointers to the coordinate arrays of a UG element */
-    static void Corner_Coordinates(const UG_NS< UG_DIM >::Element* theElement, double* x[]) {
+    static int Corner_Coordinates(const UG_NS< UG_DIM >::Element* theElement, double* x[]) {
       using UG_NAMESPACE ::NODE;
       using UG_NAMESPACE ::TRIANGLE;
       using UG_NAMESPACE ::QUADRILATERAL;
@@ -411,31 +411,36 @@ namespace Dune {
       using UG_NAMESPACE ::PRISM;
       using UG_NAMESPACE ::n_offset;
       using UG::UINT;
-      int n DUNE_UNUSED;
+      int n;
       CORNER_COORDINATES(theElement, n, x);
+      return n;
     }
 
     /** \brief Returns pointers to the coordinate arrays of a UG node */
-    static void Corner_Coordinates(const UG_NS< UG_DIM >::Node* theNode, double* x[]) {
+    static int Corner_Coordinates(const UG_NS< UG_DIM >::Node* theNode, double* x[]) {
       x[0] = theNode->myvertex->iv.x;
+      return 1;
     }
 
     /** \brief Returns pointers to the coordinate arrays of a UG edge */
-    static void Corner_Coordinates(const UG_NS< UG_DIM >::Edge* theEdge, double* x[]) {
+    static int Corner_Coordinates(const UG_NS< UG_DIM >::Edge* theEdge, double* x[]) {
       x[0] = theEdge->links[0].nbnode->myvertex->iv.x;
       x[1] = theEdge->links[1].nbnode->myvertex->iv.x;
+      return 2;
     }
 
     /** \brief Returns pointers to the coordinate arrays of a UG vector */
-    static void Corner_Coordinates(const UG_NS< UG_DIM >::Vector* theVector, double* x[]) {
+    static int Corner_Coordinates(const UG_NS< UG_DIM >::Vector* theVector, double* x[]) {
       UG_NS< UG_DIM >::Element* center;
       unsigned int side;
       UG_NS< UG_DIM >::GetElementAndSideFromSideVector(theVector, center, side);
-      for (int i = 0; i < Corners_Of_Side(center, side); i++)
+      int n = Corners_Of_Side(center, side);
+      for (int i = 0; i < n; i++)
       {
         unsigned idxInElem = Corner_Of_Side(center, side, i);
         x[i] = Corner(center, idxInElem)->myvertex->iv.x;
       }
+      return n;
     }
 
     static int GlobalToLocal(int n, const double** cornerCoords,
