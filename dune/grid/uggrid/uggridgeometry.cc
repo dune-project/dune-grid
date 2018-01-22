@@ -92,10 +92,10 @@ global(const FieldVector<UGCtype, mydim>& local) const
   // we are an actual element in UG
   // coorddim*coorddim is an upper bound for the number of vertices
   UGCtype* cornerCoords[coorddim*coorddim];
-  UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
+  int n = UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
 
   // Actually do the computation
-  UG_NS<coorddim>::Local_To_Global(corners(), cornerCoords, local, globalCoord);
+  UG_NS<coorddim>::Local_To_Global(n, cornerCoords, local, globalCoord);
 
   return globalCoord;
 }
@@ -115,11 +115,11 @@ local (const FieldVector<typename GridImp::ctype, coorddim>& global) const
 
   // coorddim*coorddim is an upper bound for the number of vertices
   UGCtype* cornerCoords[coorddim*coorddim];
-  UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
+  int n = UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
 
   // Actually do the computation
   /** \todo Why is this const_cast necessary? */
-  UG_NS<coorddim>::GlobalToLocal(corners(), const_cast<const double**>(cornerCoords), &global[0], &result[0]);
+  UG_NS<coorddim>::GlobalToLocal(n, const_cast<const double**>(cornerCoords), &global[0], &result[0]);
 
   return result;
 }
@@ -146,10 +146,10 @@ jacobianInverseTransposed (const FieldVector<typename GridImp::ctype, mydim>& lo
   // compile array of pointers to corner coordinates
   // coorddim*coorddim is an upper bound for the number of vertices
   UGCtype* cornerCoords[coorddim*coorddim];
-  UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
+  int n = UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
 
   // compute the transformation onto the reference element (or vice versa?)
-  UG_NS<coorddim>::Transformation(corners(), cornerCoords, local, jIT);
+  UG_NS<coorddim>::Transformation(n, cornerCoords, local, jIT);
 
   return jIT;
 }
@@ -162,10 +162,10 @@ jacobianTransposed (const FieldVector<typename GridImp::ctype, mydim>& local) co
   // compile array of pointers to corner coordinates
   // coorddim*coorddim is an upper bound for the number of vertices
   UGCtype* cornerCoords[coorddim*coorddim];
-  UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
+  int n = UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
 
   // compute the transformation onto the reference element (or vice versa?)
-  UG_NS<coorddim>::JacobianTransformation(corners(), cornerCoords, local, jac);
+  UG_NS<coorddim>::JacobianTransformation(n, cornerCoords, local, jac);
 
   return jac;
 }

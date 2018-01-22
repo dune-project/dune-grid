@@ -94,8 +94,8 @@ namespace Dune {
 
       // coorddim*coorddim is an upper bound for the number of vertices
       UGCtype* cornerCoords[coorddim*coorddim];
-      UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
-      return UG_NS<coorddim>::Area_Of_Element(corners(),
+      int n = UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
+      return UG_NS<coorddim>::Area_Of_Element(n,
                                               const_cast<const double**>(cornerCoords));
     }
 
