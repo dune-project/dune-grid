@@ -119,7 +119,6 @@ void checkMixedDataMapper(const Mapper& mapper, const GridView& gridView)
   std::set<int> indices;
 
   Index elementBlockSize = 0, edgeBlockSize = 0;
-  Index index;
 
   for (const auto& element : elements(gridView))
   {
