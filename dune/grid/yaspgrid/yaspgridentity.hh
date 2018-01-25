@@ -71,12 +71,12 @@ namespace Dune {
       static constexpr std::array<int, sizeof...(I)> computeValues(std::index_sequence<I...>)
         {
           int r = 0, c = 0;
-          return { ((void)I, nextValue(r, c))... };
+          return {{ ((void)I, nextValue(r, c))... }};
         }
 
       template<std::size_t... I>
       static constexpr std::array<int, sizeof...(I)> computeOffsets(std::index_sequence<I...>)
-        { return { (I*(I+1)/2)... }; }
+        { return {{ (I*(I+1)/2)... }}; }
 
       static constexpr std::array<int,(n+1)*(n+2)/2> _values = computeValues(std::make_index_sequence<(n+1)*(n+2)/2>{});
       static constexpr std::array<int,n+1> _offsets = computeOffsets(std::make_index_sequence<n+1>{});
@@ -134,7 +134,7 @@ namespace Dune {
       static constexpr std::array<int, sizeof...(I)> computeOffsets(std::index_sequence<I...>)
         {
           int offset = 0;
-          return { (nextOffset(offset, I))... };
+          return {{ (nextOffset(offset, I))... }};
         }
 
       // compute shift table entry for (`codim`, `i`) and advance `codim`, `i`
@@ -155,7 +155,7 @@ namespace Dune {
       static constexpr std::array<unsigned char, sizeof...(I)> computeValues(std::index_sequence<I...>)
         {
           int codim = 0, i = 0;
-          return { ((void)I, nextValue(codim, i))... };
+          return {{ ((void)I, nextValue(codim, i))... }};
         }
 
       static constexpr std::array<int,dim+1> _offsets = computeOffsets(std::make_index_sequence<dim+1>{});
