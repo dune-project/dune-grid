@@ -17,7 +17,6 @@
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 
-#include <dune/python/common/logger.hh>
 #include <dune/python/grid/entity.hh>
 #include <dune/python/grid/function.hh>
 #include <dune/python/grid/indexset.hh>
@@ -204,39 +203,6 @@ namespace Dune
           Args:
               codim:    Codimension to obtain range of entities for
         )doc" );
-      Logger logger( "dune.grid" );
-      cls.def( "entities", [ logger ] ( pybind11::object self, int codim, PartitionIteratorType pitype ) {
-          if( (codim < 0) || (codim > GridView::dimension) )
-            throw pybind11::value_error( "Invalid codimension: " + std::to_string( codim ) + " (must be in [0, " + std::to_string( GridView::dimension ) + "])." );
-          logger.error( "The entities no longer has a partition type argument." );
-          switch( pitype )
-          {
-          case Interior_Partition:
-            logger.error( "The parallel versions can be obtained from the corresponding partition, i.e., interiorPartition." );
-            break;
-
-          case InteriorBorder_Partition:
-            logger.error( "The parallel versions can be obtained from the corresponding partition, i.e., interiorBorderPartition." );
-            break;
-
-          case Overlap_Partition:
-            logger.error( "The parallel versions can be obtained from the corresponding partition, i.e., overlapPartition." );
-            break;
-
-          case OverlapFront_Partition:
-            logger.error( "The parallel versions can be obtained from the corresponding partition, i.e., overlapFrontPartition." );
-            break;
-
-          case All_Partition:
-            logger.error( "The parallel versions can be obtained from the corresponding partition, i.e., allPartition." );
-            break;
-
-          case Ghost_Partition:
-            logger.error( "The parallel versions can be obtained from the corresponding partition, i.e., ghostPartition." );
-            break;
-          }
-          throw pybind11::value_error( "The entities no longer has a partition type argument." );
-        } );
 
       registerPyIntersectionIterator< GridView >();
       cls.def( "intersections", [] ( const GridView &self, const typename GridView::template Codim< 0 >::Entity &e ) {

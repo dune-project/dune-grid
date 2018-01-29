@@ -23,11 +23,11 @@
 #include <dune/grid/io/file/gmshreader.hh>
 #include <dune/grid/utility/structuredgridfactory.hh>
 
-#include <dune/python/common/common.hh>
 #include <dune/python/common/mpihelper.hh>
 #include <dune/python/common/typeregistry.hh>
 
 #include <dune/python/grid/capabilities.hh>
+#include <dune/python/grid/enums.hh>
 #include <dune/python/grid/factory.hh>
 #include <dune/python/grid/gridview.hh>
 #include <dune/python/grid/idset.hh>

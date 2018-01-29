@@ -10,8 +10,8 @@
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/grid/io/file/vtk/subsamplingvtkwriter.hh>
 
-#include <dune/python/common/common.hh>
 #include <dune/python/common/getdimension.hh>
+#include <dune/python/grid/enums.hh>
 #include <dune/python/grid/object.hh>
 
 #include <dune/python/pybind11/pybind11.h>
