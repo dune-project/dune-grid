@@ -6,5 +6,3 @@ add_python_targets(grid
   map
   datahandle
 )
-
-dune_add_pybind11_module(NAME _grid)

@@ -8,7 +8,7 @@
 # from .yasp import create as yaspGrid
 
 
-from ._grid import reader
+from .._grid import reader
 from .map import MultipleCodimMultipleGeomTypeMapper as Mapper
 
 class CartesianDomain(tuple):
