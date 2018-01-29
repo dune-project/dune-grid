@@ -8,8 +8,8 @@
 # from .yasp import create as yaspGrid
 
 
-from ..common import reader
-from dune.grid.map import MultipleCodimMultipleGeomTypeMapper as Mapper
+from ._grid import reader
+from .map import MultipleCodimMultipleGeomTypeMapper as Mapper
 
 class CartesianDomain(tuple):
     def __new__ (cls, lower,upper,division,**parameters):
