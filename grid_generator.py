@@ -1,11 +1,11 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 __metaclass__ = type
 
-import dune.common as common
 from ..generator.generator import SimpleGenerator
 from dune.common.hashit import hashIt
+from dune.common import _raise
 from dune.deprecate import deprecated
-from dune.grid import gridFunction
+from dune.grid import gridFunction, DataType
 
 def getDimgrid(constructor):
     dimgrid = None
@@ -65,10 +65,10 @@ def writeVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointve
         elif dataFunctions is not None:
             raise TypeError("Argument '" + dataName + "' must be a dict or list instance.")
 
-    addDataToVTKWriter(celldata, 'celldata', common.DataType.CellData)
-    addDataToVTKWriter(pointdata, 'pointdata', common.DataType.PointData)
-    addDataToVTKWriter(cellvector, 'cellvector', common.DataType.CellVector)
-    addDataToVTKWriter(pointvector, 'pointvector', common.DataType.PointVector)
+    addDataToVTKWriter(celldata, 'celldata', DataType.CellData)
+    addDataToVTKWriter(pointdata, 'pointdata', DataType.PointData)
+    addDataToVTKWriter(cellvector, 'cellvector', DataType.CellVector)
+    addDataToVTKWriter(pointvector, 'pointvector', DataType.PointVector)
 
     if write:
         if number is None:
@@ -122,8 +122,8 @@ def addAttr(module, cls):
         setattr(cls, "plot", plot)
         setattr(cls, "triangulation", triangulation)
     else:
-        setattr(cls, "plot", lambda *arg,**kwarg: common._raise(AttributeError("plot only implemented on 2D grids")))
-        setattr(cls, "triangulation", lambda *arg,**kwarg: common._raise(AttributeError("triangulation only implemented on 2d grid")))
+        setattr(cls, "plot", lambda *arg,**kwarg: _raise(AttributeError("plot only implemented on 2D grids")))
+        setattr(cls, "triangulation", lambda *arg,**kwarg: _raise(AttributeError("triangulation only implemented on 2d grid")))
 
     setattr(cls, "globalGridFunction", globalGridFunction)
     setattr(cls, "localGridFunction", localGridFunction)
