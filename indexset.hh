@@ -129,7 +129,7 @@ namespace Dune
               throw pybind11::value_error( "Invalid codimension: " + std::to_string( c ) + " (must be in [" + std::to_string( Entity::codimension ) + ", " + std::to_string( Entity::dimension ) + "])" );
             if( (cc < c) || (cc > Entity::dimension) )
               throw pybind11::value_error( "Invalid codimension: " + std::to_string( cc ) + " (must be in [" + std::to_string( c ) + ", " + std::to_string( Entity::dimension ) + "])" );
-            const auto reference = referenceElement< double, Entity::dimension >( Entity.type() );
+            const auto reference = referenceElement< double, Entity::dimension >( entity.type() );
             const int size = reference.size( i, c, cc );
             pybind11::tuple subIndices( size );
             for( int ii = 0; ii < size; ++ii )
@@ -154,16 +154,17 @@ namespace Dune
 
             Returns:  Tuple of indices, in the order given by the reference element
           )doc" );
-      }
 
-      cls.def( "subIndices", [] ( const IndexSet &self, const Entity &entity, std::tuple< int, int >, int c ) {
+      cls.def( "subIndices", [] ( const IndexSet &self, const Entity &entity, std::pair< int, int > ic, int c ) {
+            int i  = ic.first;
+            int cc = ic.second;
             if( !self.contains( entity ) )
               pybind11::value_error( "Entity not contained in index set." );
             if( (c < Entity::codimension) || (c > Entity::dimension) )
               throw pybind11::value_error( "Invalid codimension: " + std::to_string( c ) + " (must be in [" + std::to_string( Entity::codimension ) + ", " + std::to_string( Entity::dimension ) + "])" );
             if( (cc < c) || (cc > Entity::dimension) )
               throw pybind11::value_error( "Invalid codimension: " + std::to_string( cc ) + " (must be in [" + std::to_string( c ) + ", " + std::to_string( Entity::dimension ) + "])" );
-            const auto reference = referenceElement< double, Entity::dimension >( Entity.type() );
+            const auto reference = referenceElement< double, Entity::dimension >( entity.type() );
             const int size = reference.size( i, c, cc );
             pybind11::tuple subIndices( size );
             for( int ii = 0; ii < size; ++ii )
