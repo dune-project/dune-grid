@@ -128,6 +128,12 @@ def addAttr(module, cls):
     setattr(cls, "globalGridFunction", globalGridFunction)
     setattr(cls, "localGridFunction", localGridFunction)
 
+    def gfPlot(gf, *args, **kwargs):
+        gf.grid.plot(gf,*args,**kwargs)
+    for gf in dir(cls):
+        if gf.startswith("GridFunction"):
+            setattr( getattr(cls, gf), "plot", gfPlot)
+
 
 generator = SimpleGenerator("HierarchicalGrid", "Dune::Python")
 
