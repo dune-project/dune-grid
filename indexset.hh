@@ -121,7 +121,6 @@ namespace Dune
 
             Returns:  Tuple of indices, in the order given by the reference element
           )doc" );
-      }
 
       cls.def( "subIndices", [] ( const IndexSet &self, const Entity &entity, int i, int c, int cc ) {
             if( !self.contains( entity ) )
