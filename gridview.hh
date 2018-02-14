@@ -144,19 +144,23 @@ namespace Dune
       registerGridViewIndexSet< GridView >( cls );
       registerMultipleCodimMultipleGeomTypeMapper< GridView >( cls );
 
-      typedef MultipleCodimMultipleGeomTypeMapper< GridView > MCMGMapper;
-      cls.def( "mapper", [] ( GridView &self, pybind11::function layout ) {
-          return new MCMGMapper( self, [ layout ] ( Dune::GeometryType gt, int griddim ) { return static_cast< unsigned int >( pybind11::cast< int >( layout( gt ) )); } );
+      cls.def( "mapper", [] ( GridView &self, pybind11::object layout ) {
+          return makeMultipleCodimMultipleGeomTypeMapper( self, layout );
         }, pybind11::keep_alive< 0, 1 >(), "layout"_a,
         R"doc(
-          Set up a mapper to attach data to the given grid. The layout argument
-          defines the set of subentities (given by geometry type)
-          to attach the data to and how many degrees of freedom to use per subentity.
+          Set up a mapper to attach data to the grid. The layout argument defines how many
+          degrees of freedom to assign to each subentity of a geometry type.
 
           Args:
-              layout:     function taken a geometry type and returning the number
-                          of dof to attach to the entities of that geometry type.
+              layout:     function, dict, tuple, or list defining the number of indices to reserve
+                          for each geometry type.
                           0 or `False`: do not attach any, `True` can be used instead of 1.
+
+          If layout is a dict, is must map geometry types to integers. All types not mentioned in
+          the dictionary are assumed to be zero.
+
+          If layout is a tuple or a list, it must contain exactly dimension+1 integers, one for
+          each codimension in the grid.
 
           Returns:   the mapper
         )doc" );
@@ -334,8 +338,8 @@ namespace Dune
                 collective communication must call the corresponding method.
         )doc" );
 
-      cls.def( "communicate", [] ( const GridView &gridView,
-                                   NumPyCommDataHandle<MCMGMapper,double,std::function<double(double,double)>> &dataHandle, InterfaceType iftype, CommunicationDirection dir ) {
+      typedef NumPyCommDataHandle< MultipleCodimMultipleGeomTypeMapper< GridView >, double, std::function< double ( double, double ) > > CommDataHandle;
+      cls.def( "communicate", [] ( const GridView &gridView, CommDataHandle &dataHandle, InterfaceType iftype, CommunicationDirection dir ) {
             gridView.communicate( dataHandle, iftype, dir );
           } );
       cls.def( "communicate", [] ( const GridView &gridView, pybind11::object dataHandle, InterfaceType iftype, CommunicationDirection dir ) {

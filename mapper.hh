@@ -133,7 +133,61 @@ namespace Dune
           }
         }
       }
+
     } // namespace detail
+
+
+
+    // makeMultipleCodimMultipleGeomTypeMapper
+    // ---------------------------------------
+
+    template< class GridView >
+    MultipleCodimMultipleGeomTypeMapper< GridView > *makeMultipleCodimMultipleGeomTypeMapper ( const GridView &gridView, pybind11::object layout )
+    {
+      typedef MultipleCodimMultipleGeomTypeMapper< GridView > MCMGMapper;
+
+      if( pybind11::isinstance< pybind11::function >( layout ) )
+      {
+        const auto function = pybind11::cast< pybind11::function >( layout );
+        return new MCMGMapper( gridView, [ function ] ( Dune::GeometryType gt, int griddim ) -> unsigned int { return pybind11::cast< int >( function( gt ) ); } );
+      }
+
+      if( pybind11::isinstance< pybind11::dict >( layout ) )
+      {
+        typedef Dune::GlobalGeometryTypeIndex GTI;
+        std::array< unsigned int, GTI::size( GridView::dimension ) > count;
+        std::fill( count.begin(), count.end(), 0 );
+        for( auto entry : pybind11::cast< pybind11::dict >( layout ) )
+          count[ GTI::index( pybind11::cast< Dune::GeometryType >( entry.first ) ) ] = pybind11::cast< int >( entry.second );
+        return new MCMGMapper( gridView, [ count ] ( Dune::GeometryType gt, int griddim ) { return count[ Dune::GlobalGeometryTypeIndex::index( gt ) ]; } );
+      }
+
+      if( pybind11::isinstance< pybind11::tuple >( layout ) )
+      {
+        std::array< unsigned int, GridView::dimension+1 > count;
+        const auto tuple = pybind11::cast< pybind11::tuple >( layout );
+        if( pybind11::len( tuple ) != GridView::dimension+1 )
+          throw pybind11::value_error( "len(layout) must be " + std::to_string( GridView::dimension ) + "." );
+        for( int d = 0; d < GridView::dimension; ++d )
+          count[ d ] = pybind11::cast< int >( tuple[ GridView::dimension - d ] );
+        return new MCMGMapper( gridView, [ count ] ( Dune::GeometryType gt, int griddim ) { return count[ gt.dim() ]; } );
+      }
+
+      if( pybind11::isinstance< pybind11::list >( layout ) )
+      {
+        std::array< unsigned int, GridView::dimension+1 > count;
+        const auto list = pybind11::cast< pybind11::list >( layout );
+        if( pybind11::len( list ) != GridView::dimension+1 )
+          throw pybind11::value_error( "len(layout) must be " + std::to_string( GridView::dimension ) + "." );
+        for( int d = 0; d < GridView::dimension; ++d )
+          count[ d ] = pybind11::cast< int >( list[ GridView::dimension - d ] );
+        return new MCMGMapper( gridView, [ count ] ( Dune::GeometryType gt, int griddim ) { return count[ gt.dim() ]; } );
+      }
+
+      throw pybind11::value_error( "Argument 'layout' must be either a function, a dict, a tuple, or a list." );
+    }
+
+
 
     // registerMapperCommunicate
     // -------------------------
@@ -331,23 +385,40 @@ namespace Dune
         )doc" );
     }
 
+
+
     // registerMultipleCodimMultipleGeomTypeMapper
     // -------------------------------------------
 
     template<typename GridView>
     auto registerMultipleCodimMultipleGeomTypeMapper(pybind11::handle scope)
     {
+      using pybind11::operator""_a;
+
       typedef MultipleCodimMultipleGeomTypeMapper<GridView> MCMGMapper;
       auto cls = insertClass<MCMGMapper>(scope, "MultipleCodimMultipleGeomTypeMapper",
           GenerateTypeName("Dune::MultipleCodimMultipleGeomTypeMapper", MetaType<GridView>()),
           IncludeFiles{"dune/grid/common/mcmgmapper.hh","dune/python/grid/mapper.hh"}).first;
       registerMapper<GridView>(cls);
-      cls.def( pybind11::init( [] ( const GridView& gridView, pybind11::function contains ) {
-            return MCMGMapper(gridView,
-                  [contains](Dune::GeometryType gt, int griddim)
-                  { return (unsigned)(contains(gt).cast<int>()); }
-                ); } ),
-          pybind11::keep_alive<1, 2>() );
+      cls.def( pybind11::init( [] ( const GridView &grid, pybind11::object layout ) {
+          return makeMultipleCodimMultipleGeomTypeMapper( grid, layout );
+        } ), pybind11::keep_alive< 1, 2 >(), "grid"_a, "layout"_a,
+        R"doc(
+          Set up a mapper to attach data to a grid. The layout argument defines how many
+          degrees of freedom to assign to each subentity of a geometry type.
+
+          Args:
+              grid:       grid to set the mapper up for
+              layout:     function, dict, tuple, or list defining the number of indices to reserve
+                          for each geometry type.
+                          0 or `False`: do not attach any, `True` can be used instead of 1.
+
+          If layout is a dict, is must map geometry types to integers. All types not mentioned in
+          the dictionary are assumed to be zero.
+
+          If layout is a tuple or a list, it must contain exactly dimension+1 integers, one for
+          each codimension in the grid.
+        )doc" );
       return cls;
     }
 
