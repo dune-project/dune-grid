@@ -101,10 +101,6 @@ def plot(self, function=None, *args, **kwargs):
         except AttributeError:
             dune.plotting.plotPointData(solution=self.function(function),*args,**kwargs)
 
-def mapper(self,layout):
-    from dune.grid.map import MultipleCodimMultipleGeomTypeMapper as Mapper
-    return Mapper(self,layout)
-
 @deprecated
 def globalGridFunction(gv, evaluator):
     return gv.function(evaluator)
@@ -116,7 +112,6 @@ def addAttr(module, cls):
     setattr(cls, "_module", module)
     setattr(cls, "writeVTK", writeVTK)
     setattr(cls, "sequencedVTK", sequencedVTK)
-    setattr(cls, "mapper", mapper)
 
     if cls.dimension == 2:
         setattr(cls, "plot", plot)
