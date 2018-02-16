@@ -154,13 +154,15 @@ namespace Dune
           Args:
               layout:     function, dict, tuple, or list defining the number of indices to reserve
                           for each geometry type.
-                          0 or `False`: do not attach any, `True` can be used instead of 1.
 
           If layout is a dict, is must map geometry types to integers. All types not mentioned in
           the dictionary are assumed to be zero.
 
           If layout is a tuple or a list, it must contain exactly dimension+1 integers, one for
           each codimension in the grid.
+
+          if layout is a function it maps a geometry type to the number of degrees of freedom to
+          reserve. Here a return value of 0 or `False` indicates that no data is to be attach, `True` can be used instead of 1.
 
           Returns:   the mapper
         )doc" );
