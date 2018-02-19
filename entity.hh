@@ -186,7 +186,7 @@ namespace Dune
         cls.def_property_readonly( "level", [] ( const Entity &self ) { return self.level(); } );
         cls.def_property_readonly( "type", [] ( const Entity &self ) { return self.type(); } );
         cls.def_property_readonly( "partitionType", [] ( const Entity &self ) { return self.partitionType(); } );
-        cls.def_property_readonly( "domain", [] ( const Entity &self ) { return referenceElement< double, Entity::dimension >( self.type() ); }, pybind11::keep_alive< 0, 1 >() );
+        cls.def_property_readonly( "referenceElement", [] ( const Entity &self ) { return referenceElement< double, Entity::dimension >( self.type() ); }, pybind11::keep_alive< 0, 1 >() );
 
         cls.def( pybind11::self == pybind11::self );
         cls.def( pybind11::self != pybind11::self );

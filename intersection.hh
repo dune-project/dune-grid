@@ -26,6 +26,7 @@ namespace Dune
       void registerGridIntersection ( pybind11::handle scope,
           pybind11::class_<Intersection> cls )
       {
+        const int mydimension = Intersection::mydimension;
         // information on boundary intersections
         cls.def_property_readonly( "boundary", &Intersection::boundary );
         cls.def_property_readonly( "boundarySegmentIndex", [] ( const Intersection &i ) {
@@ -38,6 +39,12 @@ namespace Dune
         // geometric information
         cls.def_property_readonly( "geometry", &Intersection::geometry );
         cls.def_property_readonly( "type", &Intersection::type );
+        cls.def_property_readonly( "referenceElement", []( const Intersection &self ) {
+            return referenceElement< double, mydimension >( self.type() );
+          }, pybind11::keep_alive< 0, 1 >(),
+          R"doc(
+            corresponding reference element, describing the domain of the map
+          )doc" );
 
         // information on inside entity
         cls.def_property_readonly( "inside", &Intersection::inside );

@@ -162,14 +162,14 @@ namespace Dune
           R"doc(
             True, if the map is affine-linear, False otherwise
           )doc" );
-        cls.def_property_readonly( "domain", []( const Geometry &self ) {
+        cls.def_property_readonly( "referenceElement", []( const Geometry &self ) {
             return referenceElement< double, mydimension >( self.type() );
           }, pybind11::keep_alive< 0, 1 >(),
           R"doc(
             corresponding reference element, describing the domain of the map
           )doc" );
 
-        cls.def( "position", [] ( const Geometry &self, const LocalCoordinate &x ) { return self.global( x ); }, "x"_a,
+        cls.def( "toGlobal", [] ( const Geometry &self, const LocalCoordinate &x ) { return self.global( x ); }, "x"_a,
           R"doc(
             obtain global position of a local point
 
@@ -182,11 +182,11 @@ namespace Dune
             Note: This method may be used in vectorized form by passing in a
                   NumPy array for 'x'.
           )doc" );
-        cls.def( "position", [] ( const Geometry &self, Array x ) {
+        cls.def( "toGlobal", [] ( const Geometry &self, Array x ) {
             return vectorize( [ &self ] ( const LocalCoordinate &x ) { return self.global( x ); }, x );
           } );
 
-        cls.def( "localPosition", [] ( const Geometry &self, const GlobalCoordinate &y ) { return self.local( y ); }, "y"_a,
+        cls.def( "toLocal", [] ( const Geometry &self, const GlobalCoordinate &y ) { return self.local( y ); }, "y"_a,
           R"doc(
             obtain local point mapped to a global position
 
@@ -199,7 +199,7 @@ namespace Dune
             Note: This method may be used in vectorized form by passing in a
                   NumPy array for 'y'.
           )doc" );
-        cls.def( "localPosition", [] ( const Geometry &self, Array y ) {
+        cls.def( "toLocal", [] ( const Geometry &self, Array y ) {
             return vectorize( [ &self ] ( const GlobalCoordinate &y ) { return self.local( y ); }, y );
           } );
 
