@@ -27,12 +27,12 @@ def _getGridFunction(view,y,dimR):
 
 def globalGridFunction(view,GFClass,func):
     def f(element,x):
-        return func(element.geometry.position(x))
+        return func(element.geometry.toGlobal(x))
     def feval(self,element,point=None):
         if point is None:
             return func(element)
         else:
-            return func(element.geometry.position(point))
+            return func(element.geometry.toGlobal(point))
     subclass = type(GFClass.__name__, (GFClass,), {"__call__": feval})
     return subclass(view,f)
 def localGridFunction(view,GFClass,func):
@@ -89,7 +89,7 @@ def GlobalGridFunction(view):
                 if point is None:
                     return cls.__call__(self,element)
                 else:
-                    return cls.__call__(self,element.geometry.position(point))
+                    return cls.__call__(self,element.geometry.toGlobal(point))
         return Wrapper
     return GlobalGridFunction_decorator
 def GridFunction(view):

@@ -107,6 +107,15 @@ def globalGridFunction(gv, evaluator):
 @deprecated
 def localGridFunction(gv, evaluator):
     return gv.function( lambda x: evaluator(x.entity,x.local) )
+@deprecated("use the `referenceElement` attribute instead")
+def domain(self):
+    return self.referenceElement
+@deprecated("use the `toGlobal` attribute instead")
+def position(self,*arg,**kwarg):
+    return self.toGlobal(*arg,**kwarg)
+@deprecated("use the `toLocal` attribute instead")
+def localPosition(self,*arg,**kwarg):
+    return self.toLocal(*arg,**kwarg)
 
 def addAttr(module, cls):
     setattr(cls, "_module", module)
@@ -128,6 +137,14 @@ def addAttr(module, cls):
     for gf in dir(cls):
         if gf.startswith("GridFunction"):
             setattr( getattr(cls, gf), "plot", gfPlot)
+    for ent in dir(cls):
+        if ent.startswith("Entity"):
+            Ent = getattr(cls, ent)
+            Ent.domain = property(domain)
+            Geo = getattr(Ent, "Geometry")
+            Geo.domain = property(domain)
+            setattr( Geo, "position", position)
+            setattr( Geo, "localPosition", localPosition)
 
 
 generator = SimpleGenerator("HierarchicalGrid", "Dune::Python")
@@ -142,7 +159,8 @@ def module(includes, typeName, *args):
 
     # register reference element for this grid
     import dune.geometry
-    dune.geometry.module(module.LeafGrid.dimension)
+    for d in range(module.LeafGrid.dimension+1):
+        dune.geometry.module(d)
 
     return module
 
