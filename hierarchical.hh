@@ -356,6 +356,45 @@ namespace Dune
           - The grid implementation defines the rule by which elements are split.
         )doc" );
 
+      cls.def( "adapt", [] ( Grid &self, const std::function< Marker( const Element &e ) > &marking ) {
+          std::pair< int, int > marked;
+          for( const Element &element : elements( self.leafGridView() ) )
+          {
+            Marker marker = marking( element );
+            marked.first += static_cast< int >( marker == Marker::Refine );
+            marked.second += static_cast< int >( marker == Marker::Coarsen );
+            self.mark( static_cast< int >( marker ), element );
+          }
+          if (marked.first + marked.second)
+          {
+            for( const auto &listener : detail::gridModificationListeners( self ) )
+              listener.second->preModification( self );
+            self.preAdapt();
+            self.adapt();
+            self.postAdapt();
+            for( const auto &listener : detail::gridModificationListeners( self ) )
+              listener.second->postModification( self );
+          }
+          return marked;
+        },
+        R"doc(
+          Refine or coarsen the hierarchical grid to match the provided marking function.
+
+          Args:
+              marking:    callback returning a dune.grid.Marker for each leaf
+                          element in the grid
+
+          All elements for which are marked for refinement by the callback function
+          will be refined by this operation.
+          However, due to closure rules, additional elements might be refined.
+          Similarly, not all elements marked for coarsening are necessarily
+          coarsened.
+
+          Note:
+          - This is a collective operation.
+          - The grid implementation defines the rule by which elements are split.
+        )doc" );
+
       cls.def( "globalRefine", [] ( Grid &self, int level ) {
           for( const auto &listener : detail::gridModificationListeners( self ) )
             listener.second->preModification( self );
