@@ -9,6 +9,10 @@
 
 #include <dune/grid/uggrid.hh>
 
+#if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
+#  include <dune/uggrid/parallel/ppif/ppifcontext.hh>
+#endif
+
 /** \todo Remove the following two includes once getAllSubfaces... is gone */
 #include <list>
 #include <iterator>
@@ -602,6 +606,10 @@ void UGGrid<dim>::loadState(const std::string& filename)
 
   if (multigrid_==nullptr)
     DUNE_THROW(GridError, "In loadState()");
+
+#if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
+  ccobj_ = multigrid_->ppifContext().comm();
+#endif
 }
 
 template < int dim >
