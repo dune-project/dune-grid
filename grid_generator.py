@@ -101,10 +101,10 @@ def plot(self, function=None, *args, **kwargs):
         except AttributeError:
             dune.plotting.plotPointData(solution=self.function(function),*args,**kwargs)
 
-@deprecated
+@deprecated("use the `gridFunction` decorator")
 def globalGridFunction(gv, evaluator):
     return gv.function(evaluator)
-@deprecated
+@deprecated("use the `gridFunction` decorator")
 def localGridFunction(gv, evaluator):
     return gv.function( lambda x: evaluator(x.entity,x.local) )
 @deprecated("use the `referenceElement` attribute instead")
