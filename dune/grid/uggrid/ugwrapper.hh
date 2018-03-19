@@ -96,18 +96,41 @@ namespace Dune {
     typedef UG_NAMESPACE::DDD_OBJ DDD_OBJ;
     typedef UG_NAMESPACE::DDD_HEADER DDD_HEADER;
 
-    static void DDD_IFOneway(DDD_IF dddIf,
+    static void DDD_IFOneway(
+#if DUNE_UGGRID_HAVE_DDDCONTEXT
+                             DDD::DDDContext& context,
+#endif
+                             DDD_IF dddIf,
                              DDD_IF_DIR dddIfDir,
                              size_t s,
+#if DUNE_UGGRID_HAVE_DDDCONTEXT
+                             UG_NAMESPACE::ComProcPtr2 gather,
+                             UG_NAMESPACE::ComProcPtr2 scatter
+#else
                              UG_NAMESPACE::ComProcPtr gather,
-                             UG_NAMESPACE::ComProcPtr scatter)
+                             UG_NAMESPACE::ComProcPtr scatter
+#endif
+      )
     {
-      UG_NAMESPACE::DDD_IFOneway(dddIf, dddIfDir, s, gather, scatter);
+      UG_NAMESPACE::DDD_IFOneway(
+#if DUNE_UGGRID_HAVE_DDDCONTEXT
+        context,
+#endif
+        dddIf, dddIfDir, s, gather, scatter);
     }
 
-    static int *DDD_InfoProcList(DDD_HEADER *hdr)
+    static int *DDD_InfoProcList(
+#if DUNE_UGGRID_HAVE_DDDCONTEXT
+                             DDD::DDDContext& context,
+#endif
+      DDD_HEADER *hdr)
     {
+#if DUNE_UGGRID_HAVE_DDDCONTEXT
+      //return DDD::DDD_InfoProcList(context, hdr);
+      return UG_NAMESPACE::DDD_InfoProcList(context, hdr);
+#else
       return UG_NAMESPACE::DDD_InfoProcList(hdr);
+#endif
     }
 
     static DDD_IF_DIR IF_FORWARD()
@@ -120,151 +143,161 @@ namespace Dune {
       return UG_NAMESPACE::IF_BACKWARD;
     }
 
+#if DUNE_UGGRID_HAVE_DDDCONTEXT
+#  define DDD_CONTEXT_PARAM const DDD::DDDContext& context
+#  define DDD_GET_IF(id) (UG_NAMESPACE::ddd_ctrl(context).id)
+#else
+#  define DDD_CONTEXT_PARAM
+#  define DDD_GET_IF(id) (UG_NAMESPACE::id)
+#endif
 
     /*! Master->HGhost/VHGhost */
-    static DDD_IF &ElementIF()
+    static DDD_IF ElementIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::ElementIF;
+      return DDD_GET_IF(ElementIF);
     }
 
     /*! ElementSymmIF: Master/HGhost/VHGhost */
-    static DDD_IF &ElementSymmIF()
+    static DDD_IF ElementSymmIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::ElementSymmIF;
+      return DDD_GET_IF(ElementSymmIF);
     }
 
     /*! ElementVIF: Master->VGhost/VHGhost */
-    static DDD_IF &ElementVIF()
+    static DDD_IF ElementVIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::ElementVIF;
+      return DDD_GET_IF(ElementVIF);
     }
 
     /*! ElementSymmVIF: Master/VGhost/VHGhost" */
-    static DDD_IF &ElementSymmVIF()
+    static DDD_IF ElementSymmVIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::ElementSymmVIF;
+      return DDD_GET_IF(ElementSymmVIF);
     }
 
     /*! Master->VGhost/HGhost/VHGhost */
-    static DDD_IF &ElementVHIF()
+    static DDD_IF ElementVHIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::ElementVHIF;
+      return DDD_GET_IF(ElementVHIF);
     }
 
     /*! ElementSymmVHIF: Master/VGhost/HGhost/VHGhost */
-    static DDD_IF &ElementSymmVHIF()
+    static DDD_IF ElementSymmVHIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::ElementSymmVHIF;
+      return DDD_GET_IF(ElementSymmVHIF);
     }
 
     /*! BorderNodeIF: Border->Master */
-    static DDD_IF &BorderNodeIF()
+    static DDD_IF BorderNodeIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::BorderNodeIF;
+      return DDD_GET_IF(BorderNodeIF);
     }
 
     /*! BorderNodeSymmIF: Border/Master */
-    static DDD_IF &BorderNodeSymmIF()
+    static DDD_IF BorderNodeSymmIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::BorderNodeSymmIF;
+      return DDD_GET_IF(BorderNodeSymmIF);
     }
 
     /*! OuterNodeIF: Master->HGhost/VGhost */
-    static DDD_IF &OuterNodeIF()
+    static DDD_IF OuterNodeIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::OuterNodeIF;
+      return DDD_GET_IF(OuterNodeIF);
     }
 
 
     /*! NodeVIF: Master->VGhost/VHGhost */
-    static DDD_IF &NodeVIF()
+    static DDD_IF NodeVIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::NodeVIF;
+      return DDD_GET_IF(NodeVIF);
     }
 
     /*! NodeIF: Master->VGhost/HGhost/VHGhost */
-    static DDD_IF &NodeIF()
+    static DDD_IF NodeIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::NodeIF;
+      return DDD_GET_IF(NodeIF);
     }
 
     /*! NodeAllIF: All/All */
-    static DDD_IF &NodeAllIF()
+    static DDD_IF NodeAllIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::NodeAllIF;
+      return DDD_GET_IF(NodeAllIF);
     }
 
     /*! BorderVectorIF: Border->Master */
-    static DDD_IF &BorderVectorIF()
+    static DDD_IF BorderVectorIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::BorderVectorIF;
+      return DDD_GET_IF(BorderVectorIF);
     }
 
     /*! BorderVectorSymmIF: Master/Border */
-    static DDD_IF &BorderVectorSymmIF()
+    static DDD_IF BorderVectorSymmIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::BorderVectorSymmIF;
+      return DDD_GET_IF(BorderVectorSymmIF);
     }
 
     /*! OuterVectorIF: Master->HGhost/VHGhost */
-    static DDD_IF &OuterVectorIF()
+    static DDD_IF OuterVectorIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::OuterVectorIF;
+      return DDD_GET_IF(OuterVectorIF);
     }
 
     /*! OuterVectorSymmIF: Master/Border/HGhost/VHGhost */
-    static DDD_IF &OuterVectorSymmIF()
+    static DDD_IF OuterVectorSymmIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::OuterVectorSymmIF;
+      return DDD_GET_IF(OuterVectorSymmIF);
     }
 
     /*! VectorVIF: Master->VGhost/VHGhost */
-    static DDD_IF &VectorVIF()
+    static DDD_IF VectorVIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::VectorVIF;
+      return DDD_GET_IF(VectorVIF);
     }
 
     /*! VectorVAllIF: Master/Border/VGhost/VHGhost->Master/Border */
-    static DDD_IF &VectorVAllIF()
+    static DDD_IF VectorVAllIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::VectorVAllIF;
+      return DDD_GET_IF(VectorVAllIF);
     }
 
     /*! VectorIF: Master->VGhost/VHGhost/HGhost */
-    static DDD_IF &VectorIF()
+    static DDD_IF VectorIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::VectorIF;
+      return DDD_GET_IF(VectorIF);
     }
 
     /*! Master->HGhost/VHGhost */
-    static DDD_IF &EdgeIF()
+    static DDD_IF EdgeIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::EdgeIF;
+      return DDD_GET_IF(EdgeIF);
     }
 
     /*! EdgeSymmIF: Master/HGhost/VHGhost */
-    static DDD_IF &BorderEdgeSymmIF()
+    static DDD_IF BorderEdgeSymmIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::BorderEdgeSymmIF;
+      return DDD_GET_IF(BorderEdgeSymmIF);
     }
 
     /*! EdgeHIF: Master/HGhost/VHGhost */
-    static DDD_IF &EdgeHIF()
+    static DDD_IF EdgeHIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::EdgeHIF;
+      return DDD_GET_IF(EdgeHIF);
     }
 
     /*! EdgeVHIF: Master->VGhost/HGhost/VHGhost */
-    static DDD_IF &EdgeVHIF()
+    static DDD_IF EdgeVHIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::EdgeVHIF;
+      return DDD_GET_IF(EdgeVHIF);
     }
 
     /*! EdgeSymmVHIF: Master/VGhost/HGhost/VHGhost */
-    static DDD_IF &EdgeSymmVHIF()
+    static DDD_IF EdgeSymmVHIF(DDD_CONTEXT_PARAM)
     {
-      return UG_NAMESPACE::EdgeSymmVHIF;
+      return DDD_GET_IF(EdgeSymmVHIF);
     }
+
+#undef DDD_CONTEXT_PARAM
+#undef DDD_GET_IF
 
     /** \brief Encapsulates the UG EPRIO macro */
     static int EPriority(const UG_NS< UG_DIM >::Element* element)

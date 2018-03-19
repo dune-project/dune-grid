@@ -57,7 +57,11 @@ namespace Dune {
 
     // called by DDD_IFOneway to serialize the data structure to
     // be send
-    static int ugGather_(typename UG_NS<dim>::DDD_OBJ obj, void* data)
+    static int ugGather_(
+#if DUNE_UGGRID_HAVE_DDDCONTEXT
+      DDD::DDDContext&,
+#endif
+      typename UG_NS<dim>::DDD_OBJ obj, void* data)
     {
       // cast the DDD object to a UG entity pointer
       auto ugEP = reinterpret_cast<typename Dune::UG_NS<dim>::template Entity<codim>::T*>(obj);
@@ -81,7 +85,11 @@ namespace Dune {
 
     // called by DDD_IFOneway to deserialize the data structure
     // that has been received
-    static int ugScatter_(typename UG_NS<dim>::DDD_OBJ obj, void* data)
+    static int ugScatter_(
+#if DUNE_UGGRID_HAVE_DDDCONTEXT
+      DDD::DDDContext&,
+#endif
+      typename UG_NS<dim>::DDD_OBJ obj, void* data)
     {
       // cast the DDD object to a UG entity pointer
       auto ugEP = reinterpret_cast<typename Dune::UG_NS<dim>::template Entity<codim>::T*>(obj);

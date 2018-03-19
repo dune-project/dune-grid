@@ -230,7 +230,9 @@ namespace Dune {
     friend class UGGridGeometry<2,3,const UGGrid<dim> >;
 
     friend class UGGridEntity <0,dim,const UGGrid<dim> >;
+    friend class UGGridEntity <1,dim,const UGGrid<dim> >;
     friend class UGGridEntity <dim,dim,const UGGrid<dim> >;
+    friend class UGEdgeEntity <dim,const UGGrid<dim> >;
     friend class UGGridHierarchicIterator<const UGGrid<dim> >;
     friend class UGGridLeafIntersection<const UGGrid<dim> >;
     friend class UGGridLevelIntersection<const UGGrid<dim> >;
@@ -593,7 +595,11 @@ namespace Dune {
       if (!bufSize)
         return;     // we don't need to communicate if we don't have any data!
       for (unsigned i=0; i < ugIfs.size(); ++i)
-        UG_NS<dim>::DDD_IFOneway(ugIfs[i],
+        UG_NS<dim>::DDD_IFOneway(
+#if DUNE_UGGRID_HAVE_DDDCONTEXT
+                                 multigrid_->dddContext(),
+#endif
+                                 ugIfs[i],
                                  ugIfDir,
                                  bufSize,
                                  &UGMsgBuf::ugGather_,
@@ -604,6 +610,11 @@ namespace Dune {
                             InterfaceType iftype,
                             int codim) const
     {
+#if DUNE_UGGRID_HAVE_DDDCONTEXT
+#  define DDD_CONTEXT multigrid_->dddContext()
+#else
+#  define DDD_CONTEXT
+#endif
       dddIfaces.clear();
       if (codim == 0)
       {
@@ -616,14 +627,14 @@ namespace Dune {
           // The communicated elements are in the sender's
           // interior and it does not matter what they are for
           // the receiver
-          dddIfaces.push_back(UG_NS<dim>::ElementVHIF());
+          dddIfaces.push_back(UG_NS<dim>::ElementVHIF(DDD_CONTEXT));
           return;
         case All_All_Interface :
           // It does neither matter what the communicated
           // elements are for sender nor for the receiver. If
           // they are seen by these two processes, data is send
           // and received.
-          dddIfaces.push_back(UG_NS<dim>::ElementSymmVHIF());
+          dddIfaces.push_back(UG_NS<dim>::ElementSymmVHIF(DDD_CONTEXT));
           return;
         default :
           DUNE_THROW(GridError,
@@ -637,14 +648,14 @@ namespace Dune {
         switch (iftype)
         {
         case InteriorBorder_InteriorBorder_Interface :
-          dddIfaces.push_back(UG_NS<dim>::BorderNodeSymmIF());
+          dddIfaces.push_back(UG_NS<dim>::BorderNodeSymmIF(DDD_CONTEXT));
           return;
         case InteriorBorder_All_Interface :
-          dddIfaces.push_back(UG_NS<dim>::BorderNodeSymmIF());
-          dddIfaces.push_back(UG_NS<dim>::NodeIF());
+          dddIfaces.push_back(UG_NS<dim>::BorderNodeSymmIF(DDD_CONTEXT));
+          dddIfaces.push_back(UG_NS<dim>::NodeIF(DDD_CONTEXT));
           return;
         case All_All_Interface :
-          dddIfaces.push_back(UG_NS<dim>::NodeAllIF());
+          dddIfaces.push_back(UG_NS<dim>::NodeAllIF(DDD_CONTEXT));
           return;
         default :
           DUNE_THROW(GridError,
@@ -658,15 +669,15 @@ namespace Dune {
         switch (iftype)
         {
         case InteriorBorder_InteriorBorder_Interface :
-          dddIfaces.push_back(UG_NS<dim>::BorderEdgeSymmIF());
+          dddIfaces.push_back(UG_NS<dim>::BorderEdgeSymmIF(DDD_CONTEXT));
           return;
         case InteriorBorder_All_Interface :
-          dddIfaces.push_back(UG_NS<dim>::BorderEdgeSymmIF());
+          dddIfaces.push_back(UG_NS<dim>::BorderEdgeSymmIF(DDD_CONTEXT));
           // Is the following line needed or not?
-          // dddIfaces.push_back(UG_NS<dim>::EdgeIF());
+          // dddIfaces.push_back(UG_NS<dim>::EdgeIF(DDD_CONTEXT));
           return;
         case All_All_Interface :
-          dddIfaces.push_back(UG_NS<dim>::EdgeSymmVHIF());
+          dddIfaces.push_back(UG_NS<dim>::EdgeSymmVHIF(DDD_CONTEXT));
           return;
         default :
           DUNE_THROW(GridError,
@@ -681,7 +692,7 @@ namespace Dune {
         {
         case InteriorBorder_InteriorBorder_Interface :
         case InteriorBorder_All_Interface :
-          dddIfaces.push_back(UG_NS<dim>::BorderVectorSymmIF());
+          dddIfaces.push_back(UG_NS<dim>::BorderVectorSymmIF(DDD_CONTEXT));
           return;
         default :
           DUNE_THROW(GridError,
@@ -698,6 +709,7 @@ namespace Dune {
                    << " entities is not yet supported "
                    << " by the DUNE UGGrid interface!");
       }
+#undef DDD_CONTEXT
     };
 #endif // ModelP
 
