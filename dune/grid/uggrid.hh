@@ -593,7 +593,11 @@ namespace Dune {
       if (!bufSize)
         return;     // we don't need to communicate if we don't have any data!
       for (unsigned i=0; i < ugIfs.size(); ++i)
-        UG_NS<dim>::DDD_IFOneway(ugIfs[i],
+        UG_NS<dim>::DDD_IFOneway(
+#if DUNE_UGGRID_HAVE_DDDCONTEXT
+                                 multigrid_->dddContext(),
+#endif
+                                 ugIfs[i],
                                  ugIfDir,
                                  bufSize,
                                  &UGMsgBuf::ugGather_,

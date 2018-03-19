@@ -96,13 +96,27 @@ namespace Dune {
     typedef UG_NAMESPACE::DDD_OBJ DDD_OBJ;
     typedef UG_NAMESPACE::DDD_HEADER DDD_HEADER;
 
-    static void DDD_IFOneway(DDD_IF dddIf,
+    static void DDD_IFOneway(
+#if DUNE_UGGRID_HAVE_DDDCONTEXT
+                             DDD::DDDContext& context,
+#endif
+                             DDD_IF dddIf,
                              DDD_IF_DIR dddIfDir,
                              size_t s,
+#if DUNE_UGGRID_HAVE_DDDCONTEXT
+                             UG_NAMESPACE::ComProcPtr2 gather,
+                             UG_NAMESPACE::ComProcPtr2 scatter
+#else
                              UG_NAMESPACE::ComProcPtr gather,
-                             UG_NAMESPACE::ComProcPtr scatter)
+                             UG_NAMESPACE::ComProcPtr scatter
+#endif
+      )
     {
-      UG_NAMESPACE::DDD_IFOneway(dddIf, dddIfDir, s, gather, scatter);
+      UG_NAMESPACE::DDD_IFOneway(
+#if DUNE_UGGRID_HAVE_DDDCONTEXT
+        context,
+#endif
+        dddIf, dddIfDir, s, gather, scatter);
     }
 
     static int *DDD_InfoProcList(DDD_HEADER *hdr)
