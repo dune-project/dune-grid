@@ -11,6 +11,10 @@
 #include <dune/grid/uggrid/uggridfactory.hh>
 #include "boundaryextractor.hh"
 
+#if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
+#  include <dune/uggrid/parallel/ppif/ppifcontext.hh>
+#endif
+
 namespace Dune {
 
 /* The following three methods are the ones that UG calls to know about the geometry
@@ -480,7 +484,12 @@ createGrid()
   // If we are in a parallel setting and we are _not_ the master
   // process we can stop here.
   // ///////////////////////////////////////////////////////////////
-  if (PPIF::me!=0) {
+#if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
+  const bool isMaster = grid_->multigrid_->ppifContext().isMaster();
+#else
+  const bool isMaster = (PPIF::me == PPIF::master);
+#endif
+  if (not isMaster) {
     // Complete the UG-internal grid data structure even if we are
     // not the master process. (CreateAlgebra communicates via MPI
     // so we would be out of sync if we don't do this here...)
