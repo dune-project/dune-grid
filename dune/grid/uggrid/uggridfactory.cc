@@ -7,7 +7,6 @@
 
 #include <dune/common/std/memory.hh>
 #include <dune/common/stdstreams.hh>
-#include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/grid/uggrid/uggridfactory.hh>
 #include "boundaryextractor.hh"
@@ -236,23 +235,25 @@ createGrid()
   // on all processes.
   // ///////////////////////////////////////////////////////////////////////////////
 
+  const auto& comm = grid_->comm();
+
   // Broadcast the vertex positions
   int numVertices = vertexPositions_.size();
-  MPIHelper::getCollectiveCommunication().broadcast(&numVertices, 1, 0);
+  comm.broadcast(&numVertices, 1, 0);
   vertexPositions_.resize(numVertices);
-  MPIHelper::getCollectiveCommunication().broadcast(&vertexPositions_[0], vertexPositions_.size(), 0);
+  comm.broadcast(&vertexPositions_[0], vertexPositions_.size(), 0);
 
   // Broadcast the element corners
   int numElementVertices = elementVertices_.size();
-  MPIHelper::getCollectiveCommunication().broadcast(&numElementVertices, 1, 0);
+  comm.broadcast(&numElementVertices, 1, 0);
   elementVertices_.resize(numElementVertices);
-  MPIHelper::getCollectiveCommunication().broadcast(&elementVertices_[0], elementVertices_.size(), 0);
+  comm.broadcast(&elementVertices_[0], elementVertices_.size(), 0);
 
   // Broadcast the geometry types
   int numElementTypes = elementTypes_.size();
-  MPIHelper::getCollectiveCommunication().broadcast(&numElementTypes, 1, 0);
+  comm.broadcast(&numElementTypes, 1, 0);
   elementTypes_.resize(numElementTypes);
-  MPIHelper::getCollectiveCommunication().broadcast(&elementTypes_[0], elementTypes_.size(), 0);
+  comm.broadcast(&elementTypes_[0], elementTypes_.size(), 0);
 
   // ///////////////////////////////////////////
   //   Extract grid boundary segments
