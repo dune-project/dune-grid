@@ -35,32 +35,6 @@ namespace Dune {
   template <class GridType>
   class GridFactory;
 
-  template<int codim, int dim, class GridImp>
-  class UGMakeableEntity :
-    public GridImp::template Codim<codim>::Entity
-  {
-  public:
-
-    UGMakeableEntity(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) :
-      GridImp::template Codim<codim>::Entity (UGGridEntity<codim, dim, const GridImp>())
-    {
-      this->realEntity.setToTarget(target,gridImp);
-    }
-
-    UGMakeableEntity() :
-      GridImp::template Codim<codim>::Entity (UGGridEntity<codim, dim, const GridImp>())
-    {}
-
-    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) {
-      this->realEntity.setToTarget(target,gridImp);
-    }
-
-    typename UG_NS<dim>::template Entity<codim>::T* getTarget() const {
-      return this->realEntity.getTarget();
-    }
-
-  };
-
   //**********************************************************************
   //
   // --UGGridEntity
@@ -78,10 +52,10 @@ namespace Dune {
   {
 
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
-    friend class UGGridLevelIterator;
+    friend class UGGridLeafIterator;
 
-    friend class UGMakeableEntity<codim,dim,const UGGrid<dim> >;
-    friend class UGMakeableEntity<codim,dim,UGGrid<dim> >;
+    template <int codim_, PartitionIteratorType PiType_, class GridImp_>
+    friend class UGGridLevelIterator;
 
     friend class UGGrid<dim>;
 
@@ -219,9 +193,6 @@ namespace Dune {
     enum {codim = dim - 1};
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
     friend class UGGridLevelIterator;
-
-    friend class UGMakeableEntity<codim,dim,const UGGrid<dim> >;
-    friend class UGMakeableEntity<codim,dim,UGGrid<dim> >;
 
     friend class UGGrid<dim>;
 
@@ -600,9 +571,10 @@ protected:
     friend class UGGridHierarchicIterator <GridImp>;
 
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
-    friend class UGGridLevelIterator;
+    friend class UGGridLeafIterator;
 
-    friend class UGMakeableEntity<0,dim,GridImp>;
+    template <int codim_, PartitionIteratorType PiType_, class GridImp_>
+    friend class UGGridLevelIterator;
 
     typedef typename GridImp::ctype UGCtype;
 
