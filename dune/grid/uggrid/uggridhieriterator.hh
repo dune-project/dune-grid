@@ -46,16 +46,16 @@ namespace Dune {
     void increment();
 
     //! dereferencing
-    const Entity& dereference() const {return virtualEntity_;}
+    const Entity& dereference() const {return entity_;}
 
     //! equality
     bool equals(const UGGridHierarchicIterator<GridImp>& other) const {
-      return virtualEntity_ == other.virtualEntity_;
+      return entity_ == other.entity_;
     }
 
   private:
     //! The makeable entity that the iterator is pointing to
-    UGMakeableEntity<0,GridImp::dimension,GridImp> virtualEntity_;
+    Entity entity_;
 
     //! max level to go down
     int maxlevel_;

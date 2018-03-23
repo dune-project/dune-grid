@@ -23,6 +23,9 @@ namespace Dune {
       dim = GridDim
     };
 
+    using Entity = typename UGGrid<dim>::template Codim<codim>::Entity;
+    using EntityImp = typename Entity::Implementation;
+
     UGMessageBufferBase(void *ugData)
     {
       ugData_ = static_cast<char*>(ugData);
@@ -60,11 +63,10 @@ namespace Dune {
       typedef typename Dune::UG_NS<dim>::template Entity<codim>::T* UGEntityPointer;
       UGEntityPointer ugEP = reinterpret_cast<typename Dune::UG_NS<dim>::template Entity<codim>::T*>(obj);
 
-      // construct a DUNE makeable entity from the UG entity pointer
+      // construct a DUNE entity from the UG entity pointer
       /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
        * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-      typedef UGMakeableEntity<codim, dim, UGGrid<dim> > DuneMakeableEntity;
-      DuneMakeableEntity entity(ugEP, nullptr);
+      Entity entity(EntityImp(ugEP, nullptr));
 
       // safety check to only communicate what is needed
       if ((level == -1 && UG_NS<dim>::isLeaf(ugEP)) || entity.level() == level)
@@ -86,11 +88,10 @@ namespace Dune {
       typedef typename Dune::UG_NS<dim>::template Entity<codim>::T* UGEntityPointer;
       UGEntityPointer ugEP = reinterpret_cast<typename Dune::UG_NS<dim>::template Entity<codim>::T*>(obj);
 
-      // construct a DUNE makeable entity from the UG entity pointer
+      // construct a DUNE entity from the UG entity pointer
       /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
        * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-      typedef UGMakeableEntity<codim, dim, UGGrid<dim> > DuneMakeableEntity;
-      DuneMakeableEntity entity(ugEP, nullptr);
+      Entity entity(EntityImp(ugEP, nullptr));
 
       // safety check to only communicate what is needed
       if ((level == -1 && UG_NS<dim>::isLeaf(ugEP)) || entity.level() == level)
@@ -100,9 +101,9 @@ namespace Dune {
         if (!duneDataHandle_->fixedSize(dim, codim))
           msgBuf.readRaw_(size);
         else
-          size = duneDataHandle_->template size<DuneMakeableEntity>(entity);
+          size = duneDataHandle_->size(entity);
         if (size > 0)
-          duneDataHandle_->template scatter<ThisType, DuneMakeableEntity>(msgBuf, entity, size);
+          duneDataHandle_->scatter(msgBuf, entity, size);
 
       }
 

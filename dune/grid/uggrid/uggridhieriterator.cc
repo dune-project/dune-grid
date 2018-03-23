@@ -38,9 +38,9 @@ void UGGridHierarchicIterator<GridImp>::increment()
   }
 
   if (elementStack_.empty())
-    this->virtualEntity_.setToTarget(nullptr,nullptr);
+    this->entity_.impl().setToTarget(nullptr,nullptr);
   else
-    this->virtualEntity_.setToTarget(elementStack_.top(),gridImp_);
+    this->entity_.impl().setToTarget(elementStack_.top(),gridImp_);
 
 }
 
