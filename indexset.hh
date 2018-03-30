@@ -155,9 +155,9 @@ namespace Dune
             Returns:  Tuple of indices, in the order given by the reference element
           )doc" );
 
-      cls.def( "subIndices", [] ( const IndexSet &self, const Entity &entity, std::pair< int, int > ic, int c ) {
-            int i  = ic.first;
-            int cc = ic.second;
+      cls.def( "subIndices", [] ( const IndexSet &self, const Entity &entity, std::pair< int, int > ic, int cc ) {
+            int i = ic.first;
+            int c = ic.second;
             if( !self.contains( entity ) )
               pybind11::value_error( "Entity not contained in index set." );
             if( (c < Entity::codimension) || (c > Entity::dimension) )
