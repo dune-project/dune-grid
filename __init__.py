@@ -25,7 +25,7 @@ def _getGridFunction(view,y,dimR):
         raise AttributeError("dune-python not configured to support GridFunctions of dimension "+str(dimR))
     return GFClass
 
-def globalGridFunction(view,GFClass,func):
+def globalGridFunction(view,GFClass,func,name):
     def f(element,x):
         return func(element.geometry.toGlobal(x))
     def feval(self,element,point=None):
@@ -34,13 +34,19 @@ def globalGridFunction(view,GFClass,func):
         else:
             return func(element.geometry.toGlobal(point))
     subclass = type(GFClass.__name__, (GFClass,), {"__call__": feval})
-    return subclass(view,f)
-def localGridFunction(view,GFClass,func):
+    f = subclass(view,f)
+    if not name is None:
+        f.name = name
+    return f
+def localGridFunction(view,GFClass,func,name):
     def feval(self,element,point):
         return func(element,point)
     subclass = type(GFClass.__name__, (GFClass,), {"__call__": feval})
-    return subclass(view,func)
-def gridFunction(view,dimRange=None,isGlobal=None):
+    f = subclass(view,func)
+    if not name is None:
+        f.name = name
+    return f
+def gridFunction(view,name=None,dimRange=None,isGlobal=None):
     assert hasattr(view, "dimension"), "did you forget to pass in the grid view to the gridFunction decorator"
     def gridFunction_decorator(func):
         if isinstance(isGlobal,bool):
@@ -60,9 +66,9 @@ def gridFunction(view,dimRange=None,isGlobal=None):
                 _isGlobal = False
             GFClass = _getGridFunction(view,y,dimRange)
         if _isGlobal:
-            return globalGridFunction(view,GFClass,func)
+            return globalGridFunction(view,GFClass,func,name)
         else:
-            return localGridFunction(view,GFClass,func)
+            return localGridFunction(view,GFClass,func,name)
     return gridFunction_decorator
 
 def LocalGridFunction(view):
