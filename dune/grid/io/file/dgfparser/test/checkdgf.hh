@@ -53,7 +53,8 @@ void display ( const std::string &name,
     vtkWriter.addCellData( elDat, "el. Parameters", nofElParams );
     vtkWriter.addVertexData( vtxDat, "vtx. Parameters", nofVtxParams );
   }
-  vtkWriter.write( name );
+  auto pos = name.find_last_of("\\/") + 1;
+  vtkWriter.write( name.substr(pos, name.size() - pos) );
 }
 
 template< class Grid >
