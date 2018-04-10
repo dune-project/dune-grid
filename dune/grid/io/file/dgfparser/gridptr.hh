@@ -486,6 +486,9 @@ namespace Dune
           gridPtr_.elParam_.resize( indexSet.size( 0 ) );
         if( gridPtr_.nofVtxParam_ > 0 )
           gridPtr_.vtxParam_.resize( indexSet.size( dimension ) );
+        gridPtr_.bndId_.resize( indexSet.size( 1 ) );
+        if( gridPtr_.haveBndParam_ )
+            gridPtr_.bndParam_.resize( gridPtr_->numBoundarySegments() );
 
         for( const auto &element : elements( gridView, Partitions::all ) )
         {
