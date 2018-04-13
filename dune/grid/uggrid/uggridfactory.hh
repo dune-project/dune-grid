@@ -263,6 +263,11 @@ namespace Dune {
       return (insertionIndex( intersection ) < boundarySegmentVertices_.size());
     }
 
+    const typename UGGrid<dimworld>::CollectiveCommunication comm() const
+    {
+        return grid_->comm();
+    }
+
   private:
 
     // Initialize the grid structure in UG
