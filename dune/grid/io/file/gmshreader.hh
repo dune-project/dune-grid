@@ -665,7 +665,7 @@ namespace Dune
       Dune::GridFactory<Grid> factory;
 
       // create parse object and read grid on process 0
-      if (MPIHelper::getCollectiveCommunication().rank() == 0)
+      if (factory.comm().rank() == 0)
       {
         GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
         parser.read(fileName);
@@ -684,7 +684,7 @@ namespace Dune
       Dune::GridFactory<Grid> factory;
 
       // create parse object and read grid on process 0
-      if (MPIHelper::getCollectiveCommunication().rank() == 0)
+      if (factory.comm().rank() == 0)
       {
         GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
         parser.read(fileName);
@@ -701,7 +701,7 @@ namespace Dune
                       bool verbose = true, bool insertBoundarySegments=true)
     {
       // create parse object and read grid on process 0
-      if (MPIHelper::getCollectiveCommunication().rank() == 0)
+      if (factory.comm().rank() == 0)
       {
         GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
         parser.read(fileName);
@@ -716,7 +716,7 @@ namespace Dune
                       bool verbose = true, bool insertBoundarySegments=true)
     {
       // create parse object and read grid on process 0
-      if (MPIHelper::getCollectiveCommunication().rank() == 0)
+      if (factory.comm().rank() == 0)
       {
         GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
         parser.read(fileName);
