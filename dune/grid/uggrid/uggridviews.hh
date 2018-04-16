@@ -98,6 +98,8 @@ namespace Dune
 
       enum { conforming = Traits :: conforming };
 
+      static constexpr int dimension = Grid::dimension;
+
       UGGridLevelGridView ( const Grid &grid, int level )
       : grid_( &grid ),
       level_( level )
@@ -309,6 +311,8 @@ namespace Dune
       struct Codim : public Traits :: template Codim<cd> {};
 
       enum { conforming = Traits :: conforming };
+
+      static constexpr int dimension = Grid::dimension;
 
     public:
       UGGridLeafGridView ( const Grid &grid )
