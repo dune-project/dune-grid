@@ -568,7 +568,7 @@ namespace Dune {
 
   protected:
 #ifdef ModelP
-    template <class GridView, class DataHandle, int codim>
+    template <int codim, class GridView, class DataHandle>
     void communicateUG_(const GridView& gv, int level,
                         DataHandle &dataHandle,
                         InterfaceType iftype,
