@@ -208,20 +208,18 @@ namespace Dune
       void communicate ( CommDataHandleIF< DataHandleImp, DataType > &dataHandle, InterfaceType iftype, CommunicationDirection dir ) const
       {
 #ifdef ModelP
-        typedef CommDataHandleIF< DataHandleImp, DataType > DataHandle;
-
         for (int curCodim = 0; curCodim <= Grid::dimension; ++curCodim) {
           if (!dataHandle.contains(Grid::dimension, curCodim))
             continue;
 
           if (curCodim == 0)
-            grid().template communicateUG_<This, DataHandle, 0>(*this, level_, dataHandle, iftype, dir);
+            grid().template communicateUG_<0>(*this, level_, dataHandle, iftype, dir);
           else if (curCodim == Grid::dimension)
-            grid().template communicateUG_<This, DataHandle, Grid::dimension>(*this, level_, dataHandle, iftype, dir);
+            grid().template communicateUG_<Grid::dimension>(*this, level_, dataHandle, iftype, dir);
           else if (curCodim == Grid::dimension - 1)
-            grid().template communicateUG_<This, DataHandle, Grid::dimension-1>(*this, level_, dataHandle, iftype, dir);
+            grid().template communicateUG_<Grid::dimension-1>(*this, level_, dataHandle, iftype, dir);
           else if (curCodim == 1)
-            grid().template communicateUG_<This, DataHandle, 1>(*this, level_, dataHandle, iftype, dir);
+            grid().template communicateUG_<1>(*this, level_, dataHandle, iftype, dir);
           else
             DUNE_THROW(NotImplemented, className(*this) << "::communicate(): Not " "supported for dim " << Grid::dimension << " and codim " << curCodim);
         }
@@ -409,20 +407,18 @@ namespace Dune
       void communicate ( CommDataHandleIF< DataHandleImp, DataType > &dataHandle, InterfaceType iftype, CommunicationDirection dir ) const
       {
 #ifdef ModelP
-        typedef CommDataHandleIF< DataHandleImp, DataType > DataHandle;
-
         for (int curCodim = 0; curCodim <= Grid::dimension; ++curCodim) {
           if (!dataHandle.contains(Grid::dimension, curCodim))
             continue;
           int level = -1;
           if (curCodim == 0)
-            grid().template communicateUG_<This, DataHandle, 0>(*this, level, dataHandle, iftype, dir);
+            grid().template communicateUG_<0>(*this, level, dataHandle, iftype, dir);
           else if (curCodim == Grid::dimension)
-            grid().template communicateUG_<This, DataHandle, Grid::dimension>(*this, level, dataHandle, iftype, dir);
+            grid().template communicateUG_<Grid::dimension>(*this, level, dataHandle, iftype, dir);
           else if (curCodim == Grid::dimension - 1)
-            grid().template communicateUG_<This, DataHandle, Grid::dimension-1>(*this, level, dataHandle, iftype, dir);
+            grid().template communicateUG_<Grid::dimension-1>(*this, level, dataHandle, iftype, dir);
           else if (curCodim == 1)
-            grid().template communicateUG_<This, DataHandle, 1>(*this, level, dataHandle, iftype, dir);
+            grid().template communicateUG_<1>(*this, level, dataHandle, iftype, dir);
           else
             DUNE_THROW(NotImplemented, className(*this) << "::communicate(): Not " "supported for dim " << Grid::dimension << " and codim " << curCodim);
         }
