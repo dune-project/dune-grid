@@ -199,7 +199,7 @@ namespace Dune
         {
           auto r = _f(pos);
           // we need to do different things here depending on whether r supports indexing into it or not.
-          do_write(w,r,count,is_indexable<decltype(r)>());
+          do_write(w,r,count,IsIndexable<decltype(r)>());
         }
 
       private:
