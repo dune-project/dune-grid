@@ -263,7 +263,9 @@ namespace Dune {
       return (insertionIndex( intersection ) < boundarySegmentVertices_.size());
     }
 
-    const typename UGGrid<dimworld>::CollectiveCommunication comm() const
+    using Communication = typename UGGrid<dimworld>::CollectiveCommunication;
+
+    Communication comm() const
     {
         return grid_->comm();
     }
