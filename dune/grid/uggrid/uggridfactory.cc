@@ -494,7 +494,7 @@ createGrid()
     grid_->levelIndexSets_[0] = std::make_shared<UGGridLevelIndexSet<const UGGrid<dimworld> > >();
 
     /* here all temp memory since CreateMultiGrid is released */
-    Release(grid_->multigrid_->theHeap, UG::FROM_TOP, grid_->multigrid_->MarkKey);
+    ReleaseTmpMem(grid_->multigrid_->theHeap, grid_->multigrid_->MarkKey);
     grid_->multigrid_->MarkKey = 0;
 
     // ///////////////////////////////////////////////////
@@ -549,7 +549,7 @@ createGrid()
     DUNE_THROW(IOError, "Call of 'UG::D" << dimworld << "::CreateAlgebra' failed!");
 
   /* here all temp memory since CreateMultiGrid is released */
-  Release(grid_->multigrid_->theHeap, UG::FROM_TOP, grid_->multigrid_->MarkKey);
+  ReleaseTmpMem(grid_->multigrid_->theHeap, grid_->multigrid_->MarkKey);
   grid_->multigrid_->MarkKey = 0;
 
   // Set the local indices
