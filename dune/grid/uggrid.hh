@@ -701,6 +701,8 @@ namespace Dune {
     };
 #endif // ModelP
 
+  void updateBoundarySegmentIndices_();
+
   public:
     // **********************************************************
     // End of Interface Methods

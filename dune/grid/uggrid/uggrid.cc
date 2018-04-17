@@ -605,6 +605,33 @@ void UGGrid<dim>::loadState(const std::string& filename)
 }
 
 template < int dim >
+void UGGrid < dim >::updateBoundarySegmentIndices_()
+{
+    std::set<size_t> usedIndices;
+    for (const auto& element : elements(this->leafGridView()))
+    {
+        if (element.hasBoundaryIntersections())
+        {
+            for (const auto& intersection : intersections(this->leafGridView(), element))
+            {
+                if (intersection.boundary())
+                {
+                    usedIndices.insert(intersection.boundarySegmentIndex());
+                }
+            }
+        }
+    }
+
+    auto numBoundarySegments = usedIndices.size();
+    std::map<size_t, size_t> oldToNew;
+    auto it = usedIndices.begin();
+    for (size_t i = 0; i < numBoundarySegments; ++i)
+    {
+        oldToNew[*it++] = i;
+    }
+}
+
+template < int dim >
 void UGGrid < dim >::setIndices(bool setLevelZero,
                                       std::vector<unsigned int>* nodePermutation)
 {
@@ -623,6 +650,8 @@ void UGGrid < dim >::setIndices(bool setLevelZero,
       levelIndexSets_[i]->update(*this, i);
 
   leafIndexSet_.update(nodePermutation);
+
+  updateBoundarySegmentIndices_();
 
   // id sets don't need updating
 }
