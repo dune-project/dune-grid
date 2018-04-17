@@ -12,6 +12,7 @@
 
 #include <dune/common/function.hh>
 #include <dune/common/fvector.hh>
+#include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/geometry/type.hh>
 
@@ -247,6 +248,12 @@ namespace Dune
       DUNE_THROW( NotImplemented, "insertion indices have not yet been implemented." );
     }
 
+    using Communication = Dune::CollectiveCommunication<typename MPIHelper::MPICommunicator>;
+
+    Communication comm() const
+    {
+      return Communication(MPIHelper::getLocalCommunicator());
+    }
   };
 
 
