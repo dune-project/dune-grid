@@ -1,5 +1,12 @@
 # master (will become 2.7)
 
+- The `GridFactory` exports the type `Communication` and corresponding object
+  `comm()` that is used to create the grid. In the `GridFactoryInterface`, this
+  defaults to the Communication induced by the process-local communicator
+  `MPIHelper::getLocalCommunicator()`, while `UGGrid`'s factory returns the
+  Communication of the grid. This can be used to steer the grid creation
+  process, see `dune/grid/io/file/gmshreader.hh` for an example.
+
 # Release 2.6
 
 - The deprecated `EntityPointer` has been removed completely and `EntityIterator`

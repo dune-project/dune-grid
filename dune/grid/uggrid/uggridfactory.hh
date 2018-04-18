@@ -265,6 +265,10 @@ namespace Dune {
 
     using Communication = typename UGGrid<dimworld>::CollectiveCommunication;
 
+    /** \brief Return the Communication used by the grid factory
+     *
+     * Use the Communication available from the grid.
+     */
     Communication comm() const
     {
         return grid_->comm();
