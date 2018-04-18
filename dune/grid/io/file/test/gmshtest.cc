@@ -82,22 +82,22 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
   // Write MSH
   Dune::GmshWriter<typename GridType::LeafGridView> writer( leafGridView );
   writer.setPrecision(10);
-  const std::string outputName("./"+gridName+"-"+gridManagerName+"-gmshtest-write.msh");
+  const std::string outputName(gridName+"-"+gridManagerName+"-gmshtest-write.msh");
   writer.write(outputName);
   if(!elementsIDs.empty())
   {
-    const std::string outputNameEntity("./"+gridName+"-"+gridManagerName+"-gmshtest-write-entity.msh");
+    const std::string outputNameEntity(gridName+"-"+gridManagerName+"-gmshtest-write-entity.msh");
     writer.write(outputNameEntity,elementsIDs);
   }
   if((!boundaryIDs.empty())&&(!elementsIDs.empty()))
   {
-    const std::string outputNameBoundary("./"+gridName+"-"+gridManagerName+"-gmshtest-write-boundary.msh");
+    const std::string outputNameBoundary(gridName+"-"+gridManagerName+"-gmshtest-write-boundary.msh");
     writer.write(outputNameBoundary,elementsIDs,boundaryIDs);
   }
 
   // Write VTK
   std::ostringstream vtkName;
-  vtkName << "./" << gridName << "-gmshtest-" << refinements;
+  vtkName << gridName << "-gmshtest-" << refinements;
   VTKWriter<typename GridType::LeafGridView> vtkWriter( leafGridView );
   vtkWriter.write( vtkName.str() );
   std::cout<<std::endl;
