@@ -250,6 +250,10 @@ namespace Dune
 
     using Communication = Dune::CollectiveCommunication<typename MPIHelper::MPICommunicator>;
 
+    /** \brief Return the Communication used by the grid factory
+     *
+     * Defaults to the Communication induced by the process-local communicator.
+     */
     Communication comm() const
     {
       return Communication(MPIHelper::getLocalCommunicator());
