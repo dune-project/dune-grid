@@ -433,7 +433,7 @@ struct GridViewInterface
           gv.indexSet().subIndex( entity, 0, codim+subCodim);
         });
       }
-      catch( Dune::NotImplemented )
+      catch( const Dune::NotImplemented& )
       {
         // ignore Dune::NotImplemented for higher codimension
         if( codim == 0 )
