@@ -3,6 +3,7 @@
 #include <config.h>
 
 #include <dune/common/fvector.hh>
+#include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/grid/geometrygrid.hh>
 #include <dune/grid/geometrygrid/coordfunction.hh>
@@ -41,8 +42,9 @@ public:
 };
 
 
-int main (int argc, char *argv[]) try
+int main (int argc, char *argv[])
 {
+  Dune::MPIHelper::instance(argc, argv);
 
   // make simple structured grid
   typedef YaspGrid<2> GridType;
@@ -65,8 +67,4 @@ int main (int argc, char *argv[]) try
 
   mapper.update();
 
-}
-catch(Exception e)
-{
-  std::cout<<e<<std::endl;
 }
