@@ -33,7 +33,7 @@ void testDim()
   checkIntersectionIterator(identityGrid);
 }
 
-int main (int argc, char *argv[]) try
+int main (int argc, char *argv[])
 {
   Dune::MPIHelper::instance(argc, argv);
   testDim<1>();
@@ -41,12 +41,4 @@ int main (int argc, char *argv[]) try
   testDim<3>();
 
   return 0;
-}
-// //////////////////////////////////
-//   Error handler
-// /////////////////////////////////
-catch (Exception e)
-{
-  std::cout << e << std::endl;
-  return 1;
 }

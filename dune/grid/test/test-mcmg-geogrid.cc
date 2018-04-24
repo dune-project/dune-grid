@@ -41,7 +41,7 @@ public:
 };
 
 
-int main (int argc, char *argv[]) try
+int main (int argc, char *argv[])
 {
 
   // make simple structured grid
@@ -65,8 +65,4 @@ int main (int argc, char *argv[]) try
 
   mapper.update();
 
-}
-catch(Exception e)
-{
-  std::cout<<e<<std::endl;
 }
