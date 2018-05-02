@@ -16,7 +16,6 @@
 #include <dune/common/classname.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/utility/multiindex.hh>
@@ -93,7 +92,7 @@ namespace Dune {
       // The grid factory
       GridFactory<GridType> factory;
 
-      if (MPIHelper::getCollectiveCommunication().rank() == 0)
+      if (factory.comm().rank() == 0)
       {
         // Insert uniformly spaced vertices
         std::array<unsigned int,dim> vertices = elements;
@@ -168,7 +167,7 @@ namespace Dune {
       // The grid factory
       GridFactory<GridType> factory;
 
-      if(MPIHelper::getCollectiveCommunication().rank() == 0)
+      if(factory.comm().rank() == 0)
       {
         // Insert uniformly spaced vertices
         std::array<unsigned int,dim> vertices = elements;
