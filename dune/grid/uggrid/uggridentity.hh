@@ -130,7 +130,11 @@ namespace Dune {
   protected:
 #ifdef ModelP
     bool hasBorderCopy_(typename UG_NS<dim>::Node *node) const {
-      int  *plist = UG_NS<dim>::DDD_InfoProcList(UG_NS<dim>::ParHdr(node));
+      int  *plist = UG_NS<dim>::DDD_InfoProcList(
+#if DUNE_UGGRID_HAVE_DDDCONTEXT
+        gridImp_->multigrid_->dddContext(),
+#endif
+        UG_NS<dim>::ParHdr(node));
       for (int i = 0; plist[i] >= 0; i += 2)
         if (plist[i + 1] == UG_NS<dim>::PrioBorder)
           return true;
@@ -273,7 +277,11 @@ namespace Dune {
 #ifdef ModelP
     /** \brief Return true if at least one copy of the edge on another processor is marked as 'border' */
     bool hasBorderCopy_(typename UG_NS<dim>::Edge *edge) const {
-      int  *plist = UG_NS<dim>::DDD_InfoProcList(UG_NS<dim>::ParHdr(edge));
+      int  *plist = UG_NS<dim>::DDD_InfoProcList(
+#if DUNE_UGGRID_HAVE_DDDCONTEXT
+        gridImp_->multigrid_->dddContext(),
+#endif
+        UG_NS<dim>::ParHdr(edge));
       for (int i = 0; plist[i] >= 0; i += 2)
         if (plist[i + 1] == UG_NS<dim>::PrioBorder)
           return true;
@@ -474,7 +482,11 @@ namespace Dune {
 
 #ifdef ModelP
     bool hasBorderCopy_(typename UG_NS<dim>::Vector *face) const {
-      int  *plist = UG_NS<dim>::DDD_InfoProcList(UG_NS<dim>::ParHdr(face));
+      int  *plist = UG_NS<dim>::DDD_InfoProcList(
+#if DUNE_UGGRID_HAVE_DDDCONTEXT
+        gridImp_->multigrid_->dddContext(),
+#endif
+        UG_NS<dim>::ParHdr(face));
       for (int i = 0; plist[i] >= 0; i += 2)
         if (plist[i + 1] == UG_NS<dim>::PrioBorder)
           return true;

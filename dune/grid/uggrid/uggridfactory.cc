@@ -11,6 +11,10 @@
 #include <dune/grid/uggrid/uggridfactory.hh>
 #include "boundaryextractor.hh"
 
+#if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
+#  include <dune/uggrid/parallel/ppif/ppifcontext.hh>
+#endif
+
 namespace Dune {
 
 /* The following three methods are the ones that UG calls to know about the geometry
@@ -465,7 +469,12 @@ createGrid()
   sprintf(newArgs[2], "f DuneFormat%dd", dimworld);
   sprintf(newArgs[3], "h %dM", grid_->heapSize_);
 
-  if (UG_NS<dimworld>::NewCommand(4, newArgs))
+  if (UG_NS<dimworld>::NewCommand(
+        4, newArgs
+#if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
+        , std::make_shared<PPIF::PPIFContext>(grid_->comm())
+#endif
+        ))
     DUNE_THROW(GridError, "UGGrid<" << dimworld << ">::makeNewMultigrid failed!");
 
   for (int i=0; i<4; i++)
@@ -480,7 +489,12 @@ createGrid()
   // If we are in a parallel setting and we are _not_ the master
   // process we can stop here.
   // ///////////////////////////////////////////////////////////////
-  if (PPIF::me!=0) {
+#if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
+  const bool isMaster = grid_->multigrid_->ppifContext().isMaster();
+#else
+  const bool isMaster = (PPIF::me == PPIF::master);
+#endif
+  if (not isMaster) {
     // Complete the UG-internal grid data structure even if we are
     // not the master process. (CreateAlgebra communicates via MPI
     // so we would be out of sync if we don't do this here...)

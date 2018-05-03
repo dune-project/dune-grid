@@ -9,6 +9,10 @@
 
 #include <dune/grid/uggrid.hh>
 
+#if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
+#  include <dune/uggrid/parallel/ppif/ppifcontext.hh>
+#endif
+
 /** \todo Remove the following two includes once getAllSubfaces... is gone */
 #include <list>
 #include <iterator>
@@ -32,8 +36,9 @@ template<> unsigned int UGGrid<3>::heapSize_ = 500;
 
 
 template <int dim>
-UGGrid < dim >::UGGrid()
+UGGrid < dim >::UGGrid(UGCollectiveCommunication comm)
   : multigrid_(nullptr),
+    ccobj_(comm),
     leafIndexSet_(*this),
     idSet_(*this),
     refinementType_(LOCAL),
@@ -576,28 +581,36 @@ void UGGrid<dim>::loadState(const std::string& filename)
 
   if (dim==2) {
     std::string formatName = "DuneFormat2d";
-    multigrid_ = (typename UG_NS<dim>::MultiGrid*) UG::D2::LoadMultiGrid(name_.c_str(),
-                                                                         filename.c_str(),
-                                                                         type,
-                                                                         problemName.c_str(),
-                                                                         formatName.c_str(),
-                                                                         heapSize_,
-                                                                         true, //force,
-                                                                         true, //optimizedIO,
-                                                                         false //autosave
-                                                                         );
+    multigrid_ = (typename UG_NS<dim>::MultiGrid*) UG::D2::LoadMultiGrid(
+      name_.c_str(),
+      filename.c_str(),
+      type,
+      problemName.c_str(),
+      formatName.c_str(),
+      heapSize_,
+      true, //force,
+      true, //optimizedIO,
+      false //autosave
+#if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
+      , std::make_shared<PPIF::PPIFContext>(comm())
+#endif
+      );
   } else {
     std::string formatName = "DuneFormat3d";
-    multigrid_ = (typename UG_NS<dim>::MultiGrid*) UG::D3::LoadMultiGrid(name_.c_str(),
-                                                                         filename.c_str(),
-                                                                         type,
-                                                                         problemName.c_str(),
-                                                                         formatName.c_str(),
-                                                                         heapSize_,
-                                                                         true, //force,
-                                                                         true, //optimizedIO,
-                                                                         false //autosave
-                                                                         );
+    multigrid_ = (typename UG_NS<dim>::MultiGrid*) UG::D3::LoadMultiGrid(
+      name_.c_str(),
+      filename.c_str(),
+      type,
+      problemName.c_str(),
+      formatName.c_str(),
+      heapSize_,
+      true, //force,
+      true, //optimizedIO,
+      false //autosave
+#if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
+      , std::make_shared<PPIF::PPIFContext>(comm())
+#endif
+      );
   }
 
   if (multigrid_==nullptr)
