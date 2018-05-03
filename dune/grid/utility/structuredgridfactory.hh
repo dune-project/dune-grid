@@ -81,17 +81,17 @@ namespace Dune {
         If the grid dimension is less than the world dimension, the coefficients (dim+1,...,dimworld) in
         the vertex coordinates are set to the corresponding values of the lowerLeft input argument.
 
+        \param factory grid factory used for creating the grid
         \param lowerLeft Lower left corner of the grid
         \param upperRight Upper right corner of the grid
         \param elements Number of elements in each coordinate direction
      */
-    static std::unique_ptr<GridType> createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
-                                               const FieldVector<ctype,dimworld>& upperRight,
-                                               const std::array<unsigned int,dim>& elements)
+    static std::unique_ptr<GridType> createCubeGrid(
+      GridFactory<GridType>& factory,
+      const FieldVector<ctype,dimworld>& lowerLeft,
+      const FieldVector<ctype,dimworld>& upperRight,
+      const std::array<unsigned int,dim>& elements)
     {
-      // The grid factory
-      GridFactory<GridType> factory;
-
       if (factory.comm().rank() == 0)
       {
         // Insert uniformly spaced vertices
@@ -144,7 +144,24 @@ namespace Dune {
 
       // Create the grid and hand it to the calling method
       return std::unique_ptr<GridType>(factory.createGrid());
+    }
 
+    /** \brief Create a structured cube grid
+
+        If the grid dimension is less than the world dimension, the coefficients (dim+1,...,dimworld) in
+        the vertex coordinates are set to the corresponding values of the lowerLeft input argument.
+
+        \param lowerLeft Lower left corner of the grid
+        \param upperRight Upper right corner of the grid
+        \param elements Number of elements in each coordinate direction
+     */
+    static std::unique_ptr<GridType> createCubeGrid(
+      const FieldVector<ctype,dimworld>& lowerLeft,
+      const FieldVector<ctype,dimworld>& upperRight,
+      const std::array<unsigned int,dim>& elements)
+    {
+      GridFactory<GridType> factory;
+      return createCubeGrid(factory, lowerLeft, upperRight, elements);
     }
 
     /** \brief Create a structured simplex grid
@@ -156,17 +173,17 @@ namespace Dune {
         If the grid dimension is less than the world dimension, the coefficients (dim+1,...,dimworld) in
         the vertex coordinates are set to the corresponding values of the lowerLeft input argument.
 
+        \param factory grid factory used for creating the grid
         \param lowerLeft Lower left corner of the grid
         \param upperRight Upper right corner of the grid
         \param elements Number of elements in each coordinate direction
      */
-    static std::unique_ptr<GridType> createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
-                                                  const FieldVector<ctype,dimworld>& upperRight,
-                                                  const std::array<unsigned int,dim>& elements)
+    static std::unique_ptr<GridType> createSimplexGrid(
+      GridFactory<GridType>& factory,
+      const FieldVector<ctype,dimworld>& lowerLeft,
+      const FieldVector<ctype,dimworld>& upperRight,
+      const std::array<unsigned int,dim>& elements)
     {
-      // The grid factory
-      GridFactory<GridType> factory;
-
       if(factory.comm().rank() == 0)
       {
         // Insert uniformly spaced vertices
@@ -219,6 +236,28 @@ namespace Dune {
 
       // Create the grid and hand it to the calling method
       return std::unique_ptr<GridType>(factory.createGrid());
+    }
+
+    /** \brief Create a structured simplex grid
+
+        This works in all dimensions.  The Coxeter-Freudenthal-Kuhn triangulation is
+        used, which splits each cube into dim! (i.e., dim faculty) simplices.  See Allgower and Georg,
+        'Numerical Path Following' for a description.
+
+        If the grid dimension is less than the world dimension, the coefficients (dim+1,...,dimworld) in
+        the vertex coordinates are set to the corresponding values of the lowerLeft input argument.
+
+        \param lowerLeft Lower left corner of the grid
+        \param upperRight Upper right corner of the grid
+        \param elements Number of elements in each coordinate direction
+     */
+    static std::unique_ptr<GridType> createSimplexGrid(
+      const FieldVector<ctype,dimworld>& lowerLeft,
+      const FieldVector<ctype,dimworld>& upperRight,
+      const std::array<unsigned int,dim>& elements)
+    {
+      GridFactory<GridType> factory;
+      return createSimplexGrid(factory, lowerLeft, upperRight, elements);
     }
 
   };
