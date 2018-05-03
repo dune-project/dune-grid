@@ -32,8 +32,9 @@ template<> unsigned int UGGrid<3>::heapSize_ = 500;
 
 
 template <int dim>
-UGGrid < dim >::UGGrid()
+UGGrid < dim >::UGGrid(UGCollectiveCommunication comm)
   : multigrid_(nullptr),
+    ccobj_(comm),
     leafIndexSet_(*this),
     idSet_(*this),
     refinementType_(LOCAL),

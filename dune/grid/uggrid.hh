@@ -287,7 +287,7 @@ namespace Dune {
      * Uses the default heapsize, which can be set using the static method
      * setDefaultHeapSize().
      */
-    UGGrid();
+    UGGrid(UGCollectiveCommunication comm = {});
 
     //! Destructor
     ~UGGrid()  noexcept(false);
