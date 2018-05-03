@@ -1109,9 +1109,15 @@ namespace Dune {
       return UG_NAMESPACE ::ConfigureCommand(argc, (char**)argv);
     }
 
+#if DUNE_UGGRID_HAVE_PPIFCONTEXT
+    static int NewCommand(int argc, char** argv, std::shared_ptr<PPIF::PPIFContext> ppifContext = nullptr) {
+      return UG_NAMESPACE ::NewCommand(argc, argv, ppifContext);
+    }
+#else
     static int NewCommand(int argc, char** argv) {
       return UG_NAMESPACE ::NewCommand(argc, argv);
     }
+#endif
 
     static int CreateFormatCmd(int argc, char** argv) {
       return UG_NAMESPACE ::CreateFormatCmd(argc, argv);

@@ -469,7 +469,12 @@ createGrid()
   sprintf(newArgs[2], "f DuneFormat%dd", dimworld);
   sprintf(newArgs[3], "h %dM", grid_->heapSize_);
 
-  if (UG_NS<dimworld>::NewCommand(4, newArgs))
+  if (UG_NS<dimworld>::NewCommand(
+        4, newArgs
+#if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
+        , std::make_shared<PPIF::PPIFContext>(grid_->comm())
+#endif
+        ))
     DUNE_THROW(GridError, "UGGrid<" << dimworld << ">::makeNewMultigrid failed!");
 
   for (int i=0; i<4; i++)
