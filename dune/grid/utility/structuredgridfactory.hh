@@ -76,7 +76,7 @@ namespace Dune {
 
   public:
 
-    /** \brief Create a structured cube grid
+    /** \brief insert structured cube grid into grid factory
 
         If the grid dimension is less than the world dimension, the coefficients (dim+1,...,dimworld) in
         the vertex coordinates are set to the corresponding values of the lowerLeft input argument.
@@ -86,7 +86,7 @@ namespace Dune {
         \param upperRight Upper right corner of the grid
         \param elements Number of elements in each coordinate direction
      */
-    static std::unique_ptr<GridType> createCubeGrid(
+    static void createCubeGrid(
       GridFactory<GridType>& factory,
       const FieldVector<ctype,dimworld>& lowerLeft,
       const FieldVector<ctype,dimworld>& upperRight,
@@ -141,9 +141,6 @@ namespace Dune {
         }
 
       }       // if(rank == 0)
-
-      // Create the grid and hand it to the calling method
-      return std::unique_ptr<GridType>(factory.createGrid());
     }
 
     /** \brief Create a structured cube grid
@@ -161,10 +158,11 @@ namespace Dune {
       const std::array<unsigned int,dim>& elements)
     {
       GridFactory<GridType> factory;
-      return createCubeGrid(factory, lowerLeft, upperRight, elements);
+      createCubeGrid(factory, lowerLeft, upperRight, elements);
+      return std::unique_ptr<GridType>(factory.createGrid());
     }
 
-    /** \brief Create a structured simplex grid
+    /** \brief insert structured simplex grid into grid factory
 
         This works in all dimensions.  The Coxeter-Freudenthal-Kuhn triangulation is
         used, which splits each cube into dim! (i.e., dim faculty) simplices.  See Allgower and Georg,
@@ -178,7 +176,7 @@ namespace Dune {
         \param upperRight Upper right corner of the grid
         \param elements Number of elements in each coordinate direction
      */
-    static std::unique_ptr<GridType> createSimplexGrid(
+    static void createSimplexGrid(
       GridFactory<GridType>& factory,
       const FieldVector<ctype,dimworld>& lowerLeft,
       const FieldVector<ctype,dimworld>& upperRight,
@@ -233,9 +231,6 @@ namespace Dune {
         }
 
       }       // if(rank == 0)
-
-      // Create the grid and hand it to the calling method
-      return std::unique_ptr<GridType>(factory.createGrid());
     }
 
     /** \brief Create a structured simplex grid
@@ -257,7 +252,8 @@ namespace Dune {
       const std::array<unsigned int,dim>& elements)
     {
       GridFactory<GridType> factory;
-      return createSimplexGrid(factory, lowerLeft, upperRight, elements);
+      createSimplexGrid(factory, lowerLeft, upperRight, elements);
+      return std::unique_ptr<GridType>(factory.createGrid());
     }
 
   };
