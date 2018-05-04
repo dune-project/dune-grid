@@ -155,7 +155,7 @@ namespace Dune {
       }
 
       // find maximum size for all ranks
-      maxSize = MPIHelper::getCollectiveCommunication().max(maxSize);
+      maxSize = gv.comm().max(maxSize);
       if (!maxSize)
         return 0;
 
@@ -206,7 +206,7 @@ namespace Dune {
       }
 
       // find maximum size for all ranks
-      maxSize = MPIHelper::getCollectiveCommunication().max(maxSize);
+      maxSize = gv.comm().max(maxSize);
       if (!maxSize)
         return 0;
 
