@@ -134,6 +134,9 @@
 
 #ifdef ModelP
 template <class DataHandle, int GridDim, int codim>
+const Dune::UGGrid<GridDim>* Dune::UGMessageBufferBase<DataHandle, GridDim, codim>::grid_;
+
+template <class DataHandle, int GridDim, int codim>
 DataHandle *Dune::UGMessageBufferBase<DataHandle,GridDim,codim>::duneDataHandle_ = 0;
 
 template <class DataHandle, int GridDim, int codim>
@@ -594,6 +597,7 @@ namespace Dune {
       unsigned bufSize = UGMsgBuf::ugBufferSize_(gv);
       if (!bufSize)
         return;     // we don't need to communicate if we don't have any data!
+      UGMsgBuf::grid_ = this;
       for (unsigned i=0; i < ugIfs.size(); ++i)
         UG_NS<dim>::DDD_IFOneway(
 #if DUNE_UGGRID_HAVE_DDDCONTEXT

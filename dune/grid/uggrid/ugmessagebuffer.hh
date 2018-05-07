@@ -69,7 +69,7 @@ namespace Dune {
       // construct a DUNE entity from the UG entity pointer
       /** \bug The nullptr argument should actually be the UGGrid object.  But that is hard to obtain here,
        * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-      Entity entity(EntityImp(ugEP, nullptr));
+      Entity entity(EntityImp(ugEP, grid_));
 
       // safety check to only communicate what is needed
       if ((level == -1 && UG_NS<dim>::isLeaf(ugEP)) || entity.level() == level)
@@ -97,7 +97,7 @@ namespace Dune {
       // construct a DUNE entity from the UG entity pointer
       /** \bug The nullptr argument should actually the UGGrid object.  But that is hard to obtain here,
        * and the argument is (currently) only used for the boundarySegmentIndex method, which we don't call. */
-      Entity entity(EntityImp(ugEP, nullptr));
+      Entity entity(EntityImp(ugEP, grid_));
 
       // safety check to only communicate what is needed
       if ((level == -1 && UG_NS<dim>::isLeaf(ugEP)) || entity.level() == level)
@@ -116,6 +116,7 @@ namespace Dune {
       return 0;
     }
 
+    static const GridType* grid_;
     static DataHandle *duneDataHandle_;
     static int level;
     char *ugData_;
@@ -155,7 +156,7 @@ namespace Dune {
       }
 
       // find maximum size for all ranks
-      maxSize = MPIHelper::getCollectiveCommunication().max(maxSize);
+      maxSize = gv.comm().max(maxSize);
       if (!maxSize)
         return 0;
 
@@ -206,7 +207,7 @@ namespace Dune {
       }
 
       // find maximum size for all ranks
-      maxSize = MPIHelper::getCollectiveCommunication().max(maxSize);
+      maxSize = gv.comm().max(maxSize);
       if (!maxSize)
         return 0;
 
