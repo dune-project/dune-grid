@@ -16,7 +16,6 @@
 #include <dune/common/classname.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/utility/multiindex.hh>
@@ -77,23 +76,23 @@ namespace Dune {
 
   public:
 
-    /** \brief Create a structured cube grid
+    /** \brief insert structured cube grid into grid factory
 
         If the grid dimension is less than the world dimension, the coefficients (dim+1,...,dimworld) in
         the vertex coordinates are set to the corresponding values of the lowerLeft input argument.
 
+        \param factory grid factory used for creating the grid
         \param lowerLeft Lower left corner of the grid
         \param upperRight Upper right corner of the grid
         \param elements Number of elements in each coordinate direction
      */
-    static std::unique_ptr<GridType> createCubeGrid(const FieldVector<ctype,dimworld>& lowerLeft,
-                                               const FieldVector<ctype,dimworld>& upperRight,
-                                               const std::array<unsigned int,dim>& elements)
+    static void createCubeGrid(
+      GridFactory<GridType>& factory,
+      const FieldVector<ctype,dimworld>& lowerLeft,
+      const FieldVector<ctype,dimworld>& upperRight,
+      const std::array<unsigned int,dim>& elements)
     {
-      // The grid factory
-      GridFactory<GridType> factory;
-
-      if (MPIHelper::getCollectiveCommunication().rank() == 0)
+      if (factory.comm().rank() == 0)
       {
         // Insert uniformly spaced vertices
         std::array<unsigned int,dim> vertices = elements;
@@ -142,17 +141,9 @@ namespace Dune {
         }
 
       }       // if(rank == 0)
-
-      // Create the grid and hand it to the calling method
-      return std::unique_ptr<GridType>(factory.createGrid());
-
     }
 
-    /** \brief Create a structured simplex grid
-
-        This works in all dimensions.  The Coxeter-Freudenthal-Kuhn triangulation is
-        used, which splits each cube into dim! (i.e., dim faculty) simplices.  See Allgower and Georg,
-        'Numerical Path Following' for a description.
+    /** \brief Create a structured cube grid
 
         If the grid dimension is less than the world dimension, the coefficients (dim+1,...,dimworld) in
         the vertex coordinates are set to the corresponding values of the lowerLeft input argument.
@@ -161,14 +152,37 @@ namespace Dune {
         \param upperRight Upper right corner of the grid
         \param elements Number of elements in each coordinate direction
      */
-    static std::unique_ptr<GridType> createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
-                                                  const FieldVector<ctype,dimworld>& upperRight,
-                                                  const std::array<unsigned int,dim>& elements)
+    static std::unique_ptr<GridType> createCubeGrid(
+      const FieldVector<ctype,dimworld>& lowerLeft,
+      const FieldVector<ctype,dimworld>& upperRight,
+      const std::array<unsigned int,dim>& elements)
     {
-      // The grid factory
       GridFactory<GridType> factory;
+      createCubeGrid(factory, lowerLeft, upperRight, elements);
+      return std::unique_ptr<GridType>(factory.createGrid());
+    }
 
-      if(MPIHelper::getCollectiveCommunication().rank() == 0)
+    /** \brief insert structured simplex grid into grid factory
+
+        This works in all dimensions.  The Coxeter-Freudenthal-Kuhn triangulation is
+        used, which splits each cube into dim! (i.e., dim faculty) simplices.  See Allgower and Georg,
+        'Numerical Path Following' for a description.
+
+        If the grid dimension is less than the world dimension, the coefficients (dim+1,...,dimworld) in
+        the vertex coordinates are set to the corresponding values of the lowerLeft input argument.
+
+        \param factory grid factory used for creating the grid
+        \param lowerLeft Lower left corner of the grid
+        \param upperRight Upper right corner of the grid
+        \param elements Number of elements in each coordinate direction
+     */
+    static void createSimplexGrid(
+      GridFactory<GridType>& factory,
+      const FieldVector<ctype,dimworld>& lowerLeft,
+      const FieldVector<ctype,dimworld>& upperRight,
+      const std::array<unsigned int,dim>& elements)
+    {
+      if(factory.comm().rank() == 0)
       {
         // Insert uniformly spaced vertices
         std::array<unsigned int,dim> vertices = elements;
@@ -217,8 +231,28 @@ namespace Dune {
         }
 
       }       // if(rank == 0)
+    }
 
-      // Create the grid and hand it to the calling method
+    /** \brief Create a structured simplex grid
+
+        This works in all dimensions.  The Coxeter-Freudenthal-Kuhn triangulation is
+        used, which splits each cube into dim! (i.e., dim faculty) simplices.  See Allgower and Georg,
+        'Numerical Path Following' for a description.
+
+        If the grid dimension is less than the world dimension, the coefficients (dim+1,...,dimworld) in
+        the vertex coordinates are set to the corresponding values of the lowerLeft input argument.
+
+        \param lowerLeft Lower left corner of the grid
+        \param upperRight Upper right corner of the grid
+        \param elements Number of elements in each coordinate direction
+     */
+    static std::unique_ptr<GridType> createSimplexGrid(
+      const FieldVector<ctype,dimworld>& lowerLeft,
+      const FieldVector<ctype,dimworld>& upperRight,
+      const std::array<unsigned int,dim>& elements)
+    {
+      GridFactory<GridType> factory;
+      createSimplexGrid(factory, lowerLeft, upperRight, elements);
       return std::unique_ptr<GridType>(factory.createGrid());
     }
 
