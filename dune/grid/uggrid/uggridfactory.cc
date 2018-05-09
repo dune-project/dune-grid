@@ -571,7 +571,7 @@ createGrid()
 
   // Clear refinement flags
   for (const auto& element : elements(grid_->levelGridView(0)))
-    UG_NS<dimworld>::WriteCW(grid_->getRealImplementation(element).target_, UG_NS<dimworld>::NEWEL_CE, 0);
+    UG_NS<dimworld>::WriteCW(element.impl().target_, UG_NS<dimworld>::NEWEL_CE, 0);
 
 
   // ///////////////////////////////////////////////////

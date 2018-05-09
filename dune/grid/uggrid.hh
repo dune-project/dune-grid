@@ -305,7 +305,7 @@ namespace Dune {
     entity(const Seed& seed) const
     {
       const int codim = Seed::codimension;
-      return typename Traits::template Codim<codim>::Entity(UGGridEntity<codim,dim,const UGGrid<dim> >(this->getRealImplementation(seed).target(),this));
+      return typename Traits::template Codim<codim>::Entity(UGGridEntity<codim,dim,const UGGrid<dim> >(seed.impl().target(),this));
     }
 
     /** \brief Number of grid entities per level and codim

@@ -33,16 +33,16 @@ namespace Dune {
 
     //! equality
     bool equals(const UGGridLevelIntersectionIterator<GridImp>& other) const {
-      return GridImp::getRealImplementation(intersection_).equals(GridImp::getRealImplementation(other.intersection_));
+      return intersection_.impl().equals(other.intersection_.impl());
     }
 
     //! prefix increment
     void increment() {
-      GridImp::getRealImplementation(intersection_).neighborCount_++;
+      intersection_.impl().neighborCount_++;
 
-      GridImp::getRealImplementation(intersection_).geometry_.reset();
-      GridImp::getRealImplementation(intersection_).geometryInInside_.reset();
-      GridImp::getRealImplementation(intersection_).geometryInOutside_.reset();
+      intersection_.impl().geometry_.reset();
+      intersection_.impl().geometryInInside_.reset();
+      intersection_.impl().geometryInOutside_.reset();
     }
 
     //! \brief dereferencing
@@ -80,7 +80,7 @@ namespace Dune {
 
     //! equality
     bool equals(const UGGridLeafIntersectionIterator<GridImp>& other) const {
-      return GridImp::getRealImplementation(intersection_).equals(GridImp::getRealImplementation(other.intersection_));
+      return intersection_.impl().equals(other.intersection_.impl());
     }
 
     /** \brief Prefix increment.
@@ -94,7 +94,7 @@ namespace Dune {
      */
     void increment() {
 
-      UGGridLeafIntersection<GridImp>& intersectionImp = GridImp::getRealImplementation(intersection_);
+      UGGridLeafIntersection<GridImp>& intersectionImp = intersection_.impl();
 
       intersectionImp.subNeighborCount_++;
 
