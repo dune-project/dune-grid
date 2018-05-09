@@ -19,7 +19,7 @@ void UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, std::v
   // ///////////////////////////////////
 
   for (const auto& element : elements(grid.levelGridView(level_))) {
-    typename UG_NS<dim>::Element* target_ = grid_->getRealImplementation(element).target_;
+    typename UG_NS<dim>::Element* target_ = element.impl().target_;
     // codim dim-1
     for (unsigned int i=0; i<element.subEntities(dim-1); i++)
     {
@@ -53,7 +53,7 @@ void UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, std::v
 
   for (const auto& element : elements(grid.levelGridView(level_))) {
 
-    typename UG_NS<dim>::Element* target = grid_->getRealImplementation(element).target_;
+    typename UG_NS<dim>::Element* target = element.impl().target_;
 
     // codim 0 (elements)
     GeometryType eType = element.type();
@@ -134,16 +134,16 @@ void UGGridLevelIndexSet<GridImp>::update(const GridImp& grid, int level, std::v
   if (nodePermutation!=0 and level==0)
   {
     for (const auto& vertex : vertices(grid.levelGridView(level_)))
-      UG_NS<dim>::levelIndex(grid_->getRealImplementation(vertex).target_) = (*nodePermutation)[numVertices_++];
+      UG_NS<dim>::levelIndex(vertex.impl().target_) = (*nodePermutation)[numVertices_++];
   }
   else
   {
     for (const auto& vertex : vertices(grid.levelGridView(level_)))
-      UG_NS<dim>::levelIndex(grid_->getRealImplementation(vertex).target_) = numVertices_++;
+      UG_NS<dim>::levelIndex(vertex.impl().target_) = numVertices_++;
   }
 
   /*    for (; vIt!=vEndIt; ++vIt)
-          UG_NS<dim>::levelIndex(grid_->getRealImplementation(*vIt).target_) = numVertices_++;*/
+          UG_NS<dim>::levelIndex(vIt->impl().target_) = numVertices_++;*/
 
   myTypes_[dim].resize(0);
   myTypes_[dim].push_back(GeometryTypes::vertex);
@@ -162,7 +162,7 @@ void UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePermutat
     for (const auto& element : elements(grid_.levelGridView(level_)))
     {
       // get pointer to UG object
-      typename UG_NS<dim>::Element* target_ = grid_.getRealImplementation(element).target_;
+      typename UG_NS<dim>::Element* target_ = element.impl().target_;
 
       // codim dim-1
       for (unsigned int i=0; i<element.subEntities(dim-1); i++)
@@ -220,7 +220,7 @@ void UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePermutat
         containsLeafElements = true;
 
       // get pointer to UG object
-      typename UG_NS<dim>::Element* target_ = grid_.getRealImplementation(element).target_;
+      typename UG_NS<dim>::Element* target_ = element.impl().target_;
 
       // codim dim-1 (edges)
       for (unsigned int i=0; i<element.subEntities(dim-1); i++)
@@ -321,13 +321,13 @@ void UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePermutat
     GeometryType eType = element.type();
 
     if (eType.isSimplex())
-      UG_NS<dim>::leafIndex(grid_.getRealImplementation(element).target_) = numSimplices_++;
+      UG_NS<dim>::leafIndex(element.impl().target_) = numSimplices_++;
     else if (eType.isPyramid())
-      UG_NS<dim>::leafIndex(grid_.getRealImplementation(element).target_) = numPyramids_++;
+      UG_NS<dim>::leafIndex(element.impl().target_) = numPyramids_++;
     else if (eType.isPrism())
-      UG_NS<dim>::leafIndex(grid_.getRealImplementation(element).target_) = numPrisms_++;
+      UG_NS<dim>::leafIndex(element.impl().target_) = numPrisms_++;
     else if (eType.isCube())
-      UG_NS<dim>::leafIndex(grid_.getRealImplementation(element).target_) = numCubes_++;
+      UG_NS<dim>::leafIndex(element.impl().target_) = numCubes_++;
     else {
       DUNE_THROW(GridError, "Found the GeometryType " << eType
                                                       << ", which should never occur in a UGGrid!");
@@ -355,12 +355,12 @@ void UGGridLeafIndexSet<GridImp>::update(std::vector<unsigned int>* nodePermutat
   if (nodePermutation!=0 and grid_.maxLevel()==0)
   {
     for (const auto& vertex : vertices(grid_.leafGridView()))
-      UG_NS<dim>::leafIndex(grid_.getRealImplementation(vertex).target_) = (*nodePermutation)[numVertices_++];
+      UG_NS<dim>::leafIndex(vertex.impl().target_) = (*nodePermutation)[numVertices_++];
   }
   else
   {
     for (const auto& vertex : vertices(grid_.leafGridView()))
-      UG_NS<dim>::leafIndex(grid_.getRealImplementation(vertex).target_) = numVertices_++;
+      UG_NS<dim>::leafIndex(vertex.impl().target_) = numVertices_++;
   }
 
   myTypes_[dim].resize(0);

@@ -233,7 +233,7 @@ namespace Dune {
     virtual unsigned int
     insertionIndex ( const typename Codim< 0 >::Entity &entity ) const
     {
-      return UG_NS<dimension>::levelIndex(grid_->getRealImplementation(entity).target_);
+      return UG_NS<dimension>::levelIndex(entity.impl().target_);
     }
 
     /** \brief Return the number of the vertex in the order of insertion into the factory
@@ -243,7 +243,7 @@ namespace Dune {
     virtual unsigned int
     insertionIndex ( const typename Codim< dimension >::Entity &entity ) const
     {
-      return UG_NS<dimension>::levelIndex(grid_->getRealImplementation(entity).target_);
+      return UG_NS<dimension>::levelIndex(entity.impl().target_);
     }
 
     /** \brief Return the number of the intersection in the order of insertion into the factory
