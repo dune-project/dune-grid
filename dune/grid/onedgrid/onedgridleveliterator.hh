@@ -38,14 +38,14 @@ namespace Dune {
     /** \brief Constructor from a given iterator */
     OneDGridLevelIterator<codim,pitype, GridImp>(OneDEntityImp<dim-codim>* it)
     {
-      GridImp::getRealImplementation(virtualEntity_).setToTarget(it);
+      virtualEntity_.impl().setToTarget(it);
     }
 
   public:
 
     //! prefix increment
     void increment() {
-      GridImp::getRealImplementation(this->virtualEntity_).setToTarget(GridImp::getRealImplementation(this->virtualEntity_).target_->succ_);
+      this->virtualEntity_.impl().setToTarget(this->virtualEntity_.impl().target_->succ_);
     }
 
     //! dereferencing
