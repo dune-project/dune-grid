@@ -35,14 +35,14 @@ namespace Dune {
     //! the default Constructor
     explicit IdentityGridHierarchicIterator(const GridImp* identityGrid, const Entity& startEntity, int maxLevel) :
       identityGrid_(identityGrid),
-      hostHierarchicIterator_(GridImp::getRealImplementation(startEntity).hostEntity_.hbegin(maxLevel))
+      hostHierarchicIterator_(startEntity.impl().hostEntity_.hbegin(maxLevel))
     {}
 
 
     //! \todo Please doc me !
     explicit IdentityGridHierarchicIterator(const GridImp* identityGrid, const Entity& startEntity, int maxLevel, bool endDummy) :
       identityGrid_(identityGrid),
-      hostHierarchicIterator_(GridImp::getRealImplementation(startEntity).hostEntity_.hend(maxLevel))
+      hostHierarchicIterator_(startEntity.impl().hostEntity_.hend(maxLevel))
     {}
 
 
