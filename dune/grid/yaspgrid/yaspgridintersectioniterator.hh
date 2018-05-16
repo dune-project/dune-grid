@@ -27,7 +27,7 @@ namespace Dune {
     //! increment
     void increment()
     {
-      GridImp::getRealImplementation(intersection_)._count += (GridImp::getRealImplementation(intersection_)._count < 2*dim);
+      intersection_.impl()._count += (intersection_.impl()._count < 2*dim);
     }
 
     //! equality
@@ -39,7 +39,7 @@ namespace Dune {
     //! \brief dereferencing
     const Intersection & dereference() const
     {
-      GridImp::getRealImplementation(intersection_).update();
+      intersection_.impl().update();
       return intersection_;
     }
 

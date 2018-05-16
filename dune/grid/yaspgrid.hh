@@ -1219,13 +1219,13 @@ namespace Dune {
     entity(const Seed& seed) const
     {
       const int codim = Seed::codimension;
-      YGridLevelIterator g = begin(this->getRealImplementation(seed).level());
+      YGridLevelIterator g = begin(seed.impl().level());
 
       typedef typename Traits::template Codim<Seed::codimension>::Entity Entity;
       typedef YaspEntity<codim,dim,const YaspGrid> EntityImp;
       typedef typename YGrid::Iterator YIterator;
 
-      return Entity(EntityImp(g,YIterator(g->overlapfront[codim],this->getRealImplementation(seed).coord(),this->getRealImplementation(seed).offset())));
+      return Entity(EntityImp(g,YIterator(g->overlapfront[codim],seed.impl().coord(),seed.impl().offset())));
     }
 
     //! return size (= distance in graph) of overlap region
