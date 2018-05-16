@@ -31,7 +31,7 @@ namespace Dune {
       _entity(YaspEntity<0, dim, GridImp>(g,it))
     {
       // store reference to entity implementation for better readability
-      YaspEntityImp& entity = entityImplementation();
+      YaspEntityImp& entity = _entity.impl();
       // now iterator points to current cell
       StackElem se(entity._g);
       std::copy(entity._it.coord().begin(), entity._it.coord().end(), se.coord.begin());
@@ -64,7 +64,7 @@ namespace Dune {
       if (stack.empty()) return;
 
       // if maxlevel not reached then push sons
-      if (entityImplementation()._g->level()<_maxlevel)
+      if (_entity.impl()._g->level()<_maxlevel)
         push_sons();
 
       // in any case pop one element
@@ -86,7 +86,7 @@ namespace Dune {
     void print (std::ostream& s) const
     {
       // store reference to entity implementation for better readability
-      YaspEntityImp& entity = entityImplementation();
+      YaspEntityImp& entity = _entity.impl();
       s << "HIER: " << "level=" << entity._g.level()
         << " position=" << entity._it.coord()
         << " superindex=" << entity._it.superindex()
@@ -111,7 +111,7 @@ namespace Dune {
     void push_sons ()
     {
       // store reference to entity implementation for better readability
-      YaspEntityImp& entity = entityImplementation();
+      YaspEntityImp& entity = _entity.impl();
 
       // yes, process all 1<<dim sons
       YGLI finer = entity._g;
@@ -134,18 +134,14 @@ namespace Dune {
       }
     }
 
-    YaspEntityImp& entityImplementation()
-    {
-      return GridImp::getRealImplementation(this->_entity);
-    }
-
     // make TOS the current element
     void pop_tos ()
     {
       StackElem se = stack.top();
       stack.pop();
-      entityImplementation()._g = se.g;
-      entityImplementation()._it.reinit(entityImplementation()._g->overlap[0],se.coord);
+      YaspEntityImp& entity = _entity.impl();
+      entity._g = se.g;
+      entity._it.reinit(entity._g->overlap[0],se.coord);
     }
   };
 
