@@ -138,7 +138,7 @@ namespace Dune
       {}
 
       EntityBase ( const Grid &grid, const EntitySeed &seed )
-        : hostEntity_( grid.hostGrid().entity( grid.getRealImplementation(seed).hostEntitySeed() ) )
+        : hostEntity_( grid.hostGrid().entity( seed.impl().hostEntitySeed() ) )
         , grid_( &grid )
       {}
 
@@ -433,8 +433,8 @@ namespace Dune
       {}
 
       EntityBase ( const Grid &grid, const EntitySeed &seed )
-        : hostElement_( grid.hostGrid().entity( grid.getRealImplementation(seed).hostElementSeed() ) )
-        , subEntity_( grid.getRealImplementation(seed).subEntity() )
+        : hostElement_( grid.hostGrid().entity( seed.impl().hostElementSeed() ) )
+        , subEntity_( seed.impl().subEntity() )
         , grid_( &grid )
       {}
 
