@@ -94,7 +94,7 @@ namespace Dune
     IndexType index ( const typename Traits::template Codim< cc >::Entity &entity ) const
     {
       typedef AlbertaGridEntity< cc, dim, const Grid > EntityImp;
-      const EntityImp &entityImp = Grid::getRealImplementation( entity );
+      const EntityImp &entityImp = entity.impl();
       return subIndex( entityImp.elementInfo(), entityImp.subEntity(), cc );
     }
 
@@ -103,7 +103,7 @@ namespace Dune
     IndexType subIndex ( const typename Traits::template Codim< cc >::Entity &entity, int i, unsigned int codim ) const
     {
       typedef AlbertaGridEntity< cc, dim, const Grid > EntityImp;
-      const EntityImp &entityImp = Grid::getRealImplementation( entity );
+      const EntityImp &entityImp = entity.impl();
 
       int k = i;
       if( cc > 0 )
@@ -375,7 +375,7 @@ namespace Dune
       const int codim = Entity::codimension;
 
       const AlbertaGridEntity< codim, dim, const Grid > &entityImp
-        = Grid::getRealImplementation( entity );
+        = entity.impl();
       const Alberta::Element *element = entityImp.elementInfo().el();
 
       const IndexType *const array = indices_[ codim ];
@@ -392,7 +392,7 @@ namespace Dune
     IndexType index ( const typename Traits::template Codim< cc >::Entity &entity ) const
     {
       typedef AlbertaGridEntity< cc, dim, const Grid > EntityImp;
-      const EntityImp &entityImp = Grid::getRealImplementation( entity );
+      const EntityImp &entityImp = entity.impl();
       return subIndex( entityImp.elementInfo(), entityImp.subEntity(), cc );
     }
 
@@ -401,7 +401,7 @@ namespace Dune
     IndexType subIndex ( const typename Traits::template Codim< cc >::Entity &entity, int i, unsigned int codim ) const
     {
       typedef AlbertaGridEntity< cc, dim, const Grid > EntityImp;
-      const EntityImp &entityImp = Grid::getRealImplementation( entity );
+      const EntityImp &entityImp = entity.impl();
 
       int k = i;
       if( cc > 0 )
@@ -455,7 +455,7 @@ namespace Dune
       for( Iterator it = begin; it != end; ++it )
       {
         const AlbertaGridEntity< 0, dim, const Grid > &entityImp
-          = Grid::getRealImplementation( *it );
+          = it->impl();
         const Alberta::Element *element = entityImp.elementInfo().el();
         Hybrid::forEach( Std::make_index_sequence< dimension+1 >{},
           [ & ]( auto i ){ Insert< i >::apply( element, *this ); } );

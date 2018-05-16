@@ -59,7 +59,7 @@ namespace Dune
     template< class Intersection >
     int boundaryId ( const Intersection &intersection ) const
     {
-      return Grid::getRealImplementation( intersection ).boundaryId();
+      return intersection.impl().boundaryId();
     }
 
     // return true if boundary parameters found

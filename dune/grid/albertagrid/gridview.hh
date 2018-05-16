@@ -186,13 +186,13 @@ namespace Dune
       if( grid().maxLevel() == 0)
       {
         typename IntersectionIteratorImpl::Begin begin;
-        return IntersectionIteratorImpl( Grid::getRealImplementation( entity ), begin );
+        return IntersectionIteratorImpl( entity.impl(), begin );
       }
       else
       {
         DUNE_THROW( NotImplemented, "method ibegin not implemented on LevelGridView for AlbertaGrid." );
         typename IntersectionIteratorImpl::End end;
-        return IntersectionIteratorImpl( Grid::getRealImplementation( entity ), end );
+        return IntersectionIteratorImpl( entity.impl(), end );
       }
     }
 
@@ -201,7 +201,7 @@ namespace Dune
     iend ( const typename Codim< 0 >::Entity &entity ) const
     {
       typename IntersectionIteratorImpl::End end;
-      return IntersectionIteratorImpl( Grid::getRealImplementation( entity ), end );
+      return IntersectionIteratorImpl( entity.impl(), end );
     }
 
     /** \brief obtain collective communication object */
@@ -388,7 +388,7 @@ namespace Dune
     IntersectionIterator
     ibegin ( const typename Codim< 0 >::Entity &entity ) const
     {
-      const ElementInfo elementInfo = Grid::getRealImplementation( entity ).elementInfo();
+      const ElementInfo elementInfo = entity.impl().elementInfo();
       assert( !!elementInfo );
 
 #ifndef NDEBUG
@@ -400,16 +400,16 @@ namespace Dune
 #endif // #ifndef NDEBUG
 
       typename IntersectionIteratorImpl::Begin begin;
-      return IntersectionIteratorImpl( Grid::getRealImplementation( entity ), begin );
+      return IntersectionIteratorImpl( entity.impl(), begin );
     }
 
     /** \brief obtain end intersection iterator with respect to this view */
     IntersectionIterator
     iend ( const typename Codim< 0 >::Entity &entity ) const
     {
-      assert( !!Grid::getRealImplementation( entity ).elementInfo() );
+      assert( !!entity.impl().elementInfo() );
       typename IntersectionIteratorImpl::End end;
-      return IntersectionIteratorImpl( Grid::getRealImplementation( entity ), end );
+      return IntersectionIteratorImpl( entity.impl(), end );
     }
 
     /** \brief obtain collective communication object */

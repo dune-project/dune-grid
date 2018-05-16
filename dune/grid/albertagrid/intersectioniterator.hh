@@ -51,12 +51,12 @@ namespace Dune
     {}
 
     AlbertaGridLeafIntersectionIterator ( const This &other )
-      : intersection_( other.intersectionImp() )
+      : intersection_( other.intersection_.impl() )
     {}
 
     This &operator= ( const This &other )
     {
-      intersectionImp() = other.intersectionImp();
+      intersection_.impl() = other.intersection_.impl();
       return *this;
     }
 
@@ -67,25 +67,15 @@ namespace Dune
 
     bool equals ( const This &other ) const
     {
-      return (intersectionImp() == other.intersectionImp());
+      return (intersection_.impl() == other.intersection_.impl());
     }
 
     void increment ()
     {
-      intersectionImp().next();
+      intersection_.impl().next();
     }
 
   private:
-    const IntersectionImp &intersectionImp () const
-    {
-      return GridImp::getRealImplementation( intersection_ );
-    }
-
-    IntersectionImp &intersectionImp ()
-    {
-      return GridImp::getRealImplementation( intersection_ );
-    }
-
     Intersection intersection_;
   };
 

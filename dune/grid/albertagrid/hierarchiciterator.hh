@@ -59,7 +59,7 @@ namespace Dune
     //! equality
     bool equals ( const This &other ) const
     {
-      return entityImp().equals( other.entityImp() );
+      return entity_.impl().equals( other.entity_.impl() );
     }
 
     //! dereferencing
@@ -71,26 +71,14 @@ namespace Dune
     //! ask for level of entities
     int level () const
     {
-      return entityImp().level();
+      return entity_.impl().level();
     }
 
   protected:
-    //! obtain reference to internal entity implementation
-    EntityImp &entityImp ()
-    {
-      return GridImp::getRealImplementation( entity_ );
-    }
-
-    //! obtain const reference to internal entity implementation
-    const EntityImp &entityImp () const
-    {
-      return GridImp::getRealImplementation( entity_ );
-    }
-
     //! obtain a reference to the grid
     const GridImp &grid () const
     {
-      return entityImp().grid();
+      return entity_.impl().grid();
     }
 
   private:
@@ -151,7 +139,7 @@ namespace Dune
   template< class GridImp >
   inline void AlbertaGridHierarchicIterator< GridImp >::increment ()
   {
-    increment( entityImp().elementInfo() );
+    increment( entity_.impl().elementInfo() );
   }
 
   template< class GridImp >
@@ -164,12 +152,12 @@ namespace Dune
       while( (elementInfo.level() > startLevel_) && (elementInfo.indexInFather() == 1) )
         elementInfo = elementInfo.father();
       if( elementInfo.level() > startLevel_ )
-        entityImp().setElement( elementInfo.father().child( 1 ), 0 );
+        entity_.impl().setElement( elementInfo.father().child( 1 ), 0 );
       else
-        entityImp().clearElement();
+        entity_.impl().clearElement();
     }
     else
-      entityImp().setElement( elementInfo.child( 0 ), 0 );
+      entity_.impl().setElement( elementInfo.child( 0 ), 0 );
   }
 
 }

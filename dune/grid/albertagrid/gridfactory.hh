@@ -328,22 +328,22 @@ namespace Dune
     virtual unsigned int
     insertionIndex ( const typename Codim< 0 >::Entity &entity ) const
     {
-      return insertionIndex( Grid::getRealImplementation( entity ).elementInfo() );
+      return insertionIndex( entity.impl().elementInfo() );
     }
 
     virtual unsigned int
     insertionIndex ( const typename Codim< dimension >::Entity &entity ) const
     {
-      const int elIndex = insertionIndex( Grid::getRealImplementation( entity ).elementInfo() );
+      const int elIndex = insertionIndex( entity.impl().elementInfo() );
       const typename MacroData::ElementId &elementId = macroData_.element( elIndex );
-      return elementId[ Grid::getRealImplementation( entity ).subEntity() ];
+      return elementId[ entity.impl().subEntity() ];
     }
 
     virtual unsigned int
     insertionIndex ( const typename Grid::LeafIntersection &intersection ) const
     {
-      const Grid &grid = Grid::getRealImplementation( intersection ).grid();
-      const ElementInfo &elementInfo = Grid::getRealImplementation( intersection ).elementInfo();
+      const Grid &grid = intersection.impl().grid();
+      const ElementInfo &elementInfo = intersection.impl().elementInfo();
       const int face = grid.generic2alberta( 1, intersection.indexInInside() );
       return insertionIndex( elementInfo, face );
     }
