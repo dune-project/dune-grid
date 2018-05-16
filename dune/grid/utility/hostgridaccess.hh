@@ -92,7 +92,7 @@ namespace Dune
     static const typename Codim< codim >::HostEntity &
     hostEntity ( const typename Codim< codim >::Entity &entity )
     {
-      return Grid::getRealImplementation( entity ).hostEntity();
+      return entity.impl().hostEntity();
     }
 
     template< class HostIntersection >
@@ -168,19 +168,19 @@ namespace Dune
     static const typename Codim< codim >::HostEntity &
     hostEntity ( const typename Codim< codim >::Entity &entity )
     {
-      return *Grid::getRealImplementation( entity ).hostEntity_;
+      return *entity.impl().hostEntity_;
     }
 
     static const HostLeafIntersection &
     hostIntersection ( const LeafIntersection &intersection )
     {
-      return *Grid::getRealImplementation( intersection ).hostIterator_;
+      return *intersection.impl().hostIterator_;
     }
 
     static const HostLevelIntersection &
     hostIntersection ( const LevelIntersection &intersection )
     {
-      return *Grid::getRealImplementation( intersection ).hostIterator_;
+      return *intersection.impl().hostIterator_;
     }
   };
 
