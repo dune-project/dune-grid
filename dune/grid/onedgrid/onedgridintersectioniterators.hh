@@ -42,12 +42,12 @@ namespace Dune {
 
     //! equality
     bool equals(const OneDGridLevelIntersectionIterator<GridImp>& other) const {
-      return GridImp::getRealImplementation(intersection_).equals(GridImp::getRealImplementation(other.intersection_));
+      return intersection_.impl().equals(other.intersection_.impl());
     }
 
     //! prefix increment
     void increment() {
-      GridImp::getRealImplementation(intersection_).neighbor_++;
+      intersection_.impl().neighbor_++;
     }
 
     //! \brief dereferencing
@@ -93,12 +93,12 @@ namespace Dune {
 
     //! equality
     bool equals(const OneDGridLeafIntersectionIterator<GridImp>& other) const {
-      return GridImp::getRealImplementation(intersection_).equals(GridImp::getRealImplementation(other.intersection_));
+      return intersection_.impl().equals(other.intersection_.impl());
     }
 
     //! prefix increment
     void increment() {
-      GridImp::getRealImplementation(intersection_).neighbor_++;
+      intersection_.impl().neighbor_++;
     }
 
     //! \brief dereferencing

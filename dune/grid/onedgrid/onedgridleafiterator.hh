@@ -29,16 +29,16 @@ namespace Dune {
       /** \todo Can a make the fullRefineLevel work somehow? */
       const int fullRefineLevel = 0;
 
-      GridImp::getRealImplementation(this->virtualEntity_).setToTarget((OneDEntityImp<1-codim>*) std::get<1-codim>(grid_->entityImps_[fullRefineLevel]).begin());
+      this->virtualEntity_.impl().setToTarget((OneDEntityImp<1-codim>*) std::get<1-codim>(grid_->entityImps_[fullRefineLevel]).begin());
 
-      if (!GridImp::getRealImplementation(this->virtualEntity_).target_->isLeaf())
+      if (!this->virtualEntity_.impl().target_->isLeaf())
         increment();
     }
 
     //! Constructor
     OneDGridLeafIterator()
     {
-      GridImp::getRealImplementation(this->virtualEntity_).setToTarget(OneDGridNullIteratorFactory<1-codim>::null());
+      this->virtualEntity_.impl().setToTarget(OneDGridNullIteratorFactory<1-codim>::null());
     }
 
     //! prefix increment
@@ -46,8 +46,8 @@ namespace Dune {
       // Increment until you find a leaf entity
       do {
         globalIncrement();
-      } while (GridImp::getRealImplementation(this->virtualEntity_).target_
-               && !GridImp::getRealImplementation(this->virtualEntity_).target_->isLeaf());
+      } while (this->virtualEntity_.impl().target_
+               && !this->virtualEntity_.impl().target_->isLeaf());
     }
 
     //! dereferencing
@@ -68,12 +68,12 @@ namespace Dune {
       const int oldLevel = this->virtualEntity_.level();
 
       // Increment on this level
-      GridImp::getRealImplementation(this->virtualEntity_).setToTarget(GridImp::getRealImplementation(this->virtualEntity_).target_->succ_);
+      this->virtualEntity_.impl().setToTarget(this->virtualEntity_.impl().target_->succ_);
 
       // If beyond the end of this level set to first of next level
-      if (!GridImp::getRealImplementation(this->virtualEntity_).target_ && oldLevel < grid_->maxLevel()) {
+      if (!this->virtualEntity_.impl().target_ && oldLevel < grid_->maxLevel()) {
 
-        GridImp::getRealImplementation(this->virtualEntity_).setToTarget(const_cast<OneDEntityImp<dim-codim>*>(std::get<1-codim>(grid_->entityImps_[oldLevel+1]).begin()));
+        this->virtualEntity_.impl().setToTarget(const_cast<OneDEntityImp<dim-codim>*>(std::get<1-codim>(grid_->entityImps_[oldLevel+1]).begin()));
 
       }
 

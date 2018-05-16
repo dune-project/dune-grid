@@ -31,7 +31,7 @@ namespace Dune {
     template<int cd>
     int index (const typename GridImp::Traits::template Codim<cd>::Entity& e) const
     {
-      return grid_->getRealImplementation(e).levelIndex();
+      return e.impl().levelIndex();
     }
 
     //! get index of subentity of an entity
@@ -40,7 +40,7 @@ namespace Dune {
                            int i,
                            unsigned int codim) const
     {
-      return grid_->getRealImplementation(e).subLevelIndex(i,codim);
+      return e.impl().subLevelIndex(i,codim);
     }
 
     //! get number of entities of given type and on this level
@@ -164,7 +164,7 @@ namespace Dune {
     template<int cd>
     int index (const typename std::remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
-      return grid_.getRealImplementation(e).leafIndex();
+      return e.impl().leafIndex();
     }
 
     //! get index of subentity of an entity
@@ -173,7 +173,7 @@ namespace Dune {
                   int i,
                   unsigned int codim) const
     {
-      return grid_.getRealImplementation(e).subLeafIndex(i,codim);
+      return e.impl().subLeafIndex(i,codim);
     }
 
     //! get number of entities of given codim, type on the leaf level
@@ -264,7 +264,7 @@ namespace Dune {
       // ///////////////////////////////
       numElements_ = 0;
       for (const auto& element : elements(grid_.leafGridView()))
-        grid_.getRealImplementation(element).target_->leafIndex_ = numElements_++;
+        element.impl().target_->leafIndex_ = numElements_++;
 
       // //////////////////////////////
       //   Init the vertex indices
@@ -321,7 +321,7 @@ namespace Dune {
     template<int cd>
     IdType id (const typename std::remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
-      return grid_.getRealImplementation(e).globalId();
+      return e.impl().globalId();
     }
 
     //! get id of subentity
@@ -329,7 +329,7 @@ namespace Dune {
                   int i,
                   unsigned int codim) const
     {
-      return grid_.getRealImplementation(e).subId(i,codim);
+      return e.impl().subId(i,codim);
     }
 
   private:
