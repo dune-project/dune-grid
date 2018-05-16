@@ -216,7 +216,7 @@ namespace Dune {
     IdType id (const typename std::remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       // Return id of the host entity
-      return grid_->hostgrid_->globalIdSet().id(grid_->getRealImplementation(e).hostEntity_);
+      return grid_->hostgrid_->globalIdSet().id(e.impl().hostEntity_);
     }
 
 
@@ -228,7 +228,7 @@ namespace Dune {
     IdType subId (const typename std::remove_const<GridImp>::type::Traits::template Codim<0>::Entity& e, int i, int codim) const
     {
       // Return sub id of the host entity
-      return grid_->hostgrid_->globalIdSet().subId(grid_->getRealImplementation(e).hostEntity_,i, codim);
+      return grid_->hostgrid_->globalIdSet().subId(e.impl().hostEntity_,i, codim);
     }
 
 
@@ -270,7 +270,7 @@ namespace Dune {
     IdType id (const typename std::remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
       // Return id of the host entity
-      return grid_->hostgrid_->localIdSet().id(grid_->getRealImplementation(e).hostEntity_);
+      return grid_->hostgrid_->localIdSet().id(e.impl().hostEntity_);
     }
 
 
@@ -282,7 +282,7 @@ namespace Dune {
     IdType subId (const typename std::remove_const<GridImp>::type::template Codim<0>::Entity& e, int i, int codim) const
     {
       // Return sub id of the host entity
-      return grid_->hostgrid_->localIdSet().subId(grid_->getRealImplementation(e).hostEntity_,i,codim);
+      return grid_->hostgrid_->localIdSet().subId(e.impl().hostEntity_,i,codim);
     }
 
 
