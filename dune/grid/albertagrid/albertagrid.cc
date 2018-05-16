@@ -395,7 +395,7 @@ namespace Dune
 
     // set new marking
     adaptationState_.mark( refCount );
-    getRealImplementation( e ).elementInfo().setMark( refCount );
+    e.impl().elementInfo().setMark( refCount );
 
     return true;
   }
@@ -405,7 +405,7 @@ namespace Dune
   inline int AlbertaGrid< dim, dimworld >
   ::getMark( const typename Traits::template Codim< 0 >::Entity &e ) const
   {
-    return getRealImplementation( e ).elementInfo().getMark();
+    return e.impl().elementInfo().getMark();
   }
 
 

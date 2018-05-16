@@ -164,7 +164,7 @@ namespace Dune
 
       for( Iterator it = begin; it != end; ++it )
       {
-        const ElementInfo &elementInfo = Grid::getRealImplementation( *it ).elementInfo();
+        const ElementInfo &elementInfo = it->impl().elementInfo();
         Hybrid::forEach( Std::make_index_sequence< dimension+1-firstCodim >{},
           [ & ]( auto i ){ Codim< i+firstCodim >::apply( dofNumbering, marker, elementInfo ); } );
       }
@@ -225,7 +225,7 @@ namespace Dune
     //! equality
     bool equals ( const This &other ) const
     {
-      return entityImp().equals( other.entityImp() );
+      return entity_.impl().equals( other.entity_.impl() );
     }
 
     //! dereferencing
@@ -237,29 +237,17 @@ namespace Dune
     //! ask for level of entities
     int level () const
     {
-      return entityImp().level();
+      return entity_.impl().level();
     }
 
     //! increment
     void increment();
 
   protected:
-    //! obtain reference to internal entity implementation
-    EntityImp &entityImp ()
-    {
-      return GridImp::getRealImplementation( entity_ );
-    }
-
-    //! obtain const reference to internal entity implementation
-    const EntityImp &entityImp () const
-    {
-      return GridImp::getRealImplementation( entity_ );
-    }
-
     //! obtain a reference to the grid
     const GridImp &grid () const
     {
-      return entityImp().grid();
+      return entity_.impl().grid();
     }
 
   private:
@@ -370,7 +358,7 @@ namespace Dune
     if( codim > 0 )
       goNext( elementInfo );
     // it is ok to set the invalid ElementInfo
-    entityImp().setElement( elementInfo, subEntity_ );
+    entity_.impl().setElement( elementInfo, subEntity_ );
   }
 
 
@@ -417,10 +405,10 @@ namespace Dune
   template< int codim, class GridImp, bool leafIterator >
   inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >::increment ()
   {
-    ElementInfo elementInfo = entityImp().elementInfo_;
+    ElementInfo elementInfo = entity_.impl().elementInfo_;
     goNext ( elementInfo );
     // it is ok to set the invalid ElementInfo
-    entityImp().setElement( elementInfo, subEntity_ );
+    entity_.impl().setElement( elementInfo, subEntity_ );
   }
 
 

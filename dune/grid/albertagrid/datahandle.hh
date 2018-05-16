@@ -46,14 +46,14 @@ namespace Dune
       void restrictLocal ( const Patch &patch, int i )
       {
         ElementInfo fatherInfo = patch.elementInfo( i, grid_.levelProvider() );
-        Grid::getRealImplementation( father_ ).setElement( fatherInfo, 0 );
+        father_.impl().setElement( fatherInfo, 0 );
         rpOp_.preCoarsening( (const Entity &)father_ );
       }
 
       void prolongLocal ( const Patch &patch, int i )
       {
         ElementInfo fatherInfo = patch.elementInfo( i, grid_.levelProvider() );
-        Grid::getRealImplementation( father_ ).setElement( fatherInfo, 0 );
+        father_.impl().setElement( fatherInfo, 0 );
         rpOp_.postRefinement( (const Entity &)father_ );
       }
     };

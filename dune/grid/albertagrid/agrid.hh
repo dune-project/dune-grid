@@ -450,7 +450,7 @@ namespace Dune
     entity ( const EntitySeed &seed ) const
     {
       typedef typename Traits::template Codim< EntitySeed::codimension >::EntityImpl EntityImpl;
-      return EntityImpl( *this, this->getRealImplementation(seed).elementInfo( meshPointer() ), this->getRealImplementation(seed).subEntity() );
+      return EntityImpl( *this, seed.impl().elementInfo( meshPointer() ), seed.impl().subEntity() );
     }
 
     //**********************************************************
@@ -562,32 +562,32 @@ namespace Dune
     static int
     getTwist ( const typename Traits::template Codim< codim >::Entity &entity )
     {
-      return getRealImplementation( entity ).twist();
+      return entity.impl().twist();
     }
 
     template< int codim >
     static int
     getTwist ( const typename Traits::template Codim< 0 >::Entity &entity, int subEntity )
     {
-      return getRealImplementation( entity ).template twist< codim >( subEntity );
+      return entity.impl().template twist< codim >( subEntity );
     }
 
     static int
     getTwistInInside ( const typename Traits::LeafIntersection &intersection )
     {
-      return getRealImplementation( intersection ).twistInInside();
+      return intersection.impl().twistInInside();
     }
 
     static int
     getTwistInOutside ( const typename Traits::LeafIntersection &intersection )
     {
-      return getRealImplementation( intersection ).twistInOutside();
+      return intersection.impl().twistInOutside();
     }
 
     const AlbertaGridLeafIntersection< const This > &
     getRealIntersection ( const typename Traits::LeafIntersection &intersection ) const
     {
-      return getRealImplementation( intersection );
+      return intersection.impl();
     }
 
   public:

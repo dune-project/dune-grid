@@ -94,11 +94,11 @@ namespace Dune
     FieldVector< ctype, dimension > refNormal = refSimplex.integrationOuterNormal( face );
 
     const typename Entity::Geometry::JacobianInverseTransposed &jInvT
-      = Grid::getRealImplementation( geoInside ).jacobianInverseTransposed();
+      = geoInside.impl().jacobianInverseTransposed();
 
     NormalVector normal;
     jInvT.mv( refNormal, normal );
-    normal *= Grid::getRealImplementation( geoInside ).integrationElement();
+    normal *= geoInside.impl().integrationElement();
 
     return normal;
   }
