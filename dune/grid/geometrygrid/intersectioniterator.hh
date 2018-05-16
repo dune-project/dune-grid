@@ -34,7 +34,7 @@ namespace Dune
       IntersectionIterator ( const Entity &inside,
                              const HostIntersectionIterator &hostIterator )
         : hostIterator_( hostIterator )
-        , insideGeo_( Grid::getRealImplementation( inside.geometry() ) )
+        , insideGeo_( inside.geometry().impl() )
       {}
 
       IntersectionIterator ( const IntersectionIterator &other )

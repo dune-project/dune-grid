@@ -49,7 +49,7 @@ namespace Dune
       template< int codim >
       IdType id ( const typename Traits::template Codim< codim >::Entity &entity ) const
       {
-        return Grid::getRealImplementation( entity ).id( hostIdSet() );
+        return entity.impl().id( hostIdSet() );
       }
 
       template< class Entity >

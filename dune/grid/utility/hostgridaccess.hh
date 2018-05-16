@@ -99,7 +99,7 @@ namespace Dune
     static const HostIntersection &
     hostIntersection ( const Intersection< const Grid, GeoGrid::Intersection< const Grid, HostIntersection > > &intersection )
     {
-      return Grid::getRealImplementation( intersection ).hostIntersection();
+      return intersection.impl().hostIntersection();
     }
   };
 

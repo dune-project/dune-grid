@@ -58,13 +58,13 @@ namespace Dune
       template< int cc >
       IndexType index ( const typename Traits::template Codim< cc >::Entity &entity ) const
       {
-        return Grid::getRealImplementation( entity ).index( hostIndexSet() );
+        return entity.impl().index( hostIndexSet() );
       }
 
       template< int cc >
       IndexType subIndex ( const typename Traits::template Codim< cc >::Entity &entity, int i, unsigned int codim ) const
       {
-        return Grid::getRealImplementation( entity ).subIndex( hostIndexSet(), i, codim );
+        return entity.impl().subIndex( hostIndexSet(), i, codim );
       }
 
       IndexType size ( GeometryType type ) const
@@ -80,7 +80,7 @@ namespace Dune
       template< class Entity >
       bool contains ( const Entity &entity ) const
       {
-        return Grid::getRealImplementation( entity ).isContained( hostIndexSet() );
+        return entity.impl().isContained( hostIndexSet() );
       }
 
       Types types ( int codim ) const { return hostIndexSet().types( codim ); }

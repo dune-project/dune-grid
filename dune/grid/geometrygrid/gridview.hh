@@ -190,13 +190,13 @@ namespace Dune
       IntersectionIterator ibegin ( const typename Codim< 0 >::Entity &entity ) const
       {
         typedef GeoGrid::IntersectionIterator< const Grid, typename HostGridView::IntersectionIterator > IntersectionIteratorImpl;
-        return IntersectionIteratorImpl( entity, hostGridView().ibegin( Grid::getRealImplementation( entity ).hostEntity() ) );
+        return IntersectionIteratorImpl( entity, hostGridView().ibegin( entity.impl().hostEntity() ) );
       }
 
       IntersectionIterator iend ( const typename Codim< 0 >::Entity &entity ) const
       {
         typedef GeoGrid::IntersectionIterator< const Grid, typename HostGridView::IntersectionIterator > IntersectionIteratorImpl;
-        return IntersectionIteratorImpl( entity, hostGridView().iend( Grid::getRealImplementation( entity ).hostEntity() ) );
+        return IntersectionIteratorImpl( entity, hostGridView().iend( entity.impl().hostEntity() ) );
       }
 
       const CollectiveCommunication &comm () const
