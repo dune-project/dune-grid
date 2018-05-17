@@ -56,7 +56,7 @@ namespace Dune {
     template<int cc>
     IndexType index (const typename std::remove_const<GridImp>::type::Traits::template Codim<cc>::Entity& e) const
     {
-      return grid.getRealImplementation(e).compressedIndex();
+      return e.impl().compressedIndex();
     }
 
     //! get index of subentity of an entity
@@ -64,7 +64,7 @@ namespace Dune {
     IndexType subIndex ( const typename std::remove_const< GridImp >::type::Traits::template Codim< cc >::Entity &e,
                          int i, unsigned int codim ) const
     {
-      return grid.getRealImplementation(e).subCompressedIndex(i, codim);
+      return e.impl().subCompressedIndex(i, codim);
     }
 
     //! get number of entities of given type and level (the level is known to the object)

@@ -65,7 +65,7 @@ namespace Dune {
         LBMessageBuffer lbMessageBuffer;
         dataHandle.gather(lbMessageBuffer, entity);
 
-        auto ugEntity = gridView.grid().getRealImplementation(entity).getTarget();
+        auto ugEntity = entity.impl().getTarget();
         assert(not ugEntity->message_buffer());
 
         typedef typename DataHandle::DataType DataType;
@@ -97,7 +97,7 @@ namespace Dune {
       for (const auto entity : entities(gridView, Codim<codim>()))
       {
         // get data from UG message buffer and write to DUNE message buffer
-        auto ugEntity = gridView.grid().getRealImplementation(entity).getTarget();
+        auto ugEntity = entity.impl().getTarget();
 
         typedef typename DataHandle::DataType DataType;
         auto numberOfParams = ugEntity->message_buffer_size() / sizeof(DataType);

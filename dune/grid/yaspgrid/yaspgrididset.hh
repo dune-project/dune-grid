@@ -41,7 +41,7 @@ namespace Dune {
     template<int cd>
     IdType id (const typename std::remove_const<GridImp>::type::Traits::template Codim<cd>::Entity& e) const
     {
-      return GridImp::getRealImplementation(e).persistentIndex();
+      return e.impl().persistentIndex();
     }
 
     //! get id of subentity
@@ -52,7 +52,7 @@ namespace Dune {
     IdType subId (const typename std::remove_const<GridImp>::type::Traits::template Codim< 0 >::Entity &e,
                   int i, unsigned int codim ) const
     {
-      return GridImp::getRealImplementation(e).subPersistentIndex(i,codim);
+      return e.impl().subPersistentIndex(i,codim);
     }
 
   };

@@ -283,7 +283,7 @@ namespace Dune
         const typename Traits::Grid
         > EntityImp;
 
-      return EntityImp(this, hostgrid_->entity(this->getRealImplementation(seed).hostEntitySeed()));
+      return EntityImp(this, hostgrid_->entity(seed.impl().hostEntitySeed()));
     }
 
 
@@ -400,7 +400,7 @@ namespace Dune
     template <int codim>
     const typename HostGrid::Traits::template Codim<codim>::Entity& getHostEntity(const typename Traits::template Codim<codim>::Entity& e) const
     {
-      return this->getRealImplementation(e).hostEntity_;
+      return e.impl().hostEntity_;
     }
 
   protected:

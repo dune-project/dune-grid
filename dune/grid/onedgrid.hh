@@ -163,7 +163,7 @@ namespace Dune {
     entity(const Seed& seed)
     {
       const int codim = Seed::codimension;
-      return typename Traits::template Codim<codim>::Entity(OneDGridEntity<codim,dim,const OneDGrid>(OneDGrid::getRealImplementation(seed).target()));
+      return typename Traits::template Codim<codim>::Entity(OneDGridEntity<codim,dim,const OneDGrid>(seed.impl().target()));
     }
 
 

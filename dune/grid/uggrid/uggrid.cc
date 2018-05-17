@@ -190,7 +190,7 @@ template < int dim >
 bool UGGrid < dim >::mark(int refCount,
                           const typename Traits::template Codim<0>::Entity& e )
 {
-  typename UG_NS<dim>::Element* target = this->getRealImplementation(e).target_;
+  typename UG_NS<dim>::Element* target = e.impl().target_;
 
   // No refinement requested
   if (refCount==0) {
@@ -232,7 +232,7 @@ bool UGGrid < dim >::mark(const typename Traits::template Codim<0>::Entity& e,
                           typename UG_NS<dim>::RefinementRule rule,
                           int side)
 {
-  typename UG_NS<dim>::Element* target = this->getRealImplementation(e).target_;
+  typename UG_NS<dim>::Element* target = e.impl().target_;
 
   if (!UG_NS<dim>::isLeaf(target))
     return false;
@@ -246,7 +246,7 @@ bool UGGrid < dim >::mark(const typename Traits::template Codim<0>::Entity& e,
 template <int dim>
 int UGGrid<dim>::getMark(const typename Traits::template Codim<0>::Entity& e) const
 {
-  typename UG_NS<dim>::Element* target = this->getRealImplementation(e).target_;
+  typename UG_NS<dim>::Element* target = e.impl().target_;
 
   // Return -1 if element is marked for coarsening
   if (UG_NS<dim>::ReadCW(target,UG_NS<dim>::COARSEN_CE))
@@ -329,7 +329,7 @@ void UGGrid <dim>::postAdapt()
 {
   for (int i=0; i<=maxLevel(); i++)
     for (const auto& element : elements(this->levelGridView(i)))
-      UG_NS<dim>::WriteCW(this->getRealImplementation(element).target_, UG_NS<dim>::NEWEL_CE, 0);
+      UG_NS<dim>::WriteCW(element.impl().target_, UG_NS<dim>::NEWEL_CE, 0);
 
   // reset marker flags
   someElementHasBeenMarkedForRefinement_ = false;
@@ -378,7 +378,7 @@ void UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Codim<0>:
   if (!e.isLeaf()   // Get_Sons_of_ElementSide returns GM_FATAL when called for a leaf !?!
       && e.level() < maxl) {
 
-    typename UG_NS<dim>::Element* theElement = this->getRealImplementation(e).target_;
+    typename UG_NS<dim>::Element* theElement = e.impl().target_;
     list.emplace_back(theElement, elementSide);
 
   }
@@ -492,7 +492,7 @@ bool UGGrid < dim >::loadBalance(const std::vector<Rank>& targetProcessors, unsi
           DUNE_THROW(GridError, "Requesting target processor " << targetRank <<
                      ", but only " << comm().size() << " processors are available.");
 
-        UG_NS<dim>::Partition(this->getRealImplementation(element).target_) = targetRank;
+        UG_NS<dim>::Partition(element.impl().target_) = targetRank;
       } else {
 
         std::map<Rank,unsigned int> rank;
@@ -502,7 +502,7 @@ bool UGGrid < dim >::loadBalance(const std::vector<Rank>& targetProcessors, unsi
         // Loop over all children and collect the ranks they are assigned to
         for (const auto& child : descendantElements(element, element.level() + 1)) {
 
-          auto childRank = UG_NS<dim>::Partition(this->getRealImplementation(child).target_);
+          auto childRank = UG_NS<dim>::Partition(child.impl().target_);
 
           if (rank.find(childRank) == rank.end())
             rank[childRank] = 1;
@@ -517,7 +517,7 @@ bool UGGrid < dim >::loadBalance(const std::vector<Rank>& targetProcessors, unsi
         }
 
         // Assign rank that occurred most often
-        UG_NS<dim>::Partition(this->getRealImplementation(element).target_) = mostFrequentRank;
+        UG_NS<dim>::Partition(element.impl().target_) = mostFrequentRank;
 
       }
     }
@@ -541,7 +541,7 @@ template < int dim >
 void UGGrid < dim >::setPosition(const typename Traits::template Codim<dim>::Entity& e,
                                  const FieldVector<double, dim>& pos)
 {
-  typename UG_NS<dim>::Node* target = this->getRealImplementation(e).target_;
+  typename UG_NS<dim>::Node* target = e.impl().target_;
 
   for (int i=0; i<dim; i++)
     target->myvertex->iv.x[i] = pos[i];

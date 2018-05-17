@@ -596,7 +596,7 @@ namespace Dune
     static const typename HostGrid::template Codim< codim >::Entity &
     getHostEntity( const typename Codim< codim >::Entity &entity )
     {
-      return getRealImplementation( entity ).hostEntity();
+      return entity.impl().hostEntity();
     }
 
     void *allocateStorage ( std::size_t size ) const

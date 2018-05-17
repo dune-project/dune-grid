@@ -41,7 +41,7 @@ namespace Dune {
     //! increment
     void increment()
     {
-      ++(GridImp::getRealImplementation(_entity)._it);
+      ++(_entity.impl()._it);
     }
 
     //! equality

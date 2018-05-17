@@ -180,7 +180,7 @@ void checkTwists ( const GridView &gridView, const MapTwist &mapTwist )
   {
     const IntersectionIterator iend = gridView.iend( *it );
     for( IntersectionIterator iit = gridView.ibegin( *it ); iit != iend; ++iit )
-      errors += checkTwistOnIntersection( gridView.grid().getRealIntersection( *iit ), mapTwist );
+      errors += checkTwistOnIntersection( iit->impl(), mapTwist );
   }
 
   if( errors > 0 )

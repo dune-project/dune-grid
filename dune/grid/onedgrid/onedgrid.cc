@@ -465,7 +465,7 @@ bool Dune::OneDGrid::adapt()
 bool Dune::OneDGrid::preAdapt()
 {
   for (const auto& element : Dune::elements(leafGridView()))
-    if (getRealImplementation(element).target_->markState_ == OneDEntityImp<1>::COARSEN)
+    if (element.impl().target_->markState_ == OneDEntityImp<1>::COARSEN)
       return true;
 
   return false;
@@ -531,26 +531,26 @@ bool Dune::OneDGrid::mark(int refCount,
 
   if (refCount < 0) {
 
-    if (getRealImplementation(e).target_->level_ == 0)
+    if (e.impl().target_->level_ == 0)
       return false;
     else {
-      getRealImplementation(e).target_->markState_ = OneDEntityImp<1>::COARSEN;
+      e.impl().target_->markState_ = OneDEntityImp<1>::COARSEN;
       return true;
     }
 
   } else if (refCount > 0)
-    getRealImplementation(e).target_->markState_ = OneDEntityImp<1>::REFINE;
+    e.impl().target_->markState_ = OneDEntityImp<1>::REFINE;
   else
-    getRealImplementation(e).target_->markState_ = OneDEntityImp<1>::DO_NOTHING;
+    e.impl().target_->markState_ = OneDEntityImp<1>::DO_NOTHING;
 
   return true;
 }
 
 int Dune::OneDGrid::getMark(const Codim<0>::Entity & e ) const
 {
-  if(getRealImplementation(e).target_->markState_ == OneDEntityImp<1>::COARSEN)
+  if(e.impl().target_->markState_ == OneDEntityImp<1>::COARSEN)
     return -1;
-  else if(getRealImplementation(e).target_->markState_ == OneDEntityImp<1>::REFINE)
+  else if(e.impl().target_->markState_ == OneDEntityImp<1>::REFINE)
     return 1;
   return 0;
 }
