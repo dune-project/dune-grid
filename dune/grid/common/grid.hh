@@ -1004,6 +1004,7 @@ namespace Dune {
     //    - removes a possible const from the result; the type is a temporary
     //      anyway, so there is no reason to keep the const qualifier around.
     template <class InterfaceType>
+    DUNE_DEPRECATED_MSG("use the facade class' `impl()` method instead")
     static typename std::conditional<
       std::is_reference<
         InterfaceType

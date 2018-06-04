@@ -584,6 +584,7 @@ namespace Dune
       return intersection.impl().twistInOutside();
     }
 
+    DUNE_DEPRECATED_MSG("use intersection.impl() instead")
     const AlbertaGridLeafIntersection< const This > &
     getRealIntersection ( const typename Traits::LeafIntersection &intersection ) const
     {

@@ -7,6 +7,12 @@
   Communication of the grid. This can be used to steer the grid creation
   process, see `dune/grid/io/file/gmshreader.hh` for an example.
 
+- The `Grid::getRealImplementation` member function has been deprecated.
+  Use the `impl()` member function of the facade classes directly instead.
+
+- The `AlbertaGrid::getRealIntersection` member function has been deprecated.
+  Use the `impl()` member function of the intersection class directly instead.
+
 # Release 2.6
 
 - The deprecated `EntityPointer` has been removed completely and `EntityIterator`
