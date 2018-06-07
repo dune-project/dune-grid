@@ -12,21 +12,40 @@ def onedGrid(constructor):
 
     return gridModule.reader(constructor).leafView
 
-def yaspGrid(constructor, dimgrid=None, coordinates="Dune::EquidistantCoordinates", ctype="double"):
+def yaspGrid(constructor, dimgrid=None, coordinates="equidistant", ctype="double"):
+    from dune.generator import Constructor
     from .grid_generator import module, getDimgrid
 
     if not dimgrid:
         dimgrid = getDimgrid(constructor)
     if coordinates == "equidistant":
-        coordinates = "Dune::EquidistantCoordinates"
+        coordinates = "Dune::EquidistantOffsetCoordinates"
     elif coordinates == "tensorproduct":
         coordinates = "Dune::TensorProductCoordinates"
     coordinates, _ = generateTypeName(coordinates, ctype, dimgrid)
     typeName, includes = generateTypeName("Dune::YaspGrid", dimgrid, coordinates)
     includes += ["dune/grid/yaspgrid.hh", "dune/grid/io/file/dgfparser/dgfyasp.hh"]
-    gridModule = module(includes, typeName)
 
-    return gridModule.reader(constructor).leafView
+    ctor = Constructor([
+              'Dune::FieldVector<'+ctype+', '+str(dimgrid)+'> lowerleft',
+              'Dune::FieldVector<'+ctype+', '+str(dimgrid)+'> upperright',
+              'std::array<int, '+str(dimgrid)+'> elements',
+              'std::array<bool, '+str(dimgrid)+'> periodic',
+              'int overlap'],
+              ['std::bitset<'+str(dimgrid)+'> periodic_;',
+               'for (int i=0;i<'+str(dimgrid)+';++i) periodic_.set(i,periodic[i]);',
+               'return new DuneType(lowerleft,upperright,elements,periodic_,overlap);'],
+              ['"lowerleft"_a', '"upperright"_a', '"elements"_a', '"periodic"_a', '"overlap"_a'])
+
+    gridModule = module(includes, typeName, ctor)
+
+    lowerleft  = constructor.lower
+    upperright = constructor.upper
+    elements   = constructor.division
+    periodic   = constructor.param.get("periodic", [False,]*dimgrid)
+    overlap    = constructor.param.get("overlap", 0)
+
+    return gridModule.HierarchicalGrid(lowerleft,upperright,elements,periodic,overlap).leafView
 
 grid_registry = {
         "OneD"       : onedGrid,

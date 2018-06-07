@@ -27,6 +27,10 @@ class CartesianDomain(tuple):
                        tuple( (reader.dgfString, dgf) ) )
     def __init__(self,lower,upper,division,**parameters):
         self.dimgrid = len(lower)
+        self.lower = lower
+        self.upper = upper
+        self.division = division
+        self.param = parameters
     def dimgrid(self):
         return self.dimgrid
 def cartesianDomain(lower, upper, division, **parameters):
