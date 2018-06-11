@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_BOUNDARY_SEGMENT_HH
-#define DUNE_BOUNDARY_SEGMENT_HH
+#ifndef DUNE_GRID_COMMON_BOUNDARY_SEGMENT_HH
+#define DUNE_GRID_COMMON_BOUNDARY_SEGMENT_HH
 
 #include <dune/common/fvector.hh>
 
