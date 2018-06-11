@@ -25,7 +25,7 @@ namespace Dune {
      \tparam dim Dimension of the grid
      \tparam dimworld Dimension of the Euclidean space the grid is embedded in
    */
-  template< int dim, int dimworld = dim >
+  template< int dim, int dimworld = dim, class ctype = double >
   struct BoundarySegment
   {
     /** \brief Dummy virtual destructor */
@@ -33,8 +33,8 @@ namespace Dune {
 
     /** \brief A function mapping local coordinates on a boundary segment to world coordinates
      */
-    virtual FieldVector< double, dimworld >
-    operator() ( const FieldVector< double, dim-1> &local ) const = 0;
+    virtual FieldVector< ctype, dimworld >
+    operator() ( const FieldVector< ctype, dim-1> &local ) const = 0;
   };
 
 }  // end namespace Dune
