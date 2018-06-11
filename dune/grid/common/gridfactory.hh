@@ -32,42 +32,36 @@ namespace Dune
    * tetrahedra:
    * \image html cube-to-tet-6.png "Left: cube with vertex numbers.  Middle: cube triangulated into six tetrahedra.  Right: exploded version of the middle figure, with number for the tetrahedra."
      \code
-     Dune::GridFactory<Grid> gf;
+     Dune::GridFactory<Grid> factory;
 
-     Dune::FieldVector<typename Grid::ctype, 3> pos;
+     factory.insertVertex({0, 0, 0});
+     factory.insertVertex({1, 0, 0});
+     factory.insertVertex({0, 1, 0});
+     factory.insertVertex({1, 1, 0});
+     factory.insertVertex({0, 0, 1});
+     factory.insertVertex({1, 0, 1});
+     factory.insertVertex({0, 1, 1});
+     factory.insertVertex({1, 1, 1});
 
-     pos[0] = 0; pos[1] = 0; pos[2] = 0; gf.insertVertex(pos);
-     pos[0] = 1; pos[1] = 0; pos[2] = 0; gf.insertVertex(pos);
-     pos[0] = 0; pos[1] = 1; pos[2] = 0; gf.insertVertex(pos);
-     pos[0] = 1; pos[1] = 1; pos[2] = 0; gf.insertVertex(pos);
-     pos[0] = 0; pos[1] = 0; pos[2] = 1; gf.insertVertex(pos);
-     pos[0] = 1; pos[1] = 0; pos[2] = 1; gf.insertVertex(pos);
-     pos[0] = 0; pos[1] = 1; pos[2] = 1; gf.insertVertex(pos);
-     pos[0] = 1; pos[1] = 1; pos[2] = 1; gf.insertVertex(pos);
+     factory.insertElement(Dune::GeometryTypes::tetrahedron, {0, 1, 3, 7});
+     factory.insertElement(Dune::GeometryTypes::tetrahedron, {0, 5, 1, 7});
+     factory.insertElement(Dune::GeometryTypes::tetrahedron, {0, 4, 5, 7});
+     factory.insertElement(Dune::GeometryTypes::tetrahedron, {0, 6, 4, 7});
+     factory.insertElement(Dune::GeometryTypes::tetrahedron, {0, 2, 6, 7});
+     factory.insertElement(Dune::GeometryTypes::tetrahedron, {0, 3, 2, 7});
 
-     Dune::GeometryType type;
-     type.makeTetrahedron();
-     std::vector<unsigned int> vid(4);
-
-     vid[0] = 0; vid[1] = 1; vid[2] = 3; vid[3] = 7; gf.insertElement(type, vid);
-     vid[0] = 0; vid[1] = 5; vid[2] = 1; vid[3] = 7; gf.insertElement(type, vid);
-     vid[0] = 0; vid[1] = 4; vid[2] = 5; vid[3] = 7; gf.insertElement(type, vid);
-     vid[0] = 0; vid[1] = 6; vid[2] = 4; vid[3] = 7; gf.insertElement(type, vid);
-     vid[0] = 0; vid[1] = 2; vid[2] = 6; vid[3] = 7; gf.insertElement(type, vid);
-     vid[0] = 0; vid[1] = 3; vid[2] = 2; vid[3] = 7; gf.insertElement(type, vid);
-
-     std::shared_ptr<Grid> gridp(gf.createGrid());
+     std::shared_ptr<Grid> gridp(factory.createGrid());
      \endcode
    * Make sure that the inserted elements are not inverted, since not all
    * grids support that.  For instance, in the following code snippet the
    * elements 1, 3 and 5 are inverted while elements 0, 2 and 4 are not.
      \code
-     vid[0] = 0; vid[1] = 1; vid[2] = 3; vid[3] = 7; gf.insertElement(type, vid);
-     vid[0] = 0; vid[1] = 1; vid[2] = 5; vid[3] = 7; gf.insertElement(type, vid);
-     vid[0] = 0; vid[1] = 4; vid[2] = 5; vid[3] = 7; gf.insertElement(type, vid);
-     vid[0] = 0; vid[1] = 4; vid[2] = 6; vid[3] = 7; gf.insertElement(type, vid);
-     vid[0] = 0; vid[1] = 2; vid[2] = 6; vid[3] = 7; gf.insertElement(type, vid);
-     vid[0] = 0; vid[1] = 2; vid[2] = 3; vid[3] = 7; gf.insertElement(type, vid);
+     factory.insertElement(Dune::GeometryTypes::tetrahedron, {0, 1, 3, 7});
+     factory.insertElement(Dune::GeometryTypes::tetrahedron, {0, 1, 5, 7});
+     factory.insertElement(Dune::GeometryTypes::tetrahedron, {0, 4, 5, 7});
+     factory.insertElement(Dune::GeometryTypes::tetrahedron, {0, 4, 6, 7});
+     factory.insertElement(Dune::GeometryTypes::tetrahedron, {0, 2, 6, 7});
+     factory.insertElement(Dune::GeometryTypes::tetrahedron, {0, 2, 3, 7});
      \endcode
    */
   template <class GridType>
