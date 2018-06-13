@@ -7,6 +7,9 @@
   Communication of the grid. This can be used to steer the grid creation
   process, see `dune/grid/io/file/gmshreader.hh` for an example.
 
+- The number type used by a `BoundarySegment` is not hard-wired to `double`
+  anymore.
+
 - The `Grid::getRealImplementation` member function has been deprecated.
   Use the `impl()` member function of the facade classes directly instead.
 
