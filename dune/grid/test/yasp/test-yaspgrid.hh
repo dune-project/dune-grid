@@ -3,7 +3,7 @@
 #ifndef DUNE_GRID_TEST_TEST_YASPGRID_HH
 #define DUNE_GRID_TEST_TEST_YASPGRID_HH
 
-#include <memory>
+#include <string>
 
 #include <dune/grid/yaspgrid.hh>
 
@@ -134,7 +134,7 @@ struct YaspFactory<dim, Dune::TensorProductCoordinates<double,dim> >
 };
 
 template <int dim, class CC>
-void check_yasp(Dune::YaspGrid<dim,CC>* grid) {
+void check_yasp(std::string testID, Dune::YaspGrid<dim,CC>* grid) {
   std::cout << std::endl << "YaspGrid<" << dim << ">";
 
   gridcheck(*grid);
@@ -162,7 +162,7 @@ void check_yasp(Dune::YaspGrid<dim,CC>* grid) {
 
   std::ofstream file;
   std::ostringstream filename;
-  filename << "output" <<grid->comm().rank();
+  filename << testID << "-output" <<grid->comm().rank();
   file.open(filename.str());
   file << *grid << std::endl;
   file.close();
@@ -171,27 +171,27 @@ void check_yasp(Dune::YaspGrid<dim,CC>* grid) {
 }
 
 template <int dim, class CC = Dune::EquidistantCoordinates<double,dim> >
-void check_backuprestore(Dune::YaspGrid<dim,CC>* grid)
+void check_backuprestore(std::string testID, Dune::YaspGrid<dim,CC>* grid)
 {
    typedef Dune::YaspGrid<dim,CC> Grid;
    grid->globalRefine(2);
 
-   Dune::BackupRestoreFacility<Grid>::backup(*grid, "backup");
+   Dune::BackupRestoreFacility<Grid>::backup(*grid, testID+"-backup");
 
    // avoid that processes that having nothing to backup try to restore
    // a grid that has not been backuped yet.
    grid->comm().barrier();
-   Grid* restored = Dune::BackupRestoreFacility<Grid>::restore("backup");
+   Grid* restored = Dune::BackupRestoreFacility<Grid>::restore(testID+"-backup");
 
    // write a backup of the restored file. this has to be identical to backup
-   Dune::BackupRestoreFacility<Grid>::backup(*restored, "copy");
+   Dune::BackupRestoreFacility<Grid>::backup(*restored, testID+"-copy");
 
    if ((std::is_same<CC,Dune::TensorProductCoordinates<double,dim> >::value) || (grid->comm().rank() == 0))
    {
      // check whether copy and backup are equal
      std::ostringstream s1,s2;
-     s1 << "backup";
-     s2 << "copy";
+     s1 << testID << "-backup";
+     s2 << testID << "-copy";
      if (std::is_same<CC,Dune::TensorProductCoordinates<double,dim> >::value)
      {
        s1 << grid->comm().rank();
@@ -211,7 +211,7 @@ void check_backuprestore(Dune::YaspGrid<dim,CC>* grid)
      }
    }
 
-   check_yasp(restored);
+   check_yasp(testID, restored);
 
    delete grid;
 }
