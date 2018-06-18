@@ -765,7 +765,9 @@ namespace Dune {
         int global = 0;
         MPI_Allreduce(&toosmall, &global, 1, MPI_INT, MPI_LOR, comm);
         if (global)
-          DUNE_THROW(Dune::GridError,"YaspGrid is too small to be overlapping");
+          DUNE_THROW(Dune::GridError,"YaspGrid does not support degrees of freedom shared by more than immediately neighboring subdomains."
+                                     " Note that this also holds for DOFs on subdomain boundaries."
+                                     " Increase grid elements or decrease overlap accordingly.");
       }
 #endif // #if HAVE_MPI
 
@@ -835,7 +837,9 @@ namespace Dune {
         int global = 0;
         MPI_Allreduce(&toosmall, &global, 1, MPI_INT, MPI_LOR, comm);
         if (global)
-          DUNE_THROW(Dune::GridError,"YaspGrid is too small to be overlapping");
+          DUNE_THROW(Dune::GridError,"YaspGrid does not support degrees of freedom shared by more than immediately neighboring subdomains."
+                                     " Note that this also holds for DOFs on subdomain boundaries."
+                                     " Increase grid elements or decrease overlap accordingly.");
       }
 #endif // #if HAVE_MPI
 
@@ -913,7 +917,9 @@ namespace Dune {
         int global = 0;
         MPI_Allreduce(&toosmall, &global, 1, MPI_INT, MPI_LOR, comm);
         if (global)
-          DUNE_THROW(Dune::GridError,"YaspGrid is too small to be overlapping");
+          DUNE_THROW(Dune::GridError,"YaspGrid does not support degrees of freedom shared by more than immediately neighboring subdomains."
+                                     " Note that this also holds for DOFs on subdomain boundaries."
+                                     " Increase grid elements or decrease overlap accordingly.");
       }
 #endif // #if HAVE_MPI
 
