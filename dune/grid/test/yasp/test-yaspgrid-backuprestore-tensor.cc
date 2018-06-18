@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <string>
 
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/yaspgrid.hh>
@@ -16,13 +17,18 @@
 int main (int argc , char **argv) {
   try {
     // Initialize MPI, if present
-    Dune::MPIHelper::instance(argc, argv);
+    const auto & mpiHelper = Dune::MPIHelper::instance(argc, argv);
+
+    std::string testID =
+      "backuprestore-tensor-np" + std::to_string(mpiHelper.size());
 
     // check the backup restore facility
-    check_backuprestore(YaspFactory<2,Dune::TensorProductCoordinates<double,2> >::buildGrid());
+    check_backuprestore(testID,
+                        YaspFactory<2,Dune::TensorProductCoordinates<double,2> >::buildGrid());
 
     // Test again with refinement
-    check_backuprestore(YaspFactory<2,Dune::TensorProductCoordinates<double,2> >::buildGrid(true, 1));
+    check_backuprestore(testID + "-ref",
+                        YaspFactory<2,Dune::TensorProductCoordinates<double,2> >::buildGrid(true, 1));
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
