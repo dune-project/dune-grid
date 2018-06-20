@@ -27,51 +27,46 @@ namespace Dune {
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
   };
 
-  /** @brief struct with three bytes of text */
-  struct b64txt
+  /** @brief struct representing the three byte text as well as the four 6 bit chunks */
+  struct b64chunk
   {
-    typedef unsigned char size_type;
+    using size_type = unsigned char;
     size_type size;
     char txt[3];
+
+    void reset()
+    {
+      size = 0;
+      txt[0] = txt[1] = txt[2] = 0;
+    }
+
     int read(const char* t, size_type s)
     {
       size = s>=3 ? 3 : s;
-      txt[2] = s>0 ? t[0] : 0;
+      txt[0] = s>0 ? t[0] : 0;
       txt[1] = s>1 ? t[1] : 0;
-      txt[0] = s>2 ? t[2] : 0;
+      txt[2] = s>2 ? t[2] : 0;
       return size;
     }
+
     void put(const char c)
     {
       assert (size < 3);
-      txt[2-size++] = c;
+      txt[size++] = c;
     }
-  };
 
-  /** struct with four six bit chunks */
-  struct b64data
-  {
-    typedef unsigned char size_type;
-    size_type size;
-    unsigned A : 6;
-    unsigned B : 6;
-    unsigned C : 6;
-    unsigned D : 6;
     void write(char* t)
     {
-      t[3] = size>2 ? base64table[A] : '=';
-      t[2] = size>1 ? base64table[B] : '=';
-      t[1] = size>0 ? base64table[C] : '=';
-      t[0] = size>0 ? base64table[D] : '=';
+      const unsigned A = (txt[0] & 0b1111'1100) >> 2;
+      const unsigned B = (txt[0] & 0b0000'0011) << 4 | (txt[1] & 0b1111'0000) >> 4;
+      const unsigned C = (txt[1] & 0b0000'1111) << 2 | (txt[2] & 0b1100'0000) >> 6;
+      const unsigned D = txt[2] & 0b0011'1111;
+      t[0] = size>0 ? base64table[A] : '=';
+      t[1] = size>0 ? base64table[B] : '=';
+      t[2] = size>1 ? base64table[C] : '=';
+      t[3] = size>2 ? base64table[D] : '=';
       size = 0;
     }
-  };
-
-  /** @brief union representing the three byte text as well as the four 6 bit chunks */
-  union b64chunk
-  {
-    b64txt txt;
-    b64data data;
   };
 
   /** @} */
