@@ -26,7 +26,7 @@ namespace Dune {
       : s(s_)
     {
       // reset chunk
-      chunk.txt.read(0,0);
+      chunk.reset();
     }
 
     //! encode a data item
@@ -42,10 +42,10 @@ namespace Dune {
       char* p = reinterpret_cast<char*>(&data);
       for (size_t len = sizeof(X); len > 0; len--,p++)
       {
-        chunk.txt.put(*p);
-        if (chunk.txt.size == 3)
+        chunk.put(*p);
+        if (chunk.size == 3)
         {
-          chunk.data.write(obuf);
+          chunk.write(obuf);
           s.write(obuf,4);
         }
       }
@@ -61,9 +61,9 @@ namespace Dune {
      */
     void flush()
     {
-      if (chunk.txt.size > 0)
+      if (chunk.size > 0)
       {
-        chunk.data.write(obuf);
+        chunk.write(obuf);
         s.write(obuf,4);
       }
     }
