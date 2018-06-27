@@ -17,7 +17,7 @@ template <class GridType>
 void readGrid (const std::string& baseName)
 {
   // read the grid
-  std::unique_ptr<GridType> grid(Dune::StarCDReader<GridType>::read(baseName));
+  std::unique_ptr<GridType> grid = Dune::StarCDReader<GridType>::read(baseName);
 
   std::cout << "Starting grid tests ." << std::flush;
 
@@ -25,6 +25,11 @@ void readGrid (const std::string& baseName)
   gridcheck(*grid);
 
   std::cout << " passed." << std::endl;
+
+  // Remove the following tests once that StarCDReader::read returns a std::unique_ptr
+  GridType* gridPtr = Dune::StarCDReader<GridType>::read(baseName);
+  delete gridPtr;
+  std::shared_ptr<GridType> gridShared = Dune::StarCDReader<GridType>::read(baseName);
 }
 
 

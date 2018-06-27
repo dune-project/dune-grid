@@ -16,6 +16,7 @@
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
+#include <dune/common/to_unique_ptr.hh>
 
 #include <dune/geometry/type.hh>
 
@@ -658,8 +659,13 @@ namespace Dune
   public:
     typedef GridType Grid;
 
-    /** \todo doc me */
-    static Grid* read (const std::string& fileName, bool verbose = true, bool insertBoundarySegments=true)
+    /** \todo doc me
+     *
+     * \return The return type is a special pointer type that casts into Grid*,
+     *    std::unique_ptr<Grid>, and std::shared_ptr<Grid>.  It is scheduled
+     *    to be replaced by std::unique_ptr<Grid> eventually.
+     */
+    static ToUniquePtr<Grid> read (const std::string& fileName, bool verbose = true, bool insertBoundarySegments=true)
     {
       // make a grid factory
       Dune::GridFactory<Grid> factory;
@@ -674,8 +680,13 @@ namespace Dune
       return factory.createGrid();
     }
 
-    /** \todo doc me */
-    static Grid* read (const std::string& fileName,
+    /** \todo doc me
+     *
+     * \return The return type is a special pointer type that casts into Grid*,
+     *    std::unique_ptr<Grid>, and std::shared_ptr<Grid>.  It is scheduled
+     *    to be replaced by std::unique_ptr<Grid> eventually.
+     */
+    static ToUniquePtr<Grid> read (const std::string& fileName,
                        std::vector<int>& boundarySegmentToPhysicalEntity,
                        std::vector<int>& elementToPhysicalEntity,
                        bool verbose = true, bool insertBoundarySegments=true)
