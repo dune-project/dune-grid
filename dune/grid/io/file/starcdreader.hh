@@ -4,6 +4,8 @@
 #define DUNE_STARCD_READER_HH
 
 #include <dune/common/exceptions.hh>
+#include <dune/common/to_unique_ptr.hh>
+
 #include <dune/geometry/type.hh>
 #include <dune/grid/common/gridfactory.hh>
 #include <iostream>
@@ -53,8 +55,12 @@ namespace Dune {
      *    \return Pointer to the grid
      *    \param fileName The base file name of the Star-CD files
      *    \param verbose Tlag to set whether information should be printed
+     *
+     * \return The return type is a special pointer type that casts into GridType*,
+     *    std::unique_ptr<GridType>, and std::shared_ptr<GridType>.  It is scheduled
+     *    to be replaced by std::unique_ptr<GridType> eventually.
      */
-    static GridType* read(const std::string& fileName, bool verbose = true)
+    static ToUniquePtr<GridType> read(const std::string& fileName, bool verbose = true)
     {
       // extract the grid dimension
       const int dim = GridType::dimension;

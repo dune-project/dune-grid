@@ -19,7 +19,7 @@ template <class GridType>
 void testReadingUnstructuredGrid(const std::string& filename) {
 
   // Read the grid
-  std::unique_ptr<GridType> grid(AmiraMeshReader<GridType>::read(filename));
+  std::unique_ptr<GridType> grid = AmiraMeshReader<GridType>::read(filename);
 
   // Write the grid into a tmp file
   LeafAmiraMeshWriter<GridType> amiramesh(*grid);
@@ -28,6 +28,10 @@ void testReadingUnstructuredGrid(const std::string& filename) {
   /** \todo Ideally we should check here whether the two files differ.
       However this is not easy as DUNE may permute the vertices of each element */
 
+  // Remove the following tests once that AmiraMeshReader::read returns a std::unique_ptr
+  GridType* gridPtr = AmiraMeshReader<GridType>::read(fileName);
+  delete gridPtr;
+  std::shared_ptr<GridType> gridShared = AmiraMeshReader<GridType>::read(fileName);
 }
 
 void testWritingUniformData() {
