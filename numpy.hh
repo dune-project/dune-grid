@@ -166,30 +166,27 @@ namespace Dune
       const std::size_t dimGrid = GridView::dimension;
       const std::size_t dimWorld = GridView::dimensionworld;
 
-      std::map< GeometryType, std::vector< std::vector< FieldVector< ctype, dimWorld > > > > coords;
+      std::map< std::size_t, std::vector< std::vector< FieldVector< ctype, dimWorld > > > > coords;
 
       for( const auto &element : elements( gridView, ps ) )
       {
-        const auto &refinement = buildRefinement< dimGrid, double >( element.type(), element.type() );
-        std::vector<FieldVector<ctype,dimWorld>> poly;
-
         // get coordinates
         const auto geometry = element.geometry();
-        for( auto it = refinement.vBegin( 0 ), end = refinement.vEnd( 0 ); it != end; ++it )
-          poly.push_back( geometry.global( it.coords() ) );
+        const std::size_t corners = geometry.corners();
+        std::vector< FieldVector< ctype, dimWorld > > poly( corners );
+        for( std::size_t i = 0; i != corners; ++i )
+          poly[ i ] = geometry.corner( i );
 
         // Martin: This seems to be limited to two spatial dimensions.
         if( element.type().isCube() )
           std::swap( poly[ 0 ], poly[ 1 ] );
 
-        coords[ element.type() ].push_back( poly );
+        coords[ corners ].push_back( poly );
       }
 
       std::vector< pybind11::array_t< typename GridView::ctype > > ret;
-      // Martin: This will not work for true polygons, due to difference vertex sizes.
-      //         A solution could be a NumPy array per vertex count instead of per geometry type.
       for( const auto &entry : coords )
-        ret.push_back( makeNumPyArray< ctype >( entry.second, { entry.second.size(), entry.second[ 0 ].size(), dimWorld } ) );
+        ret.push_back( makeNumPyArray< ctype >( entry.second, { entry.second.size(), entry.first, dimWorld } ) );
       return ret;
     }
 
