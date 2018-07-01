@@ -200,6 +200,62 @@ namespace Dune
           throw std::invalid_argument( msg.str() );
         }
 
+
+        template< class Grid >
+        inline static void insertElements ( pybind11::list data, Dune::GridFactory< Grid > &factory )
+        {
+          for( pybind11::handle hItem : data )
+          {
+            auto item = pybind11::reinterpret_borrow< pybind11::tuple >( hItem );
+            if( item.size() == 2 )
+              factory.insertElement( pybind11::cast< GeometryType >( item[ 0 ] ), pybind11::cast< std::vector< unsigned int > >( item[ 1 ] ) );
+            else
+              throw std::invalid_argument( "Element tuple must be of length 2." );
+          }
+        }
+
+        template< class Grid >
+        inline static void insertElements ( pybind11::detail::item_accessor data, Dune::GridFactory< Grid > &factory )
+        {
+          insertElements( pybind11::cast< pybind11::list >( data ), factory );
+        }
+
+
+
+        // insertBoundaries
+        // ----------------
+
+        template< class Grid >
+        inline static void insertBoundaries ( pybind11::list data, Dune::GridFactory< Grid > &factory )
+        {
+          const int dimGrid = Grid::dimension;
+          const int dimWorld = Grid::dimensionworld;
+
+          for( pybind11::handle item : data )
+          {
+            auto vertices = item.template cast< std::vector< unsigned int > >();
+
+            pybind11::function f;
+            try
+            {
+              f = item.template cast< pybind11::function >();
+            }
+            catch( const pybind11::cast_error & )
+            {}
+
+            if( f )
+              factory.insertBoundarySegment( vertices, std::make_shared< BoundarySegment< dimGrid, dimWorld > >( f ) );
+            else
+              factory.insertBoundarySegment( vertices );
+          }
+        }
+
+        template< class Grid >
+        inline static void insertBoundaries ( pybind11::detail::item_accessor data, Dune::GridFactory< Grid > &factory )
+        {
+          insertBoundaries( pybind11::cast< pybind11::list >( data ), factory );
+        }
+
       } // namespace GridFactory
 
     } // namespace detail
@@ -213,40 +269,40 @@ namespace Dune
     inline void fillGridFactory ( const pybind11::dict &dict, Dune::GridFactory< Grid > &factory )
     {
       const int dimGrid = Grid::dimension;
-      const int dimWorld = Grid::dimensionworld;
 
       if( dict.contains( "vertices" ) )
         detail::GridFactory::insertVertices( dict[ "vertices" ], factory );
       else
         throw std::invalid_argument( "Missing Key: 'vertices'" );
 
+      if( dict.contains( "lines" ) )
+        detail::GridFactory::insertElements( GeometryTypes::line, dict[ "lines" ], factory );
+      if( dict.contains( "triangles" ) )
+        detail::GridFactory::insertElements( GeometryTypes::triangle, dict[ "triangles" ], factory );
+      if( dict.contains( "tetrahedra" ) )
+        detail::GridFactory::insertElements( GeometryTypes::tetrahedron, dict[ "tetrahedra" ], factory );
+
       if( dict.contains( "simplices" ) )
         detail::GridFactory::insertElements( GeometryTypes::simplex( dimGrid ), dict[ "simplices" ], factory );
+
+      if( dict.contains( "quadrilaterals" ) )
+        detail::GridFactory::insertElements( GeometryTypes::quadrilateral, dict[ "quadrilaterals" ], factory );
+      if( dict.contains( "hexahedra" ) )
+        detail::GridFactory::insertElements( GeometryTypes::hexahedron, dict[ "hexahedra" ], factory );
 
       if( dict.contains( "cubes" ) )
         detail::GridFactory::insertElements( GeometryTypes::cube( dimGrid ), dict[ "cubes" ], factory );
 
+      if( dict.contains( "prisms" ) )
+        detail::GridFactory::insertElements( GeometryTypes::prism, dict[ "prisms" ], factory );
+      if( dict.contains( "pyramid" ) )
+        detail::GridFactory::insertElements( GeometryTypes::prism, dict[ "pyramids" ], factory );
+
+      if( dict.contains( "elements" ) )
+        detail::GridFactory::insertElements( dict[ "elements" ], factory );
+
       if( dict.contains( "boundaries" ) )
-      {
-        auto data = dict[ "boundaries" ].template cast< pybind11::list >();
-        for( pybind11::handle item : data )
-        {
-          auto vertices = item.template cast< std::vector< unsigned int > >();
-
-          pybind11::function f;
-          try
-          {
-            f = item.template cast< pybind11::function >();
-          }
-          catch( const pybind11::cast_error & )
-          {}
-
-          if( f )
-            factory.insertBoundarySegment( vertices, std::make_shared< BoundarySegment< dimGrid, dimWorld > >( f ) );
-          else
-            factory.insertBoundarySegment( vertices );
-        }
-      }
+        detail::GridFactory::insertBoundaries( dict[ "boundaries" ], factory );
     }
 
   } // namespace Python
