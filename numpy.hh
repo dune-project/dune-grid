@@ -190,6 +190,58 @@ namespace Dune
       return ret;
     }
 
+    template< class GridFunction, unsigned int partitions >
+    inline static
+    // std::pair<
+    //    std::vector< pybind11::array_t< typename GridFunction::GridView::ctype > >,
+    //    pybind11::array_t< typename GridFunction::GridView::ctype >
+    //    >
+    auto polygonData ( const GridFunction &gridFunction, PartitionSet< partitions > ps )
+    {
+      typedef typename GridFunction::GridView GridView;
+      typedef typename GridView::ctype ctype;
+
+      const std::size_t dimGrid = GridView::dimension;
+      const std::size_t dimWorld = GridView::dimensionworld;
+      typedef typename GridFunctionTraits< GridFunction >::Range Range;
+
+      std::map< std::size_t, std::pair<
+           std::vector< std::vector< FieldVector< ctype, dimWorld > > >,
+           std::vector< Range >
+           > > coords;
+
+      const auto &gv = gridView( gridFunction );
+      auto lf = localFunction( gridFunction );
+
+      for( const auto &element : elements( gv, ps ) )
+      {
+        // get coordinates
+        const auto geometry = element.geometry();
+        const std::size_t corners = geometry.corners();
+        std::vector< FieldVector< ctype, dimWorld > > poly( corners );
+        for( std::size_t i = 0; i != corners; ++i )
+          poly[ i ] = geometry.corner( i );
+
+        // Martin: This seems to be limited to two spatial dimensions.
+        if( element.type().isCube() )
+          std::swap( poly[ 0 ], poly[ 1 ] );
+
+        lf.bind(element);
+        coords[ corners ].first.push_back( poly );
+        coords[ corners ].second.push_back( lf( geometry.center() ) );
+        lf.unbind();
+      }
+
+      std::vector< pybind11::array_t< typename GridView::ctype > > ret;
+      std::vector< pybind11::array_t< typename GridView::ctype > > values;
+      for( const auto &entry : coords )
+      {
+        ret.push_back( makeNumPyArray< ctype >( entry.second.first, { entry.second.first.size(), entry.first, dimWorld } ) );
+        values.push_back( Python::makeNumPyArray< typename FieldTraits< Range >::field_type >( entry.second.second, { entry.second.second.size(), GetDimension<Range>::value } ) );
+      }
+      return std::make_pair(ret, values);
+    }
+
     template< class GridView, unsigned int partitions >
     inline static std::pair< pybind11::array_t< typename GridView::ctype >, pybind11::array_t< int > >
     tesselate ( const GridView &gridView, PartitionSet< partitions > ps )
@@ -211,7 +263,16 @@ namespace Dune
       return polygons( gridView, Partitions::all );
     }
 
-
+    template< class GridFunction >
+    inline static
+    // std::pair<
+    //    std::vector< pybind11::array_t< typename GridFunction::GridView::ctype > >,
+    //    pybind11::array_t< typename GridFunction::GridView::ctype >
+    //    >
+    auto polygonData ( const GridFunction &gridFunction )
+    {
+      return polygonData( gridFunction, Partitions::all );
+    }
 
     // pointData
     // ---------

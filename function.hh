@@ -109,6 +109,14 @@ namespace Dune
 
       cls.def( "cellData", [] ( const GridFunction &self, int level ) { return cellData( self, level ); }, "level"_a = 0 );
       cls.def( "pointData", [] ( const GridFunction &self, int level ) { return pointData( self, level ); }, "level"_a = 0 );
+      cls.def( "polygonData", [] ( const GridFunction &self ) { return polygonData( self ); },
+        R"doc(
+          Store the grid with piecewise constant data in numpy arrays.
+
+          Returns: pair with coordinate array storing the vertex coordinate of each polygon
+                   in the grid and an array with a range type for each polygon.
+        )doc" );
+
 
       cls.def( "__call__", [] ( const GridFunction &self, const Element &element, LocalCoordinate &x ) {
           auto lf = localFunction(self);
