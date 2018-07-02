@@ -57,7 +57,7 @@ namespace Dune
       std::copy(elements.begin(), elements.end(), elem.begin());
 
       return std::make_unique<GridType>(upperRight, elem,
-                             std::bitset<dim>(), 0);  // default constructor of bitset sets to zero
+                             std::bitset<dim>(), 1);  // default constructor of bitset sets to zero
     }
 
     /** \brief Create a structured simplex grid
@@ -106,7 +106,7 @@ namespace Dune
       std::copy(elements.begin(), elements.end(), elem.begin());
 
       return std::make_unique<GridType>(lowerLeft, upperRight, elem,
-                             std::bitset<dim>(), 0);  // default constructor of bitset sets to zero
+                             std::bitset<dim>(), 1);  // default constructor of bitset sets to zero
     }
 
     /** \brief Create a structured simplex grid
