@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <string>
 
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/yaspgrid.hh>
@@ -16,11 +17,17 @@
 int main (int argc , char **argv) {
   try {
     // Initialize MPI, if present
-    Dune::MPIHelper::instance(argc, argv);
+    const auto & mpiHelper = Dune::MPIHelper::instance(argc, argv);
 
-    check_yasp(YaspFactory<3,Dune::EquidistantCoordinates<double,3> >::buildGrid());
-    check_yasp(YaspFactory<3,Dune::EquidistantOffsetCoordinates<double,3> >::buildGrid());
-    check_yasp(YaspFactory<3,Dune::TensorProductCoordinates<double,3> >::buildGrid());
+    std::string testID =
+      "yaspfactory-3d-np" + std::to_string(mpiHelper.size());
+
+    check_yasp(testID + "equidistant",
+               YaspFactory<3,Dune::EquidistantCoordinates<double,3> >::buildGrid());
+    check_yasp(testID + "equidistantoffset",
+               YaspFactory<3,Dune::EquidistantOffsetCoordinates<double,3> >::buildGrid());
+    check_yasp(testID + "tensor",
+               YaspFactory<3,Dune::TensorProductCoordinates<double,3> >::buildGrid());
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
