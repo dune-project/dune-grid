@@ -44,14 +44,22 @@ namespace Dune {
     template <class ValueType>
     void writeRaw_(const ValueType &v)
     {
-      *reinterpret_cast<ValueType*>(ugData_) = v;
+      std::copy(
+        reinterpret_cast<const char*>(&v),
+        reinterpret_cast<const char*>(&v) + sizeof(ValueType),
+        reinterpret_cast<char*>(ugData_)
+        );
       ugData_ += sizeof(ValueType);
     }
 
     template <class ValueType>
     void readRaw_(ValueType &v)
     {
-      v = *reinterpret_cast<ValueType*>(ugData_);
+      std::copy(
+        reinterpret_cast<const char*>(ugData_),
+        reinterpret_cast<const char*>(ugData_) + sizeof(ValueType),
+        reinterpret_cast<char*>(&v)
+        );
       ugData_ += sizeof(ValueType);
     }
 
