@@ -4,6 +4,9 @@
 #ifndef DUNE_PYTHON_GRID_GEOMETRY_HH
 #define DUNE_PYTHON_GRID_GEOMETRY_HH
 
+#include <cstddef>
+
+#include <array>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -40,24 +43,24 @@ namespace Dune
         // g = (dimRange,localCoord,nofQuad)
         auto g = gVec.unchecked();
         // ret = (dimRange,globalCoord,nofQuad)
-        pybind11::array_t<double> ret( std::vector<size_t>{g.shape(0),(size_t)Geometry::GlobalCoordinate::size(),g.shape(2)} );
+        pybind11::array_t<double> ret( std::array< ssize_t, 3 >{{ g.shape( 0 ), static_cast< ssize_t >( Geometry::GlobalCoordinate::size() ), g.shape( 2 ) }} );
         auto y = ret.template mutable_unchecked< 3 >();
         if (x.shape(1) != g.shape(2))
           std::cout << x.shape(1) << " " << g.shape(2) << std::endl;
         if (x.shape(0) != Geometry::LocalCoordinate::size())
           std::cout << x.shape(0) << " " << Geometry::LocalCoordinate::size() << std::endl;
 
-        for (size_t p=0;p<g.shape(2);++p)
+        for (ssize_t p=0;p<g.shape(2);++p)
         {
           typename Geometry::LocalCoordinate loc;
           for (size_t l=0;l<loc.size();++l)
             loc[l] = x(l,p);
           auto jit = geo.jacobianInverseTransposed( loc );
-          for (size_t range=0;range<g.shape(0);++range)
-            for (size_t r=0;r<Geometry::GlobalCoordinate::size();++r)
+          for (ssize_t range=0;range<g.shape(0);++range)
+            for (std::size_t r=0;r<Geometry::GlobalCoordinate::size();++r)
             {
               y(range,r,p) = 0;
-              for (size_t c=0;c<Geometry::LocalCoordinate::size();++c)
+              for (std::size_t c=0;c<Geometry::LocalCoordinate::size();++c)
                 y(range,r,p) += jit[r][c]*g(range,c,p);
             }
         }
