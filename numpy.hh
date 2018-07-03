@@ -6,8 +6,8 @@
 
 #include <algorithm>
 #include <array>
-#include <vector>
 #include <map>
+#include <vector>
 
 #include <dune/common/ftraits.hh>
 
@@ -123,7 +123,7 @@ namespace Dune
 
     template< class GridView, unsigned int partitions >
     inline static std::pair< pybind11::array_t< typename GridView::ctype >, pybind11::array_t< int > >
-    tesselate ( const GridView &gridView, int level, PartitionSet< partitions > ps )
+    tesselate ( const GridView &gridView, RefinementIntervals intervals, PartitionSet< partitions > ps )
     {
       typedef typename GridView::ctype ctype;
 
@@ -140,11 +140,11 @@ namespace Dune
 
         // get coordinates
         const auto geometry = element.geometry();
-        for( auto it = refinement.vBegin( level ), end = refinement.vEnd( level ); it != end; ++it )
+        for( auto it = refinement.vBegin( intervals ), end = refinement.vEnd( intervals ); it != end; ++it )
           coords.push_back( geometry.global( it.coords() ) );
 
         // get simplices
-        for( auto it = refinement.eBegin( level ), end = refinement.eEnd( level ); it != end; ++it )
+        for( auto it = refinement.eBegin( intervals ), end = refinement.eEnd( intervals ); it != end; ++it )
         {
           std::array< int, dimGrid+1 > simplex;
           auto indices = it.vertexIndices();
@@ -158,12 +158,18 @@ namespace Dune
     }
 
     template< class GridView, unsigned int partitions >
+    inline static std::pair< pybind11::array_t< typename GridView::ctype >, pybind11::array_t< int > >
+    tesselate ( const GridView &gridView, int level, PartitionSet< partitions > ps )
+    {
+      return tesselate( gridView, refinementLevels( level ), ps );
+    }
+
+    template< class GridView, unsigned int partitions >
     inline static std::vector< pybind11::array_t< typename GridView::ctype > >
     polygons ( const GridView &gridView, PartitionSet< partitions > ps )
     {
       typedef typename GridView::ctype ctype;
 
-      const std::size_t dimGrid = GridView::dimension;
       const std::size_t dimWorld = GridView::dimensionworld;
 
       std::map< std::size_t, std::vector< std::vector< FieldVector< ctype, dimWorld > > > > coords;
