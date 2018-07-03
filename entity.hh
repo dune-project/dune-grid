@@ -109,6 +109,12 @@ namespace Dune
       inline static auto registerExtendedEntityInterface ( pybind11::class_< Entity, options... > cls, PriorityTag< 1 > )
         -> std::enable_if_t< Entity::codimension == 0 >
       {
+        const int dimension = Entity::dimension;
+        const int mydimension = Entity::mydimension;
+        const int codimension = Entity::codimension;
+
+        static_assert( mydimension + codimension == dimension, "Entity exports incompatible dimensions" );
+
         using pybind11::operator""_a;
 
         cls.def_property_readonly( "father", [] ( const Entity &self ) {
@@ -130,33 +136,33 @@ namespace Dune
             return PyHierarchicIterator< Entity >( self, maxLevel );
           }, pybind11::keep_alive< 0, 1 >() );
 
-        std::array< pybind11::object (*) ( const Entity &, int ), Entity::dimension+1 > makeSubEntity;
-        std::array< pybind11::tuple (*) ( const Entity & ), Entity::dimension+1 > makeSubEntities;
-        Hybrid::forEach( std::make_integer_sequence< int, Entity::dimension+1 >(), [ &makeSubEntity, &makeSubEntities ] ( auto &&codim ) {
+        std::array< pybind11::object (*) ( const Entity &, int ), dimension+1 > makeSubEntity;
+        std::array< pybind11::tuple (*) ( const Entity & ), dimension+1 > makeSubEntities;
+        Hybrid::forEach( std::make_integer_sequence< int, dimension+1 >(), [ &makeSubEntity, &makeSubEntities ] ( auto &&codim ) {
             makeSubEntity[ codim ] = detail::makeSubEntity< Entity, codim >;
             makeSubEntities[ codim ] = detail::makeSubEntities< Entity, codim >;
           } );
         cls.def( "subEntity", [ makeSubEntity ] ( const Entity &self, int i, int c ) {
-            if( (c < Entity::codimension) || (c > Entity::dimension) )
-              throw pybind11::value_error( "Invalid codimension: " + std::to_string( c ) + " (must be in [" + std::to_string( Entity::codimension ) + ", " + std::to_string( Entity::dimension ) + "])" );
+            if( (c < codimension) || (c > dimension) )
+              throw pybind11::value_error( "Invalid codimension: " + std::to_string( c ) + " (must be in [" + std::to_string( codimension ) + ", " + std::to_string( dimension ) + "])" );
             return makeSubEntity[ c ]( self, i );
           }, "index"_a, "codim"_a );
         cls.def( "subEntity", [ makeSubEntity ] ( const Entity &self, std::tuple< int, int > e ) {
-            if( (std::get< 1 >( e ) < Entity::codimension) || (std::get< 1 >( e ) > Entity::dimension) )
-              throw pybind11::value_error( "Invalid codimension: " + std::to_string( std::get< 1 >( e ) ) + " (must be in [" + std::to_string( Entity::codimension ) + ", " + std::to_string( Entity::dimension ) + "])" );
+            if( (std::get< 1 >( e ) < codimension) || (std::get< 1 >( e ) > dimension) )
+              throw pybind11::value_error( "Invalid codimension: " + std::to_string( std::get< 1 >( e ) ) + " (must be in [" + std::to_string( codimension ) + ", " + std::to_string( dimension ) + "])" );
             return makeSubEntity[ std::get< 1 >( e ) ]( self, std::get< 0 >( e ) );
           } );
         cls.def( "subEntities", [ makeSubEntities ] ( const Entity &self, int c ) {
-            if( (c < Entity::codimension) || (c > Entity::dimension) )
-              throw pybind11::value_error( "Invalid codimension: " + std::to_string( c ) + " (must be in [" + std::to_string( Entity::codimension ) + ", " + std::to_string( Entity::dimension ) + "])" );
+            if( (c < codimension) || (c > dimension) )
+              throw pybind11::value_error( "Invalid codimension: " + std::to_string( c ) + " (must be in [" + std::to_string( codimension ) + ", " + std::to_string( dimension ) + "])" );
             return makeSubEntities[ c ]( self );
           }, "codim"_a );
 
-        cls.def_property_readonly( "vertices", [] ( const Entity &self ) { return detail::makeSubEntities< Entity, Entity::dimension >( self ); } );
-        if( Entity::mydimension < Entity::dimension )
+        cls.def_property_readonly( "vertices", [] ( const Entity &self ) { return detail::makeSubEntities< Entity, dimension >( self ); } );
+        if( mydimension < dimension )
         {
-          cls.def_property_readonly( "edges", [] ( const Entity &self ) { return detail::makeSubEntities< Entity, (Entity::mydimension < Entity::dimension ? Entity::dimension-1 : Entity::dimension) >( self ); } );
-          cls.def_property_readonly( "facets", [] ( const Entity &self ) { return detail::makeSubEntities< Entity, (Entity::mydimension < Entity::dimension ? Entity::mydimension+1 : Entity::dimension) >( self ); } );
+          cls.def_property_readonly( "edges", [] ( const Entity &self ) { return detail::makeSubEntities< Entity, (mydimension < dimension ? dimension-1 : dimension) >( self ); } );
+          cls.def_property_readonly( "facets", [] ( const Entity &self ) { return detail::makeSubEntities< Entity, (mydimension < dimension ? mydimension+1 : dimension) >( self ); } );
         }
       }
 
