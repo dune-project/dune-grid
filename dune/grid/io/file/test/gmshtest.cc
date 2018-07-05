@@ -101,6 +101,14 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
   VTKWriter<typename GridType::LeafGridView> vtkWriter( leafGridView );
   vtkWriter.write( vtkName.str() );
   std::cout<<std::endl;
+
+  // Test whether grid can be read without giving the gridfactory explicitly
+  std::unique_ptr<GridType> gridUnique = GmshReader<GridType>::read(inputName);
+
+  // Remove the following tests once that GmshReader::read returns a std::unique_ptr
+  GridType* gridPtr = GmshReader<GridType>::read(inputName);
+  delete gridPtr;
+  std::shared_ptr<GridType> gridShared = GmshReader<GridType>::read(inputName);
 }
 
 

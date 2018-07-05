@@ -16,6 +16,17 @@
 - The `AlbertaGrid::getRealIntersection` member function has been deprecated.
   Use the `impl()` member function of the intersection class directly instead.
 
+- The return type of all file reader methods that return a grid has been changed
+  from a plain C pointer to the custom pointer class `ToUniquePtr<Grid>`
+  (from the `dune-common` module).  Values of this pointer class cast to
+  C pointers (but with a deprecation warning), to `std::unique_ptr`, and to
+  `std::shared_ptr`.  This marks the beginning of a transition period.
+  In the long run, the methods are planned to return objects of type
+  `std::unique_ptr`, to make it obvious that the calling code receives
+  the ownership of the grid object.  For the time being the calling code
+  can still store the return value in a C pointer, but that possibility
+  will go away.
+
 # Release 2.6
 
 - The deprecated `EntityPointer` has been removed completely and `EntityIterator`
