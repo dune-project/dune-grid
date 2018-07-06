@@ -39,13 +39,15 @@ def yaspGrid(constructor, dimgrid=None, coordinates="equidistant", ctype="double
 
     gridModule = module(includes, typeName, ctor)
 
-    lowerleft  = constructor.lower
-    upperright = constructor.upper
-    elements   = constructor.division
-    periodic   = constructor.param.get("periodic", [False,]*dimgrid)
-    overlap    = constructor.param.get("overlap", 0)
-
-    return gridModule.HierarchicalGrid(lowerleft,upperright,elements,periodic,overlap).leafView
+    try:
+        lowerleft  = constructor.lower
+        upperright = constructor.upper
+        elements   = constructor.division
+        periodic   = constructor.param.get("periodic", [False,]*dimgrid)
+        overlap    = constructor.param.get("overlap", 0)
+        return gridModule.HierarchicalGrid(lowerleft,upperright,elements,periodic,overlap).leafView
+    except AttributeError:
+        return gridModule.reader(constructor).leafView
 
 grid_registry = {
         "OneD"       : onedGrid,
