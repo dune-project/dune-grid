@@ -34,35 +34,49 @@ namespace Dune
       // registerGridGeometry
       // --------------------
 
-      template <class Geometry, class Array>
-      pybind11::array_t<double> pushForwardGradients( const Geometry &geo, Array xVec,
-                                pybind11::array_t<double> gVec )
+      template< class Geometry, class Array >
+      inline static pybind11::array_t< double >
+      pushForwardGradients ( const Geometry &geo, Array xVec, pybind11::array_t< double > gVec )
       {
+        typedef typename Geometry::LocalCoordinate LocalCoordinate;
+        typedef typename Geometry::GlobalCoordinate GlobalCoordinate;
+
         // x = (localCoord,nofQuad)
         auto x = xVec.unchecked();
         // g = (dimRange,localCoord,nofQuad)
         auto g = gVec.unchecked();
         // ret = (dimRange,globalCoord,nofQuad)
-        pybind11::array_t<double> ret( std::array< ssize_t, 3 >{{ g.shape( 0 ), static_cast< ssize_t >( Geometry::GlobalCoordinate::size() ), g.shape( 2 ) }} );
+        pybind11::array_t< double > ret( std::array< ssize_t, 3 >{{ g.shape( 0 ), static_cast< ssize_t >( Geometry::GlobalCoordinate::size() ), g.shape( 2 ) }} );
         auto y = ret.template mutable_unchecked< 3 >();
-        if (x.shape(1) != g.shape(2))
-          std::cout << x.shape(1) << " " << g.shape(2) << std::endl;
-        if (x.shape(0) != Geometry::LocalCoordinate::size())
-          std::cout << x.shape(0) << " " << Geometry::LocalCoordinate::size() << std::endl;
+        if( x.shape( 1 ) != g.shape( 2 ) )
+          std::cout << x.shape( 1 ) << " " << g.shape( 2 ) << std::endl;
+        if( x.shape( 0 ) != LocalCoordinate::size() )
+          std::cout << x.shape( 0 ) << " " << Geometry::LocalCoordinate::size() << std::endl;
 
-        for (ssize_t p=0;p<g.shape(2);++p)
+        for( ssize_t p = 0; p < g.shape( 2 ); ++p )
         {
-          typename Geometry::LocalCoordinate loc;
-          for (size_t l=0;l<loc.size();++l)
-            loc[l] = x(l,p);
-          auto jit = geo.jacobianInverseTransposed( loc );
-          for (ssize_t range=0;range<g.shape(0);++range)
-            for (std::size_t r=0;r<Geometry::GlobalCoordinate::size();++r)
-            {
-              y(range,r,p) = 0;
-              for (std::size_t c=0;c<Geometry::LocalCoordinate::size();++c)
-                y(range,r,p) += jit[r][c]*g(range,c,p);
-            }
+          LocalCoordinate xLocal;
+          for( std::size_t l = 0; l < LocalCoordinate::size(); ++l )
+            xLocal[ l ] = x( l, p );
+          const auto jit = geo.jacobianInverseTransposed( xLocal );
+
+          for( ssize_t range = 0; range < g.shape( 0 ); ++range )
+          {
+            // Performance Issue:
+            // The copies gradLocal and gradGlobal can be avoided by providing
+            // a DenseVector implementation based on a single axis of the
+            // pybind11::array accessor, because the `jit.mv` method is required
+            // to take arbitrary implementations of the dense vector interface.
+            LocalCoordinate gradLocal;
+            for( std::size_t l = 0; l < LocalCoordinate::size(); ++l )
+              gradLocal[ l ] = g(range, l, p );
+
+            GlobalCoordinate gradGlobal;
+            jit.mv( gradLocal, gradGlobal );
+
+            for( std::size_t r = 0; r < GlobalCoordinate::size(); ++r )
+              y( range, r, p ) = gradGlobal[ r ];
+          }
         }
         return ret;
       }
