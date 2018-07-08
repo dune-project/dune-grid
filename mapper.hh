@@ -205,7 +205,7 @@ namespace Dune
           GridViewPartition< GridView, toType > to,
           detail::CommOp commOp, pybind11::args args ) {
             std::vector<pybind11::array_t<double>> data(args.size());
-            for (int i=0;i<args.size();++i)
+            for (unsigned int i=0;i<args.size();++i)
               data[i] = pybind11::array_t<double>(args[i]);
             mapperCommunicate(self,commOp, data, interfaceType, ForwardCommunication);
           }, "from"_a, "to"_a, "commOp"_a);
@@ -215,7 +215,7 @@ namespace Dune
           GridViewPartition< GridView, toType > to,
           pybind11::function operation, pybind11::args args ) {
             std::vector<pybind11::array_t<double>> data(args.size());
-            for (int i=0;i<args.size();++i)
+            for (unsigned int i=0;i<args.size();++i)
               data[i] = pybind11::array_t<double>(args[i]);
             auto dataHandle = numPyCommDataHandle( self, data, operation.template cast<std::function<double(double,double)>>());
             self.gridView().communicate( dataHandle, interfaceType, ForwardCommunication);
@@ -228,7 +228,7 @@ namespace Dune
             GridViewPartition< GridView, toType > to,
             detail::CommOp commOp, pybind11::args args ) {
               std::vector<pybind11::array_t<double>> data(args.size());
-              for (int i=0;i<args.size();++i)
+              for (unsigned int i=0;i<args.size();++i)
                 data[i] = pybind11::array_t<double>(args[i]);
               mapperCommunicate(self,commOp, data, interfaceType, BackwardCommunication);
             }, "from"_a, "to"_a, "commOp"_a );
@@ -238,7 +238,7 @@ namespace Dune
             GridViewPartition< GridView, toType > to,
             pybind11::function operation, pybind11::args args ) {
               std::vector<pybind11::array_t<double>> data(args.size());
-              for (int i=0;i<args.size();++i)
+              for (unsigned int i=0;i<args.size();++i)
                 data[i] = pybind11::array_t<double>(args[i]);
               auto dataHandle = numPyCommDataHandle( self, data, operation.template cast<std::function<double(double,double)>>());
               self.gridView().communicate( dataHandle, interfaceType, BackwardCommunication);
