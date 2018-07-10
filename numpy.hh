@@ -235,8 +235,11 @@ namespace Dune
 
         lf.bind(element);
         coords[ corners ].first.push_back( poly );
-        auto ref = ReferenceElements< typename GridView::ctype, dimGrid >::general( element.type() );
-        coords[ corners ].second.push_back( lf( ref.position(0,0) ) );
+        // for polygons we can't use a reference element but one could use
+        // the following for elements with type not none:
+        // auto ref = ReferenceElements< typename GridView::ctype, dimGrid >::general( element.type() );
+        // coords[ corners ].second.push_back( lf( ref.position(0,0) ) );
+        coords[ corners ].second.push_back( lf( geometry.local( geometry.center() )  ) );
         lf.unbind();
       }
 
