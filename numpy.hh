@@ -14,6 +14,7 @@
 #include <dune/geometry/dimension.hh>
 #include <dune/geometry/type.hh>
 #include <dune/geometry/virtualrefinement.hh>
+#include <dune/geometry/referenceelements.hh>
 
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/common/rangegenerators.hh>
@@ -234,7 +235,8 @@ namespace Dune
 
         lf.bind(element);
         coords[ corners ].first.push_back( poly );
-        coords[ corners ].second.push_back( lf( geometry.center() ) );
+        auto ref = ReferenceElements< typename GridView::ctype, dimGrid >::general( element.type() );
+        coords[ corners ].second.push_back( lf( ref.position(0,0) ) );
         lf.unbind();
       }
 
