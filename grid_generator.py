@@ -97,9 +97,9 @@ def plot(self, function=None, *args, **kwargs):
     else:
         try:
             grid = function.grid
-            dune.plotting.plotPointData(solution=function,*args,**kwargs)
+            dune.plotting.plot(solution=function,*args,**kwargs)
         except AttributeError:
-            dune.plotting.plotPointData(solution=self.function(function),*args,**kwargs)
+            dune.plotting.plot(solution=self.function(function),*args,**kwargs)
 
 @deprecated("use the `gridFunction` decorator")
 def globalGridFunction(gv, evaluator):
