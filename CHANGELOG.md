@@ -27,6 +27,17 @@
   can still store the return value in a C pointer, but that possibility
   will go away.
 
+- Likewise, the return type of the `GridFactory::createGrid`method has been changed
+  from a plain C pointer to the custom pointer class `ToUniquePtr<Grid>`.
+  In the long run, the method is planned to return objects of type
+  `std::unique_ptr`, to make it obvious that the calling code receives
+  the ownership of the grid object.  For the time being the calling code
+  can still store the return value in a C pointer, but that possibility
+  will go away.  While this procedure allows full backward compatibility
+  for code that calls `GridFactory::createGrid`, implementors or third-party
+  grid implementations will need to update their implementations of
+  `GridFactory::createGrid`.
+
 # Release 2.6
 
 - The deprecated `EntityPointer` has been removed completely and `EntityIterator`

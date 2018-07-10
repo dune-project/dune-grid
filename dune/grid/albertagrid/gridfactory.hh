@@ -15,6 +15,8 @@
 #include <map>
 #include <memory>
 
+#include <dune/common/to_unique_ptr.hh>
+
 #include <dune/geometry/referenceelements.hh>
 
 #include <dune/grid/common/gridfactory.hh>
@@ -288,7 +290,7 @@ namespace Dune
      *  \note ALBERTA's grid factory provides a static method for freeing the
      *        grid (destroyGrid).
      */
-    Grid *createGrid ()
+    ToUniquePtr<Grid> createGrid ()
     {
       macroData_.finalize();
       if( macroData_.elementCount() == 0 )
