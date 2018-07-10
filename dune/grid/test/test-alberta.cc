@@ -106,13 +106,12 @@ void checkProjectedUnitCube ()
   addToGridFactory( gridFactory, Dune::Dim< Grid::dimensionworld > () );
   gridFactory.insertBoundaryProjection( new Projection );
   gridFactory.markLongestEdge();
-  Grid *grid = gridFactory.createGrid();
+  auto grid = gridFactory.createGrid();
   for( int i = 0; i < 2; ++i )
   {
     grid->globalRefine( Grid::dimension );
     gridcheck( *grid );
   }
-  delete grid;
 }
 
 

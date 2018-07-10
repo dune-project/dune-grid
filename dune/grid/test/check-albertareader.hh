@@ -26,11 +26,9 @@ void checkAlbertaReader ()
   reader.readGrid( filename.str(), factory );
 
   // create grid and just check the macro grid
-  Grid *grid = factory.createGrid();
+  auto grid = factory.createGrid();
   grid->globalRefine( 2 );
   gridcheck( *grid );
-  //GridFactory< Grid >::destroyGrid( grid );
-  delete grid;
 }
 
 #else

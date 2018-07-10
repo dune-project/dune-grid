@@ -98,7 +98,14 @@ void makeHalfCircleQuad(Dune::UGGrid<2>& grid, bool boundarySegments, bool param
   // //////////////////////////////////////
   //   Finish initialization
   // //////////////////////////////////////
-  factory.createGrid();
+
+  // The factory returns the grid object we have given it as a std::unique_ptr.
+  // Release it, the keep the std::unique_ptr destructor from killing it at
+  // the end of this very method.
+  // Yes, that is a bit weird.  But in particular the calling method tests whether
+  // the GridFactory can reuse an existing UGGrid object, and I would like to keep
+  // that for the time being.
+  factory.createGrid().release();
 
 }
 

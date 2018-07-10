@@ -14,6 +14,7 @@
 #include <vector>
 
 #include <dune/common/fvector.hh>
+#include <dune/common/to_unique_ptr.hh>
 
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/grid/common/gridfactory.hh>
@@ -216,7 +217,7 @@ namespace Dune {
 
        The receiver takes responsibility of the memory allocated for the grid
      */
-    virtual UGGrid<dimworld>* createGrid();
+    virtual ToUniquePtr<UGGrid<dimworld>> createGrid();
 
     static const int dimension = UGGrid<dimworld>::dimension;
 
