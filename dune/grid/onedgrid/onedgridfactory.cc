@@ -100,7 +100,7 @@ insertionIndex(const typename OneDGrid::LeafIntersection& intersection) const
   return insertionIdx;
 }
 
-Dune::OneDGrid* Dune::GridFactory<Dune::OneDGrid>::
+ToUniquePtr<OneDGrid> Dune::GridFactory<Dune::OneDGrid>::
 createGrid()
 {
   // Prevent a crash when this method is called twice in a row
