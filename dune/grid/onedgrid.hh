@@ -170,13 +170,15 @@ namespace Dune {
     /** \brief Number of grid entities per level and codim
      */
     int size (int level, int codim) const {
-      if (codim<0 || codim>1)
-        DUNE_THROW(GridError, "There are no codim " << codim << " entities in a OneDGrid!");
-
-      if (codim==0)
-        return elements(level).size();
-
-      return vertices(level).size();
+      switch (codim)
+      {
+        case 0:
+          return elements(level).size();
+        case 1:
+          return vertices(level).size();
+        default:
+          return 0;
+      }
     }
 
 
