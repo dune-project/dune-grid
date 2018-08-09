@@ -29,9 +29,13 @@ template<int dim>
 struct YaspFactory<dim, Dune::EquidistantCoordinates<double,dim> >
 {
   static Dune::YaspGrid<dim>* buildGrid(
-      bool keepPhysicalOverlap = true, int refCount = 0, bool periodic = false)
+      bool keepPhysicalOverlap = true, int refCount = 0, bool periodic = false,
+      bool useGenericConstructor = false)
   {
-    std::cout << " using equidistant coordinate container!" << std::endl << std::endl;
+    std::cout << " using equidistant coordinate container";
+    if (useGenericConstructor)
+      std::cout << " with generic constructor";
+    std::cout << "!" << std::endl << std::endl;
 
     Dune::FieldVector<double,dim> len(1.0);
     std::array<int,dim> s;
@@ -41,29 +45,16 @@ struct YaspFactory<dim, Dune::EquidistantCoordinates<double,dim> >
     p[0] = periodic;
     int overlap = 1;
 
-    auto grid = new Dune::YaspGrid<dim>(len,s,p,overlap);
-    grid->refineOptions (keepPhysicalOverlap);
-    grid->globalRefine (refCount);
-    return grid;
-  }
+    Dune::YaspGrid<dim>* grid;
 
-  static std::unique_ptr<Dune::YaspGrid<dim> > buildGridWithGenericConstructor(
-      bool keepPhysicalOverlap = true, int refCount = 0, bool periodic = false)
-  {
-    std::cout << " using equidistant coordinate container with generic constructor!" << std::endl << std::endl;
-
-    Dune::FieldVector<double,dim> len(1.0);
-    std::array<int,dim> s;
-    if (dim < 3)
-      std::fill(s.begin(), s.end(), 8);
+    if (useGenericConstructor)
+    {
+      Dune::EquidistantCoordinates<double,dim> coordinates(len,s);
+      grid = new Dune::YaspGrid<dim>(coordinates,p,overlap);
+    }
     else
-      std::fill(s.begin(), s.end(), 4);
-    std::bitset<dim> p(0);
-    p[0] = periodic;
-    int overlap = 1;
+      grid = new Dune::YaspGrid<dim>(len,s,p,overlap);
 
-    Dune::EquidistantCoordinates<double,dim> coordinates(len,s);
-    auto grid = std::make_unique<Dune::YaspGrid<dim> >(coordinates,p,overlap);
     grid->refineOptions (keepPhysicalOverlap);
     grid->globalRefine (refCount);
     return grid;
