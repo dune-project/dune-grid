@@ -33,7 +33,7 @@ struct YaspFactory<dim, Dune::EquidistantCoordinates<double,dim> >
   {
     std::cout << " using equidistant coordinate container!" << std::endl << std::endl;
 
-    Dune::FieldVector<double,dim> Len(1.0);
+    Dune::FieldVector<double,dim> len(1.0);
     std::array<int,dim> s;
     std::fill(s.begin(), s.end(), 4);
     s[0] = 8;
@@ -41,7 +41,7 @@ struct YaspFactory<dim, Dune::EquidistantCoordinates<double,dim> >
     p[0] = periodic;
     int overlap = 1;
 
-    auto grid = new Dune::YaspGrid<dim>(Len,s,p,overlap);
+    auto grid = new Dune::YaspGrid<dim>(len,s,p,overlap);
     grid->refineOptions (keepPhysicalOverlap);
     grid->globalRefine (refCount);
     return grid;
