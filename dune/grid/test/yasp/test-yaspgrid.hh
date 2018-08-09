@@ -65,9 +65,13 @@ template<int dim>
 struct YaspFactory<dim, Dune::EquidistantOffsetCoordinates<double,dim> >
 {
   static Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double,dim> >* buildGrid(
-      bool keepPhysicalOverlap = true, int refCount = 0, bool periodic = false)
+      bool keepPhysicalOverlap = true, int refCount = 0, bool periodic = false,
+      bool useGenericConstructor = false)
   {
-    std::cout << " using equidistant coordinate container with non-zero origin!" << std::endl << std::endl;
+    if (useGenericConstructor)
+      std::cout << " using equidistant coordinate container with non-zero origin and generic constructor!" << std::endl << std::endl;
+    else
+      std::cout << " using equidistant coordinate container with non-zero origin!" << std::endl << std::endl;
 
     Dune::FieldVector<double,dim> lowerleft(-1.0);
     Dune::FieldVector<double,dim> upperright(1.0);
@@ -78,7 +82,19 @@ struct YaspFactory<dim, Dune::EquidistantOffsetCoordinates<double,dim> >
     p[0] = periodic;
     int overlap = 1;
 
-    auto grid = new Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double,dim> >(lowerleft,upperright,s,p,overlap);
+    Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double,dim> >* grid;
+
+    if (useGenericConstructor)
+    {
+      Dune::FieldVector<double,dim> elementSize;
+      for (std::size_t i=0; i<dim; i++)
+        elementSize[i] = (upperright[i] - lowerleft[i]) / s[i];
+      Dune::EquidistantOffsetCoordinates<double,dim> coordinates(lowerleft,elementSize,s);
+      grid = new Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double,dim> >(coordinates,p,overlap);
+    }
+    else
+      grid = new Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double,dim> >(lowerleft,upperright,s,p,overlap);
+
     grid->refineOptions (keepPhysicalOverlap);
     grid->globalRefine (refCount);
     return grid;
