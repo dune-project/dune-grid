@@ -739,8 +739,14 @@ namespace Dune {
         _periodic(periodic), _overlap(overlap),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
+      // check whether YaspGrid has been given the correct template parameter
+      static_assert(std::is_same<Coordinates,EquidistantCoordinates<ctype,dim> >::value,
+                    "YaspGrid coordinate container template parameter and given constructor values do not match!");
+
+      // Set domain size
       for (int i=0; i<dim; i++)
-        _L[i] = coordinates.meshsize(i,0);
+        _L[i] = coordinates.size(i) * coordinates.meshsize(i,0);
+
       std::array<int, dim> s;
       for (std::size_t i=0; i<s.size(); i++)
         s[i] = coordinates.size(i);
@@ -854,6 +860,7 @@ namespace Dune {
           s_overlap[i] += overlap;
       }
 
+      // New coordinate object that additionally contains the overlap elements
       EquidistantCoordinates<ctype,dim> cc(h,s_overlap);
 
       // add level
