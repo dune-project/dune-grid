@@ -870,6 +870,89 @@ namespace Dune {
     }
 
     /** Constructor for an equidistant YaspGrid with non-trivial origin
+     *  @param coordinates Object that stores or computes the vertex coordinates
+     *  @param periodic tells if direction is periodic or not
+     *  @param overlap size of overlap on coarsest grid (same in all directions)
+     *  @param comm the collective communication object for this grid. An MPI communicator can be given here.
+     *  @param lb pointer to an overloaded YLoadBalance instance
+     */
+    YaspGrid (const EquidistantOffsetCoordinates<ctype,dim>& coordinates,
+              std::bitset<dim> periodic = std::bitset<dim>(0ULL),
+              int overlap = 1,
+              CollectiveCommunicationType comm = CollectiveCommunicationType(),
+              const YLoadBalance<dim>* lb = defaultLoadbalancer())
+      : ccobj(comm), leafIndexSet_(*this),
+        _periodic(periodic), _overlap(overlap),
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+    {
+      // check whether YaspGrid has been given the correct template parameter
+      static_assert(std::is_same<Coordinates,EquidistantOffsetCoordinates<ctype,dim> >::value,
+                    "YaspGrid coordinate container template parameter and given constructor values do not match!");
+
+      // Set domain size
+      for (std::size_t i=0; i<dim; i++)
+        _L[i] = coordinates.size(i) * coordinates.meshsize(i,0);
+
+      std::array<int, dim> s;
+      for (std::size_t i=0; i<s.size(); i++)
+        s[i] = coordinates.size(i);
+
+      _torus = decltype(_torus)(comm,tag,s,lb);
+      _coarseSize = s;
+
+      _levels.resize(1);
+
+      iTupel o;
+      std::fill(o.begin(), o.end(), 0);
+      iTupel o_interior(o);
+      iTupel s_interior(s);
+
+      _torus.partition(_torus.rank(),o,s,o_interior,s_interior);
+
+#if HAVE_MPI
+      // check whether the grid is large enough to be overlapping
+      for (int i=0; i<dim; i++)
+      {
+        // find out whether the grid is too small to
+        int toosmall = (s_interior[i] / 2 <= overlap) &&    // interior is very small
+            (periodic[i] || (s_interior[i] != s[i]));    // there is an overlap in that direction
+        // communicate the result to all those processes to have all processors error out if one process failed.
+        int global = 0;
+        MPI_Allreduce(&toosmall, &global, 1, MPI_INT, MPI_LOR, comm);
+        if (global)
+          DUNE_THROW(Dune::GridError,"YaspGrid does not support degrees of freedom shared by more than immediately neighboring subdomains."
+                                     " Note that this also holds for DOFs on subdomain boundaries."
+                                     " Increase grid elements or decrease overlap accordingly.");
+      }
+#endif // #if HAVE_MPI
+
+      iTupel s_overlap(s_interior);
+      for (int i=0; i<dim; i++)
+      {
+        if ((o_interior[i] - overlap > 0) || (periodic[i]))
+          s_overlap[i] += overlap;
+        if ((o_interior[i] + s_interior[i] + overlap <= _coarseSize[i]) || (periodic[i]))
+          s_overlap[i] += overlap;
+      }
+
+      // New coordinate object that additionally contains the overlap elements
+      Dune::FieldVector<ctype,dim> h;
+      Dune::FieldVector<ctype,dim> lowerleft;
+      for (int i=0; i<dim; i++)
+      {
+        h[i] = coordinates.meshsize(i,0);
+        lowerleft[i] = coordinates.origin(i);
+      }
+
+      EquidistantOffsetCoordinates<ctype,dim> coordinatesWithOverlap(lowerleft,h,s_overlap);
+
+      // add level
+      makelevel(coordinatesWithOverlap,periodic,o_interior,overlap);
+
+      init();
+    }
+
+    /** Constructor for an equidistant YaspGrid with non-trivial origin
      *  @param lowerleft Lower left corner of the domain
      *  @param upperright Upper right corner of the domain
      *  @param s number of cells on coarse mesh in each direction
