@@ -1028,6 +1028,122 @@ namespace Dune {
       init();
     }
 
+    /** @brief Constructor for a tensor-product YaspGrid
+     *  @param coordinates Object that stores or computes the vertex coordinates
+     *  @param periodic tells if direction is periodic or not
+     *  @param overlap size of overlap on coarsest grid (same in all directions)
+     *  @param comm the collective communication object for this grid. An MPI communicator can be given here.
+     *  @param lb pointer to an overloaded YLoadBalance instance
+     */
+    YaspGrid (const TensorProductCoordinates<ctype,dim>& coordinates,
+              std::bitset<dim> periodic = std::bitset<dim>(0ULL),
+              int overlap = 1,
+              CollectiveCommunicationType comm = CollectiveCommunicationType(),
+              const YLoadBalance<dim>* lb = defaultLoadbalancer())
+      : ccobj(comm),
+        leafIndexSet_(*this), _periodic(periodic), _overlap(overlap),
+        keep_ovlp(true), adaptRefCount(0), adaptActive(false)
+    {
+      // check whether YaspGrid has been given the correct template parameter
+      static_assert(std::is_same<Coordinates,TensorProductCoordinates<ctype,dim> >::value,
+                    "YaspGrid coordinate container template parameter and given constructor values do not match!");
+
+      // TODO: The container of coordinates is copied here only because it is
+      // private in TensorProductCoordinates.
+      std::array<std::vector<ctype>, dim> coords;
+      for (int i=0; i<dim; i++)
+      {
+        coords[i].resize(coordinates.size(i)+1);
+        for (std::size_t j=0; j<coords[i].size(); j++)
+          coords[i][j] = coordinates.coordinate(i, j);
+      }
+      _torus = decltype(_torus)(comm,tag,Dune::Yasp::sizeArray<dim>(coords),lb);
+
+      _levels.resize(1);
+      //determine sizes of vector to correctly construct torus structure and store for later size requests
+      for (int i=0; i<dim; i++) {
+        _coarseSize[i] = coords[i].size() - 1;
+        _L[i] = coords[i][_coarseSize[i]] - coords[i][0];
+      }
+
+      iTupel o;
+      std::fill(o.begin(), o.end(), 0);
+      iTupel o_interior(o);
+      iTupel s_interior(_coarseSize);
+
+      _torus.partition(_torus.rank(),o,_coarseSize,o_interior,s_interior);
+
+#if HAVE_MPI
+      // check whether the grid is large enough to be overlapping
+      for (int i=0; i<dim; i++)
+      {
+        // find out whether the grid is too small to
+        int toosmall = (s_interior[i] / 2 <= overlap) &&               // interior is very small
+             (periodic[i] || (s_interior[i] != _coarseSize[i]));    // there is an overlap in that direction
+        // communicate the result to all those processes to have all processors error out if one process failed.
+        int global = 0;
+        MPI_Allreduce(&toosmall, &global, 1, MPI_INT, MPI_LOR, comm);
+        if (global)
+          DUNE_THROW(Dune::GridError,"YaspGrid does not support degrees of freedom shared by more than immediately neighboring subdomains."
+                                     " Note that this also holds for DOFs on subdomain boundaries."
+                                     " Increase grid elements or decrease overlap accordingly.");
+      }
+#endif // #if HAVE_MPI
+
+
+      std::array<std::vector<ctype>,dim> newcoords;
+      std::array<int, dim> offset(o_interior);
+
+      // find the relevant part of the coords vector for this processor and copy it to newcoords
+      for (int i=0; i<dim; ++i)
+      {
+        //define iterators on coords that specify the coordinate range to be used
+        typename std::vector<ctype>::iterator begin = coords[i].begin() + o_interior[i];
+        typename std::vector<ctype>::iterator end = begin + s_interior[i] + 1;
+
+        // check whether we are not at the physical boundary. In that case overlap is a simple
+        // extension of the coordinate range to be used
+        if (o_interior[i] - overlap > 0)
+        {
+          begin = begin - overlap;
+          offset[i] -= overlap;
+        }
+        if (o_interior[i] + s_interior[i] + overlap < _coarseSize[i])
+          end = end + overlap;
+
+        //copy the selected part in the new coord vector
+        newcoords[i].resize(end-begin);
+        std::copy(begin, end, newcoords[i].begin());
+
+        // check whether we are at the physical boundary and a have a periodic grid.
+        // In this case the coordinate vector has to be tweaked manually.
+        if ((periodic[i]) && (o_interior[i] + s_interior[i] + overlap >= _coarseSize[i]))
+        {
+          // we need to add the first <overlap> cells to the end of newcoords
+          typename std::vector<ctype>::iterator it = coords[i].begin();
+          for (int j=0; j<overlap; ++j)
+            newcoords[i].push_back(newcoords[i].back() - *it + *(++it));
+        }
+
+        if ((periodic[i]) && (o_interior[i] - overlap <= 0))
+        {
+          offset[i] -= overlap;
+
+          // we need to add the last <overlap> cells to the begin of newcoords
+          typename std::vector<ctype>::iterator it = coords[i].end() - 1;
+          for (int j=0; j<overlap; ++j)
+            newcoords[i].insert(newcoords[i].begin(), newcoords[i].front() - *it + *(--it));
+        }
+      }
+
+      TensorProductCoordinates<ctype,dim> cc(newcoords, offset);
+
+      // add level
+      makelevel(cc,periodic,o_interior,overlap);
+
+      init();
+    }
+
     /** @brief Standard constructor for a tensorproduct YaspGrid
      *  @param coords coordinate vectors to be used for coarse grid
      *  @param periodic tells if direction is periodic or not

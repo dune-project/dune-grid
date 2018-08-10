@@ -105,9 +105,13 @@ template<int dim>
 struct YaspFactory<dim, Dune::TensorProductCoordinates<double,dim> >
 {
   static Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >* buildGrid(
-      bool keepPhysicalOverlap = true, int refCount = 0, bool periodic = false)
+      bool keepPhysicalOverlap = true, int refCount = 0, bool periodic = false,
+      bool useGenericConstructor = false)
   {
-    std::cout << " using tensorproduct coordinate container!" << std::endl << std::endl;
+    if (useGenericConstructor)
+      std::cout << " using tensorproduct coordinate container and generic constructor!" << std::endl << std::endl;
+    else
+      std::cout << " using tensorproduct coordinate container!" << std::endl << std::endl;
 
     std::bitset<dim> p(0);
     p[0] = periodic;
@@ -134,7 +138,18 @@ struct YaspFactory<dim, Dune::TensorProductCoordinates<double,dim> >
       coords[i][4] =  1.0;
     }
 
-    auto grid = new Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >(coords,p,overlap);
+    Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >* grid;
+
+    if (useGenericConstructor)
+    {
+      std::array<int,dim> offset;
+      std::fill(offset.begin(), offset.end(), 0);
+      Dune::TensorProductCoordinates<double,dim> coordinates(coords,offset);
+      grid = new Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >(coordinates,p,overlap);
+    }
+    else
+      grid = new Dune::YaspGrid<dim, Dune::TensorProductCoordinates<double,dim> >(coords,p,overlap);
+
     grid->refineOptions (keepPhysicalOverlap);
     grid->globalRefine (refCount);
     return grid;
