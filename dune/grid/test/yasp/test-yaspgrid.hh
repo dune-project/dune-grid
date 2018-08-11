@@ -49,7 +49,10 @@ struct YaspFactory<dim, Dune::EquidistantCoordinates<double,dim> >
 
     if (useGenericConstructor)
     {
-      Dune::EquidistantCoordinates<double,dim> coordinates(len,s);
+      Dune::FieldVector<double,dim> elementSize;
+      for (std::size_t i=0; i<dim; i++)
+        elementSize[i] = len[i] / s[i];
+      Dune::EquidistantCoordinates<double,dim> coordinates(elementSize,s);
       grid = new Dune::YaspGrid<dim>(coordinates,p,overlap);
     }
     else
