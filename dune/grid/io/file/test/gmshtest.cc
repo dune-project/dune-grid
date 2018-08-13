@@ -106,8 +106,10 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
   std::unique_ptr<GridType> gridUnique = GmshReader<GridType>::read(inputName);
 
   // Remove the following tests once that GmshReader::read returns a std::unique_ptr
+  DUNE_NO_DEPRECATED_BEGIN
   GridType* gridPtr = GmshReader<GridType>::read(inputName);
   delete gridPtr;
+  DUNE_NO_DEPRECATED_END
   std::shared_ptr<GridType> gridShared = GmshReader<GridType>::read(inputName);
 }
 
