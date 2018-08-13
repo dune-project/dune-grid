@@ -47,7 +47,7 @@ namespace Dune
      \f$D\subseteq\mathbf{R}^\textrm{mydim}\f$ and
      \f$W\subseteq\mathbf{R}^\textrm{cdim}\f$.
      The domain \f$D\f$ is one of a set of predefined convex polytopes, the
-     so-called reference elements (\see Dune::ReferenceElement). The dimensionality
+     so-called reference elements (see Dune::ReferenceElement). The dimensionality
      of \f$D\f$ is <tt>mydim</tt>.
      In general \f$\textrm{mydim}\leq\textrm{cdim}\f$, i.e.
      the convex polytope may be mapped to a manifold. Moreover, we require that
