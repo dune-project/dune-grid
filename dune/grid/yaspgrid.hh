@@ -886,8 +886,8 @@ namespace Dune {
 
         TensorProductCoordinates<ctype,dim> coordinatesWithOverlap(newCoords, offset);
 
-        // add level
-        makelevel(id(coordinatesWithOverlap),periodic,o_interior,overlap);
+        // add level (the this-> is needed to make g++-6 happy)
+        this->makelevel(id(coordinatesWithOverlap),periodic,o_interior,overlap);
       });
 
       init();
