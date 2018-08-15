@@ -814,8 +814,8 @@ namespace Dune {
           // New coordinate object that additionally contains the overlap elements
           EquidistantCoordinates<ctype,dim> coordinatesWithOverlap(h,s_overlap);
 
-          // add level
-          makelevel(id(coordinatesWithOverlap),periodic,o_interior,overlap);
+          // add level (the this-> is needed to make g++-6 happy)
+          this->makelevel(id(coordinatesWithOverlap),periodic,o_interior,overlap);
         });
 
         Hybrid::ifElse(std::integral_constant<bool,std::is_same<Coordinates,EquidistantOffsetCoordinates<ctype,dim> >::value>{}, [&](auto id)
@@ -827,8 +827,8 @@ namespace Dune {
           // New coordinate object that additionally contains the overlap elements
           EquidistantOffsetCoordinates<ctype,dim> coordinatesWithOverlap(lowerleft,h,s_overlap);
 
-          // add level
-          makelevel(id(coordinatesWithOverlap),periodic,o_interior,overlap);
+          // add level (the this-> is needed to make g++-6 happy)
+          this->makelevel(id(coordinatesWithOverlap),periodic,o_interior,overlap);
         });
       }
 
