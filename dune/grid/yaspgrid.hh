@@ -840,9 +840,9 @@ namespace Dune {
         // find the relevant part of the coords vector for this processor and copy it to newCoords
         for (int i=0; i<dim; ++i)
         {
-          //define iterators on coords that specify the coordinate range to be used
+          //define the coordinate range to be used
           std::size_t begin = o_interior[i];
-          std::size_t end   = s_interior[i] + 1;
+          std::size_t end   = begin + s_interior[i] + 1;
 
           // check whether we are not at the physical boundary. In that case overlap is a simple
           // extension of the coordinate range to be used
