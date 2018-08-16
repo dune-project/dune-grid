@@ -809,7 +809,7 @@ namespace Dune {
         for (int i=0; i<dim; i++)
           h[i] = coordinates.meshsize(i,0);
 
-        Hybrid::ifElse(std::integral_constant<bool,std::is_same<Coordinates,EquidistantCoordinates<ctype,dim> >::value>{}, [&](auto id)
+        Hybrid::ifElse(std::is_same<Coordinates,EquidistantCoordinates<ctype,dim> >{}, [&](auto id)
         {
           // New coordinate object that additionally contains the overlap elements
           EquidistantCoordinates<ctype,dim> coordinatesWithOverlap(h,s_overlap);
@@ -818,7 +818,7 @@ namespace Dune {
           this->makelevel(id(coordinatesWithOverlap),periodic,o_interior,overlap);
         });
 
-        Hybrid::ifElse(std::integral_constant<bool,std::is_same<Coordinates,EquidistantOffsetCoordinates<ctype,dim> >::value>{}, [&](auto id)
+        Hybrid::ifElse(std::is_same<Coordinates,EquidistantOffsetCoordinates<ctype,dim> >{}, [&](auto id)
         {
           Dune::FieldVector<ctype,dim> lowerleft;
           for (int i=0; i<dim; i++)
@@ -832,7 +832,7 @@ namespace Dune {
         });
       }
 
-      Hybrid::ifElse(std::integral_constant<bool,std::is_same<Coordinates,TensorProductCoordinates<ctype,dim> >::value>{}, [&](auto id)
+      Hybrid::ifElse(std::is_same<Coordinates,TensorProductCoordinates<ctype,dim> >{}, [&](auto id)
       {
         std::array<std::vector<ctype>,dim> newCoords;
         std::array<int, dim> offset(o_interior);
