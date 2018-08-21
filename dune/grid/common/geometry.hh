@@ -202,7 +202,7 @@ namespace Dune
     }
 
     /** \brief return volume of geometry */
-    ctype volume () const
+    auto volume () const
     {
       return impl().volume();
     }
