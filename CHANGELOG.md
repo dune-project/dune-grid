@@ -64,6 +64,13 @@
 - The Capability `hasBackupRestoreFacilities<GeometryGrid<HG, CoordFunction>>` 
   now returns `false` in case the `CoordFunction` is not default-constructible.
 
+- The `Geometry` interface now provides the type `Volume` for the return value of the
+  method of the same name.  Note that this may be different from `ctype` if you care
+  about dimensions.  In that case `ctype` is a length, and not appropriate for
+  a quantity that is a volume.
+
+>>>>>>> Update CHANGELOG.md [ci skip]
+
 # Release 2.6
 
 - The deprecated `EntityPointer` has been removed completely and `EntityIterator`
