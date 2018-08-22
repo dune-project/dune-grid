@@ -38,6 +38,10 @@
   grid implementations will need to update their implementations of
   `GridFactory::createGrid`.
 
+- The `Gemoetry` interface now provides the type `Volume` which might be different
+  of `ctype`.
+
+
 # Release 2.6
 
 - The deprecated `EntityPointer` has been removed completely and `EntityIterator`
