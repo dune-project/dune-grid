@@ -117,6 +117,14 @@ namespace Dune
               std::stringstream s; s << name << std::setw(5) << std::setfill('0') << number;
               writer.write( s.str() );
             });
+        cls.def( "write",
+            [] ( Writer &writer, const std::string &name, int number, Dune::VTK::OutputType outputType ) {
+              std::stringstream s; s << name << std::setw(5) << std::setfill('0') << number;
+              writer.write( s.str(), outputType );
+            },
+            pybind11::arg("name"),
+            pybind11::arg("number"),
+            pybind11::arg("outputType")=VTK::ascii );
       }
     }
 
