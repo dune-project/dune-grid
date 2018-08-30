@@ -29,6 +29,13 @@ int main (int argc , char **argv) {
     check_yasp(testID + "tensor",
                YaspFactory<1,Dune::TensorProductCoordinates<double,1> >::buildGrid());
 
+    check_yasp(testID + "equidistant-generic-constructor",
+               YaspFactory<1,Dune::EquidistantCoordinates<double,1> >::buildGrid(true,0,false,true));
+    check_yasp(testID + "equidistantoffset-generic-constructor",
+               YaspFactory<1,Dune::EquidistantOffsetCoordinates<double,1> >::buildGrid(true,0,false,true));
+    check_yasp(testID + "tensor-generic-constructor",
+               YaspFactory<1,Dune::TensorProductCoordinates<double,1> >::buildGrid(true,0,false,true));
+
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
     return 1;
