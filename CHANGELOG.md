@@ -1,5 +1,16 @@
 # master (will become 2.7)
 
+- The `YaspGrid` class has a new constructor that takes a `Coordinates`
+  object as its first argument.  This object can be of type `EquidistantCoordinates`,
+  `EquidistantOffsetCoordinates`, or `TensorProductCoordinates`,
+  and encapsulates the domain and element sizes.  Previously, this data
+  was given directly to different constructors of `YaspGrid`,
+  and the constructor had to match the `Coordinates` object used
+  as the second template argument of the `YaspGrid` class.
+  The new constructor subsumes the previous three, and makes sure
+  by design that the correct information is passed at `YaspGrid`
+  construction.
+
 - The `GridFactory` exports the type `Communication` and corresponding object
   `comm()` that is used to create the grid. In the `GridFactoryInterface`, this
   defaults to the Communication induced by the process-local communicator

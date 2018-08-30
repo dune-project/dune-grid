@@ -723,6 +723,176 @@ namespace Dune {
     typedef YaspIndexSet<YaspGrid<dim, Coordinates>, true > LeafIndexSetType;
     typedef YaspGlobalIdSet<YaspGrid<dim, Coordinates> > GlobalIdSetType;
 
+    /** Standard constructor for a YaspGrid with a given Coordinates object
+     *  @param coordinates Object that stores or computes the vertex coordinates
+     *  @param periodic tells if direction is periodic or not
+     *  @param overlap size of overlap on coarsest grid (same in all directions)
+     *  @param comm the collective communication object for this grid. An MPI communicator can be given here.
+     *  @param lb pointer to an overloaded YLoadBalance instance
+     */
+    YaspGrid (const Coordinates& coordinates,
+              std::bitset<dim> periodic = std::bitset<dim>(0ULL),
+              int overlap = 1,
+              CollectiveCommunicationType comm = CollectiveCommunicationType(),
+              const YLoadBalance<dim>* lb = defaultLoadbalancer())
+      : ccobj(comm)
+      , leafIndexSet_(*this)
+      , _periodic(periodic)
+      , _overlap(overlap)
+      , keep_ovlp(true)
+      , adaptRefCount(0)
+      , adaptActive(false)
+    {
+      _levels.resize(1);
+
+      // Number of elements per coordinate direction on the coarsest level
+      for (std::size_t i=0; i<dim; i++)
+        _coarseSize[i] = coordinates.size(i);
+
+      // Construct the communication torus
+      _torus = decltype(_torus)(comm,tag,_coarseSize,lb);
+
+      iTupel o;
+      std::fill(o.begin(), o.end(), 0);
+      iTupel o_interior(o);
+      iTupel s_interior(_coarseSize);
+
+      _torus.partition(_torus.rank(),o,_coarseSize,o_interior,s_interior);
+
+      // Set domain size
+      if (std::is_same<Coordinates,EquidistantCoordinates<ctype,dim> >::value
+        || std::is_same<Coordinates,EquidistantOffsetCoordinates<ctype,dim> >::value)
+      {
+        for (std::size_t i=0; i<dim; i++)
+          _L[i] = coordinates.size(i) * coordinates.meshsize(i,0);
+      }
+      if (std::is_same<Coordinates,TensorProductCoordinates<ctype,dim> >::value)
+      {
+        //determine sizes of vector to correctly construct torus structure and store for later size requests
+        for (int i=0; i<dim; i++)
+          _L[i] = coordinates.coordinate(i,_coarseSize[i]) - coordinates.coordinate(i,0);
+      }
+
+      // TODO: Settle on a single value for all coordinate types
+      int mysteryFactor = (std::is_same<Coordinates,EquidistantCoordinates<ctype,dim> >::value) ? 1 : 2;
+
+#if HAVE_MPI
+      // check whether the grid is large enough to be overlapping
+      for (int i=0; i<dim; i++)
+      {
+        // find out whether the grid is too small to
+        int toosmall = (s_interior[i] <= mysteryFactor * overlap) &&    // interior is very small
+            (periodic[i] || (s_interior[i] != _coarseSize[i]));    // there is an overlap in that direction
+        // communicate the result to all those processes to have all processors error out if one process failed.
+        int global = 0;
+        MPI_Allreduce(&toosmall, &global, 1, MPI_INT, MPI_LOR, comm);
+        if (global)
+          DUNE_THROW(Dune::GridError,"YaspGrid does not support degrees of freedom shared by more than immediately neighboring subdomains."
+                                     " Note that this also holds for DOFs on subdomain boundaries."
+                                     " Increase grid elements or decrease overlap accordingly.");
+      }
+#endif // #if HAVE_MPI
+
+      if (std::is_same<Coordinates,EquidistantCoordinates<ctype,dim> >::value
+        || std::is_same<Coordinates,EquidistantOffsetCoordinates<ctype,dim> >::value)
+      {
+        iTupel s_overlap(s_interior);
+        for (int i=0; i<dim; i++)
+        {
+          if ((o_interior[i] - overlap > 0) || (periodic[i]))
+            s_overlap[i] += overlap;
+          if ((o_interior[i] + s_interior[i] + overlap <= _coarseSize[i]) || (periodic[i]))
+            s_overlap[i] += overlap;
+        }
+
+        Dune::FieldVector<ctype,dim> h;
+        for (int i=0; i<dim; i++)
+          h[i] = coordinates.meshsize(i,0);
+
+        Hybrid::ifElse(std::is_same<Coordinates,EquidistantCoordinates<ctype,dim> >{}, [&](auto id)
+        {
+          // New coordinate object that additionally contains the overlap elements
+          EquidistantCoordinates<ctype,dim> coordinatesWithOverlap(h,s_overlap);
+
+          // add level (the this-> is needed to make g++-6 happy)
+          this->makelevel(id(coordinatesWithOverlap),periodic,o_interior,overlap);
+        });
+
+        Hybrid::ifElse(std::is_same<Coordinates,EquidistantOffsetCoordinates<ctype,dim> >{}, [&](auto id)
+        {
+          Dune::FieldVector<ctype,dim> lowerleft;
+          for (int i=0; i<dim; i++)
+            lowerleft[i] = id(coordinates).origin(i);
+
+          // New coordinate object that additionally contains the overlap elements
+          EquidistantOffsetCoordinates<ctype,dim> coordinatesWithOverlap(lowerleft,h,s_overlap);
+
+          // add level (the this-> is needed to make g++-6 happy)
+          this->makelevel(id(coordinatesWithOverlap),periodic,o_interior,overlap);
+        });
+      }
+
+      Hybrid::ifElse(std::is_same<Coordinates,TensorProductCoordinates<ctype,dim> >{}, [&](auto id)
+      {
+        std::array<std::vector<ctype>,dim> newCoords;
+        std::array<int, dim> offset(o_interior);
+
+        // find the relevant part of the coords vector for this processor and copy it to newCoords
+        for (int i=0; i<dim; ++i)
+        {
+          //define the coordinate range to be used
+          std::size_t begin = o_interior[i];
+          std::size_t end   = begin + s_interior[i] + 1;
+
+          // check whether we are not at the physical boundary. In that case overlap is a simple
+          // extension of the coordinate range to be used
+          if (o_interior[i] - overlap > 0)
+          {
+            begin = begin - overlap;
+            offset[i] -= overlap;
+          }
+          if (o_interior[i] + s_interior[i] + overlap < _coarseSize[i])
+            end = end + overlap;
+
+          //copy the selected part in the new coord vector
+          newCoords[i].resize(end-begin);
+          auto newCoordsIt = newCoords[i].begin();
+          for (std::size_t j=begin; j<end; j++)
+          {
+            *newCoordsIt = coordinates.coordinate(i, j);
+            newCoordsIt++;
+          }
+
+          // Check whether we are at the physical boundary and have a periodic grid.
+          // In this case the coordinate vector has to be tweaked manually.
+          if ((periodic[i]) && (o_interior[i] + s_interior[i] + overlap >= _coarseSize[i]))
+          {
+            // we need to add the first <overlap> cells to the end of newcoords
+            for (int j=0; j<overlap; ++j)
+              newCoords[i].push_back(newCoords[i].back() - coordinates.coordinate(i,j) + coordinates.coordinate(i,j+1));
+          }
+
+          if ((periodic[i]) && (o_interior[i] - overlap <= 0))
+          {
+            offset[i] -= overlap;
+
+            // we need to add the last <overlap> cells to the begin of newcoords
+            std::size_t reverseCounter = coordinates.size(i);
+            for (int j=0; j<overlap; ++j, --reverseCounter)
+              newCoords[i].insert(newCoords[i].begin(), newCoords[i].front()
+                                  - coordinates.coordinate(i,reverseCounter) + coordinates.coordinate(i,reverseCounter-1));
+          }
+        }
+
+        TensorProductCoordinates<ctype,dim> coordinatesWithOverlap(newCoords, offset);
+
+        // add level (the this-> is needed to make g++-6 happy)
+        this->makelevel(id(coordinatesWithOverlap),periodic,o_interior,overlap);
+      });
+
+      init();
+    }
+
     /** Standard constructor for an equidistant YaspGrid
      *  @param L extension of the domain
      *  @param s number of cells on coarse mesh in each direction
@@ -784,6 +954,7 @@ namespace Dune {
           s_overlap[i] += overlap;
       }
 
+      // New coordinate object that additionally contains the overlap elements
       EquidistantCoordinates<ctype,dim> cc(h,s_overlap);
 
       // add level

@@ -41,6 +41,14 @@ int main (int argc , char **argv) {
                  YaspFactory<2,Dune::TensorProductCoordinates<double,2> >::buildGrid(refineOpt == 1, 1));
     }
 
+    // Test the generic constructor
+    check_yasp(testID + "equidistant-generic-constructor",
+               YaspFactory<2,Dune::EquidistantCoordinates<double,2> >::buildGrid(true,0,false,true));
+    check_yasp(testID + "equidistantoffset-generic-constructor",
+               YaspFactory<2,Dune::EquidistantOffsetCoordinates<double,2> >::buildGrid(true,0,false,true));
+    check_yasp(testID + "tensor-generic-constructor",
+               YaspFactory<2,Dune::TensorProductCoordinates<double,2> >::buildGrid(true,0,false,true));
+
     // And periodicity
 //    check_yasp(YaspFactory<2,Dune::EquidistantCoordinates<double,2> >::buildGrid(true, 0, true));
 //    check_yasp(YaspFactory<2,Dune::EquidistantOffsetCoordinates<double,2> >::buildGrid(true, 0, true));
