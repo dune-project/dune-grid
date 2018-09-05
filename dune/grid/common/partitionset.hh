@@ -141,7 +141,7 @@ namespace Dune {
     //! Returns a new PartitionSet that also contains the partitions in set.
     template<unsigned int p>
     struct PartitionSet<partitions | p>
-    constexpr operator+(const PartitionSet<p>& set) const
+    constexpr operator+(const PartitionSet<p>&) const
     {
       return PartitionSet<partitions | p>();
     }
@@ -149,7 +149,7 @@ namespace Dune {
     //! Returns a new PartitionSet that does not contain the partitions in set.
     template<unsigned int p>
     struct PartitionSet<partitions & ~p>
-    constexpr operator-(const PartitionSet<p>& set) const
+    constexpr operator-(const PartitionSet<p>&) const
     {
       return PartitionSet<partitions & ~p>();
     }
