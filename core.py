@@ -23,6 +23,19 @@ class CartesianDomain(tuple):
         for key in parameters:
             dgf += key + " " + str(parameters[key]) + "\n"
         dgf += "#\n"
+        try:
+            periodic = parameters["periodic"]
+            if any(periodic):
+                dgf += "PERIODICFACETRANSFORMATION\n"
+                for i,p in enumerate(periodic):
+                    if p:
+                        dgf += "1 0, 0 1 + "
+                        dgf += " ".join([str(upper[i]-lower[i]) if i==j
+                            else "0" for j in range(len(lower))])
+                        dgf += "\n"
+                dgf += "#\n"
+        except KeyError:
+            pass
         return super(CartesianDomain, cls).__new__(cls,
                        tuple( (reader.dgfString, dgf) ) )
     def __init__(self,lower,upper,division,**parameters):
