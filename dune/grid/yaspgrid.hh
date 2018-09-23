@@ -805,14 +805,14 @@ namespace Dune {
             s_overlap[i] += overlap;
         }
 
-        Dune::FieldVector<ctype,dim> h;
+        FieldVector<ctype,dim> upperRightWithOverlap;
         for (int i=0; i<dim; i++)
-          h[i] = coordinates.meshsize(i,0);
+          upperRightWithOverlap[i] = coordinates.coordinate(i,0) + coordinates.meshsize(i,0) * s_overlap[i];
 
         Hybrid::ifElse(std::is_same<Coordinates,EquidistantCoordinates<ctype,dim> >{}, [&](auto id)
         {
           // New coordinate object that additionally contains the overlap elements
-          EquidistantCoordinates<ctype,dim> coordinatesWithOverlap(h,s_overlap);
+          EquidistantCoordinates<ctype,dim> coordinatesWithOverlap(upperRightWithOverlap,s_overlap);
 
           // add level (the this-> is needed to make g++-6 happy)
           this->makelevel(id(coordinatesWithOverlap),periodic,o_interior,overlap);
@@ -825,7 +825,7 @@ namespace Dune {
             lowerleft[i] = id(coordinates).origin(i);
 
           // New coordinate object that additionally contains the overlap elements
-          EquidistantOffsetCoordinates<ctype,dim> coordinatesWithOverlap(lowerleft,h,s_overlap);
+          EquidistantOffsetCoordinates<ctype,dim> coordinatesWithOverlap(lowerleft,upperRightWithOverlap,s_overlap);
 
           // add level (the this-> is needed to make g++-6 happy)
           this->makelevel(id(coordinatesWithOverlap),periodic,o_interior,overlap);
@@ -941,10 +941,6 @@ namespace Dune {
       }
 #endif // #if HAVE_MPI
 
-      fTupel h(L);
-      for (int i=0; i<dim; i++)
-        h[i] /= s[i];
-
       iTupel s_overlap(s_interior);
       for (int i=0; i<dim; i++)
       {
@@ -954,8 +950,13 @@ namespace Dune {
           s_overlap[i] += overlap;
       }
 
+      FieldVector<ctype,dim> upperRightWithOverlap;
+
+      for (int i=0; i<dim; i++)
+        upperRightWithOverlap[i] = (L[i] / s[i]) * s_overlap[i];
+
       // New coordinate object that additionally contains the overlap elements
-      EquidistantCoordinates<ctype,dim> cc(h,s_overlap);
+      EquidistantCoordinates<ctype,dim> cc(upperRightWithOverlap,s_overlap);
 
       // add level
       makelevel(cc,periodic,o_interior,overlap);
@@ -1014,14 +1015,6 @@ namespace Dune {
       }
 #endif // #if HAVE_MPI
 
-      Dune::FieldVector<ctype,dim> extension(upperright);
-      Dune::FieldVector<ctype,dim> h;
-      for (int i=0; i<dim; i++)
-      {
-        extension[i] -= lowerleft[i];
-        h[i] = extension[i] / s[i];
-      }
-
       iTupel s_overlap(s_interior);
       for (int i=0; i<dim; i++)
       {
@@ -1031,7 +1024,12 @@ namespace Dune {
           s_overlap[i] += overlap;
       }
 
-      EquidistantOffsetCoordinates<ctype,dim> cc(lowerleft,h,s_overlap);
+      FieldVector<ctype,dim> upperRightWithOverlap;
+      for (int i=0; i<dim; i++)
+        upperRightWithOverlap[i] = lowerleft[i]
+                                 + s_overlap[i] * (upperright[i]-lowerleft[i]) / s[i];
+
+      EquidistantOffsetCoordinates<ctype,dim> cc(lowerleft,upperRightWithOverlap,s_overlap);
 
       // add level
       makelevel(cc,periodic,o_interior,overlap);

@@ -35,13 +35,17 @@ namespace Dune
     EquidistantCoordinates() {}
 
     /** \brief construct a container with all necessary information
-     *  \param h the meshsize in all directions
+     *  \param upperRight upper right corner of the domain
      *  \param s the size (in codim 0 elements) of the grid on this processor
      *  the size information is kept with this container, because this is the natural
      *  way to handle this for a tensorproduct grid.
      */
-    EquidistantCoordinates(const Dune::FieldVector<ct,dim>& h, const std::array<int,dim>& s)
-      : _h(h), _s(s) {}
+    EquidistantCoordinates(const Dune::FieldVector<ct,dim>& upperRight, const std::array<int,dim>& s)
+      : _s(s)
+    {
+      for (int i=0; i<dim; i++)
+        _h[i] = upperRight[i] / _s[i];
+    }
 
     /** \returns the meshsize in given direction at given position
      *  \param d the direction to be used
@@ -79,7 +83,7 @@ namespace Dune
     {
       //determine new size and meshsize
       std::array<int,dim> news;
-      Dune::FieldVector<ct,dim> newh;
+      Dune::FieldVector<ct,dim> newUpperRight;
 
       for (int i=0; i<dim; i++)
       {
@@ -92,9 +96,9 @@ namespace Dune
             news[i] -= overlap;
         }
 
-        newh[i] = _h[i] / ct(2.);
+        newUpperRight[i] = (_h[i] / ct(2.)) * news[i];
       }
-      return EquidistantCoordinates<ct,dim>(newh,news);
+      return EquidistantCoordinates<ct,dim>(newUpperRight,news);
     }
 
     /** \brief print information on this container */
@@ -133,14 +137,19 @@ namespace Dune
      EquidistantOffsetCoordinates() {}
 
      /** \brief construct a container with all necessary information
-      *  \param h the meshsize in all directions
+      *  \param lowerLeft the lower left corner of the grid
+      *  \param upperRight the upper right corner of the grid
       *  \param s the size (in codim 0 elements) of the grid on this processor
-      *  \param origin the coordinate of the lowerleft corner of this grid
+      *
       *  the size information is kept with this container, because this is the natural
       *  way to handle this for a tensorproduct grid.
       */
-     EquidistantOffsetCoordinates(const Dune::FieldVector<ct,dim>& origin, const Dune::FieldVector<ct,dim>& h, const std::array<int,dim>& s)
-       : _origin(origin), _h(h), _s(s) {}
+     EquidistantOffsetCoordinates(const Dune::FieldVector<ct,dim>& lowerLeft, const Dune::FieldVector<ct,dim>& upperRight, const std::array<int,dim>& s)
+       : _origin(lowerLeft), _s(s)
+     {
+       for (int i=0; i<dim; i++)
+         _h[i] = (upperRight[i] - lowerLeft[i]) / s[i];
+     }
 
      /** \returns the meshsize in given direction at given position
       *  \param d the direction to be used
@@ -186,7 +195,7 @@ namespace Dune
      {
        //determine new size and meshsize
        std::array<int,dim> news;
-       Dune::FieldVector<ct,dim> newh;
+       Dune::FieldVector<ct,dim> newUpperRight;
 
        for (int i=0; i<dim; i++)
        {
@@ -199,9 +208,9 @@ namespace Dune
              news[i] -= overlap;
          }
 
-         newh[i] = _h[i] / ct(2.);
+         newUpperRight[i] = _origin[i] + (_h[i] / ct(2.)) * news[i];
        }
-       return EquidistantOffsetCoordinates<ct,dim>(_origin,newh,news);
+       return EquidistantOffsetCoordinates<ct,dim>(_origin,newUpperRight,news);
      }
 
      /** \brief print information on this container */

@@ -49,10 +49,7 @@ struct YaspFactory<dim, Dune::EquidistantCoordinates<double,dim> >
 
     if (useGenericConstructor)
     {
-      Dune::FieldVector<double,dim> elementSize;
-      for (std::size_t i=0; i<dim; i++)
-        elementSize[i] = len[i] / s[i];
-      Dune::EquidistantCoordinates<double,dim> coordinates(elementSize,s);
+      Dune::EquidistantCoordinates<double,dim> coordinates(len,s);
       grid = new Dune::YaspGrid<dim>(coordinates,p,overlap);
     }
     else
@@ -89,10 +86,7 @@ struct YaspFactory<dim, Dune::EquidistantOffsetCoordinates<double,dim> >
 
     if (useGenericConstructor)
     {
-      Dune::FieldVector<double,dim> elementSize;
-      for (std::size_t i=0; i<dim; i++)
-        elementSize[i] = (upperright[i] - lowerleft[i]) / s[i];
-      Dune::EquidistantOffsetCoordinates<double,dim> coordinates(lowerleft,elementSize,s);
+      Dune::EquidistantOffsetCoordinates<double,dim> coordinates(lowerleft,upperright,s);
       grid = new Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double,dim> >(coordinates,p,overlap);
     }
     else
