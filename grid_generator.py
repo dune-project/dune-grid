@@ -61,7 +61,13 @@ def writeVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointve
                 try:
                     _writeVTK(vtk,grid,f,f.name,dataTag)
                 except AttributeError:
-                    _writeVTK(vtk,grid,f[0],f[1],dataTag)
+                    try:
+                        _writeVTK(vtk,grid,f[0],f[1],dataTag)
+                    except IndexError:
+                        raise TypeError("""
+Did you try to pass in a function without a name attribute?
+Try using a dictionary with name:function instead.""")
+
         elif dataFunctions is not None:
             raise TypeError("Argument '" + dataName + "' must be a dict or list instance.")
 
