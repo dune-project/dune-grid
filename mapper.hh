@@ -168,7 +168,7 @@ namespace Dune
         const auto tuple = pybind11::cast< pybind11::tuple >( layout );
         if( pybind11::len( tuple ) != GridView::dimension+1 )
           throw pybind11::value_error( "len(layout) must be " + std::to_string( GridView::dimension ) + "." );
-        for( int d = 0; d < GridView::dimension; ++d )
+        for( int d = 0; d <= GridView::dimension; ++d )
           count[ d ] = pybind11::cast< int >( tuple[ GridView::dimension - d ] );
         return new MCMGMapper( gridView, [ count ] ( Dune::GeometryType gt, int griddim ) { return count[ gt.dim() ]; } );
       }
@@ -179,7 +179,7 @@ namespace Dune
         const auto list = pybind11::cast< pybind11::list >( layout );
         if( pybind11::len( list ) != GridView::dimension+1 )
           throw pybind11::value_error( "len(layout) must be " + std::to_string( GridView::dimension ) + "." );
-        for( int d = 0; d < GridView::dimension; ++d )
+        for( int d = 0; d <= GridView::dimension; ++d )
           count[ d ] = pybind11::cast< int >( list[ GridView::dimension - d ] );
         return new MCMGMapper( gridView, [ count ] ( Dune::GeometryType gt, int griddim ) { return count[ gt.dim() ]; } );
       }
