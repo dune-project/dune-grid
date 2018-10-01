@@ -207,7 +207,7 @@ namespace Dune
     // registerGridViewIndexSet
     // ------------------------
 
-    template< class GridView, class IndexSet, class... options >
+    template< class IndexSet, class... options >
     inline static void registerGridViewIndexSet ( pybind11::handle scope, pybind11::class_< IndexSet, options... > cls )
     {
       using pybind11::operator""_a;
@@ -244,8 +244,8 @@ namespace Dune
 
       cls.def( "size", [] ( IndexSet &self, Dune::GeometryType type ) { return self.size( type ); } );
       cls.def( "size", [] ( IndexSet &self, int codim ) {
-          if( (codim < 0) || (codim > GridView::dimension) )
-            throw pybind11::value_error( "Invalid codimension: " + std::to_string( codim ) + " (must be in [0, " + std::to_string( GridView::dimension ) + "])" );
+          if( (codim < 0) || (codim > IndexSet::dimension) )
+            throw pybind11::value_error( "Invalid codimension: " + std::to_string( codim ) + " (must be in [0, " + std::to_string( IndexSet::dimension ) + "])" );
           return self.size( codim );
         } );
 
@@ -265,8 +265,8 @@ namespace Dune
                     domain of the index set
         )doc" );
 
-      Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [ &cls ] ( auto &&codim ) {
-          typedef typename GridView::template Codim< codim >::Entity Entity;
+      Hybrid::forEach( std::make_integer_sequence< int, IndexSet::dimension+1 >(), [ &cls ] ( auto &&codim ) {
+          typedef typename IndexSet::template Codim< codim >::Entity Entity;
 
           using pybind11::operator""_a;
 
@@ -310,7 +310,7 @@ namespace Dune
       typedef typename GridView::IndexSet IndexSet;
 
       auto cls = insertClass< IndexSet >( scope, "IndexSet", GenerateTypeName( MetaType< GridView >(), "IndexSet" ) ).first;
-      registerGridViewIndexSet< GridView >( scope, cls );
+      registerGridViewIndexSet( scope, cls );
       return cls;
     }
 

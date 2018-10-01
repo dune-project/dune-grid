@@ -168,7 +168,7 @@ namespace Dune
         const auto tuple = pybind11::cast< pybind11::tuple >( layout );
         if( pybind11::len( tuple ) != GridView::dimension+1 )
           throw pybind11::value_error( "len(layout) must be " + std::to_string( GridView::dimension ) + "." );
-        for( int d = 0; d < GridView::dimension; ++d )
+        for( int d = 0; d <= GridView::dimension; ++d )
           count[ d ] = pybind11::cast< int >( tuple[ GridView::dimension - d ] );
         return new MCMGMapper( gridView, [ count ] ( Dune::GeometryType gt, int griddim ) { return count[ gt.dim() ]; } );
       }
@@ -179,7 +179,7 @@ namespace Dune
         const auto list = pybind11::cast< pybind11::list >( layout );
         if( pybind11::len( list ) != GridView::dimension+1 )
           throw pybind11::value_error( "len(layout) must be " + std::to_string( GridView::dimension ) + "." );
-        for( int d = 0; d < GridView::dimension; ++d )
+        for( int d = 0; d <= GridView::dimension; ++d )
           count[ d ] = pybind11::cast< int >( list[ GridView::dimension - d ] );
         return new MCMGMapper( gridView, [ count ] ( Dune::GeometryType gt, int griddim ) { return count[ gt.dim() ]; } );
       }
@@ -390,15 +390,12 @@ namespace Dune
     // registerMultipleCodimMultipleGeomTypeMapper
     // -------------------------------------------
 
-    template<typename GridView>
-    auto registerMultipleCodimMultipleGeomTypeMapper(pybind11::handle scope)
+    template< class MCMGMapper, class... options >
+    inline static auto registerMultipleCodimMultipleGeomTypeMapper( pybind11::handle scope, pybind11::class_< MCMGMapper, options... > cls )
     {
+      typedef typename MCMGMapper::GridView GridView;
       using pybind11::operator""_a;
 
-      typedef MultipleCodimMultipleGeomTypeMapper<GridView> MCMGMapper;
-      auto cls = insertClass<MCMGMapper>(scope, "MultipleCodimMultipleGeomTypeMapper",
-          GenerateTypeName("Dune::MultipleCodimMultipleGeomTypeMapper", MetaType<GridView>()),
-          IncludeFiles{"dune/grid/common/mcmgmapper.hh","dune/python/grid/mapper.hh"}).first;
       registerMapper<GridView>(cls);
       cls.def( pybind11::init( [] ( const GridView &grid, pybind11::object layout ) {
           return makeMultipleCodimMultipleGeomTypeMapper( grid, layout );
@@ -420,6 +417,15 @@ namespace Dune
           each codimension in the grid.
         )doc" );
       return cls;
+    }
+    template<typename GridView>
+    auto registerMultipleCodimMultipleGeomTypeMapper(pybind11::handle scope)
+    {
+      typedef MultipleCodimMultipleGeomTypeMapper<GridView> MCMGMapper;
+      auto cls = insertClass<MCMGMapper>(scope, "MultipleCodimMultipleGeomTypeMapper",
+          GenerateTypeName("Dune::MultipleCodimMultipleGeomTypeMapper", MetaType<GridView>()),
+          IncludeFiles{"dune/grid/common/mcmgmapper.hh","dune/python/grid/mapper.hh"}).first;
+      registerMultipleCodimMultipleGeomTypeMapper(scope,cls);
     }
 
   } // namespace Python
