@@ -123,6 +123,21 @@ def position(self,*arg,**kwarg):
 def localPosition(self,*arg,**kwarg):
     return self.toLocal(*arg,**kwarg)
 
+isGenerator = SimpleGenerator("GridViewIndexSet", "Dune::Python")
+def indexSet(gv):
+    includes = gv._includes + ["dune/python/grid/indexset.hh"]
+    typeName = gv._typeName+"::IndexSet"
+    moduleName = "indexset_" + hashIt(typeName)
+    module = isGenerator.load(includes, typeName, moduleName)
+    return gv._indexSet
+mcmgGenerator = SimpleGenerator("MultipleCodimMultipleGeomTypeMapper", "Dune::Python")
+def mapper(gv,layout):
+    includes = gv._includes + ["dune/python/grid/mapper.hh"]
+    typeName = "Dune::MultipleCodimMultipleGeomTypeMapper< "+gv._typeName+" >"
+    moduleName = "mcmgmapper_" + hashIt(typeName)
+    module = mcmgGenerator.load(includes, typeName, moduleName)
+    return gv._mapper(layout)
+
 def addAttr(module, cls):
     setattr(cls, "_module", module)
     setattr(cls, "writeVTK", writeVTK)
@@ -151,23 +166,30 @@ def addAttr(module, cls):
             Geo.domain = property(domain)
             setattr( Geo, "position", position)
             setattr( Geo, "localPosition", localPosition)
+    cls.indexSet = property(indexSet)
+    setattr(cls,"mapper",mapper)
 
+gvGenerator = SimpleGenerator("GridView", "Dune::Python")
+def levelView(hgrid,level):
+    includes = hgrid._includes + ["dune/python/grid/gridview.hh"]
+    typeName = "typename "+hgrid._typeName+"::LevelGridView"
+    moduleName = "view_" + hashIt(typeName)
+    module = gvGenerator.load(includes, typeName, moduleName)
+    addAttr(module, module.GridView)
+    return hgrid._levelView(level)
 
 generator = SimpleGenerator("HierarchicalGrid", "Dune::Python")
-
-
 def module(includes, typeName, *args):
     includes = includes + ["dune/python/grid/hierarchical.hh"]
     typeHash = "hierarchicalgrid_" + hashIt(typeName)
     module = generator.load(includes, typeName, typeHash, *args)
     addAttr(module, module.LeafGrid)
-    addAttr(module, module.LevelGrid)
 
     # register reference element for this grid
     import dune.geometry
     for d in range(module.LeafGrid.dimension+1):
         dune.geometry.module(d)
-
+    setattr(module.HierarchicalGrid,"levelView",levelView)
     return module
 
 

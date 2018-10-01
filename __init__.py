@@ -10,8 +10,8 @@ registry = dict()
 
 registry["grid"] = grid_registry
 
-def leafGrid(*args, **kwargs):
-    return create(*args, **kwargs)
+# def leafGrid(*args, **kwargs):
+#     return create(*args, **kwargs)
 
 def _getGridFunction(view,y,dimR):
     if dimR is None:
