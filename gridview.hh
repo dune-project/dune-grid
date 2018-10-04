@@ -20,8 +20,8 @@
 #include <dune/python/grid/entity.hh>
 #include <dune/python/grid/function.hh>
 #include <dune/python/grid/indexset.hh>
-#include <dune/python/grid/intersection.hh>
 #include <dune/python/grid/mapper.hh>
+#include <dune/python/grid/intersection.hh>
 #include <dune/python/grid/numpy.hh>
 #include <dune/python/grid/range.hh>
 #include <dune/python/grid/vtk.hh>
@@ -141,10 +141,7 @@ namespace Dune
       registerGridEntities< GridView >( cls );
       registerGridIntersection< GridView >( cls );
 
-      registerGridViewIndexSet< GridView >( cls );
-      registerMultipleCodimMultipleGeomTypeMapper< GridView >( cls );
-
-      cls.def( "mapper", [] ( GridView &self, pybind11::object layout ) {
+      cls.def( "_mapper", [] ( GridView &self, pybind11::object layout ) {
           return makeMultipleCodimMultipleGeomTypeMapper( self, layout );
         }, pybind11::keep_alive< 0, 1 >(), "layout"_a,
         R"doc(
@@ -168,7 +165,6 @@ namespace Dune
         )doc" );
 
       // register iterators
-
       Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [ &cls ] ( auto &&codim ) {
           registerPyGridViewIterator< GridView, codim >();
         } );
@@ -323,7 +319,7 @@ namespace Dune
           return self.ghostSize( codim );
         }, "codim"_a );
 
-      cls.def_property_readonly( "indexSet", [] ( const GridView &self ) -> const typename GridView::IndexSet & {
+      cls.def_property_readonly( "_indexSet", [] ( const GridView &self ) -> const typename GridView::IndexSet & {
           return self.indexSet();
         }, pybind11::return_value_policy::reference, pybind11::keep_alive< 0, 1 >(),
         R"doc(

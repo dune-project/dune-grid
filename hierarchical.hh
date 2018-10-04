@@ -272,10 +272,6 @@ namespace Dune
       pybind11::options opts;
       opts.disable_function_signatures();
 
-      auto clsLevelView = insertClass< typename Grid::LevelGridView >( module, "LevelGrid", GenerateTypeName( cls, "LevelGridView" ) );
-      if( clsLevelView.second )
-        registerGridView( module, clsLevelView.first );
-
       auto clsLeafView = insertClass< typename Grid::LeafGridView >( module, "LeafGrid", GenerateTypeName( cls, "LeafGridView" ) );
       if( clsLeafView.second )
         registerGridView( module, clsLeafView.first );
@@ -297,7 +293,7 @@ namespace Dune
 
           Returns:  leaf grid view
         )doc" );
-      cls.def( "levelView", [] ( const Grid &self, int level ) {
+      cls.def( "_levelView", [] ( const Grid &self, int level ) {
           return self.levelGridView( level );
         }, pybind11::keep_alive< 0, 1 >(), "level"_a,
         R"doc(
@@ -310,7 +306,6 @@ namespace Dune
         )doc" );
 
       typedef typename Grid::template Codim< 0 >::Entity Element;
-
       cls.def( "mark", [] ( Grid &self, const Element &element, Marker marker ) {
             self.mark( static_cast< int >( marker ), element );
           }, "element"_a, "marker"_a,
