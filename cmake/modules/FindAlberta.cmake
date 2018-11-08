@@ -108,7 +108,7 @@ else(ALBERTA_UTIL_LIB)
   _dune_set_alberta(FALSE)
 endif(ALBERTA_UTIL_LIB)
 
-set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${ALBERTA_UTIL_LIB} ${ALBERTA_EXTRA_LIBS})
+set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${ALBERTA_EXTRA_LIBS})
 
 # check for which dimensions are supported Alberta installation
 if(ALBERTA_LIBCHECK)
@@ -131,7 +131,7 @@ endif(ALBERTA_LIBCHECK)
 cmake_pop_check_state()
 
 list(LENGTH ALBERTA_WORLD_DIMS _length)
-if(length GREATER 0)
+if(_length GREATER 0)
   _dune_set_alberta(TRUE)
 endif(length GREATER 0)
 
