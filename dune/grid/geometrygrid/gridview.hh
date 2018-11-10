@@ -215,7 +215,7 @@ namespace Dune
       }
 
       template< class DataHandle, class Data >
-      void communicate ( CommDataHandleIF< DataHandle, Data > &dataHandle,
+      auto communicate ( CommDataHandleIF< DataHandle, Data > &dataHandle,
                          InterfaceType interface,
                          CommunicationDirection direction ) const
       {
@@ -223,7 +223,7 @@ namespace Dune
         typedef GeoGrid::CommDataHandle< Grid, DataHandleIF > WrappedDataHandle;
 
         WrappedDataHandle wrappedDataHandle( grid(), dataHandle );
-        hostGridView().communicate( wrappedDataHandle, interface, direction );
+        return hostGridView().communicate( wrappedDataHandle, interface, direction );
       }
 
       const HostGridView &hostGridView () const { return hostGridView_; }
