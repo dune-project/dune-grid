@@ -3,6 +3,8 @@
 #ifndef DUNE_GRIDVIEW_HH
 #define DUNE_GRIDVIEW_HH
 
+#include <typeinfo>
+
 #include <dune/common/iteratorrange.hh>
 
 #include <dune/geometry/type.hh>
@@ -262,11 +264,13 @@ namespace Dune
 
     /** \brief Communicate data on this view */
     template< class DataHandleImp, class DataType >
-    void communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
+    auto communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
                        InterfaceType iftype,
                        CommunicationDirection dir ) const
     {
-      impl().communicate(data,iftype,dir);
+      typedef decltype( impl().communicate(data,iftype,dir) ) CommFuture;
+      return communicate( data,iftype, dir,
+            std::integral_constant< bool, std::is_same< CommFuture, void > :: value >() );
     }
 
     /**
@@ -284,6 +288,39 @@ namespace Dune
     const Implementation &impl () const { return impl_; }
 
   protected:
+    /** \brief Communicate data on this view */
+    template< class DataHandleImp, class DataType >
+    auto communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
+                       InterfaceType iftype,
+                       CommunicationDirection dir, std::integral_constant< bool, false > ) const
+    {
+      return impl().communicate(data,iftype,dir);
+    }
+
+    struct NoCommFuture
+    {
+      void printMessage() const
+      {
+        std::cerr << "WARNING: GridView::communicate of '" <<
+          typeid( Implementation ).name() << "' still returns void. Please update implementation to new interface!" << std::endl;
+      }
+      bool pending () const {
+        printMessage();
+        return false;
+      }
+      void wait () { printMessage(); }
+    };
+
+    /** \brief Communicate data on this view */
+    template< class DataHandleImp, class DataType >
+    auto communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
+                       InterfaceType iftype,
+                       CommunicationDirection dir, std::integral_constant< bool, true > ) const
+    {
+      impl().communicate(data,iftype,dir);
+      return NoCommFuture();
+    }
+
     Implementation impl_;
   };
 
