@@ -102,7 +102,7 @@ void runDGFTest(int argc, char ** argv)
   size_t nofElParams( 0 ), nofVtxParams( 0 );
   std::vector< double > eldat( 0 ), vtxdat( 0 );
   {
-    GridPtr< GridType > gridPtr( filename.c_str(), mpiHelper.getCommunicator() );
+    GridPtr< GridType > gridPtr( filename, mpiHelper.getCommunicator() );
 
     gridPtr.loadBalance();
 
