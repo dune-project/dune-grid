@@ -27,6 +27,8 @@
 #include <dune/grid/io/file/dgfparser/entitykey.hh>
 #include <dune/grid/io/file/dgfparser/parser.hh>
 
+#include <dune/grid/io/file/gmshreader.hh>
+
 namespace Dune
 {
 
@@ -116,6 +118,32 @@ namespace Dune
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
     static const int dimension = GridType::dimension;
 
+    std::string checkFileFormat( const std::string& filename ) const
+    {
+      std::ifstream input( filename );
+      if( input.is_open() )
+      {
+        std::string line;
+        std::getline( input, line );
+
+        int pos = line.find( "DGF" );
+        if( pos >=0 )
+        {
+          //std::cout << "Found DGF Format" << std::endl;
+          return std::string( "DGF" );
+        }
+
+        pos = line.find( "$MeshFormat" );
+        if( pos >=0 )
+        {
+          //std::cout << "Found Gmsh Format" << std::endl;
+          return std::string( "gmsh" );
+        }
+      }
+
+      return std::string("unknown_format");
+    }
+
     //! constructor given the name of a DGF file
     explicit GridPtr ( const std::string &filename,
                        MPICommunicatorType comm = MPIHelper::getCommunicator() )
@@ -129,8 +157,25 @@ namespace Dune
         nofVtxParam_( 0 ),
         haveBndParam_( false )
     {
-      DGFGridFactory< GridType > dgfFactory( filename, comm );
-      initialize( dgfFactory );
+      std::string fileID = checkFileFormat( filename );
+
+      if( fileID == "DGF" )
+      {
+        DGFGridFactory< GridType > dgfFactory( filename, comm );
+        initialize( dgfFactory );
+      }
+      else if( fileID == "gmsh" )
+      {
+        GridFactory<GridType> gridFactory;
+        std::vector<int> boundaryIDs;
+        std::vector<int> elementsIDs;
+        GmshReader<GridType>::read(gridFactory,filename,boundaryIDs,elementsIDs);
+        initialize( gridFactory, boundaryIDs,elementsIDs);
+      }
+      else
+      {
+        DUNE_THROW( NotImplemented, "GridPtr: file format not supported!" );
+      }
     }
 
     //! constructor given a std::istream
@@ -146,6 +191,7 @@ namespace Dune
         nofVtxParam_( 0 ),
         haveBndParam_( false )
     {
+      // input stream only works for DGF format right now
       DGFGridFactory< GridType > dgfFactory( input, comm );
       initialize( dgfFactory );
     }
@@ -177,17 +223,7 @@ namespace Dune
     {}
 
     //! Copy constructor, copies internal auto pointer
-    GridPtr( const GridPtr &org )
-      : gridPtr_(org.gridPtr_),
-        elParam_(org.elParam_),
-        vtxParam_(org.vtxParam_),
-        bndParam_(org.bndParam_),
-        bndId_(org.bndId_),
-        emptyParam_( org.emptyParam_ ),
-        nofElParam_(org.nofElParam_),
-        nofVtxParam_(org.nofVtxParam_),
-        haveBndParam_(org.haveBndParam_)
-    {}
+    GridPtr( const GridPtr &org ) = default;
 
     //! assignment of grid pointer
     GridPtr& operator= ( const GridPtr &org )
@@ -395,6 +431,53 @@ namespace Dune
             bndId_[ k ] = dgfFactory.boundaryId( intersection );
             if( haveBndParam_ )
               bndParam_[ intersection.boundarySegmentIndex() ] = dgfFactory.boundaryParameter( intersection );
+          }
+        }
+      }
+    }
+
+    void initialize ( GridFactory< GridType > &factory,
+                      std::vector<int>& boundaryIds,
+                      std::vector<int>& elementIds )
+    {
+      gridPtr_ = mygrid_ptr( factory.createGrid().release() );
+
+      const auto& gridView = gridPtr_->leafGridView();
+      const auto& indexSet = gridView.indexSet();
+
+      nofElParam_   = elementIds.empty() ? 0 : 1 ;
+      nofVtxParam_  = 0;
+      haveBndParam_ = boundaryIds.empty() ? 0 : 1 ;
+
+      std::array< int, 3 > nofParams = {{ nofElParam_, nofVtxParam_, static_cast< int >( haveBndParam_ ) }};
+      gridView.comm().max( nofParams.data(), nofParams.size() );
+
+      // empty grids have no parameters associated
+      if( isEmpty( elements( gridView, Partitions::interiorBorder ) ) )
+      {
+        nofElParam_ = nofParams[ 0 ];
+      }
+
+      // boundary parameters may be empty
+      haveBndParam_ = static_cast< bool >( nofParams[ 2 ] );
+
+      // Reorder boundary IDs according to the insertion index
+      if(!boundaryIds.empty() || !elementIds.empty() )
+      {
+        bndParam_.resize( boundaryIds.size() );
+        elParam_.resize( elementIds.size(), std::vector<double>(1) );
+        for(const auto& entity : elements( gridView ))
+        {
+          elParam_[ indexSet.index( entity ) ][ 0 ] = elementIds[ factory.insertionIndex( entity ) ];
+          if( haveBndParam_ )
+          {
+            for(const auto& intersection : intersections( gridView,entity) )
+            {
+              if(intersection.boundary())
+              {
+                bndParam_[intersection.boundarySegmentIndex()] = std::to_string(boundaryIds[factory.insertionIndex(intersection)]);
+              }
+            }
           }
         }
       }
