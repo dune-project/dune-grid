@@ -31,10 +31,15 @@ namespace Dune {
   template <>
   class GridFactory<OneDGrid> : public GridFactoryInterface<OneDGrid> {
 
+    typedef GridFactoryInterface<OneDGrid> Base;
+
     /** \brief Type used by the grid for coordinates */
     typedef OneDGrid::ctype ctype;
 
   public:
+
+    // use default implementation from base class
+    using Base::insertionIndex;
 
     /** \brief Default constructor */
     GridFactory();

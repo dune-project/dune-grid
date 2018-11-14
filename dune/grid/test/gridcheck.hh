@@ -72,12 +72,11 @@ struct subIndexCheck
     typedef typename Grid::template Codim< E::codimension >::EntitySeed EntitySeed;
     EntitySeed seed = e.seed();
 
-    #ifndef NDEBUG
     E e1( e );
     E e2 = g.entity( seed );
-    #endif
-    assert( e1 == e2 );
 
+    if( e1 != e2 )
+      DUNE_THROW( Dune::GridError, "EntitySeed recovery failed");
   }
 
 
@@ -684,8 +683,15 @@ void iteratorEquals (Grid &g)
     LevelIntersectionIterator li1 = levelGridView.ibegin( *l1 );
     LevelIntersectionIterator li2 = levelGridView.ibegin( *l2 );
     assert(li1 == li2 && !(li1 != li2));
+    if( !( li1 == li2 && !(li1 != li2) ) )
+      DUNE_THROW( Dune::GridError, "LevelIntersectionIterator check failed" );
+
     if (li1 != levelGridView.iend(*l1))
+    {
       assert(*li1 == *li2 && !(*li1 != *li2));
+      if( ! ( *li1 == *li2 && !(*li1 != *li2) ) )
+        DUNE_THROW( Dune::GridError, "LevelIntersectionIterator dereferencing check failed" );
+    }
   }
 
 }

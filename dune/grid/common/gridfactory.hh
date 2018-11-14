@@ -268,6 +268,8 @@ namespace Dune
   template <class GridType>
   class GridFactory : public GridFactoryInterface<GridType> {
 
+    typedef GridFactoryInterface<GridType> Base;
+
     /** \brief The grid world dimension */
     enum {dimworld = GridType::dimensionworld};
 
@@ -275,6 +277,9 @@ namespace Dune
     typedef typename GridType::ctype ctype;
 
   public:
+
+    // use default implementation from base class
+    using Base::insertBoundarySegment;
 
     /** \brief Default constructor */
     GridFactory() {
