@@ -271,7 +271,7 @@ void checkGrid(const Grid& grid)
   }
 
   // check mixed element and edge mapper
-  const auto elementEdgeLayout = [](GeometryType gt, int dimgrid) {
+  const auto elementEdgeLayout = [](GeometryType gt, unsigned int dimgrid) {
     return (gt.dim() == dimgrid)? 3 : (gt.dim() == 1? 2 : 0);
   };
   // check leafMCMGMapper

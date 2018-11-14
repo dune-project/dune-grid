@@ -129,7 +129,7 @@ namespace Dune
     }
 
     // create grid
-    grid_ = factory_.createGrid();
+    grid_ = factory_.createGrid().release();
 
     // set closure type to none if parameter say so
     if( gridParam.noClosure() )

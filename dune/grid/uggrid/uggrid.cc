@@ -470,7 +470,7 @@ bool UGGrid < dim >::loadBalance(const std::vector<Rank>& targetProcessors, unsi
     return true;
 
 #ifdef ModelP  // The Partition field only exists if ModelP is set
-  if (targetProcessors.size() != this->leafGridView().size(0))
+  if (int(targetProcessors.size()) != this->leafGridView().size(0))
     DUNE_THROW(Exception, "targetProcessors argument does not have the correct size");
 
   // Get unique consecutive index across different element types
@@ -485,7 +485,7 @@ bool UGGrid < dim >::loadBalance(const std::vector<Rank>& targetProcessors, unsi
 
       if (element.isLeaf()) {
 
-        auto targetRank = targetProcessors[elementMapper.index(element)];
+        int targetRank = targetProcessors[elementMapper.index(element)];
 
         // sanity check
         if (targetRank >= comm().size())
