@@ -38,6 +38,9 @@
 #include <dune/grid/io/file/dgfparser/blocks/gridparameter.hh>
 #include <dune/grid/io/file/dgfparser/blocks/interval.hh>
 #include <dune/grid/io/file/dgfparser/blocks/periodicfacetrans.hh>
+#include <dune/grid/io/file/dgfparser/blocks/polygon.hh>
+#include <dune/grid/io/file/dgfparser/blocks/polyhedron.hh>
+#include <dune/grid/io/file/dgfparser/blocks/projection.hh>
 #include <dune/grid/io/file/dgfparser/blocks/simplex.hh>
 #include <dune/grid/io/file/dgfparser/blocks/simplexgeneration.hh>
 #include <dune/grid/io/file/dgfparser/blocks/vertex.hh>

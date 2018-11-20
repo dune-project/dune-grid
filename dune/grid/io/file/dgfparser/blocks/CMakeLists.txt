@@ -1,8 +1,7 @@
 dune_add_library(dgfparserblocks
   OBJECT basic.cc  boundarydom.cc  boundaryseg.cc
     cube.cc  dim.cc  general.cc  gridparameter.cc
-    interval.cc  periodicfacetrans.cc polygon.hh polyhedron.hh
-    projection.cc simplex.cc  simplexgeneration.cc  vertex.cc)
+    interval.cc  periodicfacetrans.cc projection.cc simplex.cc  simplexgeneration.cc  vertex.cc)
 #add_dune_mpi_flags(dgfparserblocks)
 
 set(HEADERS
@@ -15,6 +14,8 @@ set(HEADERS
   gridparameter.hh
   interval.hh
   periodicfacetrans.hh
+  polygon.hh
+  polyhedron.hh
   projection.hh
   simplex.hh
   simplexgeneration.hh
