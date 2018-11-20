@@ -3,11 +3,14 @@
 #ifndef DUNE_GRID_TEST_CHECKIDSET_HH
 #define DUNE_GRID_TEST_CHECKIDSET_HH
 
+#include <iostream>
 #include <map>
 #include <utility>
 
 #include <dune/common/float_cmp.hh>
 #include <dune/common/hybridutilities.hh>
+
+#include <dune/grid/common/exceptions.hh>
 
 /** @file
    @brief Unit tests for IdSet implementations
