@@ -53,11 +53,14 @@ def writeVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointve
     vtk = grid.vtkWriter() if subsampling is None else grid.vtkWriter(subsampling)
 
     def addDataToVTKWriter(dataFunctions, dataName, dataTag):
+        if dataFunctions is None: return
         if isinstance(dataFunctions, dict):
             for n, f in dataFunctions.items():
+                if f is None: continue
                 _writeVTK(vtk,grid,f,n,dataTag)
         elif isinstance(dataFunctions, list):
             for f in dataFunctions:
+                if f is None: continue
                 try:
                     _writeVTK(vtk,grid,f,f.name,dataTag)
                 except AttributeError:
