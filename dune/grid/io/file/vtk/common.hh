@@ -376,10 +376,11 @@ namespace Dune
       };
 
       //! Create a FieldInfo instance with the given name, type and size.
-      FieldInfo(std::string name, Type type, std::size_t size)
+      FieldInfo(std::string name, Type type, std::size_t size, Precision prec = Precision::float32)
         : _name(name)
         , _type(type)
         , _size(size)
+        , _prec(prec)
       {}
 
       //! The name of the data field
@@ -400,11 +401,18 @@ namespace Dune
         return _size;
       }
 
+      //! The precision used for the output of the data field
+      Precision precision() const
+      {
+        return _prec;
+      }
+
     private:
 
       std::string _name;
       Type _type;
       std::size_t _size;
+      Precision _prec;
 
     };
 
