@@ -303,6 +303,54 @@ namespace Dune
     };
 
 
+    //////////////////////////////////////////////////////////////////////
+    //
+    //  which precision to use when writing out data
+    //
+
+    //! which precision to use when writing out data to vtk files
+    /**
+       \code
+       #include <dune/grid/io/file/vtk/common.hh>
+       \endcode
+     */
+    enum class Precision {
+      int32,
+      uint32,
+      float32,
+      float64
+    };
+
+    //! map precision to VTK type name
+    inline std::string typeName(Precision p)
+    {
+      if (p == Precision::float32)
+        return "Float32";
+      else if (p == Precision::float64)
+        return "Float64";
+      else if (p == Precision::uint32)
+        return "UInt32";
+      else if (p == Precision::int32)
+        return "Int32";
+      else
+        DUNE_THROW(Dune::NotImplemented, "Unknown precision type");
+    }
+
+    //! map precision to byte size
+    inline std::size_t typeSize(Precision p)
+    {
+      if (p == Precision::float32)
+        return sizeof(float);
+      else if (p == Precision::float64)
+        return sizeof(double);
+      else if (p == Precision::uint32)
+        return sizeof(unsigned int);
+      else if (p == Precision::int32)
+        return sizeof(int);
+      else
+        DUNE_THROW(Dune::NotImplemented, "Unknown precision type");
+    }
+
     //! Descriptor struct for VTK fields
     /**
      * This struct provides general information about a data field to be
