@@ -275,7 +275,8 @@ namespace Dune
         , _fieldInfo(
           vtkFunctionPtr->name(),
           vtkFunctionPtr->ncomps() > 1 ? VTK::FieldInfo::Type::vector : VTK::FieldInfo::Type::scalar,
-          vtkFunctionPtr->ncomps()
+          vtkFunctionPtr->ncomps(),
+          vtkFunctionPtr->precision()
           )
       {}
 
@@ -617,7 +618,8 @@ namespace Dune
      * @param ncomps Number of components (default is 1).
      */
     template<class Container>
-    void addCellData (const Container& v, const std::string &name, int ncomps = 1)
+    void addCellData (const Container& v, const std::string &name, int ncomps = 1,
+                      VTK::Precision prec = VTK::Precision::float32)
     {
       typedef P0VTKFunction<GridView, Container> Function;
       for (int c=0; c<ncomps; ++c) {
@@ -625,7 +627,7 @@ namespace Dune
         compName << name;
         if (ncomps>1)
           compName << "[" << c << "]";
-        VTKFunction* p = new Function(gridView_, v, compName.str(), ncomps, c);
+        VTKFunction* p = new Function(gridView_, v, compName.str(), ncomps, c, prec);
         addCellData(std::shared_ptr< const VTKFunction >(p));
       }
     }
@@ -665,7 +667,8 @@ namespace Dune
      * @param ncomps Number of components (default is 1).
      */
     template<class Container>
-    void addVertexData (const Container& v, const std::string &name, int ncomps=1)
+    void addVertexData (const Container& v, const std::string &name, int ncomps=1,
+                        VTK::Precision prec = VTK::Precision::float32)
     {
       typedef P1VTKFunction<GridView, Container> Function;
       for (int c=0; c<ncomps; ++c) {
@@ -673,7 +676,7 @@ namespace Dune
         compName << name;
         if (ncomps>1)
           compName << "[" << c << "]";
-        VTKFunction* p = new Function(gridView_, v, compName.str(), ncomps, c);
+        VTKFunction* p = new Function(gridView_, v, compName.str(), ncomps, c, prec);
         addVertexData(std::shared_ptr< const VTKFunction >(p));
       }
     }
