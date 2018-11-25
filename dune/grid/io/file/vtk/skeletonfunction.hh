@@ -84,17 +84,20 @@ namespace Dune {
       std::shared_ptr<const Func> func;
       std::string name_;
       unsigned dimR;
-      std::shared_ptr<DataArrayWriter<RF> > arraywriter;
+      VTK::Precision precision_;
+      std::shared_ptr<DataArrayWriter> arraywriter;
 
     public:
       SkeletonFunctionWriter(const std::shared_ptr<const Func>& func_,
-                             const std::string& name, unsigned dimR_)
-        : func(func_), name_(name), dimR(dimR_)
+                             const std::string& name, unsigned dimR_,
+                             VTK::Precision prec = VTK::Precision::float32)
+        : func(func_), name_(name), dimR(dimR_), precision_(prec)
       { }
 
       SkeletonFunctionWriter(const std::shared_ptr<const Func>& func_,
-                             const std::string& name)
-        : func(func_), name_(name), dimR(func->dimRange())
+                             const std::string& name,
+                             VTK::Precision prec = VTK::Precision::float32)
+        : func(func_), name_(name), dimR(func->dimRange()), precision_(prec)
       { }
 
       //! return name
@@ -105,13 +108,13 @@ namespace Dune {
 
       //! add this field to the given parallel writer
       virtual void addArray(PVTUWriter& writer) {
-        writer.addArray<RF>(name(), ncomps());
+        writer.addArray(name(), ncomps(), precision_);
       }
 
       //! start writing with the given writer
       virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
-        arraywriter.reset(writer.makeArrayWriter<RF>(name(), ncomps(),
-                                                     nitems));
+        arraywriter.reset(writer.makeArrayWriter(name(), ncomps(),
+                                                 nitems, precision_));
         return !arraywriter->writeIsNoop();
       }
 

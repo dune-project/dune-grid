@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <ostream>
 #include <string>
+#include <iomanip>
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/indent.hh>
@@ -31,9 +32,7 @@ namespace Dune
 
     //! base class for data array writers
     /**
-     * \tparam T Type of the data elements to write
-     *
-     * This is an abstract base class; for an actual implementation look at
+     * This is the base class; for an actual implementation look at
      * VTKAsciiDataArrayWriter, VTKBinaryDataArrayWriter, or
      * VTKBinaryAppendedDataArrayWriter.
      *
@@ -49,21 +48,54 @@ namespace Dune
      * the writer).  Finally, in the destructor, the stream is put back in a
      * sane state.  That usually means writing something line "</DataArray>".
      */
-    template<class T>
     class DataArrayWriter
     {
     public:
-      //! write one data element
-      virtual void write (T data) = 0;
+      //! \brief construct a data array writer
+      /**
+       * \brief construct a data array writer
+       * \param prec the precision type with which to write the data
+       */
+      DataArrayWriter(Precision _prec)
+      : prec(_prec)
+      {}
+
+      //! write one element of data
+      template<class T>
+      void write(T data)
+      {
+        if (prec == Precision::float32)
+          writeFloat(data);
+        else if (prec == Precision::float64)
+          writeDouble(data);
+        else if (prec == Precision::uint32)
+          writeUInt(data);
+        else if (prec == Precision::int32)
+          writeInt(data);
+        else
+          DUNE_THROW(Dune::NotImplemented, "Unknown precision type");
+      }
+
       //! whether calls to write may be skipped
       virtual bool writeIsNoop() const { return false; }
       //! virtual destructor
       virtual ~DataArrayWriter () {}
+
+    private:
+      //! write one data element as float
+      virtual void writeFloat (float data) = 0;
+      //! write one data element as double
+      virtual void writeDouble (double data) = 0;
+      //! write one data element as integer
+      virtual void writeInt (int data) = 0;
+      //! write one data element as unsigned integer
+      virtual void writeUInt (unsigned int data) = 0;
+
+      Precision prec;
     };
 
     //! a streaming writer for data array tags, uses ASCII inline format
-    template<class T>
-    class AsciiDataArrayWriter : public DataArrayWriter<T>
+    class AsciiDataArrayWriter : public DataArrayWriter
     {
     public:
       //! make a new data array writer
@@ -76,26 +108,14 @@ namespace Dune
        *                  for the actual data.
        */
       AsciiDataArrayWriter(std::ostream& theStream, std::string name,
-                           int ncomps, const Indent& indent_)
-        : s(theStream), counter(0), numPerLine(12), indent(indent_)
+                           int ncomps, const Indent& indent_, Precision prec)
+        : DataArrayWriter(prec), s(theStream), counter(0), numPerLine(12), indent(indent_)
       {
-        TypeName<T> tn;
-        s << indent << "<DataArray type=\"" << tn() << "\" "
+        s << indent << "<DataArray type=\"" << typeName(prec) << "\" "
           << "Name=\"" << name << "\" ";
         s << "NumberOfComponents=\"" << ncomps << "\" ";
         s << "format=\"ascii\">\n";
         ++indent;
-      }
-
-      //! write one data element to output stream
-      void write (T data)
-      {
-        typedef typename PrintType<T>::Type PT;
-        if(counter%numPerLine==0) s << indent;
-        else s << " ";
-        s << (PT) data;
-        counter++;
-        if (counter%numPerLine==0) s << "\n";
       }
 
       //! finish output; writes end tag
@@ -107,6 +127,32 @@ namespace Dune
       }
 
     private:
+      //! write one double data element to output stream
+      void writeDouble (double data) final
+      { write_(data); }
+      //! write one float data element to output stream
+      void writeFloat (float data) final
+      { write_(data); }
+      //! write one unsigned int data element to output stream
+      void writeInt (int data) final
+      { write_(data); }
+      //! write one int data element to output stream
+      void writeUInt (unsigned int data) final
+      { write_(data); }
+
+      template<class T>
+      void write_(T data)
+      {
+        typedef typename PrintType<T>::Type PT;
+        if(counter%numPerLine==0) s << indent;
+        else s << " ";
+        const auto original_precision = std::cout.precision();
+        s << std::setprecision(std::numeric_limits<PT>::digits10) << (PT) data;
+        std::cout.precision(original_precision);
+        counter++;
+        if (counter%numPerLine==0) s << "\n";
+      }
+
       std::ostream& s;
       int counter;
       int numPerLine;
@@ -114,8 +160,7 @@ namespace Dune
     };
 
     //! a streaming writer for data array tags, uses binary inline format
-    template<class T>
-    class BinaryDataArrayWriter : public DataArrayWriter<T>
+    class BinaryDataArrayWriter : public DataArrayWriter
     {
     public:
       //! make a new data array writer
@@ -130,11 +175,10 @@ namespace Dune
        *                  for the actual data.
        */
       BinaryDataArrayWriter(std::ostream& theStream, std::string name,
-                            int ncomps, int nitems, const Indent& indent_)
-        : s(theStream), b64(theStream), indent(indent_)
+                            int ncomps, int nitems, const Indent& indent_, Precision prec)
+        : DataArrayWriter(prec), s(theStream), b64(theStream), indent(indent_)
       {
-        TypeName<T> tn;
-        s << indent << "<DataArray type=\"" << tn() << "\" "
+        s << indent << "<DataArray type=\"" << typeName(prec) << "\" "
           << "Name=\"" << name << "\" ";
         s << "NumberOfComponents=\"" << ncomps << "\" ";
         s << "format=\"binary\">\n";
@@ -142,15 +186,9 @@ namespace Dune
         // write indentation for the data chunk
         s << indent+1;
         // store size, needs to be exactly 32 bit
-        std::uint32_t size = ncomps*nitems*sizeof(T);
+        std::uint32_t size = ncomps*nitems*typeSize(prec);
         b64.write(size);
         b64.flush();
-      }
-
-      //! write one data element to output stream
-      void write (T data)
-      {
-        b64.write(data);
       }
 
       //! finish output; writes end tag
@@ -164,14 +202,33 @@ namespace Dune
       }
 
     private:
+      //! write one double data element to output stream
+      void writeDouble (double data) final
+      { write_(data); }
+      //! write one float data element to output stream
+      void writeFloat (float data) final
+      { write_(data); }
+      //! write one unsigned int data element to output stream
+      void writeInt (int data) final
+      { write_(data); }
+      //! write one int data element to output stream
+      void writeUInt (unsigned int data) final
+      { write_(data); }
+
+      //! write one data element to output stream
+      template<class T>
+      void write_(T data)
+      {
+        b64.write(data);
+      }
+
       std::ostream& s;
       Base64Stream b64;
       const Indent& indent;
     };
 
     //! a streaming writer for data array tags, uses appended raw format
-    template<class T>
-    class AppendedRawDataArrayWriter : public DataArrayWriter<T>
+    class AppendedRawDataArrayWriter : public DataArrayWriter
     {
     public:
       //! make a new data array writer
@@ -189,27 +246,30 @@ namespace Dune
        */
       AppendedRawDataArrayWriter(std::ostream& s, std::string name,
                                  int ncomps, unsigned nitems, unsigned& offset,
-                                 const Indent& indent)
+                                 const Indent& indent, Precision prec)
+      : DataArrayWriter(prec)
       {
-        TypeName<T> tn;
-        s << indent << "<DataArray type=\"" << tn() << "\" "
+        s << indent << "<DataArray type=\"" << typeName(prec) << "\" "
           << "Name=\"" << name << "\" ";
         s << "NumberOfComponents=\"" << ncomps << "\" ";
         s << "format=\"appended\" offset=\""<< offset << "\" />\n";
         offset += 4; // header
-        offset += ncomps*nitems*sizeof(T);
+        offset += ncomps*nitems*typeSize(prec);
       }
-
-      //! write one data element to output stream (noop)
-      void write (T) { }
 
       //! whether calls to write may be skipped
       bool writeIsNoop() const { return true; }
+
+    private:
+      //! write one data element to output stream (noop)
+      void writeDouble (double data) final {}
+      void writeFloat (float data) final {}
+      void writeInt (int data) final {}
+      void writeUInt (unsigned int data) final {}
     };
 
     //! a streaming writer for data array tags, uses appended base64 format
-    template<class T>
-    class AppendedBase64DataArrayWriter : public DataArrayWriter<T>
+    class AppendedBase64DataArrayWriter : public DataArrayWriter
     {
     public:
       //! make a new data array writer
@@ -227,25 +287,29 @@ namespace Dune
        */
       AppendedBase64DataArrayWriter(std::ostream& s, std::string name,
                                     int ncomps, unsigned nitems,
-                                    unsigned& offset, const Indent& indent)
+                                    unsigned& offset, const Indent& indent, Precision prec)
+      : DataArrayWriter(prec)
       {
-        TypeName<T> tn;
-        s << indent << "<DataArray type=\"" << tn() << "\" "
+        s << indent << "<DataArray type=\"" << typeName(prec) << "\" "
           << "Name=\"" << name << "\" ";
         s << "NumberOfComponents=\"" << ncomps << "\" ";
         s << "format=\"appended\" offset=\""<< offset << "\" />\n";
         offset += 8; // header
-        unsigned bytes = ncomps*nitems*sizeof(T);
+        std::size_t bytes = ncomps*nitems*typeSize(prec);
         offset += bytes/3*4;
         if(bytes%3 != 0)
           offset += 4;
       }
 
-      //! write one data element to output stream (noop)
-      void write (T) { }
-
       //! whether calls to write may be skipped
       bool writeIsNoop() const { return true; }
+
+    private:
+      //! write one data element to output stream (noop)
+      void writeDouble (double data) final {}
+      void writeFloat (float data) final {}
+      void writeInt (int data) final {}
+      void writeUInt (unsigned int data) final {}
     };
 
     //////////////////////////////////////////////////////////////////////
@@ -254,8 +318,7 @@ namespace Dune
     //
 
     //! a streaming writer for appended data array tags, uses base64 format
-    template<class T>
-    class NakedBase64DataArrayWriter : public DataArrayWriter<T>
+    class NakedBase64DataArrayWriter : public DataArrayWriter
     {
     public:
       //! make a new data array writer
@@ -266,28 +329,41 @@ namespace Dune
        *                  point data.
        */
       NakedBase64DataArrayWriter(std::ostream& theStream, int ncomps,
-                                 int nitems)
-        : b64(theStream)
+                                 int nitems, Precision prec)
+        : DataArrayWriter(prec), b64(theStream)
       {
         // store size
-        std::uint32_t size = ncomps*nitems*sizeof(T);
+        std::uint32_t size = ncomps*nitems*typeSize(prec);
         b64.write(size);
         b64.flush();
       }
 
+    private:
+      //! write one double data element to output stream
+      void writeDouble (double data) final
+      { write_(data); }
+      //! write one float data element to output stream
+      void writeFloat (float data) final
+      { write_(data); }
+      //! write one unsigned int data element to output stream
+      void writeInt (int data) final
+      { write_(data); }
+      //! write one int data element to output stream
+      void writeUInt (unsigned int data) final
+      { write_(data); }
+
       //! write one data element to output stream
-      void write (T data)
+      template<class T>
+      void write_(T data)
       {
-        b64.write(data);
+          b64.write(data);
       }
 
-    private:
       Base64Stream b64;
     };
 
     //! a streaming writer for appended data arrays, uses raw format
-    template<class T>
-    class NakedRawDataArrayWriter : public DataArrayWriter<T>
+    class NakedRawDataArrayWriter : public DataArrayWriter
     {
       RawStream s;
 
@@ -300,14 +376,29 @@ namespace Dune
        *                  point data.
        */
       NakedRawDataArrayWriter(std::ostream& theStream, int ncomps,
-                              int nitems)
-        : s(theStream)
+                              int nitems, Precision prec)
+        : DataArrayWriter(prec), s(theStream)
       {
-        s.write((unsigned int)(ncomps*nitems*sizeof(T)));
+        s.write((unsigned int)(ncomps*nitems*typeSize(prec)));
       }
 
+    private:
+      //! write one double data element to output stream
+      void writeDouble (double data) final
+      { write_(data); }
+      //! write one float data element to output stream
+      void writeFloat (float data) final
+      { write_(data); }
+      //! write one unsigned int data element to output stream
+      void writeInt (int data) final
+      { write_(data); }
+      //! write one int data element to output stream
+      void writeUInt (unsigned int data) final
+      { write_(data); }
+
       //! write one data element to output stream
-      void write (T data)
+      template<class T>
+      void write_(T data)
       {
         s.write(data);
       }
@@ -398,28 +489,30 @@ namespace Dune
        * \param indent Indentation to use.  This is use as-is for the header
        *               and trailer lines, but increase by one level for the
        *               actual data.
+       * \param prec   the precision type of the output
        *
        * The should never be more than one DataArrayWriter on the same stream
        * around.  The returned object should be freed with delete.
        */
-      template<typename T>
-      DataArrayWriter<T>* make(const std::string& name, unsigned ncomps,
-                               unsigned nitems, const Indent& indent) {
+      DataArrayWriter* make(const std::string& name, unsigned ncomps,
+                            unsigned nitems, const Indent& indent,
+                            Precision prec)
+      {
         switch(phase) {
         case main :
           switch(type) {
           case ascii :
-            return new AsciiDataArrayWriter<T>(stream, name, ncomps, indent);
+            return new AsciiDataArrayWriter(stream, name, ncomps, indent, prec);
           case base64 :
-            return new BinaryDataArrayWriter<T>(stream, name, ncomps, nitems,
-                                                indent);
+            return new BinaryDataArrayWriter(stream, name, ncomps, nitems,
+                                             indent, prec);
           case appendedraw :
-            return new AppendedRawDataArrayWriter<T>(stream, name, ncomps,
-                                                     nitems, offset, indent);
+            return new AppendedRawDataArrayWriter(stream, name, ncomps,
+                                                  nitems, offset, indent, prec);
           case appendedbase64 :
-            return new AppendedBase64DataArrayWriter<T>(stream, name, ncomps,
-                                                        nitems, offset,
-                                                        indent);
+            return new AppendedBase64DataArrayWriter(stream, name, ncomps,
+                                                     nitems, offset,
+                                                     indent, prec);
           }
           break;
         case appended :
@@ -428,9 +521,9 @@ namespace Dune
           case base64 :
             break; // invlid in appended mode
           case appendedraw :
-            return new NakedRawDataArrayWriter<T>(stream, ncomps, nitems);
+            return new NakedRawDataArrayWriter(stream, ncomps, nitems, prec);
           case appendedbase64 :
-            return new NakedBase64DataArrayWriter<T>(stream, ncomps, nitems);
+            return new NakedBase64DataArrayWriter(stream, ncomps, nitems, prec);
           }
           break;
         }

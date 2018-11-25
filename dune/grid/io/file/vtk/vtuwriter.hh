@@ -48,8 +48,8 @@ namespace Dune {
          // dump cell data (optional)
          writer.beginCellData();
          for(each cell data field) {
-           shared_ptr<DataArrayWriter<T> > arraywriter
-             (writer.makeArrayWriter(field.name, field.ncomps, ncells));
+           shared_ptr<DataArrayWriter> arraywriter
+             (writer.makeArrayWriter(field.name, field.ncomps, ncells, precision));
            // iterate over the points and write data for each
          }
          writer.endCellData();
@@ -57,8 +57,8 @@ namespace Dune {
          // dump point data (optional)
          writer.beginPointData();
          for(each point data field) {
-           shared_ptr<DataArrayWriter<T> > arraywriter
-             (writer.makeArrayWriter(field.name, field.ncomps, npoints));
+           shared_ptr<DataArrayWriter> arraywriter
+             (writer.makeArrayWriter(field.name, field.ncomps, npoints, precision));
            // iterate over the points and write data for each
          }
          writer.endPointData();
@@ -66,8 +66,8 @@ namespace Dune {
          // dump point coordinates
          writer.beginPoints();
          {
-           shared_ptr<DataArrayWriter<float> > arraywriter
-             (writer.makeArrayWriter("Coordinates", 3, npoints));
+           shared_ptr<DataArrayWriter> arraywriter
+             (writer.makeArrayWriter("Coordinates", 3, npoints, precision));
            // iterate over the points and write data for each
          }
          writer.endPoints();
@@ -75,18 +75,18 @@ namespace Dune {
          // dump cells
          writer.beginCells();
          { // connectivity
-           shared_ptr<DataArrayWriter<int> > arraywriter
-             (writer.makeArrayWriter("connectivity", 1, ncorners));
+           shared_ptr<DataArrayWriter> arraywriter
+             (writer.makeArrayWriter("connectivity", 1, ncorners, precision));
            // iterate over the cells and write data for each
          }
          { // connectivity
-           shared_ptr<DataArrayWriter<int> > arraywriter
-             (writer.makeArrayWriter("offsets", 1, ncells));
+           shared_ptr<DataArrayWriter> arraywriter
+             (writer.makeArrayWriter("offsets", 1, ncells, precision));
            // iterate over the cells and write data for each
          }
          if(fileType == unstructuredGrid) { // types
-           shared_ptr<DataArrayWriter<unsigned char> > arraywriter
-             (writer.makeArrayWriter("types", 1, ncells));
+           shared_ptr<DataArrayWriter> arraywriter
+             (writer.makeArrayWriter("types", 1, ncells, precision));
            // iterate over the cells and write data for each
          }
          writer.endCells();
@@ -375,10 +375,10 @@ namespace Dune {
        * same VTUWriter around.  The returned object should be freed with
        * delete.
        */
-      template<typename T>
-      DataArrayWriter<T>* makeArrayWriter(const std::string& name,
-                                          unsigned ncomps, unsigned nitems) {
-        return factory.make<T>(name, ncomps, nitems, indent);
+      DataArrayWriter* makeArrayWriter(const std::string& name,
+                                       unsigned ncomps, unsigned nitems,
+                                       Precision prec) {
+        return factory.make(name, ncomps, nitems, indent, prec);
       }
     };
 
