@@ -324,31 +324,37 @@ namespace Dune
     //! map precision to VTK type name
     inline std::string toString(Precision p)
     {
-      if (p == Precision::float32)
-        return "Float32";
-      else if (p == Precision::float64)
-        return "Float64";
-      else if (p == Precision::uint32)
-        return "UInt32";
-      else if (p == Precision::int32)
-        return "Int32";
-      else
-        DUNE_THROW(Dune::NotImplemented, "Unknown precision type");
+      switch(p)
+      {
+        case Precision::float32:
+          return "Float32";
+        case Precision::float64:
+          return "Float64";
+        case Precision::uint32:
+          return "UInt32";
+        case Precision::int32:
+          return "Int32";
+        default:
+          DUNE_THROW(Dune::NotImplemented, "Unknown precision type");
+      }
     }
 
     //! map precision to byte size
     inline std::size_t typeSize(Precision p)
     {
-      if (p == Precision::float32)
-        return sizeof(float);
-      else if (p == Precision::float64)
-        return sizeof(double);
-      else if (p == Precision::uint32)
-        return sizeof(unsigned int);
-      else if (p == Precision::int32)
-        return sizeof(int);
-      else
-        DUNE_THROW(Dune::NotImplemented, "Unknown precision type");
+      switch(p)
+      {
+        case Precision::float32:
+          return sizeof(float);
+        case Precision::float64:
+          return sizeof(double);
+        case Precision::uint32:
+          return sizeof(unsigned int);
+        case Precision::int32:
+          return sizeof(int);
+        default:
+          DUNE_THROW(Dune::NotImplemented, "Unknown precision type");
+      }
     }
 
     //! Descriptor struct for VTK fields

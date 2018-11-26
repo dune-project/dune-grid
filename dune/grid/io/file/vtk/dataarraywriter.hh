@@ -64,16 +64,19 @@ namespace Dune
       template<class T>
       void write(T data)
       {
-        if (prec == Precision::float32)
-          writeFloat(data);
-        else if (prec == Precision::float64)
-          writeDouble(data);
-        else if (prec == Precision::uint32)
-          writeUInt(data);
-        else if (prec == Precision::int32)
-          writeInt(data);
-        else
-          DUNE_THROW(Dune::NotImplemented, "Unknown precision type");
+        switch(prec)
+        {
+          case Precision::float32:
+            writeFloat(data); break;
+          case Precision::float64:
+            writeDouble(data); break;
+          case Precision::uint32:
+            writeUInt(data); break;
+          case Precision::int32:
+            writeInt(data); break;
+          default:
+            DUNE_THROW(Dune::NotImplemented, "Unknown precision type");
+        }
       }
 
       //! whether calls to write may be skipped
