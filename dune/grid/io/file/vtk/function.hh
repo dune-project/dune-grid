@@ -118,20 +118,20 @@ namespace Dune
     using Base::dim;
 
     //! return number of components
-    virtual int ncomps () const
+    int ncomps () const override
     {
       return 1;
     }
 
     //! evaluate
-    virtual double evaluate (int, const Entity& e,
-                             const Dune::FieldVector<ctype,dim>&) const
+    double evaluate (int, const Entity& e,
+                     const Dune::FieldVector<ctype,dim>&) const override
     {
       return v[mapper.index(e)*ncomps_+mycomp_];
     }
 
     //! get name
-    virtual std::string name () const
+    std::string name () const override
     {
       return s;
     }
@@ -226,14 +226,14 @@ namespace Dune
     using Base::dim;
 
     //! return number of components
-    virtual int ncomps () const
+    int ncomps () const override
     {
       return 1;
     }
 
     //! evaluate
-    virtual double evaluate (int comp, const Entity& e,
-                             const Dune::FieldVector<ctype,dim>& xi) const
+    double evaluate (int comp, const Entity& e,
+                     const Dune::FieldVector<ctype,dim>& xi) const override
     {
       const unsigned int dim = Entity::mydimension;
       const unsigned int nVertices = e.subEntities(dim);
@@ -248,7 +248,7 @@ namespace Dune
     }
 
     //! get name
-    virtual std::string name () const
+    std::string name () const override
     {
       return s;
     }
