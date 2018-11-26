@@ -111,7 +111,7 @@ namespace Dune
                            int ncomps, const Indent& indent_, Precision prec)
         : DataArrayWriter(prec), s(theStream), counter(0), numPerLine(12), indent(indent_)
       {
-        s << indent << "<DataArray type=\"" << typeName(prec) << "\" "
+        s << indent << "<DataArray type=\"" << toString(prec) << "\" "
           << "Name=\"" << name << "\" ";
         s << "NumberOfComponents=\"" << ncomps << "\" ";
         s << "format=\"ascii\">\n";
@@ -178,7 +178,7 @@ namespace Dune
                             int ncomps, int nitems, const Indent& indent_, Precision prec)
         : DataArrayWriter(prec), s(theStream), b64(theStream), indent(indent_)
       {
-        s << indent << "<DataArray type=\"" << typeName(prec) << "\" "
+        s << indent << "<DataArray type=\"" << toString(prec) << "\" "
           << "Name=\"" << name << "\" ";
         s << "NumberOfComponents=\"" << ncomps << "\" ";
         s << "format=\"binary\">\n";
@@ -249,7 +249,7 @@ namespace Dune
                                  const Indent& indent, Precision prec)
       : DataArrayWriter(prec)
       {
-        s << indent << "<DataArray type=\"" << typeName(prec) << "\" "
+        s << indent << "<DataArray type=\"" << toString(prec) << "\" "
           << "Name=\"" << name << "\" ";
         s << "NumberOfComponents=\"" << ncomps << "\" ";
         s << "format=\"appended\" offset=\""<< offset << "\" />\n";
@@ -290,7 +290,7 @@ namespace Dune
                                     unsigned& offset, const Indent& indent, Precision prec)
       : DataArrayWriter(prec)
       {
-        s << indent << "<DataArray type=\"" << typeName(prec) << "\" "
+        s << indent << "<DataArray type=\"" << toString(prec) << "\" "
           << "Name=\"" << name << "\" ";
         s << "NumberOfComponents=\"" << ncomps << "\" ";
         s << "format=\"appended\" offset=\""<< offset << "\" />\n";

@@ -204,7 +204,7 @@ namespace Dune {
        */
       void addArray(const std::string& name, unsigned ncomps, Precision prec) {
         stream << indent << "<PDataArray"
-               << " type=\"" << typeName(prec) << "\""
+               << " type=\"" << toString(prec) << "\""
                << " Name=\"" << name << "\""
                << " NumberOfComponents=\"" << ncomps << "\"/>\n";
       }

@@ -322,7 +322,7 @@ namespace Dune
     };
 
     //! map precision to VTK type name
-    inline std::string typeName(Precision p)
+    inline std::string toString(Precision p)
     {
       if (p == Precision::float32)
         return "Float32";
