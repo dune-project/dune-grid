@@ -8,6 +8,7 @@
 #include <ostream>
 #include <string>
 #include <iomanip>
+#include <cstdint>
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/indent.hh>
@@ -67,13 +68,13 @@ namespace Dune
         switch(prec)
         {
           case Precision::float32:
-            writeFloat(data); break;
+            writeFloat32(data); break;
           case Precision::float64:
-            writeDouble(data); break;
+            writeFloat64(data); break;
           case Precision::uint32:
-            writeUInt(data); break;
+            writeUInt32(data); break;
           case Precision::int32:
-            writeInt(data); break;
+            writeInt32(data); break;
           default:
             DUNE_THROW(Dune::NotImplemented, "Unknown precision type");
         }
@@ -86,13 +87,13 @@ namespace Dune
 
     private:
       //! write one data element as float
-      virtual void writeFloat (float data) = 0;
+      virtual void writeFloat32 (float data) = 0;
       //! write one data element as double
-      virtual void writeDouble (double data) = 0;
+      virtual void writeFloat64 (double data) = 0;
       //! write one data element as integer
-      virtual void writeInt (int data) = 0;
+      virtual void writeInt32 (std::int32_t data) = 0;
       //! write one data element as unsigned integer
-      virtual void writeUInt (unsigned int data) = 0;
+      virtual void writeUInt32 (std::uint32_t data) = 0;
 
       Precision prec;
     };
@@ -131,16 +132,16 @@ namespace Dune
 
     private:
       //! write one double data element to output stream
-      void writeDouble (double data) final
+      void writeFloat64 (double data) final
       { write_(data); }
       //! write one float data element to output stream
-      void writeFloat (float data) final
+      void writeFloat32 (float data) final
       { write_(data); }
       //! write one unsigned int data element to output stream
-      void writeInt (int data) final
+      void writeInt32 (std::int32_t data) final
       { write_(data); }
       //! write one int data element to output stream
-      void writeUInt (unsigned int data) final
+      void writeUInt32 (std::uint32_t data) final
       { write_(data); }
 
       template<class T>
@@ -206,16 +207,16 @@ namespace Dune
 
     private:
       //! write one double data element to output stream
-      void writeDouble (double data) final
+      void writeFloat64 (double data) final
       { write_(data); }
       //! write one float data element to output stream
-      void writeFloat (float data) final
+      void writeFloat32 (float data) final
       { write_(data); }
       //! write one unsigned int data element to output stream
-      void writeInt (int data) final
+      void writeInt32 (std::int32_t data) final
       { write_(data); }
       //! write one int data element to output stream
-      void writeUInt (unsigned int data) final
+      void writeUInt32 (std::uint32_t data) final
       { write_(data); }
 
       //! write one data element to output stream
@@ -265,10 +266,10 @@ namespace Dune
 
     private:
       //! write one data element to output stream (noop)
-      void writeDouble (double data) final {}
-      void writeFloat (float data) final {}
-      void writeInt (int data) final {}
-      void writeUInt (unsigned int data) final {}
+      void writeFloat64 (double data) final {}
+      void writeFloat32 (float data) final {}
+      void writeInt32 (std::int32_t data) final {}
+      void writeUInt32 (std::uint32_t data) final {}
     };
 
     //! a streaming writer for data array tags, uses appended base64 format
@@ -309,10 +310,10 @@ namespace Dune
 
     private:
       //! write one data element to output stream (noop)
-      void writeDouble (double data) final {}
-      void writeFloat (float data) final {}
-      void writeInt (int data) final {}
-      void writeUInt (unsigned int data) final {}
+      void writeFloat64 (double data) final {}
+      void writeFloat32 (float data) final {}
+      void writeInt32 (std::int32_t data) final {}
+      void writeUInt32 (std::uint32_t data) final {}
     };
 
     //////////////////////////////////////////////////////////////////////
@@ -343,16 +344,16 @@ namespace Dune
 
     private:
       //! write one double data element to output stream
-      void writeDouble (double data) final
+      void writeFloat64 (double data) final
       { write_(data); }
       //! write one float data element to output stream
-      void writeFloat (float data) final
+      void writeFloat32 (float data) final
       { write_(data); }
       //! write one unsigned int data element to output stream
-      void writeInt (int data) final
+      void writeInt32 (std::int32_t data) final
       { write_(data); }
       //! write one int data element to output stream
-      void writeUInt (unsigned int data) final
+      void writeUInt32 (std::uint32_t data) final
       { write_(data); }
 
       //! write one data element to output stream
@@ -387,16 +388,16 @@ namespace Dune
 
     private:
       //! write one double data element to output stream
-      void writeDouble (double data) final
+      void writeFloat64 (double data) final
       { write_(data); }
       //! write one float data element to output stream
-      void writeFloat (float data) final
+      void writeFloat32 (float data) final
       { write_(data); }
       //! write one unsigned int data element to output stream
-      void writeInt (int data) final
+      void writeInt32 (std::int32_t data) final
       { write_(data); }
       //! write one int data element to output stream
-      void writeUInt (unsigned int data) final
+      void writeUInt32 (std::uint32_t data) final
       { write_(data); }
 
       //! write one data element to output stream
