@@ -317,6 +317,7 @@ namespace Dune
      */
     enum class Precision {
       int32,
+      uint8,
       uint32,
       float32,
       float64
@@ -333,6 +334,8 @@ namespace Dune
           return "Float64";
         case Precision::uint32:
           return "UInt32";
+        case Precision::uint8:
+          return "UInt8";
         case Precision::int32:
           return "Int32";
         default:
@@ -351,6 +354,8 @@ namespace Dune
           return sizeof(double);
         case Precision::uint32:
           return sizeof(std::uint_least32_t);
+        case Precision::uint8:
+          return sizeof(std::uint_least8_t);
         case Precision::int32:
           return sizeof(std::int_least32_t);
         default:
