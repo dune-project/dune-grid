@@ -49,6 +49,14 @@
   grid implementations will need to update their implementations of
   `GridFactory::createGrid`.
 
+- The `VTKWriter`s now support custom output data precision for functions
+  (via the provided `FieldInfo`), `VTKFunction`s  (via a new virtual interface method `precision()`),
+  and coordinates (via an argument to the writer's constructor) that can be
+  chosen at runtime. Any field can now choose between VTK's `Float32`, `Float64`,
+  `Int32`, and `UInt32`, represented as `Dune::VTK::Precision::float32`/`float64`/`int32`/`uint32`,
+  the `DataArrayWriter` selects the correct type at runtime. The default for
+  functions and coordinate is `Float32` as before.
+
 # Release 2.6
 
 - The deprecated `EntityPointer` has been removed completely and `EntityIterator`
