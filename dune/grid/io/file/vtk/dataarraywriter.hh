@@ -73,6 +73,8 @@ namespace Dune
             writeFloat64(data); break;
           case Precision::uint32:
             writeUInt32(data); break;
+          case Precision::uint8:
+            writeUInt8(data); break;
           case Precision::int32:
             writeInt32(data); break;
           default:
@@ -92,6 +94,8 @@ namespace Dune
       virtual void writeFloat64 (double data) = 0;
       //! write one data element as integer
       virtual void writeInt32 (std::int32_t data) = 0;
+      //! write one data element as unsigned integer
+      virtual void writeUInt8 (std::uint8_t data) = 0;
       //! write one data element as unsigned integer
       virtual void writeUInt32 (std::uint32_t data) = 0;
 
@@ -137,11 +141,14 @@ namespace Dune
       //! write one float data element to output stream
       void writeFloat32 (float data) final
       { write_(data); }
-      //! write one unsigned int data element to output stream
+      //! write one int data element to output stream
       void writeInt32 (std::int32_t data) final
       { write_(data); }
-      //! write one int data element to output stream
+      //! write one unsigned int data element to output stream
       void writeUInt32 (std::uint32_t data) final
+      { write_(data); }
+      //! write one unsigned int data element to output stream
+      void writeUInt8 (std::uint8_t data) final
       { write_(data); }
 
       template<class T>
@@ -212,11 +219,14 @@ namespace Dune
       //! write one float data element to output stream
       void writeFloat32 (float data) final
       { write_(data); }
-      //! write one unsigned int data element to output stream
+      //! write one int data element to output stream
       void writeInt32 (std::int32_t data) final
       { write_(data); }
-      //! write one int data element to output stream
+      //! write one unsigned int data element to output stream
       void writeUInt32 (std::uint32_t data) final
+      { write_(data); }
+      //! write one unsigned int data element to output stream
+      void writeUInt8 (std::uint8_t data) final
       { write_(data); }
 
       //! write one data element to output stream
@@ -270,6 +280,7 @@ namespace Dune
       void writeFloat32 (float data) final {}
       void writeInt32 (std::int32_t data) final {}
       void writeUInt32 (std::uint32_t data) final {}
+      void writeUInt8 (std::uint8_t data) final {}
     };
 
     //! a streaming writer for data array tags, uses appended base64 format
@@ -314,6 +325,7 @@ namespace Dune
       void writeFloat32 (float data) final {}
       void writeInt32 (std::int32_t data) final {}
       void writeUInt32 (std::uint32_t data) final {}
+      void writeUInt8 (std::uint8_t data) final {}
     };
 
     //////////////////////////////////////////////////////////////////////
@@ -349,11 +361,14 @@ namespace Dune
       //! write one float data element to output stream
       void writeFloat32 (float data) final
       { write_(data); }
-      //! write one unsigned int data element to output stream
+      //! write one int data element to output stream
       void writeInt32 (std::int32_t data) final
       { write_(data); }
-      //! write one int data element to output stream
+      //! write one unsigned int data element to output stream
       void writeUInt32 (std::uint32_t data) final
+      { write_(data); }
+      //! write one unsigned int data element to output stream
+      void writeUInt8 (std::uint8_t data) final
       { write_(data); }
 
       //! write one data element to output stream
@@ -393,11 +408,14 @@ namespace Dune
       //! write one float data element to output stream
       void writeFloat32 (float data) final
       { write_(data); }
-      //! write one unsigned int data element to output stream
+      //! write one int data element to output stream
       void writeInt32 (std::int32_t data) final
       { write_(data); }
-      //! write one int data element to output stream
+      //! write one unsigned int data element to output stream
       void writeUInt32 (std::uint32_t data) final
+      { write_(data); }
+      //! write one unsigned int data element to output stream
+      void writeUInt8 (std::uint8_t data) final
       { write_(data); }
 
       //! write one data element to output stream
