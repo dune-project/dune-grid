@@ -329,15 +329,15 @@ namespace Dune
       switch(p)
       {
         case Precision::float32:
-          return "Float32";
+          return TypeName<float>{}();
         case Precision::float64:
-          return "Float64";
+          return TypeName<double>{}();
         case Precision::uint32:
-          return "UInt32";
+          return TypeName<std::uint_least32_t>{}();
         case Precision::uint8:
-          return "UInt8";
+          return TypeName<std::uint_least8_t>{}();
         case Precision::int32:
-          return "Int32";
+          return TypeName<std::int_least32_t>{}();
         default:
           DUNE_THROW(Dune::NotImplemented, "Unknown precision type");
       }
