@@ -361,7 +361,7 @@ namespace Dune
     if (dim>1)
     {
       std::shared_ptr<VTK::DataArrayWriter> p3
-        (writer.makeArrayWriter("types", 1, ncells, VTK::Precision::uint32));
+        (writer.makeArrayWriter("types", 1, ncells, VTK::Precision::uint8));
       if(!p3->writeIsNoop())
         for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
         {

@@ -212,13 +212,13 @@ namespace Dune
 
       //! add this field to the given parallel writer
       virtual void addArray(PVTUWriter& writer) {
-        writer.addArray(name(), ncomps(), Precision::uint32);
+        writer.addArray(name(), ncomps(), Precision::int32);
       }
 
       //! start writing with the given writer
       virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
         arraywriter.reset(writer.makeArrayWriter(name(), ncomps(),
-                                                 nitems, Precision::uint32));
+                                                 nitems, Precision::int32));
         if(arraywriter->writeIsNoop())
           return false;
 
@@ -269,13 +269,13 @@ namespace Dune
 
       //! add this field to the given parallel writer
       virtual void addArray(PVTUWriter& writer) {
-        writer.addArray(name(), ncomps(), Precision::uint32);
+        writer.addArray(name(), ncomps(), Precision::int32);
       }
 
       //! start writing with the given writer
       virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
         arraywriter.reset(writer.makeArrayWriter(name(), ncomps(),
-                                                 nitems, Precision::float32));
+                                                 nitems, Precision::int32));
         counter = 0;
         return !arraywriter->writeIsNoop();
       }
@@ -310,13 +310,13 @@ namespace Dune
 
       //! add this field to the given parallel writer
       virtual void addArray(PVTUWriter& writer) {
-        writer.addArray(name(), ncomps(), Precision::uint32);
+        writer.addArray(name(), ncomps(), Precision::int32);
       }
 
       //! start writing with the given writer
       virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
         arraywriter.reset(writer.makeArrayWriter(name(), ncomps(),
-                                                 nitems, Precision::uint32));
+                                                 nitems, Precision::int32));
         offset = 0;
         return !arraywriter->writeIsNoop();
       }
@@ -349,13 +349,13 @@ namespace Dune
 
       //! add this field to the given parallel writer
       virtual void addArray(PVTUWriter& writer) {
-        writer.addArray(name(), ncomps(), Precision::uint32);
+        writer.addArray(name(), ncomps(), Precision::uint8);
       }
 
       //! start writing with the given writer
       virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
         arraywriter.reset(writer.makeArrayWriter
-                            ( name(), ncomps(), nitems, Precision::uint32));
+                            ( name(), ncomps(), nitems, Precision::uint8));
         return !arraywriter->writeIsNoop();
       }
       //! write at the given position
