@@ -7,6 +7,7 @@
 #include <limits>
 #include <sstream>
 #include <string>
+#include <cstdint>
 
 #include <dune/common/exceptions.hh>
 #include <dune/geometry/type.hh>
@@ -349,9 +350,9 @@ namespace Dune
         case Precision::float64:
           return sizeof(double);
         case Precision::uint32:
-          return sizeof(unsigned int);
+          return sizeof(std::uint_least32_t);
         case Precision::int32:
-          return sizeof(int);
+          return sizeof(std::int_least32_t);
         default:
           DUNE_THROW(Dune::NotImplemented, "Unknown precision type");
       }
