@@ -9,6 +9,7 @@
 #include <string>
 #include <cstdint>
 
+#include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/geometry/type.hh>
 #include <dune/common/typetraits.hh>
@@ -122,7 +123,7 @@ namespace Dune
      * \tparam T The type whose VTK name is requested
      */
     template<typename T>
-    class TypeName {
+    class DUNE_DEPRECATED_MSG("TypeName will be removed after Dune 2.7. Look at VTK::toString and VTK::Precision for substitution.") TypeName {
       static std::string getString() {
         static const unsigned int_sizes[] = { 8, 16, 32, 64, 0 };
         static const unsigned float_sizes[] = { 32, 64, 0 };
