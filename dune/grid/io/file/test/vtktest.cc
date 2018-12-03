@@ -103,9 +103,11 @@ int doWrite( Dune::VTKChecker& vtkChecker, const std::string& gridViewName, cons
   const typename GridView :: IndexSet &is = gridView.indexSet();
   std::vector<int> vertexdata(is.size(dim),dim);
   std::vector<int> celldata(is.size(0),0);
+  std::vector<double> celldoubledata(is.size(0), 1.00000000000346e-12);
 
   vtk.addVertexData(vertexdata,"vertexData");
   vtk.addCellData(celldata,"cellData");
+  vtk.addCellData(celldoubledata, "cellData_double", 1, Dune::VTK::Precision::float64);
 
   vtk.addVertexData(std::make_shared< VTKVectorFunction<GridView> >("vertex"));
   vtk.addCellData(std::make_shared< VTKVectorFunction<GridView> >("cell"));

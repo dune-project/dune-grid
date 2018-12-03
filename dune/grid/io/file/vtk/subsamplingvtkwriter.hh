@@ -71,12 +71,14 @@ namespace Dune
      * @param coerceToSimplex_ Set this to true to always triangulate elements
      *                         into simplices, even where it's not necessary
      *                         (i.e. for hypercubes).
+     * @param coordPrecision   the precision in which to write out coordinates
      *
      * The datamode is always nonconforming.
      */
     explicit SubsamplingVTKWriter (const GridView &gridView,
-                                   Dune::RefinementIntervals intervals_, bool coerceToSimplex_ = false)
-        : Base(gridView, VTK::nonconforming)
+                                   Dune::RefinementIntervals intervals_, bool coerceToSimplex_ = false,
+                                   VTK::Precision coordPrecision = VTK::Precision::float32)
+        : Base(gridView, VTK::nonconforming, coordPrecision)
         , intervals(intervals_), coerceToSimplex(coerceToSimplex_)
     {
       if(intervals_.intervals() < 1) {
@@ -156,8 +158,8 @@ namespace Dune
           case VTK::FieldInfo::Type::tensor:
             DUNE_THROW(NotImplemented,"VTK output for tensors not implemented yet");
           }
-        std::shared_ptr<VTK::DataArrayWriter<float> > p
-          (writer.makeArrayWriter<float>(f.name(), writecomps, nentries));
+        std::shared_ptr<VTK::DataArrayWriter> p
+          (writer.makeArrayWriter(f.name(), writecomps, nentries, fieldInfo.precision()));
         if(!p->writeIsNoop())
           for (Iterator eit = begin; eit!=end; ++eit)
           {
@@ -275,8 +277,8 @@ namespace Dune
   {
     writer.beginPoints();
 
-    std::shared_ptr<VTK::DataArrayWriter<float> > p
-      (writer.makeArrayWriter<float>("Coordinates", 3, nvertices));
+    std::shared_ptr<VTK::DataArrayWriter> p
+      (writer.makeArrayWriter("Coordinates", 3, nvertices, this->coordPrecision()));
     if(!p->writeIsNoop())
       for (CellIterator i=cellBegin(); i!=cellEnd(); ++i)
       {
@@ -308,8 +310,8 @@ namespace Dune
 
     // connectivity
     {
-      std::shared_ptr<VTK::DataArrayWriter<int> > p1
-        (writer.makeArrayWriter<int>("connectivity", 1, ncorners));
+      std::shared_ptr<VTK::DataArrayWriter> p1
+        (writer.makeArrayWriter("connectivity", 1, ncorners, VTK::Precision::int32));
       // The offset within the index numbering
       if(!p1->writeIsNoop()) {
         int offset = 0;
@@ -333,8 +335,8 @@ namespace Dune
 
     // offsets
     {
-      std::shared_ptr<VTK::DataArrayWriter<int> > p2
-        (writer.makeArrayWriter<int>("offsets", 1, ncells));
+      std::shared_ptr<VTK::DataArrayWriter> p2
+        (writer.makeArrayWriter("offsets", 1, ncells,  VTK::Precision::int32));
       if(!p2->writeIsNoop()) {
         // The offset into the connectivity array
         int offset = 0;
@@ -358,8 +360,8 @@ namespace Dune
     // types
     if (dim>1)
     {
-      std::shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
-        (writer.makeArrayWriter<unsigned char>("types", 1, ncells));
+      std::shared_ptr<VTK::DataArrayWriter> p3
+        (writer.makeArrayWriter("types", 1, ncells, VTK::Precision::uint8));
       if(!p3->writeIsNoop())
         for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
         {

@@ -33,18 +33,18 @@ namespace Dune {
          // dump cell data (optional)
          writer.beginCellData();
          for(each cell data field)
-           writer.addArray<T>(field.name, field.ncomps);
+           writer.addArray(field.name, field.ncomps, precision);
          writer.endCellData();
 
          // dump point data (optional)
          writer.beginPointData();
          for(each point data field)
-           writer.addArray<T>(field.name, field.ncomps);
+           writer.addArray(field.name, field.ncomps, precision);
          writer.endPointData();
 
          // dump point coordinates
          writer.beginPoints();
-         writer.addArray("Coordinates", 3);
+         writer.addArray("Coordinates", 3, precision);
          writer.endPoints();
 
          for(each serial piece)
@@ -200,12 +200,11 @@ namespace Dune {
        * \tparam T The datatype of the array.
        * \param name   Name of the array.
        * \param ncomps Number of components in each vector of the array.
+       * \param prec   The output precision of the data array
        */
-      template<typename T>
-      void addArray(const std::string& name, unsigned ncomps) {
-        TypeName<T> tn;
+      void addArray(const std::string& name, unsigned ncomps, Precision prec) {
         stream << indent << "<PDataArray"
-               << " type=\"" << tn() << "\""
+               << " type=\"" << toString(prec) << "\""
                << " Name=\"" << name << "\""
                << " NumberOfComponents=\"" << ncomps << "\"/>\n";
       }

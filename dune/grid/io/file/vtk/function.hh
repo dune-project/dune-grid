@@ -14,6 +14,7 @@
 #include <dune/geometry/multilineargeometry.hh>
 
 #include <dune/grid/common/mcmgmapper.hh>
+#include <dune/grid/io/file/vtk/common.hh>
 
 /** @file
     @author Peter Bastian, Christian Engwer
@@ -60,6 +61,10 @@ namespace Dune
     //! get name
     virtual std::string name () const = 0;
 
+    //! get output precision for the field
+    virtual VTK::Precision precision() const
+    { return VTK::Precision::float32; }
+
     //! virtual destructor
     virtual ~VTKFunction () {}
   };
@@ -102,6 +107,8 @@ namespace Dune
     //! index of the component of the field in the vector this function is
     //! responsible for
     int mycomp_;
+    //! precision with which to output the field
+    VTK::Precision prec_;
     //! mapper used to map elements to indices
     Mapper mapper;
 
@@ -111,22 +118,28 @@ namespace Dune
     using Base::dim;
 
     //! return number of components
-    virtual int ncomps () const
+    int ncomps () const override
     {
       return 1;
     }
 
     //! evaluate
-    virtual double evaluate (int, const Entity& e,
-                             const Dune::FieldVector<ctype,dim>&) const
+    double evaluate (int, const Entity& e,
+                     const Dune::FieldVector<ctype,dim>&) const override
     {
       return v[mapper.index(e)*ncomps_+mycomp_];
     }
 
     //! get name
-    virtual std::string name () const
+    std::string name () const override
     {
       return s;
+    }
+
+    //! get output precision for the field
+    VTK::Precision precision() const override
+    {
+      return prec_;
     }
 
     //! construct from a vector and a name
@@ -145,13 +158,15 @@ namespace Dune
      *               vector.
      * \param mycomp Number of the field component this function is
      *               responsible for.
+     * \param prec   the precision with which to output the field
      */
     P0VTKFunction(const GV &gv, const V &v_, const std::string &s_,
-                  int ncomps=1, int mycomp=0 )
+                  int ncomps=1, int mycomp=0, VTK::Precision prec = VTK::Precision::float32)
       : v( v_ ),
         s( s_ ),
         ncomps_(ncomps),
         mycomp_(mycomp),
+        prec_(prec),
         mapper( gv, mcmgElementLayout() )
     {
       if (v.size()!=(unsigned int)(mapper.size()*ncomps_))
@@ -200,6 +215,8 @@ namespace Dune
     //! index of the component of the field in the vector this function is
     //! responsible for
     int mycomp_;
+    //! precision with which to output the field
+    VTK::Precision prec_;
     //! mapper used to map elements to indices
     Mapper mapper;
 
@@ -209,14 +226,14 @@ namespace Dune
     using Base::dim;
 
     //! return number of components
-    virtual int ncomps () const
+    int ncomps () const override
     {
       return 1;
     }
 
     //! evaluate
-    virtual double evaluate (int comp, const Entity& e,
-                             const Dune::FieldVector<ctype,dim>& xi) const
+    double evaluate (int comp, const Entity& e,
+                     const Dune::FieldVector<ctype,dim>& xi) const override
     {
       const unsigned int dim = Entity::mydimension;
       const unsigned int nVertices = e.subEntities(dim);
@@ -231,9 +248,15 @@ namespace Dune
     }
 
     //! get name
-    virtual std::string name () const
+    std::string name () const override
     {
       return s;
+    }
+
+    //! get output precision for the field
+    VTK::Precision precision() const override
+    {
+      return prec_;
     }
 
     //! construct from a vector and a name
@@ -252,13 +275,15 @@ namespace Dune
      *               vector.
      * \param mycomp Number of the field component this function is
      *               responsible for.
+     * \param prec   the precision with which to output the field
      */
     P1VTKFunction(const GV& gv, const V &v_, const std::string &s_,
-                  int ncomps=1, int mycomp=0 )
+                  int ncomps=1, int mycomp=0, VTK::Precision prec = VTK::Precision::float32)
       : v( v_ ),
         s( s_ ),
         ncomps_(ncomps),
         mycomp_(mycomp),
+        prec_(prec),
         mapper( gv, mcmgVertexLayout() )
     {
       if (v.size()!=(unsigned int)(mapper.size()*ncomps_))

@@ -88,11 +88,13 @@ namespace Dune
     {
       typedef FunctionWriterBase<typename Func::Entity> Base;
       std::shared_ptr<const Func> func;
-      std::shared_ptr<DataArrayWriter<float> > arraywriter;
+      VTK::Precision precision_;
+      std::shared_ptr<DataArrayWriter> arraywriter;
 
     public:
-      VTKFunctionWriter(const std::shared_ptr<const Func>& func_)
-        : func(func_)
+        VTKFunctionWriter(const std::shared_ptr<const Func>& func_,
+                          VTK::Precision prec = VTK::Precision::float32)
+        : func(func_), precision_(prec)
       { }
 
       //! return name
@@ -106,13 +108,13 @@ namespace Dune
 
       //! add this field to the given parallel writer
       virtual void addArray(PVTUWriter& writer) {
-        writer.addArray<float>(name(), ncomps());
+        writer.addArray(name(), ncomps(), precision_);
       }
 
       //! start writing with the given writer
       virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
-        arraywriter.reset(writer.makeArrayWriter<float>(name(), ncomps(),
-                                                        nitems));
+        arraywriter.reset(writer.makeArrayWriter(name(), ncomps(),
+                                                 nitems, precision_));
         return !arraywriter->writeIsNoop();
       }
 
@@ -143,9 +145,13 @@ namespace Dune
     {
       typedef FunctionWriterBase<Cell> Base;
 
-      std::shared_ptr<DataArrayWriter<float> > arraywriter;
+      VTK::Precision precision_;
+      std::shared_ptr<DataArrayWriter> arraywriter;
 
     public:
+      explicit CoordinatesWriter(VTK::Precision prec = VTK::Precision::float32)
+      : precision_(prec)
+      {}
 
       //! return name
       virtual std::string name() const { return "Coordinates"; }
@@ -155,13 +161,13 @@ namespace Dune
 
       //! add this field to the given parallel writer
       virtual void addArray(PVTUWriter& writer) {
-        writer.addArray<float>(name(), ncomps());
+        writer.addArray(name(), ncomps(), precision_);
       }
 
       //! start writing with the given writer
       virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
-        arraywriter.reset(writer.makeArrayWriter<float>(name(), ncomps(),
-                                                        nitems));
+        arraywriter.reset(writer.makeArrayWriter(name(), ncomps(),
+                                                 nitems, precision_));
         return !arraywriter->writeIsNoop();
       }
       //! write at the given position
@@ -189,7 +195,7 @@ namespace Dune
       static const unsigned mydim = Base::Cell::mydimension;
 
       const IteratorFactory& factory;
-      std::shared_ptr<DataArrayWriter<unsigned> > arraywriter;
+      std::shared_ptr<DataArrayWriter> arraywriter;
       std::vector<unsigned> pointIndices;
 
     public:
@@ -206,13 +212,13 @@ namespace Dune
 
       //! add this field to the given parallel writer
       virtual void addArray(PVTUWriter& writer) {
-        writer.addArray<unsigned>(name(), ncomps());
+        writer.addArray(name(), ncomps(), Precision::int32);
       }
 
       //! start writing with the given writer
       virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
-        arraywriter.reset(writer.makeArrayWriter<unsigned>(name(), ncomps(),
-                                                           nitems));
+        arraywriter.reset(writer.makeArrayWriter(name(), ncomps(),
+                                                 nitems, Precision::int32));
         if(arraywriter->writeIsNoop())
           return false;
 
@@ -251,7 +257,7 @@ namespace Dune
     class NonConformingConnectivityWriter
       : public FunctionWriterBase<Cell>
     {
-      std::shared_ptr<DataArrayWriter<unsigned> > arraywriter;
+      std::shared_ptr<DataArrayWriter> arraywriter;
       unsigned counter;
 
     public:
@@ -263,13 +269,13 @@ namespace Dune
 
       //! add this field to the given parallel writer
       virtual void addArray(PVTUWriter& writer) {
-        writer.addArray<unsigned>(name(), ncomps());
+        writer.addArray(name(), ncomps(), Precision::int32);
       }
 
       //! start writing with the given writer
       virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
-        arraywriter.reset(writer.makeArrayWriter<unsigned>(name(), ncomps(),
-                                                           nitems));
+        arraywriter.reset(writer.makeArrayWriter(name(), ncomps(),
+                                                 nitems, Precision::int32));
         counter = 0;
         return !arraywriter->writeIsNoop();
       }
@@ -292,7 +298,7 @@ namespace Dune
     {
       typedef FunctionWriterBase<Cell> Base;
 
-      std::shared_ptr<DataArrayWriter<unsigned> > arraywriter;
+      std::shared_ptr<DataArrayWriter> arraywriter;
       unsigned offset;
 
     public:
@@ -304,13 +310,13 @@ namespace Dune
 
       //! add this field to the given parallel writer
       virtual void addArray(PVTUWriter& writer) {
-        writer.addArray<unsigned>(name(), ncomps());
+        writer.addArray(name(), ncomps(), Precision::int32);
       }
 
       //! start writing with the given writer
       virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
-        arraywriter.reset(writer.makeArrayWriter<unsigned>(name(), ncomps(),
-                                                           nitems));
+        arraywriter.reset(writer.makeArrayWriter(name(), ncomps(),
+                                                 nitems, Precision::int32));
         offset = 0;
         return !arraywriter->writeIsNoop();
       }
@@ -332,7 +338,7 @@ namespace Dune
     {
       typedef FunctionWriterBase<Cell> Base;
 
-      std::shared_ptr<DataArrayWriter<unsigned char> > arraywriter;
+      std::shared_ptr<DataArrayWriter> arraywriter;
 
     public:
       //! return name
@@ -343,13 +349,13 @@ namespace Dune
 
       //! add this field to the given parallel writer
       virtual void addArray(PVTUWriter& writer) {
-        writer.addArray<unsigned char>(name(), ncomps());
+        writer.addArray(name(), ncomps(), Precision::uint8);
       }
 
       //! start writing with the given writer
       virtual bool beginWrite(VTUWriter& writer, std::size_t nitems) {
-        arraywriter.reset(writer.makeArrayWriter<unsigned char>
-                            ( name(), ncomps(), nitems));
+        arraywriter.reset(writer.makeArrayWriter
+                            ( name(), ncomps(), nitems, Precision::uint8));
         return !arraywriter->writeIsNoop();
       }
       //! write at the given position

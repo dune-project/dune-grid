@@ -150,7 +150,7 @@ namespace Dune
 
     public:
 
-      typedef VTK::DataArrayWriter<float> Writer;
+      typedef VTK::DataArrayWriter Writer;
 
       //! Base class for polymorphic container of underlying data set
       struct FunctionWrapperBase
@@ -275,7 +275,8 @@ namespace Dune
         , _fieldInfo(
           vtkFunctionPtr->name(),
           vtkFunctionPtr->ncomps() > 1 ? VTK::FieldInfo::Type::vector : VTK::FieldInfo::Type::scalar,
-          vtkFunctionPtr->ncomps()
+          vtkFunctionPtr->ncomps(),
+          vtkFunctionPtr->precision()
           )
       {}
 
@@ -572,11 +573,14 @@ namespace Dune
      *
      * @param gridView The gridView the grid functions live on. (E. g. a LevelGridView.)
      * @param dm The data mode.
+     * @param coordPrecision the precision with which to write out the coordinates
      */
     explicit VTKWriter ( const GridView &gridView,
-                         VTK::DataMode dm = VTK::conforming )
+                         VTK::DataMode dm = VTK::conforming,
+                         VTK::Precision coordPrecision = VTK::Precision::float32)
       : gridView_( gridView ),
         datamode( dm ),
+        coordPrec (coordPrecision),
         polyhedralCellsPresent_( checkForPolyhedralCells() )
     { }
 
@@ -614,7 +618,8 @@ namespace Dune
      * @param ncomps Number of components (default is 1).
      */
     template<class Container>
-    void addCellData (const Container& v, const std::string &name, int ncomps = 1)
+    void addCellData (const Container& v, const std::string &name, int ncomps = 1,
+                      VTK::Precision prec = VTK::Precision::float32)
     {
       typedef P0VTKFunction<GridView, Container> Function;
       for (int c=0; c<ncomps; ++c) {
@@ -622,7 +627,7 @@ namespace Dune
         compName << name;
         if (ncomps>1)
           compName << "[" << c << "]";
-        VTKFunction* p = new Function(gridView_, v, compName.str(), ncomps, c);
+        VTKFunction* p = new Function(gridView_, v, compName.str(), ncomps, c, prec);
         addCellData(std::shared_ptr< const VTKFunction >(p));
       }
     }
@@ -662,7 +667,8 @@ namespace Dune
      * @param ncomps Number of components (default is 1).
      */
     template<class Container>
-    void addVertexData (const Container& v, const std::string &name, int ncomps=1)
+    void addVertexData (const Container& v, const std::string &name, int ncomps=1,
+                        VTK::Precision prec = VTK::Precision::float32)
     {
       typedef P1VTKFunction<GridView, Container> Function;
       for (int c=0; c<ncomps; ++c) {
@@ -670,7 +676,7 @@ namespace Dune
         compName << name;
         if (ncomps>1)
           compName << "[" << c << "]";
-        VTKFunction* p = new Function(gridView_, v, compName.str(), ncomps, c);
+        VTKFunction* p = new Function(gridView_, v, compName.str(), ncomps, c, prec);
         addVertexData(std::shared_ptr< const VTKFunction >(p));
       }
     }
@@ -681,6 +687,10 @@ namespace Dune
       celldata.clear();
       vertexdata.clear();
     }
+
+    //! get the precision with which coordinates are written out
+    VTK::Precision coordPrecision() const
+    { return coordPrec; }
 
     //! destructor
     virtual ~VTKWriter ()
@@ -985,7 +995,7 @@ namespace Dune
       {
         unsigned writecomps = it->fieldInfo().size();
         if(writecomps == 2) writecomps = 3;
-        writer.addArray<float>(it->name(), writecomps);
+        writer.addArray(it->name(), writecomps, it->fieldInfo().precision());
       }
       writer.endPointData();
 
@@ -1002,13 +1012,13 @@ namespace Dune
       {
         unsigned writecomps = it->fieldInfo().size();
         if(writecomps == 2) writecomps = 3;
-        writer.addArray<float>(it->name(), writecomps);
+        writer.addArray(it->name(), writecomps, it->fieldInfo().precision());
       }
       writer.endCellData();
 
       // PPoints
       writer.beginPoints();
-      writer.addArray<float>("Coordinates", 3);
+      writer.addArray("Coordinates", 3, coordPrec);
       writer.endPoints();
 
       // Pieces
@@ -1169,8 +1179,8 @@ namespace Dune
           case VTK::FieldInfo::Type::tensor:
             DUNE_THROW(NotImplemented,"VTK output for tensors not implemented yet");
           }
-        std::shared_ptr<VTK::DataArrayWriter<float> > p
-          (writer.makeArrayWriter<float>(f.name(), writecomps, nentries));
+        std::shared_ptr<VTK::DataArrayWriter> p
+          (writer.makeArrayWriter(f.name(), writecomps, nentries, fieldInfo.precision()));
         if(!p->writeIsNoop())
           for (Iterator eit = begin; eit!=end; ++eit)
           {
@@ -1219,8 +1229,8 @@ namespace Dune
     {
       writer.beginPoints();
 
-      std::shared_ptr<VTK::DataArrayWriter<float> > p
-        (writer.makeArrayWriter<float>("Coordinates", 3, nvertices));
+      std::shared_ptr<VTK::DataArrayWriter> p
+        (writer.makeArrayWriter("Coordinates", 3, nvertices, coordPrec));
       if(!p->writeIsNoop()) {
         VertexIterator vEnd = vertexEnd();
         for (VertexIterator vit=vertexBegin(); vit!=vEnd; ++vit)
@@ -1245,8 +1255,8 @@ namespace Dune
 
       // connectivity
       {
-        std::shared_ptr<VTK::DataArrayWriter<int> > p1
-          (writer.makeArrayWriter<int>("connectivity", 1, ncorners));
+        std::shared_ptr<VTK::DataArrayWriter> p1
+          (writer.makeArrayWriter("connectivity", 1, ncorners, VTK::Precision::int32));
         if(!p1->writeIsNoop())
           for (CornerIterator it=cornerBegin(); it!=cornerEnd(); ++it)
             p1->write(it.id());
@@ -1254,8 +1264,8 @@ namespace Dune
 
       // offsets
       {
-        std::shared_ptr<VTK::DataArrayWriter<int> > p2
-          (writer.makeArrayWriter<int>("offsets", 1, ncells));
+        std::shared_ptr<VTK::DataArrayWriter> p2
+          (writer.makeArrayWriter("offsets", 1, ncells, VTK::Precision::int32));
         if(!p2->writeIsNoop()) {
           int offset = 0;
           for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
@@ -1270,8 +1280,8 @@ namespace Dune
       if (n>1)
       {
         {
-          std::shared_ptr<VTK::DataArrayWriter<unsigned char> > p3
-            (writer.makeArrayWriter<unsigned char>("types", 1, ncells));
+          std::shared_ptr<VTK::DataArrayWriter> p3
+            (writer.makeArrayWriter("types", 1, ncells, VTK::Precision::uint8));
 
           if(!p3->writeIsNoop())
           {
@@ -1324,8 +1334,8 @@ namespace Dune
       assert( int(faceOffsets.size()) == ncells );
 
       {
-        std::shared_ptr<VTK::DataArrayWriter< int > > p4
-          (writer.makeArrayWriter< int >("faces", 1, faces.size()));
+        std::shared_ptr<VTK::DataArrayWriter> p4
+          (writer.makeArrayWriter("faces", 1, faces.size(), VTK::Precision::int32));
         if(!p4->writeIsNoop())
         {
           for( const auto& face : faces )
@@ -1334,8 +1344,8 @@ namespace Dune
       }
 
       {
-        std::shared_ptr<VTK::DataArrayWriter< int > > p5
-          (writer.makeArrayWriter< int >("faceoffsets", 1, ncells ));
+        std::shared_ptr<VTK::DataArrayWriter> p5
+          (writer.makeArrayWriter("faceoffsets", 1, ncells, VTK::Precision::int32));
         if(!p5->writeIsNoop())
         {
           for( const auto& offset : faceOffsets )
@@ -1454,6 +1464,7 @@ namespace Dune
     // hold its number in the iteration order (VertexIterator)
     std::vector<int> number;
     VTK::DataMode datamode;
+    VTK::Precision coordPrec;
 
     // true if polyhedral cells are present in the grid
     const bool polyhedralCellsPresent_;

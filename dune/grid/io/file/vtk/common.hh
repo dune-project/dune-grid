@@ -7,7 +7,9 @@
 #include <limits>
 #include <sstream>
 #include <string>
+#include <cstdint>
 
+#include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/geometry/type.hh>
 #include <dune/common/typetraits.hh>
@@ -121,7 +123,7 @@ namespace Dune
      * \tparam T The type whose VTK name is requested
      */
     template<typename T>
-    class TypeName {
+    class DUNE_DEPRECATED_MSG("TypeName will be removed after Dune 2.7. Look at VTK::toString and VTK::Precision for substitution.") TypeName {
       static std::string getString() {
         static const unsigned int_sizes[] = { 8, 16, 32, 64, 0 };
         static const unsigned float_sizes[] = { 32, 64, 0 };
@@ -303,6 +305,65 @@ namespace Dune
     };
 
 
+    //////////////////////////////////////////////////////////////////////
+    //
+    //  which precision to use when writing out data
+    //
+
+    //! which precision to use when writing out data to vtk files
+    /**
+       \code
+       #include <dune/grid/io/file/vtk/common.hh>
+       \endcode
+     */
+    enum class Precision {
+      int32,
+      uint8,
+      uint32,
+      float32,
+      float64
+    };
+
+    //! map precision to VTK type name
+    inline std::string toString(Precision p)
+    {
+      switch(p)
+      {
+        case Precision::float32:
+          return "Float32";
+        case Precision::float64:
+          return "Float64";
+        case Precision::uint32:
+          return "UInt32";
+        case Precision::uint8:
+          return "UInt8";
+        case Precision::int32:
+          return "Int32";
+        default:
+          DUNE_THROW(Dune::NotImplemented, "Unknown precision type");
+      }
+    }
+
+    //! map precision to byte size
+    inline std::size_t typeSize(Precision p)
+    {
+      switch(p)
+      {
+        case Precision::float32:
+          return sizeof(float);
+        case Precision::float64:
+          return sizeof(double);
+        case Precision::uint32:
+          return sizeof(std::uint32_t);
+        case Precision::uint8:
+          return sizeof(std::uint8_t);
+        case Precision::int32:
+          return sizeof(std::int32_t);
+        default:
+          DUNE_THROW(Dune::NotImplemented, "Unknown precision type");
+      }
+    }
+
     //! Descriptor struct for VTK fields
     /**
      * This struct provides general information about a data field to be
@@ -328,10 +389,11 @@ namespace Dune
       };
 
       //! Create a FieldInfo instance with the given name, type and size.
-      FieldInfo(std::string name, Type type, std::size_t size)
+      FieldInfo(std::string name, Type type, std::size_t size, Precision prec = Precision::float32)
         : _name(name)
         , _type(type)
         , _size(size)
+        , _prec(prec)
       {}
 
       //! The name of the data field
@@ -352,11 +414,18 @@ namespace Dune
         return _size;
       }
 
+      //! The precision used for the output of the data field
+      Precision precision() const
+      {
+        return _prec;
+      }
+
     private:
 
       std::string _name;
       Type _type;
       std::size_t _size;
+      Precision _prec;
 
     };
 
