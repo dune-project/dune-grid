@@ -61,7 +61,7 @@
   i.e., functions that are not defined with respect to the grid.  Such functions
   will be sampled on the grid vertices (`addVertexData`) or grid element centers (`addCellData`).
 
-- The Capability `hasBackupRestoreFacilities<GeometryGrid<HG, CoordFunction>>` 
+- The Capability `hasBackupRestoreFacilities<GeometryGrid<HG, CoordFunction>>`
   now returns `false` in case the `CoordFunction` is not default-constructible.
 
 - The `Geometry` interface now provides the type `Volume` for the return value of the
@@ -69,6 +69,10 @@
   about dimensions.  In that case `ctype` is a length, and not appropriate for
   a quantity that is a volume.
 
+- The `VTKSequenceWriter` now exposes the function `clear()` of the associated `VTKWriter`
+
+- The `VTKSequenceWriter` allows to get and set the time steps storage, which enables serialization
+of a sequence writer. The feature can be used to restart a sequence.
 
 # Release 2.6
 
