@@ -57,6 +57,11 @@
   the `DataArrayWriter` selects the correct type at runtime. The default for
   functions and coordinate is `Float32` as before.
 
+- The `VTKSequenceWriter` now exposes the function `clear()` of the associated `VTKWriter`
+
+- The `VTKSequenceWriter` allows to get and set the time steps storage, which enables serialization
+  of a sequence writer. The feature can be used to restart a sequence.
+
 # Release 2.6
 
 - The deprecated `EntityPointer` has been removed completely and `EntityIterator`
