@@ -63,7 +63,8 @@ public:
 };
 
 template< class GridView >
-void doWrite( const GridView &gridView, Dune::VTK::DataMode dm )
+void doWrite( const GridView &gridView, Dune::VTK::DataMode dm,
+              bool testRestart = false)
 {
   enum { dim = GridView :: dimension };
 
@@ -82,22 +83,42 @@ void doWrite( const GridView &gridView, Dune::VTK::DataMode dm )
   auto vectordata = std::make_shared<VTKVectorFunction<GridView> >();
   vtk.addVertexData(vectordata);
   double time = 0;
-  while (time<1) {
+  double tEnd = testRestart ? 0.5 : 1.0;
+  while (time < tEnd) {
     vectordata->setTime(time);
     vtk.write(time);
     time += 0.1;
+  }
+
+  if (testRestart)
+  {
+    const auto& timeSteps = vtk.getTimeSteps();
+    auto vtkWriter2 = std::make_shared<Dune::VTKWriter<GridView> >(gridView, dm);
+    Dune :: VTKSequenceWriter< GridView > vtk2( vtkWriter2, name.str(), ".", "" );
+    vtk2.setTimeSteps(timeSteps);
+
+    vtk2.addVertexData(vertexdata,"vertexData");
+    vtk2.addCellData(celldata,"cellData");
+    vtk2.addVertexData(vectordata);
+
+    while (time < 1) {
+      vectordata->setTime(time);
+      vtk2.write(time);
+      time += 0.1;
+    }
   }
 }
 
 template<int dim>
 void vtkCheck(const std::array<int,dim>& n,
-              const Dune::FieldVector<double,dim>& h)
+              const Dune::FieldVector<double,dim>& h,
+              bool testRestart = false)
 {
   std::cout << std::endl << "vtkSequenceCheck dim=" << dim << std::endl << std::endl;
   Dune::YaspGrid<dim> g(h, n);
   g.globalRefine(1);
 
-  doWrite( g.leafGridView(), Dune::VTK::conforming );
+  doWrite( g.leafGridView(), Dune::VTK::conforming, testRestart );
   doWrite( g.leafGridView(), Dune::VTK::nonconforming );
   doWrite( g.levelGridView( 0 ), Dune::VTK::conforming );
   doWrite( g.levelGridView( 0 ), Dune::VTK::nonconforming );
@@ -128,7 +149,7 @@ int main(int argc, char **argv)
     {
       std::array<int,3> n = { { 5, 5, 5 } };
       Dune::FieldVector<double,3> h = { 1.0, 2.0, 3.0 };
-      vtkCheck<3>(n,h);
+      vtkCheck<3>(n,h, /*testRestart=*/true);
     }
 
   } catch (Dune::Exception &e) {
