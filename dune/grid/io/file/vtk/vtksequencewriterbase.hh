@@ -147,6 +147,15 @@ namespace Dune {
         pvdFile.close();
       }
     }
+
+    /**
+     * \brief Clears all VTK data added to the VTK writer
+     */
+    void clear()
+    {
+        vtkWriter_->clear();
+    }
+
   private:
 
     // create sequence name
