@@ -55,7 +55,7 @@ grid_registry = {
     }
 
 try:
-    assertHave("ALBERTA")
+    assertHave("HAVE_ALBERTA")
     def albertaGrid(constructor, dimgrid=None):
         from .grid_generator import module, getDimgrid
 
