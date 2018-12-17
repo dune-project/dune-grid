@@ -167,44 +167,51 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
     const LocalGeometry geometryInInside = intersection.geometryInInside();
     checkLocalGeometry( geometryInInside, inside.type(), "geometryInInside" );
 
-    if( geometryInInside.corners() != geometry.corners() )
-      DUNE_THROW( Dune::GridError, "Intersection's geometry is inconsistent with concatenation of inside entity's geometry and intersection's geometryInInside.");
-
+    if( dimension == Intersection::dimensionworld || intersection.conforming() )
+    {
+      if( geometryInInside.corners() != geometry.corners() )
+       DUNE_THROW( Dune::GridError, "Intersection's geometry is inconsistent with concatenation of inside entity's geometry and intersection's geometryInInside.");
+    }
     // create quadrature rule as a set of test points
 
     const Dune::QuadratureType::Enum qt = Dune::QuadratureType::GaussLegendre;
     const Dune::QuadratureRule< ctype, mydimension > &quadrature
       = Dune::QuadratureRules< ctype, mydimension >::rule( intersection.type(), 3, qt );
 
-    for( std::size_t i = 0; i < quadrature.size(); ++i )
+    //only check in case of conforming intersection
+    //or non-manifolds
+    if( dimension == Intersection::dimensionworld || intersection.conforming() )
     {
-      const Dune::FieldVector< ctype, mydimension > &pt = quadrature[ i ].position();
-
-      typename Geometry::GlobalCoordinate globalPos = geometry.global( pt );
-      typename Geometry::GlobalCoordinate localPos = insideGeometry.global( geometryInInside.global( pt ) );
-
-      if( (globalPos - localPos).infinity_norm() > 1e-6 )
+      for( std::size_t i = 0; i < quadrature.size(); ++i )
       {
-        std::cerr << "Error: Intersection's geometry is inconsistent with concatenation of inside entity's geometry and intersection's geometryInInside." << std::endl;
+        const Dune::FieldVector< ctype, mydimension > &pt = quadrature[ i ].position();
 
-        std::cerr << "       inside()->geometry().global( intersection.geometryInInside().global( x ) ) != intersection.geometry().global( x )" << std::endl;
-        std::cerr << "       x = " << pt << std::endl;
-        std::cerr << "       interesction.geometry() = " << geometry.corner( 0 );
-        for( int i = 1; i < geometry.corners(); ++i )
-          std::cerr << " | " << geometry.corner( i );
-        std::cerr << std::endl;
+        typename Geometry::GlobalCoordinate globalPos = geometry.global( pt );
+        typename Geometry::GlobalCoordinate localPos = insideGeometry.global( geometryInInside.global( pt ) );
 
-        std::cerr << "       intersection.geometryInInside() = " << geometryInInside.corner( 0 );
-        for( int i = 1; i < geometryInInside.corners(); ++i )
-          std::cerr << " | " << geometryInInside.corner( i );
-        std::cerr << std::endl;
+        if( (globalPos - localPos).infinity_norm() > 1e-6 )
+        {
+          std::cerr << "Error: Intersection's geometry is inconsistent with concatenation of inside entity's geometry and intersection's geometryInInside." << std::endl;
 
-        std::cerr << "       inside()->geometry() = " << insideGeometry.corner( 0 );
-        for( int i = 1; i < insideGeometry.corners(); ++i )
-          std::cerr << " | " << insideGeometry.corner( i );
-        std::cerr << std::endl;
+          std::cerr << "       inside()->geometry().global( intersection.geometryInInside().global( x ) ) != intersection.geometry().global( x )" << std::endl;
+          std::cerr << "       x = " << pt << std::endl;
+          std::cerr << "       interesction.geometry() = " << geometry.corner( 0 );
+          for( int i = 1; i < geometry.corners(); ++i )
+            std::cerr << " | " << geometry.corner( i );
+          std::cerr << std::endl;
 
-        assert( false );
+          std::cerr << "       intersection.geometryInInside() = " << geometryInInside.corner( 0 );
+          for( int i = 1; i < geometryInInside.corners(); ++i )
+            std::cerr << " | " << geometryInInside.corner( i );
+          std::cerr << std::endl;
+
+          std::cerr << "       inside()->geometry() = " << insideGeometry.corner( 0 );
+          for( int i = 1; i < insideGeometry.corners(); ++i )
+            std::cerr << " | " << insideGeometry.corner( i );
+          std::cerr << std::endl;
+
+          assert( false );
+        }
       }
     }
   }
@@ -220,8 +227,13 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
     {
       const LocalGeometry geometryInOutside = intersection.geometryInOutside();
       checkLocalGeometry( geometryInOutside, outside.type(), "geometryInOutside" );
-      if( geometryInOutside.corners() != geometry.corners() )
-        DUNE_THROW( Dune::GridError, "Intersection's geometry is inconsistent with concatenation of outside entity's geometry and intersection's geometryInOutside.");
+      //only check in case of conforming intersection
+      //or non-manifolds
+      if( dimension == Intersection::dimensionworld || intersection.conforming() )
+      {
+        if( geometryInOutside.corners() != geometry.corners() )
+          DUNE_THROW( Dune::GridError, "Intersection's geometry is inconsistent with concatenation of outside entity's geometry and intersection's geometryInOutside.");
+      }
 
       if( !intersection.boundary() )
       {
@@ -233,35 +245,40 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
         const Dune::QuadratureRule< ctype, mydimension > &quadrature
           = Dune::QuadratureRules< ctype, mydimension >::rule( intersection.type(), 3, qt );
 
-        for( std::size_t i = 0; i < quadrature.size(); ++i )
+        //only check in case of conforming intersection
+        //or non-manifolds
+        if( dimension == Intersection::dimensionworld || intersection.conforming() )
         {
-          const Dune::FieldVector< ctype, mydimension > &pt = quadrature[ i ].position();
-
-          typename Geometry::GlobalCoordinate globalPos = geometry.global( pt );
-          typename Geometry::GlobalCoordinate localPos = outsideGeometry.global( geometryInOutside.global( pt ) );
-
-          if( (globalPos - localPos).infinity_norm() > 1e-6 )
+          for( std::size_t i = 0; i < quadrature.size(); ++i )
           {
-            std::cerr << "Error: Intersection's geometry is inconsistent with concatenation of outside entity's geometry and intersection's geometryInOutside." << std::endl;
+            const Dune::FieldVector< ctype, mydimension > &pt = quadrature[ i ].position();
 
-            std::cerr << "       outside()->geometry().global( intersection.geometryInOutside().global( x ) ) != intersection.geometry().global( x )" << std::endl;
-            std::cerr << "       x = " << pt << std::endl;
-            std::cerr << "       intersection.geometry() = " << geometry.corner( 0 );
-            for( int i = 1; i < geometry.corners(); ++i )
-              std::cerr << " | " << geometry.corner( i );
-            std::cerr << std::endl;
+            typename Geometry::GlobalCoordinate globalPos = geometry.global( pt );
+            typename Geometry::GlobalCoordinate localPos = outsideGeometry.global( geometryInOutside.global( pt ) );
 
-            std::cerr << "       intersection.geometryInOutside() = " << geometryInOutside.corner( 0 );
-            for( int i = 1; i < geometryInOutside.corners(); ++i )
-              std::cerr << " | " << geometryInOutside.corner( i );
-            std::cerr << std::endl;
+            if( (globalPos - localPos).infinity_norm() > 1e-6 )
+            {
+              std::cerr << "Error: Intersection's geometry is inconsistent with concatenation of outside entity's geometry and intersection's geometryInOutside." << std::endl;
 
-            std::cerr << "       outside()->geometry() = " << outsideGeometry.corner( 0 );
-            for( int i = 1; i < outsideGeometry.corners(); ++i )
-              std::cerr << " | " << outsideGeometry.corner( i );
-            std::cerr << std::endl;
+              std::cerr << "       outside()->geometry().global( intersection.geometryInOutside().global( x ) ) != intersection.geometry().global( x )" << std::endl;
+              std::cerr << "       x = " << pt << std::endl;
+              std::cerr << "       intersection.geometry() = " << geometry.corner( 0 );
+              for( int i = 1; i < geometry.corners(); ++i )
+                std::cerr << " | " << geometry.corner( i );
+              std::cerr << std::endl;
 
-            assert( false );
+              std::cerr << "       intersection.geometryInOutside() = " << geometryInOutside.corner( 0 );
+              for( int i = 1; i < geometryInOutside.corners(); ++i )
+                std::cerr << " | " << geometryInOutside.corner( i );
+              std::cerr << std::endl;
+
+              std::cerr << "       outside()->geometry() = " << outsideGeometry.corner( 0 );
+              for( int i = 1; i < outsideGeometry.corners(); ++i )
+                std::cerr << " | " << outsideGeometry.corner( i );
+              std::cerr << std::endl;
+
+              assert( false );
+            }
           }
         }
       }
@@ -309,7 +326,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
       // check normal vector is orthogonal to all vectors connecting the vertices
       // note: This only makes sense for non-curved faces. As there is no method
       //       to check curvature, we only check this for affine surface.
-      if( geometry.affine() )
+      if( geometry.affine() && (dimension == Intersection::dimensionworld || intersection.conforming()))
       {
         for( int c = 1; c < geometry.corners(); ++c )
         {
@@ -317,7 +334,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
           x -= geometry.corner( c );
           if( x*normal >= 1e3*std::numeric_limits< ctype >::epsilon() )
           {
-            std::cerr << "outerNormal not orthogonal to line between corner "
+            std::cerr << "Error: outerNormal not orthogonal to line between corner "
                       << (c-1) << " and corner " << c << "." << std::endl;
             assert( false );
           }
@@ -327,21 +344,33 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
       // check consistency with JacobianInverseTransposed (J^-1 * n) = 0,
       // where J denotes the Jacobian of the intersection's geometry and n is a
       // normal.
-      checkJIn( normal, jit, "outerNormal" );
+      // only check in case of conforming intersection
+      // or non-manifolds
+      if( dimension == Intersection::dimensionworld || intersection.conforming() )
+        checkJIn( normal, jit, "outerNormal" );
 
       // check integration outer normal
 
       const typename Intersection::GlobalCoordinate intNormal = intersection.integrationOuterNormal( pt );
       const ctype det = geometry.integrationElement( pt );
-      if( std::abs( det - intNormal.two_norm() ) > 1e-8 )
+      // only check in case of conforming intersection
+      // or non-manifolds
+      if( dimension == Intersection::dimensionworld || intersection.conforming() )
       {
-        std::cerr << "Error: integrationOuterNormal yields wrong length." << std::endl;
-        std::cerr << "       |integrationOuterNormal| = " << intNormal.two_norm()
-                  << ", integrationElement = " << det << std::endl;
-        assert( false );
+        if( std::abs( det - intNormal.two_norm() ) > 1e-8 )
+        {
+          std::cerr << "Error: integrationOuterNormal yields wrong length." << std::endl;
+          std::cerr << "       |integrationOuterNormal| = " << intNormal.two_norm()
+            << ", integrationElement = " << det << std::endl;
+          if( dimension == Intersection::dimensionworld || intersection.conforming() )
+            assert( false );
+        }
       }
 
-      checkJIn( intNormal, jit, "integrationOuterNormal" );
+      // only check in case of conforming intersection
+      // or non-manifolds
+      if( dimension == Intersection::dimensionworld || intersection.conforming() )
+        checkJIn( intNormal, jit, "integrationOuterNormal" );
       if( !inside.type().isNone() )
         checkParallel( intNormal, refIntNormal, "integrationOuterNormal" );
 
@@ -366,7 +395,10 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
         assert( false );
       }
 
-      checkJIn( unitNormal, jit, "unitOuterNormal" );
+      // only check in case of conforming intersection
+      // or non-manifolds
+      if( dimension == Intersection::dimensionworld || intersection.conforming() )
+        checkJIn( unitNormal, jit, "unitOuterNormal" );
       if( !inside.type().isNone() )
         checkParallel( unitNormal, refIntNormal, "unitOuterNormal" );
 
