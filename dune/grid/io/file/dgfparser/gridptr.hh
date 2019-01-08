@@ -4,6 +4,7 @@
 #define DUNE_DGF_GRIDPTR_HH
 
 #include <cassert>
+#include <cctype>
 
 #include <array>
 #include <iostream>
@@ -115,34 +116,25 @@ namespace Dune
       }
     };
 
+  protected:
+    std::string getFileExtension( const std::string& filename ) const
+    {
+      // extract file extension
+      auto extpos = filename.find_last_of(".");
+      std::string ext;
+      if( extpos != std::string::npos)
+        ext = filename.substr( extpos + 1 );
+
+      // convert all letters to lower case
+      for( auto& item : ext )
+        item = std::tolower( item );
+      return ext;
+    }
+
+  public:
+
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
     static const int dimension = GridType::dimension;
-
-    std::string checkFileFormat( const std::string& filename ) const
-    {
-      std::ifstream input( filename );
-      if( input.is_open() )
-      {
-        std::string line;
-        std::getline( input, line );
-
-        int pos = line.find( "DGF" );
-        if( pos >=0 )
-        {
-          //std::cout << "Found DGF Format" << std::endl;
-          return std::string( "DGF" );
-        }
-
-        pos = line.find( "$MeshFormat" );
-        if( pos >=0 )
-        {
-          //std::cout << "Found Gmsh Format" << std::endl;
-          return std::string( "gmsh" );
-        }
-      }
-
-      return std::string("unknown_format");
-    }
 
     //! constructor given the name of a DGF file
     explicit GridPtr ( const std::string &filename,
@@ -157,14 +149,14 @@ namespace Dune
         nofVtxParam_( 0 ),
         haveBndParam_( false )
     {
-      std::string fileID = checkFileFormat( filename );
+      std::string fileExt = getFileExtension( filename );
 
-      if( fileID == "DGF" )
+      if( fileExt == "dgf" )
       {
         DGFGridFactory< GridType > dgfFactory( filename, comm );
         initialize( dgfFactory );
       }
-      else if( fileID == "gmsh" )
+      else if( fileExt == "msh" )
       {
         GridFactory<GridType> gridFactory;
         std::vector<int> boundaryIDs;
@@ -172,9 +164,19 @@ namespace Dune
         GmshReader<GridType>::read(gridFactory,filename,boundaryIDs,elementsIDs);
         initialize( gridFactory, boundaryIDs,elementsIDs);
       }
+      else if( fileExt == "amc" || fileExt == "2d" || fileExt == "3d" )
+      {
+        // TODO: AlbertaReader
+        DUNE_THROW( NotImplemented, "GridPtr: file format '" << fileExt << "' not supported yet!" );
+      }
+      else if( fileExt == "vtu" )
+      {
+        // TODO: vtu/vtk reader
+        DUNE_THROW( NotImplemented, "GridPtr: file format '" << fileExt << "' not supported yet!" );
+      }
       else
       {
-        DUNE_THROW( NotImplemented, "GridPtr: file format not supported!" );
+        DUNE_THROW( NotImplemented, "GridPtr: file format '" << fileExt << "' not supported yet!" );
       }
     }
 
