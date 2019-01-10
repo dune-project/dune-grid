@@ -466,11 +466,9 @@ class CheckCommunication
     // call communication of grid
     try
     {
-      // obtain the type of returned object from communicate
-      typedef decltype( gridView_.communicate(dh,Dune::InteriorBorder_All_Interface,Dune::ForwardCommunication) ) CommReturnType;
       // call forward and backward communication
       auto obj1 = gridView_.communicate( dh, Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication );
-      if( obj1.pending() )
+      if( ! obj1.ready() )
         obj1.wait();
 
       // make sure backward communication does the same, this should change nothing
