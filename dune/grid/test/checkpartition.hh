@@ -372,7 +372,9 @@ public:
   {
     std::cout << "Checking communication for " << iftype << "..." << std::endl;
     CheckPartitionDataHandle handle( gridView );
-    gridView.communicate( handle, iftype, Dune::ForwardCommunication );
+    auto commFuture = gridView.communicate( handle, iftype, Dune::ForwardCommunication );
+    if( ! commFuture.ready() )
+      commFuture.wait();
   }
 
   const Grid &grid () const { return gridView_.grid(); }

@@ -6,6 +6,7 @@
 #include <typeinfo>
 
 #include <dune/common/iteratorrange.hh>
+#include <dune/common/parallel/future.hh>
 
 #include <dune/geometry/type.hh>
 
@@ -297,18 +298,20 @@ namespace Dune
       return impl().communicate(data,iftype,dir);
     }
 
-    struct NoCommFuture
+    struct DeprecatedMethodEmptyFuture : public Future<void>
     {
       void printMessage() const
       {
         std::cerr << "WARNING: GridView::communicate of '" <<
-          typeid( Implementation ).name() << "' still returns void. Please update implementation to new interface!" << std::endl;
+          typeid( Implementation ).name() << "' still returns void. Please update implementation to new interface returning a future object!" << std::endl;
       }
-      bool pending () const {
+
+      bool ready () {
         printMessage();
-        return false;
+        return true;
       }
       void wait () { printMessage(); }
+      bool valid () const { printMessage(); return true; }
     };
 
     /** \brief Communicate data on this view */
@@ -318,7 +321,7 @@ namespace Dune
                        CommunicationDirection dir, std::integral_constant< bool, true > ) const
     {
       impl().communicate(data,iftype,dir);
-      return NoCommFuture();
+      return DeprecatedMethodEmptyFuture();
     }
 
     Implementation impl_;
