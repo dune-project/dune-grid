@@ -642,7 +642,7 @@ namespace Dune
 
      \brief Read Gmsh mesh file
 
-     Read a .msh file generated using Gmsh and construct a grid using the grid factory interface.
+     Read a .msh (version 2) file generated using Gmsh and construct a grid using the grid factory interface.
 
      The file format used by gmsh can hold grids that are more general than the simplex grids that
      the gmsh grid generator is able to construct.  We try to read as many grids as possible, as
@@ -652,6 +652,14 @@ namespace Dune
      All grids in a gmsh file live in three-dimensional Euclidean space.  If the world dimension
      of the grid type that you are reading the file into is less than three, the remaining coordinates
      are simply ignored.
+
+     \note Recent versions of Gmsh introduced a new .msh file format (version 4) with a different syntax.
+     This is currently not supported by GmshReader. One can export to an older .msh version as follows:
+       - select File&rarr;Export (or CTRL+E)
+       - select file format `.msh`
+       - a dialog asks for options
+       - select 'Version 2 ASCII' and mark 'Save all elements'
+
    */
   template<typename GridType>
   class GmshReader
