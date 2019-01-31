@@ -148,10 +148,10 @@ namespace Dune
       : dgfHostFactory_( filename, comm ),
         grid_( 0 )
     {
-      HostGrid *hostGrid = dgfHostFactory_.grid();
+      auto hostGrid = std::shared_ptr<HostGrid>(dgfHostFactory_.grid());
       assert( hostGrid != 0 );
       std::ifstream input( filename.c_str() );
-      CoordFunction *coordFunction = CoordFunctionFactory::create( input, *hostGrid );
+      auto coordFunction = std::shared_ptr<CoordFunction>(CoordFunctionFactory::create( input, *hostGrid ));
       grid_ = new Grid( hostGrid, coordFunction );
     }
 
