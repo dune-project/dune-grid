@@ -3,7 +3,10 @@
 #ifndef DUNE_GEOGRID_GRID_HH
 #define DUNE_GEOGRID_GRID_HH
 
+#include <memory>
+
 #include <dune/common/deprecated.hh>
+#include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/common/grid.hh>
 
@@ -223,9 +226,40 @@ namespace Dune
      *  \param[in]  allocator      storage allocator
      */
     GeometryGrid ( HostGrid &hostGrid, CoordFunction &coordFunction, const Allocator &allocator = Allocator() )
-      : hostGrid_( &hostGrid ),
-        coordFunction_( &coordFunction ),
-        removeHostGrid_( false ),
+      : hostGrid_( Dune::stackobject_to_shared_ptr(hostGrid) ),
+        coordFunction_( Dune::stackobject_to_shared_ptr(coordFunction) ),
+        levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
+        storageAllocator_( allocator )
+    {}
+
+    /** \brief constructor
+     *
+     *  The grid takes ownership of the pointers to host grid and coordinate
+     *  function. They will be deleted when the grid is destroyed.
+     *
+     *  \param[in]  hostGrid       shared pointer to the grid to wrap
+     *  \param[in]  coordFunction  shared pointer to the coordinate function
+     *  \param[in]  allocator      storage allocator
+     */
+    GeometryGrid ( std::shared_ptr<HostGrid> hostGrid, std::shared_ptr<CoordFunction> coordFunction, const Allocator &allocator = Allocator() )
+      : hostGrid_( hostGrid ),
+        coordFunction_( coordFunction ),
+        levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
+        storageAllocator_( allocator )
+    {}
+
+    /** \brief constructor
+     *
+     *  The grid takes ownership of the pointer to host grid and it will
+     *  be deleted when the grid is destroyed. The coordinate function
+     *  is automatically constructed.
+     *
+     *  \param[in]  hostGrid       shared pointer to the grid to wrap
+     *  \param[in]  allocator      storage allocator
+     */
+    GeometryGrid ( std::shared_ptr<HostGrid> hostGrid, const Allocator &allocator = Allocator() )
+      : hostGrid_( hostGrid ),
+        coordFunction_( std::make_shared<CoordFunction>( this->hostGrid() ) ),
         levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
         storageAllocator_( allocator )
     {}
@@ -240,9 +274,9 @@ namespace Dune
      *  \param[in]  allocator      storage allocator
      */
     GeometryGrid ( HostGrid *hostGrid, CoordFunction *coordFunction, const Allocator &allocator = Allocator() )
+      DUNE_DEPRECATED_MSG("Pass the host grid and coord function as shared_ptr instead of a raw pointer. This constructor will be removed after Dune 2.7.")
       : hostGrid_( hostGrid ),
         coordFunction_( coordFunction ),
-        removeHostGrid_( true ),
         levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
         storageAllocator_( allocator )
     {}
@@ -257,9 +291,9 @@ namespace Dune
      *  \param[in]  allocator      storage allocator
      */
     GeometryGrid ( HostGrid *hostGrid, const Allocator &allocator = Allocator() )
+      DUNE_DEPRECATED_MSG("Pass the host grid as shared_ptr instead of a raw pointer. This constructor will be removed after Dune 2.7.")
       : hostGrid_( hostGrid ),
-        coordFunction_( new CoordFunction( this->hostGrid() ) ),
-        removeHostGrid_( true ),
+        coordFunction_( std::make_shared<CoordFunction>( this->hostGrid() ) ),
         levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
         storageAllocator_( allocator )
     {}
@@ -273,12 +307,6 @@ namespace Dune
       {
         if( levelIndexSets_[ i ] )
           delete( levelIndexSets_[ i ] );
-      }
-
-      if( removeHostGrid_ )
-      {
-        delete coordFunction_;
-        delete hostGrid_;
       }
     }
 
@@ -610,8 +638,8 @@ namespace Dune
     }
 
   private:
-    HostGrid *const hostGrid_;
-    CoordFunction *coordFunction_;
+    std::shared_ptr<HostGrid> const hostGrid_;
+    std::shared_ptr<CoordFunction> coordFunction_;
     bool removeHostGrid_;
     mutable std::vector< LevelIndexSet *, typename Allocator::template rebind< LevelIndexSet * >::other > levelIndexSets_;
     mutable LeafIndexSet leafIndexSet_;
