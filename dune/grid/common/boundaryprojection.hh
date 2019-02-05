@@ -52,6 +52,13 @@ namespace Dune
     }
 
     template <class BufferImp>
+    void toBuffer( BufferImp& buffer ) const
+    {
+      MessageBufferIF< BufferImp > buf( buffer );
+      toBuffer( buf );
+    }
+
+    template <class BufferImp>
     void toBuffer( MessageBufferIF< BufferImp > & buffer ) const
     {
       std::stringstream str;
@@ -62,6 +69,13 @@ namespace Dune
       buffer.write( size );
       for( size_t i=0; i<size; ++i )
         buffer.write( data[ i ] );
+    }
+
+    template <class BufferImp>
+    static ThisType* restoreFromBuffer( BufferImp & buffer )
+    {
+      MessageBufferIF< BufferImp > buf( buffer );
+      return restoreFromBuffer( buf );
     }
 
     template <class BufferImp>

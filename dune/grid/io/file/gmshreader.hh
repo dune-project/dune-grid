@@ -104,9 +104,11 @@ namespace Dune
       {
         // backup key to identify object
         out.write( key(), 4 );
-        out.write( (const char*) &p0[ 0 ], sizeof(double)*dimWorld );
-        out.write( (const char*) &p1[ 0 ], sizeof(double)*dimWorld );
-        out.write( (const char*) &p2[ 0 ], sizeof(double)*dimWorld );
+        // backup data
+        const int bytes = sizeof(double)*dimWorld;
+        out.write( (const char*) &p0[ 0 ], bytes );
+        out.write( (const char*) &p1[ 0 ], bytes );
+        out.write( (const char*) &p2[ 0 ], bytes );
       }
 
     protected:
@@ -115,9 +117,10 @@ namespace Dune
       {
         // key is read before by the factory
         GlobalVector p0,p1,p2;
-        in.read( (char *) &p0[ 0 ], sizeof(double)*dimWorld );
-        in.read( (char *) &p1[ 0 ], sizeof(double)*dimWorld );
-        in.read( (char *) &p2[ 0 ], sizeof(double)*dimWorld );
+        const int bytes = sizeof(double)*dimWorld;
+        in.read( (char *) &p0[ 0 ], bytes );
+        in.read( (char *) &p1[ 0 ], bytes );
+        in.read( (char *) &p2[ 0 ], bytes );
         return new GmshReaderQuadraticBoundarySegment< 2, dimWorld >( p0, p1, p2 );
       }
 
@@ -182,9 +185,11 @@ namespace Dune
           DUNE_THROW(Dune::IOError, "gamma in quadratic boundary segment bad");
       }
 
+      static const char* key () { return "gms3"; }
+
       static void registerFactory()
       {
-        Dune::BoundarySegment< 3 >::registerFactory( "gmshseg3", &restore );
+        Dune::BoundarySegment< 3 >::registerFactory( key(), &factory );
       }
 
       virtual Dune::FieldVector<double,3> operator() (const Dune::FieldVector<double,2>& local) const
@@ -202,27 +207,30 @@ namespace Dune
 
       void backup( std::stringstream& out ) const
       {
-        /*
-        buffer.write( p0 );
-        buffer.write( p1 );
-        buffer.write( p2 );
-        buffer.write( p3 );
-        buffer.write( p4 );
-        buffer.write( p5 );
-        */
+        // backup key to identify object
+        out.write( key(), 4 );
+        // backup data
+        const int bytes = sizeof(double)*3;
+        out.write( (const char*) &p0[ 0 ], bytes );
+        out.write( (const char*) &p1[ 0 ], bytes );
+        out.write( (const char*) &p2[ 0 ], bytes );
+        out.write( (const char*) &p3[ 0 ], bytes );
+        out.write( (const char*) &p4[ 0 ], bytes );
+        out.write( (const char*) &p5[ 0 ], bytes );
       }
 
     protected:
       static Dune::BoundarySegment< 3 >*
-      restore( std::stringstream& buffer )
+      factory( std::stringstream& in )
       {
         Dune::FieldVector<double,3> p0,p1,p2,p3,p4,p5;
-        //buffer.read( p0 );
-        //buffer.read( p1 );
-        //buffer.read( p2 );
-        //buffer.read( p3 );
-        //buffer.read( p4 );
-        //buffer.read( p5 );
+        const int bytes = sizeof(double)*3;
+        in.read( (char *) &p0[ 0 ], bytes );
+        in.read( (char *) &p1[ 0 ], bytes );
+        in.read( (char *) &p2[ 0 ], bytes );
+        in.read( (char *) &p3[ 0 ], bytes );
+        in.read( (char *) &p4[ 0 ], bytes );
+        in.read( (char *) &p5[ 0 ], bytes );
         return new GmshReaderQuadraticBoundarySegment< 3, 3 >( p0, p1, p2, p3, p4, p5 );
       }
 
