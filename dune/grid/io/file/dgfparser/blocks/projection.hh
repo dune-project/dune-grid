@@ -136,6 +136,7 @@ namespace Dune
       {}
 
       virtual void evaluate ( const Vector &argument, Vector &result ) const = 0;
+      virtual void backup( std::stringstream& buffer ) const = 0 ;
     };
 
 
@@ -163,6 +164,11 @@ namespace Dune
         for( int i = 0; i < dimworld; ++i )
           result[ i ] = y[ i ];
         return result;
+      }
+
+      virtual void backup( std::stringstream& buffer ) const
+      {
+        expression_->backup( buffer );
       }
 
     private:
