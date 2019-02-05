@@ -13,15 +13,28 @@
 #include <dune/geometry/multilineargeometry.hh>
 
 #include <dune/grid/common/boundarysegment.hh>
+#include <dune/grid/common/datahandleif.hh>
+#include <dune/grid/io/file/gmshreader.hh>
 
 namespace Dune
 {
+  /** \brief Interface class for vertex projection at the boundary.
+   */
+  template <int dimworld>
+  struct DuneBoundaryProjection;
 
   /** \brief Interface class for vertex projection at the boundary.
    */
   template <int dimworld>
   struct DuneBoundaryProjection
+    : public BoundarySegmentBackupRestore< DuneBoundaryProjection< dimworld > >
   {
+    typedef DuneBoundaryProjection< dimworld > ThisType;
+    typedef BoundarySegmentBackupRestore< DuneBoundaryProjection< dimworld > > BaseType;
+
+    using BaseType :: restore;
+    using BaseType :: registerFactory;
+
     //! \brief type of coordinate vector
     typedef FieldVector< double, dimworld> CoordinateType;
     //! \brief destructor
@@ -29,6 +42,42 @@ namespace Dune
 
     //! \brief projection operator projection a global coordinate
     virtual CoordinateType operator() (const CoordinateType& global) const = 0;
+
+    /** \brief write DuneBoundaryProjection's data to stream buffer
+     *  \param buffer buffer to store data
+     */
+    virtual void backup( std::stringstream& buffer ) const
+    {
+      DUNE_THROW(NotImplemented,"DuneBoundaryProjection::backup needs to be overloaded!");
+    }
+
+    template <class BufferImp>
+    void toBuffer( MessageBufferIF< BufferImp > & buffer ) const
+    {
+      std::stringstream str;
+      // call virtual interface backup
+      backup( str );
+      std::string data = str.str();
+      const size_t size = data.size();
+      buffer.write( size );
+      for( size_t i=0; i<size; ++i )
+        buffer.write( data[ i ] );
+    }
+
+    template <class BufferImp>
+    static ThisType* restoreFromBuffer( MessageBufferIF< BufferImp > & buffer )
+    {
+      std::string data;
+      size_t size = 0;
+      buffer.read( size );
+      data.resize( size );
+      for( size_t i=0; i<size; ++i )
+        buffer.read( data[ i ] );
+
+      std::stringstream str;
+      str.write( data.c_str(), size );
+      return BaseType::restore( str );
+    }
   };
 
   template < int dimworld >
@@ -69,6 +118,7 @@ namespace Dune
 
     typedef MultiLinearGeometry<typename Base::CoordinateType::value_type,dim-1,dimworld> FaceMapping;
 
+    typedef GmshReaderQuadraticBoundarySegment< dim, dimworld >  GmshBoundarySegment;
   public:
     typedef typename Base::CoordinateType CoordinateType;
     typedef Dune::BoundarySegment< dim, dimworld > BoundarySegment;
@@ -96,6 +146,51 @@ namespace Dune
     const BoundarySegment &boundarySegment () const
     {
       return *boundarySegment_;
+    }
+
+    void backup( std::stringstream& buffer ) const
+    {
+      // write identifier key first
+      buffer.write( key(), Base::keyLength );
+      // now all data
+      GeometryType type = faceMapping_.type();
+      buffer.write( (const char *) &type, sizeof(GeometryType) );
+
+      int corners = faceMapping_.corners() ;
+      buffer.write( (const char *) &corners, sizeof(int) );
+
+      CoordinateType corner( 0 );
+      for( int i=0; i<corners; ++i )
+      {
+        corner = faceMapping_.corner( i );
+        buffer.write( (const char *) &corner[ 0 ], sizeof(double)*CoordinateType::dimension );
+      }
+
+      boundarySegment_->backup( buffer );
+    }
+
+    static void registerFactory()
+    {
+      Base::registerFactory( key(), &factory );
+    }
+
+  protected:
+    static const char* key () { return "bswr"; }
+
+    // create and object of this class from a stream buffer
+    static Base* factory( std::stringstream& buffer )
+    {
+      GeometryType type;
+      buffer.read( (char *) &type, sizeof(GeometryType) );
+      int corners = 0;
+      buffer.read( (char *) &corners, sizeof(int) );
+      std::vector< CoordinateType > vertices( corners, CoordinateType(0) );
+      for( int i=0; i<corners; ++i )
+      {
+        buffer.read( (char *) &vertices[ i ][ 0 ], sizeof(double)*CoordinateType::dimension );
+      }
+      std::shared_ptr< BoundarySegment > ptr( BoundarySegment::restore( buffer ) );
+      return new BoundarySegmentWrapper< dim, dimworld >( type, vertices, ptr );
     }
 
   private:
