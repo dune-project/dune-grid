@@ -3,6 +3,7 @@
 #ifndef DUNE_GRID_COMMON_BOUNDARY_SEGMENT_HH
 #define DUNE_GRID_COMMON_BOUNDARY_SEGMENT_HH
 
+#include <map>
 #include <sstream>
 
 #include <dune/common/fvector.hh>
