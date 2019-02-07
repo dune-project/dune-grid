@@ -64,7 +64,10 @@ namespace Dune
       const DuneBoundaryProjection< dimworld > *defaultProjection () const
       {
         if( defaultFunction_ != 0 )
-          return new BoundaryProjection< dimworld >( defaultFunction_ );
+        {
+          std::string name( "default" );
+          return new BoundaryProjection< dimworld >( defaultFunction_, name );
+        }
         else
           return 0;
       }
@@ -84,7 +87,7 @@ namespace Dune
       const DuneBoundaryProjection< dimworld > *boundaryProjection ( const size_t i ) const
       {
         assert( i < numBoundaryProjections() );
-        return new BoundaryProjection< dimworld >( boundaryFunctions_[ i ].second );
+        return new BoundaryProjection< dimworld >( boundaryFunctions_[ i ].second, expressionNames_[ i ] );
       }
 
       const Expression *function ( const std::string &name ) const
@@ -122,6 +125,7 @@ namespace Dune
       FunctionMap functions_;
       const Expression *defaultFunction_;
       std::vector< BoundaryFunction > boundaryFunctions_;
+      std::vector< std::string > expressionNames_;
     };
 
 
@@ -136,7 +140,6 @@ namespace Dune
       {}
 
       virtual void evaluate ( const Vector &argument, Vector &result ) const = 0;
-      virtual void backup( std::stringstream& buffer ) const = 0 ;
     };
 
 
@@ -145,12 +148,14 @@ namespace Dune
       : public DuneBoundaryProjection< dimworld >
     {
       typedef DuneBoundaryProjection< dimworld > Base;
+      typedef BoundaryProjection < dimworld >    This;
 
     public:
       typedef typename Base::CoordinateType CoordinateType;
 
-      BoundaryProjection ( const Expression *expression )
-        : expression_( expression )
+      BoundaryProjection ( const Expression* expression, const std::string& expressionName )
+        : expression_( expression ),
+          expressionName_( expressionName )
       {}
 
       virtual CoordinateType operator() ( const CoordinateType &global ) const
@@ -166,13 +171,33 @@ namespace Dune
         return result;
       }
 
-      virtual void backup( std::stringstream& buffer ) const
+      // backup name of expression that should allow to recreate this class
+      virtual void backup( std::stringstream& buffer ) const override
       {
-        expression_->backup( buffer );
+        buffer.write( key(), Base::keyLength );
+        int size = expressionName_.size();
+        buffer.write( (const char *) &size, sizeof(int) );
+        buffer.write( expressionName_.c_str(), size );
       }
 
-    private:
-      const Expression *expression_;
+    protected:
+      static const char* key () { return "dgfp"; }
+
+      static Base* factory( std::stringstream& buffer )
+      {
+        int size = 0;
+        buffer.read( (char *) &size, sizeof(int) );
+        std::string exprname;
+        exprname.resize( size );
+        buffer.read( (char *) exprname.c_str(), size );
+
+        const Expression* expr = nullptr;
+        // ...
+        return new This( expr, exprname );
+      }
+
+      const Expression* expression_;
+      const std::string expressionName_;
     };
 
   }
