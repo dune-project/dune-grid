@@ -447,13 +447,15 @@ namespace Dune
     {
       while( getnextline() )
       {
-        //std::cout << "Projection line:" << line.str() << std::endl;
+        std::string thisLine = line.str();
         nextToken();
 
         if( token.type == Token::functionKeyword )
         {
           nextToken();
           parseFunction();
+          expressionNames_.push_back( thisLine );
+          std::cout << "Projection line: '" << thisLine << "'" << std::endl;
         }
         else if( token.type == Token::defaultKeyword )
         {
