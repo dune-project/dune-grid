@@ -78,15 +78,12 @@ namespace Dune
         alpha=d1.two_norm()/(d1.two_norm()+d2.two_norm());
         if (alpha<1E-6 || alpha>1-1E-6)
           DUNE_THROW(Dune::IOError, "ration in quadratic boundary segment bad");
-
-        std::cout << "Create GmshSegment: (" << p0 << ") (" << p1 << ") (" << p2 << ") " << alpha << std::endl;
       }
 
       static const char* key () { return "gms2"; }
 
       static void registerFactory()
       {
-        std::cout << "Call register Factory" << std::endl;
         Dune::BoundarySegment< 2, dimWorld >::registerFactory( key(), &factory );
       }
 
