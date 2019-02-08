@@ -442,8 +442,11 @@ namespace Dune
 
     ProjectionBlock::ProjectionBlock ( std::istream &in, int dimworld )
       : BasicBlock( in, "Projection" ),
-        defaultFunction_( 0 )
+        defaultFunction_()
     {
+      // for backup and load balancing
+      registerProjectionFactory( dimworld );
+
       while( getnextline() )
       {
         std::string thisLine = line.str();
@@ -452,9 +455,8 @@ namespace Dune
         if( token.type == Token::functionKeyword )
         {
           nextToken();
-          parseFunction();
-          expressionNames_.push_back( thisLine );
-          std::cout << "Projection line: '" << thisLine << "'" << std::endl;
+          parseFunction( thisLine );
+          // std::cout << "Projection line: '" << thisLine << "'" << std::endl;
         }
         else if( token.type == Token::defaultKeyword )
         {
@@ -473,7 +475,7 @@ namespace Dune
     }
 
 
-    void ProjectionBlock::parseFunction ()
+    void ProjectionBlock::parseFunction ( const std::string& exprname )
     {
       if( token.type != Token::string )
         DUNE_THROW( DGFException, "Error in " << *this << ": function name expected." );
@@ -493,7 +495,7 @@ namespace Dune
       ExpressionPointer expression = parseExpression( variableName );
 
       //std::cout << std::endl << "Declaring function: " << functionName << "( " << variableName << " )" << std::endl;
-      functions_[ functionName ] = expression;
+      functions_[ functionName ] = std::make_pair( expression, exprname );
     }
 
 
@@ -558,7 +560,7 @@ namespace Dune
             DUNE_THROW( DGFException, "Error in " << *this << ": function " << token.literal << " not declared." );
           nextToken();
           matchToken( Token::openingParen, "'(' expected." );
-          expression.reset( new Expr::FunctionCallExpression( it->second, parseExpression( variableName ) ) );
+          expression.reset( new Expr::FunctionCallExpression( it->second.first, parseExpression( variableName ) ) );
           matchToken( Token::closingParen, "')' expected." );
         }
         else
