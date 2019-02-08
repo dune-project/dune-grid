@@ -53,6 +53,8 @@ namespace Dune
     public:
       struct Expression;
 
+      typedef std::shared_ptr< Expression > ExpressionPointer;
+
     private:
       template< int dimworld >
       class BoundaryProjection;
@@ -90,7 +92,7 @@ namespace Dune
         return new BoundaryProjection< dimworld >( boundaryFunctions_[ i ].second, expressionNames_[ i ] );
       }
 
-      const Expression *function ( const std::string &name ) const
+      ExpressionPointer function ( const std::string &name ) const
       {
         const FunctionMap::const_iterator it = functions_.find( name );
         return (it != functions_.end() ? it->second : 0);
@@ -98,12 +100,12 @@ namespace Dune
 
     private:
       void parseFunction ();
-      const Expression *parseBasicExpression ( const std::string &variableName );
-      const Expression *parsePostfixExpression ( const std::string &variableName );
-      const Expression *parseUnaryExpression ( const std::string &variableName );
-      const Expression *parsePowerExpression ( const std::string &variableName );
-      const Expression *parseMultiplicativeExpression ( const std::string &variableName );
-      const Expression *parseExpression ( const std::string &variableName );
+      ExpressionPointer parseBasicExpression ( const std::string &variableName );
+      ExpressionPointer parsePostfixExpression ( const std::string &variableName );
+      ExpressionPointer parseUnaryExpression ( const std::string &variableName );
+      ExpressionPointer parsePowerExpression ( const std::string &variableName );
+      ExpressionPointer parseMultiplicativeExpression ( const std::string &variableName );
+      ExpressionPointer parseExpression ( const std::string &variableName );
       void parseDefault ();
       void parseSegment ();
 
@@ -116,14 +118,14 @@ namespace Dune
       }
 
     protected:
-      typedef std::map< std::string, const Expression * > FunctionMap;
-      typedef std::pair< std::vector< unsigned int >, const Expression * > BoundaryFunction;
+      typedef std::map< std::string, ExpressionPointer  > FunctionMap;
+      typedef std::pair< std::vector< unsigned int >, ExpressionPointer > BoundaryFunction;
 
       using BasicBlock::line;
 
       Token token;
       FunctionMap functions_;
-      const Expression *defaultFunction_;
+      ExpressionPointer defaultFunction_;
       std::vector< BoundaryFunction > boundaryFunctions_;
       std::vector< std::string > expressionNames_;
     };
@@ -153,7 +155,7 @@ namespace Dune
     public:
       typedef typename Base::CoordinateType CoordinateType;
 
-      BoundaryProjection ( const Expression* expression, const std::string& expressionName )
+      BoundaryProjection ( const ExpressionPointer& expression, const std::string& expressionName )
         : expression_( expression ),
           expressionName_( expressionName )
       {}
@@ -191,13 +193,13 @@ namespace Dune
         exprname.resize( size );
         buffer.read( (char *) exprname.c_str(), size );
 
-        const Expression* expr = nullptr;
+        ExpressionPointer expr;
         // ...
         return new This( expr, exprname );
       }
 
-      const Expression* expression_;
-      const std::string expressionName_;
+      ExpressionPointer expression_;
+      std::string expressionName_;
     };
 
   }
