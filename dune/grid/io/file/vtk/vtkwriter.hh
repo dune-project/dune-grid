@@ -18,7 +18,6 @@
 
 #include <dune/common/typetraits.hh>
 #include <dune/common/exceptions.hh>
-#include <dune/common/std/memory.hh>
 #include <dune/common/indent.hh>
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/path.hh>
@@ -256,14 +255,14 @@ namespace Dune
       //! Construct a VTKLocalFunction for a dune-functions style LocalFunction
       template<typename F, std::enable_if_t<Impl::IsBindable<F, Entity>::value, int> = 0>
       VTKLocalFunction(F&& f, VTK::FieldInfo fieldInfo)
-        : _f(Dune::Std::make_unique<FunctionWrapper<F> >(std::forward<F>(f)))
+        : _f(std::make_unique<FunctionWrapper<F> >(std::forward<F>(f)))
         , _fieldInfo(fieldInfo)
       {}
 
       //! Construct a VTKLocalFunction for a dune-functions style Function
       template<typename F, std::enable_if_t<not Impl::IsBindable<F, Entity>::value, int> = 0>
       VTKLocalFunction(F&& f, VTK::FieldInfo fieldInfo)
-        : _f(Dune::Std::make_unique< FunctionWrapper<
+        : _f(std::make_unique< FunctionWrapper<
           typename std::decay<decltype(localFunction(std::forward<F>(f)))>::type
           > >(localFunction(std::forward<F>(f))))
         , _fieldInfo(fieldInfo)
@@ -271,7 +270,7 @@ namespace Dune
 
       //! Construct a VTKLocalFunction for a legacy VTKFunction
       explicit VTKLocalFunction (const std::shared_ptr< const VTKFunction >& vtkFunctionPtr)
-        : _f(Dune::Std::make_unique<VTKFunctionWrapper>(vtkFunctionPtr))
+        : _f(std::make_unique<VTKFunctionWrapper>(vtkFunctionPtr))
         , _fieldInfo(
           vtkFunctionPtr->name(),
           vtkFunctionPtr->ncomps() > 1 ? VTK::FieldInfo::Type::vector : VTK::FieldInfo::Type::scalar,
