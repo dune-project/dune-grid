@@ -441,7 +441,7 @@ namespace Dune
     // ---------------
 
     ProjectionBlock::ProjectionBlock ( std::istream &in, int dimworld )
-      : BasicBlock( in, "Projection" ),
+      : BasicBlock( in, blockId() ),
         defaultFunction_()
     {
       // for backup and load balancing
