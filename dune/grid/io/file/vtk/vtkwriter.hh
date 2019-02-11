@@ -105,8 +105,8 @@ namespace Dune
 
     typedef typename GridView::IndexSet IndexSet;
 
-    //static const PartitionIteratorType VTK_Partition = InteriorBorder_Partition;
-    static const PartitionIteratorType VTK_Partition = All_Partition;
+    static const PartitionIteratorType VTK_Partition = InteriorBorder_Partition;
+    //static const PartitionIteratorType VTK_Partition = All_Partition;
 
     typedef typename GridView::template Codim< 0 >
     ::template Partition< VTK_Partition >::Iterator

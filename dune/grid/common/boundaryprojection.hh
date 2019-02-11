@@ -48,7 +48,7 @@ namespace Dune
      */
     virtual void backup( std::stringstream& buffer ) const
     {
-      DUNE_THROW(NotImplemented,"DuneBoundaryProjection::backup needs to be overloaded!");
+      DUNE_THROW(NotImplemented,"DuneBoundaryProjection::backup not overloaded!");
     }
 
     template <class BufferImp>

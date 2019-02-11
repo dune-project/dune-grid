@@ -80,7 +80,6 @@ namespace Dune {
       auto it = fac.find( key );
       if( it == fac.end() )
       {
-        std::cout << "Register seg " << key << std::endl;
         fac.insert( std::make_pair( key, factory ) );
       }
     }
