@@ -83,7 +83,7 @@ int main(int argc, char** argv)
 {
 #if ! (HAVE_PARMETIS && defined(PARMETIS_MAJOR_VERSION))
   // Skip test -- without ParMetis it doesn't do anything useful
-  std::cerr << "This test requires ParMetis.\n"
+  std::cerr << "This test requires ParMetis and will be skipped.\n"
             << "Note that the emulation layer provided by scotch is not sufficient.\n";
   return 77;
 #else
