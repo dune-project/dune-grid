@@ -5,7 +5,7 @@
 #define DUNE_GRID_IO_FILE_VTK_DATAARRAYWRITER_HH
 
 #include <cstdint>
-#include <ostream>
+#include <iostream>
 #include <string>
 #include <iomanip>
 #include <cstdint>
