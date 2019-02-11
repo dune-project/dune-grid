@@ -62,6 +62,7 @@ namespace Dune
 
       void registerProjectionFactory( const int dimworld );
 
+      static const char* blockId() { return "Projection"; }
     public:
       ProjectionBlock ( std::istream &in, int dimworld );
 
@@ -109,7 +110,9 @@ namespace Dune
       static ProjectionBlock::ExpressionPair createExpression( const std::string& funcexpr, const int dimworld )
       {
         std::stringstream str;
-        str << funcexpr;
+        str << blockId() << std::endl;
+        str << funcexpr << std::endl;
+        str << "#" << std::endl;
         ProjectionBlock problock( str, dimworld );
         return problock.lastFunctionInserted();
       }
