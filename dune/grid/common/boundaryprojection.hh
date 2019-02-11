@@ -132,7 +132,6 @@ namespace Dune
 
     typedef MultiLinearGeometry<typename Base::CoordinateType::value_type,dim-1,dimworld> FaceMapping;
 
-    typedef GmshReaderQuadraticBoundarySegment< dim, dimworld >  GmshBoundarySegment;
   public:
     typedef typename Base::CoordinateType CoordinateType;
     typedef Dune::BoundarySegment< dim, dimworld > BoundarySegment;
