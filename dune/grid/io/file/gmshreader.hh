@@ -47,7 +47,11 @@ namespace Dune
     // arbitrary dimension, implementation is in specialization
     template< int dimension, int dimWorld = dimension >
     class GmshReaderQuadraticBoundarySegment
-    {};
+    {
+    public:
+      // empty function since this class does not implement anything
+      static void registerFactory() {}
+    };
 
     // quadratic boundary segments in 1d
     /*
