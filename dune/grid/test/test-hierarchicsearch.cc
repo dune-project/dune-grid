@@ -9,7 +9,6 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/parallel/mpihelper.hh>
-#include <dune/common/std/memory.hh>
 
 #include <dune/grid/common/exceptions.hh>
 #include <dune/grid/utility/hierarchicsearch.hh>
@@ -32,7 +31,7 @@ public:
     Dune::FieldVector< double, dimension > domain( 1. );
     std::array< int, dimension > cells;
     cells.fill( 1 );
-    return Dune::Std::make_unique< Grid >( domain, cells );
+    return std::make_unique< Grid >( domain, cells );
   }
 };
 
