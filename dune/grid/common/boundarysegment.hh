@@ -37,14 +37,14 @@ namespace Dune {
   {
   protected:
     typedef BndSeg  BoundarySegment;
-    static const unsigned int keyLength = 4 ;
   public:
-    typedef BoundarySegment* BoundarySegmentFactoryType( std::stringstream& in );
+    // type of object stream used for storing boundary segment information
+    typedef std::stringstream ObjectStreamType ;
 
-    //typedef std::type_info  KeyType;
-    typedef std::string KeyType;
+    typedef BoundarySegment* BoundarySegmentFactoryType( const std::string&, ObjectStreamType& in );
 
-    typedef std::map< KeyType, BoundarySegmentFactoryType* > FactoryStorage;
+    // type of factory function pointer storage
+    typedef std::vector< std::pair< BoundarySegmentFactoryType*, std::string > > FactoryStorage;
 
   protected:
     /** \brief create an object of BoundarySegment type from a previously
@@ -53,35 +53,33 @@ namespace Dune {
      *
      *  \return Object derived from BoundarySegment.
      */
-    static BoundarySegment* restore( std::stringstream& in )
+    static BoundarySegment* restore( ObjectStreamType& in )
     {
       FactoryStorage& fac = storage();
-      char key[ keyLength ];
-      in.read( key, keyLength );
+      int key;
+      in.read( (char *) &key, sizeof( int ) );
 
-      auto it = fac.find( std::string(key) );
-      if( it == fac.end() )
-      {
-        DUNE_THROW(NotImplemented,"Requested BoundarySegment type " << std::string(key) << " not previously registered");
-      }
+      assert( key >= 0 );
+      assert( key < int(fac.size()) );
+      auto& factory = fac[ key ];
 
-      // call factory routine
-      return it->second( in );
+      // call factory routine to create object
+      return factory.first( factory.second, in );
     }
 
-    static void registerFactory( const KeyType& key, BoundarySegmentFactoryType* factory )
+    static int registerFactory( const std::string& className, BoundarySegmentFactoryType* factory )
     {
-      if( key.size() != keyLength )
+      FactoryStorage& fac = storage();
+      for( const auto& item : fac )
       {
-        DUNE_THROW(InvalidStateException,"Key for BoundarySegment type is expected to have length " << keyLength);
+        if( item.second == className )
+        {
+          DUNE_THROW(InvalidStateException,"BoundarySegment::registerFactory: " << className << " already registered!");
+        }
       }
 
-      FactoryStorage& fac = storage();
-      auto it = fac.find( key );
-      if( it == fac.end() )
-      {
-        fac.insert( std::make_pair( key, factory ) );
-      }
+      fac.push_back( std::make_pair( factory, className ) );
+      return fac.size()-1;
     }
 
   private:
@@ -98,6 +96,8 @@ namespace Dune {
     typedef BoundarySegment< dim, dimworld, ctype > ThisType;
     typedef BoundarySegmentBackupRestore< BoundarySegment< dim, dimworld, ctype > > BaseType;
 
+    typedef typename BaseType :: ObjectStreamType ObjectStreamType;
+
     using BaseType :: restore;
     using BaseType :: registerFactory;
 
@@ -112,7 +112,7 @@ namespace Dune {
     /** \brief write BoundarySegment's data to stream buffer
      *  \param buffer buffer to store data
      */
-    virtual void backup( std::stringstream& buffer ) const
+    virtual void backup( ObjectStreamType& buffer ) const
     {
       DUNE_THROW(NotImplemented,"BoundarySegment::backup needs to be overloaded!");
     }

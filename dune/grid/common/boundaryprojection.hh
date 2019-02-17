@@ -31,6 +31,7 @@ namespace Dune
   {
     typedef DuneBoundaryProjection< dimworld > ThisType;
     typedef BoundarySegmentBackupRestore< DuneBoundaryProjection< dimworld > > BaseType;
+    typedef typename BaseType :: ObjectStreamType  ObjectStreamType;
 
     using BaseType :: restore;
     using BaseType :: registerFactory;
@@ -46,7 +47,7 @@ namespace Dune
     /** \brief write DuneBoundaryProjection's data to stream buffer
      *  \param buffer buffer to store data
      */
-    virtual void backup( std::stringstream& buffer ) const
+    virtual void backup( ObjectStreamType& buffer ) const
     {
       DUNE_THROW(NotImplemented,"DuneBoundaryProjection::backup not overloaded!");
     }
@@ -61,7 +62,7 @@ namespace Dune
     template <class BufferImp>
     void toBuffer( MessageBufferIF< BufferImp > & buffer ) const
     {
-      std::stringstream str;
+      ObjectStreamType str;
       // call virtual interface backup
       backup( str );
       std::string data = str.str();
@@ -88,7 +89,7 @@ namespace Dune
       for( size_t i=0; i<size; ++i )
         buffer.read( data[ i ] );
 
-      std::stringstream str;
+      ObjectStreamType str;
       str.write( data.c_str(), size );
       return BaseType::restore( str );
     }
@@ -128,7 +129,10 @@ namespace Dune
   class BoundarySegmentWrapper
     : public DuneBoundaryProjection< dimworld >
   {
-    typedef DuneBoundaryProjection< dimworld > Base;
+    typedef BoundarySegmentWrapper< dim, dimworld >  ThisType;
+    typedef DuneBoundaryProjection< dimworld >       Base;
+
+    typedef typename Base :: ObjectStreamType  ObjectStreamType;
 
     typedef MultiLinearGeometry<typename Base::CoordinateType::value_type,dim-1,dimworld> FaceMapping;
 
@@ -161,10 +165,10 @@ namespace Dune
       return *boundarySegment_;
     }
 
-    void backup( std::stringstream& buffer ) const
+    void backup( ObjectStreamType& buffer ) const
     {
       // write identifier key first
-      buffer.write( key(), Base::keyLength );
+      buffer.write( (const char *) &key(), sizeof(int));
       // now all data
       GeometryType type = faceMapping_.type();
       buffer.write( (const char *) &type, sizeof(GeometryType) );
@@ -184,15 +188,25 @@ namespace Dune
 
     static void registerFactory()
     {
-      Base::registerFactory( key(), &factory );
+      if( key() < 0 )
+      {
+        key() = Base::registerFactory( typeid( ThisType ).name(), &factory );
+      }
     }
 
   protected:
-    static const char* key () { return "bswr"; }
+    static int& key()
+    {
+      static int k = -1;
+      return k;
+    }
 
     // create and object of this class from a stream buffer
-    static Base* factory( std::stringstream& buffer )
+    static Base* factory( const std::string& className, ObjectStreamType& buffer )
     {
+      // check that the correct function was called
+      assert( className == typeid( ThisType ).name() );
+
       GeometryType type;
       buffer.read( (char *) &type, sizeof(GeometryType) );
       int corners = 0;

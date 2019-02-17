@@ -171,6 +171,7 @@ namespace Dune
     {
       typedef DuneBoundaryProjection< dimworld > Base;
       typedef BoundaryProjection < dimworld >    This;
+      typedef typename Base :: ObjectStreamType  ObjectStreamType;
 
     public:
       typedef typename Base::CoordinateType CoordinateType;
@@ -196,7 +197,7 @@ namespace Dune
       // backup name of expression that should allow to recreate this class
       virtual void backup( std::stringstream& buffer ) const override
       {
-        buffer.write( key(), Base::keyLength );
+        buffer.write( (const char *) &key(), sizeof( int ));
         int size = expressionName_.size();
         buffer.write( (const char *) &size, sizeof(int) );
         buffer.write( expressionName_.c_str(), size );
@@ -204,19 +205,23 @@ namespace Dune
 
       static void registerFactory()
       {
-        static bool firstCall = true ;
-        if( firstCall )
+        if( key() < 0 )
         {
-          Base::registerFactory( key(), &factory );
-          firstCall = false ;
+          key() = Base::registerFactory( typeid( This ).name(), &factory );
         }
       }
 
     protected:
-      static const char* key () { return "dgfp"; }
-
-      static Base* factory( std::stringstream& buffer )
+      static int& key ()
       {
+        static int k = -1;
+        return k;
+      }
+
+      static Base* factory( const std::string& className, ObjectStreamType& buffer )
+      {
+        assert( className == typeid( This ).name() );
+
         int size = 0;
         buffer.read( (char *) &size, sizeof(int) );
         std::string exprname;
