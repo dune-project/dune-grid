@@ -6,6 +6,8 @@
 #include <map>
 #include <sstream>
 
+#include <dune/common/singleton.hh>
+#include <dune/common/parameterizedobject.hh>
 #include <dune/common/fvector.hh>
 
 /** \file
@@ -35,58 +37,53 @@ namespace Dune {
   template <class BndSeg>
   class BoundarySegmentBackupRestore
   {
-  protected:
-    typedef BndSeg  BoundarySegment;
   public:
     // type of object stream used for storing boundary segment information
     typedef std::stringstream ObjectStreamType ;
 
-    typedef BoundarySegment* BoundarySegmentFactoryType( const std::string&, ObjectStreamType& in );
-
-    // type of factory function pointer storage
-    typedef std::vector< std::pair< BoundarySegmentFactoryType*, std::string > > FactoryStorage;
-
   protected:
+    //! type of BoundarySegment interface class
+    typedef BndSeg  BoundarySegment;
+
+    //! type of factory creating a unique_ptr from an ObjectStreamType
+    typedef Dune::ParameterizedObjectFactory< std::unique_ptr< BoundarySegment > ( ObjectStreamType& ), int > FactoryType;
+
     /** \brief create an object of BoundarySegment type from a previously
      *         registered factory linked to key.
      *  \param in stream buffer previously written with backup containing key and object data
      *
      *  \return Object derived from BoundarySegment.
      */
-    static BoundarySegment* restore( ObjectStreamType& in )
+    static std::unique_ptr< BoundarySegment > restore( ObjectStreamType& in )
     {
-      FactoryStorage& fac = storage();
-      int key;
+      int key = -1;
+      // read class key for restore
       in.read( (char *) &key, sizeof( int ) );
 
-      assert( key >= 0 );
-      assert( key < int(fac.size()) );
-      auto& factory = fac[ key ];
-
-      // call factory routine to create object
-      return factory.first( factory.second, in );
+      // factory creates a unique_ptr which can be released later on
+      return factory().create( key, in );
     }
 
-    static int registerFactory( const std::string& className, BoundarySegmentFactoryType* factory )
+    template <class DerivedType>
+    static int registerFactory()
     {
-      FactoryStorage& fac = storage();
-      for( const auto& item : fac )
-      {
-        if( item.second == className )
-        {
-          DUNE_THROW(InvalidStateException,"BoundarySegment::registerFactory: " << className << " already registered!");
-        }
-      }
-
-      fac.push_back( std::make_pair( factory, className ) );
-      return fac.size()-1;
+      const int key = createKey();
+      // create factory method that produces unique_ptr
+      factory().template define< DerivedType >( key );
+      // return key for storage in derived class
+      return key;
     }
 
   private:
-    static FactoryStorage& storage()
+    static int createKey()
     {
-      static FactoryStorage s;
-      return s;
+      static int key = 0;
+      return key++;
+    }
+
+    static FactoryType& factory()
+    {
+      return Dune::Singleton< FactoryType > :: instance();
     }
   };
 

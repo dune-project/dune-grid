@@ -73,14 +73,14 @@ namespace Dune
     }
 
     template <class BufferImp>
-    static ThisType* restoreFromBuffer( BufferImp & buffer )
+    static std::unique_ptr< ThisType > restoreFromBuffer( BufferImp & buffer )
     {
       MessageBufferIF< BufferImp > buf( buffer );
       return restoreFromBuffer( buf );
     }
 
     template <class BufferImp>
-    static ThisType* restoreFromBuffer( MessageBufferIF< BufferImp > & buffer )
+    static std::unique_ptr< ThisType > restoreFromBuffer( MessageBufferIF< BufferImp > & buffer )
     {
       std::string data;
       size_t size = 0;
@@ -155,6 +155,12 @@ namespace Dune
         boundarySegment_( boundarySegment )
     {}
 
+    BoundarySegmentWrapper( ObjectStreamType& buffer )
+      : faceMapping_( readFaceMapping( buffer ) ),
+        boundarySegment_( BoundarySegment::restore( buffer ).release() )
+    {
+    }
+
     CoordinateType operator() ( const CoordinateType &global ) const
     {
       return boundarySegment() ( faceMapping_.local( global ) );
@@ -190,7 +196,7 @@ namespace Dune
     {
       if( key() < 0 )
       {
-        key() = Base::registerFactory( typeid( ThisType ).name(), &factory );
+        key() = Base::template registerFactory< ThisType >();
       }
     }
 
@@ -201,12 +207,8 @@ namespace Dune
       return k;
     }
 
-    // create and object of this class from a stream buffer
-    static Base* factory( const std::string& className, ObjectStreamType& buffer )
+    FaceMapping readFaceMapping( ObjectStreamType& buffer )
     {
-      // check that the correct function was called
-      assert( className == typeid( ThisType ).name() );
-
       GeometryType type;
       buffer.read( (char *) &type, sizeof(GeometryType) );
       int corners = 0;
@@ -216,8 +218,7 @@ namespace Dune
       {
         buffer.read( (char *) &vertices[ i ][ 0 ], sizeof(double)*CoordinateType::dimension );
       }
-      std::shared_ptr< BoundarySegment > ptr( BoundarySegment::restore( buffer ) );
-      return new BoundarySegmentWrapper< dim, dimworld >( type, vertices, ptr );
+      return FaceMapping( type, vertices );
     }
 
   private:

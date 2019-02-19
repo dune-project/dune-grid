@@ -76,21 +76,24 @@ namespace Dune
       GmshReaderQuadraticBoundarySegment ( const GlobalVector &p0_, const GlobalVector &p1_, const GlobalVector &p2_)
         : p0(p0_), p1(p1_), p2(p2_)
       {
-        GlobalVector d1 = p1;
-        d1 -= p0;
-        GlobalVector d2 = p2;
-        d2 -= p1;
+        init();
+      }
 
-        alpha=d1.two_norm()/(d1.two_norm()+d2.two_norm());
-        if (alpha<1E-6 || alpha>1-1E-6)
-          DUNE_THROW(Dune::IOError, "ration in quadratic boundary segment bad");
+      GmshReaderQuadraticBoundarySegment( ObjectStreamType& in )
+      {
+        // key is read before by the factory
+        const int bytes = sizeof(double)*dimWorld;
+        in.read( (char *) &p0[ 0 ], bytes );
+        in.read( (char *) &p1[ 0 ], bytes );
+        in.read( (char *) &p2[ 0 ], bytes );
+        init();
       }
 
       static void registerFactory()
       {
         if( key() < 0 )
         {
-          key() = Dune::BoundarySegment< 2, dimWorld >::registerFactory( typeid( ThisType ).name(), &factory );
+          key() = Dune::BoundarySegment< 2, dimWorld >::template registerFactory< ThisType >();
         }
       }
 
@@ -116,23 +119,21 @@ namespace Dune
       }
 
     protected:
+      void init()
+      {
+        GlobalVector d1 = p1;
+        d1 -= p0;
+        GlobalVector d2 = p2;
+        d2 -= p1;
+
+        alpha=d1.two_norm()/(d1.two_norm()+d2.two_norm());
+        if (alpha<1E-6 || alpha>1-1E-6)
+          DUNE_THROW(Dune::IOError, "ration in quadratic boundary segment bad");
+      }
+
       static int& key() {
         static int k = -1;
         return k;
-      }
-
-      static Dune::BoundarySegment< 2, dimWorld >*
-      factory( const std::string& className, ObjectStreamType& in )
-      {
-        // make sure class matches the stored factory
-        assert( className == typeid( ThisType ).name() );
-        // key is read before by the factory
-        GlobalVector p0,p1,p2;
-        const int bytes = sizeof(double)*dimWorld;
-        in.read( (char *) &p0[ 0 ], bytes );
-        in.read( (char *) &p1[ 0 ], bytes );
-        in.read( (char *) &p2[ 0 ], bytes );
-        return new GmshReaderQuadraticBoundarySegment< 2, dimWorld >( p0, p1, p2 );
       }
 
     private:
@@ -176,6 +177,59 @@ namespace Dune
                                           Dune::FieldVector<double,3> p4_, Dune::FieldVector<double,3> p5_)
         : p0(p0_), p1(p1_), p2(p2_), p3(p3_), p4(p4_), p5(p5_)
       {
+        init();
+      }
+
+      GmshReaderQuadraticBoundarySegment( ObjectStreamType& in )
+      {
+        const int bytes = sizeof(double)*3;
+        in.read( (char *) &p0[ 0 ], bytes );
+        in.read( (char *) &p1[ 0 ], bytes );
+        in.read( (char *) &p2[ 0 ], bytes );
+        in.read( (char *) &p3[ 0 ], bytes );
+        in.read( (char *) &p4[ 0 ], bytes );
+        in.read( (char *) &p5[ 0 ], bytes );
+        init();
+      }
+
+      static void registerFactory()
+      {
+        if( key() < 0 )
+        {
+          key() = Dune::BoundarySegment< 3 >::template registerFactory< ThisType >();
+        }
+      }
+
+      virtual Dune::FieldVector<double,3> operator() (const Dune::FieldVector<double,2>& local) const
+      {
+        Dune::FieldVector<double,3> y;
+        y = 0.0;
+        y.axpy(phi0(local),p0);
+        y.axpy(phi1(local),p1);
+        y.axpy(phi2(local),p2);
+        y.axpy(phi3(local),p3);
+        y.axpy(phi4(local),p4);
+        y.axpy(phi5(local),p5);
+        return y;
+      }
+
+      void backup( ObjectStreamType& out ) const
+      {
+        // backup key to identify object in factory
+        out.write( (const char*) &key(), sizeof( int ) );
+        // backup data
+        const int bytes = sizeof(double)*3;
+        out.write( (const char*) &p0[ 0 ], bytes );
+        out.write( (const char*) &p1[ 0 ], bytes );
+        out.write( (const char*) &p2[ 0 ], bytes );
+        out.write( (const char*) &p3[ 0 ], bytes );
+        out.write( (const char*) &p4[ 0 ], bytes );
+        out.write( (const char*) &p5[ 0 ], bytes );
+      }
+
+    protected:
+      void init()
+      {
         sqrt2 = sqrt(2.0);
         Dune::FieldVector<double,3> d1,d2;
 
@@ -198,62 +252,9 @@ namespace Dune
           DUNE_THROW(Dune::IOError, "gamma in quadratic boundary segment bad");
       }
 
-      static void registerFactory()
-      {
-        if( key() < 0 )
-        {
-          key() = Dune::BoundarySegment< 3 >::registerFactory( typeid( ThisType ).name(), &factory );
-        }
-      }
-
-      virtual Dune::FieldVector<double,3> operator() (const Dune::FieldVector<double,2>& local) const
-      {
-        Dune::FieldVector<double,3> y;
-        y = 0.0;
-        y.axpy(phi0(local),p0);
-        y.axpy(phi1(local),p1);
-        y.axpy(phi2(local),p2);
-        y.axpy(phi3(local),p3);
-        y.axpy(phi4(local),p4);
-        y.axpy(phi5(local),p5);
-        return y;
-      }
-
-      void backup( std::stringstream& out ) const
-      {
-        // backup key to identify object
-        out.write( (const char*) &key(), sizeof( int ) );
-        // backup data
-        const int bytes = sizeof(double)*3;
-        out.write( (const char*) &p0[ 0 ], bytes );
-        out.write( (const char*) &p1[ 0 ], bytes );
-        out.write( (const char*) &p2[ 0 ], bytes );
-        out.write( (const char*) &p3[ 0 ], bytes );
-        out.write( (const char*) &p4[ 0 ], bytes );
-        out.write( (const char*) &p5[ 0 ], bytes );
-      }
-
-    protected:
       static int& key() {
         static int k = -1;
         return k;
-      }
-
-      static Dune::BoundarySegment< 3 >*
-      factory( const std::string& className, ObjectStreamType& in )
-      {
-        // make sure class matches the stored factory
-        assert( className == typeid( ThisType ).name() );
-
-        Dune::FieldVector<double,3> p0,p1,p2,p3,p4,p5;
-        const int bytes = sizeof(double)*3;
-        in.read( (char *) &p0[ 0 ], bytes );
-        in.read( (char *) &p1[ 0 ], bytes );
-        in.read( (char *) &p2[ 0 ], bytes );
-        in.read( (char *) &p3[ 0 ], bytes );
-        in.read( (char *) &p4[ 0 ], bytes );
-        in.read( (char *) &p5[ 0 ], bytes );
-        return new GmshReaderQuadraticBoundarySegment< 3, 3 >( p0, p1, p2, p3, p4, p5 );
       }
 
     private:

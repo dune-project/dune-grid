@@ -181,6 +181,15 @@ namespace Dune
           expressionName_( exprpair.second )
       {}
 
+      BoundaryProjection( ObjectStreamType& buffer )
+      {
+        int size = 0;
+        buffer.read( (char *) &size, sizeof(int) );
+        expressionName_.resize( size );
+        buffer.read( (char *) expressionName_.c_str(), size );
+        expression_ = ProjectionBlock::createExpression( expressionName_, dimworld ).first;
+      }
+
       virtual CoordinateType operator() ( const CoordinateType &global ) const
       {
         std::vector< double > x( dimworld );
@@ -207,7 +216,7 @@ namespace Dune
       {
         if( key() < 0 )
         {
-          key() = Base::registerFactory( typeid( This ).name(), &factory );
+          key() = Base::template registerFactory< This >();
         }
       }
 
@@ -216,19 +225,6 @@ namespace Dune
       {
         static int k = -1;
         return k;
-      }
-
-      static Base* factory( const std::string& className, ObjectStreamType& buffer )
-      {
-        assert( className == typeid( This ).name() );
-
-        int size = 0;
-        buffer.read( (char *) &size, sizeof(int) );
-        std::string exprname;
-        exprname.resize( size );
-        buffer.read( (char *) exprname.c_str(), size );
-
-        return new This( ProjectionBlock::createExpression( exprname, dimworld ) );
       }
 
       ExpressionPointer expression_;
