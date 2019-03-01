@@ -137,7 +137,11 @@ namespace Dune
           if( (info.ndim != 2) || (info.shape[ 1 ] != numVertices) )
           {
             std::ostringstream msg;
-            msg << "buffer for geometry type " << type << " must be of shape (*, " << numVertices << ")";
+            msg << "buffer for geometry type " << type << " must be of shape (*, " << numVertices << ")\n";
+            if (info.ndim != 2)
+              msg << " shape dimension is not 2 but " << info.ndim;
+            else
+              msg << " shape dimension is 2 but shape[1] is " << info.shape[ 1 ];
             throw std::invalid_argument( msg.str() );
           }
 
@@ -275,21 +279,33 @@ namespace Dune
       else
         throw std::invalid_argument( "Missing Key: 'vertices'" );
 
+      if( dict.contains( "elements" ) )
+        detail::GridFactory::insertElements( dict[ "elements" ], factory );
+
       if( dict.contains( "lines" ) )
         detail::GridFactory::insertElements( GeometryTypes::line, dict[ "lines" ], factory );
+      if( dict.contains( "line" ) )
+        detail::GridFactory::insertElements( GeometryTypes::line, dict[ "line" ], factory );
+
       if( dict.contains( "triangles" ) )
         detail::GridFactory::insertElements( GeometryTypes::triangle, dict[ "triangles" ], factory );
+      if( dict.contains( "triangle" ) )
+        detail::GridFactory::insertElements( GeometryTypes::triangle, dict[ "triangles" ], factory );
+
       if( dict.contains( "tetrahedra" ) )
         detail::GridFactory::insertElements( GeometryTypes::tetrahedron, dict[ "tetrahedra" ], factory );
-
       if( dict.contains( "simplices" ) )
         detail::GridFactory::insertElements( GeometryTypes::simplex( dimGrid ), dict[ "simplices" ], factory );
+      if( dict.contains( "tetra" ) )
+      {
+        std::cout << "reading tetras\n";
+        detail::GridFactory::insertElements( GeometryTypes::simplex( dimGrid ), dict[ "tetra" ], factory );
+      }
 
       if( dict.contains( "quadrilaterals" ) )
         detail::GridFactory::insertElements( GeometryTypes::quadrilateral, dict[ "quadrilaterals" ], factory );
       if( dict.contains( "hexahedra" ) )
         detail::GridFactory::insertElements( GeometryTypes::hexahedron, dict[ "hexahedra" ], factory );
-
       if( dict.contains( "cubes" ) )
         detail::GridFactory::insertElements( GeometryTypes::cube( dimGrid ), dict[ "cubes" ], factory );
 
@@ -297,9 +313,6 @@ namespace Dune
         detail::GridFactory::insertElements( GeometryTypes::prism, dict[ "prisms" ], factory );
       if( dict.contains( "pyramid" ) )
         detail::GridFactory::insertElements( GeometryTypes::prism, dict[ "pyramids" ], factory );
-
-      if( dict.contains( "elements" ) )
-        detail::GridFactory::insertElements( dict[ "elements" ], factory );
 
       if( dict.contains( "boundaries" ) )
         detail::GridFactory::insertBoundaries( dict[ "boundaries" ], factory );
