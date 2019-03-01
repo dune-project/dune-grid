@@ -18,7 +18,9 @@ def getDimgrid(constructor):
         try:
             dimgrid = len(constructor["vertices"][0])
         except KeyError:
-            raise ValueError("Couldn't extract dimension of grid from constructor arguments, added dimgrid parameter")
+            pass
+    if not dimgrid:
+        raise ValueError("Couldn't extract dimension of grid from constructor arguments, added dimgrid parameter")
     return dimgrid
 
 def triangulation(grid, level=0):
@@ -182,10 +184,10 @@ def levelView(hgrid,level):
     return hgrid._levelView(level)
 
 generator = SimpleGenerator("HierarchicalGrid", "Dune::Python")
-def module(includes, typeName, *args):
+def module(includes, typeName, *args, **kwargs):
     includes = includes + ["dune/python/grid/hierarchical.hh"]
     typeHash = "hierarchicalgrid_" + hashIt(typeName)
-    module = generator.load(includes, typeName, typeHash, *args)
+    module = generator.load(includes, typeName, typeHash, *args, **kwargs)
     addAttr(module, module.LeafGrid)
 
     # register reference element for this grid
