@@ -73,13 +73,6 @@ namespace Dune
 
   } // namespace Impl
 
-  namespace VTKWriteTypeTraits {
-    template<typename T>
-    struct IsLocalFunction
-    {
-    };
-  }
-
   // Forward-declaration here, so the class can be friend of VTKWriter
   template <class GridView>
   class VTKSequenceWriterBase;
