@@ -273,7 +273,7 @@ namespace Dune
         : _f(std::make_unique<VTKFunctionWrapper>(vtkFunctionPtr))
         , _fieldInfo(
           vtkFunctionPtr->name(),
-          vtkFunctionPtr->ncomps() == n ? VTK::FieldInfo::Type::vector : VTK::FieldInfo::Type::scalar
+          vtkFunctionPtr->ncomps() == n ? VTK::FieldInfo::Type::vector : VTK::FieldInfo::Type::scalar,
           vtkFunctionPtr->ncomps(),
           vtkFunctionPtr->precision()
           )
