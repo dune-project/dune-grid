@@ -273,7 +273,7 @@ namespace Dune
         : _f(std::make_unique<VTKFunctionWrapper>(vtkFunctionPtr))
         , _fieldInfo(
           vtkFunctionPtr->name(),
-          vtkFunctionPtr->ncomps() > 1 ? VTK::FieldInfo::Type::vector : VTK::FieldInfo::Type::scalar,
+          vtkFunctionPtr->ncomps() == n ? VTK::FieldInfo::Type::vector : VTK::FieldInfo::Type::scalar
           vtkFunctionPtr->ncomps(),
           vtkFunctionPtr->precision()
           )
@@ -1176,7 +1176,7 @@ namespace Dune
             writecomps = 3;
             break;
           case VTK::FieldInfo::Type::tensor:
-            DUNE_THROW(NotImplemented,"VTK output for tensors not implemented yet");
+            break;// DUNE_THROW(NotImplemented,"VTK output for tensors not implemented yet");
           }
         std::shared_ptr<VTK::DataArrayWriter> p
           (writer.makeArrayWriter(f.name(), writecomps, nentries, fieldInfo.precision()));
