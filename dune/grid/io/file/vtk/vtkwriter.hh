@@ -1176,7 +1176,7 @@ namespace Dune
             writecomps = 3;
             break;
           case VTK::FieldInfo::Type::tensor:
-            break;// DUNE_THROW(NotImplemented,"VTK output for tensors not implemented yet");
+            DUNE_THROW(NotImplemented,"VTK output for tensors not implemented yet");
           }
         std::shared_ptr<VTK::DataArrayWriter> p
           (writer.makeArrayWriter(f.name(), writecomps, nentries, fieldInfo.precision()));
