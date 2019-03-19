@@ -49,7 +49,7 @@ namespace Dune
 
   namespace Impl
   {
-
+    // Check whether type F has a method 'bind'  (see the dune-functions interface)
     template< class F, class E, class = void >
     struct IsBindable
       : std::false_type
@@ -60,14 +60,18 @@ namespace Dune
       : std::true_type
     {};
 
-  } // namespace Impl
+    // Check whether localFunction(F) can be called  (see the dune-functions interface)
+    template< class F, class = void >
+    struct HasLocalFunction
+      : std::false_type
+    {};
 
-  namespace VTKWriteTypeTraits {
-    template<typename T>
-    struct IsLocalFunction
-    {
-    };
-  }
+    template< class F >
+    struct HasLocalFunction< F, void_t< decltype( localFunction( std::declval< F& >() ) ) > >
+      : std::true_type
+    {};
+
+  } // namespace Impl
 
   // Forward-declaration here, so the class can be friend of VTKWriter
   template <class GridView>
@@ -220,6 +224,48 @@ namespace Dune
         Function _f;
       };
 
+      //! Type erasure implementation for C++ functions, i.e., functions that can be evaluated in global coordinates
+      template<typename F>
+      struct GlobalFunctionWrapper
+        : public FunctionWrapperBase
+      {
+        using Function = typename std::decay<F>::type;
+
+        template<typename F_>
+        GlobalFunctionWrapper(F_&& f)
+          : _f(std::forward<F_>(f))
+          , element_(nullptr)
+        {}
+
+        virtual void bind(const Entity& e)
+        {
+          element_ = &e;
+        }
+
+        virtual void unbind()
+        {
+          element_ = nullptr;
+        }
+
+        virtual void write(const Coordinate& pos, Writer& w, std::size_t count) const
+        {
+          auto globalPos = element_->geometry().global(pos);
+          auto r = _f(globalPos);
+          Hybrid::ifElse(IsIndexable<decltype(r)>(),
+            [&](auto id) {
+              for (std::size_t i = 0; i < count; ++i)
+                w.write(id(r)[i]);
+            },
+            [&](auto id) {
+              assert(count == 1);
+              w.write(id(r));
+            });
+        }
+      private:
+        Function _f;
+        const Entity* element_;
+      };
+
       //! Type erasure implementation for legacy VTKFunctions.
       struct VTKFunctionWrapper
         : public FunctionWrapperBase
@@ -259,12 +305,21 @@ namespace Dune
         , _fieldInfo(fieldInfo)
       {}
 
-      //! Construct a VTKLocalFunction for a dune-functions style Function
-      template<typename F, std::enable_if_t<not Impl::IsBindable<F, Entity>::value, int> = 0>
+      //! Construct a VTKLocalFunction for a dune-functions GridViewFunction
+      // That is, a function that you can create a LocalFunction for, and evaluate that in element coordinates
+      template<typename F, std::enable_if_t<not Impl::IsBindable<F, Entity>::value && Impl::HasLocalFunction<F>::value, int> = 0>
       VTKLocalFunction(F&& f, VTK::FieldInfo fieldInfo)
         : _f(std::make_unique< FunctionWrapper<
           typename std::decay<decltype(localFunction(std::forward<F>(f)))>::type
           > >(localFunction(std::forward<F>(f))))
+        , _fieldInfo(fieldInfo)
+      {}
+
+      //! Construct a VTKLocalFunction for a C++ (global) function
+      // That is, a function that can be evaluated in global coordinates of the domain
+      template<typename F, std::enable_if_t<not Impl::IsBindable<F, Entity>::value && not Impl::HasLocalFunction<F>::value, int> = 0>
+      VTKLocalFunction(F&& f, VTK::FieldInfo fieldInfo)
+        : _f(std::make_unique< GlobalFunctionWrapper<F> >(std::forward<F>(f)))
         , _fieldInfo(fieldInfo)
       {}
 

@@ -105,12 +105,34 @@ int doWrite( Dune::VTKChecker& vtkChecker, const std::string& gridViewName, cons
   std::vector<int> celldata(is.size(0),0);
   std::vector<double> celldoubledata(is.size(0), 1.00000000000346e-12);
 
+  // Write algebraic data
   vtk.addVertexData(vertexdata,"vertexData");
   vtk.addCellData(celldata,"cellData");
   vtk.addCellData(celldoubledata, "cellData_double", 1, Dune::VTK::Precision::float64);
 
+  // Write functions given as VTKFunction objects
   vtk.addVertexData(std::make_shared< VTKVectorFunction<GridView> >("vertex"));
   vtk.addCellData(std::make_shared< VTKVectorFunction<GridView> >("cell"));
+
+  // Write globally defined C++ functions
+  auto f1 = [](const Dune :: FieldVector<double,dim>& x)
+  {
+    return std::sin(x.two_norm());
+  };
+
+  vtk.addCellData(f1,
+                  Dune :: VTK :: FieldInfo("scalar-valued lambda",
+                                           Dune :: VTK :: FieldInfo :: Type :: scalar, 1));
+
+  auto f2 = [](const Dune :: FieldVector<double,dim>& x)
+  {
+    return x;
+  };
+
+  vtk.addVertexData(f2,
+                    Dune :: VTK :: FieldInfo("vector-valued lambda",
+                                             Dune :: VTK :: FieldInfo :: Type :: vector, 2,
+                                             Dune :: VTK :: Precision::float64));
 
   int result = 0;
   std::string name;
