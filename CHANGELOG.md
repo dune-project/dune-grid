@@ -57,6 +57,10 @@
   the `DataArrayWriter` selects the correct type at runtime. The default for
   functions and coordinate is `Float32` as before.
 
+- The `VTKWriter` now supports writing functions that can only be evaluated globally,
+  i.e., functions that are not defined with respect to the grid.  Such functions
+  will be sampled on the grid vertices (`addVertexData`) or grid element centers (`addCellData`).
+
 # Release 2.6
 
 - The deprecated `EntityPointer` has been removed completely and `EntityIterator`
