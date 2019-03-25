@@ -43,8 +43,8 @@ namespace Dune
       struct FunctionCallExpression
         : public ProjectionBlock::Expression
       {
-        FunctionCallExpression ( const ProjectionBlock::Expression *function,
-                                 const ProjectionBlock::Expression *expression )
+        FunctionCallExpression ( const ProjectionBlock::ExpressionPointer& function,
+                                 const ProjectionBlock::ExpressionPointer& expression )
           : function_( function ),
             expression_( expression )
         {}
@@ -52,8 +52,8 @@ namespace Dune
         virtual void evaluate ( const Vector &argument, Vector &result ) const;
 
       private:
-        const ProjectionBlock::Expression *function_;
-        const ProjectionBlock::Expression *expression_;
+        ProjectionBlock::ExpressionPointer function_;
+        ProjectionBlock::ExpressionPointer expression_;
 
         mutable Vector tmp_;
       };
@@ -62,21 +62,21 @@ namespace Dune
       struct VectorExpression
         : public ProjectionBlock::Expression
       {
-        explicit VectorExpression ( std::vector< const ProjectionBlock::Expression * > expressions )
+        explicit VectorExpression ( const std::vector< ProjectionBlock::ExpressionPointer >& expressions )
           : expressions_( expressions )
         {}
 
         virtual void evaluate ( const Vector &argument, Vector &result ) const;
 
       private:
-        std::vector< const ProjectionBlock::Expression * > expressions_;
+        std::vector< ProjectionBlock::ExpressionPointer > expressions_;
       };
 
 
       struct BracketExpression
         : public ProjectionBlock::Expression
       {
-        BracketExpression ( const ProjectionBlock::Expression *expression, size_t field )
+        BracketExpression ( const ProjectionBlock::ExpressionPointer& expression, size_t field )
           : expression_( expression ),
             field_( field )
         {}
@@ -84,7 +84,7 @@ namespace Dune
         virtual void evaluate ( const Vector &argument, Vector &result ) const;
 
       private:
-        const ProjectionBlock::Expression *expression_;
+        ProjectionBlock::ExpressionPointer expression_;
         size_t field_;
       };
 
@@ -92,78 +92,78 @@ namespace Dune
       struct MinusExpression
         : public ProjectionBlock::Expression
       {
-        explicit MinusExpression ( const ProjectionBlock::Expression *expression )
+        explicit MinusExpression ( const ProjectionBlock::ExpressionPointer& expression )
           : expression_( expression )
         {}
 
         virtual void evaluate ( const Vector &argument, Vector &result ) const;
 
       private:
-        const ProjectionBlock::Expression *expression_;
+        ProjectionBlock::ExpressionPointer expression_;
       };
 
 
       struct NormExpression
         : public ProjectionBlock::Expression
       {
-        explicit NormExpression ( const ProjectionBlock::Expression *expression )
+        explicit NormExpression ( const ProjectionBlock::ExpressionPointer& expression )
           : expression_( expression )
         {}
 
         virtual void evaluate ( const Vector &argument, Vector &result ) const;
 
       private:
-        const ProjectionBlock::Expression *expression_;
+        ProjectionBlock::ExpressionPointer expression_;
       };
 
 
       struct SqrtExpression
         : public ProjectionBlock::Expression
       {
-        explicit SqrtExpression ( const ProjectionBlock::Expression *expression )
+        explicit SqrtExpression ( const ProjectionBlock::ExpressionPointer& expression )
           : expression_( expression )
         {}
 
         virtual void evaluate ( const Vector &argument, Vector &result ) const;
 
       private:
-        const ProjectionBlock::Expression *expression_;
+        ProjectionBlock::ExpressionPointer  expression_;
       };
 
 
       struct SinExpression
         : public ProjectionBlock::Expression
       {
-        explicit SinExpression ( const ProjectionBlock::Expression *expression )
+        explicit SinExpression ( const ProjectionBlock::ExpressionPointer& expression )
           : expression_( expression )
         {}
 
         virtual void evaluate ( const Vector &argument, Vector &result ) const;
 
       private:
-        const ProjectionBlock::Expression *expression_;
+        ProjectionBlock::ExpressionPointer expression_;
       };
 
 
       struct CosExpression
         : public ProjectionBlock::Expression
       {
-        explicit CosExpression ( const ProjectionBlock::Expression *expression )
+        explicit CosExpression ( const ProjectionBlock::ExpressionPointer& expression )
           : expression_( expression )
         {}
 
         virtual void evaluate ( const Vector &argument, Vector &result ) const;
 
       private:
-        const ProjectionBlock::Expression *expression_;
+        ProjectionBlock::ExpressionPointer expression_;
       };
 
 
       struct PowerExpression
         : public ProjectionBlock::Expression
       {
-        PowerExpression ( const ProjectionBlock::Expression *exprA,
-                          const ProjectionBlock::Expression *exprB )
+        PowerExpression ( const ProjectionBlock::ExpressionPointer& exprA,
+                          const ProjectionBlock::ExpressionPointer& exprB )
           : exprA_( exprA ),
             exprB_( exprB )
         {}
@@ -171,8 +171,8 @@ namespace Dune
         virtual void evaluate ( const Vector &argument, Vector &result ) const;
 
       private:
-        const ProjectionBlock::Expression *exprA_;
-        const ProjectionBlock::Expression *exprB_;
+        ProjectionBlock::ExpressionPointer exprA_;
+        ProjectionBlock::ExpressionPointer exprB_;
 
         mutable Vector tmp_;
       };
@@ -181,8 +181,8 @@ namespace Dune
       struct SumExpression
         : public ProjectionBlock::Expression
       {
-        SumExpression ( const ProjectionBlock::Expression *exprA,
-                        const ProjectionBlock::Expression *exprB )
+        SumExpression ( const ProjectionBlock::ExpressionPointer& exprA,
+                        const ProjectionBlock::ExpressionPointer& exprB )
           : exprA_( exprA ),
             exprB_( exprB )
         {}
@@ -190,8 +190,8 @@ namespace Dune
         virtual void evaluate ( const Vector &argument, Vector &result ) const;
 
       private:
-        const ProjectionBlock::Expression *exprA_;
-        const ProjectionBlock::Expression *exprB_;
+        ProjectionBlock::ExpressionPointer exprA_;
+        ProjectionBlock::ExpressionPointer exprB_;
 
         mutable Vector tmp_;
       };
@@ -200,8 +200,8 @@ namespace Dune
       struct DifferenceExpression
         : public ProjectionBlock::Expression
       {
-        DifferenceExpression ( const ProjectionBlock::Expression *exprA,
-                               const ProjectionBlock::Expression *exprB )
+        DifferenceExpression ( const ProjectionBlock::ExpressionPointer& exprA,
+                               const ProjectionBlock::ExpressionPointer&  exprB )
           : exprA_( exprA ),
             exprB_( exprB )
         {}
@@ -209,8 +209,8 @@ namespace Dune
         virtual void evaluate ( const Vector &argument, Vector &result ) const;
 
       private:
-        const ProjectionBlock::Expression *exprA_;
-        const ProjectionBlock::Expression *exprB_;
+        ProjectionBlock::ExpressionPointer exprA_;
+        ProjectionBlock::ExpressionPointer exprB_;
 
         mutable Vector tmp_;
       };
@@ -219,8 +219,8 @@ namespace Dune
       struct ProductExpression
         : public ProjectionBlock::Expression
       {
-        ProductExpression ( const ProjectionBlock::Expression *exprA,
-                            const ProjectionBlock::Expression *exprB )
+        ProductExpression ( const ProjectionBlock::ExpressionPointer& exprA,
+                            const ProjectionBlock::ExpressionPointer&  exprB )
           : exprA_( exprA ),
             exprB_( exprB )
         {}
@@ -228,8 +228,8 @@ namespace Dune
         virtual void evaluate ( const Vector &argument, Vector &result ) const;
 
       private:
-        const ProjectionBlock::Expression *exprA_;
-        const ProjectionBlock::Expression *exprB_;
+        ProjectionBlock::ExpressionPointer exprA_;
+        ProjectionBlock::ExpressionPointer exprB_;
 
         mutable Vector tmp_;
       };
@@ -238,8 +238,8 @@ namespace Dune
       struct QuotientExpression
         : public ProjectionBlock::Expression
       {
-        QuotientExpression ( const ProjectionBlock::Expression *exprA,
-                             const ProjectionBlock::Expression *exprB )
+        QuotientExpression ( const ProjectionBlock::ExpressionPointer& exprA,
+                             const ProjectionBlock::ExpressionPointer&  exprB )
           : exprA_( exprA ),
             exprB_( exprB )
         {}
@@ -247,8 +247,8 @@ namespace Dune
         virtual void evaluate ( const Vector &argument, Vector &result ) const;
 
       private:
-        const ProjectionBlock::Expression *exprA_;
-        const ProjectionBlock::Expression *exprB_;
+        ProjectionBlock::ExpressionPointer exprA_;
+        ProjectionBlock::ExpressionPointer exprB_;
       };
 
 
@@ -276,9 +276,8 @@ namespace Dune
       {
         result.resize( 0 );
         Vector r;
-        typedef std::vector< const Expression * >::const_iterator Iterator;
-        const Iterator end = expressions_.end();
-        for( Iterator it = expressions_.begin(); it != end; ++it )
+        const auto end = expressions_.end();
+        for( auto it = expressions_.begin(); it != end; ++it )
         {
           (*it)->evaluate( argument, r );
           for( size_t i = 0; i < r.size(); ++i )
@@ -442,18 +441,22 @@ namespace Dune
     // ---------------
 
     ProjectionBlock::ProjectionBlock ( std::istream &in, int dimworld )
-      : BasicBlock( in, "Projection" ),
-        defaultFunction_( 0 )
+      : BasicBlock( in, blockId() ),
+        defaultFunction_()
     {
+      // for backup and load balancing
+      registerProjectionFactory( dimworld );
+
       while( getnextline() )
       {
-        //std::cout << "Projection line:" << line.str() << std::endl;
+        std::string thisLine = line.str();
         nextToken();
 
         if( token.type == Token::functionKeyword )
         {
           nextToken();
-          parseFunction();
+          parseFunction( thisLine );
+          // std::cout << "Projection line: '" << thisLine << "'" << std::endl;
         }
         else if( token.type == Token::defaultKeyword )
         {
@@ -472,7 +475,7 @@ namespace Dune
     }
 
 
-    void ProjectionBlock::parseFunction ()
+    void ProjectionBlock::parseFunction ( const std::string& exprname )
     {
       if( token.type != Token::string )
         DUNE_THROW( DGFException, "Error in " << *this << ": function name expected." );
@@ -489,17 +492,17 @@ namespace Dune
       matchToken( Token::closingParen, "')' expected." );
 
       matchToken( Token::equals, "'=' expected." );
-      const Expression *expression = parseExpression( variableName );
+      ExpressionPointer expression = parseExpression( variableName );
 
       //std::cout << std::endl << "Declaring function: " << functionName << "( " << variableName << " )" << std::endl;
-      functions_[ functionName ] = expression;
+      functions_[ functionName ] = std::make_pair( expression, exprname );
     }
 
 
-    const ProjectionBlock::Expression *
+    ProjectionBlock::ExpressionPointer
     ProjectionBlock::parseBasicExpression ( const std::string &variableName )
     {
-      const Expression *expression;
+      ExpressionPointer expression;
 
       // parenthesized expression
       if( token.type == Token::openingParen )
@@ -511,7 +514,7 @@ namespace Dune
       // vector constant
       else if( token.type == Token::openingBracket )
       {
-        std::vector< const Expression * > expressions;
+        std::vector< ExpressionPointer > expressions;
         nextToken();
         while( token.type != Token::closingBracket )
         {
@@ -527,25 +530,25 @@ namespace Dune
             nextToken();
         }
         nextToken();
-        expression = new Expr::VectorExpression( expressions );
+        expression.reset( new Expr::VectorExpression( expressions ) );
       }
       // norm expression
       else if( token.type == Token::normDelim )
       {
         nextToken();
-        expression = new Expr::NormExpression( parseExpression( variableName ) );
+        expression.reset( new Expr::NormExpression( parseExpression( variableName ) ) );
         matchToken( Token::normDelim, "'|' expected." );
       }
       // number
       else if( token.type == Token::number )
       {
-        expression = new Expr::ConstantExpression( token.value );
+        expression.reset( new Expr::ConstantExpression( token.value ) );
         nextToken();
       }
       // pi
       else if( token.type == Token::piKeyword )
       {
-        expression = new Expr::ConstantExpression( MathematicalConstants< double >::pi() );
+        expression.reset( new Expr::ConstantExpression( MathematicalConstants< double >::pi() ) );
         nextToken();
       }
       else if( token.type == Token::string )
@@ -557,12 +560,12 @@ namespace Dune
             DUNE_THROW( DGFException, "Error in " << *this << ": function " << token.literal << " not declared." );
           nextToken();
           matchToken( Token::openingParen, "'(' expected." );
-          expression = new Expr::FunctionCallExpression( it->second, parseExpression( variableName ) );
+          expression.reset( new Expr::FunctionCallExpression( it->second.first, parseExpression( variableName ) ) );
           matchToken( Token::closingParen, "')' expected." );
         }
         else
         {
-          expression = new Expr::VariableExpression;
+          expression.reset( new Expr::VariableExpression );
           nextToken();
         }
       }
@@ -573,16 +576,16 @@ namespace Dune
     }
 
 
-    const ProjectionBlock::Expression *
+    ProjectionBlock::ExpressionPointer
     ProjectionBlock::parsePostfixExpression ( const std::string &variableName )
     {
-      const Expression *expression = parseBasicExpression( variableName );
+      ProjectionBlock::ExpressionPointer expression = parseBasicExpression( variableName );
       if( token.type == Token::openingBracket )
       {
         nextToken();
         if( (token.type != Token::number) || (double( int( token.value ) ) != token.value) )
           DUNE_THROW( DGFException, "Error in " << *this << ": integral number expected." );
-        expression = new Expr::BracketExpression( expression, int( token.value ) );
+        expression.reset( new Expr::BracketExpression( expression, int( token.value ) ) );
         nextToken();
         matchToken( Token::closingBracket, "']' expected." );
       }
@@ -590,34 +593,34 @@ namespace Dune
     }
 
 
-    const ProjectionBlock::Expression *
+    ProjectionBlock::ExpressionPointer
     ProjectionBlock::parseUnaryExpression ( const std::string &variableName )
     {
-      const Expression *expression;
+      ProjectionBlock::ExpressionPointer expression;
 
       // unary minus
       if( (token.type == Token::additiveOperator) && (token.symbol == '-') )
       {
         nextToken();
-        expression = new Expr::MinusExpression( parsePostfixExpression( variableName ) );
+        expression.reset( new Expr::MinusExpression( parsePostfixExpression( variableName ) ) );
       }
       // sqrt
       else if( token.type == Token::sqrtKeyword )
       {
         nextToken();
-        expression = new Expr::SqrtExpression( parseUnaryExpression( variableName ) );
+        expression.reset( new Expr::SqrtExpression( parseUnaryExpression( variableName ) ) );
       }
       // sin
       else if( token.type == Token::sinKeyword )
       {
         nextToken();
-        expression = new Expr::SinExpression( parseUnaryExpression( variableName ) );
+        expression.reset( new Expr::SinExpression( parseUnaryExpression( variableName ) ) );
       }
       // cos
       else if( token.type == Token::cosKeyword )
       {
         nextToken();
-        expression = new Expr::CosExpression( parseUnaryExpression( variableName ) );
+        expression.reset( new Expr::CosExpression( parseUnaryExpression( variableName ) ) );
       }
       else
         expression = parsePostfixExpression( variableName );
@@ -626,31 +629,31 @@ namespace Dune
     }
 
 
-    const ProjectionBlock::Expression *
+    ProjectionBlock::ExpressionPointer
     ProjectionBlock::parsePowerExpression ( const std::string &variableName )
     {
-      const Expression *expression = parseUnaryExpression( variableName );
+      ProjectionBlock::ExpressionPointer expression = parseUnaryExpression( variableName );
       while( token.type == Token::powerOperator )
       {
         nextToken();
-        expression = new Expr::PowerExpression( expression, parseUnaryExpression( variableName ) );
+        expression.reset( new Expr::PowerExpression( expression, parseUnaryExpression( variableName ) ) );
       }
       return expression;
     }
 
 
-    const ProjectionBlock::Expression *
+    ProjectionBlock::ExpressionPointer
     ProjectionBlock::parseMultiplicativeExpression ( const std::string &variableName )
     {
-      const Expression *expression = parsePowerExpression( variableName );
+      ProjectionBlock::ExpressionPointer expression = parsePowerExpression( variableName );
       while( token.type == Token::multiplicativeOperator )
       {
         const char symbol = token.symbol;
         nextToken();
         if( symbol == '*' )
-          expression = new Expr::ProductExpression( expression, parsePowerExpression( variableName ) );
+          expression.reset( new Expr::ProductExpression( expression, parsePowerExpression( variableName ) ) );
         else if( symbol == '/' )
-          expression = new Expr::QuotientExpression( expression, parsePowerExpression( variableName ) );
+          expression.reset( new Expr::QuotientExpression( expression, parsePowerExpression( variableName ) ) );
         else
           DUNE_THROW( DGFException, "Error in " << *this << ": Internal tokenizer error." );
       }
@@ -658,18 +661,18 @@ namespace Dune
     }
 
 
-    const ProjectionBlock::Expression *
+    ProjectionBlock::ExpressionPointer
     ProjectionBlock::parseExpression ( const std::string &variableName )
     {
-      const Expression *expression = parseMultiplicativeExpression( variableName );
+      ProjectionBlock::ExpressionPointer expression = parseMultiplicativeExpression( variableName );
       while( token.type == Token::additiveOperator )
       {
         const char symbol = token.symbol;
         nextToken();
         if( symbol == '+' )
-          expression = new Expr::SumExpression( expression, parseMultiplicativeExpression( variableName ) );
+          expression.reset( new Expr::SumExpression( expression, parseMultiplicativeExpression( variableName ) ) );
         else if( symbol == '-' )
-          expression = new Expr::DifferenceExpression( expression, parseMultiplicativeExpression( variableName ) );
+          expression.reset( new Expr::DifferenceExpression( expression, parseMultiplicativeExpression( variableName ) ) );
         else
           DUNE_THROW( DGFException, "Error in " << *this << ": Internal tokenizer error." );
       }

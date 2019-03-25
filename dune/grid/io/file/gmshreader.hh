@@ -47,7 +47,11 @@ namespace Dune
     // arbitrary dimension, implementation is in specialization
     template< int dimension, int dimWorld = dimension >
     class GmshReaderQuadraticBoundarySegment
-    {};
+    {
+    public:
+      // empty function since this class does not implement anything
+      static void registerFactory() {}
+    };
 
     // quadratic boundary segments in 1d
     /*
@@ -65,10 +69,57 @@ namespace Dune
     struct GmshReaderQuadraticBoundarySegment< 2, dimWorld >
       : public Dune::BoundarySegment< 2, dimWorld >
     {
+      typedef GmshReaderQuadraticBoundarySegment< 2, dimWorld >  ThisType;
+      typedef typename Dune::BoundarySegment< 2, dimWorld > :: ObjectStreamType ObjectStreamType;
       typedef Dune::FieldVector< double, dimWorld > GlobalVector;
 
       GmshReaderQuadraticBoundarySegment ( const GlobalVector &p0_, const GlobalVector &p1_, const GlobalVector &p2_)
         : p0(p0_), p1(p1_), p2(p2_)
+      {
+        init();
+      }
+
+      GmshReaderQuadraticBoundarySegment( ObjectStreamType& in )
+      {
+        // key is read before by the factory
+        const int bytes = sizeof(double)*dimWorld;
+        in.read( (char *) &p0[ 0 ], bytes );
+        in.read( (char *) &p1[ 0 ], bytes );
+        in.read( (char *) &p2[ 0 ], bytes );
+        init();
+      }
+
+      static void registerFactory()
+      {
+        if( key() < 0 )
+        {
+          key() = Dune::BoundarySegment< 2, dimWorld >::template registerFactory< ThisType >();
+        }
+      }
+
+      virtual GlobalVector operator() ( const Dune::FieldVector<double,1> &local ) const
+      {
+        GlobalVector y;
+        y = 0.0;
+        y.axpy((local[0]-alpha)*(local[0]-1.0)/alpha,p0);
+        y.axpy(local[0]*(local[0]-1.0)/(alpha*(alpha-1.0)),p1);
+        y.axpy(local[0]*(local[0]-alpha)/(1.0-alpha),p2);
+        return y;
+      }
+
+      void backup( ObjectStreamType& out ) const
+      {
+        // backup key to identify object
+        out.write( (const char *) &key(), sizeof( int ) );
+        // backup data
+        const int bytes = sizeof(double)*dimWorld;
+        out.write( (const char*) &p0[ 0 ], bytes );
+        out.write( (const char*) &p1[ 0 ], bytes );
+        out.write( (const char*) &p2[ 0 ], bytes );
+      }
+
+    protected:
+      void init()
       {
         GlobalVector d1 = p1;
         d1 -= p0;
@@ -80,14 +131,9 @@ namespace Dune
           DUNE_THROW(Dune::IOError, "ration in quadratic boundary segment bad");
       }
 
-      virtual GlobalVector operator() ( const Dune::FieldVector<double,1> &local ) const
-      {
-        GlobalVector y;
-        y = 0.0;
-        y.axpy((local[0]-alpha)*(local[0]-1.0)/alpha,p0);
-        y.axpy(local[0]*(local[0]-1.0)/(alpha*(alpha-1.0)),p1);
-        y.axpy(local[0]*(local[0]-alpha)/(1.0-alpha),p2);
-        return y;
+      static int& key() {
+        static int k = -1;
+        return k;
       }
 
     private:
@@ -123,11 +169,66 @@ namespace Dune
     class GmshReaderQuadraticBoundarySegment< 3, 3 >
       : public Dune::BoundarySegment< 3 >
     {
+      typedef GmshReaderQuadraticBoundarySegment< 3, 3 > ThisType;
+      typedef typename Dune::BoundarySegment< 3 > :: ObjectStreamType ObjectStreamType;
     public:
       GmshReaderQuadraticBoundarySegment (Dune::FieldVector<double,3> p0_, Dune::FieldVector<double,3> p1_,
                                           Dune::FieldVector<double,3> p2_, Dune::FieldVector<double,3> p3_,
                                           Dune::FieldVector<double,3> p4_, Dune::FieldVector<double,3> p5_)
         : p0(p0_), p1(p1_), p2(p2_), p3(p3_), p4(p4_), p5(p5_)
+      {
+        init();
+      }
+
+      GmshReaderQuadraticBoundarySegment( ObjectStreamType& in )
+      {
+        const int bytes = sizeof(double)*3;
+        in.read( (char *) &p0[ 0 ], bytes );
+        in.read( (char *) &p1[ 0 ], bytes );
+        in.read( (char *) &p2[ 0 ], bytes );
+        in.read( (char *) &p3[ 0 ], bytes );
+        in.read( (char *) &p4[ 0 ], bytes );
+        in.read( (char *) &p5[ 0 ], bytes );
+        init();
+      }
+
+      static void registerFactory()
+      {
+        if( key() < 0 )
+        {
+          key() = Dune::BoundarySegment< 3 >::template registerFactory< ThisType >();
+        }
+      }
+
+      virtual Dune::FieldVector<double,3> operator() (const Dune::FieldVector<double,2>& local) const
+      {
+        Dune::FieldVector<double,3> y;
+        y = 0.0;
+        y.axpy(phi0(local),p0);
+        y.axpy(phi1(local),p1);
+        y.axpy(phi2(local),p2);
+        y.axpy(phi3(local),p3);
+        y.axpy(phi4(local),p4);
+        y.axpy(phi5(local),p5);
+        return y;
+      }
+
+      void backup( ObjectStreamType& out ) const
+      {
+        // backup key to identify object in factory
+        out.write( (const char*) &key(), sizeof( int ) );
+        // backup data
+        const int bytes = sizeof(double)*3;
+        out.write( (const char*) &p0[ 0 ], bytes );
+        out.write( (const char*) &p1[ 0 ], bytes );
+        out.write( (const char*) &p2[ 0 ], bytes );
+        out.write( (const char*) &p3[ 0 ], bytes );
+        out.write( (const char*) &p4[ 0 ], bytes );
+        out.write( (const char*) &p5[ 0 ], bytes );
+      }
+
+    protected:
+      void init()
       {
         sqrt2 = sqrt(2.0);
         Dune::FieldVector<double,3> d1,d2;
@@ -151,17 +252,9 @@ namespace Dune
           DUNE_THROW(Dune::IOError, "gamma in quadratic boundary segment bad");
       }
 
-      virtual Dune::FieldVector<double,3> operator() (const Dune::FieldVector<double,2>& local) const
-      {
-        Dune::FieldVector<double,3> y;
-        y = 0.0;
-        y.axpy(phi0(local),p0);
-        y.axpy(phi1(local),p1);
-        y.axpy(phi2(local),p2);
-        y.axpy(phi3(local),p3);
-        y.axpy(phi4(local),p4);
-        y.axpy(phi5(local),p5);
-        return y;
+      static int& key() {
+        static int k = -1;
+        return k;
       }
 
     private:
@@ -664,6 +757,17 @@ namespace Dune
   template<typename GridType>
   class GmshReader
   {
+    static void registerFactory(Dune::GridFactory<GridType>& factory)
+    {
+      // register boundary segment to boundary segment factory for possible load balancing
+      // this needs to be done on all cores since the type might not be known otherwise
+      GmshReaderQuadraticBoundarySegment< Grid::dimension, Grid::dimensionworld >::registerFactory();
+
+#ifndef NDEBUG
+      // check that this method is called on all cores
+      factory.comm().barrier();
+#endif
+    }
   public:
     typedef GridType Grid;
 
@@ -677,6 +781,9 @@ namespace Dune
     {
       // make a grid factory
       Dune::GridFactory<Grid> factory;
+
+      // register create  methods for boundary segments
+      registerFactory( factory );
 
       // create parse object and read grid on process 0
       if (factory.comm().rank() == 0)
@@ -702,6 +809,9 @@ namespace Dune
       // make a grid factory
       Dune::GridFactory<Grid> factory;
 
+      // register create  methods for boundary segments
+      registerFactory( factory );
+
       // create parse object and read grid on process 0
       if (factory.comm().rank() == 0)
       {
@@ -719,6 +829,9 @@ namespace Dune
     static void read (Dune::GridFactory<Grid>& factory, const std::string& fileName,
                       bool verbose = true, bool insertBoundarySegments=true)
     {
+      // register create  methods for boundary segments
+      registerFactory( factory );
+
       // create parse object and read grid on process 0
       if (factory.comm().rank() == 0)
       {
@@ -734,6 +847,9 @@ namespace Dune
                       std::vector<int>& elementToPhysicalEntity,
                       bool verbose = true, bool insertBoundarySegments=true)
     {
+      // register create  methods for boundary segments
+      registerFactory( factory );
+
       // create parse object and read grid on process 0
       if (factory.comm().rank() == 0)
       {

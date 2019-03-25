@@ -53,18 +53,26 @@ namespace Dune
     public:
       struct Expression;
 
+      typedef std::shared_ptr< Expression > ExpressionPointer;
+      typedef std::pair< ExpressionPointer, std::string > ExpressionPair ;
+
     private:
       template< int dimworld >
       class BoundaryProjection;
 
+      void registerProjectionFactory( const int dimworld );
+
+      static const char* blockId() { return "Projection"; }
     public:
       ProjectionBlock ( std::istream &in, int dimworld );
 
       template< int dimworld >
       const DuneBoundaryProjection< dimworld > *defaultProjection () const
       {
-        if( defaultFunction_ != 0 )
+        if( defaultFunction_.first )
+        {
           return new BoundaryProjection< dimworld >( defaultFunction_ );
+        }
         else
           return 0;
       }
@@ -87,20 +95,38 @@ namespace Dune
         return new BoundaryProjection< dimworld >( boundaryFunctions_[ i ].second );
       }
 
-      const Expression *function ( const std::string &name ) const
+      ExpressionPointer function ( const std::string &name ) const
       {
         const FunctionMap::const_iterator it = functions_.find( name );
-        return (it != functions_.end() ? it->second : 0);
+        return (it != functions_.end() ? it->second.first : 0);
       }
 
+      ExpressionPair lastFunctionInserted () const
+      {
+        assert( ! functions_.empty() );
+        return functions_.begin()->second;
+      }
+
+      static ProjectionBlock::ExpressionPair createExpression( const std::string& funcexpr, const int dimworld )
+      {
+        std::stringstream str;
+        str << blockId() << std::endl;
+        str << funcexpr << std::endl;
+        str << "#" << std::endl;
+        ProjectionBlock problock( str, dimworld );
+        return problock.lastFunctionInserted();
+      }
+
+
+
     private:
-      void parseFunction ();
-      const Expression *parseBasicExpression ( const std::string &variableName );
-      const Expression *parsePostfixExpression ( const std::string &variableName );
-      const Expression *parseUnaryExpression ( const std::string &variableName );
-      const Expression *parsePowerExpression ( const std::string &variableName );
-      const Expression *parseMultiplicativeExpression ( const std::string &variableName );
-      const Expression *parseExpression ( const std::string &variableName );
+      void parseFunction ( const std::string& exprname );
+      ExpressionPointer parseBasicExpression ( const std::string &variableName );
+      ExpressionPointer parsePostfixExpression ( const std::string &variableName );
+      ExpressionPointer parseUnaryExpression ( const std::string &variableName );
+      ExpressionPointer parsePowerExpression ( const std::string &variableName );
+      ExpressionPointer parseMultiplicativeExpression ( const std::string &variableName );
+      ExpressionPointer parseExpression ( const std::string &variableName );
       void parseDefault ();
       void parseSegment ();
 
@@ -113,14 +139,14 @@ namespace Dune
       }
 
     protected:
-      typedef std::map< std::string, const Expression * > FunctionMap;
-      typedef std::pair< std::vector< unsigned int >, const Expression * > BoundaryFunction;
+      typedef std::map< std::string, ExpressionPair >     FunctionMap;
+      typedef std::pair< std::vector< unsigned int >, ExpressionPair > BoundaryFunction;
 
       using BasicBlock::line;
 
       Token token;
       FunctionMap functions_;
-      const Expression *defaultFunction_;
+      ExpressionPair defaultFunction_;
       std::vector< BoundaryFunction > boundaryFunctions_;
     };
 
@@ -144,13 +170,25 @@ namespace Dune
       : public DuneBoundaryProjection< dimworld >
     {
       typedef DuneBoundaryProjection< dimworld > Base;
+      typedef BoundaryProjection < dimworld >    This;
+      typedef typename Base :: ObjectStreamType  ObjectStreamType;
 
     public:
       typedef typename Base::CoordinateType CoordinateType;
 
-      BoundaryProjection ( const Expression *expression )
-        : expression_( expression )
+      BoundaryProjection ( const ExpressionPair& exprpair )
+        : expression_( exprpair.first ),
+          expressionName_( exprpair.second )
       {}
+
+      BoundaryProjection( ObjectStreamType& buffer )
+      {
+        int size = 0;
+        buffer.read( (char *) &size, sizeof(int) );
+        expressionName_.resize( size );
+        buffer.read( (char *) expressionName_.c_str(), size );
+        expression_ = ProjectionBlock::createExpression( expressionName_, dimworld ).first;
+      }
 
       virtual CoordinateType operator() ( const CoordinateType &global ) const
       {
@@ -165,9 +203,49 @@ namespace Dune
         return result;
       }
 
-    private:
-      const Expression *expression_;
+      // backup name of expression that should allow to recreate this class
+      virtual void backup( std::stringstream& buffer ) const override
+      {
+        buffer.write( (const char *) &key(), sizeof( int ));
+        int size = expressionName_.size();
+        buffer.write( (const char *) &size, sizeof(int) );
+        buffer.write( expressionName_.c_str(), size );
+      }
+
+      static void registerFactory()
+      {
+        if( key() < 0 )
+        {
+          key() = Base::template registerFactory< This >();
+        }
+      }
+
+    protected:
+      static int& key ()
+      {
+        static int k = -1;
+        return k;
+      }
+
+      ExpressionPointer expression_;
+      std::string expressionName_;
     };
+
+    inline void ProjectionBlock::registerProjectionFactory( const int dimworld )
+    {
+      if( dimworld == 3 ) {
+        BoundaryProjection< 3 > :: registerFactory();
+      }
+      else if ( dimworld == 2 ) {
+        BoundaryProjection< 2 > :: registerFactory();
+      }
+      else if ( dimworld == 1 ) {
+        BoundaryProjection< 1 > :: registerFactory();
+      }
+      else {
+        DUNE_THROW(NotImplemented,"ProjectionBlock::registerProjectionFactory not implemented for dimworld = " << dimworld);
+      }
+    }
 
   }
 
