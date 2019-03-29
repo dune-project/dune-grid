@@ -648,7 +648,23 @@ namespace Dune
     }
 
     /**
-     * @brief Add a grid function that lives on the cells of the grid to the visualization.
+     * @brief Add a function by sampling it on the element centers
+     *
+     * \param f The function to be written to the file
+     *
+     * The object f can be one of several things.  Depending on what it is exactly,
+     * its object life-time is influenced in different ways:
+     * - If f has the method bind(), then a copy of f is stored, regardless of whether f is an l- or r-value.
+     * - If f can be localized by calling localFunction(f), then a copy of localFunction(f) is stored,
+     *   but f is never stored, regardless of whether f is an l- or r-value.
+     * - If f supports neither bind() or localFunction(), then a copy of f is stored,
+     *   regardless if f is an l- or r-value.
+     *
+     * The previous paragraph actually refers to parts of the dune-functions interface,
+     * and you may want to read up on that if you want to write functions to VTK.
+     *
+     * \deprecated f may also be a VTKFunction object, but you are strongly discouraged
+     *   from using VTKFunctions.
      */
     template<typename F>
     void addCellData(F&& f, VTK::FieldInfo vtkFieldInfo)
@@ -696,7 +712,23 @@ namespace Dune
     }
 
     /**
-     * @brief Add a grid function that lives on the vertices of the grid to the visualization.
+     * @brief Add a function by sampling it on the grid vertices
+     *
+     * \param f The function to be written to the file
+     *
+     * The object f can be one of several things.  Depending on what it is exactly,
+     * its object life-time is influenced in different ways:
+     * - If f has the method bind(), then a copy of f is stored, regardless of whether f is an l- or r-value.
+     * - If f can be localized by calling localFunction(f), then a copy of localFunction(f) is stored,
+     *   but f is never stored, regardless of whether f is an l- or r-value.
+     * - If f supports neither bind() or localFunction(), then a copy of f is stored,
+     *   regardless if f is an l- or r-value.
+     *
+     * The previous paragraph actually refers to parts of the dune-functions interface,
+     * and you may want to read up on that if you want to write functions to VTK.
+     *
+     * \deprecated f may also be a VTKFunction object, but you are strongly discouraged
+     *   from using VTKFunctions.
      */
     template<typename F>
     void addVertexData(F&& f, VTK::FieldInfo vtkFieldInfo)
