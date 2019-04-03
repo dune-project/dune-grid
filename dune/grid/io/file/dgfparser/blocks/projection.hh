@@ -190,7 +190,7 @@ namespace Dune
         expression_ = ProjectionBlock::createExpression( expressionName_, dimworld ).first;
       }
 
-      virtual CoordinateType operator() ( const CoordinateType &global ) const
+      virtual CoordinateType operator() ( const CoordinateType &global ) const override
       {
         std::vector< double > x( dimworld );
         for( int i = 0; i < dimworld; ++i )
