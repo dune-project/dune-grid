@@ -773,10 +773,10 @@ namespace Dune {
           _L[i] = coordinates.coordinate(i,_coarseSize[i]) - coordinates.coordinate(i,0);
       }
 
+#if HAVE_MPI
       // TODO: Settle on a single value for all coordinate types
       int mysteryFactor = (std::is_same<Coordinates,EquidistantCoordinates<ctype,dim> >::value) ? 1 : 2;
 
-#if HAVE_MPI
       // check whether the grid is large enough to be overlapping
       for (int i=0; i<dim; i++)
       {
