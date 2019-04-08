@@ -71,23 +71,25 @@ def gridFunction(view,name=None,dimRange=None,isGlobal=None):
             return localGridFunction(view,GFClass,func,name)
     return gridFunction_decorator
 
-def LocalGridFunction(view):
+def LocalGridFunction(view,name):
     def LocalGridFunction_decorator(cls):
         class Wrapper(cls):
             def __init__(self, *args, **kwargs):
                 cls.__init__(self,*args,**kwargs)
                 self.gf = view.function(self)
+                self.name = name
             # note: any magic methods on gf will not be picked up!
             def __getattr__(self, name):
                 return getattr(self.gf, name)
         return Wrapper
     return LocalGridFunction_decorator
-def GlobalGridFunction(view):
+def GlobalGridFunction(view,name):
     def GlobalGridFunction_decorator(cls):
         class Wrapper(cls):
             def __init__(self, *args, **kwargs):
                 cls.__init__(self,*args,**kwargs)
                 self.gf = view.function(self)
+                self.name = name
             # note: any magic methods on gf will not be picked up!
             def __getattr__(self, name):
                 return getattr(self.gf, name)
@@ -98,14 +100,14 @@ def GlobalGridFunction(view):
                     return cls.__call__(self,element.geometry.toGlobal(point))
         return Wrapper
     return GlobalGridFunction_decorator
-def GridFunction(view):
+def GridFunction(view, name=None):
     def GridFunction_decorator(cls):
         if not hasattr(cls,"__call__"):
             raise TypeError("Class has no call method")
         if getNumberOfParameters(cls.__call__) == 2: # global case
-            return GlobalGridFunction(view)(cls)
+            return GlobalGridFunction(view,name)(cls)
         elif getNumberOfParameters(cls.__call__) == 3: # local case
-            return LocalGridFunction(view)(cls)
+            return LocalGridFunction(view,name)(cls)
         else:
             raise TypeError("__call__ method needed with 2 or 3 arguments, not %d " %getNumberOfParameters(cls.__call__))
     return GridFunction_decorator
