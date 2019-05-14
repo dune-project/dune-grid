@@ -411,7 +411,7 @@ namespace Dune
             throw pybind11::value_error( "Argument 'entity' is not a valid entity for this grid." );
         }, "entity"_a,
         R"doc(
-          Check whether an entity is contained in this grid
+          Check whether an entity is contained in the grid instance
 
           Args:
               entity:   entity to check

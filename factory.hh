@@ -70,7 +70,7 @@ namespace Dune
         {
           const int dimWorld = Grid::dimensionworld;
 
-          for( std::size_t i = 0; i < info.shape[ 0 ]; ++i )
+          for( int i = 0; i < info.shape[ 0 ]; ++i )
           {
             const std::size_t offset = i * (info.strides[ 0 ] / sizeof( T ));
             FieldVector< typename Grid::ctype, dimWorld > x;
@@ -133,7 +133,7 @@ namespace Dune
         {
           const int dimGrid = Grid::dimension;
 
-          const std::size_t numVertices = ReferenceElements< typename Grid::ctype, dimGrid >::general( type ).size( dimGrid );
+          const int numVertices = ReferenceElements< typename Grid::ctype, dimGrid >::general( type ).size( dimGrid );
           if( (info.ndim != 2) || (info.shape[ 1 ] != numVertices) )
           {
             std::ostringstream msg;
@@ -146,10 +146,10 @@ namespace Dune
           }
 
           std::vector< unsigned int > vertices( numVertices );
-          for( std::size_t i = 0; i < info.shape[ 0 ]; ++i )
+          for( int i = 0; i < info.shape[ 0 ]; ++i )
           {
             const std::size_t offset = i * (info.strides[ 0 ] / sizeof( T ));
-            for( std::size_t j = 0; j < numVertices; ++j )
+            for( int j = 0; j < numVertices; ++j )
               vertices[ j ] = static_cast< T * >( info.ptr )[ offset + j * (info.strides[ 1 ] / sizeof( T )) ];
             factory.insertElement( type, vertices );
           }
