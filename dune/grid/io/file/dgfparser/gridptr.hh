@@ -477,6 +477,7 @@ namespace Dune
             {
               if(intersection.boundary())
               {
+                // DGFBoundaryParameter::type is of type string.
                 bndParam_[intersection.boundarySegmentIndex()] = std::to_string(boundaryIds[factory.insertionIndex(intersection)]);
               }
             }
