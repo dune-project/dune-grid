@@ -58,12 +58,6 @@ namespace Dune
       int rank;      // process to send to / receive from
       void *buffer;  // buffer to send / receive
       int size;      // size of buffer
-#if HAVE_MPI
-      MPI_Request request; // used by MPI to handle request
-#else
-      int request;
-#endif
-      int flag;      // used by MPI
     };
 
   public:
@@ -410,8 +404,9 @@ namespace Dune
 
 #if HAVE_MPI
       // handle foreign requests
-      int sends=0;
-      int recvs=0;
+
+      std::vector<MPI_Request> requests(_sendrequests.size() + _recvrequests.size());
+      MPI_Request* req = requests.data();
 
       // issue sends to foreign processes
       for (unsigned int i=0; i<_sendrequests.size(); i++)
@@ -420,9 +415,7 @@ namespace Dune
           //          std::cout << "[" << rank() << "]" << " send " << _sendrequests[i].size << " bytes "
           //                    << "to " << _sendrequests[i].rank << " p=" << _sendrequests[i].buffer << std::endl;
           MPI_Isend(_sendrequests[i].buffer, _sendrequests[i].size, MPI_BYTE,
-                    _sendrequests[i].rank, _tag, _comm, &(_sendrequests[i].request));
-          _sendrequests[i].flag = false;
-          sends++;
+                    _sendrequests[i].rank, _tag, _comm, req++);
         }
 
       // issue receives from foreign processes
@@ -432,43 +425,11 @@ namespace Dune
           //          std::cout << "[" << rank() << "]"  << " recv " << _recvrequests[i].size << " bytes "
           //                    << "fm " << _recvrequests[i].rank << " p=" << _recvrequests[i].buffer << std::endl;
           MPI_Irecv(_recvrequests[i].buffer, _recvrequests[i].size, MPI_BYTE,
-                    _recvrequests[i].rank, _tag, _comm, &(_recvrequests[i].request));
-          _recvrequests[i].flag = false;
-          recvs++;
+                    _recvrequests[i].rank, _tag, _comm, req++);
         }
 
-      // poll sends
-      while (sends>0)
-      {
-        for (unsigned int i=0; i<_sendrequests.size(); i++)
-          if (!_sendrequests[i].flag)
-          {
-            MPI_Status status;
-            MPI_Test( &(_sendrequests[i].request), &(_sendrequests[i].flag), &status);
-            if (_sendrequests[i].flag)
-            {
-              sends--;
-              //                  std::cout << "[" << rank() << "]"  << " send to " << _sendrequests[i].rank << " OK" << std::endl;
-            }
-          }
-      }
-
-      // poll receives
-      while (recvs>0)
-      {
-        for (unsigned int i=0; i<_recvrequests.size(); i++)
-          if (!_recvrequests[i].flag)
-          {
-            MPI_Status status;
-            MPI_Test( &(_recvrequests[i].request), &(_recvrequests[i].flag), &status);
-            if (_recvrequests[i].flag)
-            {
-              recvs--;
-              //                  std::cout << "[" << rank() << "]"  << " recv fm " << _recvrequests[i].rank << " OK" << std::endl;
-            }
-
-          }
-      }
+      // Wait for communication to complete
+      MPI_Waitall(requests.size(), requests.data(), MPI_STATUSES_IGNORE);
 
       // clear request buffers
       _sendrequests.clear();
