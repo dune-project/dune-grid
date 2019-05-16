@@ -56,8 +56,8 @@ namespace Dune
 
     struct CommTask {
       int rank;      // process to send to / receive from
-      void *buffer;  // buffer to send / receive
       int size;      // size of buffer
+      void *buffer;  // buffer to send / receive
     };
 
   public:
