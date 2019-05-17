@@ -124,7 +124,7 @@ namespace Dune {
 
   //! A set of PartitionType values.
   /**
-   * PartitionSet cotains a set of PartitionType values fixed at compile time. The contents
+   * PartitionSet contains a set of PartitionType values fixed at compile time. The contents
    * of the set is encoded in the template parameter partitions, but the exact semantics are
    * an implementation detail. PartitionSets can be combined by adding them up. They also support
    * removing partitions by subtracting them.
