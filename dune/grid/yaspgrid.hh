@@ -1973,7 +1973,7 @@ namespace Dune {
     struct hasSingleGeometryType< YaspGrid<dim, Coordinates> >
     {
       static const bool v = true;
-      static const unsigned int topologyId = Impl::CubeTopology< dim >::type::id;
+      static const unsigned int topologyId = GeometryTypes::cube(dim).id();
     };
 
     /** \brief YaspGrid is a Cartesian grid

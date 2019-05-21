@@ -33,7 +33,7 @@ namespace Dune
     struct hasSingleGeometryType< AlbertaGrid< dim, dimworld > >
     {
       static const bool v = true;
-      static const unsigned int topologyId = Impl::SimplexTopology< dim >::type::id;
+      static const unsigned int topologyId = GeometryTypes::simplex(dim).id();
     };
 
 
