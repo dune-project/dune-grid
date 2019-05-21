@@ -386,7 +386,7 @@ namespace Dune {
     struct hasSingleGeometryType< OneDGrid >
     {
       static const bool v = true;
-      static const unsigned int topologyId = Impl::CubeTopology< 1 >::type::id;
+      static const unsigned int topologyId = GeometryTypes::cube(1).id();
     };
 
 

@@ -39,14 +39,14 @@ namespace Dune
     struct InferHasSingleGeometryType< hasSingleGeometryType, dim, 1 >
     {
       static const bool v = true;
-      static const unsigned int topologyId = Impl::CubeTopology< 1 >::type::id;
+      static const unsigned int topologyId = GeometryTypes::cube(1).id();
     };
 
     template< class hasSingleGeometryType, int dim >
     struct InferHasSingleGeometryType< hasSingleGeometryType, dim, 0 >
     {
       static const bool v = true;
-      static const unsigned int topologyId = Impl::CubeTopology< 0 >::type::id;
+      static const unsigned int topologyId = GeometryTypes::cube(1).id();
     };
 
 
