@@ -64,7 +64,7 @@ namespace Dune {
         unsigned int,
         OneDGridIdSet<const OneDGrid>,
         unsigned int,
-        CollectiveCommunication<Dune::OneDGrid>,
+        CollectiveCommunication<No_Comm>,
         OneDGridLevelGridViewTraits,
         OneDGridLeafGridViewTraits,
         OneDGridEntitySeed>
