@@ -5,7 +5,7 @@
 
 #include <type_traits>
 
-#include <dune/common/exception.hh>
+#include <dune/common/exceptions.hh>
 #include <dune/grid/common/backuprestore.hh>
 
 #include <dune/grid/geometrygrid/declaration.hh>
