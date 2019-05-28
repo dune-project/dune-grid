@@ -27,7 +27,7 @@ namespace Dune
     /** \copydoc Dune::BackupRestoreFacility::backup(grid,filename)  */
     static void backup ( const Grid &grid, const std::string &filename )
     {
-      grid.writeGridXdr( filename, 0.0 );
+      grid.writeGrid( filename, 0.0 );
     }
 
     /** \copydoc Dune::BackupRestoreFacility::backup(grid,stream)
@@ -44,7 +44,7 @@ namespace Dune
     {
       Grid *grid = new Grid;
       double time; // ignore time
-      grid->readGridXdr( filename, time );
+      grid->readGrid( filename, time );
       return grid;
     }
 
