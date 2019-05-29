@@ -61,6 +61,9 @@
   i.e., functions that are not defined with respect to the grid.  Such functions
   will be sampled on the grid vertices (`addVertexData`) or grid element centers (`addCellData`).
 
+- The Capability `hasBackupRestoreFacilities<GeometryGrid<HG, CoordFunction>>` 
+  now returns `false` in case the `CoordFunction` is not default-constructible.
+
 # Release 2.6
 
 - The deprecated `EntityPointer` has been removed completely and `EntityIterator`
