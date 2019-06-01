@@ -90,7 +90,7 @@ namespace Dune
         {
           // return if we found the leaf, else search through the child entites
           if( indexSet_.contains( child ) )
-            return std::move( child );
+            return child;
           else
             return hFindEntity( child, global );
         }
@@ -162,7 +162,7 @@ namespace Dune
 
         // return if we found the leaf, else search through the child entites
         if( indexSet_.contains( entity ) )
-          return std::move( entity );
+          return entity;
         else
           return hFindEntity( entity, global );
       }
