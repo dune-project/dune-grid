@@ -870,6 +870,10 @@ namespace Dune {
 
   }; // end Class UGGrid
 
+  // those are defined in uggrid/uggrid.cc
+  template<> unsigned int UGGrid<2>::heapSize_;
+  template<> unsigned int UGGrid<3>::heapSize_;
+
   namespace Capabilities
   {
     /** \struct hasEntity
