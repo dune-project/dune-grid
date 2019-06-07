@@ -459,25 +459,24 @@ createGrid()
     DUNE_THROW(GridError, "Calling UG::" << dimworld << "d::ConfigureCommand failed!");
 
   //new @PROBLEM $b @PROBLEM $f @FORMAT $h @HEAP;
-  char* newArgs[4];
-  for (int i=0; i<4; i++)
+  char* newArgs[3];
+  for (int i=0; i<3; i++)
     newArgs[i] = (char*)::malloc(50*sizeof(char));
 
   sprintf(newArgs[0], "new %s", grid_->name_.c_str());
 
   sprintf(newArgs[1], "b %s_Problem", grid_->name_.c_str());
   sprintf(newArgs[2], "f DuneFormat%dd", dimworld);
-  sprintf(newArgs[3], "h %dM", grid_->heapSize_);
 
   if (UG_NS<dimworld>::NewCommand(
-        4, newArgs
+        3, newArgs
 #if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
         , std::make_shared<PPIF::PPIFContext>(grid_->comm())
 #endif
         ))
     DUNE_THROW(GridError, "UGGrid<" << dimworld << ">::makeNewMultigrid failed!");
 
-  for (int i=0; i<4; i++)
+  for (int i=0; i<3; i++)
     free(newArgs[i]);
 
   // Get a direct pointer to the newly created multigrid

@@ -286,9 +286,6 @@ namespace Dune {
     typedef unsigned int Rank;
 
     /** \brief Default constructor
-     *
-     * Uses the default heapsize, which can be set using the static method
-     * setDefaultHeapSize().
      */
     UGGrid(UGCollectiveCommunication comm = {});
 
@@ -767,9 +764,9 @@ namespace Dune {
      * specified on grid creation (at the latest).  This sets the default heap
      * size, which is used when no heap size is given to the constructor.
      */
-    static void setDefaultHeapSize(unsigned size) {
-      heapSize_ = size;
-    }
+    static void setDefaultHeapSize(unsigned size)
+    DUNE_DEPRECATED_MSG("Do not set the UGGrid default heap size---it is ignored anyway!")
+    {}
 
     /** \brief Sets a vertex to a new position
 
@@ -852,12 +849,6 @@ namespace Dune {
      */
     bool someElementHasBeenMarkedForCoarsening_;
 
-    /** \brief The size of UG's internal heap in megabytes
-     *
-     * It is handed over to UG for each new multigrid.
-     */
-    static unsigned int heapSize_;
-
     /** \brief The classes implementing the geometry of the boundary segments, if requested */
     std::vector<std::shared_ptr<BoundarySegment<dim> > > boundarySegments_;
 
@@ -869,10 +860,6 @@ namespace Dune {
     unsigned int numBoundarySegments_;
 
   }; // end Class UGGrid
-
-  // those are defined in uggrid/uggrid.cc
-  template<> unsigned int UGGrid<2>::heapSize_;
-  template<> unsigned int UGGrid<3>::heapSize_;
 
   namespace Capabilities
   {
