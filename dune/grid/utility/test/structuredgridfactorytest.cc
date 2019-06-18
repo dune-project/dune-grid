@@ -11,6 +11,7 @@
 #include <memory>
 
 #include <dune/common/parallel/mpihelper.hh>
+#include <dune/common/test/testsuite.hh>
 #include <dune/grid/onedgrid.hh>
 #include <dune/grid/yaspgrid.hh>
 #if HAVE_UG
@@ -22,9 +23,17 @@
 
 using namespace Dune;
 
+Dune::TestSuite checkNEntities(const char* gridName, const char* entityName, int n, int nExpected)
+{
+  Dune::TestSuite t;
+  t.check(nExpected == n)
+    << gridName << ": has " << n << " " << entityName << ", but expected " << nExpected;
+  return t;
+}
 
 int main (int argc , char **argv)
 try {
+  Dune::TestSuite t;
 
   // this method calls MPI_Init, if MPI is enabled
   MPIHelper::instance(argc,argv);
@@ -41,8 +50,8 @@ try {
                                                                                       FieldVector<double,1>(1),
                                                                                       elements1d);
 
-  assert(onedCubeGrid->size(1) == static_cast< int >(elements1d[0]+1));
-  assert(onedCubeGrid->size(0) == static_cast< int >(elements1d[0]));
+  t.subTest(checkNEntities("onedCubeGrid", "vertices", onedCubeGrid->size(1), static_cast<int>(elements1d[0]+1)));
+  t.subTest(checkNEntities("onedCubeGrid", "elements", onedCubeGrid->size(0), static_cast<int>(elements1d[0])));
 
   gridcheck(*onedCubeGrid);
 
@@ -52,8 +61,8 @@ try {
                                                                                             FieldVector<double,1>(1),
                                                                                             elements1d);
 
-  assert(onedCubeGrid->size(1) == static_cast< int >(elements1d[0]+1));
-  assert(onedCubeGrid->size(0) == static_cast< int >(elements1d[0]));
+  t.subTest(checkNEntities("onedSimplexGrid", "vertices", onedSimplexGrid->size(1), static_cast<int>(elements1d[0]+1)));
+  t.subTest(checkNEntities("onedSimplexGrid", "elements", onedSimplexGrid->size(0), static_cast<int>(elements1d[0])));
 
   gridcheck(*onedSimplexGrid);
 
@@ -63,8 +72,8 @@ try {
                                                         FieldVector<double,1>(1),
                                                         elements1d);
 
-  assert(yaspGrid1d->size(1) == static_cast< int >(elements1d[0]+1));
-  assert(yaspGrid1d->size(0) == static_cast< int >(elements1d[0]));
+  t.subTest(checkNEntities("yaspGrid1d", "vertices", yaspGrid1d->size(1),static_cast<int>(elements1d[0]+1)));
+  t.subTest(checkNEntities("yaspGrid1d", "elements", yaspGrid1d->size(1),static_cast<int>(elements1d[0]+1)));
 
   gridcheck(*yaspGrid1d);
 
@@ -74,8 +83,8 @@ try {
                                                                 FieldVector<double,1>(1),
                                                                 elements1d);
 
-    assert(yaspGridOff1d->size(1) == static_cast< int >(elements1d[0]+1));
-    assert(yaspGridOff1d->size(0) == static_cast< int >(elements1d[0]));
+    t.subTest(checkNEntities("yaspGridOff1d", "vertices", yaspGridOff1d->size(1),static_cast<int>(elements1d[0]+1)));
+    t.subTest(checkNEntities("yaspGridOff1d", "elements", yaspGridOff1d->size(1),static_cast<int>(elements1d[0]+1)));
 
     gridcheck(*yaspGridOff1d);
   }
@@ -95,8 +104,8 @@ try {
                                                           FieldVector<double,2>(1),
                                                           elements2d);
 
-  assert(yaspGrid2d->size(2) == static_cast< int >(numVertices2d));
-  assert(yaspGrid2d->size(0) == static_cast< int >(numCubes2d));
+  t.subTest(checkNEntities("yaspGrid2d", "vertices", yaspGrid2d->size(2), static_cast<int>(numVertices2d)));
+  t.subTest(checkNEntities("yaspGrid2d", "elements", yaspGrid2d->size(0), static_cast<int>(numCubes2d)));
 
   gridcheck(*yaspGrid2d);
 
@@ -106,10 +115,10 @@ try {
                                                               FieldVector<double,2>(1),
                                                               elements2d);
 
-      assert(yaspGridOff2d->size(2) == static_cast< int >(numVertices2d));
-      assert(yaspGridOff2d->size(0) == static_cast< int >(numCubes2d));
+    t.subTest(checkNEntities("yaspGridOff2d", "vertices", yaspGridOff2d->size(2), static_cast<int>(numVertices2d)));
+    t.subTest(checkNEntities("yaspGridOff2d", "elements", yaspGridOff2d->size(0), static_cast<int>(numCubes2d)));
 
-      gridcheck(*yaspGridOff2d);
+    gridcheck(*yaspGridOff2d);
   }
 
   // Test creation of 2d cube grid using UG
@@ -120,8 +129,8 @@ try {
                                                                                                                      FieldVector<double,2>(1),
                                                                                                                      elements2d);
 
-  assert(quadrilateralGrid->size(2) == numVertices2d);
-  assert(quadrilateralGrid->size(0) == numCubes2d);
+  t.subTest(checkNEntities("quadrilateralGrid", "vertices", quadrilateralGrid->size(2), static_cast<int>(numVertices2d)));
+  t.subTest(checkNEntities("quadrilateralGrid", "elements", quadrilateralGrid->size(0), static_cast<int>(numCubes2d)));
 
   gridcheck(*quadrilateralGrid);
 #ifdef ModelP  // parallel UGGrid can only have one grid at a time
@@ -140,8 +149,9 @@ try {
                                                                                                          FieldVector<double,2>(1),
                                                                                                          elements2d);
 
-  assert(triangleGrid->size(2) == numVertices2d);
-  assert(triangleGrid->size(0) == 2*numCubes2d);    // each cube gets split into 2 triangles
+  t.subTest(checkNEntities("triangleGrid", "vertices", triangleGrid->size(2), static_cast<int>(numVertices2d)));
+  // each cube gets split into 2 triangles
+  t.subTest(checkNEntities("triangleGrid", "elements", triangleGrid->size(0), static_cast<int>(2*numCubes2d)));
 
   gridcheck(*triangleGrid);
 #ifdef ModelP  // parallel UGGrid can only have one grid at a time
@@ -168,8 +178,8 @@ try {
                                                                                                             FieldVector<double,3>(1),
                                                                                                             elements3d);
 
-  assert(hexahedralGrid->size(3) == numVertices3d);
-  assert(hexahedralGrid->size(0) == numCubes3d);
+  t.subTest(checkNEntities("hexahedralGrid", "vertices", hexahedralGrid->size(3), numVertices3d));
+  t.subTest(checkNEntities("hexahedralGrid", "elements", hexahedralGrid->size(0), numCubes3d));
 
   gridcheck(*hexahedralGrid);
 #ifdef ModelP  // parallel UGGrid can only have one grid at a time
@@ -187,8 +197,9 @@ try {
                                                                                                                   FieldVector<double,3>(1),
                                                                                                                   elements3d);
 
-  assert(tetrahedralGrid->size(3) == numVertices3d);
-  assert(tetrahedralGrid->size(0) == 6*numCubes3d);    // each cube gets split into 6 tetrahedra
+  t.subTest(checkNEntities("tetrahedralGrid", "vertices", tetrahedralGrid->size(3), numVertices3d));
+  // each cube gets split into 6 tetrahedra
+  t.subTest(checkNEntities("tetrahedralGrid", "elements", tetrahedralGrid->size(0), 6*numCubes3d));
 
   gridcheck(*tetrahedralGrid);
 #ifdef ModelP  // parallel UGGrid can only have one grid at a time
@@ -198,8 +209,7 @@ try {
   std::cout << "WARNING: 3d simplicial grids not tested because no suitable grid implementation is available!" << std::endl;
 #endif
 
-  return 0;
-
+  return t.exit();
 }
 catch (Exception &e) {
   std::cerr << e << std::endl;
