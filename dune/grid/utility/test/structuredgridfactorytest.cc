@@ -133,9 +133,6 @@ try {
   t.subTest(checkNEntities("quadrilateralGrid", "elements", quadrilateralGrid->size(0), static_cast<int>(numCubes2d)));
 
   gridcheck(*quadrilateralGrid);
-#ifdef ModelP  // parallel UGGrid can only have one grid at a time
-  quadrilateralGrid.reset();
-#endif
 #else
   std::cout << "WARNING: 2d cube grids not tested because no suitable grid implementation is available!" << std::endl;
 #endif
@@ -154,9 +151,6 @@ try {
   t.subTest(checkNEntities("triangleGrid", "elements", triangleGrid->size(0), static_cast<int>(2*numCubes2d)));
 
   gridcheck(*triangleGrid);
-#ifdef ModelP  // parallel UGGrid can only have one grid at a time
-  triangleGrid.reset();
-#endif
 #else
   std::cout << "WARNING: 2d simplicial grids not tested because no suitable grid implementation is available!" << std::endl;
 #endif
@@ -182,9 +176,6 @@ try {
   t.subTest(checkNEntities("hexahedralGrid", "elements", hexahedralGrid->size(0), numCubes3d));
 
   gridcheck(*hexahedralGrid);
-#ifdef ModelP  // parallel UGGrid can only have one grid at a time
-  hexahedralGrid.reset();
-#endif
 #else
   std::cout << "WARNING: 3d cube grids not tested because no suitable grid implementation is available!" << std::endl;
 #endif
@@ -202,9 +193,6 @@ try {
   t.subTest(checkNEntities("tetrahedralGrid", "elements", tetrahedralGrid->size(0), 6*numCubes3d));
 
   gridcheck(*tetrahedralGrid);
-#ifdef ModelP  // parallel UGGrid can only have one grid at a time
-  tetrahedralGrid.reset();
-#endif
 #else
   std::cout << "WARNING: 3d simplicial grids not tested because no suitable grid implementation is available!" << std::endl;
 #endif
