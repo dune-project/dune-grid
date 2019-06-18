@@ -594,9 +594,13 @@ void checkIntersectionIterator ( const GridViewType &view,
   // check whether integral over the outer normals is zero
   // note: This is wrong on curved surfaces (take, e.g., the upper half sphere).
   //       Therefore we only enforce this check on affine elements.
+  //       This might be also wrong for network grids where intersections maybe overlapping
+  //       Therefore we only enforce this check for dim==dimworld
+  // note: The errorState variable will propagate the error as a warning for the cases
+  //       where this check is not enforced
   if( (sumNormal.two_norm() > 1e-8) && (eIt->partitionType() != Dune::GhostEntity) )
   {
-    if( eIt->geometry().affine() )
+    if( eIt->geometry().affine() && int(GridViewType::dimension) == int(GridViewType::dimensionworld))
       DUNE_THROW( Dune::GridError, "Integral over outer normals on affine entity is nonzero: " << sumNormal );
     ++errorState.sumNormalsNonZero;
   }
@@ -626,7 +630,7 @@ void checkViewIntersectionIterator(const GridViewType& view) {
     std :: cerr << "Warning: Integral over outer normals is not always zero."
                 << std :: endl;
     std :: cerr << "         This behaviour may be correct for entities with"
-                << " nonzero curvature." << std :: endl;;
+                << " nonzero curvature, or in network grids." << std :: endl;
   }
 }
 
