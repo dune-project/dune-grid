@@ -508,12 +508,12 @@ namespace Dune
                             const std::vector< GlobalVector > & nodes)
     {
       // some data about gmsh elements
-      const int nDofs[12]      = {-1, 2, 3, 4, 4, 8, 6, 5, 3, 6, -1, 10};
-      const int nVertices[12]  = {-1, 2, 3, 4, 4, 8, 6, 5, 2, 3, -1, 4};
-      const int elementDim[12] = {-1, 1, 2, 2, 3, 3, 3, 3, 1, 2, -1, 3};
+      const int nDofs[16]      = {-1, 2, 3, 4, 4, 8, 6, 5, 3, 6, -1, 10, -1, -1, -1, 1};
+      const int nVertices[16]  = {-1, 2, 3, 4, 4, 8, 6, 5, 2, 3, -1, 4, -1, -1, -1, 1};
+      const int elementDim[16] = {-1, 1, 2, 2, 3, 3, 3, 3, 1, 2, -1, 3, -1, -1, -1, 0};
 
       // test whether we support the element type
-      if ( not (elm_type >= 0 && elm_type < 12         // index in suitable range?
+      if ( not (elm_type > 0 && elm_type <= 15         // index in suitable range?
                 && (elementDim[elm_type] == dim || elementDim[elm_type] == (dim-1) ) ) )         // real element or boundary element?
       {
         skipline(file);         // skip rest of line if element is unknown
@@ -597,12 +597,12 @@ namespace Dune
                                     const int physical_entity)
     {
       // some data about gmsh elements
-      const int nDofs[12]      = {-1, 2, 3, 4, 4, 8, 6, 5, 3, 6, -1, 10};
-      const int nVertices[12]  = {-1, 2, 3, 4, 4, 8, 6, 5, 2, 3, -1, 4};
-      const int elementDim[12] = {-1, 1, 2, 2, 3, 3, 3, 3, 1, 2, -1, 3};
+      const int nDofs[16]      = {-1, 2, 3, 4, 4, 8, 6, 5, 3, 6, -1, 10, -1, -1, -1, 1};
+      const int nVertices[16]  = {-1, 2, 3, 4, 4, 8, 6, 5, 2, 3, -1, 4, -1, -1, -1, 1};
+      const int elementDim[16] = {-1, 1, 2, 2, 3, 3, 3, 3, 1, 2, -1, 3, -1, -1, -1, 0};
 
       // test whether we support the element type
-      if ( not (elm_type >= 0 && elm_type < 12         // index in suitable range?
+      if ( not (elm_type > 0 && elm_type <= 15         // index in suitable range?
                 && (elementDim[elm_type] == dim || elementDim[elm_type] == (dim-1) ) ) )         // real element or boundary element?
       {
         skipline(file);         // skip rest of line if element is unknown
@@ -691,6 +691,10 @@ namespace Dune
             break;
 
           case 2 :              // 3-node triangle
+            factory.insertBoundarySegment(vertices);
+            break;
+
+          case 15 :             // 1-node point
             factory.insertBoundarySegment(vertices);
             break;
 
