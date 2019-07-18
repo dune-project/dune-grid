@@ -28,9 +28,11 @@ if(dune-uggrid_FOUND)
   dune_register_package_flags(COMPILE_DEFINITIONS "${UG_DEFINITIONS}"
                               INCLUDE_DIRS "${UG_INCLUDES}"
                               LIBRARIES "dunegrid;${UG_LIBRARIES};${DUNE_LIBS}")
-  dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE UGGRID ASSERTION GRIDDIM == WORLDDIM
+
+  dune_define_gridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE UGGRID
+    ASSERTION "GRIDDIM == WORLDDIM"
     DUNETYPE "Dune::UGGrid< dimgrid >"
-    HEADERS dune/grid/uggrid.hh dune/grid/io/file/dgfparser/dgfug.hh)
+    HEADERS "dune/grid/uggrid.hh" "dune/grid/io/file/dgfparser/dgfug.hh")
 endif()
 
 # Add flags to targets
