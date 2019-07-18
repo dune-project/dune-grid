@@ -61,7 +61,7 @@
   i.e., functions that are not defined with respect to the grid.  Such functions
   will be sampled on the grid vertices (`addVertexData`) or grid element centers (`addCellData`).
 
-- The Capability `hasBackupRestoreFacilities<GeometryGrid<HG, CoordFunction>>` 
+- The Capability `hasBackupRestoreFacilities<GeometryGrid<HG, CoordFunction>>`
   now returns `false` in case the `CoordFunction` is not default-constructible.
 
 - The `Geometry` interface now provides the type `Volume` for the return value of the
@@ -158,3 +158,7 @@
 - `UGGrid` now supports transferring element data during load balancing.
 
     See core/dune-grid!172
+
+- A convenience method `referenceElement( entity )` was added.
+
+    See core/dune-grid!349
