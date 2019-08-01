@@ -9,6 +9,7 @@
 #include <string>
 #include <iomanip>
 #include <cstdint>
+#include <cmath>
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/indent.hh>
@@ -137,10 +138,10 @@ namespace Dune
     private:
       //! write one double data element to output stream
       void writeFloat64 (double data) final
-      { write_(data); }
+      { write_float(data); }
       //! write one float data element to output stream
       void writeFloat32 (float data) final
-      { write_(data); }
+      { write_float(data); }
       //! write one int data element to output stream
       void writeInt32 (std::int32_t data) final
       { write_(data); }
@@ -158,7 +159,26 @@ namespace Dune
         if(counter%numPerLine==0) s << indent;
         else s << " ";
         const auto original_precision = std::cout.precision();
-        s << std::setprecision(std::numeric_limits<PT>::digits10) << (PT) data;
+        s << std::setprecision(std::numeric_limits<PT>::digits10) << (PT)data;
+        std::cout.precision(original_precision);
+        counter++;
+        if (counter%numPerLine==0) s << "\n";
+      }
+
+      template<class T>
+      void write_float(T data)
+      {
+        typedef typename PrintType<T>::Type PT;
+        if(counter%numPerLine==0) s << indent;
+        else s << " ";
+        PT out_data = (PT) data;
+        if (std::fpclassify(out_data) == FP_SUBNORMAL)
+        {
+          // truncate denormalized data to 0 to avoid Paraview segfaults on macOS
+          out_data = 0;
+        }
+        const auto original_precision = std::cout.precision();
+        s << std::setprecision(std::numeric_limits<PT>::digits10) << out_data;
         std::cout.precision(original_precision);
         counter++;
         if (counter%numPerLine==0) s << "\n";
