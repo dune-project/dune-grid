@@ -9,6 +9,7 @@
 #include <string>
 #include <iomanip>
 #include <cstdint>
+#include <cmath>
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/indent.hh>
@@ -157,9 +158,18 @@ namespace Dune
         typedef typename PrintType<T>::Type PT;
         if(counter%numPerLine==0) s << indent;
         else s << " ";
-        const auto original_precision = std::cout.precision();
-        s << std::setprecision(std::numeric_limits<PT>::digits10) << (PT) data;
-        std::cout.precision(original_precision);
+        PT out_data = (PT) data;
+        if (std::fpclassify(out_data) == FP_SUBNORMAL)
+        {
+          // bound denormalized data to 0 to avoid Paraview segfaults on macOS
+          s << 0;
+        }
+        else
+        {
+          const auto original_precision = std::cout.precision();
+          s << std::setprecision(std::numeric_limits<PT>::digits10) << out_data;
+          std::cout.precision(original_precision);
+        }
         counter++;
         if (counter%numPerLine==0) s << "\n";
       }
