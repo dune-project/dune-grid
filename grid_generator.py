@@ -183,6 +183,15 @@ def levelView(hgrid,level):
     addAttr(module, module.GridView)
     return hgrid._levelView(level)
 
+pcGenerator = SimpleGenerator("PersistentContainer", "Dune::Python")
+def persistentContainer(hgrid,codim,dimension):
+    includes = hgrid._includes + ["dune/python/grid/persistentcontainer.hh"]
+    typeName = "Dune::PersistentContainer<"+hgrid._typeName+", Dune::FieldVector<double,"+str(dimension)+">>"
+    moduleName = "persistentcontainer_" + hashIt(typeName)
+    module = pcGenerator.load(includes, typeName, moduleName)
+    return module.PersistentContainer(hgrid,codim)
+
+
 generator = SimpleGenerator("HierarchicalGrid", "Dune::Python")
 def module(includes, typeName, *args, **kwargs):
     includes = includes + ["dune/python/grid/hierarchical.hh"]
@@ -195,6 +204,7 @@ def module(includes, typeName, *args, **kwargs):
     for d in range(module.LeafGrid.dimension+1):
         dune.geometry.module(d)
     setattr(module.HierarchicalGrid,"levelView",levelView)
+    setattr(module.HierarchicalGrid,"persistentContainer",persistentContainer)
     return module
 
 
