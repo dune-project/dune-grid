@@ -11,6 +11,7 @@
 
 #include <dune/grid/common/mcmgmapper.hh>
 
+#include <dune/python/grid/capabilities.hh>
 #include <dune/python/common/logger.hh>
 #include <dune/python/pybind11/extensions.h>
 #include <dune/python/pybind11/pybind11.h>
