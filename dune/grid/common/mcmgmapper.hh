@@ -377,10 +377,9 @@ namespace Dune
       const GeometryType gt = eType.isNone() ?
         GeometryTypes::none( GV::dimension - cc ) :
         ReferenceElements<double,GV::dimension>::general(eType).type(i,cc) ;
-      //GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,cc);
       if (offset(gt) == invalidOffset)
         return false;
-      result = is.subIndex(e, i, cc) + offset(gt);
+      result = is.subIndex(e, i, cc)*blockSize(gt) + offset(gt);
       return true;
     }
 
