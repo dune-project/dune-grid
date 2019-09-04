@@ -134,6 +134,7 @@ namespace Dune
   template<typename GV>
   void checkGeometryLifetime (const GV &gridView)
   {
+    using std::abs;
     typedef typename GV::ctype ctype;
     enum { dim  = GV::dimension };
     enum { dimw = GV::dimensionworld };
@@ -157,7 +158,7 @@ namespace Dune
     {
       // due to register/memory differences we might have
       // errors < 1e-16
-      assert (std::abs((geomCopy.global(pos) - glob).one_norm()) < std::numeric_limits<ctype>::epsilon());
+      assert (abs((geomCopy.global(pos) - glob).one_norm()) < std::numeric_limits<ctype>::epsilon());
     }
   }
 

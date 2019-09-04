@@ -59,10 +59,11 @@ inline void checkJIn ( const Dune :: FieldVector< ctype, dimworld > &normal,
                        const JacobianInverseTransposed &jit,
                        const String & name )
 {
+  using std::sqrt;
   const int facedim = JacobianInverseTransposed::cols;
   Dune :: FieldVector< ctype, facedim > x( ctype( 0 ) );
   jit.umtv( normal, x );
-  if (x.infinity_norm() > 1e-8)
+  if (x.infinity_norm() > sqrt(std::numeric_limits< ctype >::epsilon()))
   {
     const Dune::FieldMatrix< ctype, dimworld, facedim > &mjit = jit;
     std :: cerr << "Error:  (J^-1 * n) != 0." << std :: endl;
@@ -106,6 +107,7 @@ void checkIntersectionAssignment ( const GridView &view, const typename GridView
 template< class Intersection >
 void checkIntersection ( const Intersection &intersection, bool isCartesian = false )
 {
+  using std::sqrt; using std::abs;
   typedef typename Intersection::ctype ctype;
 
   typedef typename Intersection::Entity Entity;
@@ -129,6 +131,8 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
                 "Type Intersection::ctype differs from Intersection::LocalGeometry::ctype.");
   static_assert((std::is_same< ctype, typename Geometry::ctype >::value),
                 "Type Intersection::ctype differs from Intersection::Geometry::ctype.");
+
+  const ctype tolerance = sqrt(std::numeric_limits< ctype >::epsilon());
 
   // cache some information on the intersection
 
@@ -183,7 +187,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
       typename Geometry::GlobalCoordinate globalPos = geometry.global( pt );
       typename Geometry::GlobalCoordinate localPos = insideGeometry.global( geometryInInside.global( pt ) );
 
-      if( (globalPos - localPos).infinity_norm() > 1e-6 )
+      if( (globalPos - localPos).infinity_norm() > tolerance )
       {
         std::cerr << "Error: Intersection's geometry is inconsistent with concatenation of inside entity's geometry and intersection's geometryInInside." << std::endl;
 
@@ -240,7 +244,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
           typename Geometry::GlobalCoordinate globalPos = geometry.global( pt );
           typename Geometry::GlobalCoordinate localPos = outsideGeometry.global( geometryInOutside.global( pt ) );
 
-          if( (globalPos - localPos).infinity_norm() > 1e-6 )
+          if( (globalPos - localPos).infinity_norm() > tolerance )
           {
             std::cerr << "Error: Intersection's geometry is inconsistent with concatenation of outside entity's geometry and intersection's geometryInOutside." << std::endl;
 
@@ -315,7 +319,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
         {
           typename Geometry::GlobalCoordinate x = geometry.corner( c-1 );
           x -= geometry.corner( c );
-          if( x*normal >= 1e3*std::numeric_limits< ctype >::epsilon() )
+          if( x*normal >= tolerance )
           {
             std::cerr << "outerNormal not orthogonal to line between corner "
                       << (c-1) << " and corner " << c << "." << std::endl;
@@ -333,7 +337,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
       const typename Intersection::GlobalCoordinate intNormal = intersection.integrationOuterNormal( pt );
       const ctype det = geometry.integrationElement( pt );
-      if( std::abs( det - intNormal.two_norm() ) > 1e-8 )
+      if( abs( det - intNormal.two_norm() ) > tolerance )
       {
         std::cerr << "Error: integrationOuterNormal yields wrong length." << std::endl;
         std::cerr << "       |integrationOuterNormal| = " << intNormal.two_norm()
@@ -345,7 +349,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
       if( !inside.type().isNone() )
         checkParallel( intNormal, refIntNormal, "integrationOuterNormal" );
 
-      if( (intNormal - refIntNormal).two_norm() > 1e-8 )
+      if( (intNormal - refIntNormal).two_norm() > tolerance )
       {
         std::cerr << "Error: Wrong integration outer normal (" << intNormal
                   << ", should be " << refIntNormal << ")." << std::endl;
@@ -359,7 +363,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
       // check unit outer normal
 
       const typename Intersection::GlobalCoordinate unitNormal = intersection.unitOuterNormal( pt );
-      if( std::abs( ctype( 1 ) - unitNormal.two_norm() ) > 1e-8 )
+      if( abs( ctype( 1 ) - unitNormal.two_norm() ) > tolerance )
       {
         std::cerr << "Error: unitOuterNormal yields wrong length." << std::endl;
         std::cerr << "       |unitOuterNormal| = " << unitNormal.two_norm() << std::endl;
@@ -381,7 +385,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
         typename Intersection::GlobalCoordinate normal( 0 );
         normal[ indexInInside / 2 ] = 2 * (indexInInside % 2) - 1;
 
-        if( (normal - unitNormal).infinity_norm() > 1e-8 )
+        if( (normal - unitNormal).infinity_norm() > tolerance )
           DUNE_THROW( Dune::GridError, "Unit normal is not in Cartesian format, although isCartesian is true" );
       }
     }
@@ -390,7 +394,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
     auto refFace = referenceElement( geometry );
 
-    if( (intersection.centerUnitOuterNormal() - intersection.unitOuterNormal( refFace.position( 0, 0 ) )).two_norm() > 1e-8 )
+    if( (intersection.centerUnitOuterNormal() - intersection.unitOuterNormal( refFace.position( 0, 0 ) )).two_norm() > tolerance )
     {
       std::cerr << "Error: centerUnitOuterNormal() does not match unitOuterNormal( "
                 << refFace.position( 0, 0 ) << " )." << std::endl;
@@ -410,6 +414,7 @@ void checkIntersectionIterator ( const GridViewType &view,
                                  const typename GridViewType::template Codim< 0 >::Iterator &eIt,
                                  ErrorState &errorState )
 {
+  using std::sqrt;
   typedef typename GridViewType::Grid GridType;
   typedef typename GridViewType::IntersectionIterator IntersectionIterator;
   typedef typename GridViewType::Intersection Intersection;
@@ -598,7 +603,7 @@ void checkIntersectionIterator ( const GridViewType &view,
   //       Therefore we only enforce this check for dim==dimworld
   // note: The errorState variable will propagate the error as a warning for the cases
   //       where this check is not enforced
-  if( (sumNormal.two_norm() > 1e-8) && (eIt->partitionType() != Dune::GhostEntity) )
+  if( (sumNormal.two_norm() > sqrt(std::numeric_limits< ctype >::epsilon())) && (eIt->partitionType() != Dune::GhostEntity) )
   {
     if( eIt->geometry().affine() && int(GridViewType::dimension) == int(GridViewType::dimensionworld))
       DUNE_THROW( Dune::GridError, "Integral over outer normals on affine entity is nonzero: " << sumNormal );

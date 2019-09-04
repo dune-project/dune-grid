@@ -32,6 +32,7 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
 
   typedef typename Intersection::Entity Entity;
   typedef typename Entity::Geometry Geometry;
+  typedef typename Geometry::ctype ctype;
 
   typedef typename Intersection::LocalGeometry LocalGeometry;
 
@@ -44,6 +45,7 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
     return 0;
 
   int errors = 0;
+  const ctype tolerance = std::numeric_limits< ctype >::epsilon();
 
   const int tIn = mapTwist( intersection.twistInInside() );
   const int tOut = mapTwist( intersection.twistInOutside() );
@@ -70,7 +72,7 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
     WorldVector xIn = geoIn.corner( refIn.subEntity( nIn, 1, iIn, dimension ) );
     WorldVector xOut = geoOut.corner( refOut.subEntity( nOut, 1, iOut, dimension ) );
 
-    if( (xIn - xOut).two_norm() < 1e-12 )
+    if( (xIn - xOut).two_norm() < tolerance )
       continue;
 
     std::cout << "Error: corner( " << iIn << " ) = " << xIn
@@ -90,7 +92,7 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
 
     const int iIn = applyTwist( inverseTwist( tIn, numCorners ), i, numCorners );
     LocalVector xIn = refIn.position( refIn.subEntity( nIn, 1, iIn, dimension ), dimension );
-    if( (xIn - lGeoIn.corner( gi )).two_norm() >= 1e-12 )
+    if( (xIn - lGeoIn.corner( gi )).two_norm() >= tolerance )
     {
       std::cout << "Error: twisted inside reference corner( " << iIn << " ) = " << xIn
                 << " != " << lGeoIn.corner( gi ) << " = local corner( " << i << " )."
@@ -101,7 +103,7 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
 
     const int iOut = applyTwist( inverseTwist( tOut, numCorners ), i, numCorners );
     LocalVector xOut = refOut.position( refOut.subEntity( nOut, 1, iOut, dimension ), dimension );
-    if( (xOut - lGeoOut.corner( gi )).two_norm() >= 1e-12 )
+    if( (xOut - lGeoOut.corner( gi )).two_norm() >= tolerance )
     {
       std::cout << "Error: twisted outside reference corner( " << iOut << " ) = " << xOut
                 << " != " << lGeoOut.corner( gi ) << " = local corner( " << i << " )."
@@ -122,7 +124,7 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
         const int gi = i;
         const int iIn = applyTwist( inverseTwist( nTwist, numCorners ), i, numCorners );
         LocalVector xIn = refIn.position( refIn.subEntity( nIn, 1, iIn, dimension ), dimension );
-        if( (xIn - lGeoIn.corner( gi )).two_norm() >= 1e-12 )
+        if( (xIn - lGeoIn.corner( gi )).two_norm() >= tolerance )
         {
           twistInside = false ;
         }
@@ -148,7 +150,7 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
         const int gi = i;
         const int iOut = applyTwist( inverseTwist( nTwist, numCorners ), i, numCorners );
         LocalVector xOut = refOut.position( refOut.subEntity( nOut, 1, iOut, dimension ), dimension );
-        if( (xOut - lGeoOut.corner( gi )).two_norm() >= 1e-12 )
+        if( (xOut - lGeoOut.corner( gi )).two_norm() >= tolerance )
         {
           twistOutside = false;
         }
