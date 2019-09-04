@@ -94,6 +94,7 @@ namespace Dune
     {
       // field type
       typedef typename Jacobian::field_type field_type;
+      typedef typename FieldTraits< field_type >::real_type real_type;
       static_assert(( std::is_convertible<ctype, field_type>::value &&
                       std::is_convertible<field_type, ctype>::value ),
                     "Field type not compatible with geometry's coordinate type");
@@ -123,13 +124,13 @@ namespace Dune
         }
 
         // call norms
-        DUNE_UNUSED typename FieldTraits< field_type >::real_type frobenius_norm
+        DUNE_UNUSED real_type frobenius_norm
           = jacobian.frobenius_norm();
-        DUNE_UNUSED typename FieldTraits< field_type >::real_type frobenius_norm2
+        DUNE_UNUSED real_type frobenius_norm2
           = jacobian.frobenius_norm2();
-        DUNE_UNUSED typename FieldTraits< field_type >::real_type infinity_norm
+        DUNE_UNUSED real_type infinity_norm
           = jacobian.infinity_norm();
-        DUNE_UNUSED typename FieldTraits< field_type >::real_type infinity_norm_real
+        DUNE_UNUSED real_type infinity_norm_real
           = jacobian.infinity_norm_real();
 
         // cast to FieldMatrix
@@ -140,7 +141,7 @@ namespace Dune
         // check consistency with matrix-vector multiplication
         assemble( jacobian, B );
         A -= B;
-        if( A.frobenius_norm() > 1e-12 )
+        if( A.frobenius_norm() > std::numeric_limits< real_type >::epsilon() )
           DUNE_THROW( MathError, "Cast to field matrix is inconsistent with matrix-vector multiplication" );
       }
 

@@ -109,6 +109,7 @@ namespace Dune {
         : public Dune::CommDataHandleIF<CommunicationTestDataHandle<GV>,
                                   typename GV::template Codim<0>::Geometry::GlobalCoordinate>
       {
+        using ctype = typename GV::ctype;
 
         bool contains(int dim, int codim) const
         {
@@ -136,7 +137,7 @@ namespace Dune {
             std::cout << "Gathering from entity " << _mapper.index(e) << " at " << e.geometry().center() << std::endl;
           ++_writes[_mapper.index(e)];
           center -= _coords[_mapper.index(e)];
-          assert(Dune::FloatCmp::eq(center.two_norm(),0.0));
+          assert(Dune::FloatCmp::eq(center.two_norm(),ctype(0)));
         }
 
         template<typename Buf, typename E>
@@ -148,9 +149,9 @@ namespace Dune {
           ++_reads[_mapper.index(e)];
           auto center = e.geometry().center();
           data -= e.geometry().center();
-          assert(Dune::FloatCmp::eq(data.two_norm(),0.0));
+          assert(Dune::FloatCmp::eq(data.two_norm(),ctype(0)));
           center -= _coords[_mapper.index(e)];
-          assert(Dune::FloatCmp::eq(center.two_norm(),0.0));
+          assert(Dune::FloatCmp::eq(center.two_norm(),ctype(0)));
         }
 
         template<int cd, typename Check>
