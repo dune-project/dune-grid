@@ -23,6 +23,11 @@ void checkGeometryInFather(const GridType& grid)
 {
   using namespace Dune;
 
+  using ctype = typename GridType::ctype;
+
+  // define a tolerance for floating-point checks
+  const ctype tolerance = std::sqrt(std::numeric_limits< ctype >::epsilon());
+
   // count the number of different vertices
   unsigned int differentVertexCoords = 0;
 
@@ -180,7 +185,7 @@ void checkGeometryInFather(const GridType& grid)
           const typename Geometry::GlobalCoordinate cornerViaFather =
             eIt->father().geometry().global(cornerInFather);
 
-          if( (cornerViaFather - cornerViaSon).infinity_norm() > 1e-7 )
+          if( (cornerViaFather - cornerViaSon).infinity_norm() > tolerance )
           {
             ++differentVertexCoords;
             std :: cout << "global transformation of geometryInFather yields different vertex position "
@@ -199,7 +204,7 @@ void checkGeometryInFather(const GridType& grid)
             e = e.father();
         }
 
-        if ((e.geometry().global(x)-eIt->geometry().global(X)).two_norm() > 1e-8)
+        if ((e.geometry().global(x)-eIt->geometry().global(X)).two_norm() > tolerance)
         {
           std::cerr << "Warning: mapping broken! " << e.geometry().global(x)
                     << " vs. "  << eIt->geometry().global(X)
@@ -224,7 +229,7 @@ void checkGeometryInFather(const GridType& grid)
           const typename Geometry::LocalCoordinate cornerFromGlobal =
             eIt->father().geometry().local(cornerViaSon);
 
-          if( (cornerInFather - cornerFromGlobal).infinity_norm() > 1e-7 )
+          if( (cornerInFather - cornerFromGlobal).infinity_norm() > tolerance )
           {
             ++differentVertexCoords;
             std :: cout << "geometryInFather().global() and yields different vertex position than father().geometry().local()"
@@ -253,7 +258,7 @@ void checkGeometryInFather(const GridType& grid)
           const typename Geometry::LocalCoordinate cornerViaFather =
             geometryInFather.local(cornerInFather);
 
-          if( (cornerViaFather - cornerInSon).infinity_norm() > 1e-7 )
+          if( (cornerViaFather - cornerInSon).infinity_norm() > tolerance )
           {
             ++differentVertexCoords;
             std :: cout << "local transformation of geometryInFather yields different vertex position "
@@ -277,7 +282,7 @@ void checkGeometryInFather(const GridType& grid)
 
           const typename Geometry::GlobalCoordinate &cornerViaSon = eIt->geometry().corner( j );
 
-          if( (cornerViaFather - cornerViaSon).infinity_norm() > 1e-7 )
+          if( (cornerViaFather - cornerViaSon).infinity_norm() > tolerance )
           {
             ++differentVertexCoords;
             std :: cout << "geometryInFather yields different vertex position "
