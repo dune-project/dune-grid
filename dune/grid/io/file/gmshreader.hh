@@ -366,7 +366,7 @@ namespace Dune
 
       // open file name, we use C I/O
       fileName = f;
-      FILE* file = fopen(fileName.c_str(),"r");
+      FILE* file = fopen(fileName.c_str(),"rb");
       if (file==0)
         DUNE_THROW(Dune::IOError, "Could not open " << fileName);
 
@@ -441,7 +441,7 @@ namespace Dune
       //    actually occur as corners of an element.
       //=========================================
 
-      long section_element_offset = ftell(file);
+      off_t section_element_offset = ftello(file);
       std::map<int,unsigned int> renumber;
       for (int i=1; i<=number_of_elements; i++)
       {
@@ -474,7 +474,7 @@ namespace Dune
       // Pass 2: Insert boundary segments and elements
       //==============================================
 
-      fseek(file, section_element_offset, SEEK_SET);
+      fseeko(file, section_element_offset, SEEK_SET);
       boundary_element_count = 0;
       element_count = 0;
       for (int i=1; i<=number_of_elements; i++)
