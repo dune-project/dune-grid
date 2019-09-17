@@ -10,7 +10,7 @@ if(ALBERTA_FOUND)
   # create dimension dependent alberta libraries
   foreach(_dim ${ALBERTA_WORLD_DIMS})
     list(APPEND ALBERTAGRID_LIBS albertagrid_${_dim}d)
-    dune_add_library(albertagrid_${_dim}d OBJECT ${ALBERTAGRID_SOURCES})
+    dune_add_library(albertagrid_${_dim}d OBJECT SOURCES ${ALBERTAGRID_SOURCES})
   endforeach(_dim RANGE 1 9)
 endif(ALBERTA_FOUND)
 

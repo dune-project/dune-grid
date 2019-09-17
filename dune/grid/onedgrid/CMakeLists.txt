@@ -18,6 +18,7 @@ install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/onedg
 exclude_from_headercheck( onedgridleafiterator.hh onedgridleveliterator.hh onedgridhieriterator.hh )
 
 dune_add_library(onedgrid OBJECT
+  SOURCES
   onedgrid.cc
   onedgridfactory.cc
   nulliteratorfactory.cc)
