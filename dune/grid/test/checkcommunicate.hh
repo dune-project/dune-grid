@@ -139,6 +139,12 @@ public:
   template<class MessageBuffer, class EntityType>
   void scatter (MessageBuffer& buff, const EntityType& e, size_t n)
   {
+    using Geometry = typename EntityType::Geometry;
+    using ctype = typename Geometry::ctype;
+
+    // define a tolerance for floating-point checks
+    const ctype tolerance = std::sqrt(std::numeric_limits< ctype >::epsilon());
+
     // as this problem is a fixed size problem we can check the sizes
     assert( n == size(e) );
 
@@ -173,16 +179,15 @@ public:
     }
 
     // test if the sending/receiving entities are geometrically the same
-    typedef typename EntityType::Geometry Geometry;
     const Geometry &geometry = e.geometry();
     for( int i = 0; i < geometry.corners(); ++i )
     {
-      typedef Dune::FieldVector< typename Geometry::ctype, Geometry::coorddimension > Vector;
+      typedef Dune::FieldVector< ctype, Geometry::coorddimension > Vector;
       const Vector corner = geometry.corner( i );
       for( int j = 0; j < Geometry::coorddimension; ++j )
       {
         buff.read(x);
-        if( std::abs( corner[ j ] - x ) > 1e-8 )
+        if( std::abs( corner[ j ] - x ) > tolerance )
         {
           std::cerr << "ERROR in scatter: Vertex <" << i << "," << j << ">: "
                     << " this : (" << corner[ j ] << ")"
@@ -218,7 +223,7 @@ class CheckCommunication
   typedef typename Grid :: ctype ctype;
 
   typedef Dune::FieldVector< ctype, dimworld > CoordinateVector;
-  typedef std :: vector< double > ArrayType;
+  typedef std :: vector< ctype > ArrayType;
 
   CoordinateVector upwind_;
   OutputStream &sout_;
@@ -228,7 +233,7 @@ class CheckCommunication
   const int level_;
 
   // the function
-  double f ( const CoordinateVector &x )
+  ctype f ( const CoordinateVector &x )
   {
     CoordinateVector a( 1.0 );
     a[0] = -0.5;
@@ -256,7 +261,7 @@ class CheckCommunication
         const int numVertices = entity.subEntities(dim);
         for( int i = 0; i < numVertices; ++i )
           mid += entity.geometry().corner( i );
-        mid /= double( numVertices );
+        mid /= ctype( numVertices );
 
         int index = indexSet_.index( entity );
         data[ index ]  = f( mid );
@@ -275,7 +280,7 @@ class CheckCommunication
           const Dune::FieldVector< ctype, dim-1 > &bary = faceRefElement.position( 0, 0 );
 
           const CoordinateVector normal = intersection.integrationOuterNormal( bary );
-          double calc = normal * upwind_;
+          ctype calc = normal * upwind_;
 
           // if testing level, then on non-conform grid also set values on
           // intersections that are not boundary, but has no level
@@ -295,7 +300,7 @@ class CheckCommunication
               const int c = subE.geometry().corners();
               for( int j = 0; j < c; ++j )
                 cmid += subE.geometry().corner( j );
-              cmid /= double( c );
+              cmid /= ctype( c );
 
               data[ idx ] = f( cmid );
               weight[ idx ] = 1.0;
@@ -323,7 +328,7 @@ class CheckCommunication
                 const int c = subE.geometry().corners();
                 for( int j = 0; j < c; ++j )
                   cmid += subE.geometry().corner( j );
-                cmid /= double( c );
+                cmid /= ctype( c );
 
                 data[ idx ] = f( cmid );
                 weight[ idx ] = 1.0;
@@ -339,7 +344,7 @@ class CheckCommunication
   // difference in the function values.
   // if testweight is true an error is printed for each
   // flag not equal to 1
-  double test ( int dataSize, ArrayType &data, ArrayType &weight, bool testweight )
+  ctype test ( int dataSize, ArrayType &data, ArrayType &weight, bool testweight )
   {
     const int rank = gridView_.comm().rank();
     const int size = gridView_.comm().size();
@@ -359,7 +364,7 @@ class CheckCommunication
     //Variante MIT Geisterzellen
     //typedef typename IndexSet :: template Codim<0> :: template Partition<All_Partition> :: Iterator IteratorType;
 
-    double maxerr = 0.0;
+    ctype maxerr = 0.0;
     Iterator end = gridView_.template end< 0 >();
     for( Iterator it = gridView_.template begin< 0 >(); it != end ; ++it )
     {
@@ -369,12 +374,12 @@ class CheckCommunication
       const int numVertices = entity.subEntities(dim);
       for( int i = 0; i < numVertices; ++i )
         mid += entity.geometry().corner( i );
-      mid /= double(numVertices);
+      mid /= ctype(numVertices);
 
       if( cdim == 0 )
       {
         int index = indexSet_.index( entity );
-        double lerr = std::abs( f( mid ) - data[ index ] );
+        ctype lerr = std::abs( f( mid ) - data[ index ] );
         maxerr = std :: max( maxerr, lerr );
         if( testweight && (weight[ index ] < 0) )
         {
@@ -399,9 +404,9 @@ class CheckCommunication
           const int numVertices = subE.geometry().corners();
           for( int j = 0; j< numVertices; ++j )
             cmid += subE.geometry().corner( j );
-          cmid /= double( numVertices );
+          cmid /= ctype( numVertices );
 
-          double lerr = std::abs( f( cmid ) - data[ index ] );
+          ctype lerr = std::abs( f( cmid ) - data[ index ] );
           maxerr = std::max( maxerr, lerr );
           if( testweight && (weight[ index ] < 0) )
           {
@@ -431,6 +436,9 @@ class CheckCommunication
   // The main ''algorithm''
   bool checkCommunication ()
   {
+    // define a tolerance for floating-point checks
+    const ctype tolerance = std::sqrt(std::numeric_limits< ctype >::epsilon());
+
     upwind_[ 0 ] = -0.1113;
     int myrank = gridView_.comm().rank();
 
@@ -446,7 +454,7 @@ class CheckCommunication
     ArrayType weight(dataSize, 0.0);
     project( dataSize, data, weight, myrank );
 
-    double preresult = test( dataSize, data, weight, false );
+    ctype preresult = test( dataSize, data, weight, false );
     sout_ << "Test before Communication on <" << myrank << "> " << preresult << std :: endl;
     // Communicate
     typedef typename Grid :: Traits :: GlobalIdSet GlobalIdSet;
@@ -472,9 +480,9 @@ class CheckCommunication
       return false;
     }
 
-    double result = test( dataSize, data, weight, true );
+    ctype result = test( dataSize, data, weight, true );
     sout_ << "Test after Communication on <" << myrank << "> " << result << std :: endl;
-    return (std::abs(result) < 1e-8);
+    return (std::abs(result) < tolerance);
   }
 
 public:
