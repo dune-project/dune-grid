@@ -26,6 +26,9 @@ namespace Dune {
     typedef typename GridImp::YGrid::Iterator I;
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
+    //! default constructor creating empty iterator
+    YaspHierarchicIterator () : _entity(), _maxlevel(-1), stack() {}
+
     //! constructor
     YaspHierarchicIterator (const YGLI& g, const I& it, int maxlevel) :
       _entity(YaspEntity<0, dim, GridImp>(g,it))
