@@ -74,6 +74,8 @@
   by DUNE 2.7 will differ from the same file written in DUNE 2.6. If you are using VTK files for testing
   results, make sure to use fuzzy float comparisons!
 
+- UG 3.x is no longer supported. Use dune-uggrid instead.
+
 
 # Release 2.6
 
