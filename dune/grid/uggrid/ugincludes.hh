@@ -12,19 +12,20 @@
    therein.
  */
 
-#include <ug/gm.h>
-#include <ug/std_domain.h>
-#include <ug/initug.h>
-#include <ug/commands.h>
-#include <ug/formats.h>
-#include <ug/elements.h>
-#include <ug/shapes.h>
-#include <ug/algebra.h>
-#include <ug/refine.h>
-#include <ug/ugm.h>
-#include <ug/rm.h>
+
+#include <dune/uggrid/gm/gm.h>
+#include <dune/uggrid/domain/std_domain.h>
+#include <dune/uggrid/initug.h>
+#include <dune/uggrid/commands.h>
+#include <dune/uggrid/numerics/formats.h>
+#include <dune/uggrid/gm/elements.h>
+#include <dune/uggrid/gm/algebra.h>
+#include <dune/uggrid/gm/shapes.h>
+#include <dune/uggrid/gm/refine.h>
+#include <dune/uggrid/gm/ugm.h>
+#include <dune/uggrid/gm/rm.h>
 #if defined ModelP
-#include <ug/parallel.h>
+#include <dune/uggrid/parallel/dddif/parallel.h>
 #endif
 
 #endif
