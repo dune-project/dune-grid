@@ -12,19 +12,19 @@
    therein.
  */
 
-#include <ug/gm.h>
-#include <ug/std_domain.h>
-#include <ug/initug.h>
-#include <ug/commands.h>
-#include <ug/formats.h>
-#include <ug/elements.h>
-#include <ug/shapes.h>
-#include <ug/algebra.h>
-#include <ug/refine.h>
-#include <ug/ugm.h>
-#include <ug/rm.h>
+#include <initug.h>
+#include <np/udm/formats.h>
+#include <gm/elements.h>
+#include <dom/std/std_domain.h>
+#include <gm/algebra.h>
+#include <gm/gm.h>
+#include <gm/refine.h>
+#include <gm/shapes.h>
+#include <gm/rm.h>
+#include <gm/ugm.h>
+#include <ui/commands.h>
 #if defined ModelP
-#include <ug/parallel.h>
+#include <parallel/dddif/parallel.h>
 #endif
 
 #endif
