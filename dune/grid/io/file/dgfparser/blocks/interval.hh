@@ -52,6 +52,7 @@ namespace Dune
       std::vector< int > map_;
       bool good_;                      //data read correctly
       int dimw_;                       //dimension of world
+      int dimg_;                       //dimension of grid, i.e. number of intervals
 
     public:
       explicit IntervalBlock ( std::istream &in );
@@ -86,6 +87,11 @@ namespace Dune
       int dimw () const
       {
         return dimw_;
+      }
+
+      int dimg () const
+      {
+        return dimg_;
       }
 
       int getVtx ( int block, std::vector< std::vector< double > > &vtx ) const;
