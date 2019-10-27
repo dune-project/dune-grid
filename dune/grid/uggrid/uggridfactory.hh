@@ -135,7 +135,7 @@ namespace Dune {
      </p>
 
      <pre>
-     UGGrid<dim>* grid = factory.createGrid();
+     std::unique_ptr<UGGrid<dim> > grid = factory.createGrid();
      </pre>
 
      <p>

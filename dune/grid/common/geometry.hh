@@ -100,6 +100,9 @@ namespace Dune
     //! type of the global coordinates
     typedef FieldVector< ctype, cdim > GlobalCoordinate;
 
+    //! Number type used for the geometry volume
+    typedef decltype(std::declval<Implementation>().volume()) Volume;
+
     /**
      * \brief type of jacobian inverse transposed
      *
@@ -202,7 +205,7 @@ namespace Dune
     }
 
     /** \brief return volume of geometry */
-    ctype volume () const
+    Volume volume () const
     {
       return impl().volume();
     }
@@ -307,6 +310,9 @@ namespace Dune
     typedef FieldVector< ctype, mydim > LocalCoordinate;
     typedef FieldVector< ctype, cdim > GlobalCoordinate;
 
+    //! Number type used for the geometry volume
+    typedef ctype Volume;
+
     //! type of jacobian inverse transposed
     typedef FieldMatrix< ctype, cdim, mydim > JacobianInverseTransposed;
 
@@ -314,7 +320,7 @@ namespace Dune
     typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
 
     //! return volume of the geometry
-    ctype volume () const
+    Volume volume () const
     {
       GeometryType type = asImp().type();
 
@@ -365,6 +371,7 @@ namespace Dune
 
     typedef FieldVector< ctype, mydim > LocalCoordinate;
     typedef FieldVector< ctype, cdim > GlobalCoordinate;
+    typedef ctype Volume;
 
     //! type of jacobian inverse transposed
     typedef FieldMatrix< ctype, cdim, mydim > JacobianInverseTransposed;
@@ -385,9 +392,9 @@ namespace Dune
     }
 
     //! return volume of the geometry
-    ctype volume () const
+    Volume volume () const
     {
-      return 1.0;
+      return Volume(1.0);
     }
 
     //! return center of the geometry

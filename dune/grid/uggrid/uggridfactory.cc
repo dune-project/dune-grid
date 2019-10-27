@@ -5,7 +5,6 @@
 
 #include <memory>
 
-#include <dune/common/std/memory.hh>
 #include <dune/common/stdstreams.hh>
 
 #include <dune/grid/uggrid/uggridfactory.hh>

@@ -10,6 +10,7 @@
  */
 
 #include <cassert>
+#include <limits>
 #include <vector>
 
 #include <dune/common/exceptions.hh>
@@ -72,7 +73,7 @@ bool checkEntityLifetimeForCodim(GV gv, std::size_t check_element_count, Dune::C
           InvalidStateException,
           "ERROR! inconsistent id for entity " << i <<
           " (" << id_set.id(entity_list[i]) << " != " << ids[i] << ")");
-      if (entity_list[i].geometry().corner(0) != coords[i])
+      if ((entity_list[i].geometry().corner(0) - coords[i]).two_norm() > std::numeric_limits<typename GV::ctype>::epsilon())
         DUNE_THROW(
           InvalidStateException,
           "ERROR! inconsistent corner(0) coordinate for entity " << i <<

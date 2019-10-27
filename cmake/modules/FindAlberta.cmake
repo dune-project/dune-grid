@@ -133,7 +133,7 @@ cmake_pop_check_state()
 list(LENGTH ALBERTA_WORLD_DIMS _length)
 if(_length GREATER 0)
   _dune_set_alberta(TRUE)
-endif(length GREATER 0)
+endif()
 
 if(ALBERTA_VERSION STREQUAL "3.0")
   set(DUNE_ALBERTA_VERSION 0x300)

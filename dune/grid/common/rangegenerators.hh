@@ -541,7 +541,7 @@ namespace Dune
    * \param gv   a GridView object that contains the elements.
    * \param ps   a PartitionSet object that is used to specify the set of Dune::PartitionType to which
    *             the elements must belong.
-   * \returns    an unspecified object that is guaranteed to fulfil the interface
+   * \returns    an unspecified object that is guaranteed to fulfill the interface
    *             of IteratorRange and that can be iterated over using a range-based
    *             for loop.
    */

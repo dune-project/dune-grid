@@ -29,6 +29,7 @@
 #define GRIDDIM ALBERTA_DIM
 #endif
 
+#include <dune/common/exceptions.hh>
 #include <dune/grid/onedgrid.hh>
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/test/gridcheck.hh>
@@ -47,7 +48,9 @@ struct EnableLevelIntersectionIteratorCheck< Dune::AlbertaGrid< dim, dimworld > 
 #endif
 
 template <typename GridType>
-void testReadingAndWritingGrid( const std::string& path, const std::string& gridName, const std::string& gridManagerName, int refinements)
+void testReadingAndWritingGrid( const std::string& path, const std::string& gridName,
+                                const std::string& gridManagerName, int refinements,
+                                bool expectsBoundarySegments = false)
 {
   // Read the grid
   std::cout<<"Using "<<gridManagerName<<std::endl;
@@ -70,6 +73,9 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
           tempIDs[intersection.boundarySegmentIndex()]=boundaryIDs[gridFactory.insertionIndex(intersection)];
     boundaryIDs=std::move(tempIDs);
   }
+  else
+    if (expectsBoundarySegments)
+        DUNE_THROW(Dune::IOError, "Expected boundary segment markers found none!");
 
   // Load balancing and refinement
   grid->loadBalance();
@@ -142,7 +148,7 @@ try
 #endif
 
 #if GMSH_ONEDGRID
-  testReadingAndWritingGrid<OneDGrid>( path, "oned-testgrid", "OneDGrid", refinements );
+  testReadingAndWritingGrid<OneDGrid>( path, "oned-testgrid", "OneDGrid", refinements, true);
 #endif
 
   return 0;

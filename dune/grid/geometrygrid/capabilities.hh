@@ -4,6 +4,7 @@
 #define DUNE_GEOGRID_CAPABILITIES_HH
 
 #include <cassert>
+#include <type_traits>
 
 #include <dune/common/hybridutilities.hh>
 #include <dune/common/std/utility.hh>
@@ -55,7 +56,7 @@ namespace Dune
     template< class HostGrid, class CoordFunction, class Allocator >
     struct hasBackupRestoreFacilities< GeometryGrid< HostGrid, CoordFunction, Allocator > >
     {
-      static const bool v = hasBackupRestoreFacilities< HostGrid >::v;
+      static const bool v = hasBackupRestoreFacilities< HostGrid >::v && std::is_default_constructible< CoordFunction >::value;
     };
 
     template< class HostGrid, class CoordFunction, class Allocator >
