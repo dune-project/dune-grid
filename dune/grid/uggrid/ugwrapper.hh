@@ -788,16 +788,12 @@ namespace Dune {
 
     //! Gets the leaf index of a UG sidevector
     static UG::UINT& leafIndex(Vector* theVector) {
-      // theVector->skip is actually something other than an index.
-      // We use it anyways.
-      return theVector->skip;
+      return theVector->leafIndex;
     }
 
     //! Gets the leaf index of a UG sidevector
     static const UG::UINT& leafIndex(const Vector* theVector) {
-      // theVector->skip is actually something other than an index.
-      // We use it anyways.
-      return theVector->skip;
+      return theVector->leafIndex;
     }
 
     //! Gets the leaf index of a UG edge
