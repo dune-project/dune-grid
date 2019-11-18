@@ -549,6 +549,10 @@ void iterate(Grid &g)
     if( !geo.type().isNone() )
     {
       origin = referenceElement(geo).position(0,0);
+      typename Geometry::LocalCoordinate origin2 =
+        referenceElement( *it ).position(0,0);
+      if( (origin - origin2 ).two_norm() > 1e-10 )
+        DUNE_THROW(CheckError, "referenceElement( entity ) != referenceElement( geo )");
 
       result = geo.local( geo.global( origin ) );
       typename Grid::ctype error = (result-origin).two_norm();

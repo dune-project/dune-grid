@@ -676,6 +676,26 @@ namespace Dune
     const EntityImp<0,dim,GridImp>& asImp () const { return static_cast<const EntityImp<0,dim,GridImp>&>(*this); }
   };
 
+  //! Second-level dispatch to select the correct reference element for a grid entity.
+  /**
+   * This function is the default implementation of the second-level reference element dispatch
+   * performed by Entity.
+   *
+   * When referenceElement() is called with an Entity, it will forward the call to
+   * `referenceElement<ctype, mydim>(const GeometryType&)`. This default implementation
+   * will do the right thing as long as your geometry is based on a standard Dune ReferenceElement. If
+   * it is not and you want to supply your own reference element implementation, provide an override of
+   * this function for your specific geometry implementation.
+   *
+   * \related Entity
+   */
+  template< int cd, int dim, class GridImp, template<int,int,class> class EntityImp >
+  auto referenceElement(const Entity< cd, dim, GridImp, EntityImp >& entity )
+    -> decltype(referenceElement<typename GridImp::ctype,GridImp::template Codim<cd>::Geometry::mydimension>(entity.type()))
+  {
+    typedef typename GridImp::template Codim<cd>::Geometry Geo;
+    return referenceElement< typename Geo::ctype, Geo::mydimension >(entity.type());
+  }
 }
 
 #endif // DUNE_GRID_ENTITY_HH

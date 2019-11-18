@@ -163,3 +163,7 @@
 - `UGGrid` now supports transferring element data during load balancing.
 
     See core/dune-grid!172
+
+- A convenience method `referenceElement( entity )` was added.
+
+    See core/dune-grid!349
