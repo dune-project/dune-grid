@@ -35,7 +35,7 @@ namespace Dune {
     enum {codimension = codim};
 
     //! Constructor
-    explicit UGGridLevelIterator()
+    explicit UGGridLevelIterator() : gridImp_(nullptr)
     {
       entity_.impl().setToTarget(nullptr,nullptr);
     }

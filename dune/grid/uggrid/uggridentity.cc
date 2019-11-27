@@ -91,7 +91,7 @@ template <int cc>
 typename GridImp::template Codim<cc>::Entity
 UGGridEntity<0,dim,GridImp>::subEntity ( int i ) const
 {
-  assert(i>=0 && i < subEntities(cc));
+  assert(i>=0 && i < int(subEntities(cc)));
 
   typename UG_NS<dim>::template Entity<cc>::T* subEntity;
 
