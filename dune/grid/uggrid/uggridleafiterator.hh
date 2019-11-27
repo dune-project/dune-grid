@@ -68,7 +68,7 @@ namespace Dune {
 
     /** \brief Constructor setting up an 'end' iterator
      */
-    UGGridLeafIterator()
+    UGGridLeafIterator() : grid_(nullptr)
     {
       entity_.impl().setToTarget(nullptr,nullptr);
     }
