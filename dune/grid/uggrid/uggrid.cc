@@ -31,9 +31,6 @@ namespace Dune {
 template<> int UGGrid<2>::numOfUGGrids = 0;
 template<> int UGGrid<3>::numOfUGGrids = 0;
 
-template<> unsigned int UGGrid<2>::heapSize_ = 500;
-template<> unsigned int UGGrid<3>::heapSize_ = 500;
-
 
 template <int dim>
 UGGrid < dim >::UGGrid(UGCollectiveCommunication comm)
@@ -587,7 +584,7 @@ void UGGrid<dim>::loadState(const std::string& filename)
       type,
       problemName.c_str(),
       formatName.c_str(),
-      heapSize_,
+      0,    // dummy heap size
       true, //force,
       true, //optimizedIO,
       false //autosave
@@ -603,7 +600,7 @@ void UGGrid<dim>::loadState(const std::string& filename)
       type,
       problemName.c_str(),
       formatName.c_str(),
-      heapSize_,
+      0,    // dummy heap size
       true, //force,
       true, //optimizedIO,
       false //autosave
