@@ -38,6 +38,25 @@ struct MCMGElementEdgeLayout
 };
 
 /*!
+ * \brief Layout template for edges and elements
+ * This layout template is for use in the MultipleCodimMultipleGeomTypeMapper.
+ * It selects edges and elements (entities with dim=1 or dim=dimgrid).
+ *
+ * \tparam dimgrid The dimension of the grid.
+ */
+struct MCMGAllLayout
+{
+  /*!
+   * \brief: test whether entities of the given geometry type should be included in
+   * the map
+   */
+  bool contains(GeometryType gt)
+  {
+    return true;
+  }
+};
+
+/*!
  * \brief Check whether the index created for element data is unique,
  * consecutive and starting from zero.
  */
@@ -203,6 +222,26 @@ void checkGrid(const Grid& grid)
   {
     LeafMultipleCodimMultipleGeomTypeMapper<Grid>
     leafMCMGMapper(grid, mcmgElementLayout());
+    checkElementDataMapper(leafMCMGMapper, grid.leafGridView());
+  }
+
+  // check leafMCMGMapper
+  DUNE_NO_DEPRECATED_BEGIN
+  {   // check constructor without layout class
+    LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGAllLayout>
+    leafMCMGMapper(grid);
+    checkElementDataMapper(leafMCMGMapper, grid.leafGridView());
+  }
+  {   // check constructor with layout class
+    LeafMultipleCodimMultipleGeomTypeMapper<Grid, MCMGElementLayout>
+    leafMCMGMapper(grid, MCMGAllLayout);
+    checkElementDataMapper(leafMCMGMapper, grid.leafGridView());
+  }
+  DUNE_NO_DEPRECATED_END
+  {
+    MCMGAllLayout layout;
+    LeafMultipleCodimMultipleGeomTypeMapper<Grid>
+    leafMCMGMapper(grid, layout);
     checkElementDataMapper(leafMCMGMapper, grid.leafGridView());
   }
 
