@@ -12,8 +12,12 @@
 
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/common/mcmgmapper.hh>
+#include <dune/grid/yaspgrid.hh>
+#include <dune/grid/utility/structuredgridfactory.hh>
+#if HAVE_DUNE_UGGRID
 #include <dune/grid/uggrid.hh>
 #include "../../../../doc/grids/gridfactory/hybridtestgrids.hh"
+#endif
 
 using namespace Dune;
 
@@ -36,6 +40,7 @@ struct MCMGElementEdgeLayout
     return (gt.dim() == dimgrid || gt.dim() == 1);
   }
 };
+
 
 /*!
  * \brief Check whether the index created for element data is unique,
@@ -75,16 +80,26 @@ void checkVertexDataMapper(const Mapper& mapper, const GridView& gridView)
 {
   const size_t dim = GridView::dimension;
 
-  size_t min = 1;
-  size_t max = 0;
-  std::set<int> indices;
+  typedef typename Mapper::Index Index;
+
+  Index min = 1;
+  Index max = 0;
+  std::set< Index > indices;
 
   for (const auto& element : elements(gridView))
   {
     size_t numVertices = element.subEntities(dim);
     for (size_t curVertex = 0; curVertex < numVertices; ++curVertex)
     {
-      size_t index = mapper.subIndex(element, curVertex, dim);
+      Index testIdx = Index(-1);
+      bool contains = mapper.contains(element, curVertex, dim, testIdx );
+      Index index = mapper.subIndex(element, curVertex, dim);
+
+      if( contains && (index != testIdx) )
+      {
+        DUNE_THROW(GridError, "subIndex and contains do not return the same index!");
+      }
+
       min = std::min(min, index);
       max = std::max(max, index);
       indices.insert(index);
@@ -325,6 +340,7 @@ try
   // Check grids with more than one element type.
   // So far only UGGrid does this, so we use it to test the mappers.
 
+#if HAVE_DUNE_UGGRID
   //  Do the test for a 2d UGGrid
   {
     typedef UGGrid<2> Grid;
@@ -348,6 +364,31 @@ try
     grid->adapt();
     grid->globalRefine(1);
 
+    checkGrid(*grid);
+  }
+#endif
+
+  //  Do the test for a 2d YaspGrid
+  {
+    Dune::FieldVector< double, 2 > lower( 0 );
+    Dune::FieldVector< double, 2 > upper( 1 );
+    std::array<unsigned int,2 > elements = {{ 4 ,4 }};
+
+    typedef Dune::YaspGrid<2> Grid;
+    auto grid = Dune::StructuredGridFactory< Grid >::createCubeGrid( lower, upper, elements );
+    // create hybrid grid
+    checkGrid(*grid);
+  }
+
+  //  Do the test for a 3d YaspGrid
+  {
+    Dune::FieldVector< double, 3 > lower( 0 );
+    Dune::FieldVector< double, 3 > upper( 1 );
+    std::array<unsigned int,3 > elements = {{ 4 ,4, 4 }};
+
+    typedef Dune::YaspGrid<3> Grid;
+    auto grid = Dune::StructuredGridFactory< Grid >::createCubeGrid( lower, upper, elements );
+    // create hybrid grid
     checkGrid(*grid);
   }
 
