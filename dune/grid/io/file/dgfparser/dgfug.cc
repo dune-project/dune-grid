@@ -106,11 +106,7 @@ namespace Dune
     // get grid parameter block
     dgf::UGGridParameterBlock gridParam( input );
 
-    // create grid here to set heap size
     // create grid factory (passed grid is returned by createGrid method)
-    if( gridParam.heapSize() > 0 )
-      UGGrid< dim >::setDefaultHeapSize( gridParam.heapSize() );
-
     for( int n = 0; n < dgf_.nofvtx; n++ )
     {
       FieldVector< double, dim > v;
