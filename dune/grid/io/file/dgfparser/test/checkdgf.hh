@@ -88,8 +88,13 @@ void runDGFTest(int argc, char ** argv)
   else
   {
     std::stringstream namestr;
+#ifdef DGFTEST_USE_GMSH
+    namestr << "hybrid-testgrid-" << GridType::dimension << "d.msh";
+    filename = std::string( DUNE_GRID_EXAMPLE_GRIDS_PATH ) + "gmsh/" + namestr.str();
+#else
     namestr << "test" << GridType::dimension << "d.dgf";
     filename = std::string( DUNE_GRID_EXAMPLE_GRIDS_PATH ) + "dgf/" + namestr.str();
+#endif
   }
 
   std::cout << "tester: start grid reading; file " << filename << std::endl;
@@ -102,7 +107,7 @@ void runDGFTest(int argc, char ** argv)
   size_t nofElParams( 0 ), nofVtxParams( 0 );
   std::vector< double > eldat( 0 ), vtxdat( 0 );
   {
-    GridPtr< GridType > gridPtr( filename.c_str(), mpiHelper.getCommunicator() );
+    GridPtr< GridType > gridPtr( filename, mpiHelper.getCommunicator() );
 
     gridPtr.loadBalance();
 
