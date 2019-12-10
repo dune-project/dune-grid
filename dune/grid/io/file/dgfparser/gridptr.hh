@@ -131,6 +131,22 @@ namespace Dune
       return ext;
     }
 
+    // read gmsh file if dimension world <= 3
+    void readGmsh( const std::string& filename, std::integral_constant< bool, true > )
+    {
+      GridFactory<GridType> gridFactory;
+      std::vector<int> boundaryIDs;
+      std::vector<int> elementsIDs;
+      GmshReader<GridType>::read(gridFactory,filename,boundaryIDs,elementsIDs);
+      initialize( gridFactory, boundaryIDs,elementsIDs);
+    }
+
+    // if dimension world > 3 throw GridError
+    void readGmsh( const std::string& filename, std::integral_constant< bool, false > )
+    {
+      DUNE_THROW(GridError, "GmshReader requires dimWorld <= 3." );
+    }
+
   public:
 
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
@@ -158,11 +174,8 @@ namespace Dune
       }
       else if( fileExt == "msh" )
       {
-        GridFactory<GridType> gridFactory;
-        std::vector<int> boundaryIDs;
-        std::vector<int> elementsIDs;
-        GmshReader<GridType>::read(gridFactory,filename,boundaryIDs,elementsIDs);
-        initialize( gridFactory, boundaryIDs,elementsIDs);
+        // Gmsh reader only compiles for dimworld <= 3
+        readGmsh( filename, std::integral_constant< bool, GridType::dimensionworld <= 3 > () );
       }
       else if( fileExt == "amc" || fileExt == "2d" || fileExt == "3d" )
       {
