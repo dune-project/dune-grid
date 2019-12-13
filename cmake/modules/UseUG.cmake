@@ -66,7 +66,7 @@ function(add_dune_ug_flags)
     set_property(${_prefix} ${ADD_UG_UNPARSED_ARGUMENTS}
       APPEND PROPERTY
       COMPILE_DEFINITIONS ${UG_DEFINITIONS})
-    if(UG_PARALLEL STREQUAL "yes")
+    if(UG_PARALLEL)
       # Add mpi flags.
       add_dune_mpi_flags(${ADD_UG_UNPARSED_ARGUMENTS} ${_source_only} ${_object})
     endif()
