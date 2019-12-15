@@ -11,7 +11,7 @@
 #include <map>
 
 #include <dune/common/deprecated.hh>
-#include <dune/common/parallel/collectivecommunication.hh>
+#include <dune/common/parallel/communication.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/grid.hh>
 

@@ -11,7 +11,7 @@
 #include <memory>
 
 #include <dune/common/classname.hh>
-#include <dune/common/parallel/collectivecommunication.hh>
+#include <dune/common/parallel/communication.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/deprecated.hh>
@@ -23,7 +23,7 @@
 #if HAVE_UG || DOXYGEN
 
 #ifdef ModelP
-#include <dune/common/parallel/mpicollectivecommunication.hh>
+#include <dune/common/parallel/mpicommunication.hh>
 #endif
 
 /* [Before reading the following: the macros UG_DIM_2 and UG_DIM_3 where named
