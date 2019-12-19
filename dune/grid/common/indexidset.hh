@@ -440,6 +440,10 @@ namespace Dune
   class IdSet
   {
   public:
+
+    //! Type of the grid.
+    typedef typename std::remove_const<GridImp>::type Grid;
+
     //! Type used to represent an id.
     typedef IdTypeImp IdType;
 
