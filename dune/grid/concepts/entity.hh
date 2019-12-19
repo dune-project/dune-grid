@@ -91,7 +91,7 @@ namespace Dune {
         requireConvertible<bool>(e.mightVanish()),
         requireConvertible<bool>(e.hasBoundaryIntersections()),
         requireConcept<EntityCodimExtended<E::dimension>,E>(),
-        requireTrue<std::is_same_v<E,typename E::template Codim<0>::Entity>>()
+        requireTrue<std::is_same<E,typename E::template Codim<0>::Entity>::value>()
       );
     };
 

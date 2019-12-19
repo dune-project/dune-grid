@@ -38,14 +38,14 @@ namespace Dune {
       auto require(IS&& is) -> decltype(
         requireConvertible<int>(IS::dimension),
         requireType<typename IS::IndexType>(),
-        requireTrue<std::is_integral_v<typename IS::IndexType>>(),
+        requireTrue<std::is_integral<typename IS::IndexType>::value>(),
         requireType<typename IS::Types>(),
         requireConvertible<typename IS::Types>(is.types(/*codim*/ int{} )),
         requireConvertible<typename IS::IndexType>(is.size(/*geometry_type*/ Dune::GeometryType{} )),
         requireConvertible<typename IS::IndexType>(is.size(/*codim*/ int{} )),
         requireConcept<IndexSetEntityCodim<IS::dimension>,IS>(),
-        requireTrue<not std::is_copy_constructible_v<IS>>(),
-        requireTrue<not std::is_copy_assignable_v<IS>>(),
+        requireTrue<not std::is_copy_constructible<IS>::value>(),
+        requireTrue<not std::is_copy_assignable<IS>::value>(),
         IS{} // default constructible
       );
     };
