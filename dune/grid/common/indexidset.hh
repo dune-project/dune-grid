@@ -442,7 +442,7 @@ namespace Dune
   public:
 
     //! Type of the grid.
-    typedef typename std::remove_const<GridImp>::type Grid;
+    typedef GridImp Grid;
 
     //! Type used to represent an id.
     typedef IdTypeImp IdType;
