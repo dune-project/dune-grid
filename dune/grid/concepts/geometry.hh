@@ -34,7 +34,7 @@ namespace Dune {
         requireConvertible<typename G::GlobalCoordinate>(g.center()),
         requireConvertible<typename G::JacobianTransposed>(g.jacobianTransposed(/* local */ typename G::LocalCoordinate{})),
         requireConvertible<typename G::JacobianInverseTransposed>(g.jacobianInverseTransposed(/* local */ typename G::LocalCoordinate{})),
-        requireTrue<not std::is_default_constructible_v<G>>()
+        requireTrue<not std::is_default_constructible<G>::value>()
       );
     };
   }

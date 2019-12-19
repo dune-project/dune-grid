@@ -74,6 +74,8 @@ namespace Dune {
         requireConvertible<int>(G::dimensionworld),
         requireConcept<Dune::Concept::GridView,typename G::LeafGridView>(),
         requireConcept<Dune::Concept::GridView,typename G::LevelGridView>(),
+        requireTrue<std::is_same<G,typename G::LeafGridView::Grid>::value>(),
+        requireTrue<std::is_same<G,typename G::LevelGridView::Grid>::value>(),
         requireConcept<Dune::Concept::Intersection,typename G::LeafIntersection>(),
         requireConcept<Dune::Concept::Intersection,typename G::LevelIntersection>(),
         requireConcept<Dune::Concept::IntersectionIterator,typename G::LeafIntersectionIterator>(),
