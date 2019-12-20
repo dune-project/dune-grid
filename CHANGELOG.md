@@ -1,4 +1,4 @@
-# master (will become 2.7)
+# Release 2.7
 
 - The `YaspGrid` class has a new constructor that takes a `Coordinates`
   object as its first argument.  This object can be of type `EquidistantCoordinates`,
