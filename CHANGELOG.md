@@ -76,6 +76,11 @@
   by DUNE 2.7 will differ from the same file written in DUNE 2.6. If you are using VTK files for testing
   results, make sure to use fuzzy float comparisons!
 
+- The `VTKSequenceWriter` now exposes the function `clear()` of the associated `VTKWriter`
+
+- The `VTKSequenceWriter` allows to get and set the time steps storage, which enables serialization
+  of a sequence writer. The feature can be used to restart a sequence.
+
 - UG 3.x is no longer supported. Use dune-uggrid instead.
 
 

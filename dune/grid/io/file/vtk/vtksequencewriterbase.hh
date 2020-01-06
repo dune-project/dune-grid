@@ -147,6 +147,33 @@ namespace Dune {
         pvdFile.close();
       }
     }
+
+    /**
+     * \brief Clears all VTK data added to the VTK writer
+     */
+    void clear()
+    {
+      vtkWriter_->clear();
+    }
+
+    /**
+     * \brief Retrieve the current list of time steps
+     */
+    const std::vector<double>& getTimeSteps() const
+    {
+      return timesteps_;
+    }
+
+    /**
+     * \brief Set the current list of time steps
+     * \note This makes it possible to serialize the sequence writers state.
+     *       Can be used to continue writing a VTK sequence after a restart of the program.
+     */
+    void setTimeSteps(const std::vector<double>& timesteps)
+    {
+      timesteps_ = timesteps;
+    }
+
   private:
 
     // create sequence name
