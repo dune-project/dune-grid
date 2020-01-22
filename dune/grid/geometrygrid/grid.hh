@@ -640,11 +640,11 @@ namespace Dune
   private:
     std::shared_ptr<HostGrid> const hostGrid_;
     std::shared_ptr<CoordFunction> coordFunction_;
-    mutable std::vector< LevelIndexSet *, typename Allocator::template rebind< LevelIndexSet * >::other > levelIndexSets_;
+    mutable std::vector< LevelIndexSet *, typename std::allocator_traits<Allocator>::template rebind_alloc< LevelIndexSet * > > levelIndexSets_;
     mutable LeafIndexSet leafIndexSet_;
     mutable GlobalIdSet globalIdSet_;
     mutable LocalIdSet localIdSet_;
-    mutable typename Allocator::template rebind< char >::other storageAllocator_;
+    mutable typename std::allocator_traits<Allocator>::template rebind_alloc< char > storageAllocator_;
   };
 
 
