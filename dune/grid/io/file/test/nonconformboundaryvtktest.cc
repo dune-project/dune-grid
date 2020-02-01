@@ -97,9 +97,9 @@ void vtkCheck(const Dune::array<int,dim>& n,
   Dune::YaspGrid<dim> grid(h, n);
   grid.globalRefine(1);
 
-  doWrite( grid.template leafGridView() );
-  doWrite( grid.template levelGridView( 0 ) );
-  doWrite( grid.template levelGridView( grid.maxLevel() ) );
+  doWrite( grid.leafGridView() );
+  doWrite( grid.levelGridView( 0 ) );
+  doWrite( grid.levelGridView( grid.maxLevel() ) );
 }
 
 int main(int argc, char **argv)
