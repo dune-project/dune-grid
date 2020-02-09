@@ -113,7 +113,7 @@ namespace Dune
     if( !dumpFileName.empty() )
       factory_.write( dumpFileName );
 
-    grid_ = factory_.createGrid();
+    grid_ = factory_.createGrid().release();
     return true;
   }
 
