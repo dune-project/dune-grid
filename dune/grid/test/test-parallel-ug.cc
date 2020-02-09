@@ -503,7 +503,7 @@ public:
 
 template<typename Grid>
 std::shared_ptr<Grid>
-setupGrid(bool simplexGrid, bool localRefinement, int refinementDim, bool refineUpperPart)
+setupGrid(bool simplexGrid, bool localRefinement, int refinementDim, bool refineUpperPart, int cellsX = 4)
 {
   const static int dim = Grid::dimension;
   StructuredGridFactory<Grid> structuredGridFactory;
@@ -511,7 +511,7 @@ setupGrid(bool simplexGrid, bool localRefinement, int refinementDim, bool refine
   Dune::FieldVector<double,dim> lowerLeft(0);
   Dune::FieldVector<double,dim> upperRight(1);
   std::array<unsigned int, dim> numElements;
-  std::fill(numElements.begin(), numElements.end(), 4);
+  std::fill(numElements.begin(), numElements.end(), cellsX);
   if (simplexGrid)
     return structuredGridFactory.createSimplexGrid(lowerLeft, upperRight, numElements);
   else
@@ -668,6 +668,119 @@ void testParallelUG(bool simplexGrid, bool localRefinement, int refinementDim, b
 
 }
 
+template<int dim, class GridView>
+bool isViewWithinBounds(const GridView& gridView,
+                        const Dune::FieldVector<double, dim>& lowerLeft,
+                        const Dune::FieldVector<double, dim>& upperRight)
+{
+  for (const auto& element : elements(gridView, Dune::Partitions::interior))
+  {
+    const auto center = element.geometry().center();
+    for (int dimIdx = 0; dimIdx < dim; ++dimIdx)
+      if (center[dimIdx] < lowerLeft[dimIdx] || center[dimIdx] > upperRight[dimIdx])
+        return false;
+  }
+  return true;
+}
+
+template<int dim, class GridView, std::enable_if_t<dim==2, void>...>
+void checkDefaultBisectionPartition(const GridView& gridView, int numProcs, int rank)
+{
+  // check if all partitions exist (we don't care which processor has which partition)
+  int part = -1;
+  switch (numProcs){
+  case 1:
+    if (isViewWithinBounds<dim>(gridView, {0,0}, {1,1})) part = 0;
+    break;
+  case 2:
+    if (isViewWithinBounds<dim>(gridView, {0,0}, {0.5,1})) part = 0;
+    if (isViewWithinBounds<dim>(gridView, {0.5,0}, {1,1})) part = 1;
+    break;
+  case 3:
+    if (isViewWithinBounds<dim>(gridView, {0,0}, {1.0/3.0,1})) part = 0;
+    if (isViewWithinBounds<dim>(gridView, {1.0/3.0,0}, {1,0.5})) part = 1;
+    if (isViewWithinBounds<dim>(gridView, {1.0/3.0,0.5}, {1,1})) part = 2;
+    break;
+  case 4:
+    if (isViewWithinBounds<dim>(gridView, {0,0}, {0.5,0.5})) part = 0;
+    if (isViewWithinBounds<dim>(gridView, {0,0.5}, {0.5,1})) part = 1;
+    if (isViewWithinBounds<dim>(gridView, {0.5,0}, {1,0.5})) part = 2;
+    if (isViewWithinBounds<dim>(gridView, {0.5,0.5}, {1,1})) part = 3;
+    break;
+  case 8:
+    if (isViewWithinBounds<dim>(gridView, {0,0}, {0.25,0.5})) part = 0;
+    if (isViewWithinBounds<dim>(gridView, {0.25,0}, {0.5,0.5})) part = 1;
+    if (isViewWithinBounds<dim>(gridView, {0.5,0}, {0.75,0.5})) part = 2;
+    if (isViewWithinBounds<dim>(gridView, {0.75,0}, {1,0.5})) part = 3;
+    if (isViewWithinBounds<dim>(gridView, {0,0.5}, {0.25,1})) part = 4;
+    if (isViewWithinBounds<dim>(gridView, {0.25,0.5}, {0.5,1})) part = 5;
+    if (isViewWithinBounds<dim>(gridView, {0.5,0.5}, {0.75,1})) part = 6;
+    if (isViewWithinBounds<dim>(gridView, {0.75,0.5}, {1,1})) part = 7;
+    break;
+  default:
+    DUNE_THROW(Dune::NotImplemented, "Test for number of processors: " << numProcs);
+  }
+  const auto sumPart = gridView.comm().sum(part);
+  const auto n = numProcs-1;
+  if (sumPart != (n*n + n)/2)
+    DUNE_THROW(Dune::Exception, "Invalid partition!");
+}
+
+template<int dim, class GridView, std::enable_if_t<dim==3, void>...>
+void checkDefaultBisectionPartition(const GridView& gridView, int numProcs, int rank)
+{
+  int part = -1;
+  switch (numProcs){
+  case 1:
+    if (isViewWithinBounds<dim>(gridView, {0,0,0}, {1,1,1})) part = 0;
+    break;
+  case 2:
+    if (isViewWithinBounds<dim>(gridView, {0,0,0}, {0.5,1,1})) part = 0;
+    if (isViewWithinBounds<dim>(gridView, {0.5,0,0}, {1,1,1})) part = 1;
+    break;
+  case 3:
+    if (isViewWithinBounds<dim>(gridView, {0,0,0}, {1.0/3.0,1,1})) part = 0;
+    if (isViewWithinBounds<dim>(gridView, {1.0/3.0,0,0}, {1,0.5,1})) part = 1;
+    if (isViewWithinBounds<dim>(gridView, {1.0/3.0,0.5,0}, {1,1,1})) part = 2;
+    break;
+  case 4:
+    if (isViewWithinBounds<dim>(gridView, {0,0,0}, {0.5,0.5,1})) part = 0;
+    if (isViewWithinBounds<dim>(gridView, {0,0.5,0}, {0.5,1,1})) part = 1;
+    if (isViewWithinBounds<dim>(gridView, {0.5,0,0}, {1,0.5,1})) part = 2;
+    if (isViewWithinBounds<dim>(gridView, {0.5,0.5,0}, {1,1,1})) part = 3;
+  case 8:
+    if (isViewWithinBounds<dim>(gridView, {0,0,0}, {0.5,0.5,0.5})) part = 0;
+    if (isViewWithinBounds<dim>(gridView, {0,0.5,0}, {0.5,1,0.5})) part = 1;
+    if (isViewWithinBounds<dim>(gridView, {0.5,0,0}, {1,0.5,0.5})) part = 2;
+    if (isViewWithinBounds<dim>(gridView, {0.5,0.5,0}, {1,1,0.5})) part = 3;
+    if (isViewWithinBounds<dim>(gridView, {0,0,0.5}, {0.5,0.5,1})) part = 4;
+    if (isViewWithinBounds<dim>(gridView, {0,0.5,0.5}, {0.5,1,1})) part = 5;
+    if (isViewWithinBounds<dim>(gridView, {0.5,0,0.5}, {1,0.5,1})) part = 6;
+    if (isViewWithinBounds<dim>(gridView, {0.5,0.5,0.5}, {1,1,1})) part = 7;
+  break;
+    default:
+    DUNE_THROW(Dune::NotImplemented, "Test for number of processors: " << numProcs);
+  return;
+  }
+  const auto sumPart = gridView.comm().sum(part);
+  const auto n = numProcs-1;
+  if (sumPart != (n*n + n)/2)
+    DUNE_THROW(Dune::Exception, "Invalid partition!");
+}
+
+template<int dim>
+void testDefaultLoadBalanceStructuredCube(const Dune::MPIHelper& mpiHelper)
+{
+  if (mpiHelper.rank() == 0)
+    std::cout << "Testing default load balancer for structured cube grid in " << dim << "D\n";
+
+  auto grid = setupGrid<UGGrid<dim>>(false, false, 0, false, mpiHelper.size()*2);
+  grid->loadBalance();
+  grid->globalRefine(1);
+  const auto& gridView = grid->leafGridView();
+  checkDefaultBisectionPartition<dim>(gridView, mpiHelper.size(), mpiHelper.rank());
+}
+
 int main (int argc , char **argv) try
 {
   // initialize MPI, finalize is done automatically on exit
@@ -714,6 +827,10 @@ int main (int argc , char **argv) try
       }
     }
   }
+
+  // test default bisection load balancer for case with known partition
+  testDefaultLoadBalanceStructuredCube<2>(mpiHelper);
+  testDefaultLoadBalanceStructuredCube<3>(mpiHelper);
 
   return 0;
 }
