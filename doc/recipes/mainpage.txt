@@ -5,13 +5,10 @@
  * \page all_recipes dune-grid recipes
  * These recipes are short examples on how to achieve common tasks in dune-grid.
  *
- * Iterating
+ * Some simple examples illustrating the grid interface
  * ==============
  * - \subpage recipe-iterate-over-grid
- *
- * Titel 2
- * ==============
- * - \subpage recipe-integrating-grid-functions
+ * - \subpage recipe-integration
  *
  * @}
  */
