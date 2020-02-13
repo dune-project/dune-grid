@@ -32,7 +32,7 @@
  * can be computed by quadrature rules. These are available in Dune for all the different
  * element types and various integration orders. This simply requires an additional
  * loop over the quadrature points within an element:
- * \snippet recipe-integration.cc integration with quadrature rule]
+ * \snippet recipe-integration.cc integration with quadrature rule
  *
  * For integrating the divergence of a vector field \f$f\f$ we might use the following formula:
  * \f[
