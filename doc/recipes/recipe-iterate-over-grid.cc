@@ -13,13 +13,16 @@
  * Grids in Dune are hierachical, i.e. they are organized into levels
  * (originating from refinement) and entities that are not further refined.
  * Each of these subsets is accessible via Dune::GridView and iteration over
- * is possible only over grid views. So we extract the LeafGridView:
- * \snippet recipe-iterate-over-grid.cc iterate over codim
-
- * Now we can iterate over all the entities of a certain codimens in a grid view
+ * is possible only over grid views. So we extract the Dune::LeafGridView:
  * \snippet recipe-iterate-over-grid.cc extract gridview
  *
- * Then, we iterate over it various types of grid entities
+ * Now we can iterate over all the entities of a certain codimension in a grid view
+ * using a range-based for loop:
+ * \snippet recipe-iterate-over-grid.cc iterate over codim
+ * As an example we extract the type of an element and test for it to be a cube.
+ *
+ * Instead of specifying the codimension explicitly you can also
+ * use the following predefined names in the range-based for loop:
  * \snippet recipe-iterate-over-grid.cc iterate over grid view
  *
  * Full example code: @ref recipe-iterate-over-grid.cc
