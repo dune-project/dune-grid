@@ -805,6 +805,14 @@ namespace Dune
      *    std::unique_ptr<Grid>, and std::shared_ptr<Grid>.  It is scheduled
      *    to be replaced by std::unique_ptr<Grid> eventually.
      */
+    [[deprecated("Deprecated in Dune 2.8 (ca. 2020-02): This method is "
+                 "deprecated, see "
+                 "https://gitlab.dune-project.org/flyspray/FS/issues/1698, as "
+                 "it does not allow for relating the data to entities. Please "
+                 "use read(string, bool, bool) (if you don't use the data in "
+                 "the vectors, or use read(GridFactory&, string, "
+                 "vector<int>&, vector<int>&, bool, bool) if you do use "
+                 "them.")]]
     static ToUniquePtr<Grid> read (const std::string& fileName,
                        std::vector<int>& boundarySegmentToPhysicalEntity,
                        std::vector<int>& elementToPhysicalEntity,
