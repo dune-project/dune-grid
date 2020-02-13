@@ -25,6 +25,10 @@
  * use the following predefined names in the range-based for loop:
  * \snippet recipe-iterate-over-grid.cc iterate over grid view
  *
+ * Finally, from entities of codimension 0 (aka elements) you can access
+ * all subentities of all codimensions using the following code:
+ * \snippet recipe-iterate-over-grid.cc access to subentities
+ *
  * Full example code: @ref recipe-iterate-over-grid.cc
  * \example recipe-iterate-over-grid.cc
  * See explanation at @ref recipe-iterate-over-grid
@@ -71,19 +75,19 @@ int main(int argc, char** argv)
       if (!e.type().isCube()) std::cout << "not a cube" << std::endl;
     //! [iterate over codim]
 
-        // [iterate over grid view]
+    // [iterate over grid view]
     for (const auto& e : elements(gv)); // codim=0
     for (const auto& e : vertices(gv)); // codim=dim
     for (const auto& e : edges(gv));    // codim=dim-1
     for (const auto& e : facets(gv));   // codim=1
     //! [iterate over grid view]
 
-
-    // access subentites
-    std::cout << "iterating over subentities " << std::endl;
+    // [access to subentities]
+    const int mycodim = 2;
     for (const auto& e : elements(gv))
-      for (unsigned int i=0; i<e.subEntities(codim); ++i)
+      for (unsigned int i=0; i<e.subEntities(mycodim); ++i)
         auto v = e.template subEntity<codim>(i);
+    //! [access to subentities]
 
   }
   catch (Dune::Exception &e){
