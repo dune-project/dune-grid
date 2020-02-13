@@ -16,7 +16,6 @@
 #include <dune/uggrid/gm/gm.h>
 #include <dune/uggrid/domain/std_domain.h>
 #include <dune/uggrid/initug.h>
-#include <dune/uggrid/commands.h>
 #include <dune/uggrid/numerics/formats.h>
 #include <dune/uggrid/gm/elements.h>
 #include <dune/uggrid/gm/algebra.h>
