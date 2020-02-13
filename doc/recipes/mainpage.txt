@@ -5,15 +5,13 @@
  * \page all_recipes dune-grid recipes
  * These recipes are short examples on how to achieve common tasks in dune-grid.
  *
- * Meshing
+ * Iterating
  * ==============
- * - \subpage recipe-geometry-grid
+ * - \subpage recipe-iterate-over-grid
  *
- * Grid functions
+ * Titel 2
  * ==============
  * - \subpage recipe-integrating-grid-functions
- * - \subpage recipe-grid-function-operations
- * - \subpage recipe-blocking
  *
  * @}
  */

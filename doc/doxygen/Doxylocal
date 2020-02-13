@@ -23,7 +23,7 @@ INPUT                 += @srcdir@/mainpage.txt \
 # the \include command).
 
 EXAMPLE_PATH          += @top_srcdir@/doc/grids/dgf 
-EXAMPLE_PATH          += @top_srcdir@/doc/Recipes
+EXAMPLE_PATH          += @top_srcdir@/doc/recipes
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the 
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 

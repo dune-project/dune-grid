@@ -1,2 +1,2 @@
 
-#dune_add_test(SOURCES recipe-name.cc)
+dune_add_test(SOURCES recipe-iterate-over-grid.cc)
