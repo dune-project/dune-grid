@@ -853,11 +853,40 @@ namespace Dune
     }
 
     /** \todo doc me */
+    static void read (Dune::GridFactory<Grid> &factory,
+                      const std::string &fileName,
+                      std::vector<int> &boundarySegmentToPhysicalEntity,
+                      std::vector<int> &elementToPhysicalEntity,
+                      bool verbose=true)
+    {
+      // register create  methods for boundary segments
+      registerFactory( factory );
+
+      // create parse object and read grid on process 0
+      if (factory.comm().rank() == 0)
+      {
+        GmshReaderParser<Grid> parser(factory,verbose,true);
+        parser.read(fileName);
+
+        boundarySegmentToPhysicalEntity.swap(parser.boundaryIdMap());
+        elementToPhysicalEntity.swap(parser.elementIndexMap());
+      }
+    }
+
+    /** \todo doc me */
+    [[deprecated("Deprecated after Dune 2.7 (ca. 2020-02): The "
+                 "insertBoundarySegments argument for this overload of the "
+                 "read method is deprecated, please omit it.  See "
+                 "https://gitlab.dune-project.org/flyspray/FS/issues/1698.  "
+                 "When setting insertBoundarySegments=false there is no way "
+                 "to correctly use the data returned in "
+                 "boundarySegmentToPhysicalEntity, which makes using the old "
+                 "method error-prone.")]]
     static void read (Dune::GridFactory<Grid>& factory,
                       const std::string& fileName,
                       std::vector<int>& boundarySegmentToPhysicalEntity,
                       std::vector<int>& elementToPhysicalEntity,
-                      bool verbose = true, bool insertBoundarySegments=true)
+                      bool verbose, bool insertBoundarySegments)
     {
       // register create  methods for boundary segments
       registerFactory( factory );
