@@ -1,0 +1,19 @@
+ 
+/**
+ * @defgroup grid_recipes dune-grid recipes
+ * @{
+ * \page all_recipes dune-grid recipes
+ * These recipes are short examples on how to achieve common tasks in dune-grid.
+ *
+ * Meshing
+ * ==============
+ * - \subpage recipe-geometry-grid
+ *
+ * Grid functions
+ * ==============
+ * - \subpage recipe-integrating-grid-functions
+ * - \subpage recipe-grid-function-operations
+ * - \subpage recipe-blocking
+ *
+ * @}
+ */
