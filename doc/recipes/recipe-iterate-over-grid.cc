@@ -5,14 +5,22 @@
  * over the elements of a grid, for example in order to numerically compute integrals
  * on it. All DUNE grids provide a unified interface for this and related operations.
  *
- * First, we set up a simple structured grid.
+ * First, we set up a simple structured grid. Here we use the \ref Dune::YaspGrid class in
+ * four dimensions in order to demonstrate that even dimension larger than three
+ * can be used.
  * \snippet recipe-iterate-over-grid.cc set up grid
+ *
+ * Grids in Dune are hierachical, i.e. they are organized into levels
+ * (originating from refinement) and entities that are not further refined.
+ * Each of these subsets is accessible via Dune::GridView and iteration over
+ * is possible only over grid views. So we extract the LeafGridView:
+ * \snippet recipe-iterate-over-grid.cc iterate over codim
+
+ * Now we can iterate over all the entities of a certain codimens in a grid view
+ * \snippet recipe-iterate-over-grid.cc extract gridview
  *
  * Then, we iterate over it various types of grid entities
  * \snippet recipe-iterate-over-grid.cc iterate over grid view
- *
- * Alternatively, we can specify the type of element by codimension
- * \snippet recipe-iterate-over-grid.cc iterate over codim
  *
  * Full example code: @ref recipe-iterate-over-grid.cc
  * \example recipe-iterate-over-grid.cc
@@ -48,22 +56,25 @@ int main(int argc, char** argv)
     Dune::FieldVector<double,dim> len; for (auto& l : len) l=1.0;
     std::array<int,dim> cells; for (auto& c : cells) c=4;
     Grid grid(len,cells);
-
-    auto gv = grid.leafGridView();
     //! [set up grid]
 
-    // [iterate over grid view]
-    for (const auto& e : elements(gv)); // codim=0
-    for (const auto& e : vertices(gv)); // codim=dim
-    for (const auto& e : edges(gv));    // codim=dim-1
-    for (const auto& e : facets(gv));   // codim=1
-    //! [iterate over grid view]
+    // [extract gridview]
+    auto gv = grid.leafGridView();
+    //! [extract gridview]
 
     // [iterate over codim]
     const int codim = 2;
     for (const auto& e : entities(gv,Dune::Codim<codim>{}))
       if (!e.type().isCube()) std::cout << "not a cube" << std::endl;
     //! [iterate over codim]
+
+        // [iterate over grid view]
+    for (const auto& e : elements(gv)); // codim=0
+    for (const auto& e : vertices(gv)); // codim=dim
+    for (const auto& e : edges(gv));    // codim=dim-1
+    for (const auto& e : facets(gv));   // codim=1
+    //! [iterate over grid view]
+
 
     // access subentites
     std::cout << "iterating over subentities " << std::endl;
