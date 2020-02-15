@@ -761,7 +761,31 @@ namespace Dune
   template<typename GridType>
   class GmshReader
   {
-    static void registerFactory(Dune::GridFactory<GridType>& factory)
+    //! internal general reading method
+    /**
+     * This method does all the highlevel steering of the reader:
+     * - it will register the GmshReader boundary segment implementation with
+     *   the factory
+     * - it will ensure the reader is called on all ranks (debug mode only)
+     * - proceed to construct a parser (rank 0 only)
+     * - use the parser to read the grid into the factory (rank 0 only)
+     * - move entity and boundary data from the parser into the data vector
+     *   arguments, or clear the data vector arguments, depending on rank
+     *
+     * \note That the parser always reads the data vectors from the files.
+     *       However, if insertBoundarySegments is false, no boundary segments
+     *       are inserted into the factory, and thus there will be no correct
+     *       indexing of the boundarySegmentToPhysicalEntity vector possible.
+     *       For this reason, this method is not exposed to the user, and the
+     *       interface methods are responsible to ensure that
+     *       boundarySegmentToPhysicalEntity is discarded if boundary segments
+     *       are not inserted.
+     */
+    static void do_read(Dune::GridFactory<GridType> &factory,
+                        const std::string &fileName,
+                        std::vector<int>& boundarySegmentToPhysicalEntity,
+                        std::vector<int>& elementToPhysicalEntity,
+                        bool verbose, bool insertBoundarySegments)
     {
       // register boundary segment to boundary segment factory for possible load balancing
       // this needs to be done on all cores since the type might not be known otherwise
@@ -771,7 +795,46 @@ namespace Dune
       // check that this method is called on all cores
       factory.comm().barrier();
 #endif
+
+      // create parse object and read grid on process 0
+      if (factory.comm().rank() == 0)
+      {
+        GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
+        parser.read(fileName);
+
+        boundarySegmentToPhysicalEntity = std::move(parser.boundaryIdMap());
+        elementToPhysicalEntity = std::move(parser.elementIndexMap());
+      }
+      else
+      {
+        boundarySegmentToPhysicalEntity = {};
+        elementToPhysicalEntity = {};
+      }
     }
+
+    //! pass a discarded lvalue argument to a function
+    /**
+     * This method is intended to be used in function calls that require
+     * lvalue arguments, when the caller just wants to pass in temporary
+     * variable that is immediately discarded after the return of the
+     * function.  It expects an rvalue argument, that is turned into an
+     * lvalue.  For instance:
+     * ```c++
+     * do_read(factory, fileName, discarded(std::vector<int>{}),
+     *         discarded(std::vector<int>{}));
+     * ```
+     * Here, the vectors are constructed as rvalues, passed through
+     * `discarded()` which turns them into lvalues, so they can be arguments
+     * to `do_read()`.  `do_read()` will fill them with some data, and they
+     * will be destroyed at the end of the full-expression containing the
+     * function call.
+     *
+     * \note It is very likely an error to use this outside a function call
+     *       argument.
+     */
+    template<class T>
+    static T &discarded(T &&value) { return value; }
+
   public:
     typedef GridType Grid;
 
@@ -786,15 +849,7 @@ namespace Dune
       // make a grid factory
       Dune::GridFactory<Grid> factory;
 
-      // register create  methods for boundary segments
-      registerFactory( factory );
-
-      // create parse object and read grid on process 0
-      if (factory.comm().rank() == 0)
-      {
-        GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
-        parser.read(fileName);
-      }
+      read(factory, fileName, verbose, insertBoundarySegments);
 
       return factory.createGrid();
     }
@@ -821,18 +876,8 @@ namespace Dune
       // make a grid factory
       Dune::GridFactory<Grid> factory;
 
-      // register create  methods for boundary segments
-      registerFactory( factory );
-
-      // create parse object and read grid on process 0
-      if (factory.comm().rank() == 0)
-      {
-        GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
-        parser.read(fileName);
-
-        boundarySegmentToPhysicalEntity.swap(parser.boundaryIdMap());
-        elementToPhysicalEntity.swap(parser.elementIndexMap());
-      }
+      do_read(factory, fileName, boundarySegmentToPhysicalEntity,
+              elementToPhysicalEntity, verbose, insertBoundarySegments);
 
       return factory.createGrid();
     }
@@ -841,15 +886,8 @@ namespace Dune
     static void read (Dune::GridFactory<Grid>& factory, const std::string& fileName,
                       bool verbose = true, bool insertBoundarySegments=true)
     {
-      // register create  methods for boundary segments
-      registerFactory( factory );
-
-      // create parse object and read grid on process 0
-      if (factory.comm().rank() == 0)
-      {
-        GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
-        parser.read(fileName);
-      }
+      do_read(factory, fileName, discarded(std::vector<int>{}),
+              discarded(std::vector<int>{}), verbose, insertBoundarySegments);
     }
 
     /** \todo doc me */
@@ -859,18 +897,8 @@ namespace Dune
                       std::vector<int>& elementToPhysicalEntity,
                       bool verbose = true, bool insertBoundarySegments=true)
     {
-      // register create  methods for boundary segments
-      registerFactory( factory );
-
-      // create parse object and read grid on process 0
-      if (factory.comm().rank() == 0)
-      {
-        GmshReaderParser<Grid> parser(factory,verbose,insertBoundarySegments);
-        parser.read(fileName);
-
-        boundarySegmentToPhysicalEntity.swap(parser.boundaryIdMap());
-        elementToPhysicalEntity.swap(parser.elementIndexMap());
-      }
+      do_read(factory, fileName, boundarySegmentToPhysicalEntity,
+              elementToPhysicalEntity, verbose, insertBoundarySegments);
     }
   };
 
