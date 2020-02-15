@@ -10,6 +10,8 @@
 #include <memory>
 #include <vector>
 
+#include <dune/common/deprecated.hh>
+#define DUNE_FUNCTION_HH_SILENCE_DEPRECATION
 #include <dune/common/function.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/to_unique_ptr.hh>
@@ -107,6 +109,7 @@ namespace Dune
     virtual void insertElement(const GeometryType& type,
                                const std::vector<unsigned int>& vertices) = 0;
 
+    DUNE_NO_DEPRECATED_BEGIN
     /** \brief Insert a parametrized element into the coarse grid
         \param type The GeometryType of the new element
         \param vertices The vertices of the new element, using the DUNE numbering
@@ -114,12 +117,53 @@ namespace Dune
 
         Make sure the inserted element is not inverted (this holds even
         for simplices).  There are grids that can't handle inverted elements.
+
+        \deprecated [After Dune 2.7] VirtualFunction is deprecated, use the
+                    overload taking a std::function instead
      */
-    virtual void insertElement(const GeometryType& type,
-                               const std::vector<unsigned int>& vertices,
-                               const std::shared_ptr<VirtualFunction<FieldVector<ctype,dimension>,FieldVector<ctype,dimworld> > >& elementParametrization)
+    [[deprecated("[After Dune 2.7]: VirtualFunction is deprecated, use the "
+                 "overload taking a std::function instead")]]
+    virtual void
+    insertElement(const GeometryType& type,
+                  const std::vector<unsigned int>& vertices,
+                  const std::shared_ptr<VirtualFunction<
+                                         FieldVector<ctype,dimension>,
+                                         FieldVector<ctype,dimworld>
+                         > >& elementParametrization)
     {
       DUNE_THROW(GridError, "This grid does not support parametrized elements!");
+    }
+    DUNE_NO_DEPRECATED_END
+
+    /** \brief Insert a parametrized element into the coarse grid
+
+        \param type                   The GeometryType of the new element
+        \param vertices               The vertices of the new element, using
+                                      the DUNE numbering
+        \param elementParametrization A function prescribing the shape of this
+                                      element
+
+        Make sure the inserted element is not inverted (this holds even for
+        simplices).  There are grids that can't handle inverted elements.
+     */
+    virtual void
+    insertElement(const GeometryType& type,
+                  const std::vector<unsigned int>& vertices,
+                  std::function<FieldVector<ctype,dimworld>
+                                  (FieldVector<ctype,dimension>)>
+                       elementParametrization)
+    {
+      // note: this forward to the overload taking a Virtual function during
+      // the deprecation period, once that is over it should the throwing of
+      // the exception should be moved here directly
+      using Domain = FieldVector<ctype,dimension>;
+      using Range = FieldVector<ctype,dimworld>;
+      DUNE_NO_DEPRECATED_BEGIN
+      auto f =
+        makeVirtualFunction<Domain, Range>(std::move(elementParametrization));
+      insertElement(type, vertices,
+                    std::make_unique<decltype(f)>(std::move(f)));
+      DUNE_NO_DEPRECATED_END
     }
 
     /** \brief insert a boundary segment
