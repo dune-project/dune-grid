@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+#include <dune/common/deprecated.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
 // dune grid includes
@@ -175,7 +176,7 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
     read(true, true);
   }
 
-  // test reading with gridfactory and  data
+  // test reading with gridfactory and data
   {
     auto read = [&] (auto... args)
     {
@@ -188,9 +189,24 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
 
     read();
     read(false);
+    read(true);
+  }
+
+  // test reading with gridfactory and data (deprecated signatures)
+  {
+    auto read = [&] (bool verbose, bool insertBoundarySegments)
+    {
+      std::vector<int> boundaryData;
+      std::vector<int> elementData;
+      GridFactory<GridType> factory;
+      DUNE_NO_DEPRECATED_BEGIN
+      GmshReader<GridType>::read(factory, inputName, boundaryData, elementData,
+                                 verbose, insertBoundarySegments);
+      DUNE_NO_DEPRECATED_END
+    };
+
     read(false, false);
     read(false, true);
-    read(true);
     read(true, false);
     read(true, true);
   }
