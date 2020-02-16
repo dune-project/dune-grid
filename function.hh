@@ -134,16 +134,38 @@ namespace Dune
         }, "element"_a, "x"_a );
     }
 
-
+    template <class GridView, int dimR>
+    struct stdFunction
+    {
+      static const unsigned int dimRange = (dimR ==0 ? 1 : dimR);
+      typedef typename GridView::template Codim< 0 >::Entity Entity;
+      typedef typename Entity::Geometry::LocalCoordinate Coordinate;
+      typedef typename std::conditional< dimR == 0, double, Dune::FieldVector< double, dimRange > >::type Value;
+      typedef std::function<Value(const Entity&,const Coordinate&)> value;
+    };
+    template <class Evaluate>
+    struct stdFunctionValue;
+    template <class Entity, class Coordinate, class Value>
+    struct stdFunctionValue<std::function<Value(const Entity&,const Coordinate&)>>
+    {
+      static const int value = Coordinate::dimension;
+    };
+    template <class Entity, class Coordinate>
+    struct stdFunctionValue<std::function<double(const Entity&,const Coordinate&)>>
+    {
+      static const int value = 0;
+    };
 
     namespace detail
     {
 
       // PyGridFunctionEvaluator
       // -----------------------
+      template <class GridView, int dimR, class Evaluate>
+      struct DUNE_PRIVATE PyGridFunctionEvaluator;
 
       template <class GridView, int dimR>
-      struct DUNE_PRIVATE PyGridFunctionEvaluator
+      struct DUNE_PRIVATE PyGridFunctionEvaluator<GridView,dimR,pybind11::function>
       {
         static const unsigned int dimRange = (dimR ==0 ? 1 : dimR);
 
@@ -169,18 +191,45 @@ namespace Dune
       private:
         pybind11::function evaluate_;
       };
+      template <class GridView, int dimR>
+      struct DUNE_PRIVATE PyGridFunctionEvaluator<GridView,dimR,
+                          typename stdFunction<GridView,dimR>::value >
+      {
+        static const unsigned int dimRange = (dimR ==0 ? 1 : dimR);
+
+        typedef typename GridView::template Codim< 0 >::Entity Entity;
+        typedef typename Entity::Geometry::LocalCoordinate Coordinate;
+
+        typedef typename std::conditional< dimR == 0, double, Dune::FieldVector< double, dimRange > >::type Value;
+
+        typedef typename stdFunction<GridView,dimR>::value Evaluate;
+        explicit PyGridFunctionEvaluator ( Evaluate evaluate ) : evaluate_( evaluate ) {}
+
+        Value operator() ( const Entity &entity, const Coordinate &x ) const
+        {
+          return evaluate_( entity, x );
+        }
+#if 0
+        pybind11::array_t< double > operator() ( const Entity &entity, const pybind11::array_t<double> x ) const
+        {
+          return evaluate_( entity, x );
+        }
+#endif
+      private:
+        Evaluate evaluate_;
+      };
 
 
 
       // registerPyGridFunction
       // ----------------------
 
-      template< class GridView, int dimRange >
+      template< class GridView, class Evaluate, int dimRange >
       auto registerPyGridFunction ( pybind11::handle scope, const std::string &name, std::integral_constant< int, dimRange > )
       {
         using pybind11::operator""_a;
 
-        typedef PyGridFunctionEvaluator<GridView,dimRange> Evaluator;
+        typedef PyGridFunctionEvaluator<GridView,dimRange,Evaluate> Evaluator;
         typedef SimpleGridFunction< GridView, Evaluator > GridFunction;
         addToTypeRegistry<Evaluator>(GenerateTypeName("Dune::Python::detail::PyGridFunctionEvaluator",
                                             MetaType<GridView>(),dimRange),
@@ -192,9 +241,9 @@ namespace Dune
                   GenerateTypeName("Dune::Python::SimpleGridFunction",
                                       MetaType<GridView>(), Dune::MetaType<Evaluator>()),
             IncludeFiles{"dune/python/grid/function.hh"}).first;
-        gf.def(pybind11::init([](GridView &gridView, pybind11::function callable) {
+        gf.def(pybind11::init([](GridView &gridView, Evaluate callable) {
               return new GridFunction( gridView,
-                         PyGridFunctionEvaluator<GridView,dimRange>(callable) );
+                         PyGridFunctionEvaluator<GridView,dimRange,Evaluate>(callable) );
               }), "gridView"_a, "callable"_a, pybind11::keep_alive<1,2>() );
 
         Dune::Python::registerGridFunction( scope, gf );
@@ -206,10 +255,10 @@ namespace Dune
       // pyGlobalGridFunction
       // --------------------
 
-      template< class GridView, int dimRange >
-      pybind11::object pyGridFunction ( const GridView &gridView, pybind11::function evaluate, pybind11::object parent )
+      template< class GridView, int dimRange, class Evaluate=pybind11::function >
+      pybind11::object pyGridFunction ( const GridView &gridView, Evaluate evaluate, pybind11::object parent )
       {
-        auto gridFunction = simpleGridFunction( gridView, PyGridFunctionEvaluator< GridView, dimRange >( std::move( evaluate ) ) );
+        auto gridFunction = simpleGridFunction( gridView, PyGridFunctionEvaluator< GridView, dimRange, Evaluate >( std::move( evaluate ) ) );
         return pybind11::cast( std::move( gridFunction ), pybind11::return_value_policy::move, parent );
       }
 
@@ -223,7 +272,7 @@ namespace Dune
     template< class GridView, int... dimRange >
     auto defGridFunction ( pybind11::handle scope, std::string name, std::integer_sequence< int, dimRange... > )
     {
-      std::ignore = std::make_tuple( detail::registerPyGridFunction< GridView >( scope, name, std::integral_constant< int, dimRange >() )... );
+      std::ignore = std::make_tuple( detail::registerPyGridFunction< GridView, pybind11::function >( scope, name, std::integral_constant< int, dimRange >() )... );
 
       typedef std::function< pybind11::object( const GridView &, pybind11::function, pybind11::object ) > Dispatch;
       std::array< Dispatch, sizeof...( dimRange ) > dispatch = {{ Dispatch( detail::pyGridFunction< GridView, dimRange > )... }};
@@ -257,7 +306,15 @@ namespace Dune
           return dispatch[ static_cast< std::size_t >( dimR ) ]( gridView, std::move( evaluate ), std::move( gp ) );
         };
     }
-
+    template< class GridView, class Evaluate >
+    auto registerGridFunction ( pybind11::handle scope, pybind11::object gp, std::string name, Evaluate evaluate )
+    {
+      static const int dimRange = stdFunctionValue<Evaluate>::value;
+      detail::registerPyGridFunction< GridView, Evaluate, dimRange >( scope, name, std::integral_constant< int, dimRange >() );
+      const GridView &gridView = gp.cast< const GridView & >();
+      auto gridFunction = simpleGridFunction( gridView, detail::PyGridFunctionEvaluator< GridView, dimRange, Evaluate >( std::move( evaluate ) ) );
+      return pybind11::cast( std::move( gridFunction ), pybind11::return_value_policy::move, gp );
+    }
   } // namespace Python
 
 } // namespace Dune
