@@ -108,15 +108,92 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
   vtkWriter.write( vtkName.str() );
   std::cout<<std::endl;
 
-  // Test whether grid can be read without giving the gridfactory explicitly
-  std::unique_ptr<GridType> gridUnique = GmshReader<GridType>::read(inputName);
+  //
+  // test all signatures of the read method
+  //
 
-  // Remove the following tests once that GmshReader::read returns a std::unique_ptr
-  DUNE_NO_DEPRECATED_BEGIN
-  GridType* gridPtr = GmshReader<GridType>::read(inputName);
-  delete gridPtr;
-  DUNE_NO_DEPRECATED_END
-  std::shared_ptr<GridType> gridShared = GmshReader<GridType>::read(inputName);
+  // Test whether grid can be read without giving the gridfactory explicitly
+  {
+    // unique_ptr
+    std::unique_ptr<GridType> gridUnique =
+      GmshReader<GridType>::read(inputName);
+  }
+
+  {
+    // raw ptr -- Remove the following tests once that GmshReader::read
+    // returns a std::unique_ptr
+    DUNE_NO_DEPRECATED_BEGIN
+    GridType* gridPtr = GmshReader<GridType>::read(inputName);
+    delete gridPtr;
+    DUNE_NO_DEPRECATED_END
+  }
+
+  {
+    // shared_ptr
+    std::shared_ptr<GridType> gridShared =
+      GmshReader<GridType>::read(inputName);
+  }
+
+  // test deprecated reading without gridfactory but with data
+  {
+    auto read = [&] (auto... args)
+    {
+      std::vector<int> boundaryData;
+      std::vector<int> elementData;
+      DUNE_NO_DEPRECATED_BEGIN
+      auto gridp = GmshReader<GridType>::read(inputName, elementData,
+                                              boundaryData, args...);
+      DUNE_NO_DEPRECATED_END
+      static_assert(std::is_same<std::remove_reference_t<decltype(*gridp)>,
+                                 GridType>::value,
+                    "GmshReader::read() return type is wrong");
+    };
+
+    read();
+    read(false);
+    read(false, false);
+    read(false, true);
+    read(true);
+    read(true, false);
+    read(true, true);
+  }
+
+  // test reading with gridfactory but without data
+  {
+    auto read = [&] (auto... args)
+    {
+      GridFactory<GridType> factory;
+      GmshReader<GridType>::read(factory, inputName, args...);
+    };
+
+    read();
+    read(false);
+    read(false, false);
+    read(false, true);
+    read(true);
+    read(true, false);
+    read(true, true);
+  }
+
+  // test reading with gridfactory and  data
+  {
+    auto read = [&] (auto... args)
+    {
+      std::vector<int> boundaryData;
+      std::vector<int> elementData;
+      GridFactory<GridType> factory;
+      GmshReader<GridType>::read(factory, inputName, boundaryData, elementData,
+                                 args...);
+    };
+
+    read();
+    read(false);
+    read(false, false);
+    read(false, true);
+    read(true);
+    read(true, false);
+    read(true, true);
+  }
 }
 
 
