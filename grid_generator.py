@@ -1,11 +1,15 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 __metaclass__ = type
 
+import os
 from ..generator.generator import SimpleGenerator
 from dune.common.hashit import hashIt
 from dune.common import _raise
+from dune.common.compatibility import isString
 from dune.deprecate import deprecated
 from dune.grid import gridFunction, DataType
+from dune.generator.algorithm import cppType
+from dune.generator import builder
 
 def getDimgrid(constructor):
     dimgrid = None
@@ -142,6 +146,60 @@ def mapper(gv,layout):
     moduleName = "mcmgmapper_" + hashIt(typeName)
     module = mcmgGenerator.load(includes, typeName, moduleName)
     return gv._mapper(layout)
+def function(gv,callback,includeFiles=None,*args): # TODO export gf only here
+    if isString(callback) and not includeFiles is None:
+        source = '#include <config.h>\n\n'
+        source += '#define USING_DUNE_PYTHON 1\n\n'
+        includes = []
+        if isString(includeFiles):
+            if not os.path.dirname(includeFiles):
+                with open(includeFiles, "r") as include:
+                        source += include.read()
+                source += "\n"
+            else:
+                source += "#include <"+includeFiles+">\n"
+                includes += [includeFiles]
+        elif isinstance(includeFiles, list):
+            for includefile in includeFiles:
+                if not os.path.dirname(includefile):
+                    with open(includefile, "r") as include:
+                        source += include.read()
+                    source += "\n"
+            else:
+                source += "#include <"+includefile+">\n"
+                includes += [includefile]
+        includes += gv._includes
+        argTypes = []
+        for arg in args:
+            t,i = cppType(arg)
+            argTypes.append(t)
+            includes += i
+
+        signature = callback + "( " + ", ".join(argTypes) + " )"
+        moduleName = "gf_" + hashIt(signature) + "_" + hashIt(source)
+
+        includes = sorted(set(includes))
+        source += "".join(["#include <" + i + ">\n" for i in includes])
+        source += "\n"
+        source += '#include <dune/python/grid/function.hh>\n'
+        source += '#include <dune/python/pybind11/pybind11.h>\n'
+        source += '\n'
+
+        source += "PYBIND11_MODULE( " + moduleName + ", module )\n"
+        source += "{\n"
+        source += "  module.def( \"gf\", [module] ( "+gv._typeName + " &gv"+"".join([", "+argTypes[i] + " arg" + str(i) for i in range(len(argTypes))]) + " ) {\n"
+        source += "      auto callback="+callback+"<"+gv._typeName+">( "+",".join(["arg"+str(i) for i in range(len(argTypes))]) +"); \n"
+        source += "      return Dune::Python::registerGridFunction<"+gv._typeName+",decltype(callback)>(module,pybind11::cast(gv),\"tmp\",callback);\n"
+        source += "    } );\n"
+        source += "}"
+
+        gf = builder.load(moduleName, source, signature).gf(gv,*args)
+        def gfPlot(gf, *args, **kwargs):
+            gf.grid.plot(gf,*args,**kwargs)
+        gf.plot = gfPlot.__get__(gf)
+        return gf
+    else:
+        return gv._function(callback)
 
 def addAttr(module, cls):
     setattr(cls, "_module", module)
@@ -173,6 +231,7 @@ def addAttr(module, cls):
             setattr( Geo, "localPosition", localPosition)
     cls.indexSet = property(indexSet)
     setattr(cls,"mapper",mapper)
+    setattr(cls,"function",function)
 
 gvGenerator = SimpleGenerator("GridView", "Dune::Python")
 def levelView(hgrid,level):
