@@ -144,8 +144,8 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
       auto gridp = GmshReader<GridType>::read(inputName, elementData,
                                               boundaryData, args...);
       DUNE_NO_DEPRECATED_END
-      static_assert(std::is_same_v<std::remove_reference_t<decltype(*gridp)>,
-                                   GridType>,
+      static_assert(std::is_same<std::remove_reference_t<decltype(*gridp)>,
+                                 GridType>::value,
                     "GmshReader::read() return type is wrong");
     };
 
