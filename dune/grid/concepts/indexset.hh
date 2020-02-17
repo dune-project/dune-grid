@@ -1,10 +1,8 @@
-// -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
-// vi: set et ts=4 sw=2 sts=2:
 #ifndef DUNE_GRID_CONCEPTS_INDEX_SET_HH
 #define DUNE_GRID_CONCEPTS_INDEX_SET_HH
 
-#include "anytype.hh"
-#include "entity.hh"
+#include <dune/grid/concepts/anytype.hh>
+#include <dune/grid/concepts/entity.hh>
 
 #include <dune/geometry/type.hh>
 
