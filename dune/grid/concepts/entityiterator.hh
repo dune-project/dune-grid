@@ -3,7 +3,7 @@
 #ifndef DUNE_GRID_CONCEPTS_ENTITY_ITERATOR_HH
 #define DUNE_GRID_CONCEPTS_ENTITY_ITERATOR_HH
 
-#include "entity.hh"
+#include <dune/grid/concepts/entity.hh>
 
 #include <dune/common/concept.hh>
 

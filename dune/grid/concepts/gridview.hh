@@ -1,15 +1,13 @@
-// -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
-// vi: set et ts=4 sw=2 sts=2:
 #ifndef DUNE_GRID_CONCEPTS_GRIDVIEW_HH
 #define DUNE_GRID_CONCEPTS_GRIDVIEW_HH
 
-#include "anytype.hh"
-#include "entity.hh"
-#include "entityiterator.hh"
-#include "intersection.hh"
-#include "intersectioniterator.hh"
-#include "geometry.hh"
-#include "indexset.hh"
+#include <dune/grid/concepts/anytype.hh>
+#include <dune/grid/concepts/entity.hh>
+#include <dune/grid/concepts/entityiterator.hh>
+#include <dune/grid/concepts/intersection.hh>
+#include <dune/grid/concepts/intersectioniterator.hh>
+#include <dune/grid/concepts/geometry.hh>
+#include <dune/grid/concepts/indexset.hh>
 
 #include <dune/grid/common/gridenums.hh>
 
