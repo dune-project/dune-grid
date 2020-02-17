@@ -1,4 +1,6 @@
-# master (will become 2.7)
+# Master (will become release 2.8)
+
+# Release 2.7
 
 - The `YaspGrid` class has a new constructor that takes a `Coordinates`
   object as its first argument.  This object can be of type `EquidistantCoordinates`,
@@ -73,6 +75,11 @@
   (`DUNE::VTK::ascii`). This avoids Paraview crashes on macOS. For this reasons, most VTK files written
   by DUNE 2.7 will differ from the same file written in DUNE 2.6. If you are using VTK files for testing
   results, make sure to use fuzzy float comparisons!
+
+- The `VTKSequenceWriter` now exposes the function `clear()` of the associated `VTKWriter`
+
+- The `VTKSequenceWriter` allows to get and set the time steps storage, which enables serialization
+  of a sequence writer. The feature can be used to restart a sequence.
 
 - UG 3.x is no longer supported. Use dune-uggrid instead.
 
