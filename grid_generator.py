@@ -1,10 +1,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 __metaclass__ = type
 
-import os
+import os, inspect
 from ..generator.generator import SimpleGenerator
 from dune.common.hashit import hashIt
-from dune.common import _raise
+from dune.common import _raise, FieldVector
 from dune.common.compatibility import isString
 from dune.deprecate import deprecated
 from dune.grid import gridFunction, DataType
@@ -116,22 +116,6 @@ def plot(self, function=None, *args, **kwargs):
         except AttributeError:
             dune.plotting.plot(solution=self.function(function),*args,**kwargs)
 
-@deprecated("use the `gridFunction` decorator")
-def globalGridFunction(gv, evaluator):
-    return gv.function(evaluator)
-@deprecated("use the `gridFunction` decorator")
-def localGridFunction(gv, evaluator):
-    return gv.function( lambda x: evaluator(x.entity,x.local) )
-@deprecated("use the `referenceElement` attribute instead")
-def domain(self):
-    return self.referenceElement
-@deprecated("use the `toGlobal` attribute instead")
-def position(self,*arg,**kwarg):
-    return self.toGlobal(*arg,**kwarg)
-@deprecated("use the `toLocal` attribute instead")
-def localPosition(self,*arg,**kwarg):
-    return self.toLocal(*arg,**kwarg)
-
 isGenerator = SimpleGenerator("GridViewIndexSet", "Dune::Python")
 def indexSet(gv):
     includes = gv._includes + ["dune/python/grid/indexset.hh"]
@@ -146,19 +130,30 @@ def mapper(gv,layout):
     moduleName = "mcmgmapper_" + hashIt(typeName)
     module = mcmgGenerator.load(includes, typeName, moduleName)
     return gv._mapper(layout)
-def function(gv,callback,includeFiles=None,*args): # TODO export gf only here
-    if isString(callback) and not includeFiles is None:
+def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=None):
+    if name is None:
+        name = "tmp"+str(gv._gfCounter)
+        gv.__class__._gfCounter += 1
+    if isString(callback):
+        if includeFiles is None:
+            raise ValueError("""if `callback` is the name of a C++ function
+            then at least one include file containing that function must be
+            provided""")
         source = '#include <config.h>\n\n'
         source += '#define USING_DUNE_PYTHON 1\n\n'
         includes = []
         if isString(includeFiles):
             if not os.path.dirname(includeFiles):
                 with open(includeFiles, "r") as include:
-                        source += include.read()
+                    source += include.read()
                 source += "\n"
             else:
                 source += "#include <"+includeFiles+">\n"
                 includes += [includeFiles]
+        elif hasattr(includeFiles,"readable"): # for IOString
+            with includeFiles as include:
+                source += include.read()
+            source += "\n"
         elif isinstance(includeFiles, list):
             for includefile in includeFiles:
                 if not os.path.dirname(includefile):
@@ -190,21 +185,84 @@ def function(gv,callback,includeFiles=None,*args): # TODO export gf only here
         source += "  module.def( \"gf\", [module] ( "+gv._typeName + " &gv"+"".join([", "+argTypes[i] + " arg" + str(i) for i in range(len(argTypes))]) + " ) {\n"
         source += "      auto callback="+callback+"<"+gv._typeName+">( "+",".join(["arg"+str(i) for i in range(len(argTypes))]) +"); \n"
         source += "      return Dune::Python::registerGridFunction<"+gv._typeName+",decltype(callback)>(module,pybind11::cast(gv),\"tmp\",callback);\n"
-        source += "    } );\n"
+        source += "    },"
+        source += "    "+",".join(["pybind11::keep_alive<0,"+str(i+1)+">()" for i in range(len(argTypes)+1)])
+        source += ");\n"
         source += "}"
-
         gf = builder.load(moduleName, source, signature).gf(gv,*args)
-        def gfPlot(gf, *args, **kwargs):
-            gf.grid.plot(gf,*args,**kwargs)
-        gf.plot = gfPlot.__get__(gf)
-        return gf
     else:
-        return gv._function(callback)
+        if len(inspect.signature(callback).parameters) == 1: # global function, turn into a local function
+            callback_ = callback
+            callback = lambda e,x: callback_(e.geometry.toGlobal(x))
+        else:
+            callback_ = None
+        if dimRange is None:
+            # if no `dimRange` attribute is set on the callback,
+            # try to evaluate the function to determin the dimension of
+            # the return value. This can fail if the function is singular in
+            # the computational domain in which case an exception is raised
+            e = gv.elements.__iter__().__next__()
+            try:
+                y = callback(e,e.referenceElement.position(0,0))
+            except ArithmeticError:
+                try:
+                    y = callback(e,e.referenceElement.position(0,2))
+                except ArithmeticError:
+                    raise TypeError("can not determin dimension of range of "+
+                      "given grid function due to arithmetic exceptions being "+
+                      "raised. Add a `dimRange` parameter to the grid function to "+
+                      "solve this issue - set `dimRange`=0 for a scalar function.")
+            try:
+                dimRange = len(y)
+            except TypeError:
+                dimRange = 0
+        if dimRange > 0:
+            scalar = "false"
+        else:
+            scalar = "true"
+        FieldVector(dimRange*[0]) # register FieldVector for the return value
+        if not dimRange in gv.__class__._functions.keys():
+            source = '#include <config.h>\n\n'
+            source += '#define USING_DUNE_PYTHON 1\n\n'
+            includes = gv._includes
+
+            signature = gv._typeName+"::gf<"+str(dimRange)+">"
+            moduleName = "gf_" + hashIt(signature) + "_" + hashIt(source)
+
+            includes = sorted(set(includes))
+            source += "".join(["#include <" + i + ">\n" for i in includes])
+            source += "\n"
+            source += '#include <dune/python/grid/function.hh>\n'
+            source += '#include <dune/python/pybind11/pybind11.h>\n'
+            source += '\n'
+
+            source += "PYBIND11_MODULE( " + moduleName + ", module )\n"
+            source += "{\n"
+            source += "  typedef pybind11::function Evaluate;\n";
+            source += "  Dune::Python::registerGridFunction< "+gv._typeName+", Evaluate, "+str(dimRange)+" >( module, \"gf\", "+scalar+" );\n"
+            source += "}"
+            gfModule = builder.load(moduleName, source, signature)
+            gfFunc = getattr(gfModule,"gf"+str(dimRange))
+            if callback_ is not None:
+                gfFunc.localCall = gfFunc.__call__
+                feval = lambda self,e,x=None: callback_(e) if x is None else self.localCall(e,x)
+                subclass = type(gfFunc.__name__, (gfFunc,), {"__call__": feval})
+                gv.__class__._functions[dimRange] = subclass
+            else:
+                gv.__class__._functions[dimRange] = gfFunc
+        gf = gv.__class__._functions[dimRange](gv,callback)
+    def gfPlot(gf, *args, **kwargs):
+        gf.grid.plot(gf,*args,**kwargs)
+    gf.plot = gfPlot.__get__(gf)
+    gf.name = name
+    gf.order = order
+    return gf
 
 def addAttr(module, cls):
     setattr(cls, "_module", module)
     setattr(cls, "writeVTK", writeVTK)
     setattr(cls, "sequencedVTK", sequencedVTK)
+    setattr(cls, "_functions", {})
 
     if cls.dimension == 2:
         setattr(cls, "plot", plot)
@@ -213,25 +271,10 @@ def addAttr(module, cls):
         setattr(cls, "plot", lambda *arg,**kwarg: _raise(AttributeError("plot only implemented on 2D grids")))
         setattr(cls, "triangulation", lambda *arg,**kwarg: _raise(AttributeError("triangulation only implemented on 2d grid")))
 
-    setattr(cls, "globalGridFunction", globalGridFunction)
-    setattr(cls, "localGridFunction", localGridFunction)
-
-    def gfPlot(gf, *args, **kwargs):
-        gf.grid.plot(gf,*args,**kwargs)
-    for gf in dir(cls):
-        if gf.startswith("GridFunction"):
-            setattr( getattr(cls, gf), "plot", gfPlot)
-    for ent in dir(cls):
-        if ent.startswith("Entity"):
-            Ent = getattr(cls, ent)
-            Ent.domain = property(domain)
-            Geo = getattr(Ent, "Geometry")
-            Geo.domain = property(domain)
-            setattr( Geo, "position", position)
-            setattr( Geo, "localPosition", localPosition)
     cls.indexSet = property(indexSet)
     setattr(cls,"mapper",mapper)
     setattr(cls,"function",function)
+    setattr(cls,"_gfCounter",0)
 
 gvGenerator = SimpleGenerator("GridView", "Dune::Python")
 def levelView(hgrid,level):
