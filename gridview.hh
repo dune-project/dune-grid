@@ -420,7 +420,7 @@ namespace Dune
           - The entity must be contained in the corresponding hierarchical grid.
         )doc" );
 
-      cls.def( "_function", Dune::Python::defGridFunction< GridView >( cls, "GridFunction", std::make_integer_sequence< int, 11 >() ) );
+      // cls.def( "_function", Dune::Python::defGridFunction< GridView >( cls, "GridFunction", std::make_integer_sequence< unsigned int, 11 >() ) );
     }
 
   } // namespace Python
