@@ -197,7 +197,7 @@ struct CheckPartitionType< GridView, pitype >::CheckCodim
   static void apply ( const GridView &gridView )
   {
     std::integral_constant<
-        bool, Dune::Capabilities::hasEntity< typename GridView::Grid, codim >::v
+        bool, Dune::Capabilities::hasEntity< typename GridView::Grid, codim >::v && Dune::Capabilities::hasEntityIterator< typename GridView::Grid, codim >::v
         > capabilityVariable;
     check( capabilityVariable, gridView, gridView.grid().localIdSet() );
   }

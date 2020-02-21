@@ -192,7 +192,8 @@ namespace CheckEntitySeed // don't blur namespace Dune
     template< class GridView >
     static void apply ( const GridView &gridView, std::ostream &output )
     {
-      Check< codim, GridView >::apply( gridView, output );
+      if constexpr (Dune::Capabilities::hasEntityIterator<typename GridView::Grid, codim>::v)
+        Check< codim, GridView >::apply( gridView, output );
     }
   };
 
