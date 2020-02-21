@@ -75,6 +75,10 @@ namespace Dune {
 
     typedef UG_NAMESPACE ::vertex Vertex;
 
+    typedef UG_NAMESPACE ::BVP BVP;
+
+    typedef UG_NAMESPACE ::BVP_DESC BVP_DESC;
+
     /** \brief Point on a UG boundary patch */
     typedef UG_NAMESPACE ::BNDP BNDP;
 
@@ -1100,20 +1104,15 @@ namespace Dune {
 #endif
     }
 
-    static int ConfigureCommand(int argc, const char** argv) {
-      /** \todo Can we remove the cast? */
-      return UG_NAMESPACE ::ConfigureCommand(argc, (char**)argv);
+    static MultiGrid *CreateMultiGrid(const char *MultigridName, const char *BndValProblem,
+                                      const char *format,
+                                      int optimizedIE, int insertMesh,
+                                      std::shared_ptr<PPIF::PPIFContext> ppifContext = nullptr) {
+      return UG_NAMESPACE ::CreateMultiGrid(const_cast<char*>(MultigridName),
+                                            const_cast<char*>(BndValProblem), format,
+                                            optimizedIE, insertMesh, ppifContext);
     }
 
-#if DUNE_UGGRID_HAVE_PPIFCONTEXT
-    static int NewCommand(int argc, char** argv, std::shared_ptr<PPIF::PPIFContext> ppifContext = nullptr) {
-      return UG_NAMESPACE ::NewCommand(argc, argv, ppifContext);
-    }
-#else
-    static int NewCommand(int argc, char** argv) {
-      return UG_NAMESPACE ::NewCommand(argc, argv);
-    }
-#endif
 
     static int CreateFormatCmd(int argc, char** argv) {
       return UG_NAMESPACE ::CreateFormatCmd(argc, argv);

@@ -446,42 +446,42 @@ createGrid()
   }
 
 
-  // ///////////////////////////////////////////
-  //   Call configureCommand and newCommand
-  // ///////////////////////////////////////////
+  /////////////////////////////////////////////////
+  //   Set up a UG multigrid data structure
+  /////////////////////////////////////////////////
 
-  //configure @PROBLEM $d @DOMAIN;
-  std::string configureArgs[2] = {"configure " + grid_->name_ + "_Problem", "d " + grid_->name_ + "_Domain"};
+  std::string MultiGridName = grid_->name_;
+  std::string BVPName = MultiGridName + "_Problem";
+  std::string FormatName = "DuneFormat" + std::to_string(dimworld) + "d";
+
+  typename UG_NS<dimworld>::BVP* theBVP = UG_NS<dimworld>::BVP_GetByName(BVPName.c_str());
+  assert(theBVP);
+
+  std::string configureArgs[2] = {"configure " + BVPName, "d " + grid_->name_ + "_Domain"};
   const char* configureArgs_c[2] = {configureArgs[0].c_str(), configureArgs[1].c_str()};
 
-  if (UG_NS<dimworld>::ConfigureCommand(2, configureArgs_c))
-    DUNE_THROW(GridError, "Calling UG::" << dimworld << "d::ConfigureCommand failed!");
+  typename UG_NS<dimworld>::BVP_DESC theBVPDesc;
+  if (BVP_SetBVPDesc(theBVP,&theBVPDesc) != 0)
+    DUNE_THROW(GridError, "Calling BVP_SetBVPDesc failed!");
 
-  //new @PROBLEM $b @PROBLEM $f @FORMAT $h @HEAP;
-  char* newArgs[3];
-  for (int i=0; i<3; i++)
-    newArgs[i] = (char*)::malloc(50*sizeof(char));
+  if (theBVPDesc.ConfigProc!=nullptr)
+    if ((*theBVPDesc.ConfigProc)(2,const_cast<char**>(configureArgs_c)))
+      DUNE_THROW(GridError, "Could not configure the UG BVP");
 
-  sprintf(newArgs[0], "new %s", grid_->name_.c_str());
+  // Make sure there is no old multigrid object with the same name.
+  // TODO: Can this happen at all?
+  typename UG_NS<dimworld>::MultiGrid *theMG = UG_NS<dimworld>::GetMultigrid(MultiGridName.c_str());
+  if (theMG && DisposeMultiGrid(theMG)!=0)
+      DUNE_THROW(GridError, "Closing old multigrid failed!");
 
-  sprintf(newArgs[1], "b %s_Problem", grid_->name_.c_str());
-  sprintf(newArgs[2], "f DuneFormat%dd", dimworld);
-
-  if (UG_NS<dimworld>::NewCommand(
-        3, newArgs
+  // Create the actual multigrid data structure
+  std::shared_ptr<PPIF::PPIFContext> ppifContext;
 #if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
-        , std::make_shared<PPIF::PPIFContext>(grid_->comm())
+  ppifContext = std::make_shared<PPIF::PPIFContext>(grid_->comm());
 #endif
-        ))
-    DUNE_THROW(GridError, "UGGrid<" << dimworld << ">::makeNewMultigrid failed!");
-
-  for (int i=0; i<3; i++)
-    free(newArgs[i]);
-
-  // Get a direct pointer to the newly created multigrid
-  grid_->multigrid_ = UG_NS<dimworld>::GetMultigrid(grid_->name_.c_str());
-  if (!grid_->multigrid_)
-    DUNE_THROW(GridError, "UG::D" << dimworld << "::GetMultigrid failed!");
+  grid_->multigrid_ = UG_NS<dimworld>::CreateMultiGrid(MultiGridName.c_str(),BVPName.c_str(),FormatName.c_str(),true,true, ppifContext);
+  if (grid_->multigrid_==nullptr)
+    DUNE_THROW(GridError, "Could not create multigrid");
 
   // ///////////////////////////////////////////////////////////////
   // If we are in a parallel setting and we are _not_ the master
