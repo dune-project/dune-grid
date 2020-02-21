@@ -519,7 +519,8 @@ namespace Dune
     {
       checkIndexSetForCodim< codim >( grid, view, sout, levelIndex );
       typedef Dune :: Capabilities :: hasEntity< Grid, codim-1 > hasNextCodim;
-      CheckIndexSet< Grid, GridView, OutputStream, codim-1, hasNextCodim :: v >
+      typedef Dune :: Capabilities :: hasEntityIterator< Grid, codim-1 > hasNextCodimIterator;
+      CheckIndexSet< Grid, GridView, OutputStream, codim-1, hasNextCodim::v && hasNextCodimIterator::v >
       :: checkIndexSet( grid, view, sout, levelIndex );
     }
   };
@@ -533,7 +534,8 @@ namespace Dune
       derr << "WARNING: Entities for codim " << codim
            << " are not being tested!" << std::endl;
       typedef Dune :: Capabilities :: hasEntity< Grid, codim-1 > hasNextCodim;
-      CheckIndexSet< Grid, GridView, OutputStream, codim-1, hasNextCodim :: v >
+      typedef Dune :: Capabilities :: hasEntityIterator< Grid, codim-1 > hasNextCodimIterator;
+      CheckIndexSet< Grid, GridView, OutputStream, codim-1, (hasNextCodim::v && hasNextCodimIterator::v) >
       :: checkIndexSet( grid, view, sout, levelIndex );
     }
   };

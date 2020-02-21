@@ -132,7 +132,7 @@ namespace {
         Dune::Codim<codim>(),
         std::integral_constant<
         bool,
-        Dune::Capabilities::hasEntity<typename GV::Grid,codim>::v
+        Dune::Capabilities::hasEntity<typename GV::Grid,codim>::v && Dune::Capabilities::hasEntityIterator<typename GV::Grid,codim>::v
         >()
         )...
       );
