@@ -42,7 +42,7 @@ namespace Dune
     template< class HostGrid, class CoordFunction, class Allocator, int codim >
     struct hasEntityIterator< GeometryGrid< HostGrid, CoordFunction, Allocator >, codim >
     {
-      static const bool v = true;
+      static const bool v = hasEntityIterator<HostGrid, codim>::v;
     };
 
 
