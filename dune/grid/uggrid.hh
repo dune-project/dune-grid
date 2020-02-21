@@ -875,20 +875,11 @@ namespace Dune {
        \ingroup UGGrid
      */
 
-    /** \brief UGGrid has codim=0 entities (elements)
+    /** \brief UGGrid has entities of all codimensions
        \ingroup UGGrid
      */
-    template<int dim>
-    struct hasEntity< UGGrid<dim>, 0>
-    {
-      static const bool v = true;
-    };
-
-    /** \brief UGGrid has codim=dim entities (vertices)
-       \ingroup UGGrid
-     */
-    template<int dim>
-    struct hasEntity< UGGrid<dim>, dim>
+    template<int dim, int codim>
+    struct hasEntity< UGGrid<dim>, codim>
     {
       static const bool v = true;
     };
