@@ -7,7 +7,6 @@
 #include <functional>
 #include <iostream>
 
-#include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/rangeutilities.hh>
 #include <dune/geometry/dimension.hh>
@@ -35,60 +34,6 @@ namespace Dune
   //
   //  Common Layout templates
   //
-
-  //! Layout template for elements
-  /**
-   * This layout template is for use in the
-   * MultipleCodimMultipleGeomTypeMapper.  It selects only elements (entities
-   * with dim=dimgrid).
-   *
-   * \tparam dimgrid The dimension of the grid.
-   *
-   * \deprecated Use \ref mcmgElementLayout() instead.
-   */
-  template<int dimgrid> struct DUNE_DEPRECATED_MSG("The MCMG layout classes have been deprecated. Pass `mcmgElementLayout()` to the constructor instead")
-  MCMGElementLayout {
-    //! test whether entities of the given geometry type should be included in
-    //! the map
-    bool contains (Dune::GeometryType gt) const { return gt.dim()==dimgrid; }
-  };
-
-  //! Layout template for vertices
-  /**
-   * This layout template is for use in the
-   * MultipleCodimMultipleGeomTypeMapper.  It selects only vertices (entities
-   * with dim=0).
-   *
-   * \tparam dimgrid The dimension of the grid.
-   *
-   * \deprecated Use \ref mcmgVertexLayout() instead.
-   */
-  template<int dim> struct DUNE_DEPRECATED_MSG("The MCMG layout classes have been deprecated. Pass `mcmgVertexLayout()` to the constructor instead")
-  MCMGVertexLayout {
-    //! test whether entities of the given geometry type should be included in
-    //! the map
-    bool contains (Dune::GeometryType gt) const { return gt.dim()==0; }
-  };
-
-  namespace Impl {
-
-    /*
-     * Dummy layout to be used as the default for
-     * `MultipleCodimMultipleGeomTypeMapper`.  It should never be used, but
-     * we need a default.
-     *
-     * This class can be removed once the `LayoutClass` template parameter
-     * of `MultipleCodimMultipleGeomTypeMapper` is removed.
-     */
-    template<int dimgrid>
-    struct MCMGFailLayout {
-      MCMGFailLayout()
-        { DUNE_THROW(Exception, "The default layout class cannot be used"); }
-      bool contains(GeometryType gt) const
-        { DUNE_THROW(Exception, "The default layout class cannot be used"); }
-    };
-
-  } /* namespace Impl */
 
   /**
    * \brief layout function for `MultipleCodimMultipleGeomTypeMapper`
@@ -177,26 +122,10 @@ namespace Dune
    *
    * The geometry types to be included in the mapper are selected using a
    * layout functional (\ref MCMGLayout) that is passed to the constructor.
-   *
-   * \tparam GV     A Dune GridView type.
-   * \tparam LayoutClass (deprecated) A helper class template with a method contains(), that
-   *                returns true for all geometry types that are in the domain
-   *                of the map.  The class should be of the following shape
-     \code
-     template<int dimgrid>
-     struct LayoutClass {
-     bool contains (Dune::GeometryType gt) const {
-        // Return true if gt is in the domain of the map
-     }
-     };
-     \endcode
-   *                The MultipleCodimMultipleGeomTypeMapper will always
-   *                substitute the dimension of the grid for the template
-   *                parameter dimgrid.
    */
-  template <typename GV, template<int> class LayoutClass = Impl::MCMGFailLayout>
+  template <typename GV>
   class MultipleCodimMultipleGeomTypeMapper :
-    public Mapper<typename GV::Grid,MultipleCodimMultipleGeomTypeMapper<GV,LayoutClass>, typename GV::IndexSet::IndexType >
+    public Mapper<typename GV::Grid,MultipleCodimMultipleGeomTypeMapper<GV>, typename GV::IndexSet::IndexType >
   {
   public:
 
@@ -211,18 +140,6 @@ namespace Dune
      * The type used here is set to be the corresponding type used by the GridView's index set.
      */
     using size_type = decltype(std::declval<typename GV::IndexSet>().size(0));
-
-    /** @brief Construct mapper from grid and one of its index sets.
-     *
-     * \param gridView A Dune GridView object.
-     * \param layout A layout object.
-     *
-     * \deprecated Use the constructor taking a \ref MCMGLayout instead.
-     */
-    MultipleCodimMultipleGeomTypeMapper(const GV& gridView, const LayoutClass<GV::dimension> layout = {})
-      DUNE_DEPRECATED_MSG("Use the constructor taking a `MCMGLayout` functional instead")
-      : MultipleCodimMultipleGeomTypeMapper(gridView, wrapLayoutClass(layout))
-    {}
 
     /**
      * \brief construct mapper from grid and layout description
@@ -437,18 +354,6 @@ namespace Dune
     std::array<Index, GlobalGeometryTypeIndex::size(GV::dimension)> blocks;
     const MCMGLayout layout_;     // get layout object
     std::vector<GeometryType> myTypes_[GV::dimension+1];
-
-  protected:
-    /**
-     * \brief wrap legacy layout classes
-     */
-    static MCMGLayout wrapLayoutClass(const LayoutClass<GV::dimension>& layout)
-    {
-      /* `mutable` as the `contains()` method is not required to be const */
-      return [layout = layout](GeometryType gt, int) mutable {
-        return layout.contains(gt);
-      };
-    }
   };
 
   //////////////////////////////////////////////////////////////////////
@@ -461,29 +366,13 @@ namespace Dune
      This mapper uses all leaf entities of a certain codimension as its entity set.
 
      \tparam G      A %Dune grid type.
-     \tparam LayoutClass (deprecated) A helper class template which determines which types of
-                 entities are mapped by this mapper.  See
-                 MultipleCodimMultipleGeomTypeMapper for how exactly this
-                 template should look.
    */
-  template <typename G, template<int> class LayoutClass = Impl::MCMGFailLayout>
+  template <typename G>
   class LeafMultipleCodimMultipleGeomTypeMapper
-    : public MultipleCodimMultipleGeomTypeMapper<typename G::LeafGridView,LayoutClass>
+    : public MultipleCodimMultipleGeomTypeMapper<typename G::LeafGridView>
   {
-    typedef MultipleCodimMultipleGeomTypeMapper<typename G::LeafGridView,
-        LayoutClass> Base;
+    typedef MultipleCodimMultipleGeomTypeMapper<typename G::LeafGridView> Base;
   public:
-    /** @brief The constructor
-     *
-     * @param grid A reference to a grid.
-     * @param layout A layout object
-     *
-     * \deprecated Use the constructor taking a \ref MCMGLayout instead.
-     */
-    LeafMultipleCodimMultipleGeomTypeMapper (const G& grid, const LayoutClass<G::dimension> layout = {})
-      DUNE_DEPRECATED_MSG("Use the constructor taking a `MCMGLayout` functional instead")
-      : LeafMultipleCodimMultipleGeomTypeMapper(grid, Base::wrapLayoutClass(layout))
-    {}
 
     /**
      * \brief constructor
@@ -502,29 +391,12 @@ namespace Dune
      This mapper uses all entities of a certain codimension on a given level as its entity set.
 
      \tparam G      A %Dune grid type.
-     \tparam LayoutClass (deprecated) A helper class template which determines which types of
-                 entities are mapped by this mapper.  See
-                 MultipleCodimMultipleGeomTypeMapper for how exactly this
-                 template should look.
    */
-  template <typename G, template<int> class LayoutClass = Impl::MCMGFailLayout>
+  template <typename G>
   class LevelMultipleCodimMultipleGeomTypeMapper
-    : public MultipleCodimMultipleGeomTypeMapper<typename G::LevelGridView,LayoutClass> {
-    typedef MultipleCodimMultipleGeomTypeMapper<typename G::LevelGridView,
-        LayoutClass> Base;
+    : public MultipleCodimMultipleGeomTypeMapper<typename G::LevelGridView> {
+    typedef MultipleCodimMultipleGeomTypeMapper<typename G::LevelGridView> Base;
   public:
-    /** @brief The constructor
-     *
-     * @param grid A reference to a grid.
-     * @param level A valid level of the grid.
-     * @param layout A layout object
-     *
-     * \deprecated Use the constructor taking a \ref MCMGLayout instead.
-     */
-    LevelMultipleCodimMultipleGeomTypeMapper (const G& grid, int level, const LayoutClass<G::dimension> layout = {})
-      DUNE_DEPRECATED_MSG("Use the constructor taking a `MCMGLayout` functional instead")
-      : LevelMultipleCodimMultipleGeomTypeMapper(grid, level, Base::wrapLayoutClass(layout))
-    {}
 
     /**
      * \brief constructor
