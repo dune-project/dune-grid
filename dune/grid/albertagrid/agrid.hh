@@ -20,7 +20,6 @@
 #include <vector>
 
 // Dune includes
-#include <dune/common/deprecated.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 #include <dune/common/stdstreams.hh>
@@ -524,16 +523,6 @@ namespace Dune
       return genericNumberingMap_.alberta2dune( codim, i );
     }
 
-    // write ALBERTA mesh file
-    bool
-    DUNE_DEPRECATED_MSG("Deprecated in Dune 3.0, use writeGrid instead.")
-    writeGridXdr ( const std::string &filename, ctype time ) const;
-
-    //! reads ALBERTA mesh file
-    bool
-    DUNE_DEPRECATED_MSG("Deprecated in Dune 3.0, use readGrid instead.")
-    readGridXdr ( const std::string &filename, ctype &time );
-
   private:
     using Base::getRealImplementation;
 
@@ -582,13 +571,6 @@ namespace Dune
     getTwistInOutside ( const typename Traits::LeafIntersection &intersection )
     {
       return intersection.impl().twistInOutside();
-    }
-
-    DUNE_DEPRECATED_MSG("use intersection.impl() instead")
-    const AlbertaGridLeafIntersection< const This > &
-    getRealIntersection ( const typename Traits::LeafIntersection &intersection ) const
-    {
-      return intersection.impl();
     }
 
   public:
