@@ -104,7 +104,7 @@ namespace Dune {
         // The entity is an edge
         Hybrid::ifElse(Std::bool_constant<cc==1>(), [&](auto id)
         {
-          DUNE_THROW(NotImplemented, "Subindices of an element edge");
+          result = UG_NS<dim>::levelIndex(entity.impl().getTarget()->links[i]->nbnode);
         });
       });
 
@@ -150,7 +150,7 @@ namespace Dune {
         // The entity is an edge
         Hybrid::ifElse(Std::bool_constant<cc==1>(), [&](auto id)
         {
-          DUNE_THROW(NotImplemented, "Subindices of an element edge");
+          result = UG_NS<dim>::levelIndex(entity.impl().getTarget()->links[i]->nbnode);
         });
 
       });
@@ -328,7 +328,7 @@ namespace Dune {
         // The entity is an edge
         Hybrid::ifElse(Std::bool_constant<cc==1>(), [&](auto id)
         {
-          DUNE_THROW(NotImplemented, "Subindices of an element edge");
+          result = UG_NS<dim>::leafIndex(entity.impl().getTarget()->links[i]->nbnode);
         });
       });
 
@@ -374,7 +374,7 @@ namespace Dune {
         // The entity is an edge
         Hybrid::ifElse(Std::bool_constant<cc==2>(), [&](auto id)
         {
-          DUNE_THROW(NotImplemented, "Subindices of an element edge");
+          result = UG_NS<dim>::leafIndex(entity.impl().getTarget()->links[i]->nbnode);
         });
       });
 

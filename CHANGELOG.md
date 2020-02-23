@@ -1,5 +1,7 @@
 # Master (will become release 2.8)
 
+- `UGGrid` index sets can now compute the indices of vertices of edges.
+
 ## Deprecations and removals
 
 - Remove `Intersection`'s deprecated enums `dimension` and
