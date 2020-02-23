@@ -609,8 +609,6 @@ namespace Dune
     }
 
 
-    using Base::getRealImplementation;
-
     /** \brief obtain constant reference to the coordinate function */
     const CoordFunction &coordFunction () const { return *coordFunction_; }
 
