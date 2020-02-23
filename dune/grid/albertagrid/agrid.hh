@@ -524,8 +524,6 @@ namespace Dune
     }
 
   private:
-    using Base::getRealImplementation;
-
     typedef std::vector<int> ArrayType;
 
     void setup ();

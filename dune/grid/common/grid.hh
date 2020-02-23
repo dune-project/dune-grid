@@ -14,7 +14,6 @@
 // dune-common includes
 #include <dune/common/fvector.hh>
 #include <dune/common/typetraits.hh>
-#include <dune/common/deprecated.hh>
 
 // dune-geometry includes
 #include <dune/geometry/type.hh>
@@ -949,83 +948,6 @@ namespace Dune {
     {
       return false;
     }
-
-  protected:
-    /**
-     * @brief Helper class to choose correct implementation return type for getRealImplementation
-     *
-     * If the template parameter is const, const typename T::ImplementationType is returned otherwise
-     * just typename ::%ImplementationType.
-     */
-    template<class T>
-    class ReturnImplementationType
-      : public T // implement friendship via subclassing
-    {
-    public:
-      /** @brief The correct type of the implementation to return. */
-      typedef typename T::Implementation ImplementationType;
-    private:
-      // constructor in only need to compile
-      ReturnImplementationType(const T& t) : T(t) {}
-    };
-
-    template<class T>
-    class ReturnImplementationType<const T>
-      : public T // implement friendship via subclassing
-    {
-    public:
-      typedef const typename T::Implementation ImplementationType;
-    private:
-      // constructor in only need to compile
-      ReturnImplementationType(const T& t) : T(t) {}
-    };
-
-    //! return real implementation of interface class
-    // This rather involved return type computation does the following:
-    //
-    // 1) It detects whether the function was passed an lvalue or an
-    //    rvalue by checking whether InterfaceType is a reference (in which
-    //    case the argument is an lvalue). This relies on the special template
-    //    matching rules for unqualified rvalue references.
-    // 2) If it is an lvalue, it
-    //    - strips the reference from InterfaceType
-    //    - uses the resulting type to extract the implementation type
-    //    - re-adds an lvalue reference
-    //    This procedure transfers a possible cv-qualification from the
-    //    interface type to the implementation type
-    // 3) If it is an lvalue, it
-    //    - strips the reference anyway. This is required to make this TMP
-    //      compile if the other branch (lvalue) is taken because in that
-    //      case, the compiler still evaluates the rvalue result and without
-    //      the reference stripping step, it would pass a reference into
-    //      ReturnImplementationType, which would in turn cause a compiler
-    //      error.
-    //    - looks up the implementation type with the stripped interface type
-    //    - removes a possible const from the result; the type is a temporary
-    //      anyway, so there is no reason to keep the const qualifier around.
-    template <class InterfaceType>
-    DUNE_DEPRECATED_MSG("use the facade class' `impl()` method instead")
-    static typename std::conditional<
-      std::is_reference<
-        InterfaceType
-        >::value,
-      typename std::add_lvalue_reference<
-        typename ReturnImplementationType<
-          typename std::remove_reference<
-            InterfaceType
-            >::type
-          >::ImplementationType
-        >::type,
-      typename std::remove_const<
-        typename ReturnImplementationType<
-          typename std::remove_reference<
-            InterfaceType
-            >::type
-          >::ImplementationType
-        >::type
-      >::type
-    getRealImplementation (InterfaceType &&i) { return i.impl(); }
-
 
   protected:
     using Grid< dim, dimworld, ct, GridFamily >::asImp;
