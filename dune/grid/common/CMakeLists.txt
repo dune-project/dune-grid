@@ -24,8 +24,7 @@ set(HEADERS
   partitionset.hh
   rangegenerators.hh
   sizecache.hh
-  scsgmapper.hh
-  universalmapper.hh)
+  scsgmapper.hh)
 
 add_subdirectory(test)
 
