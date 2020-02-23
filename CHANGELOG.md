@@ -1,5 +1,7 @@
 # Master (will become release 2.8)
 
+- `UGGrid` index sets can now compute the indices of vertices of edges.
+
 # Release 2.7
 
 - The `YaspGrid` class has a new constructor that takes a `Coordinates`
