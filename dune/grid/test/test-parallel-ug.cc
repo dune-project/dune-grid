@@ -71,7 +71,7 @@ public:
     DataType x = mapper_.index(e);
 
     userDataSend_[mapper_.index(e)][0] = x;
-    std::cout << "Process "
+    dverb << "Process "
               << Dune::MPIHelper::getCollectiveCommunication().rank()+1
               << " sends for entity "
               << mapper_.index(e)
@@ -93,7 +93,7 @@ public:
     buff.read(x);
 
     userDataReceive_[mapper_.index(e)][0] = x;
-    std::cout << "Process "
+    dverb << "Process "
               << Dune::MPIHelper::getCollectiveCommunication().rank()+1
               << " received for entity "
               << mapper_.index(e)
@@ -210,14 +210,11 @@ struct checkMappersWrapper<2, 1, GridView>
 template <class GridView, int commCodim>
 void testCommunication(const GridView &gridView, bool isLeaf, bool printVTK=false)
 {
-  std::cout << gridView.comm().rank() + 1
+  dverb << gridView.comm().rank() + 1
             << ": Testing communication for codim " << commCodim << " entities\n";
 
   typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView> MapperType;
   MapperType mapper(gridView, mcmgLayout(Codim<commCodim>{}));
-
-  std::cout << gridView.comm().rank() + 1
-            << ": Index set has " << mapper.size() << " codim " << commCodim << " entities\n";
 
   const int dim = GridView::dimension;
 
@@ -251,7 +248,6 @@ void testCommunication(const GridView &gridView, bool isLeaf, bool printVTK=fals
   //////////////////////////////////////////////////////
   if (printVTK)
   {
-    std::cout << "Writing data to disk\n";
     Dune::VTKWriter<GridView> writer(gridView);
     if (commCodim == 0) {
       writer.addCellData(userDataSend, "Send");
@@ -277,7 +273,6 @@ void testCommunication(const GridView &gridView, bool isLeaf, bool printVTK=fals
       strcat(fileName, levelName);
     }
     writer.write(fileName, Dune::VTK::ascii);
-    std::cout << "Done writing data to disk\n";
   }
 }
 
@@ -290,13 +285,11 @@ public:
   {
     const int dim = GridView::dimension;
 
-    std::cout << gridView.comm().rank() + 1
+    dverb << gridView.comm().rank() + 1
               << ": Testing communication for codim " << commCodim << " entities\n";
 
     typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView> MapperType;
     MapperType mapper(gridView, mcmgLayout(Codim<commCodim>{}));
-
-    std::cout << gridView.comm().rank()+1 << ": Index set has " << mapper.size() << " codim " << commCodim << " entities\n";
 
     // create the user data arrays
     typedef std::vector<Dune::FieldVector<double, 1> > UserDataType;
@@ -324,7 +317,7 @@ public:
 
           auto referenceElement = Dune::referenceElement<double, dim>(gt);
           const auto entityGlobal = geometry.global(referenceElement.position(k, commCodim));
-          std::cout << gridView.comm().rank()+1 << ": border codim "
+          dverb << gridView.comm().rank()+1 << ": border codim "
                     << commCodim << " entity "
                     << mapper.index(entity) << " (" << entityGlobal
                     << ")" << std::endl;
@@ -342,9 +335,6 @@ public:
     // communicate the entities at the interior border to all other
     // processes
     gridView.communicate(datahandle, Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication);
-
-    std::cout << gridView.comm().rank() + 1
-              << ": Finished testing communication for codim " << commCodim << " entities\n";
   }
 };
 
@@ -427,8 +417,6 @@ class LoadBalance
   template<int codim, int... codimensions, typename=void>
   static void fillVector(const GridView& gv, Data& data)
   {
-    std::cout << "Filling vector for codim " << codim << "\n";
-
     const auto& idSet = gv.grid().localIdSet();
 
     for (const auto& entity : entities(gv, Dune::Codim<codim>(),
@@ -449,8 +437,6 @@ class LoadBalance
   template<int codim, int... codimensions, typename=void>
   static bool checkVector(const GridView& gv, const Data& data)
   {
-    std::cout << "Checking vector for codim " << codim << "\n";
-
     const auto& idSet = gv.grid().localIdSet();
 
     for (const auto& entity : entities(gv, Dune::Codim<codim>(),
@@ -496,7 +482,7 @@ public:
     // check for correctness
     checkVector<codimensions...>(gv, data);
 
-    std::cout << gv.comm().rank()
+    dverb << gv.comm().rank()
               << ": load balancing with data was successful." << std::endl;
   }
 };
@@ -563,11 +549,11 @@ void testParallelUG(bool simplexGrid, bool localRefinement, int refinementDim, b
   const LeafGV&  leafGridView = grid->leafGridView();
   const LevelGV& level0GridView = grid->levelGridView(0);
 
-  std::cout << "LevelGridView for level 0 has " << level0GridView.size(0)
+  dverb << "LevelGridView for level 0 has " << level0GridView.size(0)
             << " elements "  << level0GridView.size(dim - 1)
             << " edges and " << level0GridView.size(dim)
             << " nodes.\n";
-  std::cout << "LeafGridView has " << leafGridView.size(0)
+  dverb << "LeafGridView has " << leafGridView.size(0)
             << " elements, " << leafGridView.size(dim - 1)
             << " edges and " << leafGridView.size(dim)
             << " nodes.\n";
@@ -605,13 +591,10 @@ void testParallelUG(bool simplexGrid, bool localRefinement, int refinementDim, b
 
   if (!localRefinement)
   {
-    std::cout << "Global refinement\n";
     grid->globalRefine(1);
   }
   else
   {
-    std::cout << "Local refinement\n";
-
     // mark all elements with x-coordinate < 0.5 for refinement
     for (const auto& element : elements(grid->leafGridView())) {
       int nRefine = 1;
