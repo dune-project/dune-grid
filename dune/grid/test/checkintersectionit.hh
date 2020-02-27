@@ -5,7 +5,6 @@
 
 #include <cmath>
 
-#include <dune/common/deprecated.hh>
 #include <dune/common/test/iteratortest.hh>
 #include <dune/common/unused.hh>
 
@@ -112,13 +111,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
   typedef typename Intersection::LocalGeometry LocalGeometry;
   typedef typename Intersection::Geometry Geometry;
 
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-  DUNE_NO_DEPRECATED_BEGIN
-  DUNE_UNUSED const int dimension = Intersection::dimension;
-  DUNE_NO_DEPRECATED_END
-#else
   DUNE_UNUSED const int dimension = Entity::dimension;
-#endif
   const int mydimension = Intersection::mydimension;
 
   // check consistency of exported types
@@ -430,13 +423,6 @@ void checkIntersectionIterator ( const GridViewType &view,
 
   static_assert( (std::is_same< Intersection, typename IntersectionIterator::Intersection >::value),
                       "Type GridView::Intersection differs from GridView::IntersectionIterator::Intersection." );
-
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-  DUNE_NO_DEPRECATED_BEGIN
-  static_assert((static_cast<int>(Intersection::dimension)
-                      == static_cast<int>(GridType::dimension)),"IntersectionIterator has wrong dimension");
-  DUNE_NO_DEPRECATED_END
-#endif
 
   static_assert((static_cast<int>(Intersection::dimensionworld)
                       == static_cast<int>(GridType::dimensionworld)),"IntersectionIterator has wrong dimensionworld");
