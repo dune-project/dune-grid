@@ -307,6 +307,7 @@ namespace Dune
 
       void NormExpression::evaluate ( const Vector &argument, Vector &result ) const
       {
+        using std::sqrt;
         expression_->evaluate( argument, result );
         double normsqr = 0.0;
         const size_t size = result.size();
@@ -319,6 +320,7 @@ namespace Dune
 
       void SqrtExpression::evaluate ( const Vector &argument, Vector &result ) const
       {
+        using std::sqrt;
         expression_->evaluate( argument, result );
         if( result.size() != 1 )
           DUNE_THROW( MathError, "Cannot calculate square root of a vector." );

@@ -236,11 +236,12 @@ namespace Dune
   template <int dimworld>
   struct CircleBoundaryProjection : public DuneBoundaryProjection< dimworld >
   {
+    using std::sqrt;
     //! \brief type of coordinate vector
     typedef FieldVector< double, dimworld> CoordinateType;
 
     //! constructor taking radius of circle (default = sqrt( dimworld ) )
-    CircleBoundaryProjection(const double radius = std::sqrt( (double)dimworld ))
+    CircleBoundaryProjection(const double radius = sqrt( (double)dimworld ))
       : radius_( radius ) {}
 
     //! \brief destructor
