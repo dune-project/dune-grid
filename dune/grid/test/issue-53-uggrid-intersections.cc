@@ -26,6 +26,7 @@ using Dune::TestSuite;
 
 template<class Grid>
 TestSuite testGrid(const Grid& grid, const std::string& name) {
+  using std::sqrt;
   TestSuite test;
 
   // now iterate over intersections
@@ -36,8 +37,8 @@ TestSuite testGrid(const Grid& grid, const std::string& name) {
         continue;
 
       // compute the edge lengths of the inner and outer element
-      auto insideLength = std::sqrt(is.inside().geometry().volume());
-      auto outsideLength = std::sqrt(is.outside().geometry().volume());
+      auto insideLength = sqrt(is.inside().geometry().volume());
+      auto outsideLength = sqrt(is.outside().geometry().volume());
       // length of intersection
       auto intersectionLength = is.geometry().volume();
 

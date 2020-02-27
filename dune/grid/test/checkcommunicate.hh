@@ -139,11 +139,12 @@ public:
   template<class MessageBuffer, class EntityType>
   void scatter (MessageBuffer& buff, const EntityType& e, size_t n)
   {
+    using std::sqrt;
     using Geometry = typename EntityType::Geometry;
     using ctype = typename Geometry::ctype;
 
     // define a tolerance for floating-point checks
-    const ctype tolerance = std::sqrt(std::numeric_limits< ctype >::epsilon());
+    const ctype tolerance = sqrt(std::numeric_limits< ctype >::epsilon());
 
     // as this problem is a fixed size problem we can check the sizes
     assert( n == size(e) );
@@ -436,8 +437,9 @@ class CheckCommunication
   // The main ''algorithm''
   bool checkCommunication ()
   {
+    using std::sqrt;
     // define a tolerance for floating-point checks
-    const ctype tolerance = std::sqrt(std::numeric_limits< ctype >::epsilon());
+    const ctype tolerance = sqrt(std::numeric_limits< ctype >::epsilon());
 
     upwind_[ 0 ] = -0.1113;
     int myrank = gridView_.comm().rank();
