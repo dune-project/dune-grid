@@ -4,8 +4,6 @@
 #include <config.h>
 #endif
 
-#define DISABLE_DEPRECATED_METHOD_CHECK 1
-
 #include <dune/grid/yaspgrid.hh>
 #include <dune/grid/identitygrid.hh>
 
