@@ -172,8 +172,6 @@ namespace Dune {
 
   protected:
 
-    using GridDefaultImplementation<dim,dim,typename Coordinates::ctype,YaspGridFamily<dim, Coordinates> >::getRealImplementation;
-
   public:
     //! Type used for coordinates
     typedef typename Coordinates::ctype ctype;

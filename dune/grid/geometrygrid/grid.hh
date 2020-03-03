@@ -5,7 +5,6 @@
 
 #include <memory>
 
-#include <dune/common/deprecated.hh>
 #include <dune/common/shared_ptr.hh>
 
 #include <dune/grid/common/grid.hh>
@@ -258,40 +257,6 @@ namespace Dune
      *  \param[in]  allocator      storage allocator
      */
     GeometryGrid ( std::shared_ptr<HostGrid> hostGrid, const Allocator &allocator = Allocator() )
-      : hostGrid_( hostGrid ),
-        coordFunction_( std::make_shared<CoordFunction>( this->hostGrid() ) ),
-        levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
-        storageAllocator_( allocator )
-    {}
-
-    /** \brief constructor
-     *
-     *  The grid takes ownership of the pointers to host grid and coordinate
-     *  function. They will be deleted when the grid is destroyed.
-     *
-     *  \param[in]  hostGrid       pointer to the grid to wrap
-     *  \param[in]  coordFunction  pointer to the coordinate function
-     *  \param[in]  allocator      storage allocator
-     */
-    GeometryGrid ( HostGrid *hostGrid, CoordFunction *coordFunction, const Allocator &allocator = Allocator() )
-      DUNE_DEPRECATED_MSG("Pass the host grid and coord function as shared_ptr instead of a raw pointer. This constructor will be removed after Dune 2.7.")
-      : hostGrid_( hostGrid ),
-        coordFunction_( coordFunction ),
-        levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
-        storageAllocator_( allocator )
-    {}
-
-    /** \brief constructor
-     *
-     *  The grid takes ownership of the pointer to host grid and it will
-     *  be deleted when the grid is destroyed. The coordinate function
-     *  is automatically constructed.
-     *
-     *  \param[in]  hostGrid       pointer to the grid to wrap
-     *  \param[in]  allocator      storage allocator
-     */
-    GeometryGrid ( HostGrid *hostGrid, const Allocator &allocator = Allocator() )
-      DUNE_DEPRECATED_MSG("Pass the host grid as shared_ptr instead of a raw pointer. This constructor will be removed after Dune 2.7.")
       : hostGrid_( hostGrid ),
         coordFunction_( std::make_shared<CoordFunction>( this->hostGrid() ) ),
         levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
@@ -608,8 +573,6 @@ namespace Dune
       levelIndexSets_.resize( newNumLevels, nullptr );
     }
 
-
-    using Base::getRealImplementation;
 
     /** \brief obtain constant reference to the coordinate function */
     const CoordFunction &coordFunction () const { return *coordFunction_; }

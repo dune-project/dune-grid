@@ -570,22 +570,6 @@ namespace Dune
 
   template< int dim, int dimworld >
   inline bool AlbertaGrid< dim, dimworld >
-  ::writeGridXdr ( const std::string &filename, ctype time ) const
-  {
-    return writeGrid( filename, time );
-  }
-
-
-  template< int dim, int dimworld >
-  inline bool AlbertaGrid< dim, dimworld >
-  ::readGridXdr ( const std::string &filename, ctype &time )
-  {
-    return readGrid( filename, time );
-  }
-
-
-  template< int dim, int dimworld >
-  inline bool AlbertaGrid< dim, dimworld >
   ::writeGrid ( const std::string &filename, ctype time ) const
   {
     if( filename.size() <= 0 )
