@@ -175,8 +175,7 @@ namespace Dune {
     /** \brief Constructor for a given grid object
 
        If you already have your grid object constructed you can
-       hand it over using this constructor.  A reason may be that
-       you need a UGGrid object with a non-default heap size.
+       hand it over using this constructor.
 
        If you construct your factory class using this constructor
        the pointer handed over to you by the method createGrid() is
