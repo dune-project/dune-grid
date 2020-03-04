@@ -14,7 +14,6 @@
 #include <dune/common/parallel/communication.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/parallel/mpihelper.hh>
-#include <dune/common/deprecated.hh>
 
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/grid/common/capabilities.hh>
@@ -757,16 +756,6 @@ namespace Dune {
     void setClosureType(ClosureType type) {
       closureType_ = type;
     }
-
-    /** \brief Sets the default heap size
-     *
-     * UGGrid keeps an internal heap to allocate memory from, which must be
-     * specified on grid creation (at the latest).  This sets the default heap
-     * size, which is used when no heap size is given to the constructor.
-     */
-    static void setDefaultHeapSize(unsigned size)
-    DUNE_DEPRECATED_MSG("Do not set the UGGrid default heap size---it is ignored anyway!")
-    {}
 
     /** \brief Sets a vertex to a new position
 
