@@ -301,11 +301,12 @@ namespace Dune
 
       auto lf = localFunction( gridFunction );
       std::vector< Range > values;
+      auto refLevel = refinementLevels(level);
       for( const auto &element : elements( gv, ps ) )
       {
         lf.bind( element );
         const auto &refinement = buildRefinement< Element::mydimension, ctype >( element.type(), GeometryTypes::simplex( Element::dimension ) );
-        for( auto it = refinement.vBegin( level ), end = refinement.vEnd( level ); it != end; ++it )
+        for( auto it = refinement.vBegin( refLevel ), end = refinement.vEnd( refLevel ); it != end; ++it )
           values.push_back( lf( it.coords() ) );
         lf.unbind();
       }
@@ -343,11 +344,12 @@ namespace Dune
 
       auto lf = localFunction( gridFunction );
       std::vector< Range > values;
+      auto refLevel = refinementLevels(0);
       for( const Element &element : entities( gv, Dune::Codim< Element::codimension >(), ps ) )
       {
         lf.bind( element );
         const auto &refinement = buildRefinement< Element::mydimension, ctype >( element.type(), GeometryTypes::simplex( Element::mydimension ) );
-        for( auto it = refinement.eBegin( 0 ), end = refinement.eEnd( 0 ); it != end; ++it )
+        for( auto it = refinement.eBegin( refLevel ), end = refinement.eEnd( refLevel ); it != end; ++it )
           values.push_back( lf( it.coords() ) );
         lf.unbind();
       }
