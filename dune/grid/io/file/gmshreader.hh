@@ -12,6 +12,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include <dune/common/exceptions.hh>
@@ -835,6 +836,19 @@ namespace Dune
     template<class T>
     static T &discarded(T &&value) { return value; }
 
+    struct DataArg {
+      std::vector<int> *data_ = nullptr;
+      DataArg(std::vector<int> &data) : data_(&data) {}
+      DataArg(const decltype(std::ignore)&) {}
+      DataArg() = default;
+    };
+
+    struct DataFlagArg : DataArg {
+      bool flag_ = false;
+      using DataArg::DataArg;
+      DataFlagArg(bool flag) : flag_(flag) {}
+    };
+
   public:
     typedef GridType Grid;
 
@@ -890,15 +904,43 @@ namespace Dune
               discarded(std::vector<int>{}), verbose, insertBoundarySegments);
     }
 
-    /** \todo doc me */
+    //! read Gmsh file, possibly with data
+    /**
+     * \param factory             The GridFactory to fill.
+     * \param fileName            Name of the file to read from.
+     * \param boundarySegmentData Container to fill with boundary segment
+     *                            physical entity data, or `std::ignore`, or a
+     *                            `bool` value.  Boundary segments are
+     *                            inserted when a container or `true` is
+     *                            given, otherwise they are not inserted.
+     * \param elementData         Container to fill with element physical
+     *                            entity data, or `std::ignore`.
+     * \param verbose             Whether to be chatty.
+     *
+     * Containers to fill with data must be `std::vector<int>` lvalues.
+     * Element data is indexed by the insertion index of the element,
+     * boundarySegment data is indexed by the insertion index of the boundary
+     * intersection.  These can be obtained from the `factory`, and are lost
+     * once the grid gets modified (refined or load-balanced).
+     *
+     * \note At the moment the data containers are still filled internally,
+     *       even if they are ignored.  So not having to pass them is more of
+     *       a convenience feature and less of an optimization.  This may
+     *       however change in the future.
+     */
     static void read (Dune::GridFactory<Grid> &factory,
                       const std::string &fileName,
-                      std::vector<int> &boundarySegmentToPhysicalEntity,
-                      std::vector<int> &elementToPhysicalEntity,
+                      DataFlagArg boundarySegmentData,
+                      DataArg elementData,
                       bool verbose=true)
     {
-      do_read(factory, fileName, boundarySegmentToPhysicalEntity,
-              elementToPhysicalEntity, verbose, true);
+      do_read(factory, fileName,
+              boundarySegmentData.data_
+                ? *boundarySegmentData.data_ : discarded(std::vector<int>{}),
+              elementData.data_
+                ? *elementData.data_ : discarded(std::vector<int>{}),
+              verbose,
+              boundarySegmentData.flag_ || boundarySegmentData.data_);
     }
 
     /** \todo doc me */

@@ -7,10 +7,13 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <tuple>
+#include <utility>
 #include <vector>
 
 #include <dune/common/deprecated.hh>
 #include <dune/common/parallel/mpihelper.hh>
+#include <dune/common/std/type_traits.hh>
 
 // dune grid includes
 #if HAVE_UG
@@ -46,6 +49,14 @@ struct EnableLevelIntersectionIteratorCheck< Dune::AlbertaGrid< dim, dimworld > 
   static const bool v = false;
 };
 #endif
+
+template<class T>
+T &discarded(T &&v) { return v; }
+
+template<class Grid, class... Args>
+using read_gf_result_t =
+  decltype(GmshReader<Grid>::read(std::declval<GridFactory<Grid>&>(),
+                                  std::string{}, std::declval<Args>()...));
 
 template <typename GridType>
 void testReadingAndWritingGrid( const std::string& path, const std::string& gridName,
@@ -177,18 +188,60 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
 
   // test reading with gridfactory and data
   {
-    auto read = [&] (auto... args)
+    auto read = [&] (auto &&... args)
     {
-      std::vector<int> boundaryData;
-      std::vector<int> elementData;
-      GridFactory<GridType> factory;
-      GmshReader<GridType>::read(factory, inputName, boundaryData, elementData,
-                                 args...);
+      return GmshReader<GridType>::read(discarded(GridFactory<GridType>{}),
+                                        inputName,
+                                        std::forward<decltype(args)>(args)...);
     };
 
-    read();
-    read(false);
-    read(true);
+    // boundary data provided, element data provided
+    read(discarded(std::vector<int>{}), discarded(std::vector<int>{}));
+    read(discarded(std::vector<int>{}), discarded(std::vector<int>{}), false);
+    read(discarded(std::vector<int>{}), discarded(std::vector<int>{}), true);
+
+    // boundary data provided, element data omitted
+    read(discarded(std::vector<int>{}), std::ignore);
+    read(discarded(std::vector<int>{}), std::ignore, false);
+    read(discarded(std::vector<int>{}), std::ignore, true);
+
+    // boundary data omitted, segment insertion omitted, element data provided
+    read(std::ignore, discarded(std::vector<int>{}));
+    read(std::ignore, discarded(std::vector<int>{}), false);
+    read(std::ignore, discarded(std::vector<int>{}), true);
+
+    // boundary data omitted, segment insertion omitted, element data omitted
+    read(std::ignore, std::ignore);
+    read(std::ignore, std::ignore, false);
+    read(std::ignore, std::ignore, true);
+
+    // boundary data omitted, segment insertion omitted, element data provided
+    read(false, discarded(std::vector<int>{}));
+    read(false, discarded(std::vector<int>{}), false);
+    read(false, discarded(std::vector<int>{}), true);
+
+    // boundary data omitted, segment insertion omitted, element data omitted
+    read(false, std::ignore);
+    read(false, std::ignore, false);
+    read(false, std::ignore, true);
+
+    // boundary data omitted, segment insertion done, element data provided
+    read(true, discarded(std::vector<int>{}));
+    read(true, discarded(std::vector<int>{}), false);
+    read(true, discarded(std::vector<int>{}), true);
+
+    // boundary data omitted, segment insertion done, element data omitted
+    read(true, std::ignore);
+    read(true, std::ignore, false);
+    read(true, std::ignore, true);
+
+    // check that certain signatures are rejected
+    static_assert(!Std::is_detected_v<read_gf_result_t, GridType,
+                                      std::vector<int>, std::vector<int>&>,
+                  "rvalue boundary data should be rejected");
+    static_assert(!Std::is_detected_v<read_gf_result_t, GridType,
+                                      std::vector<int>&, std::vector<int>>,
+                  "rvalue element data should be rejected");
   }
 
   // test reading with gridfactory and data (deprecated signatures)
