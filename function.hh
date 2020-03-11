@@ -90,7 +90,7 @@ namespace Dune
       typedef pybind11::array_t< typename FieldTraits< LocalCoordinate >::field_type > Array;
 
       // TODO subclassing from a non registered traits class not covered by TypeRegistry
-      pybind11::class_< LocalFunction > clsLocalFunction( cls, "LocalFunction" );
+      pybind11::class_< LocalFunction > clsLocalFunction( cls, "LocalFunction", pybind11::dynamic_attr() );
       registerLocalView< Element >( clsLocalFunction );
       clsLocalFunction.def( "__call__", [] ( LocalFunction &self, const LocalCoordinate &x ) {
           return detail::callLocalFunction< LocalCoordinate >( self, x, PriorityTag<2>() );
