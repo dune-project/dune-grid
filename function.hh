@@ -277,18 +277,27 @@ namespace Dune
     {
       detail::registerPyGridFunction< GridView, Evaluate, dimRange >( scope, name, scalar, std::integral_constant< unsigned int, dimRange >() );
     }
+    template <class Value> struct FunctionRange
+    {
+      static constexpr int value()
+      { if constexpr (std::is_convertible_v<Value,double>) return 0; else Value::dimension; }
+    };
+    // template <> struct FunctionRange<double> { static const int value = 0; };
     template< class GridView, class Eval >
     auto registerGridFunction ( pybind11::handle scope, pybind11::object gp, std::string name, Eval eval )
     {
       typedef typename GridView::template Codim<0>::Entity Entity;
       typedef typename Entity::Geometry::LocalCoordinate LocalCoordinate;
       typedef decltype(eval(std::declval<const Entity&>(),std::declval<const LocalCoordinate&>())) Value;
+      /*
       static constexpr int dimRange = []() constexpr -> int {
         if constexpr (std::is_convertible_v<Value,double>)
           return 0;
         else
           return Value::dimension;
       }();
+      */
+      static constexpr int dimRange = FunctionRange<Value>::value();
       typedef typename Dune::Python::stdFunction<GridView,dimRange>::type Evaluate;
       Evaluate evaluate(eval);
       registerGridFunction< GridView, Evaluate, dimRange >( scope, name, dimRange==0 );
