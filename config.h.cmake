@@ -39,17 +39,11 @@
 /* Define to the revision of dune-grid */
 #define DUNE_GRID_VERSION_REVISION ${DUNE_GRID_VERSION_REVISION}
 
-/* If this is set, public access to the implementation of facades like Entity, Geometry, etc. is granted. (deprecated) */
-#define DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS 1
-
 /* Define to 1 if psurface library is found */
 #cmakedefine HAVE_PSURFACE 1
 
 /* Define to 1 if AmiraMesh library is found */
 #cmakedefine HAVE_AMIRAMESH 1
-
-/* The namespace prefix of the psurface library (deprecated) */
-#define PSURFACE_NAMESPACE psurface::
 
 /* Define to 1 if you have at least psurface version 2.0 */
 #cmakedefine HAVE_PSURFACE_2_0 1

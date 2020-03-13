@@ -85,23 +85,6 @@ namespace Dune
         DUNE_THROW(Dune::IOError,"SubsamplingVTKWriter: Negative Subsampling " << intervals_.intervals() << " must not be used!");
       }
     }
-    /**
-     * @brief Construct a SubsamplingVTKWriter working on a specific GridView.
-     *
-     * @param gridView         The gridView the grid functions live
-     *                         on. (E. g. a LevelGridView.)
-     * @param level_           The level for the subrefinement.
-     * @param coerceToSimplex_ Set this to true to always triangulate elements
-     *                         into simplices, even where it's not necessary
-     *                         (i.e. for hypercubes).
-     *
-     * The datamode is always nonconforming.
-     */
-    DUNE_DEPRECATED_MSG("SubsampligVTKWriter(GV,int,bool) is deprecated, use SubsamplingVTKWriter(GV,Dune::refinement{Intervals|Levels}(int),bool)")
-    explicit SubsamplingVTKWriter (const GridView &gridView,
-                                   int level_,  bool coerceToSimplex_ = false)
-        : SubsamplingVTKWriter(gridView, Dune::refinementIntervals(1<<level_), coerceToSimplex_)
-    { }
 
   private:
     GeometryType subsampledGeometryType(GeometryType geometryType)

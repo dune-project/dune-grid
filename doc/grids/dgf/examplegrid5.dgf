@@ -14,8 +14,6 @@ overlap 1
 closure none
 % generate copies in UGGrid
 copies yes
-% set heap size for UGGrid
-heapsize 1000
 #
 
 PERIODICFACETRANSFORMATION
