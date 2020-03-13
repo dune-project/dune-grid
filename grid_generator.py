@@ -44,16 +44,16 @@ def _writeVTK(vtk,grid,f,name,dataTag):
         pass
     if not done:
         for dispatch in _writeVTKDispatcher:
-            func = dispatch(grid,f)
+            try:
+                func = dispatch(grid,f)
+            except:
+                func = None
             if func is not None:
                 func.addToVTKWriter(name,vtk,dataTag)
                 done = True
                 break
     if not done:
-        @gridFunction(grid)
-        def f_(*args,**kwargs):
-            return f(*args,**kwargs)
-        f_.addToVTKWriter(name, vtk, dataTag)
+        gridFunction(grid)(f).addToVTKWriter(name, vtk, dataTag)
 
 def writeVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointvector=None, number=None, subsampling=None, write=True):
     vtk = grid.vtkWriter() if subsampling is None else grid.vtkWriter(subsampling)

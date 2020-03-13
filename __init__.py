@@ -31,7 +31,7 @@ def GridFunction(view, name=None,order=None):
                     self.gf = view.function(lambda e,x: cls.__call__(self,e,x),name=name)
                 else:
                     raise TypeError("__call__ method needed with 2 or 3 arguments, not %d " %getNumberOfParameters(cls.__call__))
-                if not hasattr(self,order):
+                if not hasattr(self,"order"):
                     self.order = order
             # note: any magic methods on gf will not be picked up!
             def __getattr__(self, name):
