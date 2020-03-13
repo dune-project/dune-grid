@@ -26,7 +26,6 @@ typedef unsigned char uint8_t;
 #include <dune/common/reservedvector.hh>
 #include <dune/common/parallel/communication.hh>
 #include <dune/common/parallel/mpihelper.hh>
-#include <dune/common/deprecated.hh>
 #include <dune/geometry/axisalignedcubegeometry.hh>
 #include <dune/geometry/type.hh>
 #include <dune/grid/common/indexidset.hh>
