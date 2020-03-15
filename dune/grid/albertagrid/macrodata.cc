@@ -190,6 +190,7 @@ namespace Dune
     inline Real MacroData< dim >::Library< dimWorld >
     ::edgeLength ( const MacroData &macroData, const ElementId &e, int edge )
     {
+      using std::sqrt;
       const int i = MapVertices< dim, dim-1 >::apply( edge, 0 );
       assert( (macroData.vertexCount_ < 0) || (e[ i ] < macroData.vertexCount_) );
       const GlobalVector &x = macroData.vertex( e[ i ] );

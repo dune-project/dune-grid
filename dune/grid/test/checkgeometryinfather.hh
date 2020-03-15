@@ -22,11 +22,12 @@ template <class GridType>
 void checkGeometryInFather(const GridType& grid)
 {
   using namespace Dune;
+  using std::sqrt;
 
   using ctype = typename GridType::ctype;
 
   // define a tolerance for floating-point checks
-  const ctype tolerance = std::sqrt(std::numeric_limits< ctype >::epsilon());
+  const ctype tolerance = sqrt(std::numeric_limits< ctype >::epsilon());
 
   // count the number of different vertices
   unsigned int differentVertexCoords = 0;

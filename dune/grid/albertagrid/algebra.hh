@@ -39,6 +39,7 @@ namespace Dune
     template< class K, int m >
     inline static K determinant ( const FieldMatrix< K, 1, m > &matrix )
     {
+      using std::sqrt;
       K sum = matrix[ 0 ][ 0 ] * matrix[ 0 ][ 0 ];
       for( int i = 1; i < m; ++i )
         sum += matrix[ 0 ][ i ] * matrix[ 0 ][ i ];
@@ -60,6 +61,7 @@ namespace Dune
     template< class K, int m >
     inline static K determinant ( const FieldMatrix< K, 2, m > &matrix )
     {
+      using std::sqrt;
       const K tmpA = matrix[ 0 ].two_norm2();
       const K tmpB = matrix[ 1 ].two_norm2();
       const K tmpC = matrix[ 0 ] * matrix[ 1 ];
@@ -92,6 +94,7 @@ namespace Dune
     inline static K invert ( const FieldMatrix< K, 1, m > &matrix,
                              FieldMatrix< K, m, 1 > &inverse )
     {
+      using std::sqrt;
       K detSqr = matrix[ 0 ].two_norm2();
       K invDetSqr = K( 1 ) / detSqr;
       for( int i = 0; i < m; ++i )
@@ -116,6 +119,7 @@ namespace Dune
     inline static K invert ( const FieldMatrix< K, 2, m > &matrix,
                              FieldMatrix< K, m, 2 > &inverse )
     {
+      using std::sqrt;
       const K tmpA = matrix[ 0 ].two_norm2();
       const K tmpB = matrix[ 1 ].two_norm2();
       const K tmpC = matrix[ 0 ] * matrix[ 1 ];
