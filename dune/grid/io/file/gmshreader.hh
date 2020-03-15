@@ -231,6 +231,7 @@ namespace Dune
     protected:
       void init()
       {
+        using std::sqrt;
         sqrt2 = sqrt(2.0);
         Dune::FieldVector<double,3> d1,d2;
 
