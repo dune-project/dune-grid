@@ -98,10 +98,50 @@ namespace Dune
        returns true if size of data per entity of given dim and codim is a constant
        @param dim valid dimension (i.e. the grids dimension)
        @param codim valid codimension of the entity set for which data should be communicated
+
+       This method calls 'fixedSize' (with a capital S) of the derived class,
+       if it exists in the derived class.  Otherwise, it calls 'fixedsize'.
+
+       @deprecated This method (with the lower-case 's') is deprecated.  Use 'fixedSize' instead!
+     */
+    [[deprecated]]
+    bool fixedsize (int dim, int codim) const
+    {
+      auto basePtr = &CommDataHandleIF<DataHandleImp,DataTypeImp>::fixedSize;
+      auto derPtr  = &DataHandleImp::fixedSize;
+      const bool hasOverwrittenFixedSize = (basePtr != derPtr);
+      if( hasOverwrittenFixedSize )
+      {
+        return asImp().fixedSize(dim,codim);
+      }
+      else
+      {
+        return deprecatedOverloadedMethod_fixedsize( dim, codim );
+      }
+    }
+
+    /** @brief
+       returns true if size of data per entity of given dim and codim is a constant
+       @param dim valid dimension (i.e. the grids dimension)
+       @param codim valid codimension of the entity set for which data should be communicated
+
+       This method calls 'fixedSize' (with a capital S) of the derived class,
+       if it exists in the derived class.  Otherwise, it calls 'fixedsize'.
      */
     bool fixedSize (int dim, int codim) const
     {
-      return asImp().fixedSize(dim,codim);
+      auto basePtr = &CommDataHandleIF<DataHandleImp,DataTypeImp>::fixedSize;
+      auto derPtr  = &DataHandleImp::fixedSize;
+      const bool hasOverwrittenFixedSize = (basePtr != derPtr);
+      if( hasOverwrittenFixedSize )
+      {
+        CHECK_INTERFACE_IMPLEMENTATION((asImp().fixedSize(dim,codim)));
+        return asImp().fixedSize(dim,codim);
+      }
+      else
+      {
+        return deprecatedOverloadedMethod_fixedsize( dim, codim );
+      }
     }
 
     /** @brief how many objects of type DataType have to be sent for a given entity
@@ -141,6 +181,23 @@ namespace Dune
     }
 
   private:
+    /** @brief
+       forward to derived class 'fixedsize'. If this method is called the derived class
+       methods needs to be changed to 'fixedSize'.
+       @param dim valid dimension (i.e. the grids dimension)
+       @param codim valid codimension of the entity set for which data should be communicated
+
+       This method calls 'fixedsize' of the derived class,
+       if it exists in the derived class.
+     */
+    [[deprecated]]
+    bool deprecatedOverloadedMethod_fixedsize (int dim, int codim) const
+    {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().fixedsize(dim,codim)));
+      // change overloaded method to fixedSize
+      return asImp().fixedsize(dim,codim);
+    }
+
     //!  Barton-Nackman trick
     DataHandleImp& asImp () {return static_cast<DataHandleImp &> (*this);}
     //!  Barton-Nackman trick
