@@ -98,9 +98,28 @@ namespace Dune
        returns true if size of data per entity of given dim and codim is a constant
        @param dim valid dimension (i.e. the grids dimension)
        @param codim valid codimension of the entity set for which data should be communicated
+
+       This method calls 'fixedSize' (with a capital S) of the derived class,
+       if it exists in the derived class.  Otherwise, it calls 'fixedsize'.
+
+       @deprecated This method (with the lower-case 's') is deprecated.  Use 'fixedSize' instead!
+     */
+    [[deprecated]]
+    bool fixedsize (int dim, int codim) const
+    {
+      return fixedSize( dim, codim );
+    }
+
+    /** @brief
+       returns true if size of data per entity of given dim and codim is a constant
+       @param dim valid dimension (i.e. the grids dimension)
+       @param codim valid codimension of the entity set for which data should be communicated
+
+       This method calls 'fixedSize' of the derived class.
      */
     bool fixedSize (int dim, int codim) const
     {
+      CHECK_INTERFACE_IMPLEMENTATION((asImp().fixedSize(dim,codim)));
       return asImp().fixedSize(dim,codim);
     }
 
