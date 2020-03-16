@@ -9,6 +9,7 @@
    MessageBuffers and DataHandles
  */
 
+#include <type_traits> // remove after deprecation period of fixedsize
 #include <dune/common/bartonnackmanifcheck.hh>
 
 namespace Dune
@@ -106,10 +107,7 @@ namespace Dune
      */
     bool fixedsize (int dim, int codim) const
     {
-      auto basePtr = &CommDataHandleIF<DataHandleImp,DataTypeImp>::fixedSize;
-      auto derPtr = &DataHandleImp::fixedSize;
-      bool hasOverwrittenFixedSize = basePtr != derPtr;
-      if (hasOverwrittenFixedSize)
+      if (std::is_same<&CommDataHandleIF<DataHandleImp,DataTypeImp>::fixedSize, &DataHandleImp::fixedSize>::value)
         return asImp().fixedSize(dim,codim);
       else
         return asImp().fixedsize(dim,codim);
@@ -125,10 +123,7 @@ namespace Dune
      */
     bool fixedSize (int dim, int codim) const
     {
-      auto basePtr = &CommDataHandleIF<DataHandleImp,DataTypeImp>::fixedSize;
-      auto derPtr = &DataHandleImp::fixedSize;
-      bool hasOverwrittenFixedSize = basePtr != derPtr;
-      if (hasOverwrittenFixedSize)
+      if (std::is_same<&CommDataHandleIF<DataHandleImp,DataTypeImp>::fixedSize, &DataHandleImp::fixedSize>::value)
         return asImp().fixedSize(dim,codim);
       else
         return asImp().fixedsize(dim,codim);
