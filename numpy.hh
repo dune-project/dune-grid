@@ -208,7 +208,6 @@ namespace Dune
       typedef typename GridFunction::GridView GridView;
       typedef typename GridView::ctype ctype;
 
-      const std::size_t dimGrid = GridView::dimension;
       const std::size_t dimWorld = GridView::dimensionworld;
       typedef typename GridFunctionTraits< GridFunction >::Range Range;
 

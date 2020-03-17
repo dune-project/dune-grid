@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include <dune/common/visibility.hh>
 #include <dune/common/fvector.hh>
 
 #include <dune/geometry/referenceelements.hh>
@@ -38,7 +39,7 @@ namespace Dune
     // ---------------
 
     template< int dim, int dimworld >
-    struct BoundarySegment final
+    struct DUNE_PRIVATE BoundarySegment final
       : public Dune::BoundarySegment< dim, dimworld >
     {
       explicit BoundarySegment ( pybind11::function parametrization )
