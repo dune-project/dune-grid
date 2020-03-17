@@ -19,8 +19,9 @@ namespace Dune
       // LocalViewRegistry
       // -----------------
 
+
       template< class LocalView, class Context >
-      struct LocalViewRegistry
+      struct DUNE_PRIVATE LocalViewRegistry
       {
         void bind ( pybind11::handle localView, pybind11::object context )
         {
