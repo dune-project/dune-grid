@@ -74,6 +74,44 @@ namespace Dune
   template <class DataHandleImp, class DataTypeImp>
   class CommDataHandleIF
   {
+    template <class M>
+    class CheckFixedSizeMethod
+    {
+      // check for old signature of deprecated fixedsize method.
+      template <class T>
+      static std::true_type testSignature(bool (T::*)(int, int) const);
+
+      template <class T>
+      static decltype(testSignature(&T::fixedsize)) test(std::nullptr_t);
+
+      template <class T>
+      static std::false_type test(...);
+
+      using type = decltype(test<M>(nullptr));
+    public:
+      static const bool value = type::value;
+    };
+
+
+    template <class DH, bool>
+    struct CallFixedSize
+    {
+      static bool fixedSize( const DH& dh, int dim, int codim )
+      {
+        return dh.fixedSize( dim, codim );
+      }
+    };
+
+    // old, deprecated implementation
+    template <class DH>
+    struct CallFixedSize< DH, true >
+    {
+      static bool fixedSize( const DH& dh, int dim, int codim )
+      {
+        return dh.overloaded_deprecated_fixedsize( dim, codim );
+      }
+    };
+
   public:
     //! data type of data to communicate
     typedef DataTypeImp DataType;
@@ -105,9 +143,18 @@ namespace Dune
        @deprecated This method (with the lower-case 's') is deprecated.  Use 'fixedSize' instead!
      */
     [[deprecated]]
-    bool fixedsize (int dim, int codim) const
+    int fixedsize (int dim, int codim) const
     {
-      return fixedSize( dim, codim );
+      return int(fixedSize( dim, codim ));
+    }
+
+    // if this deprecation appears then the DataHandle implementation
+    // is overloaded in the old 'fixedsize' method but not the new 'fixedSize'
+    // method.
+    [[deprecated]]
+    bool overloaded_deprecated_fixedsize( int dim, int codim ) const
+    {
+      return asImp().fixedsize( dim, codim );
     }
 
     /** @brief
@@ -119,8 +166,10 @@ namespace Dune
      */
     bool fixedSize (int dim, int codim) const
     {
-      CHECK_INTERFACE_IMPLEMENTATION((asImp().fixedSize(dim,codim)));
-      return asImp().fixedSize(dim,codim);
+      // this should be enabled once the old fixedsize is removed
+      //CHECK_INTERFACE_IMPLEMENTATION((asImp().fixedSize(dim,codim)));
+      return CallFixedSize< DataHandleImp,
+                            CheckFixedSizeMethod< DataHandleImp >::value >::fixedSize( asImp(), dim, codim );
     }
 
     /** @brief how many objects of type DataType have to be sent for a given entity
