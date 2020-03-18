@@ -142,7 +142,7 @@ namespace Dune
 
        @deprecated This method (with the lower-case 's') is deprecated.  Use 'fixedSize' instead!
      */
-    [[deprecated]]
+    [[deprecated("fixedsize (lower case s) will be removed after release 2.8. Implement and call fixedSize (camelCase) instead!")]]
     int fixedsize (int dim, int codim) const
     {
       return int(fixedSize( dim, codim ));
@@ -151,7 +151,7 @@ namespace Dune
     // if this deprecation appears then the DataHandle implementation
     // is overloaded in the old 'fixedsize' method but not the new 'fixedSize'
     // method.
-    [[deprecated]]
+    [[deprecated("fixedsize (lower case s) will be removed after release 2.8. Implement and call fixedSize (camelCase) instead!")]]
     bool overloaded_deprecated_fixedsize( int dim, int codim ) const
     {
       return asImp().fixedsize( dim, codim );
