@@ -110,11 +110,9 @@ def plot(self, function=None, *args, **kwargs):
     if not function:
         dune.plotting.plotGrid(self, *args, **kwargs)
     else:
-        try:
-            grid = function.grid
-            dune.plotting.plot(solution=function,*args,**kwargs)
-        except AttributeError:
-            dune.plotting.plot(solution=self.function(function),*args,**kwargs)
+        if not hasattr(function,"grid"):
+            function = self.function(function)
+        dune.plotting.plot(solution=function,*args,**kwargs)
 
 isGenerator = SimpleGenerator("GridViewIndexSet", "Dune::Python")
 def indexSet(gv):
