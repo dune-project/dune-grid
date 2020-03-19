@@ -17,7 +17,6 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/hybridutilities.hh>
-#include <dune/common/std/utility.hh>
 
 #include <dune/geometry/multilineargeometry.hh>
 #include <dune/geometry/referenceelements.hh>
@@ -202,11 +201,6 @@ namespace Dune {
       }
     }
   };
-
-  template<int dimgrid>
-  struct MCMGNonElementLayout {
-    bool contains(GeometryType gt) const { return gt.dim() < dimgrid; }
-  };
 #endif // !DOXYGEN
 
   //! fill a GridViewInfo structure from a serial grid
@@ -228,7 +222,10 @@ namespace Dune {
 
     typedef ReferenceElements<ctype, dim> RefElems;
 
-    MultipleCodimMultipleGeomTypeMapper<GV, MCMGNonElementLayout> mapper(gv);
+    MultipleCodimMultipleGeomTypeMapper<GV>
+          mapper(gv,
+                 [](GeometryType gt, int) { return gt.dim() < GV::dimension; }
+                );
     std::vector<bool> visited(mapper.size(), false);
 
     gridViewInfo.gridName = className<typename GV::Grid>();
@@ -246,21 +243,21 @@ namespace Dune {
 
       if(!eit->type().isNone()) {
         const EGeometry &geo = eit->geometry();
-        Hybrid::forEach(Std::make_index_sequence< dim >{},
+        Hybrid::forEach(std::make_index_sequence< dim >{},
           [ & ](auto i){ FillGridInfoOperation< i+1 >::apply(*eit, mapper, visited, geo, RefElems::general(eit->type()), gridViewInfo); } );
       }
     }
 
-    GeometryType gt;
-    gt.makeNone(dim);
+    GeometryType gt = GeometryTypes::none(dim);
     if(gridViewInfo.count(gt) > 0) {
-      for(std::size_t codim = 0; codim < dim; ++codim) {
-        gt.makeNone(dim-codim);
+      for(std::size_t codim = 0; codim < dim; ++codim)
+      {
+        gt = GeometryTypes::none(dim-codim);
         EntityInfo<ctype> & ei = gridViewInfo[gt];
         ei.volumeMin = ei.volumeMax = ei.volumeSum =
                                         std::numeric_limits<ctype>::quiet_NaN();
       }
-      gt.makeNone(0);
+      gt = GeometryTypes::none(0);
       EntityInfo<ctype> & ei = gridViewInfo[gt];
       ei.volumeMin = ei.volumeMax = ei.volumeSum = 0;
     }
