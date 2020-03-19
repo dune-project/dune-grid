@@ -3,8 +3,9 @@
 #ifndef DUNE_ALBERTA_DOFADMIN_HH
 #define DUNE_ALBERTA_DOFADMIN_HH
 
+#include <utility>
+
 #include <dune/common/hybridutilities.hh>
-#include <dune/common/std/utility.hh>
 
 #include <dune/grid/albertagrid/misc.hh>
 #include <dune/grid/albertagrid/elementinfo.hh>
@@ -202,8 +203,8 @@ namespace Dune
 
       mesh_ = mesh;
 
-      Hybrid::forEach( Std::make_index_sequence< dimension+1 >{}, [ & ]( auto i ){ CreateDofSpace< i >::apply( mesh_, dofSpace_ ); } );
-      Hybrid::forEach( Std::make_index_sequence< dimension+1 >{}, [ & ]( auto i ){ CacheDofSpace< i >::apply( dofSpace_, cache_ ); } );
+      Hybrid::forEach( std::make_index_sequence< dimension+1 >{}, [ & ]( auto i ){ CreateDofSpace< i >::apply( mesh_, dofSpace_ ); } );
+      Hybrid::forEach( std::make_index_sequence< dimension+1 >{}, [ & ]( auto i ){ CacheDofSpace< i >::apply( dofSpace_, cache_ ); } );
 
       emptySpace_ = createEmptyDofSpace( mesh_ );
       for( int i = 0; i < nNodeTypes; ++i )
