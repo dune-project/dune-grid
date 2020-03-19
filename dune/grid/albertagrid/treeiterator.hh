@@ -4,8 +4,9 @@
 #ifndef DUNE_ALBERTA_TREEITERATOR_HH
 #define DUNE_ALBERTA_TREEITERATOR_HH
 
+#include <utility>
+
 #include <dune/common/hybridutilities.hh>
-#include <dune/common/std/utility.hh>
 #include <dune/common/typetraits.hh>
 
 #include <dune/grid/albertagrid/elementinfo.hh>
@@ -165,7 +166,7 @@ namespace Dune
       for( Iterator it = begin; it != end; ++it )
       {
         const ElementInfo &elementInfo = it->impl().elementInfo();
-        Hybrid::forEach( Std::make_index_sequence< dimension+1-firstCodim >{},
+        Hybrid::forEach( std::make_index_sequence< dimension+1-firstCodim >{},
           [ & ]( auto i ){ Codim< i+firstCodim >::apply( dofNumbering, marker, elementInfo ); } );
       }
     }

@@ -5,9 +5,10 @@
 
 #include <algorithm>
 #include <cassert>
+#include <type_traits>
+#include <utility>
 
 #include <dune/common/hybridutilities.hh>
-#include <dune/common/std/utility.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/grid/common/capabilities.hh>
 
@@ -83,7 +84,7 @@ namespace Dune
 
     void resize ( const Value &value = Value() )
     {
-      Hybrid::forEach( Std::make_index_sequence< Grid::dimension+1 >{},
+      Hybrid::forEach( std::make_index_sequence< Grid::dimension+1 >{},
         [ & ]( auto i ){ if( i == this->codimension() ) this->template resize< i >( value ); } );
     }
 
