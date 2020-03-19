@@ -16,6 +16,7 @@
 #include <list>
 #include <map>
 
+#include <dune/common/visibility.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/indent.hh>
@@ -177,8 +178,9 @@ namespace Dune
       };
 
       //! Type erasure implementation for functions conforming to the dune-functions LocalFunction interface
+      // DUNE_PRIVATE since _f has less visibility
       template<typename F>
-      struct FunctionWrapper
+      struct DUNE_PRIVATE FunctionWrapper
         : public FunctionWrapperBase
       {
         using Function = typename std::decay<F>::type;
