@@ -108,7 +108,7 @@ namespace Dune
             \return An index in the range 0 ... Max number of entities in set - 1.
      */
     template<int cc>
-    IndexType index (const typename Traits::template Codim<cc>::Entity& e) const
+    IndexType index (const typename Codim<cc>::Entity& e) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template index<cc>(e)));
       return asImp().template index<cc>(e);
@@ -148,7 +148,7 @@ namespace Dune
      *  \return An index in the range 0 ... Max number of entities in set - 1.
      */
     template< int cc >
-    IndexType subIndex ( const typename Traits::template Codim< cc >::Entity &e,
+    IndexType subIndex ( const typename Codim< cc >::Entity &e,
                          int i, unsigned int codim ) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template subIndex< cc >(e,i,codim)));
