@@ -5,10 +5,10 @@
 
 #include <iostream>
 #include <map>
+#include <utility>
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/hybridutilities.hh>
-#include <dune/common/std/utility.hh>
 #include <dune/common/test/iteratortest.hh>
 
 #include <dune/grid/common/capabilities.hh>
@@ -57,7 +57,7 @@ public:
   static void apply ( const GridView &gridView )
   {
     std::cout << "Checking iterators for higher codimension..." << std::endl;
-    Dune::Hybrid::forEach( Dune::Std::make_index_sequence< GridView::dimension >{}, [ & ]( auto i ){ CheckCodim< i+1 >::apply( gridView ); } );
+    Dune::Hybrid::forEach( std::make_index_sequence< GridView::dimension >{}, [ & ]( auto i ){ CheckCodim< i+1 >::apply( gridView ); } );
   }
 };
 
