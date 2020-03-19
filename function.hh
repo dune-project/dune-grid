@@ -280,7 +280,7 @@ namespace Dune
     template <class Value> struct FunctionRange
     {
       static constexpr int value()
-      { if constexpr (std::is_convertible_v<Value,double>) return 0; else Value::dimension; }
+      { if constexpr (std::is_convertible_v<Value,double>) return 0; else return Value::dimension; }
     };
     // template <> struct FunctionRange<double> { static const int value = 0; };
     template< class GridView, class Eval >
