@@ -9,10 +9,10 @@ namespace Dune {
    */
   class UGLBGatherScatter
   {
+    template <class DataType>
     class LBMessageBuffer
     {
     public:
-      template <class DataType>
       void read(DataType& x)
       {
         count_--;
@@ -21,7 +21,6 @@ namespace Dune {
           free(data_);
       }
 
-      template <class DataType>
       void write(const DataType& x)
       {
         count_++;
@@ -62,13 +61,13 @@ namespace Dune {
           continue;
 
         // obtain data from DUNE handle and write it into the UG message buffer
-        LBMessageBuffer lbMessageBuffer;
+        using DataType = typename DataHandle::DataType;
+        LBMessageBuffer<DataType> lbMessageBuffer;
         dataHandle.gather(lbMessageBuffer, entity);
 
         auto ugEntity = entity.impl().getTarget();
         assert(not ugEntity->message_buffer());
 
-        typedef typename DataHandle::DataType DataType;
         std::size_t buffer_size = numberOfParams * sizeof(DataType);
         char* buffer = static_cast<char*>(std::malloc(buffer_size));
         ugEntity->message_buffer(buffer, buffer_size);
@@ -107,7 +106,7 @@ namespace Dune {
         auto buffer = ugEntity->message_buffer();
         assert(buffer);
 
-        LBMessageBuffer lbMessageBuffer;
+        LBMessageBuffer<DataType> lbMessageBuffer;
 
         for (std::size_t paramIdx = 0; paramIdx < numberOfParams; paramIdx++)
         {
