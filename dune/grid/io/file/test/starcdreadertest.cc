@@ -24,9 +24,6 @@ void readGrid (const std::string& baseName)
 
   std::cout << " passed." << std::endl;
 
-  // Remove the following tests once that StarCDReader::read returns a std::unique_ptr
-  GridType* gridPtr = Dune::StarCDReader<GridType>::read(baseName);
-  delete gridPtr;
   std::shared_ptr<GridType> gridShared = Dune::StarCDReader<GridType>::read(baseName);
 }
 
