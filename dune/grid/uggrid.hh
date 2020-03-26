@@ -540,10 +540,12 @@ namespace Dune {
     {
 #ifdef ModelP
       // gather element data
-      //        UGLBGatherScatter::template gather<0>(this->leafGridView(), dataHandle);
+      if (dataHandle.contains(dim, 0))
+        UGLBGatherScatter::template gather<0>(this->leafGridView(), dataHandle);
 
       // gather node data
-      UGLBGatherScatter::template gather<dim>(this->leafGridView(), dataHandle);
+      if (dataHandle.contains(dim,dim))
+        UGLBGatherScatter::template gather<dim>(this->leafGridView(), dataHandle);
 #endif
 
       // the load balancing step now also attaches
@@ -552,10 +554,12 @@ namespace Dune {
 
 #ifdef ModelP
       // scatter element data
-      //        UGLBGatherScatter::template scatter<0>(this->leafGridView(), dataHandle);
+      if (dataHandle.contains(dim, 0))
+        UGLBGatherScatter::template scatter<0>(this->leafGridView(), dataHandle);
 
       // scatter node data
-      UGLBGatherScatter::template scatter<dim>(this->leafGridView(), dataHandle);
+      if (dataHandle.contains(dim,dim))
+        UGLBGatherScatter::template scatter<dim>(this->leafGridView(), dataHandle);
 #endif
 
       return true;
