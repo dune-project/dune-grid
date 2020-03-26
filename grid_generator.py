@@ -8,6 +8,7 @@ from dune.common import _raise, FieldVector
 from dune.common.compatibility import isString
 from dune.deprecate import deprecated
 from dune.grid import gridFunction, DataType
+from dune.grid import OutputType
 from dune.generator.algorithm import cppType
 from dune.generator import builder
 
@@ -55,7 +56,11 @@ def _writeVTK(vtk,grid,f,name,dataTag):
     if not done:
         gridFunction(grid)(f).addToVTKWriter(name, vtk, dataTag)
 
-def writeVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointvector=None, number=None, subsampling=None, write=True):
+def writeVTK(grid, name,
+             celldata=None, pointdata=None,
+             cellvector=None, pointvector=None,
+             number=None, subsampling=None,outputType=OutputType.ascii,
+             write=True):
     vtk = grid.vtkWriter() if subsampling is None else grid.vtkWriter(subsampling)
 
     def addDataToVTKWriter(dataFunctions, dataName, dataTag):
@@ -85,25 +90,33 @@ Try using a dictionary with name:function instead.""")
     addDataToVTKWriter(cellvector, 'cellvector', DataType.CellVector)
     addDataToVTKWriter(pointvector, 'pointvector', DataType.PointVector)
 
+    assert isinstance(outputType,dune.grid.OutputType)
     if write:
         if number is None:
-            vtk.write(name)
+            vtk.write(name, outputType)
         else:
-            vtk.write(name, number)
+            vtk.write(name, number, outputType)
     else:
         return vtk
 
 class SequencedVTK:
-    def __init__(self, grid, name, number, celldata, pointdata, cellvector, pointvector, subsampling):
+    def __init__(self, grid, name, number,
+                 celldata, pointdata, cellvector, pointvector,
+                 subsampling, outputType=OutputType.ascii):
         self.number = number
         self.name = name
         self.vtk = grid.writeVTK(name,celldata=celldata,pointdata=pointdata,cellvector=cellvector,pointvector=pointvector,subsampling=subsampling,write=False)
+        self.outputType = outputType
     def __call__(self):
-        self.vtk.write(self.name, self.number)
+        self.vtk.write(self.name, self.number, self.outputType)
         self.number += 1
 
-def sequencedVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointvector=None, number=0, subsampling=None):
-    return SequencedVTK(grid,name,number,celldata=celldata,pointdata=pointdata,cellvector=cellvector,pointvector=pointvector,subsampling=subsampling)
+def sequencedVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointvector=None,
+                 number=0, subsampling=None, outputType=OutputType.ascii):
+    return SequencedVTK(grid,name,number,
+                        celldata=celldata,pointdata=pointdata,
+                        cellvector=cellvector,pointvector=pointvector,
+                        subsampling=subsampling,outputType=outputType)
 
 def plot(self, function=None, *args, **kwargs):
     import dune.plotting
