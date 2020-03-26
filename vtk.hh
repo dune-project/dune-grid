@@ -110,13 +110,20 @@ namespace Dune
         auto cls = insertClass< Writer, VTKWriter<GridView> >(scope, "SubsamplingVTKWriter",
             GenerateTypeName("SubsamplingVTKWriter", MetaType<GridView>()) ).first;
 
-        cls.def( "write", [] ( Writer &writer, const std::string &name ) { writer.write( name ); } );
+        cls.def( "write",
+            [] ( Writer &writer, const std::string &name, Dune::VTK::OutputType outputType ) {
+              writer.write( name, outputType );
+            },
+            pybind11::arg("name"),
+            pybind11::arg("outputType")=VTK::ascii );
 
         cls.def( "write",
             [] ( Writer &writer, const std::string &name, int number ) {
               std::stringstream s; s << name << std::setw(5) << std::setfill('0') << number;
               writer.write( s.str() );
-            });
+            },
+            pybind11::arg("name"),
+            pybind11::arg("number") );
         cls.def( "write",
             [] ( Writer &writer, const std::string &name, int number, Dune::VTK::OutputType outputType ) {
               std::stringstream s; s << name << std::setw(5) << std::setfill('0') << number;
