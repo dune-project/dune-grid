@@ -90,7 +90,7 @@ Try using a dictionary with name:function instead.""")
     addDataToVTKWriter(cellvector, 'cellvector', DataType.CellVector)
     addDataToVTKWriter(pointvector, 'pointvector', DataType.PointVector)
 
-    assert isinstance(outputType,dune.grid.OutputType)
+    assert isinstance(outputType,OutputType)
     if write:
         if number is None:
             vtk.write(name, outputType)
