@@ -15,7 +15,7 @@
 #include <dune/python/common/dimrange.hh>
 #include <dune/python/common/typeregistry.hh>
 #include <dune/python/common/vector.hh>
-#include <dune/python/function/simplegridfunction.hh>
+#include <dune/python/grid/simplegridfunction.hh>
 #include <dune/python/grid/localview.hh>
 #include <dune/python/grid/entity.hh>
 #include <dune/python/grid/numpy.hh>
