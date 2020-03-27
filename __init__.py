@@ -1,4 +1,4 @@
-from .._grid import *
+from ._grid import *
 from .core import *
 
 from ._grids import *
