@@ -5,7 +5,7 @@ from dune.common.hashit import hashIt
 generator = SimpleGenerator("DataHandle", "Dune::Python")
 
 def load(includes, typeName, *args):
-    includes = includes + ["dune/python/utility/numpycommdatahandle.hh"]
+    includes = includes + ["dune/python/common/numpycommdatahandle.hh"]
     moduleName = "numpycommdatahandle_" + hashIt(typeName)
     return generator.load(includes, typeName, moduleName, *args)
 
