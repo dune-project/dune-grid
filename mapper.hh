@@ -10,7 +10,7 @@
 
 #include <dune/python/grid/commops.hh>
 #include <dune/python/grid/range.hh>
-#include <dune/python/utility/numpycommdatahandle.hh>
+#include <dune/python/common/numpycommdatahandle.hh>
 
 #include <dune/python/common/typeregistry.hh>
 #include <dune/python/pybind11/pybind11.h>
