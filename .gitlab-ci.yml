@@ -25,5 +25,5 @@ debian-11-gcc-9-17-python:
     # cmake flags we use for all dune moudle - important is that build shared libs is set (need some better way of doing this)
     DUNECI_CMAKE_FLAGS: $DUNE_CMAKE_FLAGS
     # finally set the python path to all modules
-    PYTHONPATH:         /dunci/modules/dune-common/build-cmake/python:/duneci/modules/dune-geometry/build-cmake/python:$CI_PROJECT_DIR/build-cmake/python
+    PYTHONPATH:         /duneci/modules/dune-common/build-cmake/python:/duneci/modules/dune-geometry/build-cmake/python:$CI_PROJECT_DIR/build-cmake/python
   tags: [duneci]
