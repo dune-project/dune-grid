@@ -1,7 +1,5 @@
 from io import StringIO
 import numpy, math
-from dune.common import FieldVector
-from dune.grid import gridFunction, structuredGrid
 
 codeFunc = """
 #include <cmath>
@@ -36,6 +34,7 @@ auto myVecFunction(Dune::FieldVector<double,1> &a, const GF &gf)
 fcalls = 0
 gcalls = 0
 def testGF_first(gridView):
+    from dune.grid import gridFunction
     global fcalls
     global gcalls
     @gridFunction(gridView)
@@ -85,6 +84,8 @@ def testGF_first(gridView):
     lf.unbind()
 
 def testGF_second(gridView):
+    from dune.common import FieldVector
+    from dune.grid import gridFunction
     gf1 = gridView.function(lambda e,x:\
               math.sin(math.pi*(e.geometry.toGlobal(x)[0]+e.geometry.toGlobal(x)[1])))
 
@@ -203,6 +204,7 @@ if __name__ == "__main__":
     try:
         from dune.common.module import get_dune_py_dir
         _ = get_dune_py_dir()
+        from dune.grid import structuredGrid
         gridView = structuredGrid([0,0],[1,1],[10,10])
         testGF_first(gridView)
         testGF_second(gridView)
