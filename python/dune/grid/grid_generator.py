@@ -2,7 +2,7 @@ import os, inspect
 from ..generator.generator import SimpleGenerator
 from dune.common.hashit import hashIt
 from dune.common import _raise, FieldVector
-from dune.common.compatibility import isString
+from dune.common.utility import isString
 from dune.deprecate import deprecated
 from dune.grid import gridFunction, DataType
 from dune.grid import OutputType
