@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from dune.common.checkconfiguration import assertHave, ConfigurationError
 from dune.typeregistry import generateTypeName
 
