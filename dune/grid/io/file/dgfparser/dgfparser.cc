@@ -339,14 +339,16 @@ namespace Dune
       }
       else
         dimw = interval.dimw();
-      if( (dimgrid >= 0) && (dimgrid != dimw) )
+
+      if( (dimgrid >= 0) && (dimgrid != interval.dimg()) )
       {
         DUNE_THROW( DGFException,
                     "Error in " << interval << ": Coordinate dimension differs "
                                 << "from grid dimension." );
       }
       else
-        dimgrid = dimw;
+        dimgrid = interval.dimg();
+
       cube2simplex = true;
 
       simplexgrid = (element == Simplex);

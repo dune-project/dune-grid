@@ -18,7 +18,8 @@ namespace Dune
         intervals_( 0 ),
         map_(),
         good_( false ),
-        dimw_( 0 )
+        dimw_( 0 ),
+        dimg_( 0 )
     {
       if( !isactive() )
         return;
@@ -47,6 +48,7 @@ namespace Dune
         DUNE_THROW( DGFException,
                     "Too few coordinates for point p0 in IntervalBlock" );
       }
+      dimg_ = dimw_;
 
       // reset stream
       reset();
@@ -170,7 +172,17 @@ namespace Dune
       for( int i = 0; i < dimw_; ++i )
       {
         if( !getnextentry( v[ i ] ) )
-          DUNE_THROW( DGFException, "ERROR in " << *this << ": Not enough values." );
+        {
+          if( i == (dimw_ - 1) ) // i.e. dim < dimw
+          {
+            dimg_ = dimw_ - 1;
+            v[ i ] = 1; // fill dummy value for 2,3 dim grids
+          }
+          else
+          {
+            DUNE_THROW( DGFException, "ERROR in " << *this << ": Not enough values." );
+          }
+        }
       }
     }
 
