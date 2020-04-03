@@ -1,5 +1,7 @@
 from io import StringIO
-import numpy, math
+import math
+from dune.common import FieldVector
+from dune.grid import gridFunction, structuredGrid
 
 codeFunc = """
 #include <cmath>
@@ -31,61 +33,7 @@ auto myVecFunction(Dune::FieldVector<double,1> &a, const GF &gf)
 }
 """
 
-fcalls = 0
-gcalls = 0
-def testGF_first(gridView):
-    from dune.grid import gridFunction
-    global fcalls
-    global gcalls
-    @gridFunction(gridView)
-    def f(x):
-        global fcalls
-        fcalls += 1
-        return x[0]*x[1]
-    @gridFunction(gridView)
-    def g(e,x):
-        global gcalls
-        gcalls += 1
-        return e.geometry.toGlobal(x)
-
-    fcalls = 0
-    gcalls = 0
-    e = gridView.elements.__next__()
-    xLoc = numpy.array([[0,0.1,0.2,0.3],[0,0.4,0.6,0.8]])
-    xGlb = e.geometry.toGlobal(xLoc)
-
-    fcalls = 0
-    gcalls = 0
-    y=f(xGlb)
-    # print( y, fcalls)
-    assert fcalls == 1
-    y = g(e, xLoc)
-    # print( y, gcalls)
-    assert gcalls == 1
-
-    fcalls = 0
-    y = f(e,xLoc)
-    # print( y, fcalls)
-    assert fcalls == 1
-
-    fcalls = 0
-    gcalls = 0
-    lf = f.localFunction()
-    lg = g.localFunction()
-    lf.bind(e)
-    lg.bind(e)
-    y = lf(xLoc)
-    # print( y, fcalls)
-    assert fcalls == 1
-    y = lg(xLoc)
-    # print( y, gcalls)
-    assert gcalls == 1
-    lg.unbind()
-    lf.unbind()
-
 def testGF_second(gridView):
-    from dune.common import FieldVector
-    from dune.grid import gridFunction
     gf1 = gridView.function(lambda e,x:\
               math.sin(math.pi*(e.geometry.toGlobal(x)[0]+e.geometry.toGlobal(x)[1])))
 
@@ -99,23 +47,23 @@ def testGF_second(gridView):
         for e in gridView.elements:
             lgf1.bind(e)
             average1 += lgf1([0.5,0.5])*e.geometry.volume
-         # print(average1)
-         # gf1.plot()
-         # gf2 = gridView.function("myFunction",StringIO(codeFunc),a,name="gf2")
-         # lgf2 = gf2.localFunction()
-         # average2 = 0
-         # for e in gridView.elements:
-         #    lgf2.bind(e)
-         #    average2 += lgf2([0.5,0.5])*e.geometry.volume
-         # print(average2)
-         # gf2.plot()
-         # assert abs(average1-average2)<1e-12
-         # diff = 0
-         # for e in gridView.elements:
-         #    lgf1.bind(e)
-         #    lgf2.bind(e)
-         #    diff += abs(lgf1([0.5,0.5])-lgf2([0.5,0.5]))
-         # assert diff<1e-12
+        # print(average1)
+        # gf1.plot()
+        gf2 = gridView.function("myFunction",StringIO(codeFunc),a,name="gf2")
+        lgf2 = gf2.localFunction()
+        average2 = 0
+        for e in gridView.elements:
+           lgf2.bind(e)
+           average2 += lgf2([0.5,0.5])*e.geometry.volume
+        # print(average2)
+        # gf2.plot()
+        # assert abs(average1-average2)<1e-12
+        diff = 0
+        for e in gridView.elements:
+           lgf1.bind(e)
+           lgf2.bind(e)
+           diff += abs(lgf1([0.5,0.5])-lgf2([0.5,0.5]))
+        assert diff<1e-12
 
     if True:
         gf1 = gridView.function(lambda e,x:\
@@ -188,26 +136,6 @@ def testGF_second(gridView):
             diff += abs(lgf1([0.5,0.5])-lgf2([0.5,0.5]))
         assert diff<1e-12
 
-def test_subIndices(gridView):
-    indexSet = gridView.indexSet
-    for intersection in gridView.boundaryIntersections:
-        entity      = intersection.inside
-        subentity   = (intersection.indexInInside, 1)
-        indices_global      = indexSet.subIndices(entity, subentity, 2)
-        indices_reference   = entity.referenceElement.subEntities(subentity, 2)
-        indices_lookup      = indexSet.subIndices(entity, 2)
-        assert len(indices_global) == len(indices_reference)
-        for i, j in zip(indices_global, indices_reference):
-            assert i == indices_lookup[j]
-
 if __name__ == "__main__":
-    try:
-        from dune.common.module import get_dune_py_dir
-        _ = get_dune_py_dir()
-        from dune.grid import structuredGrid
-        gridView = structuredGrid([0,0],[1,1],[10,10])
-        testGF_first(gridView)
-        testGF_second(gridView)
-        test_subIndices(gridView)
-    except ImportError:
-        pass
+    gridView = structuredGrid([0,0],[1,1],[10,10])
+    testGF_second(gridView)
