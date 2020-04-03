@@ -10,7 +10,6 @@
 #include <vector>
 #include <set>
 
-#include <dune/common/hybridutilities.hh>
 #include <dune/common/std/type_traits.hh>
 #include <dune/grid/common/grid.hh>
 
@@ -54,7 +53,7 @@ namespace Dune {
      * \param codim Codimension WITH RESPECT TO THE GRID of the subentity whose index we want
      */
     template<int cc>
-    unsigned int subIndex (const typename GridImp::Traits::template Codim<cc>::Entity& e,
+    unsigned int subIndex (const typename GridImp::Traits::template Codim<cc>::Entity& entity,
                            int i,
                            unsigned int codim) const
     {
@@ -62,100 +61,88 @@ namespace Dune {
       if (cc==dim)
       {
         assert(codim==dim);
-        return UG_NS<dim>::levelIndex(e.impl().getTarget());
+        return UG_NS<dim>::levelIndex(entity.impl().getTarget());
       }
 
-      // Returning values from within a lambda is tricky.  We therefore write the result of
-      // the method into this variable, and return only once, at the end of the method.
-
-      // We need to initialize this with something, because the compiler warns otherwise.
-      // The initializer should never get out of this method, so let's use an insane
-      // value to make sure that we notice early if it does escape after all.
-      unsigned int result = std::numeric_limits<unsigned int>::max();
-
       // The following block is for 2d grids
-      Hybrid::ifElse(Std::bool_constant<dim==2>(), [&](auto id)
+      if constexpr (dim==2)
       {
         // The entity is an element
-        Hybrid::ifElse(Std::bool_constant<cc==0>(), [&](auto id)
+        if constexpr (cc==0)
         {
           // Element indices
           if (codim==0)
-            result = UG_NS<dim>::levelIndex(e.impl().getTarget());
+            return UG_NS<dim>::levelIndex(entity.impl().getTarget());
 
           // Edge indices
           if (codim==1)
           {
-            auto ref_el = referenceElement<double,dim>(e.type());
+            auto ref_el = referenceElement<double,dim>(entity.type());
             auto a = ref_el.subEntity(i,dim-1,0,dim);
             auto b = ref_el.subEntity(i,dim-1,1,dim);
-            result = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(id(e).impl().getTarget(),
-                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
-                                                              UG_NS<dim>::Corner(id(e).impl().getTarget(),
-                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(b,id(e).type()))));
+            return UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(entity.impl().getTarget(),
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(a,entity.type())),
+                                                              UG_NS<dim>::Corner(entity.impl().getTarget(),
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(b,entity.type()))));
           }
 
           // Vertex indices
           if (codim==dim)
-            result = UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(id(e).impl().getTarget(),
-                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.type())));
-        });
+            return UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(entity.impl().getTarget(),
+                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(i,entity.type())));
+        }
 
         // The entity is an edge
-        Hybrid::ifElse(Std::bool_constant<cc==1>(), [&](auto id)
-        {
-          DUNE_THROW(NotImplemented, "Subindices of an element edge");
-        });
-      });
+        if constexpr (cc==1)
+          return UG_NS<dim>::levelIndex(entity.impl().getTarget()->links[i].nbnode);
+      }
 
       // The following block is for 3d grids
-      Hybrid::ifElse(Std::bool_constant<dim==3>(), [&](auto id)
+      if constexpr (dim==3)
       {
         // The entity is an element
-        Hybrid::ifElse(Std::bool_constant<cc==0>(), [&](auto id)
+        if constexpr (cc==0)
         {
           // Element indices
           if (codim==0)
-            result = UG_NS<dim>::levelIndex(id(e).impl().getTarget());
+            return UG_NS<dim>::levelIndex(entity.impl().getTarget());
 
           // Face indices
           if (codim==1)
-            result = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(id(e).impl().getTarget(),
-                                                                 UGGridRenumberer<dim>::facesDUNEtoUG(i,e.type())));
+            return UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(entity.impl().getTarget(),
+                                                                 UGGridRenumberer<dim>::facesDUNEtoUG(i,entity.type())));
 
           // Edge indices
           if (codim==2)
           {
-            auto ref_el = referenceElement<double,dim>(e.type());
+            auto ref_el = referenceElement<double,dim>(entity.type());
             auto a = ref_el.subEntity(i,dim-1,0,dim);
             auto b = ref_el.subEntity(i,dim-1,1,dim);
-            result = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(id(e).impl().getTarget(),
-                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
-                                                              UG_NS<dim>::Corner(id(e).impl().getTarget(),
-                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(b,e.type()))));
+            return UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(entity.impl().getTarget(),
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(a,entity.type())),
+                                                              UG_NS<dim>::Corner(entity.impl().getTarget(),
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(b,entity.type()))));
           }
 
           // Vertex indices
           if (codim==3)
-            result = UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(id(e).impl().getTarget(),
-                                                               UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.type())));
-        });
+            return UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(entity.impl().getTarget(),
+                                                               UGGridRenumberer<dim>::verticesDUNEtoUG(i,entity.type())));
+        }
 
         // The entity is a face
-        Hybrid::ifElse(Std::bool_constant<cc==1>(), [&](auto id)
+        if constexpr (cc==1)
         {
           DUNE_THROW(NotImplemented, "Subindices of an element face");
-        });
+        }
 
         // The entity is an edge
-        Hybrid::ifElse(Std::bool_constant<cc==1>(), [&](auto id)
-        {
-          DUNE_THROW(NotImplemented, "Subindices of an element edge");
-        });
+        if constexpr (cc==2)
+          return UG_NS<dim>::levelIndex(entity.impl().getTarget()->links[i].nbnode);
+      }
 
-      });
-
-      return result;
+      // Should never happen
+      return std::numeric_limits<unsigned int>::max();
     }
 
     //! get number of entities of given codim, type and on this level
@@ -278,7 +265,7 @@ namespace Dune {
        because the const class is not instantiated yet.
      */
     template<int cc>
-    unsigned int subIndex (const typename std::remove_const<GridImp>::type::Traits::template Codim<cc>::Entity& e,
+    unsigned int subIndex (const typename std::remove_const<GridImp>::type::Traits::template Codim<cc>::Entity& entity,
                            int i,
                            unsigned int codim) const
     {
@@ -286,99 +273,87 @@ namespace Dune {
       if (cc==dim)
       {
         assert(codim==dim);
-        return UG_NS<dim>::leafIndex(e.impl().getTarget());
+        return UG_NS<dim>::leafIndex(entity.impl().getTarget());
       }
 
-      // Returning values from within a lambda is tricky.  We therefore write the result of
-      // the method into this variable, and return only once, at the end of the method.
-
-      // We need to initialize this with something, because the compiler warns otherwise.
-      // The initializer should never get out of this method, so let's use an insane
-      // value to make sure that we notice early if it does escape after all.
-      unsigned int result = std::numeric_limits<unsigned int>::max();
-
       // The following block is for 2d grids
-      Hybrid::ifElse(Std::bool_constant<dim==2>(), [&](auto id)
+      if constexpr (dim==2)
       {
         // The entity is an element
-        Hybrid::ifElse(Std::bool_constant<cc==0>(), [&](auto id)
+        if constexpr (cc==0)
         {
           // Element indices
           if (codim==0)
-            result = UG_NS<dim>::leafIndex(id(e).impl().getTarget());
+            return UG_NS<dim>::leafIndex(entity.impl().getTarget());
 
           // Edge indices
           if (codim==1)
           {
-            auto ref_el = referenceElement<double,dim>(e.type());
+            auto ref_el = referenceElement<double,dim>(entity.type());
             auto a = ref_el.subEntity(i,dim-1,0,dim);
             auto b = ref_el.subEntity(i,dim-1,1,dim);
-            result = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(id(e).impl().getTarget(),
-                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
-                                                              UG_NS<dim>::Corner(id(e).impl().getTarget(),
-                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(b,e.type()))));
+            return UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(entity.impl().getTarget(),
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(a,entity.type())),
+                                                              UG_NS<dim>::Corner(entity.impl().getTarget(),
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(b,entity.type()))));
           }
 
           // Vertex indices
           if (codim==dim)
-            result = UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(id(e).impl().getTarget(),
-                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.type())));
-        });
+            return UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(entity.impl().getTarget(),
+                                                             UGGridRenumberer<dim>::verticesDUNEtoUG(i,entity.type())));
+        }
 
         // The entity is an edge
-        Hybrid::ifElse(Std::bool_constant<cc==1>(), [&](auto id)
-        {
-          DUNE_THROW(NotImplemented, "Subindices of an element edge");
-        });
-      });
+        if constexpr (cc==1)
+          return UG_NS<dim>::leafIndex(entity.impl().getTarget()->links[i].nbnode);
+      }
 
       // The following block is for 3d grids
-      Hybrid::ifElse(Std::bool_constant<dim==3>(), [&](auto id)
+      if constexpr (dim==3)
       {
         // The entity is an element
-        Hybrid::ifElse(Std::bool_constant<cc==0>(), [&](auto id)
+        if constexpr (cc==0)
         {
           // Element indices
           if (codim==0)
-            result = UG_NS<dim>::leafIndex(id(e).impl().getTarget());
+            return UG_NS<dim>::leafIndex(entity.impl().getTarget());
 
           // Face indices
           if (codim==1)
-            result = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(id(e).impl().getTarget(),
-                                                                 UGGridRenumberer<dim>::facesDUNEtoUG(i,e.type())));
+            return UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(entity.impl().getTarget(),
+                                                                 UGGridRenumberer<dim>::facesDUNEtoUG(i,entity.type())));
 
           // Edge indices
           if (codim==2)
           {
-            auto ref_el = referenceElement<double,dim>(e.type());
+            auto ref_el = referenceElement<double,dim>(entity.type());
             auto a = ref_el.subEntity(i,dim-1,0,dim);
             auto b = ref_el.subEntity(i,dim-1,1,dim);
-            result = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(id(e).impl().getTarget(),
-                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(a,e.type())),
-                                                              UG_NS<dim>::Corner(id(e).impl().getTarget(),
-                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(b,e.type()))));
+            return UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(entity.impl().getTarget(),
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(a,entity.type())),
+                                                              UG_NS<dim>::Corner(entity.impl().getTarget(),
+                                                                                 UGGridRenumberer<dim>::verticesDUNEtoUG(b,entity.type()))));
           }
 
           // Vertex indices
           if (codim==3)
-            result = UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(id(e).impl().getTarget(),
-                                                              UGGridRenumberer<dim>::verticesDUNEtoUG(i,e.type())));
-        });
+            return UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(entity.impl().getTarget(),
+                                                              UGGridRenumberer<dim>::verticesDUNEtoUG(i,entity.type())));
+        }
 
         // The entity is a face
-        Hybrid::ifElse(Std::bool_constant<cc==1>(), [&](auto id)
+        if constexpr (cc==1)
         {
           DUNE_THROW(NotImplemented, "Subindices of an element face");
-        });
+        }
 
         // The entity is an edge
-        Hybrid::ifElse(Std::bool_constant<cc==2>(), [&](auto id)
-        {
-          DUNE_THROW(NotImplemented, "Subindices of an element edge");
-        });
-      });
+        if constexpr (cc==2)
+          return UG_NS<dim>::leafIndex(entity.impl().getTarget()->links[i].nbnode);
+      }
 
-      return result;
+      return std::numeric_limits<unsigned int>::max();
     }
 
     //! get number of entities of given codim and type
