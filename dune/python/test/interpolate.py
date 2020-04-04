@@ -1,7 +1,9 @@
 import time, math, numpy, io
 import dune
 from dune.generator import algorithm
-from dune.grid import cartesianDomain, yaspGrid
+import dune.geometry
+from dune.grid import cartesianDomain
+from dune.grid import yaspGrid as gridView
 
 def testPyQuad(view,rules,error):
     start = time.time()
@@ -63,31 +65,37 @@ def testCppQuad(view,rules,error):
     return l2norm2
 
 if __name__ == "__main__":
-    domain = cartesianDomain([0, 0], [1, 0.25], [12, 3])
-    yaspView = yaspGrid(domain)
+    domain = cartesianDomain([0, 0], [1, 1], [50, 50])
+    view = gridView(domain)
 
-    @dune.grid.gridFunction(yaspView)
+    @dune.grid.gridFunction(view)
     def function(x):
-        return numpy.cos(2.*numpy.pi/(0.3+x[0]*x[1]))
+        return numpy.cos(numpy.pi*x[0])*numpy.cos(numpy.pi*x[1])
     def interpolate(grid):
         mapper = grid.mapper({dune.geometry.vertex: 1})
         data = numpy.zeros(mapper.size)
         for v in grid.vertices:
             data[mapper.index(v)] = function(v.geometry.center)
         return mapper, data
-    mapper, data = interpolate(yaspView)
-    @dune.grid.gridFunction(yaspView)
+    mapper, data = interpolate(view)
+    @dune.grid.gridFunction(view)
     def p12dEvaluate(element,x):
         indices = mapper(element)
-        bary = (1-x[0])*(1-x[1]), x[0]*(1-x[1]), (1-x[0])*x[1], x[0]*x[1]
-        return sum( bary[i] * data[indices[i]] for i in range(4) )
+        if element.type == dune.geometry.cube(2):
+            bary = (1-x[0])*(1-x[1]), x[0]*(1-x[1]), (1-x[0])*x[1], x[0]*x[1]
+        elif element.type == dune.geometry.simplex(2):
+            bary = 1-x[0]-x[1], x[0], x[1]
+        else:
+            raise RuntimeError("basis functions not implemented for type "+str(element.type))
+        assert len(indices) == len(bary)
+        return sum( b*data[i] for b,i in zip(bary,indices) )
 
-    @dune.grid.gridFunction(yaspView)
+    @dune.grid.gridFunction(view)
     def error(element,x):
         return p12dEvaluate(element,x)-function(element,x)
 
     rules = dune.geometry.quadratureRules(5)
-    value1 = testPyQuad(yaspView,rules,error)
-    value2 = testCppQuad(yaspView,rules,error)
+    value1 = testPyQuad(view,rules,error)
+    value2 = testCppQuad(view,rules,error)
     assert abs(value1-value2) < 1e-14
-    assert abs(value1-0.042109328)/0.042109328 < 1e-7
+    assert value1 < 1e-6
