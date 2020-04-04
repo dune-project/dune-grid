@@ -16,8 +16,7 @@
 #include <dune/common/rangeutilities.hh>
 #include <dune/common/visibility.hh>
 
-#include <dune/python/common/fmatrix.hh>
-#include <dune/python/common/fvector.hh>
+#include <dune/python/common/fvecmatregistry.hh>
 
 #include <dune/geometry/referenceelements.hh>
 
@@ -95,10 +94,10 @@ namespace Dune
         typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
         typedef FieldMatrix< ctype, mydimension, coorddimension > JacobianTransposed;
         typedef FieldMatrix< ctype, coorddimension, mydimension > JacobianInverseTransposed;
-        registerFieldVector<ctype,mydimension>( scope );
-        registerFieldVector<ctype,coorddimension>( scope );
-        registerFieldMatrix<ctype,mydimension,coorddimension> ( scope );
-        registerFieldMatrix<ctype,coorddimension,mydimension> ( scope );
+        registerFieldVecMat<LocalCoordinate>::apply();
+        registerFieldVecMat<GlobalCoordinate>::apply();
+        registerFieldVecMat<JacobianTransposed>::apply();
+        registerFieldVecMat<JacobianInverseTransposed>::apply();
 
         typedef pybind11::array_t< ctype > Array;
 
