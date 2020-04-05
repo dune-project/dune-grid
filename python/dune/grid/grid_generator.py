@@ -302,11 +302,15 @@ def persistentContainer(hgrid,codim,dimension):
     return module.PersistentContainer(hgrid,codim)
 
 
-generator = SimpleGenerator("HierarchicalGrid", "Dune::Python")
 def module(includes, typeName, *args, **kwargs):
+    try:
+        generator = kwargs.pop("generator")
+    except KeyError:
+        generator = SimpleGenerator("HierarchicalGrid", "Dune::Python")
     includes = includes + ["dune/python/grid/hierarchical.hh"]
     typeHash = "hierarchicalgrid_" + hashIt(typeName)
     module = generator.load(includes, typeName, typeHash, *args, **kwargs)
+
     addAttr(module, module.LeafGrid)
 
     # register reference element for this grid
