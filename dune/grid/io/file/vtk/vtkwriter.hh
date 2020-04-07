@@ -253,15 +253,14 @@ namespace Dune
         {
           auto globalPos = element_->geometry().global(pos);
           auto r = _f(globalPos);
-          Hybrid::ifElse(IsIndexable<decltype(r)>(),
-            [&](auto id) {
-              for (std::size_t i = 0; i < count; ++i)
-                w.write(id(r)[i]);
-            },
-            [&](auto id) {
-              assert(count == 1);
-              w.write(id(r));
-            });
+          if constexpr (IsIndexable<decltype(r)>()) {
+            for (std::size_t i = 0; i < count; ++i)
+                w.write(r[i]);
+          }
+          else {
+            assert(count == 1);
+            w.write(r);
+          }
         }
       private:
         Function _f;

@@ -806,30 +806,30 @@ namespace Dune {
         for (int i=0; i<dim; i++)
           upperRightWithOverlap[i] = coordinates.coordinate(i,0) + coordinates.meshsize(i,0) * s_overlap[i];
 
-        Hybrid::ifElse(std::is_same<Coordinates,EquidistantCoordinates<ctype,dim> >{}, [&](auto id)
+        if constexpr (std::is_same_v<Coordinates,EquidistantCoordinates<ctype,dim>>)
         {
           // New coordinate object that additionally contains the overlap elements
           EquidistantCoordinates<ctype,dim> coordinatesWithOverlap(upperRightWithOverlap,s_overlap);
 
           // add level (the this-> is needed to make g++-6 happy)
-          this->makelevel(id(coordinatesWithOverlap),periodic,o_interior,overlap);
-        });
+          this->makelevel(coordinatesWithOverlap,periodic,o_interior,overlap);
+        }
 
-        Hybrid::ifElse(std::is_same<Coordinates,EquidistantOffsetCoordinates<ctype,dim> >{}, [&](auto id)
+        if constexpr (std::is_same_v<Coordinates,EquidistantOffsetCoordinates<ctype,dim>>)
         {
           Dune::FieldVector<ctype,dim> lowerleft;
           for (int i=0; i<dim; i++)
-            lowerleft[i] = id(coordinates).origin(i);
+            lowerleft[i] = coordinates.origin(i);
 
           // New coordinate object that additionally contains the overlap elements
           EquidistantOffsetCoordinates<ctype,dim> coordinatesWithOverlap(lowerleft,upperRightWithOverlap,s_overlap);
 
           // add level (the this-> is needed to make g++-6 happy)
-          this->makelevel(id(coordinatesWithOverlap),periodic,o_interior,overlap);
-        });
+          this->makelevel(coordinatesWithOverlap,periodic,o_interior,overlap);
+        }
       }
 
-      Hybrid::ifElse(std::is_same<Coordinates,TensorProductCoordinates<ctype,dim> >{}, [&](auto id)
+      if constexpr (std::is_same_v<Coordinates,TensorProductCoordinates<ctype,dim>>)
       {
         std::array<std::vector<ctype>,dim> newCoords;
         std::array<int, dim> offset(o_interior);
@@ -884,8 +884,8 @@ namespace Dune {
         TensorProductCoordinates<ctype,dim> coordinatesWithOverlap(newCoords, offset);
 
         // add level (the this-> is needed to make g++-6 happy)
-        this->makelevel(id(coordinatesWithOverlap),periodic,o_interior,overlap);
-      });
+        this->makelevel(coordinatesWithOverlap,periodic,o_interior,overlap);
+      }
 
       init();
     }
