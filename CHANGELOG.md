@@ -1,5 +1,30 @@
 # Master (will become release 2.8)
 
+- `UGGrid` index sets can now compute the indices of vertices of edges.
+- Python bindings have been moved from the `dune-python` module which is now
+  obsolete. To activate Python bindings the CMake flag
+  `DUNE_ENABLE_PYTHONBINDINGS` needs to be turned on (default is off).
+  Furthermore, flags for either shared library or position independent code
+  needs to be used.
+
+## Deprecations and removals
+
+- Remove `Intersection`'s deprecated enums `dimension` and
+  `codimension`. Instead use grid's dimension and 1.
+
+- Remove deprecated `Grid::getRealImplementation`.
+  Use the `impl()` member function of the facade classes directly instead.
+
+- Remove GeometryGrid's deprecated constructors accepting raw pointers.
+
+- Remove deprecated `AlbertaGrid::getRealIntersection`.
+  Use the `impl()` member function of the intersection class directly instead.
+
+- Remove deprecated `AlbertaGrid::readGridXdr` and `AlbertaGrid::writeGridXdr`.
+  Instead use `AlbertaGrid::readGrid` and `AlbertaGrid::writeGrid`.
+
+- Remove deprecated header `dune/common/universalmapper.hh`.
+
 # Release 2.7
 
 - The `YaspGrid` class has a new constructor that takes a `Coordinates`

@@ -9,9 +9,9 @@
 #include <bitset>
 #include <set>
 #include <map>
+#include <utility>
 
 #include <dune/common/hybridutilities.hh>
-#include <dune/common/std/utility.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/common/unused.hh>
 
@@ -108,7 +108,7 @@ public:
   static void apply ( const GridView &gridView )
   {
     std::cout << "Checking iterators for " << pitype << "..." << std::endl;
-    Dune::Hybrid::forEach( Dune::Std::make_index_sequence< GridView::dimension+1 >{}, [ & ]( auto i ){ CheckCodim< i >::apply( gridView ); } );
+    Dune::Hybrid::forEach( std::make_index_sequence< GridView::dimension+1 >{}, [ & ]( auto i ){ CheckCodim< i >::apply( gridView ); } );
   }
 };
 
@@ -231,7 +231,7 @@ public:
       doubleInterior_( false ),
       interiorBorder_( false )
   {
-    Dune::Hybrid::forEach( Dune::Std::make_index_sequence< dimension+1 >{},
+    Dune::Hybrid::forEach( std::make_index_sequence< dimension+1 >{},
       [ & ]( auto i ){ contains_[ i ] = Dune::Capabilities::canCommunicate< Grid, i >::v; } );
   }
 

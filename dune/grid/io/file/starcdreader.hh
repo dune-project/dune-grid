@@ -56,7 +56,7 @@ namespace Dune {
      *    \param fileName The base file name of the Star-CD files
      *    \param verbose Tlag to set whether information should be printed
      *
-     * \return The return type is a special pointer type that casts into GridType*,
+     * \return The return type is a special pointer type that casts into
      *    std::unique_ptr<GridType>, and std::shared_ptr<GridType>.  It is scheduled
      *    to be replaced by std::unique_ptr<GridType> eventually.
      */

@@ -5,7 +5,6 @@
 
 #include <cmath>
 
-#include <dune/common/deprecated.hh>
 #include <dune/common/test/iteratortest.hh>
 #include <dune/common/unused.hh>
 
@@ -42,7 +41,8 @@ inline void checkParallel ( const Dune::FieldVector< ctype, dimworld > &normal,
                             const Dune::FieldVector< ctype, dimworld > &refNormal,
                             const String & name )
 {
-  if( (normal.two_norm()*refNormal.two_norm() - normal*refNormal) > std::sqrt(std::numeric_limits< ctype >::epsilon()) )
+  using std::sqrt;
+  if( (normal.two_norm()*refNormal.two_norm() - normal*refNormal) > sqrt(std::numeric_limits< ctype >::epsilon()) )
   {
     std::cerr << "Error: " << name << " does not point in the direction of outer normal." << std::endl;
     std::cerr << "       " << name << " = " << normal << ", outer normal = " << refNormal << std :: endl;
@@ -59,10 +59,11 @@ inline void checkJIn ( const Dune :: FieldVector< ctype, dimworld > &normal,
                        const JacobianInverseTransposed &jit,
                        const String & name )
 {
+  using std::sqrt;
   const int facedim = JacobianInverseTransposed::cols;
   Dune :: FieldVector< ctype, facedim > x( ctype( 0 ) );
   jit.umtv( normal, x );
-  if (x.infinity_norm() > std::sqrt(std::numeric_limits< ctype >::epsilon()))
+  if (x.infinity_norm() > sqrt(std::numeric_limits< ctype >::epsilon()))
   {
     const Dune::FieldMatrix< ctype, dimworld, facedim > &mjit = jit;
     std :: cerr << "Error:  (J^-1 * n) != 0." << std :: endl;
@@ -106,19 +107,14 @@ void checkIntersectionAssignment ( const GridView &view, const typename GridView
 template< class Intersection >
 void checkIntersection ( const Intersection &intersection, bool isCartesian = false )
 {
+  using std::sqrt;
   typedef typename Intersection::ctype ctype;
 
   typedef typename Intersection::Entity Entity;
   typedef typename Intersection::LocalGeometry LocalGeometry;
   typedef typename Intersection::Geometry Geometry;
 
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-  DUNE_NO_DEPRECATED_BEGIN
-  DUNE_UNUSED const int dimension = Intersection::dimension;
-  DUNE_NO_DEPRECATED_END
-#else
   DUNE_UNUSED const int dimension = Entity::dimension;
-#endif
   const int mydimension = Intersection::mydimension;
 
   // check consistency of exported types
@@ -130,7 +126,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
   static_assert((std::is_same< ctype, typename Geometry::ctype >::value),
                 "Type Intersection::ctype differs from Intersection::Geometry::ctype.");
 
-  const ctype tolerance = std::sqrt(std::numeric_limits< ctype >::epsilon());
+  const ctype tolerance = sqrt(std::numeric_limits< ctype >::epsilon());
 
   // cache some information on the intersection
 
@@ -412,6 +408,7 @@ void checkIntersectionIterator ( const GridViewType &view,
                                  const typename GridViewType::template Codim< 0 >::Iterator &eIt,
                                  ErrorState &errorState )
 {
+  using std::sqrt;
   typedef typename GridViewType::Grid GridType;
   typedef typename GridViewType::IntersectionIterator IntersectionIterator;
   typedef typename GridViewType::Intersection Intersection;
@@ -430,13 +427,6 @@ void checkIntersectionIterator ( const GridViewType &view,
 
   static_assert( (std::is_same< Intersection, typename IntersectionIterator::Intersection >::value),
                       "Type GridView::Intersection differs from GridView::IntersectionIterator::Intersection." );
-
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-  DUNE_NO_DEPRECATED_BEGIN
-  static_assert((static_cast<int>(Intersection::dimension)
-                      == static_cast<int>(GridType::dimension)),"IntersectionIterator has wrong dimension");
-  DUNE_NO_DEPRECATED_END
-#endif
 
   static_assert((static_cast<int>(Intersection::dimensionworld)
                       == static_cast<int>(GridType::dimensionworld)),"IntersectionIterator has wrong dimensionworld");
@@ -600,7 +590,7 @@ void checkIntersectionIterator ( const GridViewType &view,
   //       Therefore we only enforce this check for dim==dimworld
   // note: The errorState variable will propagate the error as a warning for the cases
   //       where this check is not enforced
-  if( (sumNormal.two_norm() > std::sqrt(std::numeric_limits< ctype >::epsilon())) && (eIt->partitionType() != Dune::GhostEntity) )
+  if( (sumNormal.two_norm() > sqrt(std::numeric_limits< ctype >::epsilon())) && (eIt->partitionType() != Dune::GhostEntity) )
   {
     if( eIt->geometry().affine() && int(GridViewType::dimension) == int(GridViewType::dimensionworld))
       DUNE_THROW( Dune::GridError, "Integral over outer normals on affine entity is nonzero: " << sumNormal );

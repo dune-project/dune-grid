@@ -1,4 +1,3 @@
-# Add all tests without deprecations
 dune_add_test(NAME test-yaspgrid-backuprestore-equidistant
               SOURCES test-yaspgrid-backuprestore-equidistant.cc
               MPI_RANKS 1 2

@@ -6,7 +6,6 @@
 
 #include <memory>
 
-#include <dune/common/deprecated.hh>
 #include <dune/grid/io/file/vtk/vtksequencewriterbase.hh>
 
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
@@ -89,34 +88,6 @@ namespace Dune {
                                  const std::string& extendpath,
                                  VTK::DataMode dm = VTK::conforming )
       : VTKSequenceWriterBase<GridView>(std::make_shared<VTKWriter<GridView> >(gridView,dm),
-                                        name,path,extendpath,
-                                        gridView.comm().rank(), gridView.comm().size())
-    {}
-  };
-
-  /**
-   * @brief Writer for the ouput of grid functions in the vtk format.
-   * @ingroup VTK
-   *
-   * Writes arbitrary grid functions (living on cells or vertices of a grid)
-   * to a file suitable for easy visualization with
-   * <a href="http://www.vtk.org/">The Visualization Toolkit (VTK)</a>.
-   *
-   * \deprecated Please use VTKSequenceWriter together with a SubsamplingVTKWriter instead!
-   */
-  template< class GridView >
-  class
-  DUNE_DEPRECATED_MSG("Use VTKSequenceWriter together with a SubsamplingVTKWriter instead of SubsamplingVTKSequenceWriter!")
-  SubsamplingVTKSequenceWriter :
-    public VTKSequenceWriterBase<GridView>
-  {
-  public:
-    explicit SubsamplingVTKSequenceWriter ( const GridView &gridView,
-                                            unsigned int level_,
-                                            const std::string& name,
-                                            const std::string& path,
-                                            const std::string& extendpath)
-      : VTKSequenceWriterBase<GridView>(std::make_shared<SubsamplingVTKWriter<GridView> >(gridView,level_),
                                         name,path,extendpath,
                                         gridView.comm().rank(), gridView.comm().size())
     {}

@@ -5,9 +5,9 @@
 #define DUNE_GRID_TEST_CHECKGEOMETRY_HH
 
 #include <limits>
+#include <utility>
 
 #include <dune/common/hybridutilities.hh>
-#include <dune/common/std/utility.hh>
 #include <dune/common/typetraits.hh>
 
 #include <dune/geometry/test/checkgeometry.hh>
@@ -174,7 +174,7 @@ namespace Dune
       const auto end = gridView.template end<0>();
       auto it = gridView.template begin<0>();
       for( ; it != end; ++it )
-        Hybrid::forEach(Std::make_index_sequence<GridView<VT>::dimension+1>{},[&](auto i){SubEntityGeometryChecker<i>::apply(*it);});
+        Hybrid::forEach(std::make_index_sequence<GridView<VT>::dimension+1>{},[&](auto i){SubEntityGeometryChecker<i>::apply(*it);});
     }
   };
 

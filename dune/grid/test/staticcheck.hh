@@ -15,7 +15,6 @@
 #include <type_traits>
 #include <utility>
 
-#include <dune/common/deprecated.hh>
 #include <dune/common/hybridutilities.hh>
 #include <dune/geometry/type.hh>
 #include <dune/grid/common/capabilities.hh>
@@ -481,11 +480,6 @@ struct GridInterface
     typedef typename Grid::LeafGridView LeafGridView DUNE_UNUSED;
 
     typedef typename Grid::ctype ctype DUNE_UNUSED;
-
-#if !DISABLE_DEPRECATED_METHOD_CHECK
-    typedef typename Grid::template Codim<0>::LevelIterator LevelIterator DUNE_UNUSED;
-    typedef typename Grid::template Codim<0>::LeafIterator LeafIterator DUNE_UNUSED;
-#endif // #if !DISABLE_DEPRECATED_METHOD_CHECK
 
     // check for grid views
     g.levelGridView( 0 );

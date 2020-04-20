@@ -27,6 +27,12 @@ add_subdirectory("lib")
 add_subdirectory("src")
 add_subdirectory("cmake/modules")
 
+# if Python bindings are enabled, include necessary sub directories.
+if( DUNE_ENABLE_PYTHONBINDINGS )
+  add_subdirectory("python")
+  dune_python_install_package(PATH python)
+endif()
+
 # Use a  custom section to export path to the grid examples.
 set(DUNE_CUSTOM_PKG_CONFIG_SECTION "#Export the directory with the grid example for downstream modules
 set(DUNE_GRID_EXAMPLE_GRIDS_PATH \"@DUNE_MODULE_SRC_DOCDIR@/grids/\")

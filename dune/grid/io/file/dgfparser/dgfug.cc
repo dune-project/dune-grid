@@ -18,8 +18,7 @@ namespace Dune
     UGGridParameterBlock::UGGridParameterBlock ( std::istream &input )
       : GridParameterBlock( input ),
         noClosure_( false ), // default value
-        noCopy_( true ),   // default value
-        heapSize_( 0 )     // default value (see UGGrid constructor)
+        noCopy_( true )   // default value
     {
       // check closure
       if( findtoken( "closure" ) )
@@ -62,26 +61,6 @@ namespace Dune
       {
         dwarn << "UGGridParameterBlock: Parameter 'copies' not specified"
               << ", using default: 'NO'." << std::endl;
-      }
-
-      if( findtoken( "heapsize" ) )
-      {
-        int heapSize;
-        if( getnextentry( heapSize ) )
-        {
-          if( heapSize > 0 )
-            heapSize_ = heapSize;
-          else
-          {
-            dwarn << "UGGridParameterBlock: Parameter 'heapsize' is non-positive"
-                  << ", using default: '500' MB." << std::endl;
-          }
-        }
-      }
-      else
-      {
-        dwarn << "UGGridParameterBlock: Parameter 'heapsize' not specified"
-              << ", using default: '500' MB." << std::endl;
       }
     }
 

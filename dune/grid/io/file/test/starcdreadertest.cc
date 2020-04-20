@@ -1,8 +1,6 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 
-#define DISABLE_DEPRECATED_METHOD_CHECK 1
-
 #include <config.h>
 
 #include <string>
@@ -26,9 +24,6 @@ void readGrid (const std::string& baseName)
 
   std::cout << " passed." << std::endl;
 
-  // Remove the following tests once that StarCDReader::read returns a std::unique_ptr
-  GridType* gridPtr = Dune::StarCDReader<GridType>::read(baseName);
-  delete gridPtr;
   std::shared_ptr<GridType> gridShared = Dune::StarCDReader<GridType>::read(baseName);
 }
 

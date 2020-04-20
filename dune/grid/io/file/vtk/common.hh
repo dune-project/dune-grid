@@ -9,7 +9,6 @@
 #include <string>
 #include <cstdint>
 
-#include <dune/common/deprecated.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/geometry/type.hh>
 #include <dune/common/typetraits.hh>
@@ -111,55 +110,6 @@ namespace Dune
       typedef std::conditional<std::numeric_limits<char>::is_signed,
           int, unsigned>::type
       Type;
-    };
-
-    //////////////////////////////////////////////////////////////////////
-    //
-    //  TypeName
-    //
-
-    //! map type to its VTK name in data array
-    /**
-     * \tparam T The type whose VTK name is requested
-     */
-    template<typename T>
-    class DUNE_DEPRECATED_MSG("TypeName will be removed after Dune 2.7. Look at VTK::toString and VTK::Precision for substitution.") TypeName {
-      static std::string getString() {
-        static const unsigned int_sizes[] = { 8, 16, 32, 64, 0 };
-        static const unsigned float_sizes[] = { 32, 64, 0 };
-        const unsigned* sizes;
-
-        std::ostringstream s;
-        if(std::numeric_limits<T>::is_integer) {
-          if(std::numeric_limits<T>::is_signed)
-            s << "Int";
-          else
-            s << "UInt";
-          sizes = int_sizes;
-        }
-        else {
-          // assume float
-          s << "Float";
-          sizes = float_sizes;
-        }
-
-        static const unsigned size = 8*sizeof(T);
-        while(*sizes != 0 && *sizes <= size) ++sizes;
-        --sizes;
-        s << *sizes;
-
-        return s.str();
-      }
-
-    public:
-      //! return VTK name of the type
-      /**
-       * If the type is not known to VTK, return empty string.
-       */
-      const std::string& operator()() const {
-        static const std::string s = getString();
-        return s;
-      }
     };
 
     //////////////////////////////////////////////////////////////////////

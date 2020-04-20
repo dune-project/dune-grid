@@ -4,10 +4,10 @@
 #define DUNE_ALBERTA_MISC_HH
 
 #include <cassert>
+#include <utility>
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/hybridutilities.hh>
-#include <dune/common/std/utility.hh>
 #include <dune/common/typetraits.hh>
 
 #include <dune/grid/albertagrid/albertaheader.hh>
@@ -373,7 +373,7 @@ namespace Dune
     public:
       NumberingMap ()
       {
-        Hybrid::forEach( Std::make_index_sequence< dim+1 >{}, [ & ]( auto i ){ Initialize< i >::apply( *this ); } );
+        Hybrid::forEach( std::make_index_sequence< dim+1 >{}, [ & ]( auto i ){ Initialize< i >::apply( *this ); } );
       }
 
       ~NumberingMap ()

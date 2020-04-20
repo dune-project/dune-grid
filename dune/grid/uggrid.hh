@@ -14,7 +14,6 @@
 #include <dune/common/parallel/communication.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/parallel/mpihelper.hh>
-#include <dune/common/deprecated.hh>
 
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/grid/common/capabilities.hh>
@@ -541,10 +540,12 @@ namespace Dune {
     {
 #ifdef ModelP
       // gather element data
-      //        UGLBGatherScatter::template gather<0>(this->leafGridView(), dataHandle);
+      if (dataHandle.contains(dim, 0))
+        UGLBGatherScatter::template gather<0>(this->leafGridView(), dataHandle);
 
       // gather node data
-      UGLBGatherScatter::template gather<dim>(this->leafGridView(), dataHandle);
+      if (dataHandle.contains(dim,dim))
+        UGLBGatherScatter::template gather<dim>(this->leafGridView(), dataHandle);
 #endif
 
       // the load balancing step now also attaches
@@ -553,10 +554,12 @@ namespace Dune {
 
 #ifdef ModelP
       // scatter element data
-      //        UGLBGatherScatter::template scatter<0>(this->leafGridView(), dataHandle);
+      if (dataHandle.contains(dim, 0))
+        UGLBGatherScatter::template scatter<0>(this->leafGridView(), dataHandle);
 
       // scatter node data
-      UGLBGatherScatter::template scatter<dim>(this->leafGridView(), dataHandle);
+      if (dataHandle.contains(dim,dim))
+        UGLBGatherScatter::template scatter<dim>(this->leafGridView(), dataHandle);
 #endif
 
       return true;
@@ -757,16 +760,6 @@ namespace Dune {
     void setClosureType(ClosureType type) {
       closureType_ = type;
     }
-
-    /** \brief Sets the default heap size
-     *
-     * UGGrid keeps an internal heap to allocate memory from, which must be
-     * specified on grid creation (at the latest).  This sets the default heap
-     * size, which is used when no heap size is given to the constructor.
-     */
-    static void setDefaultHeapSize(unsigned size)
-    DUNE_DEPRECATED_MSG("Do not set the UGGrid default heap size---it is ignored anyway!")
-    {}
 
     /** \brief Sets a vertex to a new position
 

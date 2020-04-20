@@ -60,13 +60,6 @@ if(ALBERTA_FOUND)
   target_compile_definitions(test-alberta-1-1 PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
   dune_add_test(TARGET test-alberta-1-1)
 
-  add_executable(test-alberta-1-1-no-deprecated EXCLUDE_FROM_ALL test-alberta.cc)
-  add_dune_alberta_flags(test-alberta-1-1-no-deprecated GRIDDIM 1 WORLDDIM 1)
-  target_compile_definitions(test-alberta-1-1-no-deprecated PUBLIC
-    DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
-    DISABLE_DEPRECATED_METHOD_CHECK=1)
-  dune_add_test(TARGET test-alberta-1-1-no-deprecated)
-
   add_executable(test-alberta-1-2 EXCLUDE_FROM_ALL test-alberta.cc)
   add_dune_alberta_flags(test-alberta-1-2 WORLDDIM 2)
   target_compile_definitions(test-alberta-1-2 PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")

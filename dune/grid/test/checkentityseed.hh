@@ -6,10 +6,10 @@
 //- C++ includes
 #include <cassert>
 #include <ostream>
+#include <utility>
 
 //- dune-common includes
 #include <dune/common/hybridutilities.hh>
-#include <dune/common/std/utility.hh>
 
 //- dune-grid includes
 #include <dune/grid/common/capabilities.hh>
@@ -211,7 +211,7 @@ namespace Dune
   void checkEntitySeed ( const GridView< VT > &gridView, std::ostream &output = std::cerr )
   {
     const int dimension = GridView< VT >::dimension;
-    Hybrid::forEach( Std::make_index_sequence< dimension+1 >{},
+    Hybrid::forEach( std::make_index_sequence< dimension+1 >{},
       [ & ]( auto i ){ CheckEntitySeed::IfHasEntitySeed< i >::apply( gridView, output ); } );
   }
 
