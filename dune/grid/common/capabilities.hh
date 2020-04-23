@@ -48,17 +48,18 @@ namespace Dune
       static const bool v = false;
     };
 
-    /** \brief Specialize with 'true' if the grid is twist free, i.e.
-               sub entities are always oriented in the same way when viewed from
-               different codimension 0 entities. (default=false).
+    /** \brief Specialize with 'true' if the grid is twist-free, that is, if for all
+               elements T in the grid all its sub-entities e < T are oriented in the same
+               way as the mapping F_T(e') of sub-entities e' < T' of the reference-element
+               T' of T. (default=false).
+        \note A consequence of this property is that an entity e shared by two elements,
+              T1 and T2, is oriented the same within T1 and T2.
 
-        \note Cartesian grids satisfy this property.
         \ingroup GICapabilities
      */
     template<class Grid>
     struct isTwistFree
     {
-      // default value is false
       static const bool v = false;
     };
 
