@@ -5,16 +5,15 @@
 
 #include <dune/geometry/referenceelements.hh>
 
-int applyTwist ( const int twist, const int i, const int numCorners )
+inline int applyTwist ( const int twist, const int i, const int numCorners )
 {
   return (twist < 0 ? (2*numCorners + 1 - i + twist) : i + twist) % numCorners;
 }
 
-int inverseTwist ( const int twist, const int numCorners )
+inline int inverseTwist ( const int twist, const int numCorners )
 {
   return (twist <= 0 ? twist : numCorners - twist);
 }
-
 
 struct NoMapTwist
 {
@@ -25,14 +24,43 @@ struct NoMapTwist
 };
 
 
+struct TwistZero
+{
+  // overwrite twist with 0
+  int operator() ( const int twist ) const
+  {
+    return 0;
+  }
+};
+
+namespace detail {
+
+  // for non-twist free grids this class needs to be specialized
+  // to return the correct twist information
+  template <class Intersection>
+  struct GetTwist
+  {
+    static int twistInInside( const Intersection& intersection )
+    {
+      return 0;
+    }
+
+    static int twistInOutside( const Intersection& intersection )
+    {
+      return 0;
+    }
+  };
+
+}
+
 template< class Intersection, class MapTwist >
 int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist &mapTwist )
 {
-  const int dimension = Intersection::dimension;
-
   typedef typename Intersection::Entity Entity;
   typedef typename Entity::Geometry Geometry;
   typedef typename Geometry::ctype ctype;
+
+  const int dimension = Entity::dimension;
 
   typedef typename Intersection::LocalGeometry LocalGeometry;
 
@@ -47,8 +75,8 @@ int checkTwistOnIntersection ( const Intersection &intersection, const MapTwist 
   int errors = 0;
   const ctype tolerance = std::numeric_limits< ctype >::epsilon();
 
-  const int tIn = mapTwist( intersection.twistInInside() );
-  const int tOut = mapTwist( intersection.twistInOutside() );
+  const int tIn  = mapTwist( detail::GetTwist< Intersection >::twistInInside( intersection ) );
+  const int tOut = mapTwist( detail::GetTwist< Intersection >::twistInOutside( intersection ) );
 
   const Entity entityIn = intersection.inside();
   const Entity entityOut = intersection.outside();
@@ -182,11 +210,18 @@ void checkTwists ( const GridView &gridView, const MapTwist &mapTwist )
   {
     const IntersectionIterator iend = gridView.iend( *it );
     for( IntersectionIterator iit = gridView.ibegin( *it ); iit != iend; ++iit )
-      errors += checkTwistOnIntersection( iit->impl(), mapTwist );
+      errors += checkTwistOnIntersection( *iit, mapTwist );
   }
 
   if( errors > 0 )
     std::cerr << "Error: Intersection twists contain errors." << std::endl;
+}
+
+template< class GridView >
+void checkTwistFree ( const GridView &gridView )
+{
+  // twist free grids have twist 0 everywhere
+  checkTwists( gridView, TwistZero() );
 }
 
 #endif // DUNE_GRID_TEST_CHECKTWISTS_HH

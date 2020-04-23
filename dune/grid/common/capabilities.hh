@@ -48,6 +48,20 @@ namespace Dune
       static const bool v = false;
     };
 
+    /** \brief Specialize with 'true' if the grid is twist free, i.e.
+               sub entities are always oriented in the same way when viewed from
+               different codimension 0 entities. (default=false).
+
+        \note Cartesian grids satisfy this property.
+        \ingroup GICapabilities
+     */
+    template<class Grid>
+    struct isTwistFree
+    {
+      // default value is false
+      static const bool v = false;
+    };
+
     /** \brief Specialize with 'true' for all codims that a grid implements entities for. (default=false)
         \ingroup GICapabilities
      */
@@ -187,6 +201,12 @@ namespace Dune
     struct isCartesian< const Grid >
     {
       static const bool v = Dune::Capabilities::isCartesian<Grid>::v;
+    };
+
+    template<class Grid>
+    struct isTwistFree< const Grid >
+    {
+      static const bool v = Dune::Capabilities::isTwistFree<Grid>::v;
     };
 
     template<class Grid, int codim>
