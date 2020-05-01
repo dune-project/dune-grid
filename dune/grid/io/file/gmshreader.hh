@@ -14,10 +14,12 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <string_view>
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/to_unique_ptr.hh>
+#include <dune/common/parametertree.hh>
 
 #include <dune/geometry/type.hh>
 
@@ -962,6 +964,91 @@ namespace Dune
       do_read(factory, fileName, boundarySegmentToPhysicalEntity,
               elementToPhysicalEntity, verbose, insertBoundarySegments);
     }
+
+    [[deprecated("Will be removed after 2.8. Either use other constructors or use static methods without constructing an object")]]
+    GmshReader() = default;
+
+    //! Construct a Gmsh reader object (alternatively use one of the static member functions)
+    GmshReader(const std::string& fileName, GridFactory<Grid>& factory,
+               const Dune::ParameterTree& params = Dune::ParameterTree{})
+    {
+        const bool verbose = params.get<bool>("verbose", true);
+        const bool insertBoundarySegments = params.get<bool>("insertBoundarySegments", true);
+        const bool readBoundaryData = params.get<bool>("readBoundaryData", true);
+        const bool readElementData = params.get<bool>("readElementData", true);
+        throwEmptyDataError_ = params.get<bool>("throwEmptyDataError", false);
+
+        do_read(factory, fileName, boundarySegmentIndexToGmshPhysicalEntity_,
+                elementIndexToGmshPhysicalEntity_, verbose,
+                readBoundaryData || insertBoundarySegments);
+
+        // clear unwanted data
+        if (!readBoundaryData)
+            boundarySegmentIndexToGmshPhysicalEntity_ = std::vector<int>{};
+        if (!readElementData)
+            elementIndexToGmshPhysicalEntity_ = std::vector<int>{};
+    }
+
+    //! Access element data (maps element index to Gmsh physical entity)
+    const std::vector<int>& elementData() const
+    {
+      maybeThrowForEmptyData_(elementIndexToGmshPhysicalEntity_, __func__);
+      return elementIndexToGmshPhysicalEntity_;
+    }
+
+    //! Access boundary data (maps boundary segment index to Gmsh physical entity)
+    const std::vector<int>& boundaryData() const
+    {
+      maybeThrowForEmptyData_(boundarySegmentIndexToGmshPhysicalEntity_, __func__);
+      return boundarySegmentIndexToGmshPhysicalEntity_;
+    }
+
+    /**
+     * \brief If element data is available
+     * \note This is false if no such data was requested (params["readElementData"] == false)
+     */
+    bool hasElementData() const
+    { return !elementIndexToGmshPhysicalEntity_.empty(); }
+
+    /**
+     * \brief If boundary data is available
+     * \note This is false if (a) the mesh fail doesn't contain any boundary data,
+     *       or (b) if no such data was requested (params["readBoundaryData"] == false)
+     */
+    bool hasBoundaryData() const
+    { return !boundarySegmentIndexToGmshPhysicalEntity_.empty(); }
+
+    //! Erase element data from reader and return the data
+    std::vector<int> popElementData()
+    {
+      maybeThrowForEmptyData_(elementIndexToGmshPhysicalEntity_, __func__);
+      std::vector<int> elementData;
+      elementData.swap(elementIndexToGmshPhysicalEntity_);
+      return elementData;
+    }
+
+    //! Erase boundary data from reader and return the data
+    std::vector<int> popBoundaryData()
+    {
+      maybeThrowForEmptyData_(boundarySegmentIndexToGmshPhysicalEntity_, __func__);
+      std::vector<int> boundaryData;
+      boundaryData.swap(boundarySegmentIndexToGmshPhysicalEntity_);
+      return boundaryData;
+    }
+
+  private:
+    template<class Data>
+    void maybeThrowForEmptyData_(const Data& data, std::string_view funcName)
+    {
+        if (throwEmptyDataError_ && data.empty())
+          DUNE_THROW(Dune::InvalidStateException, "Called " << funcName << " but no such data is available!"
+                                                   << " Either the mesh file doesn't contain any such data,"
+                                                   << " or the parameters passed to the reader do not match the request!");
+    }
+
+    std::vector<int> elementIndexToGmshPhysicalEntity_;
+    std::vector<int> boundarySegmentIndexToGmshPhysicalEntity_;
+    bool throwEmptyDataError_ = false;
   };
 
   /** \} */
