@@ -14,6 +14,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <string_view>
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
@@ -962,6 +963,90 @@ namespace Dune
       do_read(factory, fileName, boundarySegmentToPhysicalEntity,
               elementToPhysicalEntity, verbose, insertBoundarySegments);
     }
+
+    //! Options for constructing a Gmsh reader
+    struct Options
+    {
+        bool readBoundaryData = true;
+        bool readElementData = true;
+        bool throwEmptyDataError = true;
+        bool verbose = false;
+    };
+
+    //! Construct a Gmsh reader object (alternatively use one of the static member functions)
+    GmshReader(const std::string& fileName,
+               const Options& options = Options{},
+               std::shared_ptr<GridFactory<Grid>> factory = std::make_shared<GridFactory<Grid>>())
+    : factory_(factory)
+    , throwEmptyDataError_(options.throwEmptyDataError)
+    {
+        do_read(*factory, fileName, boundarySegmentIndexToGmshPhysicalEntity_,
+                elementIndexToGmshPhysicalEntity_, options.verbose, options.readBoundaryData);
+
+        // clear unwanted data
+        if (!options.readBoundaryData)
+            boundarySegmentIndexToGmshPhysicalEntity_ = std::vector<int>{};
+        if (!options.readElementData)
+            elementIndexToGmshPhysicalEntity_ = std::vector<int>{};
+    }
+
+    //! Access element data (maps element index to Gmsh physical entity)
+    const std::vector<int>& elementData() const
+    {
+      maybeThrowForEmptyData_(elementIndexToGmshPhysicalEntity_, __func__);
+      return elementIndexToGmshPhysicalEntity_;
+    }
+
+    //! Access boundary data (maps boundary segment index to Gmsh physical entity)
+    const std::vector<int>& boundaryData() const
+    {
+      maybeThrowForEmptyData_(boundarySegmentIndexToGmshPhysicalEntity_, __func__);
+      return boundarySegmentIndexToGmshPhysicalEntity_;
+    }
+
+    //! Erase element data from reader and return the data
+    std::vector<int> popElementData()
+    {
+      maybeThrowForEmptyData_(elementIndexToGmshPhysicalEntity_, __func__);
+      std::vector<int> elementData;
+      elementData.swap(elementIndexToGmshPhysicalEntity_);
+      return elementData;
+    }
+
+    //! Erase boundary data from reader and return the data
+    std::vector<int> popBoundaryData()
+    {
+      maybeThrowForEmptyData_(boundarySegmentIndexToGmshPhysicalEntity_, __func__);
+      std::vector<int> boundaryData;
+      boundaryData.swap(boundarySegmentIndexToGmshPhysicalEntity_);
+      return boundaryData;
+    }
+
+    //! Erase all data from reader and return the data as a tuple
+    auto popData()
+    { return std::make_tuple(popElementData(), popBoundaryData()); }
+
+    //! Create the grid
+    std::unique_ptr<Grid> createGrid()
+    { return factory_->createGrid(); }
+
+    //! Access the grid factory
+    const GridFactory<Grid>& gridFactory() const
+    { return *factory_; }
+
+  private:
+    template<class Data>
+    void maybeThrowForEmptyData_(const Data& data, std::string_view funcName)
+    {
+        if (throwEmptyDataError_ && data.empty())
+          DUNE_THROW(Dune::InvalidStateException, "Called " << funcName << " but no such data was requested to be read."
+                                                   << " Adjust the options passed to the reader!");
+    }
+
+    std::vector<int> elementIndexToGmshPhysicalEntity_;
+    std::vector<int> boundarySegmentIndexToGmshPhysicalEntity_;
+    std::shared_ptr<GridFactory<Grid>> factory_;
+    bool throwEmptyDataError_ = true;
   };
 
   /** \} */
