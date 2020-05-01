@@ -66,12 +66,12 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
   // Read the grid
   std::cout<<"Using "<<gridManagerName<<std::endl;
   GridFactory<GridType> gridFactory;
-  std::vector<int> boundaryIDs;
-  std::vector<int> elementsIDs;
   const std::string inputName(path+gridName+".msh");
   std::cout<<"Reading mesh file "<<inputName<<std::endl;
-  GmshReader<GridType>::read(gridFactory,inputName,boundaryIDs,elementsIDs);
-  auto grid=std::unique_ptr<GridType>(gridFactory.createGrid());
+  auto reader = GmshReader<GridType>(inputName, gridFactory);
+  auto grid = std::unique_ptr<GridType>(gridFactory.createGrid());
+  auto elementsIDs = reader.popElementData();
+  auto boundaryIDs = reader.popBoundaryData();
 
   // Reorder boundary IDs according to the inserction index
   const auto leafGridView(grid->leafGridView());
