@@ -30,26 +30,25 @@ dune_add_test(SOURCES starcdreadertest.cc
               CMAKE_GUARD dune-uggrid_FOUND)
 
 # the gmsh tests
-dune_add_test(NAME gmshtest-onedgrid
-              SOURCES gmshtest.cc
-              LINK_LIBRARIES dunegrid
-              COMPILE_DEFINITIONS GMSH_ONEDGRID
-                                  DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+foreach(FLAVOUR IN ITEMS dynamicgmsh gmsh)
+  dune_add_test(NAME ${FLAVOUR}test-onedgrid
+                SOURCES ${FLAVOUR}test.cc
+                LINK_LIBRARIES dunegrid
+                COMPILE_DEFINITIONS GMSH_ONEDGRID
+                                    DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
 
-dune_add_test(NAME gmshtest-uggrid
-              SOURCES gmshtest.cc
-              COMPILE_DEFINITIONS GMSH_UGGRID
-                                  DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
-              CMAKE_GUARD dune-uggrid_FOUND)
+  dune_add_test(NAME ${FLAVOUR}test-uggrid
+                SOURCES ${FLAVOUR}test.cc
+                COMPILE_DEFINITIONS GMSH_UGGRID
+                                    DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
+                CMAKE_GUARD dune-uggrid_FOUND)
 
-if(HAVE_ALBERTA)
-  add_executable(gmshtest-alberta2d gmshtest.cc)
-  add_dune_alberta_flags(gmshtest-alberta2d WORLDDIM 2)
-  target_compile_definitions(gmshtest-alberta2d PUBLIC GMSH_ALBERTAGRID DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
-  dune_add_test(TARGET gmshtest-alberta2d)
-
-  add_executable(gmshtest-alberta3d gmshtest.cc)
-  add_dune_alberta_flags(gmshtest-alberta3d WORLDDIM 3)
-  target_compile_definitions(gmshtest-alberta3d PUBLIC GMSH_ALBERTAGRID DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
-  dune_add_test(TARGET gmshtest-alberta3d)
-endif()
+  if(HAVE_ALBERTA)
+    foreach(DIM IN ITEMS 2 3)
+      add_executable(${FLAVOUR}test-alberta${DIM}d ${FLAVOUR}test.cc)
+      add_dune_alberta_flags(${FLAVOUR}test-alberta${DIM}d WORLDDIM ${DIM})
+      target_compile_definitions(${FLAVOUR}test-alberta${DIM}d PUBLIC GMSH_ALBERTAGRID DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+      dune_add_test(TARGET ${FLAVOUR}test-alberta${DIM}d)
+    endforeach(DIM)
+  endif()
+endforeach(FLAVOUR)

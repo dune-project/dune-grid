@@ -12,7 +12,9 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <tuple>
+#include <type_traits>
 #include <vector>
 
 #include <dune/common/exceptions.hh>
@@ -736,33 +738,8 @@ namespace Dune
 
   };
 
-  /**
-     \ingroup Gmsh
+  namespace GmshReaderImpl {
 
-     \brief Read Gmsh mesh file
-
-     Read a .msh (version 2) file generated using Gmsh and construct a grid using the grid factory interface.
-
-     The file format used by gmsh can hold grids that are more general than the simplex grids that
-     the gmsh grid generator is able to construct.  We try to read as many grids as possible, as
-     long as they are valid files.  You can test this by checking whether gmsh will load the file
-     and display its content.
-
-     All grids in a gmsh file live in three-dimensional Euclidean space.  If the world dimension
-     of the grid type that you are reading the file into is less than three, the remaining coordinates
-     are simply ignored.
-
-     \note Recent versions of Gmsh introduced a new .msh file format (version 4) with a different syntax.
-     This is currently not supported by GmshReader. One can export to an older .msh version as follows:
-       - select File&rarr;Export (or CTRL+E)
-       - select file format `.msh`
-       - a dialog asks for options
-       - select 'Version 2 ASCII' and mark 'Save all elements'
-
-   */
-  template<typename GridType>
-  class GmshReader
-  {
     //! internal general reading method
     /**
      * This method does all the highlevel steering of the reader:
@@ -783,12 +760,15 @@ namespace Dune
      *       boundarySegmentToPhysicalEntity is discarded if boundary segments
      *       are not inserted.
      */
-    static void do_read(Dune::GridFactory<GridType> &factory,
-                        const std::string &fileName,
-                        std::vector<int>& boundarySegmentToPhysicalEntity,
-                        std::vector<int>& elementToPhysicalEntity,
-                        bool verbose, bool insertBoundarySegments)
+    template<class Factory>
+    void do_read(Factory &factory,
+                 const std::string &fileName,
+                 std::vector<int>& boundarySegmentToPhysicalEntity,
+                 std::vector<int>& elementToPhysicalEntity,
+                 bool verbose, bool insertBoundarySegments)
     {
+      using Grid = std::decay_t<decltype(*factory.createGrid())>;
+
       // register boundary segment to boundary segment factory for possible load balancing
       // this needs to be done on all cores since the type might not be known otherwise
       GmshReaderQuadraticBoundarySegment< Grid::dimension, Grid::dimensionworld >::registerFactory();
@@ -835,8 +815,37 @@ namespace Dune
      *       argument.
      */
     template<class T>
-    static T &discarded(T &&value) { return value; }
+    T &discarded(T &&value) { return value; }
 
+  } // namespace GmshReaderImpl
+
+  /**
+     \ingroup Gmsh
+
+     \brief Read Gmsh mesh file
+
+     Read a .msh (version 2) file generated using Gmsh and construct a grid using the grid factory interface.
+
+     The file format used by gmsh can hold grids that are more general than the simplex grids that
+     the gmsh grid generator is able to construct.  We try to read as many grids as possible, as
+     long as they are valid files.  You can test this by checking whether gmsh will load the file
+     and display its content.
+
+     All grids in a gmsh file live in three-dimensional Euclidean space.  If the world dimension
+     of the grid type that you are reading the file into is less than three, the remaining coordinates
+     are simply ignored.
+
+     \note Recent versions of Gmsh introduced a new .msh file format (version 4) with a different syntax.
+     This is currently not supported by GmshReader. One can export to an older .msh version as follows:
+       - select File&rarr;Export (or CTRL+E)
+       - select file format `.msh`
+       - a dialog asks for options
+       - select 'Version 2 ASCII' and mark 'Save all elements'
+
+   */
+  template<typename GridType>
+  class GmshReader
+  {
     struct DataArg {
       std::vector<int> *data_ = nullptr;
       DataArg(std::vector<int> &data) : data_(&data) {}
@@ -888,6 +897,8 @@ namespace Dune
                        std::vector<int>& elementToPhysicalEntity,
                        bool verbose = true, bool insertBoundarySegments=true)
     {
+      using GmshReaderImpl::do_read;
+
       // make a grid factory
       Dune::GridFactory<Grid> factory;
 
@@ -901,6 +912,8 @@ namespace Dune
     static void read (Dune::GridFactory<Grid>& factory, const std::string& fileName,
                       bool verbose = true, bool insertBoundarySegments=true)
     {
+      using GmshReaderImpl::do_read;
+      using GmshReaderImpl::discarded;
       do_read(factory, fileName, discarded(std::vector<int>{}),
               discarded(std::vector<int>{}), verbose, insertBoundarySegments);
     }
@@ -935,6 +948,8 @@ namespace Dune
                       DataArg elementData,
                       bool verbose=true)
     {
+      using GmshReaderImpl::do_read;
+      using GmshReaderImpl::discarded;
       do_read(factory, fileName,
               boundarySegmentData.data_
                 ? *boundarySegmentData.data_ : discarded(std::vector<int>{}),
@@ -959,8 +974,234 @@ namespace Dune
                       std::vector<int>& elementToPhysicalEntity,
                       bool verbose, bool insertBoundarySegments)
     {
+      using GmshReaderImpl::do_read;
       do_read(factory, fileName, boundarySegmentToPhysicalEntity,
               elementToPhysicalEntity, verbose, insertBoundarySegments);
+    }
+  };
+
+  //! Dynamic interface to the \c GmshReader
+  /**
+   * This is a version of the \c GmshReader interface that supports doing the
+   * decision whether or not to read data at runtime.  Unless you need it
+   * specifically you should stick to the static \c GmshReader interface, as
+   * that allows for earlier error detection at compile-time rather than
+   * runtime.
+   *
+   * Objects of type \c DynamicGmshReader can be copied and moved freely.
+   * This will copy/move any contained flags or data.  A moved-from object of
+   * type DynamicGmshReader is in an invalid state, it should be either
+   * destroyed or assigned to before any other operation.
+   *
+   * Moving from the contained data vectors does not result in an invalid \c
+   * DynamicGmshReader object left behind, only the moved-from vector is
+   * invalidated.  It will again be valid after the next \c read().
+   *
+   * The intended use is like this:
+   * ```
+   * DynamicGmshReader reader{};
+   *
+   * // Set options
+   * reader.setReadElementData();
+   * reader.setReadBoundaryData(wantBoundaryData);
+   * // optionally, call more option setters
+   *
+   * // Do the reading
+   * GridFactory<Grid> factory;
+   * reader.read(factory, "file.msh");
+   * auto gridp = factory.createGrid();
+   *
+   * // get the data
+   * // will throw if the correct data was not read
+   * auto elementData = std::move(reader.elementData());
+   * // will return an empty vector if the data was not read
+   * auto boundaryData = std::move(reader.boundaryDataOrEmpty());
+   *
+   * // optionally, change options and read again
+   * ```
+   *
+   * Options remain intact across reads.  Any previously read data is lost if
+   * options are changed.
+   */
+  class DynamicGmshReader {
+  public:
+    //! Exception thrown when DynamicGmshReader is in an invalid state
+    /**
+     * This exception is thrown by any of the data accessor functions when no
+     * grid has been read, or options have been set since reading the grid.
+     * It is also thrown when no data of the requested kind was read when last
+     * reading a grid, unless the accessor default to returning empty data.
+     */
+    struct StateError : InvalidStateException {};
+
+  private:
+    std::vector<int> boundaryData_;
+    std::vector<int> elementData_;
+    bool readBoundaryData_ = false;
+    bool readElementData_ = false;
+    bool forceInsertBoundarySegments_ = false;
+    bool verbose_ = false;
+    bool haveRead_ = false;
+
+    void reset() noexcept {
+      haveRead_ = false;
+      boundaryData_ = std::vector<int>{};
+      elementData_ = std::vector<int>{};
+    }
+    void checkHaveRead(std::string_view fname) const {
+      if(!haveRead_)
+        DUNE_THROW(StateError, "DynamicGmshReader::" << fname <<"() called "
+                   "but no grid was read");
+    }
+    void checkHaveBoundaryData() const {
+      checkHaveRead("boundaryData");
+      if(!readBoundaryData_)
+        DUNE_THROW(StateError, "DynamicGmshReader::boundaryData() called but "
+                   "no boundary data was read");
+    }
+    void checkHaveElementData() const {
+      checkHaveRead("elementData");
+      if(!(haveRead_ && readElementData_))
+        DUNE_THROW(StateError, "DynamicGmshReader::elementData() called but "
+                   "no element data was read");
+    }
+
+  public:
+    //! Set whether to read boundary data
+    void setReadBoundaryData(bool readBoundaryData = true) noexcept
+    {
+      reset();
+      readBoundaryData_ = readBoundaryData;
+    }
+    //! Set whether to read element data
+    void setReadElementData(bool readElementData = true) noexcept
+    {
+      reset();
+      readElementData_ = readElementData;
+    }
+    //! Set whether to insert boundary segments
+    /**
+     * \note Boundary segments will be inserted regardless of this setting if
+     *       boundary data is read.
+     */
+    void setForceInsertBoundarySegments
+       (bool forceInsertBoundarySegments = true) noexcept
+    {
+      reset();
+      forceInsertBoundarySegments_ = forceInsertBoundarySegments;
+    }
+    //! Set wether to be verbose
+    void setVerbose(bool verbose = true) noexcept
+    {
+      reset();
+      verbose_ = verbose;
+    }
+
+    //! Read the grid from fileName into the provided factory
+    template<class Factory>
+    void read(Factory &factory, const std::string &fileName) {
+      using GmshReaderImpl::do_read;
+
+      // release memory, do_read will allocate it's own memory internally
+      // anyway so no use persisting buffers
+      reset();
+
+      do_read(factory, fileName, boundaryData_, elementData_, verbose_,
+              readBoundaryData_ || forceInsertBoundarySegments_);
+
+      // release memory with bogus data, if any
+      if(!readBoundaryData_)
+        boundaryData_ = std::vector<int>{};
+      if(!readElementData_)
+        elementData_ = std::vector<int>{};
+
+      haveRead_ = true;
+    }
+
+    // Get the boundary data
+    /**
+     * Feel free to move from the returned value.
+     *
+     * \throw StateError if no grid has been read, options have been set since
+     *        reading the grid, or boundary data has not been read.
+     */
+    std::vector<int> &boundaryData()
+    {
+      checkHaveBoundaryData();
+      return boundaryData_;
+    }
+    // Get the boundary data
+    /**
+     * \throw StateError if no grid has been read, options have been set since
+     *        reading the grid, or boundary data has not been read.
+     */
+    const std::vector<int> &boundaryData() const
+    {
+      checkHaveBoundaryData();
+      return boundaryData_;
+    }
+    // Get the element data
+    /**
+     * Feel free to move from the returned value.
+     *
+     * \throw StateError if no grid has been read, options have been set since
+     *        reading the grid, or element data has not been read.
+     */
+    std::vector<int> &elementData()
+    {
+      checkHaveElementData();
+      return elementData_;
+    }
+    // Get the element data
+    /**
+     * \throw StateError if no grid has been read, options have been set since
+     *        reading the grid, or element data has not been read.
+     */
+    const std::vector<int> &elementData() const
+    {
+      checkHaveElementData();
+      return elementData_;
+    }
+
+    // Get the boundary data if read
+    /**
+     * Feel free to move from the returned value.
+     *
+     * \throw StateError if no grid has been read or options have been set
+     *        since reading the grid
+     */
+    std::vector<int> &boundaryDataOrEmpty() {
+      checkHaveRead(__func__);
+      return boundaryData_;
+    }
+    // Get the boundary data if read
+    /**
+     * \throw StateError if no grid has been read or options have been set
+     *        since reading the grid
+     */
+    const std::vector<int> &boundaryDataOrEmpty() const {
+      checkHaveRead(__func__);
+      return boundaryData_;
+    }
+    // Get the element data if read
+    /**
+     * Feel free to move from the returned value.
+     *
+     * \throw StateError if no grid has been read or options have been set
+     *        since reading the grid
+     */
+    std::vector<int> &elementDataOrEmpty() {
+      checkHaveRead(__func__);
+      return elementData_;
+    }
+    // Get the element data if read
+    /**
+     * \throw StateError if no grid has been read or options have been set
+     *        since reading the grid
+     */
+    const std::vector<int> &elementDataOrEmpty() const {
+      checkHaveRead(__func__);
+      return elementData_;
     }
   };
 
