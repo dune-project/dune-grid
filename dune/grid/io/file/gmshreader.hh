@@ -14,6 +14,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <utility>
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
@@ -743,6 +744,36 @@ namespace Dune
 
   };
 
+  namespace Gmsh {
+    /**
+      \ingroup Gmsh
+      \brief Option for the Gmsh mesh file reader
+      \note Two or more options can be composed using the binary "|"-operator
+    **/
+    enum class ReaderOptions
+    {
+      verbose = 1,
+      insertBoundarySegments = 2,
+      readElementData = 4,
+      readBoundaryData = 8
+    };
+
+    //! composition operator for reader options
+    constexpr ReaderOptions operator | (ReaderOptions a, ReaderOptions b)
+    {
+      return static_cast<ReaderOptions>(
+        static_cast<int>(a) | static_cast<int>(b)
+      );
+    }
+
+    //! query operator for reader options (is b set in a)
+    constexpr bool operator & (ReaderOptions a, ReaderOptions b)
+    {
+      return static_cast<int>(a) & static_cast<int>(b);
+    }
+
+  } // end namespace Gmsh
+
   /**
      \ingroup Gmsh
 
@@ -985,6 +1016,189 @@ namespace Dune
       do_read(factory, fileName, boundarySegmentToPhysicalEntity,
               elementToPhysicalEntity, verbose, insertBoundarySegments);
     }
+
+    //! Dynamic Gmsh reader interface
+    //\{
+
+    [[deprecated("Will be removed after 2.8. Either use other constructors or use static methods without constructing an object")]]
+    GmshReader() = default;
+
+    using Opts = Gmsh::ReaderOptions;
+
+    static constexpr Opts defaultOpts =
+      Opts::verbose | Opts::insertBoundarySegments | Opts::readElementData | Opts::readBoundaryData;
+
+    //! Construct a Gmsh reader object (alternatively use one of the static member functions)
+
+    /**
+     * \brief Construct a Gmsh reader object from a file name
+     * \param fileName Name of the file to read from.
+     * \param options Options of the type `Dune::Gmsh::ReaderOptions`
+     *
+     * To pass several options, combine them with the |-operator like this
+     *
+      \code
+      using Opt = Dune::Gmsh::ReaderOptions;
+      auto reader = Dune::GmshReader("grid.msh", Opt::verbose | Opt::readElementData)
+      \endcode
+     *
+     * Per default the reader has enabled the following options
+       - Dune::Gmsh::ReaderOptions::verbose
+       - Dune::Gmsh::ReaderOptions::insertBoundarySegments
+       - Dune::Gmsh::ReaderOptions::readBoundaryData
+       - Dune::Gmsh::ReaderOptions::readElementData
+     *
+     * Passing any option to the interface will overwrite these defaults.
+     *
+     * A Dune grid object can be obtained via the `createGrid()` member
+     */
+    GmshReader(const std::string& fileName,
+               Gmsh::ReaderOptions options = defaultOpts)
+    {
+      gridFactory_ = std::make_unique<Dune::GridFactory<Grid>>();
+      readGridFile(fileName, *gridFactory_, options);
+    }
+
+    /**
+     * \brief Construct a Gmsh reader object from a file name and a grid factory
+     * \param fileName Name of the file to read from.
+     * \param options Options of the type `Dune::Gmsh::ReaderOptions`
+     * \note Use this constructor if you need access to the grid factor,
+     *       e.g. for obtaining boundary segment insertion indices.
+     */
+    GmshReader(const std::string& fileName, GridFactory<Grid>& factory,
+               Gmsh::ReaderOptions options = defaultOpts)
+    {
+      readGridFile(fileName, factory, options);
+    }
+
+    //! Access element data (maps element index to Gmsh physical entity)
+    const std::vector<int>& elementData () const
+    {
+      checkElementData();
+      return elementIndexToGmshPhysicalEntity_;
+    }
+
+    //! Access boundary data (maps boundary segment index to Gmsh physical entity)
+    const std::vector<int>& boundaryData () const
+    {
+      checkBoundaryData();
+      return boundarySegmentIndexToGmshPhysicalEntity_;
+    }
+
+    /**
+     * \brief If element data is available
+     * \note This is false if no such data was requested
+     */
+    bool hasElementData () const
+    { return hasElementData_ && !extractedElementData_; }
+
+    /**
+     * \brief If boundary data is available
+     * \note This is false if no such data was requested
+     */
+    bool hasBoundaryData () const
+    { return hasBoundaryData_ && !extractedBoundaryData_; }
+
+    //! Erase element data from reader and return the data
+    std::vector<int> extractElementData ()
+    {
+      checkElementData();
+      extractedElementData_ = true;
+      return std::move(elementIndexToGmshPhysicalEntity_);
+    }
+
+    //! Erase boundary data from reader and return the data
+    std::vector<int> extractBoundaryData ()
+    {
+      checkBoundaryData();
+      extractedBoundaryData_ = true;
+      return std::move(boundarySegmentIndexToGmshPhysicalEntity_);
+    }
+
+    //! Create the grid
+    std::unique_ptr<Grid> createGrid ()
+    {
+      if (!gridFactory_)
+        DUNE_THROW(Dune::InvalidStateException,
+          "This GmshReader has been constructed with a Dune::GridFactory. "
+          << "This grid factory has been filled with all information to create a grid. "
+          << "Please use this factory to create the grid by calling factory.createGrid(). "
+          << "Alternatively use the constructor without passing the factory in combination with this member function."
+        );
+
+      return gridFactory_->createGrid();
+    }
+
+    //\}
+
+  private:
+    void checkElementData () const
+    {
+      if (!hasElementData_)
+        DUNE_THROW(Dune::InvalidStateException,
+          "This GmshReader has been constructed without the option 'readElementData'. "
+          << "Please enable reading element data by passing the option 'Gmsh::ReaderOpts::readElementData' "
+          << "to the constructor of this class."
+        );
+
+      if (extractedElementData_)
+        DUNE_THROW(Dune::InvalidStateException,
+          "The element data has already been extracted from this GmshReader "
+          << "via a function call to reader.extractElementData(). Use the extraced data or "
+          << "read the grid data from file again by constructing a new reader."
+        );
+    }
+
+    void checkBoundaryData () const
+    {
+      if (!hasBoundaryData_)
+        DUNE_THROW(Dune::InvalidStateException,
+          "This GmshReader has been constructed without the option 'readBoundaryData'. "
+          << "Please enable reading boundary data by passing the option 'Gmsh::ReaderOpts::readBoundaryData' "
+          << "to the constructor of this class."
+        );
+
+      if (extractedBoundaryData_)
+        DUNE_THROW(Dune::InvalidStateException,
+          "The boundary data has already been extracted from this GmshReader "
+          << "via a function call to reader.extractBoundaryData(). Use the extraced data or "
+          << "read the grid data from file again by constructing a new reader."
+        );
+    }
+
+    void readGridFile (const std::string& fileName, GridFactory<Grid>& factory, Gmsh::ReaderOptions options)
+    {
+      const bool verbose = options & Opts::verbose;
+      const bool insertBoundarySegments = options & Opts::insertBoundarySegments;
+      const bool readBoundaryData = options & Opts::readBoundaryData;
+      const bool readElementData = options & Opts::readElementData;
+
+      do_read(factory, fileName, boundarySegmentIndexToGmshPhysicalEntity_,
+              elementIndexToGmshPhysicalEntity_, verbose,
+              readBoundaryData || insertBoundarySegments);
+
+      // clear unwanted data
+      if (!readBoundaryData)
+          boundarySegmentIndexToGmshPhysicalEntity_ = std::vector<int>{};
+      if (!readElementData)
+          elementIndexToGmshPhysicalEntity_ = std::vector<int>{};
+
+      hasElementData_ = readElementData;
+      hasBoundaryData_ = readBoundaryData;
+    }
+
+    std::unique_ptr<Dune::GridFactory<Grid>> gridFactory_;
+
+    std::vector<int> elementIndexToGmshPhysicalEntity_;
+    std::vector<int> boundarySegmentIndexToGmshPhysicalEntity_;
+
+    bool hasElementData_;
+    bool hasBoundaryData_;
+
+    // for better error messages, we keep track of these separately
+    bool extractedElementData_ = false;
+    bool extractedBoundaryData_ = false;
   };
 
   /** \} */
