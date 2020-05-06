@@ -126,11 +126,14 @@ def plot(self, function=None, *args, **kwargs):
 
 isGenerator = SimpleGenerator("GridViewIndexSet", "Dune::Python")
 def indexSet(gv):
-    includes = gv._includes + ["dune/python/grid/indexset.hh"]
-    typeName = gv._typeName+"::IndexSet"
-    moduleName = "indexset_" + hashIt(typeName)
-    module = isGenerator.load(includes, typeName, moduleName)
-    return gv._indexSet
+    try:
+        return gv._indexSet
+    except TypeError:
+        includes = gv._includes + ["dune/python/grid/indexset.hh"]
+        typeName = gv._typeName+"::IndexSet"
+        moduleName = "indexset_" + hashIt(typeName)
+        module = isGenerator.load(includes, typeName, moduleName)
+        return gv._indexSet
 mcmgGenerator = SimpleGenerator("MultipleCodimMultipleGeomTypeMapper", "Dune::Python")
 def mapper(gv,layout):
     includes = gv._includes + ["dune/python/grid/mapper.hh"]
