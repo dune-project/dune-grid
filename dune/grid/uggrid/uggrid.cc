@@ -98,32 +98,6 @@ UGGrid < dim >::UGGrid(UGCollectiveCommunication comm)
   if (UG_NS<dim>::CreateBoundaryValueProblem(problemName.c_str(), 1,coeffs,1,upp) == nullptr)
     DUNE_THROW(GridError, "UG" << dim << "d::CreateBoundaryValueProblem() returned an error code!");
 
-  if (numOfUGGrids==0) {
-
-    if (dim==2)
-    {
-      char* nfarg = strdup("newformat DuneFormat2d");
-      if (UG_NS<dim>::CreateFormatCmd(1, &nfarg))
-        DUNE_THROW(GridError, "UG" << dim << "d::CreateFormat() returned an error code!");
-      free(nfarg);
-    }
-    if (dim==3)
-    {
-      char* newArgs[2];
-      for (int i=0; i<2; i++)
-        newArgs[i] = (char*)::malloc(50*sizeof(char));
-
-      sprintf(newArgs[0], "newformat DuneFormat3d" );
-      sprintf(newArgs[1], "V s1 : vt 1" ); // generates side vectors in 3D
-
-      if (UG_NS<dim>::CreateFormatCmd(2, newArgs))
-        DUNE_THROW(GridError, "UG" << dim << "d::CreateFormat() returned an error code!");
-
-      for (int i=0; i<2; i++)
-        free(newArgs[i]);
-    }
-  }
-
   numOfUGGrids++;
 
   dverb << "UGGrid<" << dim << "> with name " << name_ << " created!" << std::endl;
