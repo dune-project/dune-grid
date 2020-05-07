@@ -1113,11 +1113,6 @@ namespace Dune {
                                             optimizedIE, insertMesh, ppifContext);
     }
 
-
-    static int CreateFormatCmd(int argc, char** argv) {
-      return UG_NAMESPACE ::CreateFormatCmd(argc, argv);
-    }
-
     static void* CreateDomain(const char* name, int segments, int corners) {
       return UG_NAMESPACE ::CreateDomain(name, segments, corners);
     }
