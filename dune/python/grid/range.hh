@@ -390,7 +390,7 @@ namespace Dune
 
       using pybind11::operator""_a;
 
-      Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [] ( auto &&codim ) {
+      Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [] ( auto codim ) {
           registerPyGridViewPartitionIterator< GridView, codim, partition >();
         } );
 
@@ -406,7 +406,7 @@ namespace Dune
         cls.def_property_readonly( "vertices", [] ( pybind11::object self ) { return makePyGridViewPartitionIterator< GridView, GridView::dimension, partition >( self ); } );
 
       std::array< pybind11::object (*) ( pybind11::object ), GridView::dimension+1 > makePyIterators;
-      Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [ &makePyIterators ] ( auto &&codim ) {
+      Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [ &makePyIterators ] ( auto codim ) {
           makePyIterators[ codim ] = makePyGridViewPartitionIterator< GridView, codim, partition >;
         } );
       cls.def( "entities", [ makePyIterators ] ( pybind11::object self, int codim ) {

@@ -203,7 +203,7 @@ namespace Dune
         id.first.def( "__str__", [] ( const Id &self ) { return to_string( self ); } );
       }
 
-      Hybrid::forEach( std::make_integer_sequence< int, Grid::dimension+1 >(), [ &cls ] ( auto &&codim ) {
+      Hybrid::forEach( std::make_integer_sequence< int, Grid::dimension+1 >(), [ &cls ] ( auto codim ) {
           typedef typename Grid::template Codim< codim >::Entity Entity;
 
           using pybind11::operator""_a;

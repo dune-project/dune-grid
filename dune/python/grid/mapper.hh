@@ -283,7 +283,7 @@ namespace Dune
           Returns: list of geometry types of the given codimension with attached data
         )doc" );
 
-      Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [ &cls ] ( auto &&codim ) {
+      Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [ &cls ] ( auto codim ) {
           typedef typename GridView::template Codim< codim >::Entity Entity;
 
           using pybind11::operator""_a;
