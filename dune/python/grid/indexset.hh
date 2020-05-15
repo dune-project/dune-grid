@@ -265,7 +265,7 @@ namespace Dune
                     domain of the index set
         )doc" );
 
-      Hybrid::forEach( std::make_integer_sequence< int, IndexSet::dimension+1 >(), [ &cls ] ( auto &&codim ) {
+      Hybrid::forEach( std::make_integer_sequence< int, IndexSet::dimension+1 >(), [ &cls ] ( auto codim ) {
           typedef typename IndexSet::template Codim< codim >::Entity Entity;
 
           using pybind11::operator""_a;

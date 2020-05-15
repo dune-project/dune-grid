@@ -138,7 +138,7 @@ namespace Dune
 
         std::array< pybind11::object (*) ( const Entity &, int ), dimension+1 > makeSubEntity;
         std::array< pybind11::tuple (*) ( const Entity & ), dimension+1 > makeSubEntities;
-        Hybrid::forEach( std::make_integer_sequence< int, dimension+1 >(), [ &makeSubEntity, &makeSubEntities ] ( auto &&codim ) {
+        Hybrid::forEach( std::make_integer_sequence< int, dimension+1 >(), [ &makeSubEntity, &makeSubEntities ] ( auto codim ) {
             makeSubEntity[ codim ] = detail::makeSubEntity< Entity, codim >;
             makeSubEntities[ codim ] = detail::makeSubEntities< Entity, codim >;
           } );
