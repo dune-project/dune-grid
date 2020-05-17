@@ -11,6 +11,9 @@ documenting C/C++ code.
 The best way to start is from the page \subpage modules which gives
 you access to the documentation by category.
 
+You can find a collection of brief examples in @ref grid_recipes.
+
+
 */
 
 /** \page modules Modules
