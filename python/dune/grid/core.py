@@ -1,4 +1,4 @@
-from ._grid import reader
+from dune.generated._grid import reader
 from .map import MultipleCodimMultipleGeomTypeMapper as Mapper
 
 class CartesianDomain(tuple):

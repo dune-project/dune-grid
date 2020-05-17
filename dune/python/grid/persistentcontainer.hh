@@ -11,7 +11,7 @@
 
 
 #include <dune/grid/utility/persistentcontainer.hh>
-#include <dune/python/pybind11/pybind11.h>
+#include <pybind11/pybind11.h>
 
 #include <iostream>
 

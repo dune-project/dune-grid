@@ -13,9 +13,9 @@
 #include <dune/python/common/numpycommdatahandle.hh>
 
 #include <dune/python/common/typeregistry.hh>
-#include <dune/python/pybind11/pybind11.h>
-#include <dune/python/pybind11/functional.h>
-#include <dune/python/pybind11/numpy.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/functional.h>
+#include <pybind11/numpy.h>
 
 namespace Dune
 {

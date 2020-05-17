@@ -1,8 +1,8 @@
 import os, inspect
 from ..generator.generator import SimpleGenerator
-from dune.common.hashit import hashIt
+from dune.utility import hashIt
 from dune.common import _raise, FieldVector
-from dune.common.utility import isString
+from dune.utility import isString
 from dune.deprecate import deprecated
 from dune.grid import gridFunction, DataType
 from dune.grid import OutputType
@@ -124,7 +124,7 @@ def plot(self, function=None, *args, **kwargs):
             function = self.function(function)
         dune.plotting.plot(solution=function,*args,**kwargs)
 
-isGenerator = SimpleGenerator("GridViewIndexSet", "Dune::Python")
+isGenerator = SimpleGenerator("GridViewIndexSet", "Dune::Python", warn=True)
 def indexSet(gv):
     try:
         return gv._indexSet
@@ -188,7 +188,7 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
         source += "".join(["#include <" + i + ">\n" for i in includes])
         source += "\n"
         source += '#include <dune/python/grid/function.hh>\n'
-        source += '#include <dune/python/pybind11/pybind11.h>\n'
+        source += '#include <pybind11/pybind11.h>\n'
         source += '\n'
 
         source += "PYBIND11_MODULE( " + moduleName + ", module )\n"
@@ -244,7 +244,7 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
             source += "".join(["#include <" + i + ">\n" for i in includes])
             source += "\n"
             source += '#include <dune/python/grid/function.hh>\n'
-            source += '#include <dune/python/pybind11/pybind11.h>\n'
+            source += '#include <pybind11/pybind11.h>\n'
             source += '\n'
 
             source += "PYBIND11_MODULE( " + moduleName + ", module )\n"
@@ -287,7 +287,7 @@ def addAttr(module, cls):
     setattr(cls,"function",function)
     setattr(cls,"_gfCounter",0)
 
-gvGenerator = SimpleGenerator("GridView", "Dune::Python")
+gvGenerator = SimpleGenerator("GridView", "Dune::Python", warn=True)
 def levelView(hgrid,level):
     includes = hgrid._includes + ["dune/python/grid/gridview.hh"]
     typeName = "typename "+hgrid._typeName+"::LevelGridView"
@@ -309,7 +309,7 @@ def module(includes, typeName, *args, **kwargs):
     try:
         generator = kwargs.pop("generator")
     except KeyError:
-        generator = SimpleGenerator("HierarchicalGrid", "Dune::Python")
+        generator = SimpleGenerator("HierarchicalGrid", "Dune::Python", warn=True)
     includes = includes + ["dune/python/grid/hierarchical.hh"]
     typeHash = "hierarchicalgrid_" + hashIt(typeName)
     module = generator.load(includes, typeName, typeHash, *args, **kwargs)

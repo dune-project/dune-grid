@@ -4,7 +4,7 @@ from .core import *
 from ._grids import *
 
 from dune.common import FieldVector
-from dune.common.utility import getNumberOfParameters
+from dune.utility import getNumberOfParameters
 
 registry = dict()
 

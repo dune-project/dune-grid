@@ -7,7 +7,7 @@
 #include <dune/python/grid/commops.hh>
 #include <dune/python/grid/enums.hh>
 
-#include <dune/python/pybind11/pybind11.h>
+#include <pybind11/pybind11.h>
 
 PYBIND11_MODULE( _grid, module )
 {

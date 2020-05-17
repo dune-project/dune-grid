@@ -21,8 +21,8 @@ code="""
 #include <iostream>
 
 #include <dune/common/fvector.hh>
-#include <dune/python/pybind11/pybind11.h>
-#include <dune/python/pybind11/numpy.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
 
 template< class GridView, class Rules, class GF >
 double l2norm2 ( const GridView &gridView, const Rules &rules, const GF& gf )

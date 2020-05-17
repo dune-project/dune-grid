@@ -14,7 +14,7 @@
 #include <dune/python/grid/enums.hh>
 #include <dune/python/grid/object.hh>
 
-#include <dune/python/pybind11/pybind11.h>
+#include <pybind11/pybind11.h>
 
 namespace Dune
 {

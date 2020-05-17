@@ -28,7 +28,7 @@
 #include <dune/python/grid/capabilities.hh>
 #include <dune/python/common/numpycommdatahandle.hh>
 
-#include <dune/python/pybind11/pybind11.h>
+#include <pybind11/pybind11.h>
 
 #include <iostream>
 
