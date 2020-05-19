@@ -39,7 +39,7 @@ namespace Dune {
         requireConcept<Dune::Concept::EntitySeed,typename E::EntitySeed>(),
         requireConvertible<int>(E::dimension),
         requireConvertible<int>(E::mydimension),
-        requireTrue<E::mydimension==(E::dimension-E::codimension)>(),
+        requireTrue<(int)E::mydimension==((int)E::dimension-(int)E::codimension)>(),
         requireConvertible<int>(e.level()),
         requireConvertible<Dune::PartitionType>(e.partitionType()),
         requireConvertible<typename E::Geometry>(e.geometry()),

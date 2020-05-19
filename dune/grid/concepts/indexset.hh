@@ -43,8 +43,7 @@ namespace Dune {
         requireConvertible<typename IS::IndexType>(is.size(/*codim*/ int{} )),
         requireConcept<IndexSetEntityCodim<IS::dimension>,IS>(),
         requireTrue<not std::is_copy_constructible<IS>::value>(),
-        requireTrue<not std::is_copy_assignable<IS>::value>(),
-        IS{} // default constructible
+        requireTrue<not std::is_copy_assignable<IS>::value>()
       );
     };
 
