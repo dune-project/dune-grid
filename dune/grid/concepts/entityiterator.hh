@@ -7,6 +7,10 @@
 
 #include <dune/common/concept.hh>
 
+#if DUNE_HAVE_CXX_CONCEPTS
+#include <dune/common/std/concepts.hh>
+#endif
+
 namespace Dune {
   namespace Concept
   {
