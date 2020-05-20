@@ -42,27 +42,8 @@ namespace Concept {
 #if DUNE_HAVE_CXX_CONCEPTS
 namespace Concept {
     template<class E>
-    concept CodimensionEnum = requires(E e)
-    {
-      { E::codimension    } -> Std::convertible_to<int>;
-    };
-}
-#endif
-
-    struct CodimensionEnum
-    {
-      template<class E>
-      auto require(E&& e) -> decltype(
-        requireConvertible<int>(E::codimension)
-      );
-    };
-
-#if DUNE_HAVE_CXX_CONCEPTS
-namespace Concept {
-    template<class E>
     concept EntityGeneral = requires(E e)
     {
-      requires CodimensionEnum<E>;
       requires Geometry<typename E::Geometry>;
       requires EntitySeed<typename E::EntitySeed>;
       E::mydimension==(E::dimension-E::codimension);
@@ -83,7 +64,7 @@ namespace Concept {
 }
 #endif
 
-    struct EntityGeneral  : public Refines<CodimensionEnum>
+    struct EntityGeneral
     {
       template<class E>
       auto require(E&& e) -> decltype(
@@ -181,6 +162,22 @@ namespace Concept {
         requireTrue<std::is_same<E,typename E::template Codim<0>::Entity>::value>()
       );
     };
+
+#if DUNE_HAVE_CXX_CONCEPTS
+namespace Concept
+{
+    template<class E>
+    concept Entity = EntityExtended<E> || EntityGeneral<E>;
+}
+#endif
+
+    struct Entity
+    {
+      template<class E>
+      auto require(E&& e) -> decltype(
+        requireConcept<std::conditional_t<E::codimension == 0,EntityExtended,EntityGeneral>,E>()
+      );
+    };
   }
 
   template <class S>
@@ -213,23 +210,14 @@ namespace Concept {
 #endif
   }
 
-
   template <class E>
   constexpr bool isEntity()
   {
 #if DUNE_HAVE_CXX_CONCEPTS
-    if constexpr (Concept::Concept::CodimensionEnum<E>)
+    return Dune::Concept::Concept::Entity<E>;
 #else
-    if constexpr (models<Concept::CodimensionEnum, E>())
+    return models<Dune::Concept::Entity,E>();
 #endif
-    {
-      if constexpr (E::codimension == 0)
-        return isEntityExtended<E>();
-      else
-        return isEntityGeneral<E>();
-    }
-    else
-      return false;
   }
 }  // end namespace Dune
 

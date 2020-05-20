@@ -17,7 +17,7 @@ namespace Dune {
     {
       template<class IS>
       auto require(IS&& is) -> decltype(
-        requireTrue<Dune::isEntity<typename IS::template Codim<codim>::Entity>()>(),
+        requireConcept<Dune::Concept::Entity,typename IS::template Codim<codim>::Entity>(),
         requireConvertible<typename IS::IndexType>(is.template index<codim>(/*entity*/ std::declval<const typename IS::template Codim<codim>::Entity&>())),
         requireConvertible<typename IS::IndexType>(is.index(/*entity*/ std::declval<const typename IS::template Codim<codim>::Entity&>())),
         requireConvertible<typename IS::IndexType>(is.template subIndex<codim>(/*entity*/ std::declval<const typename IS::template Codim<codim>::Entity&>(), /*i*/ int{}, /*codim*/ (unsigned int){} )),

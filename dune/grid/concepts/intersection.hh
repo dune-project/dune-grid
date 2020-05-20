@@ -15,6 +15,7 @@ namespace Dune {
       template<class I>
       auto require(I&& i) -> decltype(
         requireConcept<Dune::Concept::EntityGeneral,typename I::Entity>(),
+        // requireTrue<I::Entity::codimension == 1>(),
         requireConcept<Dune::Concept::Geometry,typename I::Geometry>(),
         requireConcept<Dune::Concept::Geometry,typename I::LocalGeometry>(),
         requireType<typename I::LocalCoordinate>(),
