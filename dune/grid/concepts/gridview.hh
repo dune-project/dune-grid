@@ -86,9 +86,9 @@ namespace Dune {
   }
 
   template <class GV>
-  constexpr bool isGridView()
+  constexpr void expectGridView()
   {
-    return models<Concept::GridView, GV>();
+    static_assert(models<Concept::GridView, GV>());
   }
 
 }  // end namespace Dune

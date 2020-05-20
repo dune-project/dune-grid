@@ -39,16 +39,16 @@ bool checkEntityLifetimeForCodim(GV gv, std::size_t check_element_count, Dune::C
       check_element_count = gv.size(codim);
     }
 
-  static_assert(isGridView<GV>());
+  expectGridView<GV>();
 
   auto& index_set = gv.indexSet();
-  static_assert(Dune::isIndexSet<typename GV::IndexSet>());
+  expectIndexSet<typename GV::IndexSet>();
 
   auto& id_set = gv.grid().localIdSet();
-  static_assert(Dune::isIdSet<typename GV::Grid::LocalIdSet>());
-  static_assert(Dune::isIdSet<typename GV::Grid::GlobalIdSet>());
+  expectIdSet<typename GV::Grid::LocalIdSet>();
+  expectIdSet<typename GV::Grid::GlobalIdSet>();
   auto entity_iterator = gv.template begin<codim>();
-  static_assert(Dune::isEntityIterator<decltype(entity_iterator)>());
+  expectEntityIterator<decltype(entity_iterator)>();
 
   std::vector<typename GV::IndexSet::IndexType> indices;
   std::vector<typename GV::Grid::LocalIdSet::IdType> ids;
@@ -61,10 +61,7 @@ bool checkEntityLifetimeForCodim(GV gv, std::size_t check_element_count, Dune::C
     for (const auto& e : entities(gv,Dune::Codim<codim>()))
       {
         using E = std::decay_t<decltype(e)>;
-#if DUNE_HAVE_CXX_CONCEPTS
-        static_assert(Dune::Concept::Concept::EntityGeneral<E>);
-#endif
-        static_assert(Dune::isEntity<E>());
+        expectEntity<E>();
         if (++i > check_element_count)
           break;
         indices.push_back(index_set.index(e));
@@ -94,7 +91,7 @@ bool checkEntityLifetimeForCodim(GV gv, std::size_t check_element_count, Dune::C
           " (" << entity_list[i].geometry().corner(0) << " != " << coords[i] << ")");
     }
 
-  static_assert(isGrid<typename GV::Grid>());
+  expectGrid<typename GV::Grid>();
 
   return true;
 }

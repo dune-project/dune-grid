@@ -59,12 +59,12 @@ namespace Concept{
   // }
 
   template <class G>
-  constexpr bool isGeometry()
+  constexpr void expectGeometry()
   {
 #if DUNE_HAVE_CXX_CONCEPTS
-    return Concept::Concept::Geometry<G>;
+    static_assert(Concept::Concept::Geometry<G>);
 #else
-    return models<Concept::Geometry, G>();;
+    static_assert(models<Concept::Geometry, G>());
 #endif
   }
 

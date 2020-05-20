@@ -182,42 +182,42 @@ namespace Concept
   }
 
   template <class S>
-  constexpr bool isEntitySeed()
+  constexpr void expectEntitySeed()
   {
 #if DUNE_HAVE_CXX_CONCEPTS
-    return Concept::Concept::EntitySeed<S>;
+    static_assert(Concept::Concept::EntitySeed<S>);
 #else
-    return models<Concept::EntitySeed, S>();
+    static_assert(models<Concept::EntitySeed, S>());
 #endif
   }
 
   template <class E>
-  constexpr bool isEntityGeneral()
+  constexpr void expectEntityGeneral()
   {
 #if DUNE_HAVE_CXX_CONCEPTS
-    return Concept::Concept::EntityGeneral<E>;
+    static_assert(Concept::Concept::EntityGeneral<E>);
 #else
-    return models<Concept::EntityGeneral, E>();
+    static_assert(models<Concept::EntityGeneral, E>());
 #endif
   }
 
   template <class E>
-  constexpr bool isEntityExtended()
+  constexpr void expectEntityExtended()
   {
 #if DUNE_HAVE_CXX_CONCEPTS
-    return Concept::Concept::EntityExtended<E>;
+    static_assert(Concept::Concept::EntityExtended<E>);
 #else
-    return models<Concept::EntityExtended, E>();
+    static_assert(models<Concept::EntityExtended, E>());
 #endif
   }
 
   template <class E>
-  constexpr bool isEntity()
+  constexpr void expectEntity()
   {
 #if DUNE_HAVE_CXX_CONCEPTS
-    return Dune::Concept::Concept::Entity<E>;
+    static_assert(Dune::Concept::Concept::Entity<E>);
 #else
-    return models<Dune::Concept::Entity,E>();
+    static_assert(models<Dune::Concept::Entity,E>());
 #endif
   }
 }  // end namespace Dune

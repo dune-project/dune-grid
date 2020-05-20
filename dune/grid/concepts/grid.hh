@@ -112,9 +112,9 @@ namespace Dune {
   }
 
   template <class GV>
-  constexpr bool isGrid()
+  constexpr void expectGrid()
   {
-    return models<Concept::Grid, GV>();
+    static_assert(models<Concept::Grid, GV>());
   }
 
 }  // end namespace Dune
