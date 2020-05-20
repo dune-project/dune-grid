@@ -16,20 +16,20 @@ namespace Dune {
 namespace Concept{
 
     template<class G>
-    concept Geometry = requires(G g)
+    concept Geometry = requires(G g, typename G::GlobalCoordinate global, typename G::LocalCoordinate local)
     {
       not Std::default_initializable<G>;
-      { G::coorddimension                                                       } -> Std::convertible_to<int>;
-      { G::coorddimension                                                       } -> Std::convertible_to<int>;
-      { g.type()                                                                } -> Std::convertible_to<Dune::GeometryType>;
-      { g.affine()                                                              } -> Std::convertible_to<bool>;
-      { g.corner(/*i*/ int{})                                                   } -> Std::convertible_to<typename G::GlobalCoordinate>;
-      { g.global(/*local*/ typename G::LocalCoordinate{})                       } -> Std::convertible_to<typename G::GlobalCoordinate>;
-      { g.local(/*global*/ typename G::GlobalCoordinate{})                      } -> Std::convertible_to<typename G::LocalCoordinate>;
-      { g.volume()                                                              } -> Std::convertible_to<typename G::Volume>;
-      { g.center()                                                              } -> Std::convertible_to<typename G::GlobalCoordinate>;
-      { g.jacobianTransposed(/* local */ typename G::LocalCoordinate{})         } -> Std::convertible_to<typename G::JacobianTransposed>;
-      { g.jacobianInverseTransposed(/* local */ typename G::LocalCoordinate{})  } -> Std::convertible_to<typename G::JacobianInverseTransposed>;
+      { G::coorddimension                   } -> Std::convertible_to<int>;
+      { G::coorddimension                   } -> Std::convertible_to<int>;
+      { g.type()                            } -> Std::convertible_to<Dune::GeometryType>;
+      { g.affine()                          } -> Std::convertible_to<bool>;
+      { g.corner(/*i*/ int{})               } -> Std::convertible_to<typename G::GlobalCoordinate>;
+      { g.global(local)                     } -> Std::convertible_to<typename G::GlobalCoordinate>;
+      { g.local(global)                     } -> Std::convertible_to<typename G::LocalCoordinate>;
+      { g.volume()                          } -> Std::convertible_to<typename G::Volume>;
+      { g.center()                          } -> Std::convertible_to<typename G::GlobalCoordinate>;
+      { g.jacobianTransposed(local)         } -> Std::convertible_to<typename G::JacobianTransposed>;
+      { g.jacobianInverseTransposed(local)  } -> Std::convertible_to<typename G::JacobianInverseTransposed>;
     };
 }
 #endif
