@@ -24,7 +24,7 @@ namespace Dune {
       template<class G>
       auto require(G&& g) -> decltype(
         requireConcept<Dune::Concept::EntityIterator, typename G::template Codim<codim>::Iterator>(),
-        requireConcept<Dune::Concept::Entity<codim>,typename G::template Codim<codim>::Entity>(),
+        requireConcept<Dune::Concept::Entity,typename G::template Codim<codim>::Entity>(),
         requireConcept<Dune::Concept::EntitySeed,typename G::template Codim<codim>::EntitySeed>(),
         requireConcept<Dune::Concept::Geometry,typename G::template Codim<codim>::Geometry>(),
         requireConcept<Dune::Concept::Geometry,typename G::template Codim<codim>::LocalGeometry>(),

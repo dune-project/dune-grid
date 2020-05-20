@@ -17,7 +17,7 @@ namespace Dune {
     {
       template<class IS>
       auto require(IS&& is) -> decltype(
-        requireConcept<Dune::Concept::Entity<codim>,typename IS::template Codim<codim>::Entity>(),
+        requireConcept<Dune::Concept::Entity,typename IS::template Codim<codim>::Entity>(),
         requireConvertible<typename IS::IndexType>(is.template index<codim>(/*entity*/ std::declval<const typename IS::template Codim<codim>::Entity&>())),
         requireConvertible<typename IS::IndexType>(is.index(/*entity*/ std::declval<const typename IS::template Codim<codim>::Entity&>())),
         requireConvertible<typename IS::IndexType>(is.template subIndex<codim>(/*entity*/ std::declval<const typename IS::template Codim<codim>::Entity&>(), /*i*/ int{}, /*codim*/ (unsigned int){} )),
@@ -53,7 +53,7 @@ namespace Dune {
       template<class IS>
       auto require(IS&& is) -> decltype(
         requireType<typename IS::Grid::template Codim<codim>::Entity>(),
-        requireConcept<Dune::Concept::Entity<codim>,typename IS::Grid::template Codim<codim>::Entity>(),
+        requireTrue<Dune::isEntity<typename IS::Grid::template Codim<codim>::Entity>()>(),
         requireConvertible<typename IS::IdType>(is.template id<codim>(/*entity*/ std::declval<const typename IS::Grid::template Codim<codim>::Entity&>())),
         requireConvertible<typename IS::IdType>(is.id(/*entity*/ std::declval<const typename IS::Grid::template Codim<codim>::Entity&>()))
       );

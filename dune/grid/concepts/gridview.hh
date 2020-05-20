@@ -23,7 +23,7 @@ namespace Dune {
       template<class GV>
       auto require(GV&& gv) -> decltype(
         requireConcept<Dune::Concept::EntityIterator, typename GV::template Codim<codim>::Iterator>(),
-        requireConcept<Dune::Concept::Entity<codim>,typename GV::template Codim<codim>::Entity>(),
+        requireConcept<Dune::Concept::Entity,typename GV::template Codim<codim>::Entity>(),
         requireConcept<Dune::Concept::Geometry,typename GV::template Codim<codim>::Geometry>(),
         requireConcept<Dune::Concept::Geometry,typename GV::template Codim<codim>::LocalGeometry>(),
         requireConcept<Dune::Concept::EntityIterator, typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Interior_Partition>::Iterator>(),
