@@ -15,7 +15,7 @@ namespace Dune {
     {
       template<class I>
       auto require(I&& i) -> decltype(
-        requireConcept<Dune::Concept::Entity<I::Entity::codimension>, typename I::Entity>(),
+        requireConcept<Dune::Concept::Entity,typename I::Entity>(),
         requireType<typename I::Reference>(),
         i++, // FIXME set type requirement
         ++i, // FIXME set type requirement

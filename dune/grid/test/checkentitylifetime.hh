@@ -60,7 +60,11 @@ bool checkEntityLifetimeForCodim(GV gv, std::size_t check_element_count, Dune::C
     std::size_t i = 0;
     for (const auto& e : entities(gv,Dune::Codim<codim>()))
       {
-        static_assert(Dune::isEntity<std::decay_t<decltype(e)>>());
+        using E = std::decay_t<decltype(e)>;
+#if DUNE_HAVE_CXX_CONCEPTS
+        static_assert(Dune::Concept::Concept::EntityGeneral<E>);
+#endif
+        static_assert(Dune::isEntity<E>());
         if (++i > check_element_count)
           break;
         indices.push_back(index_set.index(e));

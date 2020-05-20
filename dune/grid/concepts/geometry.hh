@@ -5,42 +5,67 @@
 
 #include <dune/common/concept.hh>
 
-namespace Dune {
-  namespace Concept
-  {
+#if DUNE_HAVE_CXX_CONCEPTS
+#include <dune/common/std/concepts.hh>
+#endif
 
-    struct Geometry
+namespace Dune {
+  namespace Concept{
+
+#if DUNE_HAVE_CXX_CONCEPTS
+namespace Concept{
+
+    template<class G>
+    concept Geometry = requires(G g, typename G::GlobalCoordinate global, typename G::LocalCoordinate local)
     {
-      template<class G>
-      auto require(G&& g) -> decltype(
-        requireConvertible<int>(G::coorddimension),
-        requireConvertible<int>(G::mydimension),
-        requireType<typename G::ctype>(),
-        requireType<typename G::LocalCoordinate>(),
-        requireType<typename G::GlobalCoordinate>(),
-        requireType<typename G::Volume>(),
-        requireType<typename G::JacobianInverseTransposed>(),
-        requireType<typename G::JacobianTransposed>(),
-        requireConvertible<Dune::GeometryType>(g.type()),
-        requireConvertible<bool>(g.affine()),
-        requireConvertible<int>(g.corners()),
-        requireConvertible<typename G::GlobalCoordinate>(g.corner(/* i */ int{})),
-        requireConvertible<typename G::GlobalCoordinate>(g.global(/* local */ typename G::LocalCoordinate{})),
-        requireConvertible<typename G::LocalCoordinate>(g.local(/* global */ typename G::GlobalCoordinate{})),
-        requireConvertible<typename G::ctype>(g.integrationElement(/* local */ typename G::LocalCoordinate{})),
-        requireConvertible<typename G::Volume>(g.volume()),
-        requireConvertible<typename G::GlobalCoordinate>(g.center()),
-        requireConvertible<typename G::JacobianTransposed>(g.jacobianTransposed(/* local */ typename G::LocalCoordinate{})),
-        requireConvertible<typename G::JacobianInverseTransposed>(g.jacobianInverseTransposed(/* local */ typename G::LocalCoordinate{})),
-        requireTrue<not std::is_default_constructible<G>::value>()
-      );
+      requires (not Std::default_initializable<G>);
+      { G::coorddimension                   } -> Std::convertible_to<int>;
+      { G::coorddimension                   } -> Std::convertible_to<int>;
+      { g.type()                            } -> Std::convertible_to<Dune::GeometryType>;
+      { g.affine()                          } -> Std::convertible_to<bool>;
+      { g.corner(/*i*/ int{})               } -> Std::convertible_to<typename G::GlobalCoordinate>;
+      { g.global(local)                     } -> Std::convertible_to<typename G::GlobalCoordinate>;
+      { g.local(global)                     } -> Std::convertible_to<typename G::LocalCoordinate>;
+      { g.volume()                          } -> Std::convertible_to<typename G::Volume>;
+      { g.center()                          } -> Std::convertible_to<typename G::GlobalCoordinate>;
+      { g.jacobianTransposed(local)         } -> Std::convertible_to<typename G::JacobianTransposed>;
+      { g.jacobianInverseTransposed(local)  } -> Std::convertible_to<typename G::JacobianInverseTransposed>;
     };
-  }
+}
+#endif
+
+    // namespace Fallback {
+      struct Geometry
+      {
+        template<class G>
+        auto require(G&& g) -> decltype(
+          requireConvertible<int                                        >( G::coorddimension                                                       ),
+          requireConvertible<int                                        >( G::mydimension                                                          ),
+          requireConvertible<Dune::GeometryType                         >( g.type()                                                                ),
+          requireConvertible<bool                                       >( g.affine()                                                              ),
+          requireConvertible<int                                        >( g.corners()                                                             ),
+          requireConvertible<typename G::GlobalCoordinate               >( g.corner(/* i */ int{})                                                 ),
+          requireConvertible<typename G::GlobalCoordinate               >( g.global(/* local */ typename G::LocalCoordinate{})                     ),
+          requireConvertible<typename G::LocalCoordinate                >( g.local(/* global */ typename G::GlobalCoordinate{})                    ),
+          requireConvertible<typename G::ctype                          >( g.integrationElement(/* local */ typename G::LocalCoordinate{})         ),
+          requireConvertible<typename G::Volume                         >( g.volume()                                                              ),
+          requireConvertible<typename G::GlobalCoordinate               >( g.center()                                                              ),
+          requireConvertible<typename G::JacobianTransposed             >( g.jacobianTransposed(/* local */ typename G::LocalCoordinate{})         ),
+          requireConvertible<typename G::JacobianInverseTransposed      >( g.jacobianInverseTransposed(/* local */ typename G::LocalCoordinate{})  ),
+          requireTrue<not std::is_default_constructible<G>::value>()
+        );
+      };
+    }
+  // }
 
   template <class G>
   constexpr bool isGeometry()
   {
+#if DUNE_HAVE_CXX_CONCEPTS
+    return Concept::Concept::Geometry<G>;
+#else
     return models<Concept::Geometry, G>();;
+#endif
   }
 
 }  // end namespace Dune
