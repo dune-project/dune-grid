@@ -53,7 +53,7 @@ namespace Dune {
       template<class IS>
       auto require(IS&& is) -> decltype(
         requireType<typename IS::Grid::template Codim<codim>::Entity>(),
-        requireTrue<Dune::isEntity<typename IS::Grid::template Codim<codim>::Entity>()>(),
+        requireConcept<Dune::Concept::Entity,typename IS::Grid::template Codim<codim>::Entity>(),
         requireConvertible<typename IS::IdType>(is.template id<codim>(/*entity*/ std::declval<const typename IS::Grid::template Codim<codim>::Entity&>())),
         requireConvertible<typename IS::IdType>(is.id(/*entity*/ std::declval<const typename IS::Grid::template Codim<codim>::Entity&>()))
       );
@@ -76,15 +76,15 @@ namespace Dune {
   }
 
   template <class IS>
-  constexpr bool isIndexSet()
+  constexpr void expectIndexSet()
   {
-    return models<Concept::IndexSet, IS>();
+    static_assert(models<Concept::IndexSet, IS>());
   }
 
   template <class IS>
-  constexpr bool isIdSet()
+  constexpr void expectIdSet()
   {
-    return models<Concept::IdSet, IS>();
+    static_assert(models<Concept::IdSet, IS>());
   }
 
 }  // end namespace Dune
