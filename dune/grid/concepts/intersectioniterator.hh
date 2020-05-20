@@ -29,9 +29,9 @@ namespace Dune {
   }
 
   template <class I>
-  constexpr bool isIntersectionIterator()
+  constexpr void expectIntersectionIterator()
   {
-    return models<Concept::IntersectionIterator, I>();
+    static_assert(models<Concept::IntersectionIterator, I>());
   }
 
 }  // end namespace Dune
