@@ -13,8 +13,23 @@
 namespace Dune {
   namespace Concept {
 
+/*!@defgroup ConceptIntersection Intersection
+ * @{
+ *  @ingroup Concepts
+ *  @par Description
+ *    This concept models how an intersection object should look like at compilation time.
+ *    Dune::Intersection is a template for this model.
+ *  @snippet this intersection-concept
+ *  @par Uses
+ *    - @ref ConceptEntity
+ *    - @ref ConceptGeometry
+ * @}
+ */
+
+
 #if DUNE_HAVE_CXX_CONCEPTS
 
+    //! [intersection-concept]
     template<class I>
     concept Intersection = requires(I i, typename I::LocalCoordinate local)
     {
@@ -48,6 +63,7 @@ namespace Dune {
       i = i;
       i = std::move(i);
     };
+    //! [intersection-concept]
 
 #endif
 
@@ -90,6 +106,8 @@ namespace Dune {
     } // nampespace Fallback
   } // nampespace Concept
 
+
+  //! @expectConcept{ConceptIntersection,I}
   template <class I>
   constexpr void expectIntersection()
   {

@@ -18,6 +18,14 @@
 #include <dune/common/std/concepts.hh>
 #endif
 
+
+/*!@defgroup Concepts Concept defiinitions
+ * @{
+ * @par Description
+ *  This group gathers several concepts related to grids.
+ * @}
+ */
+
 namespace Dune {
   namespace Concept {
 
@@ -92,8 +100,30 @@ namespace Dune {
 
     } // nampespace Fallback
 
+/*!@defgroup ConceptGrid Grid
+ * @{
+ *  @ingroup Concepts
+ *  @par Description
+ *    This concept models how an grid object should look like at compilation time.
+ *    Dune::Grid is a template for this model.
+ *  @snippet this grid-concept
+ *  @par Uses
+ *    - @ref ConceptGridView
+ *    - @ref ConceptIndexSet
+ *    - @ref ConceptIdSet
+ *    - @ref ConceptEntity
+ *    - @ref ConceptEntitySeed
+ *    - @ref ConceptEntityIterator
+ *    - @ref ConceptIntersection
+ *    - @ref ConceptIntersectionIterator
+ *    - @ref ConceptGeometry
+ * @}
+ */
+
+
 #if DUNE_HAVE_CXX_CONCEPTS
 
+    //! [grid-concept]
     template<class G>
     concept Grid = requires(G g, int level, int codim, int refCount, Dune::GeometryType type, const typename G::template Codim<0>::Entity& entity)
     {
@@ -111,8 +141,8 @@ namespace Dune {
       requires IdSet< typename G::LocalIdSet>;
       requires std::is_same<G,typename G::LeafGridView::Grid>::value;
       requires std::is_same<G,typename G::LevelGridView::Grid>::value;
-      requires GridCodim<G,0>; // Force compiler to show errors on codim 0 if interface assertion fails
-      requires is_grid_codim<G>::value; // Start recursion on codims
+      requires GridCodim<G,0>; //! Force compiler to show errors on codim 0 if interface assertion fails
+      requires is_grid_codim<G>::value; //! Start recursion on codims
       typename G::ctype;
       typename G::HierarchicIterator;
       { g.maxLevel()              } -> Std::convertible_to< int                                 >;
@@ -133,10 +163,11 @@ namespace Dune {
       { g.adapt()                 } -> Std::convertible_to< bool                                >;
       { g.comm()                  } -> Std::convertible_to< typename G::CollectiveCommunication >;
       { g.loadBalance()           } -> Std::convertible_to< bool                                >;
-      // requireConvertible<bool>(g.loadBalance(/*data*/ std::declval<DataHandle&>())) // FIXME use a default handler to instantiate this function
+      //! requireConvertible<bool>(g.loadBalance(/*data*/ std::declval<DataHandle&>())) // FIXME use a default handler to instantiate this function
       g.globalRefine(refCount);
       g.postAdapt();
     };
+    //! [grid-concept]
 
 #endif
 
@@ -189,6 +220,7 @@ namespace Dune {
     } // nampespace Fallback
   } // nampespace Concept
 
+  //! @expectConcept{ConceptGrid,G}
   template <class G>
   constexpr void expectGrid()
   {

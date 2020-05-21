@@ -58,8 +58,21 @@ namespace Dune {
 
     } // nampespace Fallback
 
+/*!@defgroup ConceptIndexSet Index set
+ * @{
+ *  @ingroup Concepts
+ *  @par Description
+ *    This concept models how an index set object should look like at compilation time.
+ *    Dune::IndexSet is a template for this model.
+ *  @snippet this index-set-concept
+ *  @par Uses
+ *    - @ref ConceptEntity
+ * @}
+ */
+
 #if DUNE_HAVE_CXX_CONCEPTS
 
+    //! [index-set-concept]
     template<class IS>
     concept IndexSet = requires(IS is, Dune::GeometryType type, int sub_codim)
     {
@@ -71,9 +84,11 @@ namespace Dune {
       requires (not std::is_copy_constructible<IS>::value);
       requires (not std::is_copy_assignable<IS>::value);
       typename IS::Types;
-      requires IndexSetEntityCodim<IS,0>; // Force compiler to issue errors on codim 0
-      requires is_index_set_entity_codim<IS>::value; // Start recursion on codim entities
+      requires IndexSetEntityCodim<IS,0>; //! Force compiler to issue errors on codim 0
+      requires is_index_set_entity_codim<IS>::value; //! Start recursion on codim entities
     };
+    //! [index-set-concept]
+
 #endif
 
     namespace Fallback {
@@ -133,15 +148,29 @@ namespace Dune {
 
     }  // nampespace Fallback
 
+/*!@defgroup ConceptIdSet Id set
+ * @{
+ *  @ingroup Concepts
+ *  @par Description
+ *    This concept models how an id set object should look like at compilation time.
+ *    Dune::IdSet is a template for this model.
+ *  @snippet this id-set-concept
+ *  @par Uses
+ *    - @ref ConceptEntity
+ * @}
+ */
+
 #if DUNE_HAVE_CXX_CONCEPTS
 
+    //! [id-set-concept]
     template<class IS>
     concept IdSet = requires(IS is, const typename IS::Grid::template Codim<0>::Entity& entity, int i, unsigned int codim)
     {
       { is.subId(entity,i,codim) } -> Std::convertible_to<typename IS::IdType>;
-      requires IdSetEntityCodim<IS,0>; // Force compiler to issue errors on codim 0
-      requires is_id_set_entity_codim<IS>::value; // Start recursion on codim entities
+      requires IdSetEntityCodim<IS,0>; //! Force compiler to issue errors on codim 0
+      requires is_id_set_entity_codim<IS>::value; //! Start recursion on codim entities
     };
+    //! [id-set-concept]
 
 #endif
 
@@ -157,6 +186,7 @@ namespace Dune {
     } // nampespace Fallback
   } // nampespace Concept
 
+  //! @expectConcept{ConceptIndexSet,IS}
   template <class IS>
   constexpr void expectIndexSet()
   {
@@ -167,6 +197,7 @@ namespace Dune {
 #endif
   }
 
+  //! @expectConcept{ConceptIdSet,IS}
   template <class IS>
   constexpr void expectIdSet()
   {
