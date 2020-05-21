@@ -159,7 +159,7 @@ namespace Concept{
         requireConcept<Dune::Concept::IndexSet,typename G::LeafIndexSet>(),
         requireConcept<Dune::Concept::IdSet,typename G::GlobalIdSet>(),
         requireConcept<Dune::Concept::IdSet,typename G::LocalIdSet>(),
-        // requireConcept<Dune::Concept::GridCodim<G::dimension>,G>(), // Start recursion on codims
+        requireConcept<Dune::Concept::GridCodim<G::dimension>,G>(), // Start recursion on codims
         requireTrue<std::is_same<G,typename G::LeafGridView::Grid>::value>(),
         requireTrue<std::is_same<G,typename G::LevelGridView::Grid>::value>(),
         requireType<typename G::ctype>(),
