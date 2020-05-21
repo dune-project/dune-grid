@@ -16,7 +16,19 @@
 namespace Dune {
   namespace Concept {
 
+/*!@defgroup ConceptEntitySeed General entity
+ * @{
+  * @ingroup Concepts
+ *  @par Description
+ *    This concept models how _any_ entity object should look like at compilation time.
+ *    Dune::Entity is a template for this model.
+ *  @snippet this entity-seed-concept
+ * @}
+ */
+
 #if DUNE_HAVE_CXX_CONCEPTS
+
+    //! [entity-seed-concept]
     template<class S>
     concept EntitySeed = requires(S seed)
     {
@@ -24,6 +36,7 @@ namespace Dune {
       { S::codimension  } -> Std::convertible_to<int>;
       { seed.isValid()  } -> Std::convertible_to<bool>;
     };
+    //! [entity-seed-concept]
 
 #endif
 
@@ -55,7 +68,7 @@ namespace Dune {
     template<class E>
     concept EntityGeneral = requires(E e, unsigned int codim)
     {
-      requires Geometry<typename E::Geometry>;      //! <a href="link_to_my_external_page.html">My external page</a>
+      requires Geometry<typename E::Geometry>;
       requires EntitySeed<typename E::EntitySeed>;
       E::mydimension==(E::dimension-E::codimension);
       { e.level()             } -> Std::convertible_to<int>;
@@ -138,12 +151,15 @@ namespace Dune {
 
 /*!@defgroup ConceptEntityExtended Extended entity
  * @{
- *  @ingroup ConceptEntityGeneral
+ *  @ingroup Concepts
  *  @par Description
  *    This concept models how an entity object that lives in codimension 0 should
  *    look like at compilation time. The specialization of Dune::Entity with
  *    codimension 0 is a template for this model.
  *  @snippet this general-entity-concept
+ *  @par Refines
+ *    - @ref ConceptEntityGeneral
+ *    - @ref ConceptGeometry
  * @}
  */
 #if DUNE_HAVE_CXX_CONCEPTS
@@ -165,8 +181,8 @@ namespace Dune {
       { e.isNew()                       } -> Std::convertible_to<bool>;
       { e.mightVanish()                 } -> Std::convertible_to<bool>;
       { e.hasBoundaryIntersections()    } -> Std::convertible_to<bool>;
-      requires EntityCodimExtended<E,0>; // Force compiler to issue errors on codim 0
-      requires is_entity_codim_extended<E>::value; // Start recursion on codim entities
+      requires EntityCodimExtended<E,0>; //! Force compiler to issue errors on codim 0
+      requires is_entity_codim_extended<E>::value; //! Start recursion on codim entities
       requires std::is_same<E,typename E::template Codim<0>::Entity>::value;
     };
     //! [extended-entity-concept]
@@ -200,11 +216,15 @@ namespace Dune {
 
 /*!@defgroup ConceptEntity Entity
  * @{
- *  @ingroup ConceptEntityExtended
+ *  @ingroup Concepts
  *  @par Description
  *    This concept models how an entity object should look like at compilation time.
  *    Dune::Entity is a template for this model.
  *  @snippet this entity-concept
+ *  @par Refines
+ *    - @ref ConceptEntityGeneral
+ *  @par Uses
+ *    - @ref ConceptEntityExtended
  * @}
  */
 
@@ -229,7 +249,7 @@ namespace Dune {
   } // nampespace Concept
 
 
-  //! @expectConcept{Dune::Concept::Fallback::EntitySeed,S}
+  //! @expectConcept{ConceptEntitySeed,S}
   template <class S>
   constexpr void expectEntitySeed()
   {

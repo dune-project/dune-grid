@@ -10,7 +10,7 @@
 #endif
 
 
-/*!@defgroup ConceptGeometry Geometry concept
+/*!@defgroup ConceptGeometry Geometry
  * @ingroup Concepts
  * @{
  *  @par Description
