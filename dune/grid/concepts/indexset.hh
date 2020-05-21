@@ -31,11 +31,11 @@ namespace Concept{
     };
 
     template<class IS, int codim = IS::dimension>
-    struct is_index_set_codim : std::conjunction<std::bool_constant<IndexSetEntityCodim<IS,codim>>,is_index_set_codim<IS,codim-1>> {};
+    struct is_index_set_entity_codim : std::conjunction<std::bool_constant<IndexSetEntityCodim<IS,codim>>,is_index_set_entity_codim<IS,codim-1>> {};
 
     // Stop recursion
     template<class IS>
-    struct is_index_set_codim<IS,0> : std::bool_constant<IndexSetEntityCodim<IS,0>> {};
+    struct is_index_set_entity_codim<IS,0> : std::bool_constant<IndexSetEntityCodim<IS,0>> {};
 }
 #endif
 
@@ -71,7 +71,8 @@ namespace Concept{
       requires (not std::is_copy_constructible<IS>::value);
       requires (not std::is_copy_assignable<IS>::value);
       typename IS::Types;
-      requires is_index_set_codim<IS>::value; // Start recursion on codim entities
+      requires IndexSetEntityCodim<IS,0>; // Force compiler to issue errors on codim 0
+      requires is_index_set_entity_codim<IS>::value; // Start recursion on codim entities
     };
 }
 #endif
@@ -105,11 +106,11 @@ namespace Concept{
     };
 
     template<class IS, int codim = IS::Grid::dimension>
-    struct is_id_set_codim : std::conjunction<std::bool_constant<IdSetEntityCodim<IS,codim>>,is_id_set_codim<IS,codim-1>> {};
+    struct is_id_set_entity_codim : std::conjunction<std::bool_constant<IdSetEntityCodim<IS,codim>>,is_id_set_entity_codim<IS,codim-1>> {};
 
     // Stop recursion
     template<class IS>
-    struct is_id_set_codim<IS,0> : std::bool_constant<IdSetEntityCodim<IS,0>> {};
+    struct is_id_set_entity_codim<IS,0> : std::bool_constant<IdSetEntityCodim<IS,0>> {};
 }
 #endif
 
@@ -135,8 +136,9 @@ namespace Concept{
     template<class IS>
     concept IdSet = requires(IS is, const typename IS::Grid::template Codim<0>::Entity& entity, int i, unsigned int codim)
     {
-      requires is_id_set_codim<IS>::value; // Start recursion on codim entities
       { is.subId(entity,i,codim) } -> Std::convertible_to<typename IS::IdType>;
+      requires IdSetEntityCodim<IS,0>; // Force compiler to issue errors on codim 0
+      requires is_id_set_entity_codim<IS>::value; // Start recursion on codim entities
     };
 }
 #endif
