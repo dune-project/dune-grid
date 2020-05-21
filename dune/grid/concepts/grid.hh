@@ -19,16 +19,13 @@
 #endif
 
 namespace Dune {
-  namespace Concept
-  {
+  namespace Concept {
 
 #if DUNE_HAVE_CXX_CONCEPTS
-namespace Concept{
 
     template<class G, int codim>
     concept GridCodim = requires(G g, const typename G::template Codim<codim>::EntitySeed& seed)
     {
-      // requires EntityIterator< typename G::template Codim<codim>::Iterator>;
       requires Entity< typename G::template Codim<codim>::Entity>;
       requires EntitySeed< typename G::template Codim<codim>::EntitySeed>;
       requires Geometry< typename G::template Codim<codim>::Geometry>;
@@ -57,43 +54,45 @@ namespace Concept{
     // Stop recursion
     template<class G>
     struct is_grid_codim<G,0> : std::bool_constant<GridCodim<G,0>> {};
-}
+
 #endif
 
-    template<int codim>
-    struct GridCodim : public Refines<GridCodim<codim-1>>
-    {
-      template<class G>
-      auto require(G&& g) -> decltype(
-        requireConcept<Dune::Concept::EntityIterator, typename G::template Codim<codim>::Iterator>(),
-        requireConcept<Dune::Concept::Entity,typename G::template Codim<codim>::Entity>(),
-        requireConcept<Dune::Concept::EntitySeed,typename G::template Codim<codim>::EntitySeed>(),
-        requireConcept<Dune::Concept::Geometry,typename G::template Codim<codim>::Geometry>(),
-        requireConcept<Dune::Concept::Geometry,typename G::template Codim<codim>::LocalGeometry>(),
-        requireConcept<Dune::Concept::EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Interior_Partition>::LevelIterator>(),
-        requireConcept<Dune::Concept::EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Interior_Partition>::LeafIterator>(),
-        requireConcept<Dune::Concept::EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::InteriorBorder_Partition>::LevelIterator>(),
-        requireConcept<Dune::Concept::EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::InteriorBorder_Partition>::LeafIterator>(),
-        requireConcept<Dune::Concept::EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Overlap_Partition>::LevelIterator>(),
-        requireConcept<Dune::Concept::EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Overlap_Partition>::LeafIterator>(),
-        requireConcept<Dune::Concept::EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::OverlapFront_Partition>::LevelIterator>(),
-        requireConcept<Dune::Concept::EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::OverlapFront_Partition>::LeafIterator>(),
-        requireConcept<Dune::Concept::EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::All_Partition>::LevelIterator>(),
-        requireConcept<Dune::Concept::EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::All_Partition>::LeafIterator>(),
-        requireConcept<Dune::Concept::EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Ghost_Partition>::LevelIterator>(),
-        requireConcept<Dune::Concept::EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Ghost_Partition>::LeafIterator>(),
-        requireConcept<Dune::Concept::EntityIterator, typename G::template Codim<codim>::LevelIterator>(),
-        requireConcept<Dune::Concept::EntityIterator, typename G::template Codim<codim>::LeafIterator>(),
-        requireConvertible<typename G::template Codim<codim>::Entity>( g.entity(/*seed*/ std::declval<const typename G::template Codim<codim>::EntitySeed&>())  )
-      );
-    };
+    namespace Fallback {
 
-    // stop recursion
-    template<>
-    struct GridCodim<-1> : public AnyType {};
+      template<int codim>
+      struct GridCodim : public Refines<GridCodim<codim-1>>
+      {
+        template<class G>
+        auto require(G&& g) -> decltype(
+          requireConcept<Entity,typename G::template Codim<codim>::Entity>(),
+          requireConcept<EntitySeed,typename G::template Codim<codim>::EntitySeed>(),
+          requireConcept<Geometry,typename G::template Codim<codim>::Geometry>(),
+          requireConcept<Geometry,typename G::template Codim<codim>::LocalGeometry>(),
+          requireConcept<EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Interior_Partition>::LevelIterator>(),
+          requireConcept<EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Interior_Partition>::LeafIterator>(),
+          requireConcept<EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::InteriorBorder_Partition>::LevelIterator>(),
+          requireConcept<EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::InteriorBorder_Partition>::LeafIterator>(),
+          requireConcept<EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Overlap_Partition>::LevelIterator>(),
+          requireConcept<EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Overlap_Partition>::LeafIterator>(),
+          requireConcept<EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::OverlapFront_Partition>::LevelIterator>(),
+          requireConcept<EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::OverlapFront_Partition>::LeafIterator>(),
+          requireConcept<EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::All_Partition>::LevelIterator>(),
+          requireConcept<EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::All_Partition>::LeafIterator>(),
+          requireConcept<EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Ghost_Partition>::LevelIterator>(),
+          requireConcept<EntityIterator, typename G::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Ghost_Partition>::LeafIterator>(),
+          requireConcept<EntityIterator, typename G::template Codim<codim>::LevelIterator>(),
+          requireConcept<EntityIterator, typename G::template Codim<codim>::LeafIterator>(),
+          requireConvertible<typename G::template Codim<codim>::Entity>( g.entity(/*seed*/ std::declval<const typename G::template Codim<codim>::EntitySeed&>())  )
+        );
+      };
+
+      // stop recursion
+      template<>
+      struct GridCodim<-1> : public AnyType {};
+
+    } // nampespace Fallback
 
 #if DUNE_HAVE_CXX_CONCEPTS
-namespace Concept{
 
     template<class G>
     concept Grid = requires(G g, int level, int codim, int refCount, Dune::GeometryType type, const typename G::template Codim<0>::Entity& entity)
@@ -139,68 +138,67 @@ namespace Concept{
       g.postAdapt();
     };
 
-}
 #endif
 
+    namespace Fallback {
 
-    struct Grid
-    {
-      template<class G>
-      auto require(G&& g) -> decltype(
-        requireConvertible<int>(G::dimension),
-        requireConvertible<int>(G::dimensionworld),
-        requireConcept<Dune::Concept::GridView,typename G::LeafGridView>(),
-        requireConcept<Dune::Concept::GridView,typename G::LevelGridView>(),
-        requireConcept<Dune::Concept::Intersection,typename G::LeafIntersection>(),
-        requireConcept<Dune::Concept::Intersection,typename G::LevelIntersection>(),
-        requireConcept<Dune::Concept::IntersectionIterator,typename G::LeafIntersectionIterator>(),
-        requireConcept<Dune::Concept::IntersectionIterator,typename G::LevelIntersectionIterator>(),
-        requireConcept<Dune::Concept::IndexSet,typename G::LevelIndexSet>(),
-        requireConcept<Dune::Concept::IndexSet,typename G::LeafIndexSet>(),
-        requireConcept<Dune::Concept::IdSet,typename G::GlobalIdSet>(),
-        requireConcept<Dune::Concept::IdSet,typename G::LocalIdSet>(),
-        requireConcept<Dune::Concept::GridCodim<G::dimension>,G>(), // Start recursion on codims
-        requireTrue<std::is_same<G,typename G::LeafGridView::Grid>::value>(),
-        requireTrue<std::is_same<G,typename G::LevelGridView::Grid>::value>(),
-        requireType<typename G::ctype>(),
-        requireType<typename G::HierarchicIterator>(),
-        requireConvertible< int                                 >( g.maxLevel()                                                                                       ),
-        requireConvertible< int                                 >( g.size(/*level*/ int{}, /*codim*/ int{})                                                           ),
-        requireConvertible< int                                 >( g.size(/*codim*/ int{})                                                                            ),
-        requireConvertible< int                                 >( g.size(/*level*/ int{}, /*type*/ GeometryType{})                                                   ),
-        requireConvertible< int                                 >( g.size(/*type*/ GeometryType{})                                                                    ),
-        requireConvertible< std::size_t                         >( g.numBoundarySegments()                                                                            ),
-        requireConvertible< typename G::LevelGridView           >( g.levelGridView(/*level*/ int{})                                                                   ),
-        requireConvertible< typename G::LeafGridView            >( g.leafGridView()                                                                                   ),
-        requireConvertible< const typename G::GlobalIdSet&      >( g.globalIdSet()                                                                                    ),
-        requireConvertible< const typename G::LocalIdSet&       >( g.localIdSet()                                                                                     ),
-        requireConvertible< const typename G::LevelIndexSet&    >( g.levelIndexSet(/*level*/ int{})                                                                   ),
-        requireConvertible< const typename G::LeafIndexSet&     >( g.leafIndexSet()                                                                                   ),
-        requireConvertible< bool                                >( g.mark(/*refCount*/ int{}, /*entity*/std::declval<const typename G::template Codim<0>::Entity&>()) ),
-        requireConvertible< int                                 >( g.getMark(std::declval<const typename G::template Codim<0>::Entity&>())                            ),
-        requireConvertible< bool                                >( g.preAdapt()                                                                                       ),
-        requireConvertible< bool                                >( g.adapt()                                                                                          ),
-        requireConvertible< typename G::CollectiveCommunication >( g.comm()                                                                                           ),
-        requireConvertible< bool                                >( g.loadBalance()                                                                                    ),
-        g.globalRefine(/*refCount*/ int{}),
-        g.postAdapt()
-        // requireConvertible<bool>(g.loadBalance(/*data*/ std::declval<DataHandle&>())) // FIXME use a default handler to instantiate this function
-      );
-    };
-
-  }
+      struct Grid
+      {
+        template<class G>
+        auto require(G&& g) -> decltype(
+          requireConvertible<int>(G::dimension),
+          requireConvertible<int>(G::dimensionworld),
+          requireConcept<GridView,typename G::LeafGridView>(),
+          requireConcept<GridView,typename G::LevelGridView>(),
+          requireConcept<Intersection,typename G::LeafIntersection>(),
+          requireConcept<Intersection,typename G::LevelIntersection>(),
+          requireConcept<IntersectionIterator,typename G::LeafIntersectionIterator>(),
+          requireConcept<IntersectionIterator,typename G::LevelIntersectionIterator>(),
+          requireConcept<IndexSet,typename G::LevelIndexSet>(),
+          requireConcept<IndexSet,typename G::LeafIndexSet>(),
+          requireConcept<IdSet,typename G::GlobalIdSet>(),
+          requireConcept<IdSet,typename G::LocalIdSet>(),
+          requireConcept<GridCodim<G::dimension>,G>(), // Start recursion on codims
+          requireTrue<std::is_same<G,typename G::LeafGridView::Grid>::value>(),
+          requireTrue<std::is_same<G,typename G::LevelGridView::Grid>::value>(),
+          requireType<typename G::ctype>(),
+          requireType<typename G::HierarchicIterator>(),
+          requireConvertible< int                                 >( g.maxLevel()                                                                                       ),
+          requireConvertible< int                                 >( g.size(/*level*/ int{}, /*codim*/ int{})                                                           ),
+          requireConvertible< int                                 >( g.size(/*codim*/ int{})                                                                            ),
+          requireConvertible< int                                 >( g.size(/*level*/ int{}, /*type*/ GeometryType{})                                                   ),
+          requireConvertible< int                                 >( g.size(/*type*/ GeometryType{})                                                                    ),
+          requireConvertible< std::size_t                         >( g.numBoundarySegments()                                                                            ),
+          requireConvertible< typename G::LevelGridView           >( g.levelGridView(/*level*/ int{})                                                                   ),
+          requireConvertible< typename G::LeafGridView            >( g.leafGridView()                                                                                   ),
+          requireConvertible< const typename G::GlobalIdSet&      >( g.globalIdSet()                                                                                    ),
+          requireConvertible< const typename G::LocalIdSet&       >( g.localIdSet()                                                                                     ),
+          requireConvertible< const typename G::LevelIndexSet&    >( g.levelIndexSet(/*level*/ int{})                                                                   ),
+          requireConvertible< const typename G::LeafIndexSet&     >( g.leafIndexSet()                                                                                   ),
+          requireConvertible< bool                                >( g.mark(/*refCount*/ int{}, /*entity*/std::declval<const typename G::template Codim<0>::Entity&>()) ),
+          requireConvertible< int                                 >( g.getMark(std::declval<const typename G::template Codim<0>::Entity&>())                            ),
+          requireConvertible< bool                                >( g.preAdapt()                                                                                       ),
+          requireConvertible< bool                                >( g.adapt()                                                                                          ),
+          requireConvertible< typename G::CollectiveCommunication >( g.comm()                                                                                           ),
+          requireConvertible< bool                                >( g.loadBalance()                                                                                    ),
+          g.globalRefine(/*refCount*/ int{}),
+          g.postAdapt()
+          // requireConvertible<bool>(g.loadBalance(/*data*/ std::declval<DataHandle&>())) // FIXME use a default handler to instantiate this function
+        );
+      };
+    } // nampespace Fallback
+  } // nampespace Concept
 
   template <class G>
   constexpr void expectGrid()
   {
-
 #if DUNE_HAVE_CXX_CONCEPTS
-    static_assert(Concept::Concept::Grid<G>);
+    static_assert(Concept::Grid<G>);
 #else
-    static_assert(models<Concept::Grid, G>());
+    static_assert(models<Concept::Fallback::Grid, G>());
 #endif
   }
 
-}  // end namespace Dune
+} // end namespace Dune
 
 #endif
