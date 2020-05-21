@@ -68,9 +68,9 @@ namespace Concept{
       { is.types(sub_codim) } -> Std::convertible_to< typename IS::Types      >;
       { is.size(type)       } -> Std::convertible_to< typename IS::IndexType  >;
       { is.size(sub_codim)  } -> Std::convertible_to< typename IS::IndexType  >;
-      std::is_integral<typename IS::IndexType>::value;
-      not std::is_copy_constructible<IS>::value;
-      not std::is_copy_assignable<IS>::value;
+      requires (std::is_integral<typename IS::IndexType>::value);
+      requires (not std::is_copy_constructible<IS>::value);
+      requires (not std::is_copy_assignable<IS>::value);
       typename IS::Types;
       requires is_index_set_codim<IS>::value; // Start recursion on codim entities
     };

@@ -18,7 +18,7 @@ namespace Concept{
     template<class G>
     concept Geometry = requires(G g, typename G::GlobalCoordinate global, typename G::LocalCoordinate local)
     {
-      not Std::default_initializable<G>;
+      requires (not Std::default_initializable<G>);
       { G::coorddimension                   } -> Std::convertible_to<int>;
       { G::coorddimension                   } -> Std::convertible_to<int>;
       { g.type()                            } -> Std::convertible_to<Dune::GeometryType>;

@@ -98,6 +98,7 @@ namespace Concept {
     template<class E, int codim = E::dimension>
     struct is_entity_codim_extended : std::conjunction<std::bool_constant<EntityCodimExtended<E,codim>>,is_entity_codim_extended<E,codim-1>> {};
 
+    // Stop recursion
     template<class E>
     struct is_entity_codim_extended<E,0> : std::bool_constant<EntityCodimExtended<E,0>> {};
 }
@@ -123,7 +124,7 @@ namespace Concept {
     template<class E>
     concept EntityExtended = requires(E e)
     {
-      E::codimension == 0;
+      requires (E::codimension == 0);
       requires EntityGeneral<E>;
       requires Geometry<typename E::LocalGeometry>;
       { e.father()                      } -> Std::convertible_to<E>;
@@ -136,8 +137,8 @@ namespace Concept {
       { e.isNew()                       } -> Std::convertible_to<bool>;
       { e.mightVanish()                 } -> Std::convertible_to<bool>;
       { e.hasBoundaryIntersections()    } -> Std::convertible_to<bool>;
-      is_entity_codim_extended<E>{}; // Start recursion on codim entities
-      std::is_same<E,typename E::template Codim<0>::Entity>{};
+      requires is_entity_codim_extended<E>::value; // Start recursion on codim entities
+      requires std::is_same<E,typename E::template Codim<0>::Entity>::value;
     };
 }
 #endif
