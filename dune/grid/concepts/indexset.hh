@@ -13,11 +13,9 @@
 #endif
 
 namespace Dune {
-  namespace Concept
-  {
+  namespace Concept {
 
 #if DUNE_HAVE_CXX_CONCEPTS
-namespace Concept{
 
     template<class IS, int codim>
     concept IndexSetEntityCodim = requires(IS is, int i, unsigned int sub_codim, const typename IS::template Codim<codim>::Entity& entity)
@@ -36,29 +34,31 @@ namespace Concept{
     // Stop recursion
     template<class IS>
     struct is_index_set_entity_codim<IS,0> : std::bool_constant<IndexSetEntityCodim<IS,0>> {};
-}
+
 #endif
 
-    template<int codim>
-    struct IndexSetEntityCodim : public Refines<IndexSetEntityCodim<codim-1>>
-    {
-      template<class IS>
-      auto require(IS&& is) -> decltype(
-        requireConcept<Dune::Concept::Entity,typename IS::template Codim<codim>::Entity>(),
-        requireConvertible<typename IS::IndexType   >( is.template index<codim>(/*entity*/ std::declval<const typename IS::template Codim<codim>::Entity&>())                                                 ),
-        requireConvertible<typename IS::IndexType   >( is.index(/*entity*/ std::declval<const typename IS::template Codim<codim>::Entity&>())                                                                 ),
-        requireConvertible<typename IS::IndexType   >( is.template subIndex<codim>(/*entity*/ std::declval<const typename IS::template Codim<codim>::Entity&>(), /*i*/ int{}, /*sub_codim*/ (unsigned int){} )    ),
-        requireConvertible<typename IS::IndexType   >( is.subIndex(/*entity*/ std::declval<const typename IS::template Codim<codim>::Entity&>(), /*i*/ int{}, /*sub_codim*/ (unsigned int){} )                    ),
-        requireConvertible<bool                     >( is.contains(/*entity*/ std::declval<const typename IS::template Codim<codim>::Entity&>())                                                              )
-      );
-    };
+    namespace Fallback {
+      template<int codim>
+      struct IndexSetEntityCodim : public Refines<IndexSetEntityCodim<codim-1>>
+      {
+        template<class IS>
+        auto require(IS&& is) -> decltype(
+          requireConcept<Entity,typename IS::template Codim<codim>::Entity>(),
+          requireConvertible<typename IS::IndexType   >( is.template index<codim>(/*entity*/ std::declval<const typename IS::template Codim<codim>::Entity&>())                                                 ),
+          requireConvertible<typename IS::IndexType   >( is.index(/*entity*/ std::declval<const typename IS::template Codim<codim>::Entity&>())                                                                 ),
+          requireConvertible<typename IS::IndexType   >( is.template subIndex<codim>(/*entity*/ std::declval<const typename IS::template Codim<codim>::Entity&>(), /*i*/ int{}, /*sub_codim*/ (unsigned int){} )    ),
+          requireConvertible<typename IS::IndexType   >( is.subIndex(/*entity*/ std::declval<const typename IS::template Codim<codim>::Entity&>(), /*i*/ int{}, /*sub_codim*/ (unsigned int){} )                    ),
+          requireConvertible<bool                     >( is.contains(/*entity*/ std::declval<const typename IS::template Codim<codim>::Entity&>())                                                              )
+        );
+      };
 
-    // Stop recursion
-    template<>
-    struct IndexSetEntityCodim<-1> : public AnyType {};
+      // Stop recursion
+      template<>
+      struct IndexSetEntityCodim<-1> : public AnyType {};
+
+    } // nampespace Fallback
 
 #if DUNE_HAVE_CXX_CONCEPTS
-namespace Concept{
 
     template<class IS>
     concept IndexSet = requires(IS is, Dune::GeometryType type, int sub_codim)
@@ -74,28 +74,28 @@ namespace Concept{
       requires IndexSetEntityCodim<IS,0>; // Force compiler to issue errors on codim 0
       requires is_index_set_entity_codim<IS>::value; // Start recursion on codim entities
     };
-}
 #endif
 
-    struct IndexSet
-    {
-      template<class IS>
-      auto require(IS&& is) -> decltype(
-      requireConvertible< int                     >( IS::dimension                                    ),
-      requireConvertible< typename IS::Types      >( is.types(/*codim*/ int{} )                       ),
-      requireConvertible< typename IS::IndexType  >( is.size(/*geometry_type*/ Dune::GeometryType{} ) ),
-      requireConvertible< typename IS::IndexType  >( is.size(/*codim*/ int{} )                        ),
-      requireTrue< std::is_integral<typename IS::IndexType>::value  >(),
-      requireTrue< not std::is_copy_constructible<IS>::value        >(),
-      requireTrue< not std::is_copy_assignable<IS>::value           >(),
-      requireType<typename IS::Types>(),
-      requireConcept<IndexSetEntityCodim<IS::dimension>,IS>() // Start recursion codim entities
-      );
-    };
+    namespace Fallback {
+      struct IndexSet
+      {
+        template<class IS>
+        auto require(IS&& is) -> decltype(
+        requireConvertible< int                     >( IS::dimension                                    ),
+        requireConvertible< typename IS::Types      >( is.types(/*codim*/ int{} )                       ),
+        requireConvertible< typename IS::IndexType  >( is.size(/*geometry_type*/ Dune::GeometryType{} ) ),
+        requireConvertible< typename IS::IndexType  >( is.size(/*codim*/ int{} )                        ),
+        requireTrue< std::is_integral<typename IS::IndexType>::value  >(),
+        requireTrue< not std::is_copy_constructible<IS>::value        >(),
+        requireTrue< not std::is_copy_assignable<IS>::value           >(),
+        requireType<typename IS::Types>(),
+        requireConcept<IndexSetEntityCodim<IS::dimension>,IS>() // Start recursion codim entities
+        );
+      };
+    } // nampespace Fallback
 
 
 #if DUNE_HAVE_CXX_CONCEPTS
-namespace Concept{
 
     template<class IS, int codim>
     concept IdSetEntityCodim = requires(IS is, const typename IS::Grid::template Codim<codim>::Entity& entity)
@@ -111,27 +111,29 @@ namespace Concept{
     // Stop recursion
     template<class IS>
     struct is_id_set_entity_codim<IS,0> : std::bool_constant<IdSetEntityCodim<IS,0>> {};
-}
+
 #endif
 
-    template<int codim>
-    struct IdSetEntityCodim : public Refines<IdSetEntityCodim<codim-1>>
-    {
-      template<class IS>
-      auto require(IS&& is) -> decltype(
-        requireConcept<Dune::Concept::Entity,typename IS::Grid::template Codim<codim>::Entity>(),
-        requireConvertible<typename IS::IdType>(is.template id<codim>(/*entity*/ std::declval<const typename IS::Grid::template Codim<codim>::Entity&>())),
-        requireConvertible<typename IS::IdType>(is.id(/*entity*/ std::declval<const typename IS::Grid::template Codim<codim>::Entity&>()))
-      );
-    };
+    namespace Fallback {
 
-    // stop recursion
-    template<>
-    struct IdSetEntityCodim<-1> : public AnyType {};
+      template<int codim>
+      struct IdSetEntityCodim : public Refines<IdSetEntityCodim<codim-1>>
+      {
+        template<class IS>
+        auto require(IS&& is) -> decltype(
+          requireConcept<Entity,typename IS::Grid::template Codim<codim>::Entity>(),
+          requireConvertible<typename IS::IdType>(is.template id<codim>(/*entity*/ std::declval<const typename IS::Grid::template Codim<codim>::Entity&>())),
+          requireConvertible<typename IS::IdType>(is.id(/*entity*/ std::declval<const typename IS::Grid::template Codim<codim>::Entity&>()))
+        );
+      };
 
+      // stop recursion
+      template<>
+      struct IdSetEntityCodim<-1> : public AnyType {};
+
+    }  // nampespace Fallback
 
 #if DUNE_HAVE_CXX_CONCEPTS
-namespace Concept{
 
     template<class IS>
     concept IdSet = requires(IS is, const typename IS::Grid::template Codim<0>::Entity& entity, int i, unsigned int codim)
@@ -140,26 +142,28 @@ namespace Concept{
       requires IdSetEntityCodim<IS,0>; // Force compiler to issue errors on codim 0
       requires is_id_set_entity_codim<IS>::value; // Start recursion on codim entities
     };
-}
+
 #endif
 
-    struct IdSet
-    {
-      template<class IS>
-      auto require(IS&& is) -> decltype(
-        requireConcept<IdSetEntityCodim<IS::Grid::dimension>,IS>(), // Start recursion codim entities
-        requireConvertible<typename IS::IdType>(is.subId(/*entity*/ std::declval<const typename IS::Grid::template Codim<0>::Entity&>(), /*i*/ int{}, /*codim*/ (unsigned int){} ))
-      );
-    };
-  }
+    namespace Fallback {
+      struct IdSet
+      {
+        template<class IS>
+        auto require(IS&& is) -> decltype(
+          requireConcept<IdSetEntityCodim<IS::Grid::dimension>,IS>(), // Start recursion codim entities
+          requireConvertible<typename IS::IdType>(is.subId(/*entity*/ std::declval<const typename IS::Grid::template Codim<0>::Entity&>(), /*i*/ int{}, /*codim*/ (unsigned int){} ))
+        );
+      };
+    } // nampespace Fallback
+  } // nampespace Concept
 
   template <class IS>
   constexpr void expectIndexSet()
   {
 #if DUNE_HAVE_CXX_CONCEPTS
-    static_assert(Concept::Concept::IndexSet<IS>);
+    static_assert(Concept::IndexSet<IS>);
 #else
-    static_assert(models<Concept::IndexSet, IS>());
+    static_assert(models<Concept::Fallback::IndexSet, IS>());
 #endif
   }
 
@@ -168,12 +172,12 @@ namespace Concept{
   {
 
 #if DUNE_HAVE_CXX_CONCEPTS
-    static_assert(Concept::Concept::IdSet<IS>);
+    static_assert(Concept::IdSet<IS>);
 #else
-    static_assert(models<Concept::IdSet, IS>());
+    static_assert(models<Concept::Fallback::IdSet, IS>());
 #endif
   }
 
-}  // end namespace Dune
+} // end namespace Dune
 
 #endif

@@ -10,10 +10,9 @@
 #endif
 
 namespace Dune {
-  namespace Concept{
+  namespace Concept {
 
 #if DUNE_HAVE_CXX_CONCEPTS
-namespace Concept{
 
     template<class G>
     concept Geometry = requires(G g, typename G::GlobalCoordinate global, typename G::LocalCoordinate local)
@@ -31,10 +30,10 @@ namespace Concept{
       { g.jacobianTransposed(local)         } -> Std::convertible_to<typename G::JacobianTransposed>;
       { g.jacobianInverseTransposed(local)  } -> Std::convertible_to<typename G::JacobianInverseTransposed>;
     };
-}
+
 #endif
 
-    // namespace Fallback {
+    namespace Fallback {
       struct Geometry
       {
         template<class G>
@@ -55,19 +54,19 @@ namespace Concept{
           requireTrue<not std::is_default_constructible<G>::value>()
         );
       };
-    }
-  // }
+    } // nampespace Fallback
+  } // nampespace Concept
 
   template <class G>
   constexpr void expectGeometry()
   {
 #if DUNE_HAVE_CXX_CONCEPTS
-    static_assert(Concept::Concept::Geometry<G>);
+    static_assert(Concept::Geometry<G>);
 #else
-    static_assert(models<Concept::Geometry, G>());
+    static_assert(models<Concept::Fallback::Geometry, G>());
 #endif
   }
 
-}  // end namespace Dune
+} // end namespace Dune
 
 #endif

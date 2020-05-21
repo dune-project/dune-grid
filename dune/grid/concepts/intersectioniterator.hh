@@ -5,12 +5,15 @@
 
 #include <dune/common/concept.hh>
 
+#if DUNE_HAVE_CXX_CONCEPTS
+#include <dune/common/std/concepts.hh>
+#endif
+
 namespace Dune {
-  namespace Concept
-  {
+  namespace Concept {
 
 #if DUNE_HAVE_CXX_CONCEPTS
-namespace Concept {
+
     template<class I>
     concept IntersectionIterator = requires(I i)
     {
@@ -23,37 +26,37 @@ namespace Concept {
       { i!=i } -> Std::convertible_to<bool>;
       requires Std::default_initializable<I>;
     };
-}
+
 #endif
-
-    struct IntersectionIterator
-    {
-      template<class I>
-      auto require(I&& i) -> decltype(
-        requireConcept<Dune::Concept::Intersection, typename I::Intersection>(),
-        i++, // FIXME set type requirement
-        ++i, // FIXME set type requirement
-        *i, // FIXME set type requirement
-        i.operator ->(), // FIXME set type requirement
-        requireConvertible<bool>(i==i),
-        requireConvertible<bool>(i!=i),
-        I{}, // default constructible
-        I{i} // copy constructible
-      );
-    };
-
-  }
+    namespace Fallback {
+      struct IntersectionIterator
+      {
+        template<class I>
+        auto require(I&& i) -> decltype(
+          requireConcept<Intersection, typename I::Intersection>(),
+          i++, // FIXME set type requirement
+          ++i, // FIXME set type requirement
+          *i, // FIXME set type requirement
+          i.operator ->(), // FIXME set type requirement
+          requireConvertible<bool>(i==i),
+          requireConvertible<bool>(i!=i),
+          I{}, // default constructible
+          I{i} // copy constructible
+        );
+      };
+    } // nampespace Fallback
+  } // nampespace Concept
 
   template <class I>
   constexpr void expectIntersectionIterator()
   {
 #if DUNE_HAVE_CXX_CONCEPTS
-    static_assert(Dune::Concept::Concept::IntersectionIterator<I>);
+    static_assert(Dune::Concept::IntersectionIterator<I>);
 #else
-    static_assert(models<Concept::IntersectionIterator, I>());
+    static_assert(models<Concept::Fallback::IntersectionIterator, I>());
 #endif
   }
 
-}  // end namespace Dune
+} // end namespace Dune
 
 #endif
