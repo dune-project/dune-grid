@@ -26,6 +26,8 @@ namespace Dune {
     template<class GV, int codim>
     concept GridViewCodim = requires(GV gv)
     {
+      requires Geometry<typename GV::template Codim<codim>::Geometry>;
+      requires Geometry<typename GV::template Codim<codim>::LocalGeometry>;
       requires EntityIterator<typename GV::template Codim<codim>::Iterator>;
       requires EntityIterator<typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::InteriorBorder_Partition>::Iterator>;
       requires EntityIterator<typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Overlap_Partition>::Iterator>;
@@ -96,8 +98,26 @@ namespace Dune {
 
     } // nampespace Fallback
 
+/*!@defgroup ConceptGridView Grid view
+ * @{
+ *  @ingroup Concepts
+ *  @par Description
+ *    This concept models how an grid view object should look like at compilation time.
+ *    Dune::GridView is a template for this model.
+ *  @snippet this grid-view-concept
+ *  @par Uses
+ *    - @ref ConceptIndexSet
+ *    - @ref ConceptEntity
+ *    - @ref ConceptEntityIterator
+ *    - @ref ConceptIntersection
+ *    - @ref ConceptIntersectionIterator
+ *    - @ref ConceptGeometry
+ * @}
+ */
+
 #if DUNE_HAVE_CXX_CONCEPTS
 
+    //! [grid-view-concept]
     template<class GV>
     concept GridView = requires(GV gv, int codim, Dune::GeometryType type, const typename GV::template Codim<0>::Entity& entity)
     {
@@ -118,12 +138,13 @@ namespace Dune {
       { gv.comm()             } -> Std::convertible_to< typename GV::CollectiveCommunication  >;
       { gv.overlapSize(codim) } -> Std::convertible_to< int                                   >;
       { gv.ghostSize(codim)   } -> Std::convertible_to< int                                   >;
-      requires GridViewCodim<GV,0>; // Force compiler to issue errors on codim 0
-      requires is_grid_view_codim<GV>::value; // Start recursion on other codims
-      // gv.communicate(std::declval<Handler&>(),std::declval<Dune::InterfaceType>(), std::declval<CommunicationDirection>()), // FIXME use a default handler to instantiate this function
+      requires GridViewCodim<GV,0>; //! Force compiler to issue errors on codim 0
+      requires is_grid_view_codim<GV>::value; //! Start recursion on other codims
+      //! gv.communicate(std::declval<Handler&>(),std::declval<Dune::InterfaceType>(), std::declval<CommunicationDirection>()), // FIXME use a default handler to instantiate this function
       Std::copy_constructible<GV>;
       gv = gv;
     };
+    //! [grid-view-concept]
 
 #endif
     namespace Fallback {
@@ -158,6 +179,7 @@ namespace Dune {
     } // nampespace Fallback
   } // nampespace Concept
 
+  //! @expectConcept{ConceptGridView,GV}
   template <class GV>
   constexpr void expectGridView()
   {

@@ -1,5 +1,3 @@
-// -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
-// vi: set et ts=4 sw=2 sts=2:
 #ifndef DUNE_GRID_CONCEPTS_ENTITY_ITERATOR_HH
 #define DUNE_GRID_CONCEPTS_ENTITY_ITERATOR_HH
 
@@ -14,20 +12,35 @@
 namespace Dune {
   namespace Concept {
 
+
+/*!@defgroup ConceptEntityIterator Entity iterator
+ * @{
+ *  @ingroup Concepts
+ *  @par Description
+ *    This concept models how an entity iterator object should look like at compilation time.
+ *    Dune::EntityIterator is a template for this model.
+ *  @snippet this entity-iterator-concept
+ *  @par Uses
+ *    - @ref ConceptEntity
+ * @}
+ */
+
 #if DUNE_HAVE_CXX_CONCEPTS
 
+    //! [entity-iterator-concept]
     template<class I>
     concept EntityIterator = requires(I i)
     {
       requires Entity<typename I::Entity>;
-      i++; // FIXME set type requirement
-      ++i; // FIXME set type requirement
+      i++; //! FIXME set type requirement
+      ++i; //! FIXME set type requirement
       { *i } -> Std::convertible_to<typename I::Reference>;
-      i.operator ->(); // FIXME set type requirement
+      i.operator ->(); //! FIXME set type requirement
       { i==i } -> Std::convertible_to<bool>;
       { i!=i } -> Std::convertible_to<bool>;
       requires Std::default_initializable<I>;
     };
+    //! [entity-iterator-concept]
 
 #endif
     namespace Fallback {
@@ -49,6 +62,7 @@ namespace Dune {
     } // nampespace Fallback
   } // nampespace Concept
 
+  //! @expectConcept{ConceptEntityIterator,I}
   template <class I>
   constexpr void expectEntityIterator()
   {

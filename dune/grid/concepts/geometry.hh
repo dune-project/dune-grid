@@ -9,11 +9,23 @@
 #include <dune/common/std/concepts.hh>
 #endif
 
+
+/*!@defgroup ConceptGeometry Geometry
+ * @ingroup Concepts
+ * @{
+ *  @par Description
+ *    This concept models how geometry object should look like at compilation time.
+ *    Dune::Geometry is a template for this model.
+ *  @snippet this geometry-concept
+ * @}
+ */
+
 namespace Dune {
   namespace Concept {
 
 #if DUNE_HAVE_CXX_CONCEPTS
 
+    //! [geometry-concept]
     template<class G>
     concept Geometry = requires(G g, typename G::GlobalCoordinate global, typename G::LocalCoordinate local)
     {
@@ -30,10 +42,12 @@ namespace Dune {
       { g.jacobianTransposed(local)         } -> Std::convertible_to<typename G::JacobianTransposed>;
       { g.jacobianInverseTransposed(local)  } -> Std::convertible_to<typename G::JacobianInverseTransposed>;
     };
+    //! [geometry-concept]
 
 #endif
 
     namespace Fallback {
+
       struct Geometry
       {
         template<class G>
@@ -57,6 +71,7 @@ namespace Dune {
     } // nampespace Fallback
   } // nampespace Concept
 
+  //! @expectConcept{ConceptGeometry,G}
   template <class G>
   constexpr void expectGeometry()
   {
