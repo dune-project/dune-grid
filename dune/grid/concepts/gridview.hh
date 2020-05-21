@@ -124,8 +124,6 @@ namespace Concept{
       // gv.communicate(std::declval<Handler&>(),std::declval<Dune::InterfaceType>(), std::declval<CommunicationDirection>()), // FIXME use a default handler to instantiate this function
       Std::copy_constructible<GV>;
       gv = gv;
-
-
     };
 }
 #endif
