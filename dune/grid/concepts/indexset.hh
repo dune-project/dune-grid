@@ -16,7 +16,6 @@ namespace Dune {
   namespace Concept
   {
 
-
 #if DUNE_HAVE_CXX_CONCEPTS
 namespace Concept{
 
@@ -31,12 +30,12 @@ namespace Concept{
       { is.contains(entity)                                 } -> Std::convertible_to<bool                     >;
     };
 
-    template<class E, int codim = E::dimension>
-    struct is_index_set_codim : std::conjunction<std::bool_constant<IndexSetEntityCodim<E,codim>>,is_index_set_codim<E,codim-1>> {};
+    template<class IS, int codim = IS::dimension>
+    struct is_index_set_codim : std::conjunction<std::bool_constant<IndexSetEntityCodim<IS,codim>>,is_index_set_codim<IS,codim-1>> {};
 
     // Stop recursion
-    template<class E>
-    struct is_index_set_codim<E,0> : std::bool_constant<IndexSetEntityCodim<E,0>> {};
+    template<class IS>
+    struct is_index_set_codim<IS,0> : std::bool_constant<IndexSetEntityCodim<IS,0>> {};
 }
 #endif
 
@@ -89,16 +88,36 @@ namespace Concept{
       requireTrue< not std::is_copy_constructible<IS>::value        >(),
       requireTrue< not std::is_copy_assignable<IS>::value           >(),
       requireType<typename IS::Types>(),
-      requireConcept<IndexSetEntityCodim<IS::dimension>,IS>()
+      requireConcept<IndexSetEntityCodim<IS::dimension>,IS>() // Start recursion codim entities
       );
     };
+
+
+#if DUNE_HAVE_CXX_CONCEPTS
+namespace Concept{
+
+    template<class IS, int codim>
+    concept IdSetEntityCodim = requires(IS is, const typename IS::Grid::template Codim<codim>::Entity& entity)
+    {
+      requires Entity<typename IS::Grid::template Codim<codim>::Entity>;
+      { is.template id<codim>(entity)                    } -> Std::convertible_to<typename IS::IdType   >;
+      { is.id(entity)                                    } -> Std::convertible_to<typename IS::IdType   >;
+    };
+
+    template<class IS, int codim = IS::Grid::dimension>
+    struct is_id_set_codim : std::conjunction<std::bool_constant<IdSetEntityCodim<IS,codim>>,is_id_set_codim<IS,codim-1>> {};
+
+    // Stop recursion
+    template<class IS>
+    struct is_id_set_codim<IS,0> : std::bool_constant<IdSetEntityCodim<IS,0>> {};
+}
+#endif
 
     template<int codim>
     struct IdSetEntityCodim : public Refines<IdSetEntityCodim<codim-1>>
     {
       template<class IS>
       auto require(IS&& is) -> decltype(
-        requireType<typename IS::Grid::template Codim<codim>::Entity>(),
         requireConcept<Dune::Concept::Entity,typename IS::Grid::template Codim<codim>::Entity>(),
         requireConvertible<typename IS::IdType>(is.template id<codim>(/*entity*/ std::declval<const typename IS::Grid::template Codim<codim>::Entity&>())),
         requireConvertible<typename IS::IdType>(is.id(/*entity*/ std::declval<const typename IS::Grid::template Codim<codim>::Entity&>()))
@@ -110,12 +129,23 @@ namespace Concept{
     struct IdSetEntityCodim<-1> : public AnyType {};
 
 
+#if DUNE_HAVE_CXX_CONCEPTS
+namespace Concept{
+
+    template<class IS>
+    concept IdSet = requires(IS is, const typename IS::Grid::template Codim<0>::Entity& entity, int i, unsigned int codim)
+    {
+      requires is_id_set_codim<IS>::value; // Start recursion on codim entities
+      { is.subId(entity,i,codim) } -> Std::convertible_to<typename IS::IdType>;
+    };
+}
+#endif
+
     struct IdSet
     {
       template<class IS>
       auto require(IS&& is) -> decltype(
-        requireType<typename IS::IdType>(),
-        requireConcept<IdSetEntityCodim<IS::Grid::dimension>,IS>(),
+        requireConcept<IdSetEntityCodim<IS::Grid::dimension>,IS>(), // Start recursion codim entities
         requireConvertible<typename IS::IdType>(is.subId(/*entity*/ std::declval<const typename IS::Grid::template Codim<0>::Entity&>(), /*i*/ int{}, /*codim*/ (unsigned int){} ))
       );
     };
@@ -134,7 +164,12 @@ namespace Concept{
   template <class IS>
   constexpr void expectIdSet()
   {
+
+#if DUNE_HAVE_CXX_CONCEPTS
+    static_assert(Concept::Concept::IdSet<IS>);
+#else
     static_assert(models<Concept::IdSet, IS>());
+#endif
   }
 
 }  // end namespace Dune
