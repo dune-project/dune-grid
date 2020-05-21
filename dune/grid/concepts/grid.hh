@@ -34,7 +34,6 @@ namespace Dune {
     template<class G, int codim>
     concept GridCodim = requires(G g, const typename G::template Codim<codim>::EntitySeed& seed)
     {
-      // requires EntityIterator< typename G::template Codim<codim>::Iterator>;
       requires Entity< typename G::template Codim<codim>::Entity>;
       requires EntitySeed< typename G::template Codim<codim>::EntitySeed>;
       requires Geometry< typename G::template Codim<codim>::Geometry>;
@@ -73,7 +72,6 @@ namespace Dune {
       {
         template<class G>
         auto require(G&& g) -> decltype(
-          requireConcept<EntityIterator, typename G::template Codim<codim>::Iterator>(),
           requireConcept<Entity,typename G::template Codim<codim>::Entity>(),
           requireConcept<EntitySeed,typename G::template Codim<codim>::EntitySeed>(),
           requireConcept<Geometry,typename G::template Codim<codim>::Geometry>(),
