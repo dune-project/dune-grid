@@ -158,6 +158,7 @@ namespace Dune {
     } // nampespace Fallback
   } // nampespace Concept
 
+  //! @expectConcept{Dune::Concept::Fallback::GridView,GV}
   template <class GV>
   constexpr void expectGridView()
   {

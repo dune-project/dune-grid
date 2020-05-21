@@ -39,28 +39,40 @@ namespace Dune {
       };
     } // nampespace Fallback
 
+/*!@defgroup ConceptEntityGeneral General entity
+ * @{
+  * @ingroup Concepts
+ *  @par Description
+ *    This concept models how _any_ entity object should look like at compilation time.
+ *    Dune::Entity is a template for this model.
+ *  @snippet this general-entity-concept
+ * @}
+ */
+
 #if DUNE_HAVE_CXX_CONCEPTS
 
+    //! [general-entity-concept]
     template<class E>
-    concept EntityGeneral = requires(E e)
+    concept EntityGeneral = requires(E e, unsigned int codim)
     {
-      requires Geometry<typename E::Geometry>;
+      requires Geometry<typename E::Geometry>;      //! <a href="link_to_my_external_page.html">My external page</a>
       requires EntitySeed<typename E::EntitySeed>;
       E::mydimension==(E::dimension-E::codimension);
-      { e.level()                                   } -> Std::convertible_to<int>;
-      { e.partitionType()                           } -> Std::convertible_to<Dune::PartitionType>;
-      { e.geometry()                                } -> Std::convertible_to<typename E::Geometry>;
-      { e.type()                                    } -> Std::convertible_to<Dune::GeometryType>;
-      { e.subEntities(/*codim*/ (unsigned int){})   } -> Std::convertible_to<unsigned int>;
-      { e.seed()                                    } -> Std::convertible_to<typename E::EntitySeed>;
-      { e==e                                        } -> Std::convertible_to<bool>;
-      { e!=e                                        } -> Std::convertible_to<bool>;
+      { e.level()             } -> Std::convertible_to<int>;
+      { e.partitionType()     } -> Std::convertible_to<Dune::PartitionType>;
+      { e.geometry()          } -> Std::convertible_to<typename E::Geometry>;
+      { e.type()              } -> Std::convertible_to<Dune::GeometryType>;
+      { e.subEntities(codim)  } -> Std::convertible_to<unsigned int>;
+      { e.seed()              } -> Std::convertible_to<typename E::EntitySeed>;
+      { e==e                  } -> Std::convertible_to<bool>;
+      { e!=e                  } -> Std::convertible_to<bool>;
       requires Std::default_initializable<E>;
       requires Std::copy_constructible<E>;
       requires Std::move_constructible<E>;
       e = e;
       e = std::move(e);
     };
+    //! [general-entity-concept]
 
 #endif
 
@@ -123,8 +135,20 @@ namespace Dune {
 
     } // nampespace Fallback
 
+
+/*!@defgroup ConceptEntityExtended Extended entity
+ * @{
+ *  @ingroup ConceptEntityGeneral
+ *  @par Description
+ *    This concept models how an entity object that lives in codimension 0 should
+ *    look like at compilation time. The specialization of Dune::Entity with
+ *    codimension 0 is a template for this model.
+ *  @snippet this general-entity-concept
+ * @}
+ */
 #if DUNE_HAVE_CXX_CONCEPTS
 
+    //! [extended-entity-concept]
     template<class E>
     concept EntityExtended = requires(E e)
     {
@@ -145,10 +169,12 @@ namespace Dune {
       requires is_entity_codim_extended<E>::value; // Start recursion on codim entities
       requires std::is_same<E,typename E::template Codim<0>::Entity>::value;
     };
+    //! [extended-entity-concept]
 
 #endif
 
     namespace Fallback {
+
       struct EntityExtended : public Refines<EntityGeneral>
       {
         template<class E>
@@ -171,14 +197,27 @@ namespace Dune {
       };
     } // nampespace Fallback
 
+
+/*!@defgroup ConceptEntity Entity
+ * @{
+ *  @ingroup ConceptEntityExtended
+ *  @par Description
+ *    This concept models how an entity object should look like at compilation time.
+ *    Dune::Entity is a template for this model.
+ *  @snippet this entity-concept
+ * @}
+ */
+
 #if DUNE_HAVE_CXX_CONCEPTS
 
+    //! [entity-concept]
     template<class E>
     concept Entity = EntityExtended<E> || EntityGeneral<E>;
-
+    //! [entity-concept]
 #endif
 
     namespace Fallback {
+
       struct Entity
       {
         template<class E>
@@ -189,6 +228,8 @@ namespace Dune {
     } // nampespace Fallback
   } // nampespace Concept
 
+
+  //! @expectConcept{Dune::Concept::Fallback::EntitySeed,S}
   template <class S>
   constexpr void expectEntitySeed()
   {
@@ -199,6 +240,7 @@ namespace Dune {
 #endif
   }
 
+  //! @expectConcept{ConceptEntityGeneral,E}
   template <class E>
   constexpr void expectEntityGeneral()
   {
@@ -209,6 +251,7 @@ namespace Dune {
 #endif
   }
 
+  //! @expectConcept{ConceptEntityExtended,E}
   template <class E>
   constexpr void expectEntityExtended()
   {
@@ -219,6 +262,8 @@ namespace Dune {
 #endif
   }
 
+  //! @expectConcept{ConceptEntity,E}
+  //! @ingroup{ConceptEntity}
   template <class E>
   constexpr void expectEntity()
   {

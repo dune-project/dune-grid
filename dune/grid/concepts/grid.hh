@@ -18,6 +18,14 @@
 #include <dune/common/std/concepts.hh>
 #endif
 
+
+/*!@defgroup Concepts Concept defiinitions
+ * @{
+ * @par Description
+ *  This group gathers several concepts related to grids.
+ * @}
+ */
+
 namespace Dune {
   namespace Concept {
 
@@ -191,6 +199,7 @@ namespace Dune {
     } // nampespace Fallback
   } // nampespace Concept
 
+  //! @expectConcept{Dune::Concept::Fallback::Grid,G}
   template <class G>
   constexpr void expectGrid()
   {

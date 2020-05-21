@@ -157,6 +157,7 @@ namespace Dune {
     } // nampespace Fallback
   } // nampespace Concept
 
+  //! @expectConcept{Dune::Concept::Fallback::IndexSet,IS}
   template <class IS>
   constexpr void expectIndexSet()
   {
@@ -167,6 +168,7 @@ namespace Dune {
 #endif
   }
 
+  //! @expectConcept{Dune::Concept::Fallback::IdSet,IS}
   template <class IS>
   constexpr void expectIdSet()
   {

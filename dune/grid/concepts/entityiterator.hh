@@ -49,6 +49,7 @@ namespace Dune {
     } // nampespace Fallback
   } // nampespace Concept
 
+  //! @expectConcept{Dune::Concept::Fallback::EntityIterator,I}
   template <class I>
   constexpr void expectEntityIterator()
   {

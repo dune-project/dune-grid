@@ -1,5 +1,6 @@
 add_subdirectory(albertagrid)
 add_subdirectory(common)
+add_subdirectory(concepts)
 add_subdirectory(geometrygrid)
 add_subdirectory(identitygrid)
 add_subdirectory(io)
