@@ -12,12 +12,10 @@
 #endif
 
 namespace Dune {
-  namespace Concept
-  {
-
+  namespace Concept {
 
 #if DUNE_HAVE_CXX_CONCEPTS
-namespace Concept {
+
     template<class I>
     concept EntityIterator = requires(I i)
     {
@@ -30,37 +28,37 @@ namespace Concept {
       { i!=i } -> Std::convertible_to<bool>;
       requires Std::default_initializable<I>;
     };
-}
+
 #endif
-
-    struct EntityIterator
-    {
-      template<class I>
-      auto require(I&& i) -> decltype(
-        requireConcept<Dune::Concept::Entity,typename I::Entity>(),
-        requireType<typename I::Reference>(),
-        i++, // FIXME set type requirement
-        ++i, // FIXME set type requirement
-        requireConvertible<typename I::Reference>(*i),
-        i.operator ->(), // FIXME set type requirement
-        requireConvertible<bool>(i==i),
-        requireConvertible<bool>(i!=i),
-        I{} // default constructible
-      );
-    };
-
-  }
+    namespace Fallback {
+      struct EntityIterator
+      {
+        template<class I>
+        auto require(I&& i) -> decltype(
+          requireConcept<Entity,typename I::Entity>(),
+          requireType<typename I::Reference>(),
+          i++, // FIXME set type requirement
+          ++i, // FIXME set type requirement
+          requireConvertible<typename I::Reference>(*i),
+          i.operator ->(), // FIXME set type requirement
+          requireConvertible<bool>(i==i),
+          requireConvertible<bool>(i!=i),
+          I{} // default constructible
+        );
+      };
+    } // nampespace Fallback
+  } // nampespace Concept
 
   template <class I>
   constexpr void expectEntityIterator()
   {
 #if DUNE_HAVE_CXX_CONCEPTS
-    static_assert(Dune::Concept::Concept::EntityIterator<I>);
+    static_assert(Dune::Concept::EntityIterator<I>);
 #else
-    static_assert(models<Concept::EntityIterator, I>());
+    static_assert(models<Concept::Fallback::EntityIterator, I>());
 #endif
   }
 
-}  // end namespace Dune
+} // end namespace Dune
 
 #endif

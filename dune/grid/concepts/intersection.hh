@@ -11,11 +11,10 @@
 #endif
 
 namespace Dune {
-  namespace Concept
-  {
+  namespace Concept {
 
 #if DUNE_HAVE_CXX_CONCEPTS
-namespace Concept {
+
     template<class I>
     concept Intersection = requires(I i, typename I::LocalCoordinate local)
     {
@@ -49,57 +48,58 @@ namespace Concept {
       i = i;
       i = std::move(i);
     };
-}
+
 #endif
 
-    struct Intersection
-    {
-      template<class I>
-      auto require(I&& i) -> decltype(
-        requireConcept<Dune::Concept::EntityGeneral,typename I::Entity>(),
-        requireConcept<Dune::Concept::Geometry,typename I::Geometry>(),
-        requireConcept<Dune::Concept::Geometry,typename I::LocalGeometry>(),
-        requireType<typename I::ctype>(),
-        requireConvertible<int                            >( I::mydimension                                                     ),
-        requireConvertible<int                            >( I::dimensionworld                                                  ),
-        requireConvertible<bool                           >( i.boundary()                                                       ),
-        requireConvertible<size_t                         >( i.boundarySegmentIndex()                                           ),
-        requireConvertible<bool                           >( i.neighbor()                                                       ),
-        requireConvertible<typename I::Entity             >( i.inside()                                                         ),
-        requireConvertible<typename I::Entity             >( i.outside()                                                        ),
-        requireConvertible<bool                           >( i.conforming()                                                     ),
-        requireConvertible<typename I::LocalGeometry      >( i.geometryInInside()                                               ),
-        requireConvertible<typename I::LocalGeometry      >( i.geometryInOutside()                                              ),
-        requireConvertible<typename I::Geometry           >( i.geometry()                                                       ),
-        requireConvertible<Dune::GeometryType             >( i.type()                                                           ),
-        requireConvertible<int                            >( i.indexInInside()                                                  ),
-        requireConvertible<int                            >( i.indexInOutside()                                                 ),
-        requireConvertible<typename I::GlobalCoordinate   >( i.outerNormal(/*local*/ typename I::LocalCoordinate{} )            ),
-        requireConvertible<typename I::GlobalCoordinate   >( i.integrationOuterNormal(/*local*/ typename I::LocalCoordinate{} ) ),
-        requireConvertible<typename I::GlobalCoordinate   >( i.unitOuterNormal(/*local*/ typename I::LocalCoordinate{} )        ),
-        requireConvertible<typename I::GlobalCoordinate   >( i.centerUnitOuterNormal()                                          ),
-        requireConvertible<bool                           >( i == i                                                             ),
-        requireConvertible<bool                           >( i != i                                                             ),
-        I{},
-        I{i},
-        I{std::move(i)},
-        i = i,
-        i = std::move(i)
-      );
-    };
-
-  }
+    namespace Fallback {
+      struct Intersection
+      {
+        template<class I>
+        auto require(I&& i) -> decltype(
+          requireConcept<EntityGeneral,typename I::Entity>(),
+          requireConcept<Geometry,typename I::Geometry>(),
+          requireConcept<Geometry,typename I::LocalGeometry>(),
+          requireType<typename I::ctype>(),
+          requireConvertible<int                            >( I::mydimension                                                     ),
+          requireConvertible<int                            >( I::dimensionworld                                                  ),
+          requireConvertible<bool                           >( i.boundary()                                                       ),
+          requireConvertible<size_t                         >( i.boundarySegmentIndex()                                           ),
+          requireConvertible<bool                           >( i.neighbor()                                                       ),
+          requireConvertible<typename I::Entity             >( i.inside()                                                         ),
+          requireConvertible<typename I::Entity             >( i.outside()                                                        ),
+          requireConvertible<bool                           >( i.conforming()                                                     ),
+          requireConvertible<typename I::LocalGeometry      >( i.geometryInInside()                                               ),
+          requireConvertible<typename I::LocalGeometry      >( i.geometryInOutside()                                              ),
+          requireConvertible<typename I::Geometry           >( i.geometry()                                                       ),
+          requireConvertible<Dune::GeometryType             >( i.type()                                                           ),
+          requireConvertible<int                            >( i.indexInInside()                                                  ),
+          requireConvertible<int                            >( i.indexInOutside()                                                 ),
+          requireConvertible<typename I::GlobalCoordinate   >( i.outerNormal(/*local*/ typename I::LocalCoordinate{} )            ),
+          requireConvertible<typename I::GlobalCoordinate   >( i.integrationOuterNormal(/*local*/ typename I::LocalCoordinate{} ) ),
+          requireConvertible<typename I::GlobalCoordinate   >( i.unitOuterNormal(/*local*/ typename I::LocalCoordinate{} )        ),
+          requireConvertible<typename I::GlobalCoordinate   >( i.centerUnitOuterNormal()                                          ),
+          requireConvertible<bool                           >( i == i                                                             ),
+          requireConvertible<bool                           >( i != i                                                             ),
+          I{},
+          I{i},
+          I{std::move(i)},
+          i = i,
+          i = std::move(i)
+        );
+      };
+    } // nampespace Fallback
+  } // nampespace Concept
 
   template <class I>
   constexpr void expectIntersection()
   {
 #if DUNE_HAVE_CXX_CONCEPTS
-    static_assert(Dune::Concept::Concept::Intersection<I>);
+    static_assert(Concept::Intersection<I>);
 #else
-    static_assert(models<Concept::Intersection, I>());
+    static_assert(models<Concept::Fallback::Intersection, I>());
 #endif
   }
 
-}  // end namespace Dune
+} // end namespace Dune
 
 #endif

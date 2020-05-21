@@ -18,12 +18,10 @@
 #endif
 
 namespace Dune {
-  namespace Concept
-  {
+  namespace Concept {
 
 
 #if DUNE_HAVE_CXX_CONCEPTS
-namespace Concept{
 
     template<class GV, int codim>
     concept GridViewCodim = requires(GV gv)
@@ -56,49 +54,49 @@ namespace Concept{
     // Stop recursion
     template<class GV>
     struct is_grid_view_codim<GV,0> : std::bool_constant<GridViewCodim<GV,0>> {};
-}
+
 #endif
+    namespace Fallback {
 
-    template<int codim>
-    struct GridViewCodim : public Refines<GridViewCodim<codim-1>>
-    {
-      template<class GV>
-      auto require(GV&& gv) -> decltype(
-        requireConcept<Dune::Concept::EntityIterator, typename GV::template Codim<codim>::Iterator>(),
-        requireConcept<Dune::Concept::Entity,typename GV::template Codim<codim>::Entity>(),
-        requireConcept<Dune::Concept::Geometry,typename GV::template Codim<codim>::Geometry>(),
-        requireConcept<Dune::Concept::Geometry,typename GV::template Codim<codim>::LocalGeometry>(),
-        requireConcept<Dune::Concept::EntityIterator, typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Interior_Partition>::Iterator>(),
-        requireConcept<Dune::Concept::EntityIterator, typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::InteriorBorder_Partition>::Iterator>(),
-        requireConcept<Dune::Concept::EntityIterator, typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Overlap_Partition>::Iterator>(),
-        requireConcept<Dune::Concept::EntityIterator, typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::OverlapFront_Partition>::Iterator>(),
-        requireConcept<Dune::Concept::EntityIterator, typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::All_Partition>::Iterator>(),
-        requireConcept<Dune::Concept::EntityIterator, typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Ghost_Partition>::Iterator>(),
-        requireConvertible< typename GV::template Codim<codim>::Iterator                                                                              >( gv.template begin<codim>()                                                       ),
-        requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Interior_Partition>::Iterator         >( gv.template begin<codim,Dune::PartitionIteratorType::Interior_Partition>()       ),
-        requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::InteriorBorder_Partition>::Iterator   >( gv.template begin<codim,Dune::PartitionIteratorType::InteriorBorder_Partition>() ),
-        requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Overlap_Partition>::Iterator          >( gv.template begin<codim,Dune::PartitionIteratorType::Overlap_Partition>()        ),
-        requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::OverlapFront_Partition>::Iterator     >( gv.template begin<codim,Dune::PartitionIteratorType::OverlapFront_Partition>()   ),
-        requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::All_Partition>::Iterator              >( gv.template begin<codim,Dune::PartitionIteratorType::All_Partition>()            ),
-        requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Ghost_Partition>::Iterator            >( gv.template begin<codim,Dune::PartitionIteratorType::Ghost_Partition>()          ),
-        requireConvertible< typename GV::template Codim<codim>::Iterator                                                                              >( gv.template end<codim>()                                                         ),
-        requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Interior_Partition>::Iterator         >( gv.template end<codim,Dune::PartitionIteratorType::Interior_Partition>()         ),
-        requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::InteriorBorder_Partition>::Iterator   >( gv.template end<codim,Dune::PartitionIteratorType::InteriorBorder_Partition>()   ),
-        requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Overlap_Partition>::Iterator          >( gv.template end<codim,Dune::PartitionIteratorType::Overlap_Partition>()          ),
-        requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::OverlapFront_Partition>::Iterator     >( gv.template end<codim,Dune::PartitionIteratorType::OverlapFront_Partition>()     ),
-        requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::All_Partition>::Iterator              >( gv.template end<codim,Dune::PartitionIteratorType::All_Partition>()              ),
-        requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Ghost_Partition>::Iterator            >( gv.template end<codim,Dune::PartitionIteratorType::Ghost_Partition>()            )
-      );
-    };
+      template<int codim>
+      struct GridViewCodim : public Refines<GridViewCodim<codim-1>>
+      {
+        template<class GV>
+        auto require(GV&& gv) -> decltype(
+          requireConcept<EntityIterator, typename GV::template Codim<codim>::Iterator>(),
+          requireConcept<Entity,typename GV::template Codim<codim>::Entity>(),
+          requireConcept<Geometry,typename GV::template Codim<codim>::Geometry>(),
+          requireConcept<Geometry,typename GV::template Codim<codim>::LocalGeometry>(),
+          requireConcept<EntityIterator, typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Interior_Partition>::Iterator>(),
+          requireConcept<EntityIterator, typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::InteriorBorder_Partition>::Iterator>(),
+          requireConcept<EntityIterator, typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Overlap_Partition>::Iterator>(),
+          requireConcept<EntityIterator, typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::OverlapFront_Partition>::Iterator>(),
+          requireConcept<EntityIterator, typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::All_Partition>::Iterator>(),
+          requireConcept<EntityIterator, typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Ghost_Partition>::Iterator>(),
+          requireConvertible< typename GV::template Codim<codim>::Iterator                                                                              >( gv.template begin<codim>()                                                       ),
+          requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Interior_Partition>::Iterator         >( gv.template begin<codim,Dune::PartitionIteratorType::Interior_Partition>()       ),
+          requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::InteriorBorder_Partition>::Iterator   >( gv.template begin<codim,Dune::PartitionIteratorType::InteriorBorder_Partition>() ),
+          requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Overlap_Partition>::Iterator          >( gv.template begin<codim,Dune::PartitionIteratorType::Overlap_Partition>()        ),
+          requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::OverlapFront_Partition>::Iterator     >( gv.template begin<codim,Dune::PartitionIteratorType::OverlapFront_Partition>()   ),
+          requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::All_Partition>::Iterator              >( gv.template begin<codim,Dune::PartitionIteratorType::All_Partition>()            ),
+          requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Ghost_Partition>::Iterator            >( gv.template begin<codim,Dune::PartitionIteratorType::Ghost_Partition>()          ),
+          requireConvertible< typename GV::template Codim<codim>::Iterator                                                                              >( gv.template end<codim>()                                                         ),
+          requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Interior_Partition>::Iterator         >( gv.template end<codim,Dune::PartitionIteratorType::Interior_Partition>()         ),
+          requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::InteriorBorder_Partition>::Iterator   >( gv.template end<codim,Dune::PartitionIteratorType::InteriorBorder_Partition>()   ),
+          requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Overlap_Partition>::Iterator          >( gv.template end<codim,Dune::PartitionIteratorType::Overlap_Partition>()          ),
+          requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::OverlapFront_Partition>::Iterator     >( gv.template end<codim,Dune::PartitionIteratorType::OverlapFront_Partition>()     ),
+          requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::All_Partition>::Iterator              >( gv.template end<codim,Dune::PartitionIteratorType::All_Partition>()              ),
+          requireConvertible< typename GV::template Codim<codim>::template Partition<Dune::PartitionIteratorType::Ghost_Partition>::Iterator            >( gv.template end<codim,Dune::PartitionIteratorType::Ghost_Partition>()            )
+        );
+      };
 
-    // stop recursion
-    template<>
-    struct GridViewCodim<-1> : public AnyType {};
+      // stop recursion
+      template<>
+      struct GridViewCodim<-1> : public AnyType {};
 
-
+    } // nampespace Fallback
 
 #if DUNE_HAVE_CXX_CONCEPTS
-namespace Concept{
 
     template<class GV>
     concept GridView = requires(GV gv, int codim, Dune::GeometryType type, const typename GV::template Codim<0>::Entity& entity)
@@ -126,46 +124,47 @@ namespace Concept{
       Std::copy_constructible<GV>;
       gv = gv;
     };
-}
+
 #endif
+    namespace Fallback {
 
-    struct GridView
-    {
-      template<class GV>
-      auto require(GV&& gv) -> decltype(
-        requireType<typename GV::Traits>(),
-        requireType<typename GV::ctype>(),
-        requireConcept<Dune::Concept::IndexSet,typename GV::IndexSet>(),
-        requireConcept<Dune::Concept::Intersection,typename GV::Intersection>(),
-        requireConcept<Dune::Concept::IntersectionIterator,typename GV::IntersectionIterator>(),
-        requireConcept<Dune::Concept::GridViewCodim<GV::dimension>,GV>(),
-        requireConvertible< bool                                  >( GV::conforming                                                                        ),
-        requireConvertible< int                                   >( GV::dimension                                                                         ),
-        requireConvertible< int                                   >( GV::dimensionworld                                                                    ),
-        requireConvertible< const typename GV::Grid&              >( gv.grid()                                                                             ),
-        requireConvertible< const typename GV::IndexSet&          >( gv.indexSet()                                                                         ),
-        requireConvertible< int                                   >( gv.size(/*codim*/ int{} )                                                             ),
-        requireConvertible< int                                   >( gv.size(/*type*/ Dune::GeometryType{} )                                               ),
-        requireConvertible< typename GV::IntersectionIterator     >( gv.ibegin(/*entity*/ std::declval<const typename GV::template Codim<0>::Entity&>() )  ),
-        requireConvertible< typename GV::IntersectionIterator     >( gv.iend(/*entity*/ std::declval<const typename GV::template Codim<0>::Entity&>() )    ),
-        requireConvertible< typename GV::CollectiveCommunication  >( gv.comm()                                                                             ),
-        requireConvertible< int                                   >( gv.overlapSize(/*codim*/ int{} )                                                      ),
-        requireConvertible< int                                   >( gv.ghostSize(/*codim*/ int{} )                                                        ),
-        // gv.communicate(std::declval<Handler&>(),std::declval<Dune::InterfaceType>(), std::declval<CommunicationDirection>()), // FIXME use a default handler to instantiate this function
-        GV{gv},
-        gv = gv
-      );
-    };
-
-  }
+      struct GridView
+      {
+        template<class GV>
+        auto require(GV&& gv) -> decltype(
+          requireType<typename GV::Traits>(),
+          requireType<typename GV::ctype>(),
+          requireConcept<IndexSet,typename GV::IndexSet>(),
+          requireConcept<Intersection,typename GV::Intersection>(),
+          requireConcept<IntersectionIterator,typename GV::IntersectionIterator>(),
+          requireConcept<GridViewCodim<GV::dimension>,GV>(),
+          requireConvertible< bool                                  >( GV::conforming                                                                        ),
+          requireConvertible< int                                   >( GV::dimension                                                                         ),
+          requireConvertible< int                                   >( GV::dimensionworld                                                                    ),
+          requireConvertible< const typename GV::Grid&              >( gv.grid()                                                                             ),
+          requireConvertible< const typename GV::IndexSet&          >( gv.indexSet()                                                                         ),
+          requireConvertible< int                                   >( gv.size(/*codim*/ int{} )                                                             ),
+          requireConvertible< int                                   >( gv.size(/*type*/ Dune::GeometryType{} )                                               ),
+          requireConvertible< typename GV::IntersectionIterator     >( gv.ibegin(/*entity*/ std::declval<const typename GV::template Codim<0>::Entity&>() )  ),
+          requireConvertible< typename GV::IntersectionIterator     >( gv.iend(/*entity*/ std::declval<const typename GV::template Codim<0>::Entity&>() )    ),
+          requireConvertible< typename GV::CollectiveCommunication  >( gv.comm()                                                                             ),
+          requireConvertible< int                                   >( gv.overlapSize(/*codim*/ int{} )                                                      ),
+          requireConvertible< int                                   >( gv.ghostSize(/*codim*/ int{} )                                                        ),
+          // gv.communicate(std::declval<Handler&>(),std::declval<Dune::InterfaceType>(), std::declval<CommunicationDirection>()), // FIXME use a default handler to instantiate this function
+          GV{gv},
+          gv = gv
+        );
+      };
+    } // nampespace Fallback
+  } // nampespace Concept
 
   template <class GV>
   constexpr void expectGridView()
   {
 #if DUNE_HAVE_CXX_CONCEPTS
-    static_assert(Concept::Concept::GridView<GV>);
+    static_assert(Concept::GridView<GV>);
 #else
-    static_assert(models<Concept::GridView, GV>());
+    static_assert(models<Concept::Fallback::GridView, GV>());
 #endif
   }
 
