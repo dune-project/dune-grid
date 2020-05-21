@@ -120,7 +120,8 @@ namespace Concept{
       { gv.comm()             } -> Std::convertible_to< typename GV::CollectiveCommunication  >;
       { gv.overlapSize(codim) } -> Std::convertible_to< int                                   >;
       { gv.ghostSize(codim)   } -> Std::convertible_to< int                                   >;
-      requires is_grid_view_codim<GV>::value;
+      requires GridViewCodim<GV,0>; // Force compiler to issue errors on codim 0
+      requires is_grid_view_codim<GV>::value; // Start recursion on other codims
       // gv.communicate(std::declval<Handler&>(),std::declval<Dune::InterfaceType>(), std::declval<CommunicationDirection>()), // FIXME use a default handler to instantiate this function
       Std::copy_constructible<GV>;
       gv = gv;

@@ -137,6 +137,7 @@ namespace Concept {
       { e.isNew()                       } -> Std::convertible_to<bool>;
       { e.mightVanish()                 } -> Std::convertible_to<bool>;
       { e.hasBoundaryIntersections()    } -> Std::convertible_to<bool>;
+      requires EntityCodimExtended<E,0>; // Force compiler to issue errors on codim 0
       requires is_entity_codim_extended<E>::value; // Start recursion on codim entities
       requires std::is_same<E,typename E::template Codim<0>::Entity>::value;
     };
