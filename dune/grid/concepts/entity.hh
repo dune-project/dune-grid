@@ -1,7 +1,6 @@
 #ifndef DUNE_GRID_CONCEPTS_ENTITY_HH
 #define DUNE_GRID_CONCEPTS_ENTITY_HH
 
-#include <dune/grid/concepts/anytype.hh>
 #include <dune/grid/concepts/geometry.hh>
 #include <dune/grid/common/gridenums.hh>
 
@@ -144,7 +143,10 @@ namespace Dune {
 
       // stop recursion
       template<>
-      struct EntityCodimExtended<-1> : public AnyType {};
+      struct EntityCodimExtended<-1> {
+        template<class E>
+        std::true_type require(E&& e);
+      };
 
     } // nampespace Fallback
 

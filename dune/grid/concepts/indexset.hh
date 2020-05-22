@@ -1,7 +1,6 @@
 #ifndef DUNE_GRID_CONCEPTS_INDEX_SET_HH
 #define DUNE_GRID_CONCEPTS_INDEX_SET_HH
 
-#include <dune/grid/concepts/anytype.hh>
 #include <dune/grid/concepts/entity.hh>
 
 #include <dune/geometry/type.hh>
@@ -54,7 +53,10 @@ namespace Dune {
 
       // Stop recursion
       template<>
-      struct IndexSetEntityCodim<-1> : public AnyType {};
+      struct IndexSetEntityCodim<-1> {
+        template<class E>
+        std::true_type require(E&& e);
+      };
 
     } // nampespace Fallback
 
@@ -144,7 +146,10 @@ namespace Dune {
 
       // stop recursion
       template<>
-      struct IdSetEntityCodim<-1> : public AnyType {};
+      struct IdSetEntityCodim<-1> {
+        template<class E>
+        std::true_type require(E&& e);
+      };
 
     }  // nampespace Fallback
 

@@ -1,5 +1,4 @@
 set(HEADERS
-  anytype.hh
   entity.hh
   entityiterator.hh
   geometry.hh
