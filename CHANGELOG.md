@@ -3,15 +3,17 @@ SPDX-FileCopyrightText: Copyright © DUNE Project contributors, see file LICENSE
 SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 -->
 
+## Changelog
+
 - Provide `communicate()` method in `OneDGrid` and `IdentityGrid`
+
+- Grid concepts are here! A `Grid` can now be inspected and also its components checked for valid
+  interfaces at compilation time using c++20 concepts. Note, this feature is still in development and
+  might be subject to changes.
 
 # Master (will become release 2.9)
 
 - UGGrid is now thread safe on the grid view.
-
-- Grid concepts are here! A `Grid` can now be inspected and extended
-  at compilation time using concepts.
-
 - The `Geometry` interface was extended by methods `jacobian(local)` and `jacobianInverse(local)`
   and corresponding typedefs `Jacobian` and `JacobianInverse`. All grid implementations need to
   provide the new interface. For transition, the methods and typedefs are default-implemented
