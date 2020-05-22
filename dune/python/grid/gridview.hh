@@ -165,7 +165,7 @@ namespace Dune
         )doc" );
 
       // register iterators
-      Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [ &cls ] ( auto &&codim ) {
+      Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [] ( auto &&codim ) {
           registerPyGridViewIterator< GridView, codim >();
         } );
 
