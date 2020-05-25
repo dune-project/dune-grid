@@ -80,7 +80,7 @@ inline int runShell(const std::string &code)
 
 inline int runPython(const std::string &code)
 {
-  return runShell("python -c '"+shq(code)+"'");
+  return runShell("python3 -c '"+shq(code)+"'");
 }
 
 inline bool is_suffix(const std::string &s, const std::string &suffix)
