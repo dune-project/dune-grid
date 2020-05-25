@@ -1,0 +1,14 @@
+ 
+/**
+ * @defgroup grid_recipes dune-grid recipes
+ * @{
+ * \page all_grid_recipes dune-grid recipes
+ * These recipes are short examples on how to achieve common tasks in dune-grid.
+ *
+ * Some simple examples illustrating the grid interface
+ * ==============
+ * - \subpage recipe-iterate-over-grid
+ * - \subpage recipe-integration
+ *
+ * @}
+ */
