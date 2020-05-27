@@ -300,8 +300,9 @@ namespace Dune
         )doc" );
 
       registerVTKWriter< GridView >( cls );
-      cls.def( "vtkWriter", [] ( const GridView &self ) {
-          return new VTKWriter< GridView >( self );
+      cls.def( "vtkWriter", [] ( const GridView &self, const bool nonconforming = false ) {
+          const VTK::DataMode dm = nonconforming ? VTK::nonconforming : VTK::conforming;
+          return new VTKWriter< GridView >( self, dm );
         }, pybind11::keep_alive< 0, 1 >() );
       cls.def( "vtkWriter", [] ( const GridView &self, int subsampling ) {
             return new SubsamplingVTKWriter< GridView >( self,
