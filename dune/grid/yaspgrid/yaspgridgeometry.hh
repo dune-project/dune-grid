@@ -33,7 +33,7 @@ namespace Dune {
 
     //! default constructor
     YaspGeometry ()
-      : AxisAlignedCubeGeometry<ctype,mydim,cdim>(FieldVector<ctype,cdim>(0),FieldVector<ctype,cdim>(0))
+      : AxisAlignedCubeGeometry<ctype,mydim,cdim>(FieldVector<ctype,cdim>(0),FieldVector<ctype,cdim>(0), (1<<mydim)-1)
     {}
 
     //! constructor from midpoint and extension and a bitset defining which unit vectors span the entity
