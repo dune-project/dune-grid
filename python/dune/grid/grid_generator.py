@@ -57,8 +57,8 @@ def writeVTK(grid, name,
              celldata=None, pointdata=None,
              cellvector=None, pointvector=None,
              number=None, subsampling=None,outputType=OutputType.ascii,
-             write=True):
-    vtk = grid.vtkWriter() if subsampling is None else grid.vtkWriter(subsampling)
+             write=True, nonconforming=False):
+    vtk = grid.vtkWriter(nonconforming) if subsampling is None else grid.vtkWriter(subsampling)
 
     def addDataToVTKWriter(dataFunctions, dataName, dataTag):
         if dataFunctions is None: return
