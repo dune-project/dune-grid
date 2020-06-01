@@ -3,6 +3,8 @@
 #ifndef DUNE_AMIRAMESH_READER_HH
 #define DUNE_AMIRAMESH_READER_HH
 
+#warning Support for AmiraMesh is deprecated and will be removed after Dune 2.8.
+
 #include <memory>
 #include <string>
 
