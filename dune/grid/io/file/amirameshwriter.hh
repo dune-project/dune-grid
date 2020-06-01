@@ -3,6 +3,8 @@
 #ifndef DUNE_AMIRAMESH_WRITER_HH
 #define DUNE_AMIRAMESH_WRITER_HH
 
+#warning Support for AmiraMesh is deprecated and will be removed after Dune 2.8.
+
 #include <string>
 #include <array>
 

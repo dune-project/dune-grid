@@ -27,6 +27,8 @@
 
 - Support for PSurface is deprecated and will be removed after Dune 2.8.
 
+- Support for AmiraMesh is deprecated and will be removed after Dune 2.8.
+
 # Release 2.7
 
 - The `YaspGrid` class has a new constructor that takes a `Coordinates`
