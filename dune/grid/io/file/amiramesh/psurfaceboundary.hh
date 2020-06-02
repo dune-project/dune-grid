@@ -3,6 +3,8 @@
 #ifndef DUNE_GRID_IO_FILE_AMIRAMESH_PSURFACE_BOUNDARY_HH
 #define DUNE_GRID_IO_FILE_AMIRAMESH_PSURFACE_BOUNDARY_HH
 
+#warning Support for PSurface is deprecated and will be removed after Dune 2.8.
+
 /** \file
  *  \brief A domain boundary implemented by the psurface library
  */
