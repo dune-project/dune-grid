@@ -25,6 +25,8 @@
 
 - Remove deprecated header `dune/common/universalmapper.hh`.
 
+- Support for PSurface is deprecated and will be removed after Dune 2.8.
+
 # Release 2.7
 
 - The `YaspGrid` class has a new constructor that takes a `Coordinates`
