@@ -67,76 +67,65 @@
 
 int main(int argc, char** argv)
 {
-  try{
+  // Maybe initialize Mpi
+  Dune::MPIHelper& helper = Dune::MPIHelper::instance(argc, argv);
 
-    // Maybe initialize Mpi
-    Dune::MPIHelper& helper = Dune::MPIHelper::instance(argc, argv);
+  // [set up grid]
+  const int dim = 4;
+  using Grid = Dune::YaspGrid<dim>;
+  Dune::FieldVector<double,dim> len; for (auto& l:len) l=1.0;
+  std::array<int,dim> cells; for (auto& c : cells) c=5;
+  Grid grid(len,cells);
+  //! [set up grid]
 
-    // [set up grid]
-    const int dim = 4;
-    using Grid = Dune::YaspGrid<dim>;
-    Dune::FieldVector<double,dim> len; for (auto& l:len) l=1.0;
-    std::array<int,dim> cells; for (auto& c : cells) c=5;
-    Grid grid(len,cells);
-    //! [set up grid]
+  // [small vectors and matrices]
+  Dune::FieldVector<double,4> x({1,2,3,4}); // make a vector
+  auto y(x); // copy constructor
+  y *= 1.0/3.0; // scaling
+  auto s = x*y; // scalar product
+  auto norm = x.two_norm(); // Euclidean norm
+  Dune::FieldMatrix<double,4,4> A({{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}}); // make a matrix
+  A.mv(x,y); // matvec: y = Ax
+  A.usmv(0.5,x,y); // axpy: y += 0.5*Ax
+  //! [small vectors and matrices]
 
-    // [small vectors and matrices]
-    Dune::FieldVector<double,4> x({1,2,3,4}); // make a vector
-    auto y(x); // copy constructor
-    y *= 1.0/3.0; // scaling
-    auto s = x*y; // scalar product
-    auto norm = x.two_norm(); // Euclidean norm
-    Dune::FieldMatrix<double,4,4> A({{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}}); // make a matrix
-    A.mv(x,y); // matvec: y = Ax
-    A.usmv(0.5,x,y); // axpy: y += 0.5*Ax
-    //! [small vectors and matrices]
+  // [a function to integrate]
+  auto u = [](const auto& x){return std::exp(x.two_norm());};
+  //! [a function to integrate]
 
-    // [a function to integrate]
-    auto u = [](const auto& x){return std::exp(x.two_norm());};
-    //! [a function to integrate]
+  // [integration with midpoint rule]
+  double integral=0.0;
+  auto gv = grid.leafGridView(); // extract the grid view
+  for (const auto& e : elements(gv))
+    integral += u(e.geometry().center())*e.geometry().volume();
+  std::cout << "integral = " << integral << std::endl;
+  //! [integration with midpoint rule]
 
-    // [integration with midpoint rule]
-    double integral=0.0;
-    auto gv = grid.leafGridView(); // extract the grid view
-    for (const auto& e : elements(gv))
-      integral += u(e.geometry().center())*e.geometry().volume();
-    std::cout << "integral = " << integral << std::endl;
-    //! [integration with midpoint rule]
-
-    // [integration with quadrature rule]
-    double integral2 = 0.0;
-    using QR = Dune::QuadratureRules<Grid::ctype,dim>;
-    for (const auto& e : elements(gv))
-      {
-        auto geo = e.geometry();
-        auto quadrature = QR::rule(geo.type(),5);
-        for (const auto& qp : quadrature)
-          integral2 += u(geo.global(qp.position()))
-            *geo.integrationElement(qp.position())*qp.weight();
-      }
-    std::cout << "integral2 = " << integral2 << std::endl;
-    //! [integration with quadrature rule]
-
-    // [integrating a flux]
-    auto f = [](const auto& x){return x;};
-    double divergence=0.0;
-    for (const auto& i : elements(gv)) {
-      for (const auto& I : intersections(gv,i))
-        if (!I.neighbor())
-          {
-            auto geoI = I.geometry();
-            divergence += f(geoI.center())*I.centerUnitOuterNormal()*geoI.volume();
-          }
+  // [integration with quadrature rule]
+  double integral2 = 0.0;
+  using QR = Dune::QuadratureRules<Grid::ctype,dim>;
+  for (const auto& e : elements(gv))
+    {
+      auto geo = e.geometry();
+      auto quadrature = QR::rule(geo.type(),5);
+      for (const auto& qp : quadrature)
+        integral2 += u(geo.global(qp.position()))
+          *geo.integrationElement(qp.position())*qp.weight();
     }
-    std::cout << "divergence = " << divergence << std::endl;
-    //! [integrating a flux]
+  std::cout << "integral2 = " << integral2 << std::endl;
+  //! [integration with quadrature rule]
+
+  // [integrating a flux]
+  auto f = [](const auto& x){return x;};
+  double divergence=0.0;
+  for (const auto& i : elements(gv)) {
+    for (const auto& I : intersections(gv,i))
+      if (!I.neighbor())
+        {
+          auto geoI = I.geometry();
+          divergence += f(geoI.center())*I.centerUnitOuterNormal()*geoI.volume();
+        }
   }
-  catch (Dune::Exception &e){
-    std::cerr << "Dune reported error: " << e << std::endl;
-    return 1;
-  }
-  catch (...){
-    std::cerr << "Unknown exception thrown!" << std::endl;
-    return 1;
-  }
+  std::cout << "divergence = " << divergence << std::endl;
+  //! [integrating a flux]
 }
