@@ -52,50 +52,38 @@
 
 int main(int argc, char** argv)
 {
-  try{
+  // Maybe initialize Mpi
+  Dune::MPIHelper& helper = Dune::MPIHelper::instance(argc, argv);
 
-    // Maybe initialize Mpi
-    Dune::MPIHelper& helper = Dune::MPIHelper::instance(argc, argv);
+  // [set up grid]
+  const int dim = 4;
+  using Grid = Dune::YaspGrid<dim>;
+  Dune::FieldVector<double,dim> len; for (auto& l : len) l=1.0;
+  std::array<int,dim> cells; for (auto& c : cells) c=4;
+  Grid grid(len,cells);
+  //! [set up grid]
 
-    // [set up grid]
-    const int dim = 4;
-    using Grid = Dune::YaspGrid<dim>;
-    Dune::FieldVector<double,dim> len; for (auto& l : len) l=1.0;
-    std::array<int,dim> cells; for (auto& c : cells) c=4;
-    Grid grid(len,cells);
-    //! [set up grid]
+  // [extract gridview]
+  auto gv = grid.leafGridView();
+  //! [extract gridview]
 
-    // [extract gridview]
-    auto gv = grid.leafGridView();
-    //! [extract gridview]
+  // [iterate over codim]
+  const int codim = 2;
+  for (const auto& e : entities(gv,Dune::Codim<codim>{}))
+    if (!e.type().isCube()) std::cout << "not a cube" << std::endl;
+  //! [iterate over codim]
 
-    // [iterate over codim]
-    const int codim = 2;
-    for (const auto& e : entities(gv,Dune::Codim<codim>{}))
-      if (!e.type().isCube()) std::cout << "not a cube" << std::endl;
-    //! [iterate over codim]
+  // [iterate over grid view]
+  for (const auto& e : elements(gv)); // codim=0
+  for (const auto& e : vertices(gv)); // codim=dim
+  for (const auto& e : edges(gv));    // codim=dim-1
+  for (const auto& e : facets(gv));   // codim=1
+  //! [iterate over grid view]
 
-    // [iterate over grid view]
-    for (const auto& e : elements(gv)); // codim=0
-    for (const auto& e : vertices(gv)); // codim=dim
-    for (const auto& e : edges(gv));    // codim=dim-1
-    for (const auto& e : facets(gv));   // codim=1
-    //! [iterate over grid view]
-
-    // [access to subentities]
-    const int mycodim = 2;
-    for (const auto& e : elements(gv))
-      for (unsigned int i=0; i<e.subEntities(mycodim); ++i)
-        auto v = e.template subEntity<codim>(i);
-    //! [access to subentities]
-
-  }
-  catch (Dune::Exception &e){
-    std::cerr << "Dune reported error: " << e << std::endl;
-    return 1;
-  }
-  catch (...){
-    std::cerr << "Unknown exception thrown!" << std::endl;
-    return 1;
-  }
+  // [access to subentities]
+  const int mycodim = 2;
+  for (const auto& e : elements(gv))
+    for (unsigned int i=0; i<e.subEntities(mycodim); ++i)
+      auto v = e.template subEntity<codim>(i);
+  //! [access to subentities]
 }
