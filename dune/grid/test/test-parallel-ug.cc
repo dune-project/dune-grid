@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <memory>
 #include <vector>
+#include <bitset>
 
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/float_cmp.hh>
@@ -21,10 +22,9 @@
 using namespace Dune;
 
 // A DataHandle class to exchange entries of a vector.
-template<class MapperT, int commCodim>
+template<class MapperT>
 class DataExchange
-  : public Dune::CommDataHandleIF<DataExchange<MapperT,
-            commCodim>,
+  : public Dune::CommDataHandleIF<DataExchange<MapperT>,
         double>
 {
 public:
@@ -34,6 +34,7 @@ public:
 
   //! constructor
   DataExchange(const MapperT &mapper,
+               std::bitset<MapperT::GridView::dimension+1> communicationCodims,
                UserDataType &userDataSend,
                UserDataType &userDataReceive)
     : mapper_(mapper),
@@ -45,7 +46,7 @@ public:
   //! returns true if data for this codim should be communicated
   bool contains (int dim, int codim) const
   {
-    return (codim == commCodim);
+    return communicationCodims_[codim];
   }
 
   //! returns true if size per entity of given dim and codim is a constant
@@ -104,6 +105,7 @@ public:
 
 private:
   const MapperT &mapper_;
+  const std::bitset<MapperT::GridView::dimension+1> communicationCodims_;
   UserDataType &userDataSend_;
   UserDataType &userDataReceive_;
 };
@@ -207,55 +209,67 @@ struct checkMappersWrapper<2, 1, GridView>
 { static void check(const GridView &gv) { } };
 
 
-template <class GridView, int commCodim>
-void testCommunication(const GridView &gridView)
+template <class GridView>
+void testCommunication(const GridView &gridView,
+                       std::bitset<GridView::dimension+1> communicationCodims)
 {
   const int dim = GridView::dimension;
 
   dverb << gridView.comm().rank() + 1
-            << ": Testing communication for codim " << commCodim << " entities\n";
+            << ": Testing communication for the following codimensions " << communicationCodims << std::endl;
 
   typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView> MapperType;
-  MapperType mapper(gridView, mcmgLayout(Codim<commCodim>{}));
+  auto mcmgLayout = [&communicationCodims](GeometryType gt, int dimgrid)
+    {
+      return communicationCodims[dim - gt.dim()];
+    };
+  MapperType mapper(gridView, mcmgLayout);
 
   // create the user data arrays
   using UserDataType = std::vector<Dune::FieldVector<double, 1> >;
 
-  UserDataType userDataSend(gridView.size(commCodim), 0.0);
-  UserDataType userDataReceive(gridView.size(commCodim), 0.0);
-  UserDataType entityIndex(gridView.size(commCodim), -1e10);
-  UserDataType partitionType(gridView.size(commCodim), -1e10);
+  UserDataType userDataSend(mapper.size(), 0.0);
+  UserDataType userDataReceive(mapper.size(), 0.0);
+  UserDataType entityIndex(mapper.size(), -1e10);
+  UserDataType partitionType(mapper.size(), -1e10);
 
   // write the partition type of each entity into the corresponding
   // result array
-  for (const auto& element : elements(gridView)) {
-    int numberOfSubEntities = element.subEntities(commCodim);
-    for (int k = 0; k < numberOfSubEntities; k++)
-    {
-      const auto entity(element.template subEntity<commCodim>(k));
-      entityIndex[mapper.index(entity)]   = mapper.index(entity);
-      partitionType[mapper.index(entity)] = entity.partitionType();
-
-      if (entity.partitionType() == Dune::BorderEntity)
+  for (const auto& element : elements(gridView))
+  {
+    Hybrid::forEach(std::make_index_sequence< dim+1 >{},
+      [&](auto codim){
+      if (communicationCodims[codim])
       {
-        const auto geometry = element.geometry();
-        const auto gt = geometry.type();
+        auto numberOfSubEntities = element.subEntities(codim);
+        for (std::size_t k = 0; k < numberOfSubEntities; k++)
+        {
+          const auto entity(element.template subEntity<codim>(k));
+          entityIndex[mapper.index(entity)]   = mapper.index(entity);
+          partitionType[mapper.index(entity)] = entity.partitionType();
 
-        auto referenceElement = Dune::referenceElement<double, dim>(gt);
-        const auto entityGlobal = geometry.global(referenceElement.position(k, commCodim));
-        dverb << gridView.comm().rank()+1 << ": border codim "
-                  << commCodim << " entity "
+          if (entity.partitionType() == Dune::BorderEntity)
+          {
+            const auto geometry = element.geometry();
+
+            auto referenceElement = Dune::referenceElement<double, dim>(element.type());
+            const auto entityGlobal = geometry.global(referenceElement.position(k, codim));
+            dverb << gridView.comm().rank()+1 << ": border codim "
+                  << codim << " entity "
                   << mapper.index(entity) << " (" << entityGlobal
                   << ")" << std::endl;
+          }
+        }
       }
-    }
+    });
   }
 
   // initialize data handle (marks the nodes where some data was
   // send or received)
-  DataExchange<MapperType, commCodim> datahandle(mapper,
-                                                 userDataSend,
-                                                 userDataReceive);
+  DataExchange<MapperType> datahandle(mapper,
+                                      communicationCodims,
+                                      userDataSend,
+                                      userDataReceive);
 
   // communicate the entities at the interior border to all other
   // processes
@@ -495,19 +509,14 @@ void testParallelUG(bool simplexGrid, bool localRefinement, int refinementDim, b
   checkMappersWrapper<dim, 2, LeafGV>::check(leafGridView);
   checkMappersWrapper<dim, 3, LeafGV>::check(leafGridView);
 
-  // Test element and node communication on level view
-  testCommunication<LevelGV, 0>(level0GridView);
-  testCommunication<LevelGV, dim>(level0GridView);
-  testCommunication<LevelGV, dim-1>(level0GridView);
-  if (dim == 3)
-    testCommunication<LevelGV, 1>(level0GridView);
-
-  // Test element and node communication on leaf view
-  testCommunication<LeafGV, 0>(leafGridView);
-  testCommunication<LeafGV, dim>(leafGridView);
-  testCommunication<LeafGV, dim-1>(leafGridView);
-  if (dim == 3)
-    testCommunication<LeafGV, 1>(leafGridView);
+  // Test communication
+  // The variable codimSet encodes a set of codimensions as a bitset.
+  // We loop over all possible sets.
+  for (std::size_t codimSet=0; codimSet<(1<<(dim+1)); codimSet++)
+  {
+    testCommunication<LevelGV>(level0GridView, std::bitset<dim+1>(codimSet));
+    testCommunication<LeafGV>(leafGridView, std::bitset<dim+1>(codimSet));
+  }
 
   ////////////////////////////////////////////////////
   //  Refine globally and test again
@@ -553,20 +562,16 @@ void testParallelUG(bool simplexGrid, bool localRefinement, int refinementDim, b
   checkMappersWrapper<dim, 2, LeafGV>::check(grid->leafGridView());
   checkMappersWrapper<dim, 3, LeafGV>::check(grid->leafGridView());
 
-  for (int i=0; i<=grid->maxLevel(); i++)
+  // Test communication
+  // The variable codimSet encodes a set of codimensions as a bitset.
+  // We loop over all possible sets.
+  for (std::size_t codimSet=0; codimSet<(1<<(dim+1)); codimSet++)
   {
-    testCommunication<LevelGV, 0>(grid->levelGridView(i));
-    testCommunication<LevelGV, dim>(grid->levelGridView(i));
-    testCommunication<LevelGV, dim-1>(grid->levelGridView(i));
-    if (dim == 3)
-      testCommunication<LevelGV, 1>(grid->levelGridView(i));
-  }
-  testCommunication<LeafGV, 0>(grid->leafGridView());
-  testCommunication<LeafGV, dim>(grid->leafGridView());
-  testCommunication<LeafGV, dim-1>(grid->leafGridView());
-  if (dim == 3)
-    testCommunication<LeafGV, 1>(grid->leafGridView());
+    for (int i=0; i<=grid->maxLevel(); i++)
+      testCommunication<LevelGV>(grid->levelGridView(i), std::bitset<dim+1>(codimSet));
 
+    testCommunication<LeafGV>(leafGridView, std::bitset<dim+1>(codimSet));
+  }
 }
 
 template<class GridView>
