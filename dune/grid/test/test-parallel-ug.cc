@@ -208,8 +208,10 @@ struct checkMappersWrapper<2, 1, GridView>
 
 
 template <class GridView, int commCodim>
-void testCommunication(const GridView &gridView, bool isLeaf)
+void testCommunication(const GridView &gridView)
 {
+  const int dim = GridView::dimension;
+
   dverb << gridView.comm().rank() + 1
             << ": Testing communication for codim " << commCodim << " entities\n";
 
@@ -217,7 +219,8 @@ void testCommunication(const GridView &gridView, bool isLeaf)
   MapperType mapper(gridView, mcmgLayout(Codim<commCodim>{}));
 
   // create the user data arrays
-  typedef std::vector<Dune::FieldVector<double, 1> > UserDataType;
+  using UserDataType = std::vector<Dune::FieldVector<double, 1> >;
+
   UserDataType userDataSend(gridView.size(commCodim), 0.0);
   UserDataType userDataReceive(gridView.size(commCodim), 0.0);
   UserDataType entityIndex(gridView.size(commCodim), -1e10);
@@ -225,84 +228,39 @@ void testCommunication(const GridView &gridView, bool isLeaf)
 
   // write the partition type of each entity into the corrosponding
   // result array
-  for (const auto& entity : entities(gridView, Dune::Codim<commCodim>())) {
-    entityIndex[mapper.index(entity)]   = mapper.index(entity);
-    partitionType[mapper.index(entity)] = entity.partitionType();
+  for (const auto& element : elements(gridView)) {
+    int numberOfSubEntities = element.subEntities(commCodim);
+    for (int k = 0; k < numberOfSubEntities; k++)
+    {
+      const auto entity(element.template subEntity<commCodim>(k));
+      entityIndex[mapper.index(entity)]   = mapper.index(entity);
+      partitionType[mapper.index(entity)] = entity.partitionType();
+
+      if (entity.partitionType() == Dune::BorderEntity)
+      {
+        const auto geometry = element.geometry();
+        const auto gt = geometry.type();
+
+        auto referenceElement = Dune::referenceElement<double, dim>(gt);
+        const auto entityGlobal = geometry.global(referenceElement.position(k, commCodim));
+        dverb << gridView.comm().rank()+1 << ": border codim "
+                  << commCodim << " entity "
+                  << mapper.index(entity) << " (" << entityGlobal
+                  << ")" << std::endl;
+      }
+    }
   }
 
   // initialize data handle (marks the nodes where some data was
   // send or received)
-  typedef DataExchange<MapperType, commCodim> MyDataHandle;
-  MyDataHandle datahandle(mapper,
-                          userDataSend,
-                          userDataReceive);
+  DataExchange<MapperType, commCodim> datahandle(mapper,
+                                                 userDataSend,
+                                                 userDataReceive);
 
   // communicate the entities at the interior border to all other
   // processes
   gridView.communicate(datahandle, Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication);
 }
-
-//! edge and face communication
-template <class GridView, int commCodim>
-class EdgeAndFaceCommunication
-{
-public:
-  static void test(const GridView &gridView)
-  {
-    const int dim = GridView::dimension;
-
-    dverb << gridView.comm().rank() + 1
-              << ": Testing communication for codim " << commCodim << " entities\n";
-
-    typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView> MapperType;
-    MapperType mapper(gridView, mcmgLayout(Codim<commCodim>{}));
-
-    // create the user data arrays
-    typedef std::vector<Dune::FieldVector<double, 1> > UserDataType;
-    UserDataType userDataSend(gridView.size(commCodim), 0.0);
-    UserDataType userDataReceive(gridView.size(commCodim), 0.0);
-    UserDataType entityIndex(gridView.size(commCodim), -1e10);
-    UserDataType partitionType(gridView.size(commCodim), -1e10);
-
-    // write the partition type of each entity into the corresponding
-    // result array
-    for (const auto& element : elements(gridView)) {
-      int numberOfSubEntities = element.subEntities(commCodim);
-      for (int k = 0; k < numberOfSubEntities; k++)
-      {
-        typedef typename GridView::template Codim<0>::Entity Element;
-        typedef typename Element::template Codim<commCodim>::Entity Entity;
-        const Entity entity(element.template subEntity<commCodim>(k));
-        entityIndex[mapper.index(entity)]   = mapper.index(entity);
-        partitionType[mapper.index(entity)] = entity.partitionType();
-
-        if (entity.partitionType() == Dune::BorderEntity)
-        {
-          const auto geometry = element.geometry();
-          const auto gt = geometry.type();
-
-          auto referenceElement = Dune::referenceElement<double, dim>(gt);
-          const auto entityGlobal = geometry.global(referenceElement.position(k, commCodim));
-          dverb << gridView.comm().rank()+1 << ": border codim "
-                    << commCodim << " entity "
-                    << mapper.index(entity) << " (" << entityGlobal
-                    << ")" << std::endl;
-        }
-      }
-    }
-
-    // initialize data handle (marks the nodes where some data was
-    // send or received)
-    typedef DataExchange<MapperType, commCodim> MyDataHandle;
-    MyDataHandle datahandle(mapper,
-                            userDataSend,
-                            userDataReceive);
-
-    // communicate the entities at the interior border to all other
-    // processes
-    gridView.communicate(datahandle, Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication);
-  }
-};
 
 template<typename Grid>
 class LoadBalance
@@ -538,18 +496,18 @@ void testParallelUG(bool simplexGrid, bool localRefinement, int refinementDim, b
   checkMappersWrapper<dim, 3, LeafGV>::check(leafGridView);
 
   // Test element and node communication on level view
-  testCommunication<LevelGV, 0>(level0GridView, false);
-  testCommunication<LevelGV, dim>(level0GridView, false);
-  EdgeAndFaceCommunication<LevelGV, dim-1>::test(level0GridView);
+  testCommunication<LevelGV, 0>(level0GridView);
+  testCommunication<LevelGV, dim>(level0GridView);
+  testCommunication<LevelGV, dim-1>(level0GridView);
   if (dim == 3)
-    EdgeAndFaceCommunication<LevelGV, 1>::test(level0GridView);
+    testCommunication<LevelGV, 1>(level0GridView);
 
   // Test element and node communication on leaf view
-  testCommunication<LeafGV, 0>(leafGridView, true);
-  testCommunication<LeafGV, dim>(leafGridView, true);
-  EdgeAndFaceCommunication<LeafGV, dim-1>::test(leafGridView);
+  testCommunication<LeafGV, 0>(leafGridView);
+  testCommunication<LeafGV, dim>(leafGridView);
+  testCommunication<LeafGV, dim-1>(leafGridView);
   if (dim == 3)
-    EdgeAndFaceCommunication<LeafGV, 1>::test(leafGridView);
+    testCommunication<LeafGV, 1>(leafGridView);
 
   ////////////////////////////////////////////////////
   //  Refine globally and test again
@@ -597,17 +555,17 @@ void testParallelUG(bool simplexGrid, bool localRefinement, int refinementDim, b
 
   for (int i=0; i<=grid->maxLevel(); i++)
   {
-    testCommunication<LevelGV, 0>(grid->levelGridView(i), false);
-    testCommunication<LevelGV, dim>(grid->levelGridView(i), false);
-    EdgeAndFaceCommunication<LevelGV, dim-1>::test(grid->levelGridView(i));
+    testCommunication<LevelGV, 0>(grid->levelGridView(i));
+    testCommunication<LevelGV, dim>(grid->levelGridView(i));
+    testCommunication<LevelGV, dim-1>(grid->levelGridView(i));
     if (dim == 3)
-      EdgeAndFaceCommunication<LevelGV, 1>::test(grid->levelGridView(i));
+      testCommunication<LevelGV, 1>(grid->levelGridView(i));
   }
-  testCommunication<LeafGV, 0>(grid->leafGridView(), true);
-  testCommunication<LeafGV, dim>(grid->leafGridView(), true);
-  EdgeAndFaceCommunication<LeafGV, dim-1>::test(grid->leafGridView());
+  testCommunication<LeafGV, 0>(grid->leafGridView());
+  testCommunication<LeafGV, dim>(grid->leafGridView());
+  testCommunication<LeafGV, dim-1>(grid->leafGridView());
   if (dim == 3)
-    EdgeAndFaceCommunication<LeafGV, 1>::test(grid->leafGridView());
+    testCommunication<LeafGV, 1>(grid->leafGridView());
 
 }
 
