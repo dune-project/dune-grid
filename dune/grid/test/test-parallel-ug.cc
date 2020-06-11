@@ -6,6 +6,7 @@
 
 #include <unistd.h>
 #include <iostream>
+#include <iomanip>
 #include <memory>
 #include <vector>
 
@@ -14,7 +15,6 @@
 #include <dune/geometry/referenceelements.hh>
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/mcmgmapper.hh>
-#include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/grid/uggrid.hh>
 #include <dune/grid/utility/structuredgridfactory.hh>
 
@@ -208,15 +208,13 @@ struct checkMappersWrapper<2, 1, GridView>
 
 
 template <class GridView, int commCodim>
-void testCommunication(const GridView &gridView, bool isLeaf, bool printVTK=false)
+void testCommunication(const GridView &gridView, bool isLeaf)
 {
   dverb << gridView.comm().rank() + 1
             << ": Testing communication for codim " << commCodim << " entities\n";
 
   typedef Dune::MultipleCodimMultipleGeomTypeMapper<GridView> MapperType;
   MapperType mapper(gridView, mcmgLayout(Codim<commCodim>{}));
-
-  const int dim = GridView::dimension;
 
   // create the user data arrays
   typedef std::vector<Dune::FieldVector<double, 1> > UserDataType;
@@ -242,38 +240,6 @@ void testCommunication(const GridView &gridView, bool isLeaf, bool printVTK=fals
   // communicate the entities at the interior border to all other
   // processes
   gridView.communicate(datahandle, Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication);
-
-  //////////////////////////////////////////////////////
-  // Write results to disk
-  //////////////////////////////////////////////////////
-  if (printVTK)
-  {
-    Dune::VTKWriter<GridView> writer(gridView);
-    if (commCodim == 0) {
-      writer.addCellData(userDataSend, "Send");
-      writer.addCellData(userDataReceive, "Receive");
-      writer.addCellData(partitionType, "Partition Type");
-      writer.addCellData(entityIndex, "Entity Index");
-    }
-    else if (commCodim == dim) {
-      writer.addVertexData(userDataSend, "Send");
-      writer.addVertexData(userDataReceive, "Receive");
-      writer.addVertexData(partitionType, "Partition Type");
-      writer.addVertexData(entityIndex, "Entity Index");
-    }
-
-    char fileName[1024];
-    sprintf(fileName, "test-parallel-ug-dim=%d-commCodim=%d", dim, commCodim);
-    if (isLeaf)
-      strcat(fileName, "-leaf");
-    else
-    {
-      char levelName[10];
-      sprintf(levelName, "-level=%d", (gridView.template begin<commCodim>())->level());
-      strcat(fileName, levelName);
-    }
-    writer.write(fileName, Dune::VTK::ascii);
-  }
 }
 
 //! edge and face communication
@@ -613,12 +579,6 @@ void testParallelUG(bool simplexGrid, bool localRefinement, int refinementDim, b
     grid->preAdapt();
     grid->adapt();
     grid->postAdapt();
-
-    // write the adapted grid to VTK
-    Dune::VTKWriter<LeafGV> writer(grid->leafGridView());
-    char fileName[1024];
-    sprintf(fileName, "adapted-grid-dim=%d", dim);
-    writer.write(fileName, Dune::VTK::ascii);
   }
 
   for (int i=0; i<=grid->maxLevel(); i++) {
