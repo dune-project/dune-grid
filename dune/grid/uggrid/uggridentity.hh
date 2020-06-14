@@ -18,8 +18,6 @@
 namespace Dune {
 
   // Forward declarations
-  template<int codim, int dim, class GridImp>
-  class UGGridEntity;
   template<int dim>
   class UGGrid;
   template<int codim, class GridImp>
@@ -83,6 +81,17 @@ namespace Dune {
       , gridImp_(nullptr)
     {}
 
+    /** \brief Copy constructor */
+    UGGridEntity(const UGGridEntity& other)
+      : target_(other.target_)
+      , gridImp_(other.gridImp_)
+    {
+      if constexpr (codim==dim)
+        geo_ = other.geo_;
+      else
+        geo_ = std::make_unique<GeometryImpl>(*other.geo_);
+    }
+
     UGGridEntity(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp)
     {
       setToTarget(target,gridImp);
@@ -93,7 +102,7 @@ namespace Dune {
     /** \brief The type of UGGrid Entity seeds */
     typedef typename GridImp::Traits::template Codim<codim>::EntitySeed EntitySeed;
 
-    //! level of this element
+    //! level of this entity
     int level () const {
       return UG_NS<dim>::myLevel(target_);
     }
@@ -107,34 +116,27 @@ namespace Dune {
 #ifndef ModelP
       return InteriorEntity;
 #else
-      if (codim != dim) {   // other codims are done below
-        return InteriorEntity;
-      }
-
-      typename UG_NS<dim>::Node *node =
-        static_cast<typename UG_NS<dim>::Node *>(target_);
-
-      if (UG_NS<dim>::Priority(node)    == UG_NS<dim>::PrioHGhost
-          || UG_NS<dim>::Priority(node) == UG_NS<dim>::PrioVGhost
-          || UG_NS<dim>::Priority(node) == UG_NS<dim>::PrioVHGhost)
+      if (UG_NS<dim>::Priority(target_)    == UG_NS<dim>::PrioHGhost
+          || UG_NS<dim>::Priority(target_) == UG_NS<dim>::PrioVGhost
+          || UG_NS<dim>::Priority(target_) == UG_NS<dim>::PrioVHGhost)
         return GhostEntity;
-      else if (hasBorderCopy_(node))
+      else if (hasBorderCopy())
         return BorderEntity;
-      else if (UG_NS<dim>::Priority(node) == UG_NS<dim>::PrioMaster || UG_NS<dim>::Priority(node) == UG_NS<dim>::PrioNone)
+      else if (UG_NS<dim>::Priority(target_) == UG_NS<dim>::PrioMaster || UG_NS<dim>::Priority(target_) == UG_NS<dim>::PrioNone)
         return InteriorEntity;
       else
-        DUNE_THROW(GridError, "Unknown priority " << UG_NS<dim>::Priority(node));
+        DUNE_THROW(GridError, "Unknown priority " << UG_NS<dim>::Priority(target_));
 #endif
     }
 
   protected:
 #ifdef ModelP
-    bool hasBorderCopy_(typename UG_NS<dim>::Node *node) const {
+    // \todo Unify with the following method
+    bool hasBorderCopy() const
+    {
       int  *plist = UG_NS<dim>::DDD_InfoProcList(
-#if DUNE_UGGRID_HAVE_DDDCONTEXT
         gridImp_->multigrid_->dddContext(),
-#endif
-        UG_NS<dim>::ParHdr(node));
+        UG_NS<dim>::ParHdr(target_));
       for (int i = 0; plist[i] >= 0; i += 2)
         if (plist[i + 1] == UG_NS<dim>::PrioBorder)
           return true;
@@ -143,10 +145,17 @@ namespace Dune {
     }
 #endif
 
+
   public:
 
     //! geometry of this entity
-    Geometry geometry () const { return Geometry( geo_ ); }
+    Geometry geometry () const
+    {
+      if constexpr ((dim-codim)==0)
+        return Geometry( geo_ );
+      else
+        return Geometry( *geo_ );
+    }
 
     /** \brief Get the seed corresponding to this entity */
     EntitySeed seed () const { return EntitySeed( *this ); }
@@ -172,399 +181,56 @@ namespace Dune {
   private:
     /** \brief Set this entity to a particular UG entity */
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target,const GridImp* gridImp) {
-      target_ = target;
-      geo_.setToTarget(target);
       gridImp_ = gridImp;
-    }
-
-    //! the current geometry
-    GeometryImpl geo_;
-
-    typename UG_NS<dim>::template Entity<codim>::T* target_;
-
-    /** \brief gridImp Not actually used, only the codim-0 specialization needs it
-     * But code is simpler if we just keep it everywhere.
-     */
-    const GridImp* gridImp_;
-  };
-
-  /*! \brief Edge entity
-   * \ingroup UGGrid
-   */
-  template<int dim, class GridImp>
-  class UGEdgeEntity
-  {
-    enum {codim = dim - 1};
-    template <int codim_, PartitionIteratorType PiType_, class GridImp_>
-    friend class UGGridLevelIterator;
-
-    friend class UGGrid<dim>;
-
-    template <class GridImp_>
-    friend class UGGridLevelIndexSet;
-
-    template <class GridImp_>
-    friend class UGGridLeafIndexSet;
-
-    template <class GridImp_>
-    friend class UGGridIdSet;
-
-    friend class UGGridEntitySeed<codim, GridImp>;
-    typedef typename GridImp::ctype UGCtype;
-
-    typedef typename GridImp::Traits::template Codim<codim>::GeometryImpl GeometryImpl;
-
-  public:
-
-    typedef typename GridImp::template Codim<codim>::Geometry Geometry;
-
-    UGEdgeEntity()
-      : target_(nullptr)
-      , gridImp_(nullptr)
-    {}
-
-    UGEdgeEntity(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp)
-    {
-      setToTarget(target,gridImp);
-    }
-
-    //! level of the edge
-    int level () const {
-      return UG_NS<dim>::myLevel(target_);
-    }
-
-    /** \brief Return the entity type identifier */
-    GeometryType type() const
-    {
-      return GeometryTypes::line;
-    }
-
-    /** \brief Return the number of subEntities of codimension codim.
-     */
-    unsigned int subEntities (unsigned int cd) const
-    {
-      return referenceElement<UGCtype, dim-codim>(type()).size(cd-codim);
-    }
-
-    /** \brief The partition type for parallel computing
-     */
-    PartitionType partitionType () const
-    {
-#ifndef ModelP
-      return InteriorEntity;
-#else
-
-      typename UG_NS<dim>::Edge *edge =
-        static_cast<typename UG_NS<dim>::Edge *>(target_);
-
-      if (UG_NS<dim>::Priority(edge)    == UG_NS<dim>::PrioHGhost
-          || UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioVGhost
-          || UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioVHGhost)
-        return GhostEntity;
-      else if (hasBorderCopy_(edge))
-        return BorderEntity;
-      else if (UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioMaster || UG_NS<dim>::Priority(edge) == UG_NS<dim>::PrioNone)
-        return InteriorEntity;
-      else
-        DUNE_THROW(GridError, "Unknown priority " << UG_NS<dim>::Priority(edge));
-#endif
-    }
-
-    //! geometry of this entity
-    Geometry geometry () const { return Geometry( *geo_ ); }
-
-  protected:
-#ifdef ModelP
-    /** \brief Return true if at least one copy of the edge on another processor is marked as 'border' */
-    bool hasBorderCopy_(typename UG_NS<dim>::Edge *edge) const {
-      int  *plist = UG_NS<dim>::DDD_InfoProcList(
-#if DUNE_UGGRID_HAVE_DDDCONTEXT
-        gridImp_->multigrid_->dddContext(),
-#endif
-        UG_NS<dim>::ParHdr(edge));
-      for (int i = 0; plist[i] >= 0; i += 2)
-        if (plist[i + 1] == UG_NS<dim>::PrioBorder)
-          return true;
-
-      return false;
-    }
-#endif
-
-    /** \brief Set edge object to a UG edge object */
-    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) {
       target_ = target;
 
-      // obtain the corner coordinates from UG
-      UGCtype* cornerCoords[2*dim];
-      UG_NS<dim>::Corner_Coordinates(target_, cornerCoords);
+      if constexpr ((dim-codim)==1)   // Edge entity
+      {
+        // Obtain the corner coordinates from UG
+        UGCtype* cornerCoords[2*dim];
+        UG_NS<dim>::Corner_Coordinates(target_, cornerCoords);
 
-      // convert to the type required by MultiLinearGeometry
-      std::vector<FieldVector<UGCtype, dim> > geometryCoords(2);
-      for(size_t i = 0; i < 2; i++)
-        for (size_t j = 0; j < dim; j++)
+        // convert to the type required by MultiLinearGeometry
+        std::vector<FieldVector<UGCtype, dim> > geometryCoords(2);
+        for (size_t i=0; i < 2; i++)
+          for (size_t j=0; j < dim; j++)
             geometryCoords[i][j] = cornerCoords[i][j];
 
-      geo_ = std::make_shared<GeometryImpl>(type(), geometryCoords);
-
-      gridImp_ = gridImp;
-    }
-  public:
-    /** \brief Set edge object to a UG edge object using the center element and the side number
-     * \note This method is only here to please the compiler, it should never actually be called!
-     */
-    void setToTarget(typename UG_NS<dim>::Element* target, unsigned int side) {
-      DUNE_THROW(Dune::Exception, "Programming error, this method should never be called!");
-    }
-
-    typename UG_NS<dim>::template Entity<codim>::T* getTarget() const
-    {
-      return target_;
-    }
-
-    //! equality
-    bool equals(const UGEdgeEntity& other) const
-    {
-      return getTarget() == other.getTarget();
-    }
-
-  protected:
-    std::shared_ptr<GeometryImpl> geo_;
-
-    typename UG_NS<dim>::template Entity<codim>::T* target_;
-
-    /** \brief gridImp Not actually used, only the codim-0 specialization needs it.
-     * But code is simpler if we just keep it everywhere.
-     */
-    const GridImp* gridImp_;
-  };
-
-  /*! \brief Specialization for edge in 2D
-   * \ingroup UGGrid
-   */
-  template<class GridImp>
-  class UGGridEntity<1,2,GridImp>
-    : public UGEdgeEntity<2,GridImp>
-  {
-
-  public:
-    /** \brief The type of UGGrid Entity seeds */
-    typedef typename GridImp::Traits::template Codim<1>::EntitySeed EntitySeed;
-
-    UGGridEntity()
-    {}
-
-    UGGridEntity(typename UG_NS<2>::template Entity<1>::T* target, const GridImp* gridImp)
-      : UGEdgeEntity<2,GridImp>(target,gridImp)
-    {}
-
-    /** \brief Get the seed corresponding to this entity
-     *
-     * This method cannot be moved to the base class, because the 'this' pointer has the wrong type there.
-     */
-    EntitySeed seed () const
-    {
-      return EntitySeed( *this );
-    }
-
-  };
-
-  /*! \brief Specialization for edge in 3D
-   * \ingroup UGGrid
-   */
-  template<class GridImp>
-  class UGGridEntity<2,3,GridImp>
-    : public UGEdgeEntity<3,GridImp>
-  {
-
-  public:
-    /** \brief The type of UGGrid Entity seeds */
-    typedef typename GridImp::Traits::template Codim<2>::EntitySeed EntitySeed;
-
-    UGGridEntity()
-    {}
-
-    UGGridEntity(typename UG_NS<3>::template Entity<2>::T* target, const GridImp* gridImp)
-      : UGEdgeEntity<3,GridImp>(target,gridImp)
-    {}
-
-    /** \brief Get the seed corresponding to this entity
-     *
-     * This method cannot be moved to the base class, because the 'this' pointer has the wrong type there.
-     */
-    EntitySeed seed () const
-    {
-      return EntitySeed( *this );
-    }
-
-  };
-
-  /*! \brief UGGrid face entity in 3d grids
-   * \ingroup UGGrid
-   */
-  template<class GridImp>
-  class UGGridEntity<1,3,GridImp>
-  {
-    enum {codim = 1};
-    enum {dim = 3};
-    typedef typename GridImp::ctype UGCtype;
-
-    typedef typename GridImp::Traits::template Codim<codim>::GeometryImpl GeometryImpl;
-
-  public:
-
-    typedef typename GridImp::template Codim<codim>::Geometry Geometry;
-
-    /** \brief The type of UGGrid Entity seeds */
-    typedef typename GridImp::Traits::template Codim<codim>::EntitySeed EntitySeed;
-
-    UGGridEntity()
-      : target_(nullptr)
-      , gridImp_(nullptr)
-    {}
-
-    UGGridEntity(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp)
-    {
-      setToTarget(target,gridImp);
-    }
-
-    /** \brief Return the entity type identifier */
-    GeometryType type() const
-    {
-      // retrieve an element that this face is a side of, and retrieve the side number
-      typename UG_NS<dim>::Element* center;
-      unsigned int side;
-      UG_NS<dim>::GetElementAndSideFromSideVector(target_, center, side);
-
-      switch (UG_NS<dim>::Tag(center)) {
-
-      case UG::D3::TETRAHEDRON :
-        return GeometryTypes::triangle;
-      case UG::D3::PYRAMID :
-        return (side==0 ? GeometryTypes::quadrilateral : GeometryTypes::triangle);
-      case UG::D3::PRISM :
-        return (side==0 or side==4 ? GeometryTypes::triangle : GeometryTypes::quadrilateral);
-      case UG::D3::HEXAHEDRON :
-        return GeometryTypes::quadrilateral;
-      default :
-        DUNE_THROW(GridError, "UGFaceEntity::type():  ERROR:  Unknown type "
-                   << UG_NS<dim>::Tag(center) << " found!");
-
+        geo_ = std::make_unique<GeometryImpl>(type(), geometryCoords);
       }
+      else if constexpr ((dim-codim)==2)   // Facet entity
+      {
+        // obtain the corner coordinates from UG
+        UGCtype* cornerCoords[4*dim];
+        UG_NS<dim>::Corner_Coordinates(target_, cornerCoords);
 
-    }
-
-    //! level of the face
-    int level () const {
-      return UG_NS<dim>::myLevel(target_);
-    }
-
-    /** \brief The partition type for parallel computing */
-    PartitionType partitionType () const
-    {
-#ifndef ModelP
-      return InteriorEntity;
-#else
-
-      typename UG_NS<dim>::Vector *face = getTarget();
-
-      if (UG_NS<dim>::Priority(face)    == UG_NS<dim>::PrioHGhost
-          || UG_NS<dim>::Priority(face) == UG_NS<dim>::PrioVGhost
-          || UG_NS<dim>::Priority(face) == UG_NS<dim>::PrioVHGhost)
-        return GhostEntity;
-      else if (hasBorderCopy_(face))
-        return BorderEntity;
-      else if (UG_NS<dim>::Priority(face) == UG_NS<dim>::PrioMaster || UG_NS<dim>::Priority(face) == UG_NS<dim>::PrioNone)
-        return InteriorEntity;
-      else
-        DUNE_THROW(GridError, "Unknown priority " << UG_NS<dim>::Priority(face));
-#endif
-    }
-
-#ifdef ModelP
-    bool hasBorderCopy_(typename UG_NS<dim>::Vector *face) const {
-      int  *plist = UG_NS<dim>::DDD_InfoProcList(
-#if DUNE_UGGRID_HAVE_DDDCONTEXT
-        gridImp_->multigrid_->dddContext(),
-#endif
-        UG_NS<dim>::ParHdr(face));
-      for (int i = 0; plist[i] >= 0; i += 2)
-        if (plist[i + 1] == UG_NS<dim>::PrioBorder)
-          return true;
-
-      return false;
-    }
-#endif
-
-    //! geometry of this entity
-    Geometry geometry () const { return Geometry( *geo_ ); }
-
-    /** \brief Get the seed corresponding to this entity */
-    EntitySeed seed () const
-    {
-      return EntitySeed( *this );
-    }
-
-    /** \brief Return the number of subEntities of codimension codim.
-     */
-    unsigned int subEntities (unsigned int cd) const
-    {
-      return referenceElement<UGCtype, dim-codim>(type()).size(cd-codim);
-    }
-
-    /** \brief Set to a UG side vector object
-        \param target The UG side vector to point to
-        \param gridImp Dummy argument, only for consistency with codim-0 entities
-     */
-    void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp) {
-      target_ = target;
-
-      // obtain the corner coordinates from UG
-      UGCtype* cornerCoords[4*dim];
-      UG_NS<dim>::Corner_Coordinates(target_, cornerCoords);
-
-      // convert to the type required by MultiLinearGeometry
-      size_t numCorners = type().isTriangle() ? 3 : 4;
-      std::vector<FieldVector<UGCtype, dim> > geometryCoords(numCorners);
-      for(size_t i = 0; i < numCorners; i++)
-        for (size_t j = 0; j < dim; j++)
+        // convert to the type required by MultiLinearGeometry
+        size_t numCorners = type().isTriangle() ? 3 : 4;
+        std::vector<FieldVector<UGCtype, dim> > geometryCoords(numCorners);
+        for(size_t i = 0; i < numCorners; i++)
+          for (size_t j = 0; j < dim; j++)
             geometryCoords[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, type())][j] = cornerCoords[i][j];
 
-      geo_ = std::make_shared<GeometryImpl>(type(), geometryCoords);
-
-      gridImp_ = gridImp;
+        geo_ = std::make_unique<GeometryImpl>(type(), geometryCoords);
+      }
+      else
+        geo_.setToTarget(target);
     }
 
-    typename UG_NS<dim>::template Entity<codim>::T* getTarget() const
-    {
-      return target_;
-    }
+    // The geometric realization of the entity.  It is a native UG type for vertices,
+    // and a dune-geometry MultiLinearGeometry for edges and facets.
+    // TODO: Maybe use MultiLinearGeometry for all these cases!
+    std::conditional_t<(dim-codim)==0, GeometryImpl, std::unique_ptr<GeometryImpl> > geo_;
 
-    //! equality
-    bool equals(const UGGridEntity& other) const
-    {
-      return getTarget() == other.getTarget();
-    }
-
-protected:
-    std::shared_ptr<GeometryImpl> geo_;
-
-    /** \brief The UG object (a side vector) that represents this face */
+    /** \brief The UG object that represents this entity
+     * - 0d entities: node
+     * - 1d entities: edge
+     * - 2d entities in 3d grids: side vector
+     */
     typename UG_NS<dim>::template Entity<codim>::T* target_;
 
-    /** \brief gridImp Not actually used, only the codim-0 specialization needs it.
-     * But code is simpler if we just keep it everywhere.
-     */
     const GridImp* gridImp_;
   };
-
-
-
-  //***********************
-  //
-  //  --UGGridEntity
-  //  --0Entity
-  //
-  //***********************
 
   /** \brief Specialization for codim-0-entities.
    * \ingroup UGGrid
