@@ -233,8 +233,8 @@ namespace Dune {
 
     friend class UGGridEntity <0,dim,const UGGrid<dim> >;
     friend class UGGridEntity <1,dim,const UGGrid<dim> >;
+    friend class UGGridEntity <2,dim,const UGGrid<dim> >;
     friend class UGGridEntity <dim,dim,const UGGrid<dim> >;
-    friend class UGEdgeEntity <dim,const UGGrid<dim> >;
     friend class UGGridHierarchicIterator<const UGGrid<dim> >;
     friend class UGGridLeafIntersection<const UGGrid<dim> >;
     friend class UGGridLevelIntersection<const UGGrid<dim> >;
