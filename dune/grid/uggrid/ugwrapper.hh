@@ -228,6 +228,12 @@ namespace Dune {
       return DDD_GET_IF(NodeAllIF);
     }
 
+    /*! Node_InteriorBorder_All_IF: Master/Border->All */
+    static DDD_IF NodeInteriorBorderAllIF(DDD_CONTEXT_PARAM)
+    {
+      return DDD_GET_IF(Node_InteriorBorder_All_IF);
+    }
+
     /*! BorderVectorIF: Border->Master */
     static DDD_IF BorderVectorIF(DDD_CONTEXT_PARAM)
     {
@@ -268,6 +274,11 @@ namespace Dune {
     static DDD_IF VectorIF(DDD_CONTEXT_PARAM)
     {
       return DDD_GET_IF(VectorIF);
+    }
+
+    static DDD_IF FacetInteriorBorderAllIF(DDD_CONTEXT_PARAM)
+    {
+      return DDD_GET_IF(Facet_InteriorBorder_All_IF);
     }
 
     /*! Master->HGhost/VHGhost */
