@@ -270,6 +270,11 @@ namespace Dune {
       return DDD_GET_IF(VectorIF);
     }
 
+    static DDD_IF FacetVHIF(DDD_CONTEXT_PARAM)
+    {
+      return DDD_GET_IF(FacetVHIF);
+    }
+
     /*! Master->HGhost/VHGhost */
     static DDD_IF EdgeIF(DDD_CONTEXT_PARAM)
     {

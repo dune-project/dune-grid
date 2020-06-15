@@ -676,9 +676,7 @@ namespace Dune {
           dddIfaces.push_back(UG_NS<dim>::BorderEdgeSymmIF(DDD_CONTEXT));
           return;
         case InteriorBorder_All_Interface :
-          dddIfaces.push_back(UG_NS<dim>::BorderEdgeSymmIF(DDD_CONTEXT));
-          // Is the following line needed or not?
-          // dddIfaces.push_back(UG_NS<dim>::EdgeIF(DDD_CONTEXT));
+          dddIfaces.push_back(UG_NS<dim>::EdgeVHIF(DDD_CONTEXT));
           return;
         case All_All_Interface :
           dddIfaces.push_back(UG_NS<dim>::EdgeSymmVHIF(DDD_CONTEXT));
@@ -696,7 +694,7 @@ namespace Dune {
         {
         case InteriorBorder_InteriorBorder_Interface :
         case InteriorBorder_All_Interface :
-          dddIfaces.push_back(UG_NS<dim>::BorderVectorSymmIF(DDD_CONTEXT));
+          dddIfaces.push_back(UG_NS<dim>::FacetVHIF(DDD_CONTEXT));
           return;
         default :
           DUNE_THROW(GridError,
