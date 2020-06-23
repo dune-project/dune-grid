@@ -60,7 +60,7 @@ namespace Dune {
     }
 
     // called by DDD_IFOneway to serialize the data structure to
-    // be send
+    // be sent
     static int ugGather_(
 #if DUNE_UGGRID_HAVE_DDDCONTEXT
       DDD::DDDContext&,
@@ -74,7 +74,7 @@ namespace Dune {
       Entity entity(EntityImp(ugEP, grid_));
 
       // safety check to only communicate what is needed
-      if ((level == -1 && UG_NS<gridDim>::isLeaf(ugEP)) || entity.level() == level)
+      if ((level == -1 && isToplevelLeaf(ugEP)) || entity.level() == level)
       {
         ThisType msgBuf(static_cast<DataType*>(data));
         if (!duneDataHandle_->fixedSize(gridDim, codim))
@@ -100,7 +100,7 @@ namespace Dune {
       Entity entity(EntityImp(ugEP, grid_));
 
       // safety check to only communicate what is needed
-      if ((level == -1 && UG_NS<gridDim>::isLeaf(ugEP)) || entity.level() == level)
+      if ((level == -1 && isToplevelLeaf(ugEP)) || entity.level() == level)
       {
         ThisType msgBuf(static_cast<DataType*>(data));
         int size;
@@ -114,6 +114,46 @@ namespace Dune {
       }
 
       return 0;
+    }
+
+    /** \brief Test whether entity is leaf and has no copies on higher (i.e., finer) levels
+     *
+     * Entities of the leaf grid view are equivalence class of entities of the level view.
+     * Therefore, the isLeaf method of the grid interface sometimes returns true for entities
+     * that have copies on a finer level.  In communication, we really want to call gather
+     * and scatter for these entities only once.  Therefore we use the following special
+     * implementation that returns true only if an entity is leaf and it has now children.
+     */
+    static bool isToplevelLeaf(const typename Dune::UG_NS<gridDim>::template Entity<codim>::T* ugEP)
+    {
+      // safety check to only communicate what is needed
+      bool isLeaf = UG_NS<gridDim>::isLeaf(ugEP);
+
+      // Edges: Simply checking isLeaf here will return 'true' for each top-level
+      // leaf and *and* its lower-level copies (if it has any).  However, we really
+      // want only the highest-level copy, because otherwise gather will be called
+      // more than once for that edge (interpreted as a leaf grid edge).  Therefore
+      // we need a tigher criterion.
+      if (gridDim-codim==1)
+      {
+        if (isLeaf)
+        {
+          // isLeaf is true, i.e. we either are a top-level leaf oder or a copy of one.
+          // If we are are lower-level copy then both of our end nodes have children,
+          // and these two children are connected.
+          auto nodeA = ((typename Dune::UG_NS<gridDim>::Edge*)ugEP)->links[0].nbnode;
+          auto nodeB = ((typename Dune::UG_NS<gridDim>::Edge*)ugEP)->links[1].nbnode;
+
+          if (nodeA->son && nodeB->son && UG_NS<gridDim>::GetEdge(nodeA->son, nodeB->son))
+            isLeaf = false;
+        }
+      }
+
+      // Facets: No such handling is currently needed, because UGGridLeafIndexSet<GridImp>::update
+      // does not assign leaf indices of leaf facets to their copy-fathers.
+      // This may be a bug...
+
+      return isLeaf;
     }
 
     // returns number of bytes required for the UG message buffer
