@@ -655,8 +655,7 @@ namespace Dune {
           dddIfaces.push_back(UG_NS<dim>::BorderNodeSymmIF(DDD_CONTEXT));
           return;
         case InteriorBorder_All_Interface :
-          dddIfaces.push_back(UG_NS<dim>::BorderNodeSymmIF(DDD_CONTEXT));
-          dddIfaces.push_back(UG_NS<dim>::NodeIF(DDD_CONTEXT));
+          dddIfaces.push_back(UG_NS<dim>::NodeVHIF(DDD_CONTEXT));
           return;
         case All_All_Interface :
           dddIfaces.push_back(UG_NS<dim>::NodeAllIF(DDD_CONTEXT));

@@ -228,6 +228,12 @@ namespace Dune {
       return DDD_GET_IF(NodeAllIF);
     }
 
+    /*! NodeVHIF: Master/Border->All */
+    static DDD_IF NodeVHIF(DDD_CONTEXT_PARAM)
+    {
+      return DDD_GET_IF(NodeVHIF);
+    }
+
     /*! BorderVectorIF: Border->Master */
     static DDD_IF BorderVectorIF(DDD_CONTEXT_PARAM)
     {
