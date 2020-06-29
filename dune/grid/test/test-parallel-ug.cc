@@ -35,10 +35,14 @@ public:
   //! constructor
   DataExchange(const MapperT &mapper,
                std::bitset<MapperT::GridView::dimension+1> communicationCodims,
+               std::vector<std::size_t>& gatherCounter,
+               std::vector<std::size_t>& scatterCounter,
                UserDataType &userDataSend,
                UserDataType &userDataReceive)
     : mapper_(mapper),
       communicationCodims_(communicationCodims),
+      gatherCounter_(gatherCounter),
+      scatterCounter_(scatterCounter),
       userDataSend_(userDataSend),
       userDataReceive_(userDataReceive)
   {}
@@ -71,6 +75,7 @@ public:
   void gather(MessageBuffer& buff, const EntityType& e) const
   {
     DataType x = mapper_.index(e);
+    gatherCounter_[mapper_.index(e)]++;
 
     userDataSend_[mapper_.index(e)][0] = x;
     dverb << "Process "
@@ -95,6 +100,7 @@ public:
     buff.read(x);
 
     userDataReceive_[mapper_.index(e)][0] = x;
+    scatterCounter_[mapper_.index(e)]++;
     dverb << "Process "
               << Dune::MPIHelper::getCollectiveCommunication().rank()+1
               << " received for entity "
@@ -107,6 +113,8 @@ public:
 private:
   const MapperT &mapper_;
   const std::bitset<MapperT::GridView::dimension+1> communicationCodims_;
+  std::vector<std::size_t> &gatherCounter_;
+  std::vector<std::size_t> &scatterCounter_;
   UserDataType &userDataSend_;
   UserDataType &userDataReceive_;
 };
@@ -233,6 +241,9 @@ void testCommunication(const GridView &gridView,
   UserDataType userDataReceive(mapper.size(), 0.0);
   UserDataType entityIndex(mapper.size(), -1e10);
   UserDataType partitionType(mapper.size(), -1e10);
+  // For each entity, count how many times 'gather' and 'scatter' have been called
+  std::vector<std::size_t> gatherCounter(mapper.size(), 0);
+  std::vector<std::size_t> scatterCounter(mapper.size(), 0);
 
   // write the partition type of each entity into the corresponding
   // result array
@@ -269,12 +280,83 @@ void testCommunication(const GridView &gridView,
   // send or received)
   DataExchange<MapperType> datahandle(mapper,
                                       communicationCodims,
+                                      gatherCounter,
+                                      scatterCounter,
                                       userDataSend,
                                       userDataReceive);
 
   // communicate the entities at the interior border to all other
   // processes
   gridView.communicate(datahandle, Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication);
+
+  PartitionSet sendingPartitions = Dune::Partitions::interior + Dune::Partitions::border;
+  PartitionSet receivingPartitions = Dune::Partitions::all;
+
+  // write the partition type of each entity into the corresponding
+  // result array
+  for (const auto& element : elements(gridView))
+  {
+    Hybrid::forEach(std::make_index_sequence< dim+1 >{},
+      [&](auto codim)
+    {
+      auto numberOfSubEntities = element.subEntities(codim);
+      for (std::size_t k = 0; k < numberOfSubEntities; k++)
+      {
+        const auto entity(element.template subEntity<codim>(k));
+        entityIndex[mapper.index(entity)]   = mapper.index(entity);
+
+        auto partitionTypes = entity.impl().partitionTypes();
+
+        // Check whether 'gather' has been called the appropriate number of times
+        std::size_t expectedNumberOfGatherCalls = 0;
+
+        if (communicationCodims[codim])
+        {
+          for (const auto& pType : partitionTypes)
+            if (pType.first != gridView.comm().rank()
+                && sendingPartitions.contains(entity.partitionType())
+                && receivingPartitions.contains(pType.second))
+              expectedNumberOfGatherCalls++;
+        }
+
+        if (gatherCounter[mapper.index(entity)] != expectedNumberOfGatherCalls)
+        {
+          std::cerr << gridView.comm().rank() << ": UGGrid did not call 'gather' "
+                    << expectedNumberOfGatherCalls << " times, but "
+                    << gatherCounter[mapper.index(entity)] << " times on an entity!" << std::endl;
+          std::cerr << gridView.comm().rank() << ": Problematic entity: codim = " << codim
+                    << ",  partitionType = " << entity.partitionType()
+                    << ",  center = " << entity.geometry().center()
+                    << std::endl;
+          std::abort();
+        }
+
+        // Check whether 'scatter' has been called the appropriate number of times
+        std::size_t expectedNumberOfScatterCalls = 0;
+
+        if (communicationCodims[codim])
+        {
+          for (const auto& pType : partitionTypes)
+            if (pType.first != gridView.comm().rank()
+                && receivingPartitions.contains(entity.partitionType())
+                && sendingPartitions.contains(pType.second))
+              expectedNumberOfScatterCalls++;
+        }
+
+        if (scatterCounter[mapper.index(entity)] != expectedNumberOfScatterCalls)
+        {
+          std::cerr << gridView.comm().rank() << ": UGGrid did not call 'scatter' "
+                    << expectedNumberOfScatterCalls << " times, but "
+                    << scatterCounter[mapper.index(entity)] << " times on an entity!" << std::endl;
+          std::cerr << gridView.comm().rank() << ": Problematic entity: codim = " << codim
+                    << ",  partitionType = " << entity.partitionType()
+                    << ",  center = " << entity.geometry().center()
+                    << std::endl;
+          std::abort();
+        }
+      }
+    });
+  }
 }
 
 template<typename Grid>
