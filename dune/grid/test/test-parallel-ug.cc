@@ -239,8 +239,6 @@ void testCommunication(const GridView &gridView,
 
   UserDataType userDataSend(mapper.size(), 0.0);
   UserDataType userDataReceive(mapper.size(), 0.0);
-  UserDataType entityIndex(mapper.size(), -1e10);
-  UserDataType partitionType(mapper.size(), -1e10);
   // For each entity, count how many times 'gather' and 'scatter' have been called
   std::vector<std::size_t> gatherCounter(mapper.size(), 0);
   std::vector<std::size_t> scatterCounter(mapper.size(), 0);
@@ -257,8 +255,6 @@ void testCommunication(const GridView &gridView,
         for (std::size_t k = 0; k < numberOfSubEntities; k++)
         {
           const auto entity(element.template subEntity<codim>(k));
-          entityIndex[mapper.index(entity)]   = mapper.index(entity);
-          partitionType[mapper.index(entity)] = entity.partitionType();
 
           if (entity.partitionType() == Dune::BorderEntity)
           {
