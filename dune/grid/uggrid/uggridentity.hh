@@ -129,6 +129,45 @@ namespace Dune {
 #endif
     }
 
+    /** \brief Get the partition type of each copy of a distributed entity
+     *
+     * This is a non-interface method, intended mainly for debugging and testing.
+     *
+     * \return Each pair in the return value contains a process number and the corresponding partition type
+     */
+    std::vector<std::pair<int,PartitionType> > partitionTypes () const
+    {
+      std::vector<std::pair<int,PartitionType> > result;
+
+      int *plist = UG_NS<dim>::DDD_InfoProcList(gridImp_->multigrid_->dddContext(),
+                                                UG_NS<dim>::ParHdr(target_));
+
+      for (int i = 0; plist[i] >= 0; i += 2)
+      {
+        int rank = plist[i];
+        auto priority = plist[i + 1];
+
+        if (priority == UG_NS<dim>::PrioHGhost || priority == UG_NS<dim>::PrioVGhost || priority == UG_NS<dim>::PrioVHGhost)
+          result.push_back(std::make_pair(rank, GhostEntity));
+        else
+        {
+          // The entity is not ghost.  If it is (UG)PrioBorder somewhere, it is (Dune)Border.
+          // Otherwise it is (Dune)Interior.
+          bool hasBorderCopy = false;
+          for (int i = 0; plist[i] >= 0; i += 2)
+            if (plist[i + 1] == UG_NS<dim>::PrioBorder)
+            {
+              hasBorderCopy = true;
+              break;
+            }
+
+          result.push_back(std::make_pair(rank, (hasBorderCopy) ? BorderEntity : InteriorEntity));
+        }
+      }
+
+      return result;
+    }
+
   protected:
 #ifdef ModelP
     // \todo Unify with the following method
@@ -305,6 +344,33 @@ namespace Dune {
       else
         return InteriorEntity;
 #endif
+    }
+
+    /** \brief Get the partition type of each copy of a distributed entity
+     *
+     * This is a non-interface method, intended mainly for debugging and testing.
+     *
+     * \return Each pair in the return value contains a process number and the corresponding partition type
+     */
+    std::vector<std::pair<int,PartitionType> > partitionTypes () const
+    {
+      std::vector<std::pair<int,PartitionType> > result;
+
+      int *plist = UG_NS<dim>::DDD_InfoProcList(gridImp_->multigrid_->dddContext(),
+                                                &target_->ge.ddd);
+
+      for (int i = 0; plist[i] >= 0; i += 2)
+      {
+        int rank = plist[i];
+        auto priority = plist[i + 1];
+
+        if (priority == UG_NS<dim>::PrioHGhost || priority == UG_NS<dim>::PrioVGhost || priority == UG_NS<dim>::PrioVHGhost)
+          result.push_back(std::make_pair(rank, GhostEntity));
+        else
+          result.push_back(std::make_pair(rank, InteriorEntity));
+      }
+
+      return result;
     }
 
     //! Geometry of this entity
