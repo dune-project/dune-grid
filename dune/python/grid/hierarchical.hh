@@ -443,7 +443,7 @@ namespace Dune
       cls.def_property_readonly_static( "isCartesian", [] ( pybind11::object ) { return Capabilities::isCartesian< Grid >::v; } );
       cls.def_property_readonly_static( "canCommunicate", [] ( pybind11::object ) {
           pybind11::tuple canCommunicate( Grid::dimension+1 );
-          Hybrid::forEach( std::make_integer_sequence< int, Grid::dimension+1 >(), [ &canCommunicate ] ( auto &&codim ) {
+          Hybrid::forEach( std::make_integer_sequence< int, Grid::dimension+1 >(), [ &canCommunicate ] ( auto codim ) {
               canCommunicate[ codim ] = pybind11::cast( bool( Capabilities::canCommunicate< Grid, codim >::v ) );
             } );
           return canCommunicate;
