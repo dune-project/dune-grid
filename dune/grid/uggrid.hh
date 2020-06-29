@@ -591,18 +591,14 @@ namespace Dune {
 
       UGMsgBuf::level = level;
 
-      std::vector<typename UG_NS<dim>::DDD_IF> ugIfs;
-      findDDDInterfaces_(ugIfs, iftype, codim);
+      std::vector<typename UG_NS<dim>::DDD_IF> ugIfs = findDDDInterfaces(iftype, codim);
 
       unsigned bufSize = UGMsgBuf::ugBufferSize(gv);
       if (!bufSize)
         return;     // we don't need to communicate if we don't have any data!
       UGMsgBuf::grid_ = this;
       for (unsigned i=0; i < ugIfs.size(); ++i)
-        UG_NS<dim>::DDD_IFOneway(
-#if DUNE_UGGRID_HAVE_DDDCONTEXT
-                                 multigrid_->dddContext(),
-#endif
+        UG_NS<dim>::DDD_IFOneway(multigrid_->dddContext(),
                                  ugIfs[i],
                                  ugIfDir,
                                  bufSize,
@@ -610,110 +606,10 @@ namespace Dune {
                                  &UGMsgBuf::ugScatter_);
     }
 
-    void findDDDInterfaces_(std::vector<typename UG_NS<dim>::DDD_IF > &dddIfaces,
-                            InterfaceType iftype,
-                            int codim) const
-    {
-#if DUNE_UGGRID_HAVE_DDDCONTEXT
-#  define DDD_CONTEXT multigrid_->dddContext()
-#else
-#  define DDD_CONTEXT
+    /** \brief Translate Dune communication interface to UG communication interface */
+    std::vector<typename UG_NS<dim>::DDD_IF> findDDDInterfaces(InterfaceType iftype,
+                                                               int codim) const;
 #endif
-      dddIfaces.clear();
-      if (codim == 0)
-      {
-        switch (iftype) {
-        case InteriorBorder_InteriorBorder_Interface :
-          // do not communicate anything: Elements can not be in
-          // the interior of two processes at the same time
-          return;
-        case InteriorBorder_All_Interface :
-          // The communicated elements are in the sender's
-          // interior and it does not matter what they are for
-          // the receiver
-          dddIfaces.push_back(UG_NS<dim>::ElementVHIF(DDD_CONTEXT));
-          return;
-        case All_All_Interface :
-          // It does neither matter what the communicated
-          // elements are for sender nor for the receiver. If
-          // they are seen by these two processes, data is send
-          // and received.
-          dddIfaces.push_back(UG_NS<dim>::ElementSymmVHIF(DDD_CONTEXT));
-          return;
-        default :
-          DUNE_THROW(GridError,
-                     "Element communication not supported for "
-                     "interfaces of type  "
-                     << iftype);
-        }
-      }
-      else if (codim == dim)
-      {
-        switch (iftype)
-        {
-        case InteriorBorder_InteriorBorder_Interface :
-          dddIfaces.push_back(UG_NS<dim>::BorderNodeSymmIF(DDD_CONTEXT));
-          return;
-        case InteriorBorder_All_Interface :
-          dddIfaces.push_back(UG_NS<dim>::NodeInteriorBorderAllIF(DDD_CONTEXT));
-          return;
-        case All_All_Interface :
-          dddIfaces.push_back(UG_NS<dim>::NodeAllIF(DDD_CONTEXT));
-          return;
-        default :
-          DUNE_THROW(GridError,
-                     "Node communication not supported for "
-                     "interfaces of type  "
-                     << iftype);
-        }
-      }
-      else if (codim == dim-1)
-      {
-        switch (iftype)
-        {
-        case InteriorBorder_InteriorBorder_Interface :
-          dddIfaces.push_back(UG_NS<dim>::BorderEdgeSymmIF(DDD_CONTEXT));
-          return;
-        case InteriorBorder_All_Interface :
-          dddIfaces.push_back(UG_NS<dim>::EdgeVHIF(DDD_CONTEXT));
-          return;
-        case All_All_Interface :
-          dddIfaces.push_back(UG_NS<dim>::EdgeSymmVHIF(DDD_CONTEXT));
-          return;
-        default :
-          DUNE_THROW(GridError,
-                     "Edge communication not supported for "
-                     "interfaces of type  "
-                     << iftype);
-        }
-      }
-      else if (codim == 1)
-      {
-        switch (iftype)
-        {
-        case InteriorBorder_InteriorBorder_Interface :
-        case InteriorBorder_All_Interface :
-          dddIfaces.push_back(UG_NS<dim>::FacetInteriorBorderAllIF(DDD_CONTEXT));
-          return;
-        default :
-          DUNE_THROW(GridError,
-                     "Face communication not supported for "
-                     "interfaces of type  "
-                     << iftype);
-        }
-      }
-      else
-      {
-        DUNE_THROW(GridError,
-                   "Communication for codim "
-                   << codim
-                   << " entities is not yet supported "
-                   << " by the DUNE UGGrid interface!");
-      }
-#undef DDD_CONTEXT
-    };
-#endif // ModelP
-
   public:
     // **********************************************************
     // End of Interface Methods
