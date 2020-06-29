@@ -165,7 +165,7 @@ namespace Dune
         )doc" );
 
       // register iterators
-      Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [] ( auto &&codim ) {
+      Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [] ( auto codim ) {
           registerPyGridViewIterator< GridView, codim >();
         } );
 
@@ -191,7 +191,7 @@ namespace Dune
           )doc" );
 
       std::array< pybind11::object (*) ( pybind11::object ), GridView::dimension+1 > makePyGridViewIterators;
-      Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [ &makePyGridViewIterators ] ( auto &&codim ) {
+      Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [ &makePyGridViewIterators ] ( auto codim ) {
           makePyGridViewIterators[ codim ] = makePyGridViewIterator< GridView, codim >;
         } );
       cls.def( "entities", [ makePyGridViewIterators ] ( pybind11::object self, int codim ) {
@@ -358,7 +358,7 @@ namespace Dune
       cls.def_property_readonly_static( "isCartesian", [] ( pybind11::object ) { return Capabilities::isCartesian< Grid >::v; } );
       cls.def_property_readonly_static( "canCommunicate", [] ( pybind11::object ) {
           pybind11::tuple canCommunicate( Grid::dimension+1 );
-          Hybrid::forEach( std::make_integer_sequence< int, Grid::dimension+1 >(), [ &canCommunicate ] ( auto &&codim ) {
+          Hybrid::forEach( std::make_integer_sequence< int, Grid::dimension+1 >(), [ &canCommunicate ] ( auto codim ) {
               canCommunicate[ codim ] = pybind11::cast( bool( Capabilities::canCommunicate< Grid, codim >::v ) );
             } );
           return canCommunicate;
