@@ -207,21 +207,12 @@ namespace Dune
       void communicate ( CommDataHandleIF< DataHandleImp, DataType > &dataHandle, InterfaceType iftype, CommunicationDirection dir ) const
       {
 #ifdef ModelP
-        for (int curCodim = 0; curCodim <= Grid::dimension; ++curCodim) {
-          if (!dataHandle.contains(Grid::dimension, curCodim))
-            continue;
-
-          if (curCodim == 0)
-            grid().template communicateUG_<0>(*this, level_, dataHandle, iftype, dir);
-          else if (curCodim == Grid::dimension)
-            grid().template communicateUG_<Grid::dimension>(*this, level_, dataHandle, iftype, dir);
-          else if (curCodim == Grid::dimension - 1)
-            grid().template communicateUG_<Grid::dimension-1>(*this, level_, dataHandle, iftype, dir);
-          else if (curCodim == 1)
-            grid().template communicateUG_<1>(*this, level_, dataHandle, iftype, dir);
-          else
-            DUNE_THROW(NotImplemented, className(*this) << "::communicate(): Not " "supported for dim " << Grid::dimension << " and codim " << curCodim);
-        }
+        Hybrid::forEach(std::make_index_sequence< Grid::dimension+1 >{},
+          [&](auto codim)
+        {
+          if (dataHandle.contains(Grid::dimension, codim))
+            grid().template communicateUG_<codim>(*this, level_, dataHandle, iftype, dir);
+        });
 #endif // ModelP
       }
 
@@ -406,21 +397,12 @@ namespace Dune
       void communicate ( CommDataHandleIF< DataHandleImp, DataType > &dataHandle, InterfaceType iftype, CommunicationDirection dir ) const
       {
 #ifdef ModelP
-        for (int curCodim = 0; curCodim <= Grid::dimension; ++curCodim) {
-          if (!dataHandle.contains(Grid::dimension, curCodim))
-            continue;
-          int level = -1;
-          if (curCodim == 0)
-            grid().template communicateUG_<0>(*this, level, dataHandle, iftype, dir);
-          else if (curCodim == Grid::dimension)
-            grid().template communicateUG_<Grid::dimension>(*this, level, dataHandle, iftype, dir);
-          else if (curCodim == Grid::dimension - 1)
-            grid().template communicateUG_<Grid::dimension-1>(*this, level, dataHandle, iftype, dir);
-          else if (curCodim == 1)
-            grid().template communicateUG_<1>(*this, level, dataHandle, iftype, dir);
-          else
-            DUNE_THROW(NotImplemented, className(*this) << "::communicate(): Not " "supported for dim " << Grid::dimension << " and codim " << curCodim);
-        }
+        Hybrid::forEach(std::make_index_sequence< Grid::dimension+1 >{},
+          [&](auto codim)
+        {
+          if (dataHandle.contains(Grid::dimension, codim))
+            grid().template communicateUG_<codim>(*this, -1, dataHandle, iftype, dir);
+        });
 #endif // ModelP
       }
 
