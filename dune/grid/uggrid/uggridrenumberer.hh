@@ -210,7 +210,7 @@ namespace Dune {
       if (type.isPrism()) {
 
         // edges of a prism
-        const int renumbering[9] = {3, 4, 5, 0, 1, 2, 6, 8, 7};
+        const int renumbering[9] = {3, 4, 5, 0, 2, 1, 6, 8, 7};
         return renumbering[i];
 
       }
@@ -247,7 +247,7 @@ namespace Dune {
       if (type.isPrism()) {
 
         // edges of a prism
-        const int renumbering[9] = {3, 4, 5, 0, 1, 2, 6, 8, 7};
+        const int renumbering[9] = {3, 5, 4, 0, 1, 2, 6, 8, 7};
         return renumbering[i];
 
       }
@@ -284,7 +284,7 @@ namespace Dune {
       } if (tag == UG::D3::PRISM) {
 
         // edges of a prism
-        const int renumbering[9] = {3, 4, 5, 0, 1, 2, 6, 8, 7};
+        const int renumbering[9] = {3, 5, 4, 0, 1, 2, 6, 8, 7};
         return renumbering[i];
 
       } if (tag == UG::D3::PYRAMID) {
