@@ -81,6 +81,8 @@
 
 - UG 3.x is no longer supported. Use dune-uggrid instead.
 
+- `UGGrid`: Fixed a bug in the numbering of prism edges.
+
 
 # Release 2.6
 
