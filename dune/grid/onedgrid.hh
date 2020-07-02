@@ -406,7 +406,7 @@ namespace Dune {
     template<int codim>
     struct hasEntityIterator<OneDGrid, codim>
     {
-      static const bool v = false;
+      static const bool v = true;
     };
 
     /** \brief OneDGrid is levelwise conforming

@@ -24,7 +24,7 @@ public:
 // -------------------
 
 template< class GridView, int codim,
-    bool hasEntity = Dune::Capabilities::hasEntity< typename GridView::Grid, codim >::v >
+    bool hasEntity = Dune::Capabilities::hasEntityIterator< typename GridView::Grid, codim >::v >
 struct CheckCodimIterators;
 
 template< class GridView, int codim >
