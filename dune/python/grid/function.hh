@@ -42,7 +42,6 @@ namespace Dune
 
       typedef std::decay_t< decltype( localFunction( std::declval< const GridFunction & >() ) ) > LocalFunction;
       typedef std::decay_t< decltype( std::declval< LocalFunction & >()( std::declval< const LocalCoordinate & >() ) ) > Range;
-      static const unsigned int dimRange = GridFunction::dimRange;
     };
 
 
