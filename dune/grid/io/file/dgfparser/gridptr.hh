@@ -92,7 +92,7 @@ namespace Dune
       // default constructor
       mygrid_ptr() : base_t( ( GridType * ) 0, emptydeleter_t() ) {}
       // copy constructor
-      mygrid_ptr( const mygrid_ptr& other ) { assignObj( other ); }
+      mygrid_ptr( const mygrid_ptr& other ) : base_t(nullptr) { assignObj( other ); }
       // constructor taking pointer
       explicit mygrid_ptr( GridType* grd ) : base_t( grd, emptydeleter_t() ) {}
 
