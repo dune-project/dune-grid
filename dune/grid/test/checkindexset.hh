@@ -551,6 +551,16 @@ namespace Dune
   };
 
   template< class Grid, class GridView, class OutputStream >
+  struct CheckIndexSet< Grid, GridView, OutputStream, 0, false >
+  {
+    static void checkIndexSet ( const Grid &, const GridView &,
+                                OutputStream &, bool )
+    {
+      derr << "WARNING: Entities for codim 0 are not being tested!" << std::endl;
+    }
+  };
+
+  template< class Grid, class GridView, class OutputStream >
   void checkIndexSet ( const Grid &grid, const GridView &view,
                        OutputStream &sout,  bool levelIndex = false )
   {
