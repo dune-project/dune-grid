@@ -110,6 +110,10 @@ namespace Dune
             {
               idContainer[id] = entity.geometry().center();
             }
+
+            // While we are here: Do subEntity.id and subId return the same value?
+            if (id != idSet.subId(element,face,codim))
+              DUNE_THROW(GridError, "subEntity.id and subId do not return the same value!");
           }
         });
       }
