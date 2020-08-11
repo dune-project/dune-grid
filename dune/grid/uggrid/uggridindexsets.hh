@@ -590,13 +590,38 @@ namespace Dune {
       // The entity must be a facet in a 3d grid
       assert(cd==1 && dim==3);
 
-      // \bug The following code may fail on refined grids:  The code needs to check
-      // whether the father (or grandfather etc) facet is a copy, and return its
-      // id instead.
       typename UG_NS<dim>::Vector *facet =
           reinterpret_cast<typename UG_NS<dim>::Vector *>(e.impl().getTarget());
 
-      return UG_NS<dim>::id(facet);
+      // If 'facet' is the copy of a facet on a lower level we return the id of that lower-level
+      // facet, because Dune wants entities that are copies of each other to have the same id.
+      // BUG: in a distributed setting, we only search on our own process, but the lowest
+      // copy may actually be on a different process!
+
+      // Going up and down the refinement hierarchy can only be done through an
+      // element that has 'facet' as a face.
+      // TODO: Simplify this if ever SideVector objects get hierarchical information
+      typename UG_NS<dim>::Element* supportingElement = (typename UG_NS<dim>::Element*)facet->object;
+      int thisSideVectorUGNumbering = -1;   // Dummy value
+      for (int side=0; side<UG_NS<dim>::Sides_Of_Elem(supportingElement); side++)
+      {
+        auto sideVector = UG_NS<dim>::SideVector(supportingElement,side);
+        if (sideVector==facet)
+          thisSideVectorUGNumbering = side;
+      }
+
+      Face face(supportingElement, thisSideVectorUGNumbering);
+
+      // Go down in the grid hierarchy as long as there is a copy father-facet
+      Face fatherFace;
+      fatherFace = getFatherFace(face);
+      while (fatherFace.first) {
+        face = fatherFace;
+        fatherFace = getFatherFace(face);
+      }
+
+      // Actually return the facet id
+      return UG_NS<dim>::id(UG_NS<dim>::SideVector(face.first, face.second));
     }
 
     /** \brief Get id of subentity
