@@ -510,52 +510,19 @@ namespace Dune
     }
   }
 
-
-  template< class Grid, class GridView, class OutputStream, int codim, bool hasCodim >
-  struct CheckIndexSet
-  {
-    static void checkIndexSet ( const Grid &grid, const GridView &view,
-                                OutputStream &sout, bool levelIndex )
-    {
-      checkIndexSetForCodim< codim >( grid, view, sout, levelIndex );
-      typedef Dune :: Capabilities :: hasEntity< Grid, codim-1 > hasNextCodim;
-      typedef Dune :: Capabilities :: hasEntityIterator< Grid, codim-1 > hasNextCodimIterator;
-      CheckIndexSet< Grid, GridView, OutputStream, codim-1, hasNextCodim::v && hasNextCodimIterator::v >
-      :: checkIndexSet( grid, view, sout, levelIndex );
-    }
-  };
-
-  template< class Grid, class GridView, class OutputStream, int codim >
-  struct CheckIndexSet< Grid, GridView, OutputStream, codim, false >
-  {
-    static void checkIndexSet ( const Grid &grid, const GridView &view,
-                                OutputStream &sout, bool levelIndex )
-    {
-      derr << "WARNING: Entities for codim " << codim
-           << " are not being tested!" << std::endl;
-      typedef Dune :: Capabilities :: hasEntity< Grid, codim-1 > hasNextCodim;
-      typedef Dune :: Capabilities :: hasEntityIterator< Grid, codim-1 > hasNextCodimIterator;
-      CheckIndexSet< Grid, GridView, OutputStream, codim-1, (hasNextCodim::v && hasNextCodimIterator::v) >
-      :: checkIndexSet( grid, view, sout, levelIndex );
-    }
-  };
-
-  template< class Grid, class GridView, class OutputStream >
-  struct CheckIndexSet< Grid, GridView, OutputStream, 0, true >
-  {
-    static void checkIndexSet ( const Grid &grid, const GridView &view,
-                                OutputStream &sout, bool levelIndex )
-    {
-      checkIndexSetForCodim< 0 >( grid, view, sout, levelIndex );
-    }
-  };
-
   template< class Grid, class GridView, class OutputStream >
   void checkIndexSet ( const Grid &grid, const GridView &view,
                        OutputStream &sout,  bool levelIndex = false )
   {
-    CheckIndexSet< Grid, GridView, OutputStream, Grid :: dimension, true >
-    :: checkIndexSet ( grid, view, sout, levelIndex );
+    Hybrid::forEach( std::make_index_sequence< Grid :: dimension+1 >{},
+      [ & ]( auto codim )
+    {
+      if constexpr (Capabilities :: hasEntityIterator< Grid, codim>::v)
+        checkIndexSetForCodim< codim >( grid, view, sout, levelIndex );
+      else
+        derr << "WARNING: Entities for codim " << codim
+             << " are not being tested!" << std::endl;
+    });
   }
 
 } // end namespace Dune
