@@ -395,6 +395,7 @@ template class UGGridEntity<0,2, const UGGrid<2> >;
 template class UGGridEntity<0,3, const UGGrid<3> >;
 
 template class UGGridEntity<1,2, const UGGrid<2> >;
+template class UGGridEntity<1,3, const UGGrid<3> >;
 template class UGGridEntity<2,3, const UGGrid<3> >;
 
 template Grid<2, 2, double, UGGridFamily<2> >::Codim<0>::Entity
