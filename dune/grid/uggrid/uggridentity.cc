@@ -35,17 +35,30 @@ GeometryType UGGridEntity<codim,dim,GridImp>::type() const
   if (dim-codim == 1)
     return GeometryTypes::line;
 
-  // Face in 3d
-  switch (UG_NS<dim>::Tag(target_)) {
-  case UG::D2::TRIANGLE :
-    return GeometryTypes::triangle;
-  case UG::D2::QUADRILATERAL :
-    return GeometryTypes::quadrilateral;
-  default :
-    DUNE_THROW(GridError, "UGGridGeometry::type():  ERROR:  Unknown type "
-               << UG_NS<dim>::Tag(target_) << " found!");
+  if constexpr (codim==1 && dim==3)
+  {
+    // retrieve an element that this facet is a side of, and retrieve the side number
+    typename UG_NS<dim>::Element* center;
+    unsigned int side;
+    UG_NS<dim>::GetElementAndSideFromSideVector(target_, center, side);
+
+    switch (UG_NS<dim>::Tag(center))
+    {
+      case UG::D3::TETRAHEDRON :
+        return GeometryTypes::triangle;
+      case UG::D3::PYRAMID :
+        return (side==0 ? GeometryTypes::quadrilateral : GeometryTypes::triangle);
+      case UG::D3::PRISM :
+        return (side==0 or side==4 ? GeometryTypes::triangle : GeometryTypes::quadrilateral);
+      case UG::D3::HEXAHEDRON :
+        return GeometryTypes::quadrilateral;
+      default :
+        DUNE_THROW(GridError, "UGGridEntity::type():  Unknown type "
+                   << UG_NS<dim>::Tag(center) << " found!");
+    }
   }
 
+  // The remaining cases are handled in specializations
 }
 
 
@@ -382,6 +395,7 @@ template class UGGridEntity<0,2, const UGGrid<2> >;
 template class UGGridEntity<0,3, const UGGrid<3> >;
 
 template class UGGridEntity<1,2, const UGGrid<2> >;
+template class UGGridEntity<1,3, const UGGrid<3> >;
 template class UGGridEntity<2,3, const UGGrid<3> >;
 
 template Grid<2, 2, double, UGGridFamily<2> >::Codim<0>::Entity
