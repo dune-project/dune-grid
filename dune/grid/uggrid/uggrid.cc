@@ -508,6 +508,98 @@ bool UGGrid < dim >::loadBalance(const std::vector<Rank>& targetProcessors, unsi
   return true;
 }
 
+#ifdef ModelP
+template <int dim>
+std::vector<typename UG_NS<dim>::DDD_IF> UGGrid<dim>::findDDDInterfaces(InterfaceType iftype,
+                                                                        int codim) const
+{
+  std::vector<typename UG_NS<dim>::DDD_IF> dddIfaces;
+  if (codim == 0)
+  {
+    switch (iftype) {
+    case InteriorBorder_InteriorBorder_Interface :
+      // do not communicate anything: Elements cannot be in
+      // the interior of two processes at the same time
+      break;
+    case InteriorBorder_All_Interface :
+      dddIfaces.push_back(UG_NS<dim>::ElementVHIF(multigrid_->dddContext()));
+      break;
+    case All_All_Interface :
+      dddIfaces.push_back(UG_NS<dim>::ElementSymmVHIF(multigrid_->dddContext()));
+      break;
+    default :
+      DUNE_THROW(GridError,
+                 "Element communication not supported for "
+                 "interfaces of type  "
+                 << iftype);
+    }
+  }
+  else if (codim == dim)
+  {
+    switch (iftype)
+    {
+    case InteriorBorder_InteriorBorder_Interface :
+      dddIfaces.push_back(UG_NS<dim>::BorderNodeSymmIF(multigrid_->dddContext()));
+      break;
+    case InteriorBorder_All_Interface :
+      dddIfaces.push_back(UG_NS<dim>::NodeInteriorBorderAllIF(multigrid_->dddContext()));
+      break;
+    case All_All_Interface :
+      dddIfaces.push_back(UG_NS<dim>::NodeAllIF(multigrid_->dddContext()));
+      break;
+    default :
+      DUNE_THROW(GridError,
+                 "Node communication not supported for "
+                 "interfaces of type  "
+                 << iftype);
+    }
+  }
+  else if (codim == dim-1)
+  {
+    switch (iftype)
+    {
+    case InteriorBorder_InteriorBorder_Interface :
+      dddIfaces.push_back(UG_NS<dim>::BorderEdgeSymmIF(multigrid_->dddContext()));
+      break;
+    case InteriorBorder_All_Interface :
+      dddIfaces.push_back(UG_NS<dim>::EdgeVHIF(multigrid_->dddContext()));
+      break;
+    case All_All_Interface :
+      dddIfaces.push_back(UG_NS<dim>::EdgeSymmVHIF(multigrid_->dddContext()));
+      break;
+    default :
+      DUNE_THROW(GridError,
+                 "Edge communication not supported for "
+                 "interfaces of type  "
+                 << iftype);
+    }
+  }
+  else if (codim == 1)
+  {
+    switch (iftype)
+    {
+    case InteriorBorder_InteriorBorder_Interface :
+    case InteriorBorder_All_Interface :
+      dddIfaces.push_back(UG_NS<dim>::FacetInteriorBorderAllIF(multigrid_->dddContext()));
+      break;
+    default :
+      DUNE_THROW(GridError,
+                 "Face communication not supported for "
+                 "interfaces of type  "
+                 << iftype);
+    }
+  }
+  else
+  {
+    DUNE_THROW(GridError,
+               "Communication codimension must be between 0 and " << dim << "!");
+  }
+
+  return dddIfaces;
+};
+#endif // ModelP
+
+
 template < int dim >
 void UGGrid < dim >::setPosition(const typename Traits::template Codim<dim>::Entity& e,
                                  const FieldVector<double, dim>& pos)
