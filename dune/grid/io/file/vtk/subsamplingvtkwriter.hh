@@ -82,7 +82,7 @@ namespace Dune
         , intervals(intervals_), coerceToSimplex(coerceToSimplex_)
     {
       if(intervals_.intervals() < 1) {
-        DUNE_THROW(Dune::IOError,"SubsamplingVTKWriter: Negative Subsampling " << intervals_.intervals() << " must not be used!");
+        DUNE_THROW(Dune::IOError,"SubsamplingVTKWriter: Refinement intervals must be larger than zero! (One interval means no subsampling)");
       }
     }
 
