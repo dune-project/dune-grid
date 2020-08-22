@@ -160,9 +160,9 @@ namespace Dune
         if (dimR==0) value = "double";
         else
         {
-          auto found = findInTypeRegistry<Value>().first;
-          assert(found);
-          value = found->second.name;
+          auto found = findInTypeRegistry<Value>();
+          assert(found.second);
+          value = found.first->second.name;
         }
         return "std::function<"+value+"(const "+entity+"&,const "+coord+"&)>";
       }
