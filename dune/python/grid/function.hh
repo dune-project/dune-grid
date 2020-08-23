@@ -161,7 +161,7 @@ namespace Dune
         else
         {
           auto found = findInTypeRegistry<Value>();
-          assert(found.second);
+          assert(!found.second);
           value = found.first->second.name;
         }
         return "std::function<"+value+"(const "+entity+"&,const "+coord+"&)>";
