@@ -139,6 +139,9 @@ namespace Dune {
     {
       std::vector<std::pair<int,PartitionType> > result;
 
+#ifndef ModelP
+      result.push_back(std::make_pair(0, InteriorEntity));
+#else
       int *plist = UG_NS<dim>::DDD_InfoProcList(gridImp_->multigrid_->dddContext(),
                                                 UG_NS<dim>::ParHdr(target_));
 
@@ -164,7 +167,7 @@ namespace Dune {
           result.push_back(std::make_pair(rank, (hasBorderCopy) ? BorderEntity : InteriorEntity));
         }
       }
-
+#endif
       return result;
     }
 
@@ -356,6 +359,9 @@ namespace Dune {
     {
       std::vector<std::pair<int,PartitionType> > result;
 
+#ifndef ModelP
+      result.push_back(std::make_pair(0, InteriorEntity));
+#else
       int *plist = UG_NS<dim>::DDD_InfoProcList(gridImp_->multigrid_->dddContext(),
                                                 &target_->ge.ddd);
 
@@ -369,7 +375,7 @@ namespace Dune {
         else
           result.push_back(std::make_pair(rank, InteriorEntity));
       }
-
+#endif
       return result;
     }
 
