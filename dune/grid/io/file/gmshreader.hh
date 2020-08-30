@@ -694,6 +694,10 @@ namespace Dune
             factory.insertBoundarySegment(vertices);
             break;
 
+          case 3 :            // 4-node quadrilateral
+            factory.insertBoundarySegment(vertices);
+            break;
+
           case 15 :             // 1-node point
             factory.insertBoundarySegment(vertices);
             break;
