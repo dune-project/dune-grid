@@ -696,6 +696,10 @@ namespace Dune
             factory.insertBoundarySegment(vertices);
             break;
 
+          case 3 :            // 4-node quadrilateral
+            factory.insertBoundarySegment(vertices);
+            break;
+
           case 15 :             // 1-node point
             factory.insertBoundarySegment(vertices);
             break;
@@ -715,6 +719,10 @@ namespace Dune
           }
           case 9 : {              // 6-node triangle
             boundarysegment_insert(nodes, elementDofs, vertices);
+            break;
+          }
+          default: {
+            DUNE_THROW(Dune::IOError, "GmshReader does not support using element-type " << elm_type << " for boundary segments");
             break;
           }
 
