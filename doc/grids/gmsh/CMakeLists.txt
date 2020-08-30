@@ -18,5 +18,6 @@ set(GRIDS
   telescope.geo
   telescope.msh
   twotets.geo
-  twotets.msh)
+  twotets.msh
+  unitcube.msh)
 install(FILES ${GRIDS} DESTINATION ${CMAKE_INSTALL_DOCDIR}/grids/gmsh)
