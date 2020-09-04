@@ -15,6 +15,7 @@
 #include <dune/python/common/dimrange.hh>
 #include <dune/python/common/typeregistry.hh>
 #include <dune/python/common/vector.hh>
+#include <dune/python/common/fvector.hh>
 #include <dune/python/grid/simplegridfunction.hh>
 #include <dune/python/grid/localview.hh>
 #include <dune/python/grid/entity.hh>
@@ -157,7 +158,12 @@ namespace Dune
         std::string coord = findInTypeRegistry<Coordinate>().first->second.name;
         std::string value;
         if (dimR==0) value = "double";
-        else value = findInTypeRegistry<Value>().first->second.name;
+        else
+        {
+          auto found = findInTypeRegistry<Value>();
+          assert(!found.second);
+          value = found.first->second.name;
+        }
         return "std::function<"+value+"(const "+entity+"&,const "+coord+"&)>";
       }
     };
@@ -243,6 +249,8 @@ namespace Dune
 
         typedef PyGridFunctionEvaluator<GridView,dimRange,Evaluate> Evaluator;
         typedef SimpleGridFunction< GridView, Evaluator > GridFunction;
+        if (dimRange>0)
+          Dune::Python::registerFieldVector<double,dimRange>(scope);
         addToTypeRegistry<Evaluator>(GenerateTypeName("Dune::Python::detail::PyGridFunctionEvaluator",
                                             MetaType<GridView>(),dimRange,
                                             EvaluateType<GridView,dimRange,Evaluate>::name()
