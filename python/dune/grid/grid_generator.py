@@ -150,7 +150,8 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
             raise ValueError("""if `callback` is the name of a C++ function
             then at least one include file containing that function must be
             provided""")
-        source = '#include <config.h>\n\n'
+        source  = '#pragma once\n\n'
+        source += '#include <config.h>\n\n'
         source += '#define USING_DUNE_PYTHON 1\n\n'
         includes = []
         if isString(includeFiles):
@@ -233,7 +234,8 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
             scalar = "true"
         FieldVector(dimRange*[0]) # register FieldVector for the return value
         if not dimRange in gv.__class__._functions.keys():
-            source = '#include <config.h>\n\n'
+            source  = '#pragma once\n\n'
+            source += '#include <config.h>\n\n'
             source += '#define USING_DUNE_PYTHON 1\n\n'
             includes = gv._includes
 
