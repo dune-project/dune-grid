@@ -202,7 +202,7 @@ namespace Dune
   template< int codim >
   inline void PersistentContainerMap< G, IdSet, Map >::resize ( const Value &value )
   {
-    std::integral_constant< bool, Capabilities::hasEntity< Grid, codim >::v > hasEntity;
+    std::integral_constant< bool, Capabilities::hasEntityIterator< Grid, codim >::v > hasEntityIterator;
     assert( codim == codimension() );
 
     // create empty map and swap it with current map (no need to copy twice)
@@ -212,7 +212,7 @@ namespace Dune
     // copy all data from old map into new one (adding new entries, if necessary)
     const int maxLevel = grid().maxLevel();
     for ( int level = 0; level <= maxLevel; ++level )
-      migrateLevel< codim >( level, value, data, hasEntity );
+      migrateLevel< codim >( level, value, data, hasEntityIterator );
   }
 
 
