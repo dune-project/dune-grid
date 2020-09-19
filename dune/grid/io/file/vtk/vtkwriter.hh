@@ -835,7 +835,7 @@ namespace Dune
     }
 
   protected:
-    //! return name of a parallel piece file
+    //! return name of a parallel piece file (or header name)
     /**
      * \param name     Base name of the VTK output.  This should be without
      *                 any directory parts and without a filename extension.
@@ -844,7 +844,8 @@ namespace Dune
      *                 directory part.  If non-empty, may or may not have a
      *                 trailing '/'.  If a trailing slash is missing, one is
      *                 appended implicitly.
-     * \param commRank Rank of the process to generate a piece name for.
+     * \param commRank Rank of the process to generate a piece name for. if (-1)
+     * then the header is created.
      * \param commSize Number of processes writing a parallel vtk output.
      */
     std::string getParallelPieceName(const std::string& name,
@@ -852,18 +853,52 @@ namespace Dune
                                      int commRank, int commSize) const
     {
       std::ostringstream s;
-      if(path.size() > 0) {
+      // write path first
+      if(path.size() > 0)
+      {
         s << path;
         if(path[path.size()-1] != '/')
           s << '/';
       }
-      s << 's' << std::setw(4) << std::setfill('0') << commSize << '-';
-      s << 'p' << std::setw(4) << std::setfill('0') << commRank << '-';
-      s << name;
-      if(GridView::dimension > 1)
-        s << ".vtu";
+
+      std::string fileprefix;
+      // check if a path was already added to name
+      // and if yes find filename without path
+      std::size_t pos = name.rfind('/');
+      if( pos != std::string::npos )
+      {
+        // extract filename without path
+        fileprefix = name.substr( pos+1 );
+        // extract the path and added it before
+        // the magic below is added
+        std::string newpath = name.substr(0, pos);
+        s << newpath;
+        if(newpath[name.size()-1] != '/')
+          s << '/';
+      }
       else
-        s << ".vtp";
+      {
+        // if no path was found just copy the name
+        fileprefix = name;
+      }
+
+      s << 's' << std::setw(4) << std::setfill('0') << commSize << '-';
+      const bool writeHeader = commRank < 0;
+      if( ! writeHeader )
+      {
+        s << 'p' << std::setw(4) << std::setfill('0') << commRank << '-';
+      }
+
+      s << fileprefix << ".";
+      // write p for header files
+      if( writeHeader )
+        s << "p";
+      s << "vt";
+
+      if(GridView::dimension > 1)
+        s << "u";
+      else
+        s << "p";
       return s.str();
     }
 
@@ -882,19 +917,7 @@ namespace Dune
                                       const std::string& path,
                                       int commSize) const
     {
-      std::ostringstream s;
-      if(path.size() > 0) {
-        s << path;
-        if(path[path.size()-1] != '/')
-          s << '/';
-      }
-      s << 's' << std::setw(4) << std::setfill('0') << commSize << '-';
-      s << name;
-      if(GridView::dimension > 1)
-        s << ".pvtu";
-      else
-        s << ".pvtp";
-      return s.str();
+      return getParallelPieceName( name, path, -1, commSize );
     }
 
     //! return name of a serial piece file
