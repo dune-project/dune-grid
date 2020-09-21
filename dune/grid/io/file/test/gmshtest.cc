@@ -280,6 +280,7 @@ try
   testReadingAndWritingGrid<UGGrid<3> >( path, "pyramid", "UGGrid-3D", refinements );
   testReadingAndWritingGrid<UGGrid<3> >( path, "pyramid2ndorder", "UGGrid-3D", refinements );
   testReadingAndWritingGrid<UGGrid<3> >( path, "hybrid-testgrid-3d", "UGGrid-3D", refinements );
+  testReadingAndWritingGrid<UGGrid<3> >( path, "unitcube", "UGGrid-3D", refinements );
 #endif
 
 #if GMSH_ALBERTAGRID
