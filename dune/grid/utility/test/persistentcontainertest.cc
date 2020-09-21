@@ -10,6 +10,9 @@
 
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/yaspgrid.hh>
+#if HAVE_DUNE_UGGRID
+#include <dune/grid/uggrid.hh>
+#endif
 
 #include <dune/grid/utility/persistentcontainer.hh>
 #include <dune/grid/utility/structuredgridfactory.hh>
@@ -136,7 +139,7 @@ try {
   // /////////////////////////////////////////////////////////////////////////////
   {
     typedef YaspGrid<2> GridType;
-    Dune::FieldVector<double,2> Len; Len = 1.0;
+    FieldVector<double,2> Len; Len = 1.0;
     std::array<int,2> s = { {2, 6} };
     std::bitset<2> p;
     int overlap = 1;
@@ -144,6 +147,21 @@ try {
     std::cout << "Testing YaspGrid" << std::endl;
     test(grid);
   }
+
+#if HAVE_DUNE_UGGRID
+  // /////////////////////////////////////////////////////////////////////////////
+  //   Test UGGrid
+  // /////////////////////////////////////////////////////////////////////////////
+  {
+    typedef UGGrid<2> GridType;
+    FieldVector<double,2> lowerLeft{0.0, 0.0};
+    FieldVector<double,2> upperRight{1.0, 1.0};
+    std::array<unsigned int, 2> cells = { {2, 6} };
+    const auto gridPtr = StructuredGridFactory<GridType>::createCubeGrid(lowerLeft, upperRight, cells);
+    std::cout << "Testing UGGrid" << std::endl;
+    test(*gridPtr);
+  }
+#endif
 
   return 0;
 }
