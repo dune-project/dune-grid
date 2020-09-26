@@ -162,19 +162,21 @@ namespace Dune {
     //! return unit outer normal, this should be dependent on local coordinates for higher order boundary
     FieldVector<ctype, dimworld> outerNormal (const FieldVector<ctype, dim-1>& local) const
     {
-      return _faceInfo[_count].normal;
+      return centerUnitOuterNormal();
     }
 
     //! return unit outer normal, this should be dependent on local coordinates for higher order boundary
     FieldVector<ctype, dimworld> unitOuterNormal (const FieldVector<ctype, dim-1>& local) const
     {
-      return _faceInfo[_count].normal;
+      return centerUnitOuterNormal();
     }
 
     //! return unit outer normal at center of intersection geometry
     FieldVector<ctype, dimworld> centerUnitOuterNormal () const
     {
-      return _faceInfo[_count].normal;
+      FieldVector<ctype, dimworld> normal(0);
+      normal[_dir] = (_face==0) ? -1.0 : 1.0;
+      return normal;
     }
 
     //! return unit outer normal, this should be dependent on
@@ -182,9 +184,7 @@ namespace Dune {
     //! the normal is scaled with the integration element of the intersection.
     FieldVector<ctype, dimworld> integrationOuterNormal (const FieldVector<ctype, dim-1>& local) const
     {
-      FieldVector<ctype, dimworld> n = _faceInfo[_count].normal;
-      n *= geometry().volume();
-      return n;
+      return geometry().volume() * centerUnitOuterNormal();
     }
 
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
@@ -192,7 +192,18 @@ namespace Dune {
      */
     LocalGeometry geometryInInside () const
     {
-      return LocalGeometry( _faceInfo[_count].geom_inside );
+      // set of dimensions that span the intersection
+      std::bitset<dim> s;
+      s.set();
+      s[_dir] = false;
+
+      // lower-left and upper-right corners
+      Dune::FieldVector<ctype, dim> ll(0.0);
+      Dune::FieldVector<ctype, dim> ur(1.0);
+
+      ll[_dir] = ur[_dir] = (_face==0) ? 0.0 : 1.0;
+
+      return LocalGeometry(LocalGeometryImpl(ll,ur,s));
     }
 
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
@@ -200,7 +211,18 @@ namespace Dune {
      */
     LocalGeometry geometryInOutside () const
     {
-      return LocalGeometry( _faceInfo[_count].geom_outside );
+      // set of dimensions that span the intersection
+      std::bitset<dim> s;
+      s.set();
+      s[_dir] = false;
+
+      // lower-left and upper-right corners
+      Dune::FieldVector<ctype, dim> ll(0.0);
+      Dune::FieldVector<ctype, dim> ur(1.0);
+
+      ll[_dir] = ur[_dir] = (_face==1) ? 0.0 : 1.0;
+
+      return LocalGeometry(LocalGeometryImpl(ll,ur,s));
     }
 
     /*! intersection of codimension 1 of this neighbor with element where iteration started.
@@ -314,58 +336,7 @@ namespace Dune {
     uint8_t _count;                                //!< valid neighbor count in 0 .. 2*dim-1
     uint8_t _dir;                                  //!< count/2
     uint8_t _face;                                 //!< count%2
-
-    /* static data */
-    struct faceInfo
-    {
-      FieldVector<ctype, dimworld> normal;
-      LocalGeometryImpl geom_inside;           //!< intersection in own local coordinates
-      LocalGeometryImpl geom_outside;          //!< intersection in neighbors local coordinates
-    };
-
-    /* static face info */
-    static const std::array<faceInfo, 2*GridImp::dimension> _faceInfo;
-
-    static std::array<faceInfo, 2*dim> initFaceInfo()
-    {
-      std::array<faceInfo, 2*dim> I;
-      for (uint8_t i=0; i<dim; i++)
-      {
-        // compute normals
-        I[2*i].normal = 0.0;
-        I[2*i+1].normal = 0.0;
-        I[2*i].normal[i] = -1.0;
-        I[2*i+1].normal[i] = +1.0;
-
-        // determine the shift vector for these intersection
-        std::bitset<dim> s;
-        s.set();
-        s[i] = false;
-
-        // store intersection geometries
-        Dune::FieldVector<ctype, dim> ll(0.0);
-        Dune::FieldVector<ctype, dim> ur(1.0);
-        ur[i] = 0.0;
-
-        I[2*i].geom_inside = LocalGeometryImpl(ll,ur,s);
-        I[2*i+1].geom_outside = LocalGeometryImpl(ll,ur,s);
-
-        ll[i] = 1.0;
-        ur[i] = 1.0;
-
-        I[2*i].geom_outside = LocalGeometryImpl(ll,ur,s);
-        I[2*i+1].geom_inside = LocalGeometryImpl(ll,ur,s);
-      }
-
-      return I;
-    }
   };
-
-  template<class GridImp>
-  const std::array<typename YaspIntersection<GridImp>::faceInfo, 2*GridImp::dimension>
-  YaspIntersection<GridImp>::_faceInfo =
-    YaspIntersection<GridImp>::initFaceInfo();
-
 }   // namespace Dune
 
 #endif   // DUNE_GRID_YASPGRIDINTERSECTION_HH
