@@ -647,14 +647,14 @@ namespace Dune
         {
           assert( elData_[ idSet_.id( entity ) ].size() == static_cast< std::size_t >( gridPtr_.nofElParam_ ) );
           for( double &v : elData_[ idSet_.id( entity ) ] )
-            size += dataSize( v );
+            size += sizeof( double ); // dataSize( v );
         }
 
         if( (Entity::codimension == dimension) && (gridPtr_.nofVtxParam_ > 0) )
         {
           assert( vtxData_[ idSet_.id( entity ) ].size() == static_cast< std::size_t >( gridPtr_.nofVtxParam_ ) );
           for( double &v : vtxData_[ idSet_.id( entity ) ] )
-            size += dataSize( v );
+            size += sizeof( double ); // dataSize( v );
         }
 
         if( Entity::codimension == 1 )
