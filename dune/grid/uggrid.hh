@@ -134,13 +134,13 @@
 
 #ifdef ModelP
 template <class DataHandle, int GridDim, int codim>
-const Dune::UGGrid<GridDim>* Dune::UGMessageBufferBase<DataHandle, GridDim, codim>::grid_;
+const Dune::UGGrid<GridDim>* Dune::UGMessageBuffer<DataHandle, GridDim, codim>::grid_;
 
 template <class DataHandle, int GridDim, int codim>
-DataHandle *Dune::UGMessageBufferBase<DataHandle,GridDim,codim>::duneDataHandle_ = 0;
+DataHandle *Dune::UGMessageBuffer<DataHandle,GridDim,codim>::duneDataHandle_ = nullptr;
 
 template <class DataHandle, int GridDim, int codim>
-int Dune::UGMessageBufferBase<DataHandle,GridDim,codim>::level = -1;
+int Dune::UGMessageBuffer<DataHandle,GridDim,codim>::level = -1;
 #endif // ModelP
 
 namespace Dune {
@@ -595,7 +595,7 @@ namespace Dune {
       std::vector<typename UG_NS<dim>::DDD_IF> ugIfs;
       findDDDInterfaces_(ugIfs, iftype, codim);
 
-      unsigned bufSize = UGMsgBuf::ugBufferSize_(gv);
+      unsigned bufSize = UGMsgBuf::ugBufferSize(gv);
       if (!bufSize)
         return;     // we don't need to communicate if we don't have any data!
       UGMsgBuf::grid_ = this;
@@ -656,8 +656,7 @@ namespace Dune {
           dddIfaces.push_back(UG_NS<dim>::BorderNodeSymmIF(DDD_CONTEXT));
           return;
         case InteriorBorder_All_Interface :
-          dddIfaces.push_back(UG_NS<dim>::BorderNodeSymmIF(DDD_CONTEXT));
-          dddIfaces.push_back(UG_NS<dim>::NodeIF(DDD_CONTEXT));
+          dddIfaces.push_back(UG_NS<dim>::NodeInteriorBorderAllIF(DDD_CONTEXT));
           return;
         case All_All_Interface :
           dddIfaces.push_back(UG_NS<dim>::NodeAllIF(DDD_CONTEXT));
@@ -677,9 +676,7 @@ namespace Dune {
           dddIfaces.push_back(UG_NS<dim>::BorderEdgeSymmIF(DDD_CONTEXT));
           return;
         case InteriorBorder_All_Interface :
-          dddIfaces.push_back(UG_NS<dim>::BorderEdgeSymmIF(DDD_CONTEXT));
-          // Is the following line needed or not?
-          // dddIfaces.push_back(UG_NS<dim>::EdgeIF(DDD_CONTEXT));
+          dddIfaces.push_back(UG_NS<dim>::EdgeVHIF(DDD_CONTEXT));
           return;
         case All_All_Interface :
           dddIfaces.push_back(UG_NS<dim>::EdgeSymmVHIF(DDD_CONTEXT));
@@ -697,7 +694,7 @@ namespace Dune {
         {
         case InteriorBorder_InteriorBorder_Interface :
         case InteriorBorder_All_Interface :
-          dddIfaces.push_back(UG_NS<dim>::BorderVectorSymmIF(DDD_CONTEXT));
+          dddIfaces.push_back(UG_NS<dim>::FacetInteriorBorderAllIF(DDD_CONTEXT));
           return;
         default :
           DUNE_THROW(GridError,
