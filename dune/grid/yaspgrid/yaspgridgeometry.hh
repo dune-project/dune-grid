@@ -42,11 +42,6 @@ namespace Dune {
     {
       assert(mydim == shift.count());
     }
-
-    //! copy constructor
-    YaspGeometry (const YaspGeometry& other)
-      : AxisAlignedCubeGeometry<ctype,mydim,cdim>(other)
-    {}
   };
 
   //! specialize for dim=dimworld, i.e. a volume element
