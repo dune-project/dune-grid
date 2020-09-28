@@ -279,9 +279,8 @@ namespace Dune
 
     //@}
 
-  private:
-    /** hide assignment operator */
-    const Geometry &operator= ( const Geometry &rhs );
+    /** delete assignment operator */
+    const Geometry &operator= ( const Geometry &rhs ) = delete;
 
   protected:
 
