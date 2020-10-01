@@ -34,10 +34,6 @@ namespace Dune {
       : _entity(YaspEntity<codim, dim, GridImp>(g,it))
     {}
 
-    //! copy constructor
-    YaspLevelIterator (const YaspLevelIterator& i) :
-      _entity(i._entity) {}
-
     //! increment
     void increment()
     {
