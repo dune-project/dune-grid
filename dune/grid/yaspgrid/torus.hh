@@ -308,14 +308,14 @@ namespace Dune
       }
 
       //! Return true when two iterators point to same member
-      bool operator== (const ProcListIterator& iter)
+      bool operator== (const ProcListIterator& iter) const
       {
         return i == iter.i;
       }
 
 
       //! Return true when two iterators do not point to same member
-      bool operator!= (const ProcListIterator& iter)
+      bool operator!= (const ProcListIterator& iter) const
       {
         return i != iter.i;
       }
