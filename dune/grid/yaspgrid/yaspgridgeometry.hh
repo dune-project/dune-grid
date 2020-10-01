@@ -31,11 +31,6 @@ namespace Dune {
     //! define type used for coordinates in grid module
     typedef typename GridImp::ctype ctype;
 
-    //! default constructor
-    YaspGeometry ()
-      : AxisAlignedCubeGeometry<ctype,mydim,cdim>(FieldVector<ctype,cdim>(0),FieldVector<ctype,cdim>(0))
-    {}
-
     //! constructor from midpoint and extension and a bitset defining which unit vectors span the entity
     YaspGeometry (const FieldVector<ctype, cdim>& ll, const FieldVector<ctype, cdim>& ur, const std::bitset<cdim>& shift)
       : AxisAlignedCubeGeometry<ctype,mydim,cdim>(ll,ur,shift)
@@ -56,11 +51,6 @@ namespace Dune {
   public:
     typedef typename GridImp::ctype ctype;
 
-    //! default constructor
-    YaspGeometry ()
-      : AxisAlignedCubeGeometry<ctype,mydim,mydim>(FieldVector<ctype,mydim>(0),FieldVector<ctype,mydim>(0)) // anything
-    {}
-
     //! constructor from midpoint and extension
     YaspGeometry (const FieldVector<ctype, mydim>& ll, const FieldVector<ctype, mydim>& ur)
       : AxisAlignedCubeGeometry<ctype,mydim,mydim>(ll,ur)
@@ -78,11 +68,6 @@ namespace Dune {
   {
   public:
     typedef typename GridImp::ctype ctype;
-
-    //! default constructor
-    YaspGeometry ()
-      : AxisAlignedCubeGeometry<typename GridImp::ctype,0,cdim>(FieldVector<ctype,cdim>(0)) // anything
-    {}
 
     //! constructor
     explicit YaspGeometry ( const FieldVector< ctype, cdim > &p )
