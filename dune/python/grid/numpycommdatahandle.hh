@@ -69,7 +69,7 @@ namespace Dune
         return std::any_of( types.begin(), types.end(), [ this ] ( GeometryType gt ) { return mapper_.size( gt ) > 0; } );
       }
 
-      bool fixedsize ( int dim, int codim ) const
+      bool fixedSize ( int dim, int codim ) const
       {
         const auto &types = mapper_.types( codim );
         return (std::adjacent_find( types.begin(), types.end(), [ this ] ( GeometryType a, GeometryType b ) { return mapper_.size( a ) != mapper_.size( b ); } ) == types.end());
