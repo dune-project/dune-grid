@@ -45,12 +45,15 @@ namespace Dune
       : public Dune::CommDataHandleIF< ProxyDataHandle, double >
     {
       ProxyDataHandle ( pybind11::object dataHandle )
-        : contains_( method( dataHandle, "contains" ) ), fixedsize_( method( dataHandle, "fixedsize" ) ),
-          size_( method( dataHandle, "size" ) ), gather_( method( dataHandle, "gather" ) ), scatter_( method( dataHandle, "scatter" ) )
+        : contains_( method( dataHandle, "contains" ) ),
+          fixedSze_( method( dataHandle, "fixedSize" ) ),
+          size_( method( dataHandle, "size" ) ),
+          gather_( method( dataHandle, "gather" ) ),
+          scatter_( method( dataHandle, "scatter" ) )
       {}
 
       bool contains ( int dim, int codim ) const { return contains_( dim, codim ).cast< bool >(); }
-      bool fixedsize ( int dim, int codim ) const { return fixedsize_( dim, codim ).cast< bool >(); }
+      bool fixedSize ( int dim, int codim ) const { return fixedSze_( dim, codim ).cast< bool >(); }
 
       template< class Entity >
       std::size_t size ( const Entity &entity ) const
@@ -88,7 +91,7 @@ namespace Dune
         return method;
       }
 
-      pybind11::object contains_, fixedsize_;
+      pybind11::object contains_, fixedSze_;
       pybind11::object size_, gather_, scatter_;
     };
 
