@@ -150,8 +150,9 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
             raise ValueError("""if `callback` is the name of a C++ function
             then at least one include file containing that function must be
             provided""")
-        source  = '#pragma once\n\n'
-        source += '#include <config.h>\n\n'
+
+        # unique header guard is added further down
+        source  = '#include <config.h>\n\n'
         source += '#define USING_DUNE_PYTHON 1\n\n'
         includes = []
         if isString(includeFiles):
@@ -185,6 +186,11 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
         signature = callback + "( " + ", ".join(argTypes) + " )"
         moduleName = "gf_" + hashIt(signature) + "_" + hashIt(source)
 
+        # add unique header guard with moduleName
+        source = '#ifndef Guard_'+moduleName+'\n' + \
+                 '#define Guard_'+moduleName+'\n\n' + \
+                 source
+
         includes = sorted(set(includes))
         source += "".join(["#include <" + i + ">\n" for i in includes])
         source += "\n"
@@ -200,7 +206,8 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
         source += "    },"
         source += "    "+",".join(["pybind11::keep_alive<0,"+str(i+1)+">()" for i in range(len(argTypes)+1)])
         source += ");\n"
-        source += "}"
+        source += "}\n"
+        source += "#endif\n"
         gf = builder.load(moduleName, source, signature).gf(gv,*args)
     else:
         if len(inspect.signature(callback).parameters) == 1: # global function, turn into a local function
@@ -234,13 +241,18 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
             scalar = "true"
         FieldVector(dimRange*[0]) # register FieldVector for the return value
         if not dimRange in gv.__class__._functions.keys():
-            source  = '#pragma once\n\n'
-            source += '#include <config.h>\n\n'
+            # unique header key is added further down
+            source  = '#include <config.h>\n\n'
             source += '#define USING_DUNE_PYTHON 1\n\n'
             includes = gv._includes
 
             signature = gv._typeName+"::gf<"+str(dimRange)+">"
             moduleName = "gf_" + hashIt(signature) + "_" + hashIt(source)
+
+            # add unique header guard with moduleName
+            source = '#ifndef Guard_'+moduleName+'\n' + \
+                     '#define Guard_'+moduleName+'\n\n' + \
+                     source
 
             includes = sorted(set(includes))
             source += "".join(["#include <" + i + ">\n" for i in includes])
@@ -253,7 +265,8 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
             source += "{\n"
             source += "  typedef pybind11::function Evaluate;\n";
             source += "  Dune::Python::registerGridFunction< "+gv._typeName+", Evaluate, "+str(dimRange)+" >( module, \"gf\", "+scalar+" );\n"
-            source += "}"
+            source += "}\n"
+            source += "#endif\n"
             gfModule = builder.load(moduleName, source, signature)
             gfFunc = getattr(gfModule,"gf"+str(dimRange))
             if callback_ is not None:
