@@ -42,13 +42,15 @@ dune_add_test(NAME gmshtest-uggrid
                                   DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
               CMAKE_GUARD dune-uggrid_FOUND)
 
-if(HAVE_ALBERTA)
+if(Alberta_FOUND)
   add_executable(gmshtest-alberta2d gmshtest.cc)
+  target_link_libraries(gmshtest-alberta2d PRIVATE dunegrid)
   add_dune_alberta_flags(gmshtest-alberta2d WORLDDIM 2)
   target_compile_definitions(gmshtest-alberta2d PUBLIC GMSH_ALBERTAGRID DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
   dune_add_test(TARGET gmshtest-alberta2d)
 
   add_executable(gmshtest-alberta3d gmshtest.cc)
+  target_link_libraries(gmshtest-alberta3d PRIVATE dunegrid)
   add_dune_alberta_flags(gmshtest-alberta3d WORLDDIM 3)
   target_compile_definitions(gmshtest-alberta3d PUBLIC GMSH_ALBERTAGRID DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
   dune_add_test(TARGET gmshtest-alberta3d)
