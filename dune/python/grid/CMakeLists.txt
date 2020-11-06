@@ -9,6 +9,7 @@ set(HEADERS
   intersection.hh
   localview.hh
   numpy.hh
+  numpycommdatahandle.hh
   object.hh
   vtk.hh
   function.hh

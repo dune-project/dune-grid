@@ -33,11 +33,6 @@ namespace Dune {
       : _l(level), _c(coord), _o(o)
     {}
 
-    //! copy constructor
-    YaspEntitySeed (const YaspEntitySeed& rhs)
-      : _l(rhs._l), _c(rhs._c), _o(rhs._o)
-    {}
-
     //! check whether the EntitySeed refers to a valid Entity
     bool isValid() const
     {

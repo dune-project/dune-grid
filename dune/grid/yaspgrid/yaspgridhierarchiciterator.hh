@@ -54,12 +54,6 @@ namespace Dune {
         pop_tos();
     }
 
-    //! constructor
-    YaspHierarchicIterator (const YaspHierarchicIterator& it) :
-      _entity(it._entity),
-      _maxlevel(it._maxlevel), stack(it.stack)
-    {}
-
     //! increment
     void increment ()
     {

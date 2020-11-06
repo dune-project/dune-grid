@@ -220,10 +220,6 @@ namespace Dune
     IntersectionIterator ( const Implementation &impl )
       : realIterator( impl )
     {}
-
-    /** Copy constructor */
-    IntersectionIterator(const IntersectionIterator& i) :
-      realIterator(i.realIterator) {}
     //@}
   };
 
