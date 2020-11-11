@@ -37,9 +37,7 @@
 #include <dune/python/pybind11/pybind11.h>
 #include <dune/python/pybind11/stl.h>
 
-#if HAVE_DUNE_FEM
-#include <dune/fem/storage/singleton.hh>
-#endif
+#include <dune/python/grid/singleton.hh>
 
 namespace Dune
 {
@@ -70,13 +68,8 @@ namespace Dune
       template< class Grid >
       inline GridModificationListeners< Grid > &gridModificationListeners ()
       {
-#if HAVE_DUNE_FEM
-        return Dune::Fem::Singleton< GridModificationListeners< Grid > >::instance();
-#else
-        // TODO: add the listeners to dune.grid?
-        static GridModificationListeners< Grid > listeners;
-        return listeners;
-#endif
+        SingletonStorage &singleton = pybind11::cast< SingletonStorage & >( pybind11::module::import( "dune.grid" ).attr( "singleton" ) );
+        return singleton.template instance< GridModificationListeners< Grid > >();
       }
 
       template< class Grid >

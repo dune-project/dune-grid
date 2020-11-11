@@ -6,6 +6,7 @@
 
 #include <dune/python/grid/commops.hh>
 #include <dune/python/grid/enums.hh>
+#include <dune/python/grid/singleton.hh>
 
 #include <dune/python/pybind11/pybind11.h>
 
@@ -59,4 +60,7 @@ PYBIND11_MODULE( _grid, module )
   reader.value( "dgfString", Dune::Python::Reader::dgfString );
   reader.value( "gmsh", Dune::Python::Reader::gmsh );
   reader.value( "structured", Dune::Python::Reader::structured );
+
+  pybind11::class_< Dune::SingletonStorage > cls( module, "SingletonStorage" );
+  module.attr( "singleton" ) = pybind11::cast( new Dune::SingletonStorage() );
 }
