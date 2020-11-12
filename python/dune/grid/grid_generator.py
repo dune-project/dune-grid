@@ -56,7 +56,7 @@ def _writeVTK(vtk,grid,f,name,dataTag):
 def writeVTK(grid, name,
              celldata=None, pointdata=None,
              cellvector=None, pointvector=None,
-             number=None, subsampling=None,outputType=OutputType.ascii,
+             number=None, subsampling=None,outputType=OutputType.appendedbase64,
              write=True, nonconforming=False):
     vtk = grid.vtkWriter(nonconforming) if subsampling is None else grid.vtkWriter(subsampling)
 
@@ -99,7 +99,7 @@ Try using a dictionary with name:function instead.""")
 class SequencedVTK:
     def __init__(self, grid, name, number,
                  celldata, pointdata, cellvector, pointvector,
-                 subsampling, outputType=OutputType.ascii):
+                 subsampling, outputType=OutputType.appendedbase64):
         self.number = number
         self.name = name
         self.vtk = grid.writeVTK(name,celldata=celldata,pointdata=pointdata,cellvector=cellvector,pointvector=pointvector,subsampling=subsampling,write=False)
@@ -109,7 +109,7 @@ class SequencedVTK:
         self.number += 1
 
 def sequencedVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointvector=None,
-                 number=0, subsampling=None, outputType=OutputType.ascii):
+                 number=0, subsampling=None, outputType=OutputType.appendedbase64):
     return SequencedVTK(grid,name,number,
                         celldata=celldata,pointdata=pointdata,
                         cellvector=cellvector,pointvector=pointvector,
