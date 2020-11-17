@@ -66,8 +66,9 @@ namespace Dune
         // TODO add to a python module?
         typedef LocalViewRegistry< LocalView, Context > LocalViewRegistryType;
         static LocalViewRegistryType* registry = nullptr;
-        if( registry )
+        if( !registry )
           registry = new LocalViewRegistryType();
+        assert(registry);
         return *registry;
       }
 
