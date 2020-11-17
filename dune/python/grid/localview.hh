@@ -64,8 +64,12 @@ namespace Dune
       DUNE_EXPORT inline LocalViewRegistry< LocalView, Context > &localViewRegistry ()
       {
         // TODO add to a python module?
-        static LocalViewRegistry< LocalView, Context > registry;
-        return registry;
+        typedef LocalViewRegistry< LocalView, Context > LocalViewRegistryType;
+        static LocalViewRegistryType* registry = nullptr;
+        if( !registry )
+          registry = new LocalViewRegistryType();
+        assert(registry);
+        return *registry;
       }
 
     } // namespace detail
