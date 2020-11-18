@@ -37,6 +37,7 @@ namespace Dune
     StorageType storage_;
 
   public:
+    ~SingletonStorage() {}
     /** \brief return singleton instance of given Object type.
      */
     template <class Object, class... Args>
