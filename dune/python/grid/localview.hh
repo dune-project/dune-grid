@@ -22,7 +22,7 @@ namespace Dune
 
 
       template< class LocalView, class Context >
-      struct LocalViewRegistry
+      struct DUNE_PRIVATE LocalViewRegistry
       {
         ~LocalViewRegistry()
         {
