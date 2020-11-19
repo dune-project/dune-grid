@@ -20,7 +20,7 @@ namespace Dune
 
   public:
     template <class Object>
-    struct ItemWrapper : public Item
+    struct DUNE_PRIVATE ItemWrapper : public Item
     {
       Object obj_;
       template <class... Args>
@@ -37,6 +37,7 @@ namespace Dune
     StorageType storage_;
 
   public:
+    ~SingletonStorage() {}
     /** \brief return singleton instance of given Object type.
      */
     template <class Object, class... Args>
