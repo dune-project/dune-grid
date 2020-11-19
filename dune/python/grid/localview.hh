@@ -4,6 +4,7 @@
 #include <map>
 
 #include <dune/common/visibility.hh>
+#include <dune/python/grid/singleton.hh>
 
 #include <dune/python/pybind11/pybind11.h>
 
@@ -23,6 +24,12 @@ namespace Dune
       template< class LocalView, class Context >
       struct DUNE_PRIVATE LocalViewRegistry
       {
+        ~LocalViewRegistry()
+        {
+          for (auto i = binds_.begin(), last = binds_.end(); i != last; ++i)
+            i->second = pybind11::object();
+          binds_.clear();
+        }
         void bind ( pybind11::handle localView, pybind11::object context )
         {
           localView.template cast< LocalView & >().bind( context.template cast< const Context & >() );
@@ -61,11 +68,11 @@ namespace Dune
       // -----------------
 
       template< class LocalView, class Context >
-      DUNE_EXPORT inline LocalViewRegistry< LocalView, Context > &localViewRegistry ()
+      inline LocalViewRegistry< LocalView, Context > &localViewRegistry ()
       {
-        // TODO add to a python module?
-        static LocalViewRegistry< LocalView, Context > registry;
-        return registry;
+        static SingletonStorage &singleton = pybind11::cast< SingletonStorage & >( pybind11::module::import( "dune.grid" ).attr( "singleton" ) );
+        static LocalViewRegistry< LocalView, Context > &instance = singleton.template instance< LocalViewRegistry<LocalView,Context> >();
+        return instance;
       }
 
     } // namespace detail

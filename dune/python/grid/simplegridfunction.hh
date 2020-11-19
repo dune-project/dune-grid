@@ -31,6 +31,7 @@ namespace Dune
       typedef std::decay_t< std::result_of_t< LocalEvaluator( Element, LocalCoordinate ) > > Value;
 
       explicit SimpleLocalFunction ( LocalEvaluator localEvaluator ) : localEvaluator_( std::move( localEvaluator ) ) {}
+      ~SimpleLocalFunction() { unbind(); }
       template <class GF>
       explicit SimpleLocalFunction ( const GF &gf ) : SimpleLocalFunction(gf.localEvaluator()) {}
 
