@@ -62,5 +62,5 @@ PYBIND11_MODULE( _grid, module )
   reader.value( "structured", Dune::Python::Reader::structured );
 
   pybind11::class_< Dune::SingletonStorage > cls( module, "SingletonStorage" );
-  module.attr( "singleton" ) = pybind11::cast( new Dune::SingletonStorage() );
+  module.attr( "singleton" ) = pybind11::cast( std::make_unique< Dune::SingletonStorage >() );
 }
