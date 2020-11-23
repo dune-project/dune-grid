@@ -136,18 +136,20 @@ namespace Dune
     // -------
 
     template< class Grid >
-    inline static std::unique_ptr< Grid > readDGF ( const std::string &fileName )
+    inline static std::unique_ptr< Grid > readDGF ( const std::string &fileName,
+                                                    typename Dune::MPIHelper::MPICommunicator mpiComm = Dune::MPIHelper::getCommunicator() )
     {
-      DGFGridFactory< Grid > dgfFactory( fileName );
+      DGFGridFactory< Grid > dgfFactory( fileName, mpiComm );
       std::unique_ptr< Grid > grid( dgfFactory.grid() );
       grid->loadBalance();
       return grid;
     }
 
     template< class Grid >
-    inline static std::unique_ptr< Grid > readDGF ( std::istream &input )
+    inline static std::unique_ptr< Grid > readDGF ( std::istream &input,
+                                                    typename Dune::MPIHelper::MPICommunicator mpiComm = Dune::MPIHelper::getCommunicator() )
     {
-      DGFGridFactory< Grid > dgfFactory( input );
+      DGFGridFactory< Grid > dgfFactory( input, mpiComm );
       std::unique_ptr< Grid > grid( dgfFactory.grid() );
       grid->loadBalance();
       return grid;
@@ -159,15 +161,18 @@ namespace Dune
     // --------
 
     template< class Grid, std::enable_if_t< Capabilities::HasGridFactory< Grid >::value, int > = 0 >
-    inline static std::unique_ptr< Grid > readGmsh ( const std::string &fileName )
+    inline static std::unique_ptr< Grid > readGmsh ( const std::string &fileName,
+                                                     typename Dune::MPIHelper::MPICommunicator mpiComm = Dune::MPIHelper::getCommunicator() )
     {
+      // TODO: possibility to pass communicator to factory
       Dune::GridFactory< Grid > gridFactory;
       Dune::GmshReader< Grid >::read( gridFactory, fileName, false, false );
       return std::unique_ptr< Grid >( gridFactory.createGrid() );
     }
 
     template< class Grid, std::enable_if_t< !Capabilities::HasGridFactory< Grid >::value, int > = 0 >
-    inline static std::unique_ptr< Grid > readGmsh ( const std::string &fileName )
+    inline static std::unique_ptr< Grid > readGmsh ( const std::string &fileName,
+                                                     typename Dune::MPIHelper::MPICommunicator mpiComm = Dune::MPIHelper::getCommunicator() )
     {
       throw std::invalid_argument( "Can only read Gmsh files into grids supporting the GridFactory concept." );
     }
@@ -178,21 +183,22 @@ namespace Dune
     // ------
 
     template< class Grid >
-    inline static std::unique_ptr< Grid > reader ( const std::tuple< Reader, std::string > &args )
+    inline static std::unique_ptr< Grid > reader ( const std::tuple< Reader, std::string > &args,
+                                                   typename Dune::MPIHelper::MPICommunicator mpiComm = Dune::MPIHelper::getCommunicator() )
     {
       switch( std::get< 0 >( args ) )
       {
         case Reader::dgf:
-          return readDGF< Grid >( std::get< 1 >( args ) );
+          return readDGF< Grid >( std::get< 1 >( args ), mpiComm );
 
         case Reader::dgfString:
           {
             std::istringstream input( std::get< 1 >( args ) );
-            return readDGF< Grid >( input );
+            return readDGF< Grid >( input, mpiComm );
           }
 
         case Reader::gmsh:
-          return readGmsh< Grid >( std::get< 1 >( args ) );
+          return readGmsh< Grid >( std::get< 1 >( args ), mpiComm );
 
         default:
           return nullptr;
@@ -259,7 +265,6 @@ namespace Dune
     }
 
 
-
     // registerHierarchicalGrid
     // ------------------------
 
@@ -278,6 +283,8 @@ namespace Dune
         registerGridView( module, clsLeafView.first );
 
       module.def( "reader", [] ( const std::tuple< Reader, std::string > &args ) { return reader< Grid >( args ); } );
+      typedef typename Dune::MPIHelper::MPICommunicator MPICommunicator;
+      module.def( "reader", [] ( const std::tuple< Reader, std::string > &args, MPICommunicator mpiComm ) { return reader< Grid >( args, mpiComm ); } );
       module.def( "reader", [] ( const std::string &args ) { return reader< Grid >( std::make_tuple( Reader::dgf,args ) ); } );
       module.def( "reader", [] ( const StructuredReader<Grid> &args ) { return reader< Grid >( args ); } );
       module.def( "reader", [] ( const pybind11::dict &args ) { return reader< Grid >( args ); } );
