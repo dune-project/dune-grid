@@ -1,12 +1,13 @@
 from setuptools import setup, find_packages
 
-setup(name="dune.grid",
+setup(name="${DUNE_MOD_NAME}",
     namespace_packages=['dune'],
-    description="Python lib for dune",
+    description="${DUNE_GRID_DESCRIPTION}",
     version="${DUNE_GRID_VERSION}",
-    author="Andreas Dedner and Martin Nolte",
+    author="${DUNE_GRID_AUTHOR}",
+    author_email="${DUNE_GRID_AUTHOREMAIL}",
     packages = find_packages(),
     zip_safe = 0,
     package_data = {'': ['*.so']},
-    install_requires = ['portalocker']
+    install_requires = "${DUNE_GRID_PYTHON_REQUIRES}".split(' ')
   )
