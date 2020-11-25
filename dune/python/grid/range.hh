@@ -394,33 +394,36 @@ namespace Dune
           registerPyGridViewPartitionIterator< GridView, codim, partition >();
         } );
 
-      pybind11::class_< Partition > cls( scope, "Partition" );
+      if( !pybind11::already_registered< Partition >() )
+      {
+        pybind11::class_< Partition > cls( scope, "Partition" );
 
-      if( Capabilities::canIterate< Grid, 0 >::value )
-        cls.def_property_readonly( "elements", [] ( pybind11::object self ) { return makePyGridViewPartitionIterator< GridView, 0, partition >( self ); } );
-      if( Capabilities::canIterate< Grid, 1 >::value )
-        cls.def_property_readonly( "facets", [] ( pybind11::object self ) { return makePyGridViewPartitionIterator< GridView, 1, partition >( self ); } );
-      if( Capabilities::canIterate< Grid, GridView::dimension-1 >::value )
-        cls.def_property_readonly( "edges", [] ( pybind11::object self ) { return makePyGridViewPartitionIterator< GridView, GridView::dimension-1, partition >( self ); } );
-      if( Capabilities::canIterate< Grid, GridView::dimension >::value )
-        cls.def_property_readonly( "vertices", [] ( pybind11::object self ) { return makePyGridViewPartitionIterator< GridView, GridView::dimension, partition >( self ); } );
+        if( Capabilities::canIterate< Grid, 0 >::value )
+          cls.def_property_readonly( "elements", [] ( pybind11::object self ) { return makePyGridViewPartitionIterator< GridView, 0, partition >( self ); } );
+        if( Capabilities::canIterate< Grid, 1 >::value )
+          cls.def_property_readonly( "facets", [] ( pybind11::object self ) { return makePyGridViewPartitionIterator< GridView, 1, partition >( self ); } );
+        if( Capabilities::canIterate< Grid, GridView::dimension-1 >::value )
+          cls.def_property_readonly( "edges", [] ( pybind11::object self ) { return makePyGridViewPartitionIterator< GridView, GridView::dimension-1, partition >( self ); } );
+        if( Capabilities::canIterate< Grid, GridView::dimension >::value )
+          cls.def_property_readonly( "vertices", [] ( pybind11::object self ) { return makePyGridViewPartitionIterator< GridView, GridView::dimension, partition >( self ); } );
 
-      std::array< pybind11::object (*) ( pybind11::object ), GridView::dimension+1 > makePyIterators;
-      Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [ &makePyIterators ] ( auto codim ) {
-          makePyIterators[ codim ] = makePyGridViewPartitionIterator< GridView, codim, partition >;
-        } );
-      cls.def( "entities", [ makePyIterators ] ( pybind11::object self, int codim ) {
-          if( (codim < 0) || (codim > GridView::dimension) )
-            throw pybind11::value_error( "Invalid codimension: " + std::to_string( codim ) + " (must be in [0, " + std::to_string( GridView::dimension ) + "])." );
-          return makePyIterators[ codim ]( self );
-        }, "codim"_a );
+        std::array< pybind11::object (*) ( pybind11::object ), GridView::dimension+1 > makePyIterators;
+        Hybrid::forEach( std::make_integer_sequence< int, GridView::dimension+1 >(), [ &makePyIterators ] ( auto codim ) {
+            makePyIterators[ codim ] = makePyGridViewPartitionIterator< GridView, codim, partition >;
+          } );
+        cls.def( "entities", [ makePyIterators ] ( pybind11::object self, int codim ) {
+            if( (codim < 0) || (codim > GridView::dimension) )
+              throw pybind11::value_error( "Invalid codimension: " + std::to_string( codim ) + " (must be in [0, " + std::to_string( GridView::dimension ) + "])." );
+            return makePyIterators[ codim ]( self );
+          }, "codim"_a );
 
-      registerPyBoundaryIntersectionIterator< GridView, PyElementIterator >();
-      cls.def_property_readonly( "boundaryIntersections", [] ( const Partition &self ) {
-          const GridView &gv = self.gridView;
-          return PyBoundaryIntersectionIterator< GridView, PyElementIterator >( gv, PyElementIterator( gv.template begin< 0, partition >(), gv.template end< 0, partition >() ) );
-        }, pybind11::keep_alive< 0, 1 >() );
+        registerPyBoundaryIntersectionIterator< GridView, PyElementIterator >();
+        cls.def_property_readonly( "boundaryIntersections", [] ( const Partition &self ) {
+            const GridView &gv = self.gridView;
+            return PyBoundaryIntersectionIterator< GridView, PyElementIterator >( gv, PyElementIterator( gv.template begin< 0, partition >(), gv.template end< 0, partition >() ) );
+          }, pybind11::keep_alive< 0, 1 >() );
 
+      }
 #if 0
       registerPyGridViewPartitionIntersectionIterator< GridView, partition >();
       cls.def_property_readonly( "intersections", [] ( const Partition &self ) {
