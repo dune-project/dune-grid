@@ -2,8 +2,8 @@ Module: dune-grid
 Version: 2.8-git
 Author: The Dune Core developers
 Maintainer: dune-devel@lists.dune-project.org
-Description: The Dune grid interface and some grid implementations
-URL: https://gitlab.dune-project.org/core/dune-grid
+Description: DUNE Adaptive, Load-balanced, and Unstructured Grid Module
+URL: https://gitlab.dune-project.org/extensions/dune-alugrid
 Python-Requires:
 Depends: dune-geometry (>= 2.8)
 Suggests: dune-uggrid (>=2.8)
