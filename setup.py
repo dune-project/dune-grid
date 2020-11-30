@@ -1,5 +1,6 @@
+try:
+    from dune.packagemetadata import metaData
+except ImportError:
+    from packagemetadata import metaData
 from skbuild import setup
-
-from dune.dunepackaging import metaData
-
 setup(**metaData()[1])
