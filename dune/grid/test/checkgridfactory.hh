@@ -34,7 +34,7 @@ namespace Dune
     // check insertion indices
 
     // check vertex insertion index
-    for( const auto vertex : vertices( grid.leafGridView() ) )
+    for( const auto &vertex : vertices( grid.leafGridView() ) )
     {
       std::size_t idx = factory.insertionIndex( vertex );
       Vertex v = projection( mesh.vertices[ idx ] );
@@ -44,7 +44,7 @@ namespace Dune
 
     // check element insertion index
     std::vector< unsigned int > indices;
-    for( const auto element : elements( grid.leafGridView() ) )
+    for( const auto &element : elements( grid.leafGridView() ) )
     {
       std::size_t idx = factory.insertionIndex( element );
       unsigned int numSubEntitites = element.subEntities( Grid::dimension );
