@@ -65,9 +65,10 @@ macro(add_dune_alberta_flags)
         foreach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
           if(NOT ADD_ALBERTA_NO_LINK_DUNEALBERTAGRID)
             target_link_libraries(${_target}
-              dunealbertagrid_${ADD_ALBERTA_GRIDDIM}d)
+              PUBLIC dunealbertagrid_${ADD_ALBERTA_GRIDDIM}d)
           endif(NOT ADD_ALBERTA_NO_LINK_DUNEALBERTAGRID)
           target_link_libraries(${_target}
+            PUBLIC
             ${ALBERTA_${ADD_ALBERTA_WORLDDIM}D_LIB}
             dunegrid ${DUNE_LIBS} ${ALBERTA_UTIL_LIB} ${ALBERTA_EXTRA_LIBS})
         endforeach(_target ${ADD_ALBERTA_UNPARSED_ARGUMENTS})
