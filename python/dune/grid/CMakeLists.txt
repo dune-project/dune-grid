@@ -1,5 +1,6 @@
 add_python_targets(grid
   __init__
+  __main__
   _grids
   grid_generator
   core
