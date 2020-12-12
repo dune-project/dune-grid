@@ -267,6 +267,7 @@ namespace Dune
     void registerHierarchicalGrid ( pybind11::module module, pybind11::class_< Grid, options... > cls )
     {
       pybind11::module::import( "dune.geometry" );
+      pybind11::module::import( "dune.grid" );
 
       using pybind11::operator""_a;
 
@@ -466,6 +467,10 @@ namespace Dune
           Note: For collective (or global) operations, all processes in this
                 collective communication must call the corresponding method.
         )doc" );
+
+      auto addHAttr = pybind11::module::import( "dune.grid.grid_generator" ).attr("addHAttr");
+      addHAttr(module);
+
     }
 
   } // namespace Python
