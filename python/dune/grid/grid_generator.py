@@ -1,4 +1,4 @@
-import os, inspect
+import os, inspect, pickle
 from ..generator.generator import SimpleGenerator
 from dune.common.hashit import hashIt
 from dune.common import _raise, FieldVector
@@ -319,6 +319,17 @@ def persistentContainer(hgrid,codim,dimension):
     module = pcGenerator.load(includes, typeName, moduleName)
     return module.PersistentContainer(hgrid,codim)
 
+def backup(includes, typeName, *args, **kwargs):
+    def _backup(hgrid,fileName):
+        pickle.dump([includes,typeName,args,kwargs],
+                    open(fileName+"hg1",'wb'))
+        pickle.dump([hgrid],open(fileName+"hg2",'wb'))
+    return _backup
+def restore(fileName):
+    [includes,typeName,args,kwargs] = pickle.load(open(fileName+"hg1",'rb'))
+    module( includes,typeName,*args,**kwargs )
+    grid = pickle.load(open(fileName+"hg2",'rb'))[0]
+    return grid.leafView
 
 def module(includes, typeName, *args, **kwargs):
     try:
@@ -337,8 +348,8 @@ def module(includes, typeName, *args, **kwargs):
         dune.geometry.module(d)
     setattr(module.HierarchicalGrid,"levelView",levelView)
     setattr(module.HierarchicalGrid,"persistentContainer",persistentContainer)
+    setattr(module.HierarchicalGrid,"backup",backup(includes,typeName,*args,**kwargs))
     return module
-
 
 if __name__ == "__main__":
     import doctest

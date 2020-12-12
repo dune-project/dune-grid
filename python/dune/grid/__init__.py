@@ -40,3 +40,5 @@ def GridFunction(view, name=None,order=None):
                 return self.gf(element,point)
         return Wrapper
     return GridFunction_decorator
+
+from .grid_generator import restore
