@@ -838,13 +838,10 @@ namespace Dune {
      \li Dune::OneDGrid <br>
          <i> Onedimensional adaptive grid</i>
      \li Dune::UGGrid <br>
-         <i> Provides the meshes of the finite element toolbox UG.
-             (http://www.iwr.uni-heidelberg.de/frame/iwrwikiequipment/software/ug).</i>
+         <i> Provides the meshes of the finite element toolbox UG3.
+             (described in https://doi.org/10.1007/s007910050003).</i>
      \li Dune::YaspGrid (Yet Another Structured Parallel Grid) <br>
          <i> Provides a distributed structured cube mesh.</i>
-
-     For installation instructions for external grid managers see http://www.dune-project.org/external_libraries/index.html .
-
    */
   template<int dim,
       int dimworld,
