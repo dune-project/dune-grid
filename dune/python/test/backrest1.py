@@ -10,8 +10,6 @@ def backup():
     pickle.dump([a,"hallo",grid.hierarchicalGrid,10], open("dumpA",'wb'))
     return grid
 
-grid = backup()
-
 def restore():
     return pickle.load(open("dumpA","rb"))
 
@@ -25,6 +23,8 @@ class Test:
 
 
 if __name__ == "__main__":
+    grid = backup()
+
     [b,string,otherHGrid,value] = restore()
     otherGrid = otherHGrid.leafView
 
