@@ -32,6 +32,10 @@
 
 #include <iostream>
 
+#if HAVE_DUNE_VTK
+#include <dune/vtk/function.hh>
+#endif
+
 namespace Dune
 {
 
@@ -424,7 +428,15 @@ namespace Dune
           - The entity must be contained in the corresponding hierarchical grid.
         )doc" );
 
-      // cls.def( "_function", Dune::Python::defGridFunction< GridView >( cls, "GridFunction", std::make_integer_sequence< unsigned int, 11 >() ) );
+#if HAVE_DUNE_VTK
+      // just testing for now - adding a method to the grid view
+      using VirtualizedGF = Dune::Vtk::Function<GridView>;
+      auto vgfClass = Python::insertClass<VirtualizedGF>(scope,"VtkFunction",
+          Python::GenerateTypeName("Dune::Vtk::Function", MetaType<GridView>()),
+          Python::IncludeFiles{"dune/vtk/localfunction.hh"});
+      if( vgfClass.second ) { /* is new but nothing needs to be register now */ }
+      cls.def("add",[](GridView &self, VirtualizedGF &vgf) { return vgf.name(); });
+#endif
     }
 
   } // namespace Python
