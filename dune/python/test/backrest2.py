@@ -12,3 +12,8 @@ print("level 1 after refine",
 otherGrid.hierarchicalGrid.globalRefine(-2)
 print("coarsen other", otherGrid.size(0))
 print("numpy vector",a)
+
+from backrest1 import Test
+
+test = pickle.load(open("dumpB","rb"))
+print("test:",test.run())
