@@ -185,14 +185,17 @@ namespace Dune {
   //**********************************************************************
 
   /**
-     \brief Front-end for the grid manager of the finite element toolbox
-            <a href="http://www.iwr.uni-heidelberg.de/frame/iwrwikiequipment/software/ug">UG</a>.
+     \brief Front-end for the grid manager of the finite element toolbox UG3
 
      \ingroup GridImplementations
 
-     This is the implementation of the grid interface
-     using the UG grid management system (http://www.iwr.uni-heidelberg.de/frame/iwrwikiequipment/software/ug).
-     UG provides conforming grids
+     This is the implementation of the grid interface using the UG3 grid management
+     system.  It is best described in this <a href="https://doi.org/10.1007/s007910050003">paper</a>.
+     To our knowledge, the original code is not available anymore,
+     but the relevant parts have been forked into the %Dune module
+     dune-uggrid, available from <a href="https://www.dune-project.org/modules/dune-uggrid"></a>.
+
+     UGGrid provides conforming grids
      in two and three space dimensions.  The grids can be mixed, i.e.
      2d grids can contain triangles and quadrilaterals and 3d grids can
      contain tetrahedra and hexahedra and also pyramids and prisms.
@@ -203,11 +206,7 @@ namespace Dune {
      and you can use boundaries parametrized by either analytical expressions
      or high-resolution piecewise linear surfaces.
 
-     To use this module you need the UG library.  See the
-     DUNE installation notes
-     on how to obtain and install it.
-
-     In your %Dune application, you can now instantiate objects of the
+     In your %Dune application, you can instantiate objects of the
      type UGGrid<2> or UGGrid<3>.  You can have more than one, if
      you choose.  It is even possible to have 2d and 3d grids at the same
      time, even though the original UG system never intended to support
@@ -215,11 +214,6 @@ namespace Dune {
 
      See the documentation for the factory class GridFactory<UGGrid<dimworld> >
      to learn how to create UGGrid objects.
-
-     Please send any questions, suggestions, or bug reports to the Dune mailing list
-     dune@lists.dune-project.org
-
-     For installation instructions see http://www.dune-project.org/external_libraries/install_ug.html .
    */
   template <int dim>
   class UGGrid : public GridDefaultImplementation  <dim, dim, double, UGGridFamily<dim> >
