@@ -434,8 +434,17 @@ namespace Dune
       auto vgfClass = Python::insertClass<VirtualizedGF>(scope,"VtkFunction",
           Python::GenerateTypeName("Dune::Vtk::Function", MetaType<GridView>()),
           Python::IncludeFiles{"dune/vtk/localfunction.hh"});
-      if( vgfClass.second ) { /* is new but nothing needs to be register now */ }
-      cls.def("add",[](GridView &self, VirtualizedGF &vgf) { return vgf.name(); });
+      if( vgfClass.second )
+      {
+        vgfClass.first.def("name",[](VirtualizedGF &self) { return self.name(); });
+      }
+      auto vgfList = new std::vector<VirtualizedGF>();
+      cls.def("add",[vgfList](GridView &self, VirtualizedGF &vgf)
+        { vgfList->emplace_back(std::forward<VirtualizedGF>(vgf) ); });
+      cls.def("vgfListSize",[vgfList](GridView &self)
+        { return vgfList->size(); });
+      cls.def("get",[vgfList](GridView &self, int i)
+        { return (*vgfList)[i]; });
 #endif
     }
 

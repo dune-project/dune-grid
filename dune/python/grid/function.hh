@@ -25,6 +25,7 @@
 
 #if HAVE_DUNE_VTK
 #include <dune/vtk/function.hh>
+#include <dune/python/grid/pygridfunction.hh>
 #endif
 
 #include <dune/python/pybind11/numpy.h>
@@ -150,12 +151,9 @@ namespace Dune
       auto vgfClass = Python::insertClass<VirtualizedGF>(scope,"VtkFunction",
           Python::GenerateTypeName("Dune::Vtk::Function",MetaType<GridView>()),
           Python::IncludeFiles{"dune/vtk/localfunction.hh"});
-      if( vgfClass.second ) { /* is new but nothing needs to be register now */ }
       vgfClass.first.def( pybind11::init( [] ( GridFunction &gf ) {
-          // TODO:
-          // - need to add a 'nurse' to make sure gf is not gced in Python
-          // - perhpas grid functions should just have a name attribute
-          return new VirtualizedGF( gf, "tmp" );
+          // TODO: perhpas grid functions should just have a name attribute in general
+          return new VirtualizedGF( pyGridFunction(gf), "tmp" );
         } ) );
       pybind11::implicitly_convertible<GridFunction,VirtualizedGF>();
 #endif
