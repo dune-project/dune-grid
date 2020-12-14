@@ -18,7 +18,6 @@
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 
 #include <dune/python/grid/entity.hh>
-#include <dune/python/grid/function.hh>
 #include <dune/python/grid/indexset.hh>
 #include <dune/python/grid/mapper.hh>
 #include <dune/python/grid/intersection.hh>
@@ -429,7 +428,6 @@ namespace Dune
         )doc" );
 
 #if HAVE_DUNE_VTK
-      // just testing for now - adding a method to the grid view
       using VirtualizedGF = Dune::Vtk::Function<GridView>;
       auto vgfClass = Python::insertClass<VirtualizedGF>(scope,"VtkFunction",
           Python::GenerateTypeName("Dune::Vtk::Function", MetaType<GridView>()),
@@ -438,13 +436,6 @@ namespace Dune
       {
         vgfClass.first.def("name",[](VirtualizedGF &self) { return self.name(); });
       }
-      auto vgfList = new std::vector<VirtualizedGF>();
-      cls.def("add",[vgfList](GridView &self, VirtualizedGF &vgf)
-        { vgfList->emplace_back(std::forward<VirtualizedGF>(vgf) ); });
-      cls.def("vgfListSize",[vgfList](GridView &self)
-        { return vgfList->size(); });
-      cls.def("get",[vgfList](GridView &self, int i)
-        { return (*vgfList)[i]; });
 #endif
     }
 
