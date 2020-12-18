@@ -19,6 +19,7 @@ set(HEADERS
   mapper.hh
   range.hh
   simplegridfunction.hh
+  singleton.hh
 )
 
 install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/python/grid)
