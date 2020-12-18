@@ -54,7 +54,7 @@ namespace Dune {
 
       // write the data into a global vector on process 0
       // write the macrogrid index of each entity into the corresponding UG vector
-      for (const auto entity : entities(gridView, Codim<codim>()))
+      for (const auto &entity : entities(gridView, Codim<codim>()))
       {
         int numberOfParams = dataHandle.size(entity);
         if (!numberOfParams)
@@ -93,7 +93,7 @@ namespace Dune {
 
       // obtain the data from the global vector with help of
       // the macro index and scatter it
-      for (const auto entity : entities(gridView, Codim<codim>()))
+      for (const auto &entity : entities(gridView, Codim<codim>()))
       {
         // get data from UG message buffer and write to DUNE message buffer
         auto ugEntity = entity.impl().getTarget();

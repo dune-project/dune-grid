@@ -398,7 +398,7 @@ void UGGrid<dim>::getChildrenOfSubface(const typename Traits::template Codim<0>:
   childElementSides.resize(childElements.size());
 
   int i=0;
-  for (const auto f : list)
+  for (const auto &f : list)
   {
     // Set element
     typedef typename Traits::template Codim< 0 >::Entity Entity;
