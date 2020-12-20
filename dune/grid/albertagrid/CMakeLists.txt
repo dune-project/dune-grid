@@ -13,7 +13,7 @@ if(Alberta_FOUND)
   # flags when linked together.
   foreach(_dim ${ALBERTA_WORLD_DIMS})
     add_library(albertagrid${_dim}d OBJECT ${ALBERTAGRID_SOURCES})
-    target_link_libraries(albertagrid${_dim}d PRIVATE Alberta::Alberta Alberta::Alberta_${_dim}D)
+    target_link_libraries(albertagrid${_dim}d PRIVATE Alberta::Alberta_${_dim}D)
     target_compile_definitions(albertagrid${_dim}d PRIVATE ENABLE_ALBERTA)
   endforeach(_dim)
 endif()
