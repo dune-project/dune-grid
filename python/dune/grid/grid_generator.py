@@ -1,4 +1,4 @@
-import os, inspect, pickle
+import os, inspect
 from ..generator.generator import SimpleGenerator
 from dune.common.hashit import hashIt
 from dune.common import _raise, FieldVector
@@ -308,7 +308,7 @@ def addHAttr(module):
         dune.geometry.module(d)
     setattr(module.HierarchicalGrid,"levelView",levelView)
     setattr(module.HierarchicalGrid,"persistentContainer",persistentContainer)
-    setattr(module.HierarchicalGrid,"backup",backup)
+    # setattr(module.HierarchicalGrid,"backup",backup)
     addAttr(module, module.LeafGrid)
 
 gvGenerator = SimpleGenerator("GridView", "Dune::Python")
@@ -328,12 +328,6 @@ def persistentContainer(hgrid,codim,dimension):
     module = pcGenerator.load(includes, typeName, moduleName)
     return module.PersistentContainer(hgrid,codim)
 
-def backup(hgrid,fileName):
-    pickle.dump([hgrid],open(fileName,'wb'))
-def restore(fileName):
-    grid = pickle.load(open(fileName,'rb'))[0]
-    return grid.leafView
-
 def module(includes, typeName, *args, **kwargs):
     try:
         generator = kwargs.pop("generator")
@@ -342,7 +336,6 @@ def module(includes, typeName, *args, **kwargs):
     includes = includes + ["dune/python/grid/hierarchical.hh"]
     typeHash = "hierarchicalgrid_" + hashIt(typeName)
     module = generator.load(includes, typeName, typeHash, *args, **kwargs)
-    # addHAttr(module)
     return module
 
 if __name__ == "__main__":
