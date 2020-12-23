@@ -18,7 +18,7 @@ dune_python_add_test(NAME pybackrest1
                      COMMAND ${PYTHON_EXECUTABLE} backrest1.py
                      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                      LABELS quick)
-dune_python_add_test(NAME pybackrest1
+dune_python_add_test(NAME pybackrest2
                      COMMAND ${PYTHON_EXECUTABLE} backrest2.py
                      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                      LABELS quick)
