@@ -14,3 +14,7 @@ dune_python_add_test(NAME pyinterpolate
                      COMMAND ${PYTHON_EXECUTABLE} interpolate.py
                      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                      LABELS quick)
+dune_python_add_test(NAME pybackrest1
+                     COMMAND ${PYTHON_EXECUTABLE} backrest1.py
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                     LABELS quick)
