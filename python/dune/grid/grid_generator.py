@@ -301,6 +301,15 @@ def addAttr(module, cls):
     setattr(cls,"mapper",mapper)
     setattr(cls,"function",function)
     setattr(cls,"_gfCounter",0)
+def addHAttr(module):
+    # register reference element for this grid
+    import dune.geometry
+    for d in range(module.LeafGrid.dimension+1):
+        dune.geometry.module(d)
+    setattr(module.HierarchicalGrid,"levelView",levelView)
+    setattr(module.HierarchicalGrid,"persistentContainer",persistentContainer)
+    # setattr(module.HierarchicalGrid,"backup",backup)
+    addAttr(module, module.LeafGrid)
 
 gvGenerator = SimpleGenerator("GridView", "Dune::Python")
 def levelView(hgrid,level):
@@ -319,7 +328,6 @@ def persistentContainer(hgrid,codim,dimension):
     module = pcGenerator.load(includes, typeName, moduleName)
     return module.PersistentContainer(hgrid,codim)
 
-
 def module(includes, typeName, *args, **kwargs):
     try:
         generator = kwargs.pop("generator")
@@ -328,17 +336,7 @@ def module(includes, typeName, *args, **kwargs):
     includes = includes + ["dune/python/grid/hierarchical.hh"]
     typeHash = "hierarchicalgrid_" + hashIt(typeName)
     module = generator.load(includes, typeName, typeHash, *args, **kwargs)
-
-    addAttr(module, module.LeafGrid)
-
-    # register reference element for this grid
-    import dune.geometry
-    for d in range(module.LeafGrid.dimension+1):
-        dune.geometry.module(d)
-    setattr(module.HierarchicalGrid,"levelView",levelView)
-    setattr(module.HierarchicalGrid,"persistentContainer",persistentContainer)
     return module
-
 
 if __name__ == "__main__":
     import doctest
