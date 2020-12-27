@@ -23,6 +23,11 @@
 #include <dune/python/grid/object.hh>
 #include <dune/python/grid/vtk.hh>
 
+#if HAVE_DUNE_VTK
+#include <dune/vtk/function.hh>
+#include <dune/python/grid/pygridfunction.hh>
+#endif
+
 #include <dune/python/pybind11/numpy.h>
 #include <dune/python/pybind11/pybind11.h>
 
@@ -43,6 +48,8 @@ namespace Dune
 
       typedef std::decay_t< decltype( localFunction( std::declval< const GridFunction & >() ) ) > LocalFunction;
       typedef std::decay_t< decltype( std::declval< LocalFunction & >()( std::declval< const LocalCoordinate & >() ) ) > Range;
+
+      typedef typename GridFunction::GridView GridView;
     };
 
 
@@ -86,6 +93,7 @@ namespace Dune
       typedef typename GridFunctionTraits< GridFunction >::LocalCoordinate LocalCoordinate;
       typedef typename GridFunctionTraits< GridFunction >::LocalFunction LocalFunction;
       typedef typename GridFunctionTraits< GridFunction >::Range Range;
+      typedef typename GridFunctionTraits< GridFunction >::GridView GridView;
 
       typedef pybind11::array_t< typename FieldTraits< LocalCoordinate >::field_type > Array;
 
@@ -136,6 +144,19 @@ namespace Dune
           lf.unbind();
           return y;
         }, "element"_a, "x"_a );
+
+#if HAVE_DUNE_VTK
+      using VirtualizedGF = Dune::Vtk::Function<GridView>;
+      // register the Function class if not already available
+      auto vgfClass = Python::insertClass<VirtualizedGF>(scope,"VtkFunction",
+          Python::GenerateTypeName("Dune::Vtk::Function",MetaType<GridView>()),
+          Python::IncludeFiles{"dune/vtk/function.hh"});
+      vgfClass.first.def( pybind11::init( [] ( GridFunction &gf ) {
+          // TODO: perhpas grid functions should just have a name attribute in general
+          return new VirtualizedGF( pyGridFunction(gf), "tmp" );
+        } ) );
+      pybind11::implicitly_convertible<GridFunction,VirtualizedGF>();
+#endif
     }
 
     template <class GridView, int dimR>
@@ -227,12 +248,6 @@ namespace Dune
         {
           return evaluate_( entity, x );
         }
-#if 0
-        pybind11::array_t< double > operator() ( const Entity &entity, const pybind11::array_t<double> x ) const
-        {
-          return evaluate_( entity, x );
-        }
-#endif
       private:
         Evaluate evaluate_;
       };
@@ -296,14 +311,6 @@ namespace Dune
       typedef typename GridView::template Codim<0>::Entity Entity;
       typedef typename Entity::Geometry::LocalCoordinate LocalCoordinate;
       typedef decltype(eval(std::declval<const Entity&>(),std::declval<const LocalCoordinate&>())) Value;
-      /*
-      static constexpr int dimRange = []() constexpr -> int {
-        if constexpr (std::is_convertible_v<Value,double>)
-          return 0;
-        else
-          return Value::dimension;
-      }();
-      */
       static constexpr int dimRange = FunctionRange<Value>::value();
       typedef typename Dune::Python::stdFunction<GridView,dimRange>::type Evaluate;
       Evaluate evaluate(eval);

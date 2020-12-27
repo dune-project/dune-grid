@@ -18,7 +18,6 @@
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 
 #include <dune/python/grid/entity.hh>
-#include <dune/python/grid/function.hh>
 #include <dune/python/grid/indexset.hh>
 #include <dune/python/grid/mapper.hh>
 #include <dune/python/grid/intersection.hh>
@@ -31,6 +30,10 @@
 #include <dune/python/pybind11/pybind11.h>
 
 #include <iostream>
+
+#if HAVE_DUNE_VTK
+#include <dune/vtk/function.hh>
+#endif
 
 namespace Dune
 {
@@ -424,7 +427,16 @@ namespace Dune
           - The entity must be contained in the corresponding hierarchical grid.
         )doc" );
 
-      // cls.def( "_function", Dune::Python::defGridFunction< GridView >( cls, "GridFunction", std::make_integer_sequence< unsigned int, 11 >() ) );
+#if HAVE_DUNE_VTK
+      using VirtualizedGF = Dune::Vtk::Function<GridView>;
+      auto vgfClass = Python::insertClass<VirtualizedGF>(scope,"VtkFunction",
+          Python::GenerateTypeName("Dune::Vtk::Function", MetaType<GridView>()),
+          Python::IncludeFiles{"dune/vtk/function.hh"});
+      if( vgfClass.second )
+      {
+        vgfClass.first.def("name",[](VirtualizedGF &self) { return self.name(); });
+      }
+#endif
     }
 
   } // namespace Python
