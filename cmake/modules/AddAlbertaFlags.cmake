@@ -47,8 +47,7 @@ macro(add_dune_alberta_flags)
 
     # link to ALBERTA libraries
     foreach(_target ${_ARG_TARGETS})
-      target_link_libraries(${_target} PUBLIC
-        Alberta::Alberta Alberta::Alberta_${WORLDDIM}D)
+      target_link_libraries(${_target} PUBLIC Alberta::Alberta_${WORLDDIM}D)
       target_compile_definitions(${_target} PUBLIC "ENABLE_ALBERTA=1")
     endforeach(_target)
   endif(Alberta_FOUND)

@@ -11,11 +11,8 @@ Imported targets
 
 This module defines the following :prop_tgt:`IMPORTED` target:
 
-``Alberta::Alberta``
-  The libraries, flags, and includes to use for Alberta, if found.
-
 ``Alberta::Alberta_XD``
-  Dimension dependent library
+  The libraries, flags, and includes to use for Alberta in X dimensions, if found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -109,18 +106,14 @@ find_package_handle_standard_args("Alberta"
 
 mark_as_advanced(ALBERTA_INCLUDE_DIR ALBERTA_UTIL_LIB ALBERTA_WORLD_DIMS)
 
-if(Alberta_FOUND AND NOT TARGET Alberta::Alberta)
-  add_library(Alberta::Alberta UNKNOWN IMPORTED)
-  set_target_properties(Alberta::Alberta PROPERTIES
-    IMPORTED_LOCATION ${ALBERTA_UTIL_LIB}
-    INTERFACE_INCLUDE_DIRECTORIES ${ALBERTA_INCLUDE_DIR}
-    INTERFACE_LINK_LIBRARIES "${ALBERTA_EXTRA_LIBS}")
-
+if(Alberta_FOUND)
   foreach(dim RANGE 1 9)
     if(ALBERTA_${dim}D_LIB AND NOT Alberta::Alberta_${dim}D)
       add_library(Alberta::Alberta_${dim}D UNKNOWN IMPORTED)
       set_target_properties(Alberta::Alberta_${dim}D PROPERTIES
         IMPORTED_LOCATION ${ALBERTA_${dim}D_LIB}
+        INTERFACE_INCLUDE_DIRECTORIES ${ALBERTA_INCLUDE_DIR}
+        INTERFACE_LINK_LIBRARIES "${ALBERTA_UTIL_LIB};${ALBERTA_EXTRA_LIBS}"
         INTERFACE_COMPILE_DEFINITIONS ALBERTA_DIM=${dim})
     endif()
   endforeach(dim)
