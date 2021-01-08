@@ -784,6 +784,15 @@ namespace Dune {
       static const bool v = true;
     };
 
+    /** \brief UGGrid can communicate on entities of all (existing) codimensions
+     *  \ingroup UGGrid
+     */
+    template<int dim, int codim>
+    struct canCommunicate<UGGrid<dim>, codim>
+    {
+      static const bool v = (codim>=0 && codim<=dim);
+    };
+
     /** \brief UGGrid is levelwise conforming
        \ingroup UGGrid
      */

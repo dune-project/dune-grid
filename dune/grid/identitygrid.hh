@@ -470,6 +470,15 @@ namespace Dune
       static const bool v = hasEntityIterator<HostGrid, codim>::v;
     };
 
+    /** \brief IdentityGrid can communicate when the host grid can communicate
+     *  \ingroup IdentityGrid
+     */
+    template<class HostGrid, int codim>
+    struct canCommunicate<IdentityGrid<HostGrid>, codim>
+    {
+      static const bool v = canCommunicate<HostGrid, codim>::v;
+    };
+
     /** \brief has conforming level grids when host grid has
      * \ingroup IdentityGrid
      */
