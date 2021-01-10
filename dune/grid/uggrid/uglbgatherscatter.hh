@@ -15,28 +15,32 @@ namespace Dune {
     public:
       void read(DataType& x)
       {
-        count_--;
-        memcpy(&x, data_ + count_*sizeof(DataType), sizeof(DataType));
-        if (!count_)
-          free(data_);
+        size_--;
+        x = *(data_ + size_);
+        if (size_ == 0)
+          std::free(data_);
       }
 
       void write(const DataType& x)
       {
-        count_++;
-        char* moreData_ = (char*)realloc(data_, count_*sizeof(DataType));
-        if (moreData_)
-          data_ = moreData_;
-        memcpy(data_ + (count_-1)*sizeof(DataType), &x, sizeof(DataType));
+        // allocate more space
+        size_++;
+        if (void* mem = std::realloc(data_, size_))
+          data_ = static_cast<DataType*>(mem);
+        else
+          throw std::bad_alloc();
+
+        // write data to buffer
+        *(data_ + size_-1) = x;
       }
 
       LBMessageBuffer()
-        : count_(0), data_(nullptr)
+        : size_(0), data_(nullptr)
       {}
 
     private:
-      int count_;
-      char* data_;
+      int size_;
+      DataType* data_;
     };
 
   public:
