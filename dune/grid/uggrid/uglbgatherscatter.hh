@@ -78,8 +78,9 @@ namespace Dune {
 
         for (int paramIdx = 0; paramIdx < numberOfParams; paramIdx++)
         {
-          DataType *dataPointer = (DataType*)(buffer + paramIdx*sizeof(DataType));
-          lbMessageBuffer.read(*dataPointer);
+          DataType data;
+          lbMessageBuffer.read(data);
+          std::memcpy(buffer + paramIdx*sizeof(DataType), &data, sizeof(DataType));
         }
       }
     }
@@ -114,8 +115,9 @@ namespace Dune {
 
         for (std::size_t paramIdx = 0; paramIdx < numberOfParams; paramIdx++)
         {
-          DataType *dataPointer = (DataType*)(buffer + paramIdx*sizeof(DataType));
-          lbMessageBuffer.write(*dataPointer);
+          DataType data;
+          std::memcpy(&data, buffer + paramIdx*sizeof(DataType), sizeof(DataType));
+          lbMessageBuffer.write(data);
         }
 
         // call the data handle with the message buffer
