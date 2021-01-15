@@ -1,13 +1,11 @@
 if(ALBERTA_2D_LIB_FOUND AND ENABLE_GRID_EXTRA_UTILS)
   add_executable(dune-gridinfo-gmsh-alberta-2d gridinfo-gmsh-alberta-2d.cc)
-  target_link_libraries(dune-gridinfo-gmsh-alberta-2d PRIVATE dunegrid)
   add_dune_alberta_flags(dune-gridinfo-gmsh-alberta-2d GRIDDIM 2)
   set(PROGRAMS ${PROGRAMS} dune-gridinfo-gmsh-alberta-2d)
 endif(ALBERTA_2D_LIB_FOUND AND ENABLE_GRID_EXTRA_UTILS)
 
 if(ALBERTA_3D_LIB_FOUND AND ENABLE_GRID_EXTRA_UTILS)
   add_executable(dune-gridinfo-gmsh-alberta-3d gridinfo-gmsh-alberta-3d.cc)
-  target_link_libraries(dune-gridinfo-gmsh-alberta-3d PRIVATE dunegrid)
   add_dune_alberta_flags(dune-gridinfo-gmsh-alberta-3d GRIDDIM 3)
   set(PROGRAMS ${PROGRAMS} dune-gridinfo-gmsh-alberta-3d)
 endif(ALBERTA_3D_LIB_FOUND AND ENABLE_GRID_EXTRA_UTILS)
