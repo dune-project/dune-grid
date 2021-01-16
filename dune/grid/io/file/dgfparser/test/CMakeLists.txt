@@ -17,14 +17,13 @@ dune_add_test(NAME test-dgf-oned
               COMPILE_DEFINITIONS DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
              )
 
-if(Alberta_FOUND)
+if(ALBERTA_FOUND)
   add_executable(test-dgf-alberta test-dgf-alberta.cc)
-  target_link_libraries(test-dgf-alberta PRIVATE dunegrid)
-  add_dune_alberta_flags(test-dgf-alberta WORLDDIM 2)
+  add_dune_alberta_flags(test-dgf-alberta GRIDDIM 2)
   target_compile_definitions(test-dgf-alberta PUBLIC
     DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
   dune_add_test(TARGET test-dgf-alberta)
-endif()
+endif(ALBERTA_FOUND)
 
 dune_add_test(NAME test-dgf-ug
               SOURCES test-dgf-ug.cc

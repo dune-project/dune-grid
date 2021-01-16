@@ -49,21 +49,47 @@ dune_add_test(SOURCES issue-53-uggrid-intersections.cc
 # The alberta tests are only alibi-ported, until the  grid and world dimension
 # are configuretime parameters and we can treat alberta just as any other grid manager
 # - buildsystemwise. PLEASE DON'T LOOK AT THIS IF YOU WANT TO KNOW HOW TO WRITE TESTS.
-if(Alberta_FOUND)
-  foreach(WORLDDIM RANGE 1 3)
-    foreach(GRIDDIM RANGE 1 ${WORLDDIM})
-      set(_test test-alberta-${GRIDDIM}-${WORLDDIM})
-      add_executable(${_test} EXCLUDE_FROM_ALL test-alberta.cc)
-      target_link_libraries(${_test} PRIVATE dunegrid)
-      add_dune_alberta_flags(${_test} WORLDDIM ${WORLDDIM})
-      target_compile_definitions(${_test} PUBLIC
-        GRIDDIM=${GRIDDIM}
-        DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
-      dune_add_test(TARGET ${_test})
-      unset(_test)
-    endforeach(GRIDDIM)
-  endforeach(WORLDDIM)
-endif()
+if(ALBERTA_FOUND)
+  add_executable(test-alberta EXCLUDE_FROM_ALL test-alberta.cc)
+  add_dune_alberta_flags(test-alberta WORLDDIM 2)
+  target_compile_definitions(test-alberta PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+  dune_add_test(TARGET test-alberta)
+
+  add_executable(test-alberta-1-1 EXCLUDE_FROM_ALL test-alberta.cc)
+  add_dune_alberta_flags(test-alberta-1-1 GRIDDIM 1 WORLDDIM 1)
+  target_compile_definitions(test-alberta-1-1 PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+  dune_add_test(TARGET test-alberta-1-1)
+
+  add_executable(test-alberta-1-2 EXCLUDE_FROM_ALL test-alberta.cc)
+  add_dune_alberta_flags(test-alberta-1-2 WORLDDIM 2)
+  target_compile_definitions(test-alberta-1-2 PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+  dune_add_test(TARGET test-alberta-1-2)
+
+  add_executable(test-alberta-2-2 EXCLUDE_FROM_ALL test-alberta.cc)
+  add_dune_alberta_flags(test-alberta-2-2 WORLDDIM 2)
+  target_compile_definitions(test-alberta-2-2 PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+  dune_add_test(TARGET test-alberta-2-2)
+
+  add_executable(test-alberta-1-3 EXCLUDE_FROM_ALL test-alberta.cc)
+  add_dune_alberta_flags(test-alberta-1-3 WORLDDIM 3)
+  target_compile_definitions(test-alberta-1-3 PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+  dune_add_test(TARGET test-alberta-1-3)
+
+  add_executable(test-alberta-2-3 EXCLUDE_FROM_ALL test-alberta.cc)
+  add_dune_alberta_flags(test-alberta-2-3 WORLDDIM 3)
+  target_compile_definitions(test-alberta-2-3 PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+  dune_add_test(TARGET test-alberta-2-3)
+
+  add_executable(test-alberta-3-3 EXCLUDE_FROM_ALL test-alberta.cc)
+  add_dune_alberta_flags(test-alberta-3-3 WORLDDIM 3)
+  target_compile_definitions(test-alberta-3-3 PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+  dune_add_test(TARGET test-alberta-3-3)
+
+  add_executable(test-alberta-generic EXCLUDE_FROM_ALL test-alberta.cc)
+  add_dune_alberta_flags(test-alberta-generic USE_GENERIC WORLDDIM 2)
+  target_compile_definitions(test-alberta-generic PUBLIC DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\")
+  dune_add_test(TARGET test-alberta-generic)
+endif(ALBERTA_FOUND)
 
 # install the test tools as we want to support testing 3rdparty grids with installed dune-grid
 install(FILES basicunitcube.hh

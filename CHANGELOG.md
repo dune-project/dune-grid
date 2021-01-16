@@ -11,11 +11,6 @@
 
 ## Deprecations and removals
 
-- In the `FindAlberta` cmake file, some parameters are removed since not used or
-  not useful anymore: `OBJECT`, `SOURCE_ONLY`, `USE_GENERIC`, and `GRIDDIM`.
-  Thereby, the `GRIDDIM` parameter is still parsed for backwards compatibility
-  and just sets the `WORLDDIM`.
-
 - Remove `Intersection`'s deprecated enums `dimension` and
   `codimension`. Instead use grid's dimension and 1.
 
