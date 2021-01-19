@@ -117,13 +117,13 @@ namespace Dune
     }
 
     //! return size of set for given GeometryType
-    IndexType size ( const GeometryType &type ) const
+    std::size_t size ( const GeometryType &type ) const
     {
       return (type.isSimplex() ? size( dimension - type.dim() ) : 0);
     }
 
     //! return size of set
-    IndexType size ( int codim ) const
+    std::size_t size ( int codim ) const
     {
       assert( (codim >= 0) && (codim <= dimension) );
       return indexStack_[ codim ].size();
@@ -414,12 +414,12 @@ namespace Dune
       return subIndex( entityImp.elementInfo(), j, codim );
     }
 
-    IndexType size ( const GeometryType &type ) const
+    std::size_t size ( const GeometryType &type ) const
     {
       return (type.isSimplex() ? size( dimension - type.dim() ) : 0);
     }
 
-    IndexType size ( int codim ) const
+    std::size_t size ( int codim ) const
     {
       assert( (codim >= 0) && (codim <= dimension) );
       return size_[ codim ];

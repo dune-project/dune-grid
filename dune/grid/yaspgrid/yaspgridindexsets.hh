@@ -68,7 +68,7 @@ namespace Dune {
     }
 
     //! get number of entities of given type and level (the level is known to the object)
-    int size (GeometryType type) const
+    std::size_t size (GeometryType type) const
     {
       return (isLeafIndexSet)
         ? grid.size( type )
@@ -76,7 +76,7 @@ namespace Dune {
     }
 
     //! return size of set for a given codim
-    int size (int codim) const
+    std::size_t size (int codim) const
     {
       return (isLeafIndexSet)
         ? grid.size( codim )
