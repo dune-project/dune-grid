@@ -67,12 +67,12 @@ namespace Dune
         return entity.impl().subIndex( hostIndexSet(), i, codim );
       }
 
-      IndexType size ( GeometryType type ) const
+      std::size_t size ( GeometryType type ) const
       {
         return hostIndexSet().size( type );
       }
 
-      int size ( int codim ) const
+      std::size_t size ( int codim ) const
       {
         return hostIndexSet().size( codim );
       }
