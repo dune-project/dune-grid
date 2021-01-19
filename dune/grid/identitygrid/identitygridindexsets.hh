@@ -46,13 +46,13 @@ namespace Dune {
 
 
     //! get number of entities of given codim, type and on this level
-    int size (int codim) const {
+    std::size_t size (int codim) const {
       return grid_->hostgrid_->levelIndexSet(level_).size(codim);
     }
 
 
     //! get number of entities of given codim, type and on this level
-    int size (GeometryType type) const
+    std::size_t size (GeometryType type) const
     {
       return grid_->hostgrid_->levelIndexSet(level_).size(type);
     }
@@ -143,14 +143,14 @@ namespace Dune {
 
 
     //! get number of entities of given type
-    int size (GeometryType type) const
+    std::size_t size (GeometryType type) const
     {
       return grid_->hostgrid_->leafIndexSet().size(type);
     }
 
 
     //! get number of entities of given codim
-    int size (int codim) const
+    std::size_t size (int codim) const
     {
       return grid_->hostgrid_->leafIndexSet().size(codim);
     }
