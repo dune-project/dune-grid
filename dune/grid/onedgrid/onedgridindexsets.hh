@@ -44,13 +44,13 @@ namespace Dune {
     }
 
     //! get number of entities of given type and on this level
-    int size (GeometryType type) const
+    std::size_t size (GeometryType type) const
     {
       return grid_->size(level_,type);
     }
 
     //! get number of entities of given codim, type and on this level
-    int size (int codim) const
+    std::size_t size (int codim) const
     {
       return grid_->size(level_,codim);
     }
@@ -177,7 +177,7 @@ namespace Dune {
     }
 
     //! get number of entities of given codim, type on the leaf level
-    int size (GeometryType type) const
+    std::size_t size (GeometryType type) const
     {
       if (type.isVertex()) {
 
@@ -193,7 +193,7 @@ namespace Dune {
     }
 
     //! get number of entities of given codim, type on the leaf level
-    int size(int codim) const
+    std::size_t size(int codim) const
     {
       if (codim==1) {
 

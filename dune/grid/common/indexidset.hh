@@ -215,9 +215,10 @@ namespace Dune
     /** @brief Return total number of entities of given geometry type in entity set \f$E\f$.
 
        \param[in] type A valid geometry type.
-       \return         number of entities.
+       \return    number of entities (type is auto determined by the
+                  implementation. std::size_t is the expected return type).
      */
-    IndexType size (GeometryType type) const
+    auto size (GeometryType type) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().size(type)));
       return asImp().size(type);
@@ -227,9 +228,10 @@ namespace Dune
             is simply a sum over all geometry types.
 
        \param[in] codim A valid codimension
-            \return    number of entities.
+       \return    number of entities (type is auto determined by the
+                  implementation. std::size_t is the expected return type).
      */
-    IndexType size (int codim) const
+    auto size (int codim) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().size(codim)));
       return asImp().size(codim);
@@ -302,16 +304,19 @@ namespace Dune
             is simply a sum over all geometry types.
 
        \param[in] codim A valid codimension
-                \return    number of entities.
+       \return    number of entities (type is auto determined by the
+                  implementation. std::size_t is the expected return type).
      */
-    IndexType size ( const int codim ) const
+    auto size ( const int codim ) const
     {
-      IndexType s( 0 );
       const std::vector< GeometryType > &geomTs = asImp().geomTypes( codim );
       typedef typename std::vector< GeometryType >::const_iterator Iterator;
       const Iterator end = geomTs.end();
+      typedef decltype( Base::size( *geomTs.begin() ) ) SizeType;
+      SizeType s( 0 );
       for( Iterator it = geomTs.begin(); it != end; ++it )
         s += Base::size( *it );
+
       return s;
     }
     //@{

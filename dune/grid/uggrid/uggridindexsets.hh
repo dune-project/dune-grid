@@ -146,7 +146,7 @@ namespace Dune {
     }
 
     //! get number of entities of given codim, type and on this level
-    int size (int codim) const {
+    std::size_t size (int codim) const {
       if (codim==0)
         return numSimplices_+numPyramids_+numPrisms_+numCubes_;
       if (codim==dim)
@@ -159,7 +159,7 @@ namespace Dune {
     }
 
     //! get number of entities of given codim, type and on this level
-    int size (GeometryType type) const
+    std::size_t size (GeometryType type) const
     {
       int codim = GridImp::dimension-type.dim();
 
@@ -357,7 +357,7 @@ namespace Dune {
     }
 
     //! get number of entities of given codim and type
-    int size (GeometryType type) const
+    std::size_t size (GeometryType type) const
     {
       if (type.dim()==GridImp::dimension) {
         if (type.isSimplex())
@@ -386,7 +386,7 @@ namespace Dune {
     }
 
     //! get number of entities of given codim
-    int size (int codim) const
+    std::size_t size (int codim) const
     {
       int s=0;
       const std::vector<GeometryType>& geomTs = geomTypes(codim);
