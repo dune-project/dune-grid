@@ -1,13 +1,22 @@
 # Master (will become release 2.8)
 
 - `UGGrid` index sets can now compute the indices of vertices of edges.
+
 - `UGGrid`: Fixed a bug in the numbering of prism edges.
+
 - Various bugs have been fixed in the `UGGrid` subdomain communication implementation.
+
 - Python bindings have been moved from the `dune-python` module which is now
   obsolete. To activate Python bindings the CMake flag
   `DUNE_ENABLE_PYTHONBINDINGS` needs to be turned on (default is off).
   Furthermore, flags for either shared library or position independent code
   needs to be used.
+  
+- The return type of the `IndexSet::size` methods isn't `IndexType`
+  anymore. In general the return type should be an unsigned integral
+  type. The actual type is implementation specific. All
+  implementations in `dune-grid` now return `std::size_t`, following
+  our approach to make all size information be unsigned.
 
 ## Deprecations and removals
 
