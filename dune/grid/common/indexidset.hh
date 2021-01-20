@@ -4,7 +4,9 @@
 #ifndef DUNE_GRID_COMMON_INDEXIDSET_HH
 #define DUNE_GRID_COMMON_INDEXIDSET_HH
 
+#include <type_traits>
 #include <vector>
+
 #include <dune/common/exceptions.hh>
 #include <dune/grid/common/grid.hh>
 
@@ -471,10 +473,22 @@ namespace Dune
       return asImp().template id<cc>(e);
     }
 
-    /** \brief Get id of subentity i of co-dimension codim of a co-dimension 0 entity.
+    /**
+     * \brief Get id of a subentity.
+     *
+     * \tparam  Entity  type of entity (must be GridImp::Codim< Entity::codimension >::Entity)
+     *
+     * \param[in]  e      reference to entity
+     * \param[in]  i      number subentity of e within the codimension
+     * \param[in]  codim  codimension of the subentity we're interested in
+     *
+     * \note The parameter <tt>codim</tt> denotes the codimension with respect
+     *       to the grid, i.e., it must satisfy Entity::codimension <= codim <= dimension.
+     *
+     * \return persistent id of the subentity.
      */
-    IdType subId (const typename std::remove_const<GridImp>::type::
-                  Traits::template Codim<0>::Entity& e, int i, unsigned int codim) const
+    template<class Entity, std::enable_if_t<std::is_same<typename std::remove_const_t<GridImp>::Traits::template Codim<Entity::codimension>::Entity, Entity>::value, int> = 0>
+    IdType subId (const Entity &e, int i, unsigned int codim) const
     {
       return asImp().subId(e,i,codim);
     }
