@@ -15,6 +15,9 @@
 
 #include <dune/common/exceptions.hh>
 
+#include <dune/grid/concepts/intersection.hh>
+#include <dune/grid/concepts/intersectioniterator.hh>
+
 template<typename GV>
 void checkIntersectionLifetime(GV gv, std::size_t check_element_count = 32)
 {
@@ -38,6 +41,12 @@ void checkIntersectionLifetime(GV gv, std::size_t check_element_count = 32)
   std::vector<std::vector<typename GV::Intersection> > intersection_list;
   std::vector<std::vector<typename GV::Intersection::Geometry::GlobalCoordinate> > coords;
 
+  auto entity_iterator = gv.template begin<0>();
+  expectEntityIterator<decltype(entity_iterator)>();
+
+  auto intersection_iterator = gv.ibegin(*entity_iterator);
+  expectIntersectionIterator<decltype(intersection_iterator)>();
+
   // store indices + entities + intersections + coordinates
   {
     std::size_t i = 0;
@@ -51,6 +60,7 @@ void checkIntersectionLifetime(GV gv, std::size_t check_element_count = 32)
         coords.push_back({});
         for (const auto& is : intersections(gv,e))
           {
+            expectIntersection<std::decay_t<decltype(is)>>();
             indices.back().push_back(is.indexInInside());
             intersection_list.back().push_back(is);
             coords.back().push_back(is.geometry().corner(0));

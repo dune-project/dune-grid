@@ -1,5 +1,8 @@
 # Master (will become release 2.8)
 
+- Grid concepts are here! Now a `Grid` can be inspected and extended
+  at compilation time using concepts. We provide two versions: the standard
+  C++20 concepts and a fallback implementation pre-C++20.
 - `UGGrid` index sets can now compute the indices of vertices of edges.
 
 - `UGGrid`: Fixed a bug in the numbering of prism edges.

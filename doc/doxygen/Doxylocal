@@ -6,6 +6,7 @@ INPUT                 += @srcdir@/mainpage.txt \
                          @top_srcdir@/dune/grid/albertagrid \
                          @top_srcdir@/dune/grid/albertagrid.hh \
                          @top_srcdir@/dune/grid/common \
+                         @top_srcdir@/dune/grid/concepts \
                          @top_srcdir@/dune/grid/geometrygrid.hh \
                          @top_srcdir@/dune/grid/geometrygrid \
                          @top_srcdir@/dune/grid/identitygrid.hh \
@@ -48,3 +49,14 @@ PREDEFINED            += \
 
 EXCLUDE               += \
                          @top_srcdir@/dune/grid/io/file/amiramesh/psurface.cc
+
+# Helper alias to define repetitive expected types helpers
+ALIASES += expectConcept{2}="\
+      @brief Compilation time check for @ref \1\n \
+      @ingroup \1\n \
+      @details If the input parameter does not model the @ref \1 concept, a compiler error will be issued.\n \
+               If C++20 is available, this error will describe why the input does not describe such a concept.\n \
+      @tparam \2 Type to be checked"
+
+# Helper to link concepts on different pages. See https://stackoverflow.com/a/15503491
+ALIASES += concept{1}="@ingroup \1\n@par Implemented concept:\n@ref \1"

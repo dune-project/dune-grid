@@ -354,7 +354,7 @@ namespace Dune {
      \brief Grid abstract base class
      @ingroup GIGrid
 
-     This class is the base class for all grid implementations. Although
+     This class is the base class for type-ducked grid implementations. Although
      no virtual functions are used we call it abstract since its
      methods do not contain an implementation but forward to the methods of
      the derived class via the Barton-Nackman trick.
