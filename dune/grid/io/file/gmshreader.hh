@@ -847,7 +847,17 @@ namespace Dune
 
     struct DataArg {
       std::vector<int> *data_ = nullptr;
-      DataArg(std::vector<int> &data) : data_(&data) {}
+      DataArg(std::vector<int> &data)
+      {
+        data.clear();
+        data_ = &data;
+      }
+      DataArg(std::vector<int> &data, bool usedata)
+      {
+        data.clear();
+        if(usedata)
+          data_ = &data;
+      }
       DataArg(const decltype(std::ignore)&) {}
       DataArg() = default;
     };
@@ -856,6 +866,9 @@ namespace Dune
       bool flag_ = false;
       using DataArg::DataArg;
       DataFlagArg(bool flag) : flag_(flag) {}
+      DataFlagArg(std::vector<int> &data, bool usedata, bool flag) :
+        DataArg(data, usedata), flag_(flag)
+      {}
     };
 
   public:
@@ -917,20 +930,41 @@ namespace Dune
     /**
      * \param factory             The GridFactory to fill.
      * \param fileName            Name of the file to read from.
-     * \param boundarySegmentData Container to fill with boundary segment
-     *                            physical entity data, or `std::ignore`, or a
-     *                            `bool` value.  Boundary segments are
-     *                            inserted when a container or `true` is
-     *                            given, otherwise they are not inserted.
-     * \param elementData         Container to fill with element physical
-     *                            entity data, or `std::ignore`.
+     * \param boundarySegmentData (See below) Whether and where to store
+     *                            boundary segment physical entity data, and
+     *                            whether to force inserting boundary
+     *                            segments.
+     * \param elementData         (See below) Whether and where to store
+     *                            element physical entity data.
      * \param verbose             Whether to be chatty.
      *
-     * Containers to fill with data must be `std::vector<int>` lvalues.
-     * Element data is indexed by the insertion index of the element,
-     * boundarySegment data is indexed by the insertion index of the boundary
-     * intersection.  These can be obtained from the `factory`, and are lost
-     * once the grid gets modified (refined or load-balanced).
+     * The \c boundarySegmentData and \c elementData arguments can be several
+     * things:
+     *
+     * - an `std::vector<int>` lvalue to be filled with a read data.  Element
+     *   data is indexed by the insertion index of the element,
+     *   boundarySegment data is indexed by the insertion index of the
+     *   boundary intersection.  These can be obtained from the `factory`, and
+     *   are lost once the grid gets modified (refined or load-balanced).
+     * - `std::ignore` to skip reading that data
+     * - (\c boundarySegmentData only) `true` to skip reading the data, but
+     *   insert boundary segments anyway
+     * - (\c boundarySegmentData only) `false` to skip reading the data, and
+     *   to not insert boundary segments (equivalent to `std::ignore`)
+     *
+     * The above interface assumes it is known at compile-time whether data
+     * should be read.  For cases where this assumption does not hold, the \c
+     * boundarySegmentData and \c elementData arguments can take additional
+     * forms:
+     *
+     * - `{ vector<int>& data, bool do_read }` A brace-enclosed pair of a
+     *   data-vector lvalue and a boolean value.  If `do_read` is `true`, data
+     *   is read into `data`.  If `do_read` is `false`, data is not read and
+     *   `data` is simply cleared.
+     * - `{ vector<int>& data, bool do_read, bool forceInsertBoundarySegments }`
+     *   (\c boundarySegmentData only) As above, but if
+     *   `forceInsertBoundarySegments` is given and `true`, boundary segments
+     *   are inserted regardless of whether data is being read.
      *
      * \note At the moment the data containers are still filled internally,
      *       even if they are ignored.  So not having to pass them is more of

@@ -58,6 +58,13 @@ using read_gf_result_t =
   decltype(GmshReader<Grid>::read(std::declval<GridFactory<Grid>&>(),
                                   std::string{}, std::declval<Args>()...));
 
+template<class Grid, class BData, class EData>
+using read_runtime_result_t =
+  decltype(GmshReader<Grid>::read(std::declval<GridFactory<Grid>&>(),
+                                  std::string{},
+                                  { std::declval<BData>(), false },
+                                  { std::declval<EData>(), false }));
+
 template <typename GridType>
 void testReadingAndWritingGrid( const std::string& path, const std::string& gridName,
                                 const std::string& gridManagerName, int refinements,
@@ -241,6 +248,43 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
                   "rvalue boundary data should be rejected");
     static_assert(!Std::is_detected_v<read_gf_result_t, GridType,
                                       std::vector<int>&, std::vector<int>>,
+                  "rvalue element data should be rejected");
+  }
+
+  // test reading with run-time generic interface
+  {
+    using Reader = GmshReader<GridType>;
+    using Factory = GridFactory<GridType>;
+    using Data = std::vector<int>;
+
+    Reader::read(discarded(Factory{}), inputName,
+                 { discarded(Data{}), false },
+                 std::ignore);
+    Reader::read(discarded(Factory{}), inputName,
+                 { discarded(Data{}), true },
+                 { discarded(Data{}), false },
+                 false);
+    Reader::read(discarded(Factory{}), inputName,
+                 { discarded(Data{}), false, false },
+                 { discarded(Data{}), true },
+                 true);
+    Reader::read(discarded(Factory{}), inputName,
+                 { discarded(Data{}), false, true },
+                 std::ignore);
+    Reader::read(discarded(Factory{}), inputName,
+                 std::ignore,
+                 { discarded(Data{}), false });
+    Reader::read(discarded(Factory{}), inputName,
+                 true,
+                 { discarded(Data{}), true },
+                 true);
+
+    // check that certain signatures are rejected
+    static_assert(!Std::is_detected_v<read_runtime_result_t,
+                                      GridType, Data, Data&>,
+                  "rvalue boundary data should be rejected");
+    static_assert(!Std::is_detected_v<read_runtime_result_t,
+                                      GridType, Data&, Data>,
                   "rvalue element data should be rejected");
   }
 
