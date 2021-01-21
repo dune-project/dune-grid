@@ -48,6 +48,21 @@ namespace Dune
       static const bool v = false;
     };
 
+    /** \brief Specialize with 'true' if the grid is twist-free, that is, if for all
+               elements T in the grid all its sub-entities e < T are oriented in the same
+               way as the mapping F_T(e') of sub-entities e' < T' of the reference-element
+               T' of T. (default=false).
+        \note A consequence of this property is that an entity e shared by two elements,
+              T1 and T2, is oriented the same within T1 and T2.
+
+        \ingroup GICapabilities
+     */
+    template<class Grid>
+    struct isTwistFree
+    {
+      static const bool v = false;
+    };
+
     /** \brief Specialize with 'true' for all codims that a grid implements entities for. (default=false)
         \ingroup GICapabilities
      */
@@ -187,6 +202,12 @@ namespace Dune
     struct isCartesian< const Grid >
     {
       static const bool v = Dune::Capabilities::isCartesian<Grid>::v;
+    };
+
+    template<class Grid>
+    struct isTwistFree< const Grid >
+    {
+      static const bool v = Dune::Capabilities::isTwistFree<Grid>::v;
     };
 
     template<class Grid, int codim>

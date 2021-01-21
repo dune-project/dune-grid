@@ -389,6 +389,12 @@ namespace Dune {
       static const unsigned int topologyId = GeometryTypes::cube(1).id();
     };
 
+    /** OneDGrid is twist free */
+    template< >
+    struct isTwistFree< OneDGrid >
+    {
+      static const bool v = true;
+    };
 
     /** \brief OneDGrid has entities for all codimension
        \ingroup OneDGrid

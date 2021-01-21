@@ -27,6 +27,7 @@
 #include "checkentitylifetime.hh"
 #include <dune/grid/test/checkidset.hh>
 #include "checkintersectionlifetime.hh"
+#include "checktwists.hh"
 
 #include <limits>
 
@@ -1068,6 +1069,11 @@ void gridcheck (Grid &g)
     checkIntersectionLifetime(g.levelGridView(g.maxLevel()));
   checkEntityLifetime(g.leafGridView());
   checkIntersectionLifetime(g.leafGridView());
+
+  if( Dune::Capabilities::isTwistFree<Grid>::v )
+  {
+    checkTwistFree( g.leafGridView() );
+  }
 }
 
 #endif // #ifndef DUNE_GRID_TEST_GRIDCHECK_HH
