@@ -9,33 +9,67 @@ namespace Dune {
    */
   class UGLBGatherScatter
   {
+    // a last-in, first-out message buffer/queue
     template <class DataType>
     class LBMessageBuffer
     {
+      friend class UGLBGatherScatter;
+      static constexpr std::size_t size = sizeof(DataType);
     public:
       void read(DataType& x)
       {
-        count_--;
-        memcpy(&x, data_ + count_*sizeof(DataType), sizeof(DataType));
-        if (!count_)
-          free(data_);
+        assert(bufferSize_ >= size);
+        memcpy(&x, data_+bufferSize_-size, size);
+        resize(bufferSize_-size);
       }
 
       void write(const DataType& x)
       {
-        count_++;
-        char* moreData_ = (char*)realloc(data_, count_*sizeof(DataType));
-        if (moreData_)
-          data_ = moreData_;
-        memcpy(data_ + (count_-1)*sizeof(DataType), &x, sizeof(DataType));
+        resize(bufferSize_+size);
+        memcpy(data_+bufferSize_-size, &x, size);
       }
 
       LBMessageBuffer()
-        : count_(0), data_(nullptr)
+        : bufferSize_(0), data_(nullptr)
       {}
 
     private:
-      int count_;
+      // copy num chars from this buffer to the ug buffer
+      void copyDuneIntoUGBuffer(char* ugBuffer, std::size_t num)
+      {
+        // last-in, first-out
+        assert(bufferSize_ >= num);
+        for (std::size_t i = 0; i < num; i += size)
+          std::copy(data_+bufferSize_-i-size, data_+bufferSize_-i, ugBuffer+i);
+        resize(bufferSize_-num);
+      }
+
+      // copy num chars from the ug buffer to this buffer
+      void copyUGIntoDuneBuffer(const char* ugBuffer, std::size_t num)
+      {
+        resize(bufferSize_+num);
+        std::copy(ugBuffer, ugBuffer+num, data_+bufferSize_-num);
+      }
+
+      // resize internal buffer to newSize
+      void resize(std::size_t newSize)
+      {
+        if (newSize == 0)
+        {
+          std::free(data_);
+          data_ = nullptr;
+        }
+        else
+        {
+          if (void* mem = std::realloc(data_, newSize))
+            data_ = static_cast<char*>(mem);
+          else
+            throw std::bad_alloc();
+        }
+        bufferSize_ = newSize;
+      }
+
+      std::size_t bufferSize_;
       char* data_;
     };
 
@@ -71,12 +105,7 @@ namespace Dune {
         std::size_t buffer_size = numberOfParams * sizeof(DataType);
         char* buffer = static_cast<char*>(std::malloc(buffer_size));
         ugEntity->message_buffer(buffer, buffer_size);
-
-        for (int paramIdx = 0; paramIdx < numberOfParams; paramIdx++)
-        {
-          DataType *dataPointer = (DataType*)(buffer + paramIdx*sizeof(DataType));
-          lbMessageBuffer.read(*dataPointer);
-        }
+        lbMessageBuffer.copyDuneIntoUGBuffer(buffer, buffer_size);
       }
     }
 
@@ -107,12 +136,7 @@ namespace Dune {
         assert(buffer);
 
         LBMessageBuffer<DataType> lbMessageBuffer;
-
-        for (std::size_t paramIdx = 0; paramIdx < numberOfParams; paramIdx++)
-        {
-          DataType *dataPointer = (DataType*)(buffer + paramIdx*sizeof(DataType));
-          lbMessageBuffer.write(*dataPointer);
-        }
+        lbMessageBuffer.copyUGIntoDuneBuffer(buffer, numberOfParams*sizeof(DataType));
 
         // call the data handle with the message buffer
         dataHandle.scatter(lbMessageBuffer, entity, numberOfParams);
