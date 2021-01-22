@@ -1545,7 +1545,7 @@ namespace Dune {
       // define type to iterate over send and recv lists
       typedef typename YGridList<Coordinates>::Iterator ListIt;
 
-      if (data.fixedSize(dim,codim))
+      if (data.fixedsize(dim,codim))
       {
         // fixed size: just take a dummy entity, size can be computed without communication
         cnt=0;
@@ -1706,7 +1706,7 @@ namespace Dune {
         MessageBuffer<DataType> mb(buf);
 
         // copy data from receive buffer; iterate over cells in intersection
-        if (data.fixedSize(dim,codim))
+        if (data.fixedsize(dim,codim))
         {
           typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
           it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
@@ -1734,6 +1734,320 @@ namespace Dune {
         cnt++;
       }
     }
+
+
+    /** build Dune intersection from codim 1 entity
+     *
+     * The inside cell from the intersection lives on the same proces, the outside
+     * cell is on another proces.
+     */
+    template <typename Ent>
+    Dune::Intersection<GridImp, Dune::YaspIntersection<GridImp> > buildIntersection(const Ent& ent ) const
+    {
+      // get current grid level
+      YGridLevelIterator yglit = begin(GridImp::getRealImplementation(ent).level());
+
+      // coordinate and shift from codim 1 entity
+      auto shift = GridImp::getRealImplementation(ent).transformingsubiterator().shift();
+      auto coord = GridImp::getRealImplementation(ent).transformingsubiterator().coord();
+
+      // origin (lowerleft) coordinate from codim 0 cells of interior part
+      auto origin = yglit->interior[0].dataBegin()->origin();
+
+      // Determine coordinate of codim 0 entity corresponding to
+      // given codim 1 entity that lives on the same process.
+      //
+      // On the same time we calculate the count of the
+      // intersection we want to create. The index where the
+      // shift is equal to zero corresponds to the direction
+      // _dir of the intersection. If we need to transform coord
+      // we are in the case were _face from intersection equals
+      // one. Count can be computed by 2*_dir+_face.
+      unsigned int count(0);
+      for (unsigned int i=0; i<coord.size(); ++i){
+        if (shift[i]==0){
+          count = 2*i;
+          if (coord[i]>origin[i]){
+            coord[i]-=1;
+            count += 1;
+          }
+        }
+      }
+
+      // create yasp grid codim 0 entity from iterators
+      typename YGrid::Iterator ygit(yglit->overlapfront[0], coord, 0);
+      YaspEntity<0,dim,GridImp> yentity(yglit, ygit);
+
+      // create intersection
+      Dune::YaspIntersection<GridImp> yi(yentity,false);
+      yi._count = count;
+      yi.update();
+
+      // create Dune intersection
+      Dune::Intersection<GridImp,Dune::YaspIntersection<GridImp> > inter(yi);
+
+      return inter;
+    }
+
+    /*! Communicate objects over intersections */
+    template<class DataHandle>
+    void communicateIntersection (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
+    {
+      const int codim=1;
+
+      // check input
+      if (!data.contains(dim,codim)) return; // should have been checked outside
+
+      // data types
+      typedef typename DataHandle::DataType DataType;
+
+      // access to grid level
+      YGridLevelIterator g = begin(level);
+
+      // find send/recv lists or throw error
+      const YGridList<Coordinates>* sendlist = 0;
+      const YGridList<Coordinates>* recvlist = 0;
+
+      if (iftype==InteriorBorder_InteriorBorder_Interface)
+      {
+        sendlist = &g->send_interiorborder_interiorborder[codim];
+        recvlist = &g->recv_interiorborder_interiorborder[codim];
+      }
+      if (iftype==InteriorBorder_All_Interface)
+      {
+        sendlist = &g->send_interiorborder_overlapfront[codim];
+        recvlist = &g->recv_overlapfront_interiorborder[codim];
+      }
+      if (iftype==Overlap_OverlapFront_Interface || iftype==Overlap_All_Interface)
+      {
+        sendlist = &g->send_overlap_overlapfront[codim];
+        recvlist = &g->recv_overlapfront_overlap[codim];
+      }
+      if (iftype==All_All_Interface)
+      {
+        sendlist = &g->send_overlapfront_overlapfront[codim];
+        recvlist = &g->recv_overlapfront_overlapfront[codim];
+      }
+
+      // change communication direction?
+      if (dir==BackwardCommunication)
+        std::swap(sendlist,recvlist);
+
+      int cnt;
+
+      // Size computation (requires communication if variable size)
+      std::vector<int> send_size(sendlist->size(),-1);    // map rank to total number of objects (of type DataType) to be sent
+      std::vector<int> recv_size(recvlist->size(),-1);    // map rank to total number of objects (of type DataType) to be recvd
+      std::vector<size_t*> send_sizes(sendlist->size(),static_cast<size_t*>(0)); // map rank to array giving number of objects per entity to be sent
+      std::vector<size_t*> recv_sizes(recvlist->size(),static_cast<size_t*>(0)); // map rank to array giving number of objects per entity to be recvd
+
+      // define type to iterate over send and recv lists
+      typedef typename YGridList<Coordinates>::Iterator ListIt;
+
+      if (data.fixedSize(dim,codim))
+      {
+        // fixed size: just take a dummy entity, size can be computed without communication
+        cnt=0;
+        for (ListIt is=sendlist->begin(); is!=sendlist->end(); ++is)
+        {
+          typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
+          auto intersection = buildIntersection(*it);
+          send_size[cnt] = is->grid.totalsize() * data.size(intersection);
+          cnt++;
+        }
+        cnt=0;
+        for (ListIt is=recvlist->begin(); is!=recvlist->end(); ++is)
+        {
+          typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
+          auto intersection = buildIntersection(*it);
+          recv_size[cnt] = is->grid.totalsize() * data.size(intersection);
+          cnt++;
+        }
+      }
+      else
+      {
+        // variable size case: sender side determines the size
+        cnt=0;
+        for (ListIt is=sendlist->begin(); is!=sendlist->end(); ++is)
+        {
+          // allocate send buffer for sizes per entitiy
+          size_t *buf = new size_t[is->grid.totalsize()];
+          send_sizes[cnt] = buf;
+
+          // loop over entities and ask for size
+          int i=0; size_t n=0;
+          typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
+          typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+          itend(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg,true)));
+          for ( ; it!=itend; ++it)
+          {
+            auto intersection = buildIntersection(*it);
+            buf[i] = data.size(intersection);
+            n += buf[i];
+            i++;
+          }
+
+          // now we know the size for this rank
+          send_size[cnt] = n;
+
+          // hand over send request to torus class
+          torus().send(is->rank,buf,is->grid.totalsize()*sizeof(size_t));
+          cnt++;
+        }
+
+        // allocate recv buffers for sizes and store receive request
+        cnt=0;
+        for (ListIt is=recvlist->begin(); is!=recvlist->end(); ++is)
+        {
+          // allocate recv buffer
+          size_t *buf = new size_t[is->grid.totalsize()];
+          recv_sizes[cnt] = buf;
+
+          // hand over recv request to torus class
+          torus().recv(is->rank,buf,is->grid.totalsize()*sizeof(size_t));
+          cnt++;
+        }
+
+        // exchange all size buffers now
+        torus().exchange();
+
+        // release send size buffers
+        cnt=0;
+        for (ListIt is=sendlist->begin(); is!=sendlist->end(); ++is)
+        {
+          delete[] send_sizes[cnt];
+          send_sizes[cnt] = 0;
+          cnt++;
+        }
+
+        // process receive size buffers
+        cnt=0;
+        for (ListIt is=recvlist->begin(); is!=recvlist->end(); ++is)
+        {
+          // get recv buffer
+          size_t *buf = recv_sizes[cnt];
+
+          // compute total size
+          size_t n=0;
+          for (int i=0; i<is->grid.totalsize(); ++i)
+            n += buf[i];
+
+          // ... and store it
+          recv_size[cnt] = n;
+          ++cnt;
+        }
+      }
+
+
+      // allocate & fill the send buffers & store send request
+      std::vector<DataType*> sends(sendlist->size(), static_cast<DataType*>(0)); // store pointers to send buffers
+      cnt=0;
+      for (ListIt is=sendlist->begin(); is!=sendlist->end(); ++is)
+      {
+        // allocate send buffer
+        DataType *buf = new DataType[send_size[cnt]];
+
+        // remember send buffer
+        sends[cnt] = buf;
+
+        // make a message buffer
+        MessageBuffer<DataType> mb(buf);
+
+        // fill send buffer; iterate over cells in intersection
+        typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+        it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
+        typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+        itend(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg,true)));
+
+        for ( ; it!=itend; ++it){
+          auto intersection = buildIntersection(*it);
+          data.gather(mb,intersection);
+        }
+
+        // hand over send request to torus class
+        torus().send(is->rank,buf,send_size[cnt]*sizeof(DataType));
+        cnt++;
+      }
+
+      // allocate recv buffers and store receive request
+      std::vector<DataType*> recvs(recvlist->size(),static_cast<DataType*>(0)); // store pointers to send buffers
+      cnt=0;
+      for (ListIt is=recvlist->begin(); is!=recvlist->end(); ++is)
+      {
+        // allocate recv buffer
+        DataType *buf = new DataType[recv_size[cnt]];
+
+        // remember recv buffer
+        recvs[cnt] = buf;
+
+        // hand over recv request to torus class
+        torus().recv(is->rank,buf,recv_size[cnt]*sizeof(DataType));
+        cnt++;
+      }
+
+      // exchange all buffers now
+      torus().exchange();
+
+      // release send buffers
+      cnt=0;
+      for (ListIt is=sendlist->begin(); is!=sendlist->end(); ++is)
+      {
+        delete[] sends[cnt];
+        sends[cnt] = 0;
+        cnt++;
+      }
+
+      // process receive buffers and delete them
+      cnt=0;
+      for (ListIt is=recvlist->begin(); is!=recvlist->end(); ++is)
+      {
+        // get recv buffer
+        DataType *buf = recvs[cnt];
+
+        // make a message buffer
+        MessageBuffer<DataType> mb(buf);
+
+        // copy data from receive buffer; iterate over cells in intersection
+        if (data.fixedSize(dim,codim))
+        {
+          typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
+          auto intersection = buildIntersection(*it);
+          size_t n=data.size(intersection);
+          typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+          itend(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg,true)));
+          for ( ; it!=itend; ++it){
+            auto intersection = buildIntersection(*it);
+            data.scatter(mb,intersection,n);
+          }
+        }
+        else
+        {
+          int i=0;
+          size_t *sbuf = recv_sizes[cnt];
+          typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+          it(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg)));
+          typename Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
+          itend(YaspLevelIterator<codim,All_Partition,GridImp>(g, typename YGrid::Iterator(is->yg,true)));
+          for ( ; it!=itend; ++it){
+            auto intersection = buildIntersection(*it);
+            data.scatter(mb,intersection,sbuf[i++]);
+          }
+          delete[] sbuf;
+        }
+
+        // delete buffer
+        delete[] buf; // hier krachts !
+        cnt++;
+      }
+    }
+
+
+
+
 
     // The new index sets from DDM 11.07.2005
     const typename Traits::GlobalIdSet& globalIdSet() const

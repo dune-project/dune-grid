@@ -27,6 +27,9 @@ namespace Dune {
 
     friend class YaspIntersectionIterator<GridImp>;
 
+    template <int dim, typename Coordinate>
+    friend class YaspGrid;
+
   public:
     // types used from grids
     typedef typename GridImp::YGridLevelIterator YGLI;
