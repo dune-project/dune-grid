@@ -10,7 +10,6 @@
 
 #include <dune/common/visibility.hh>
 
-#if HAVE_DUNE_GRID
 #include <dune/geometry/type.hh>
 #include <dune/grid/common/datahandleif.hh>
 
@@ -166,7 +165,5 @@ namespace Dune
   } // namespace Python
 
 } // namespace Dune
-
-#endif
 
 #endif // #ifndef DUNE_PYTHON_UTILITY_VECTORCOMMDATAHANDLE_HH
