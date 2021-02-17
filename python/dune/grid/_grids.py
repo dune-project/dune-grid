@@ -53,7 +53,7 @@ grid_registry = {
     }
 
 try:
-    assertHave("HAVE_ALBERTA")
+    # assertHave("HAVE_ALBERTA") THIS IS ON MY TODO LIST
     def albertaGrid(constructor, dimgrid=None):
         from .grid_generator import module, getDimgrid
 
@@ -70,7 +70,7 @@ except ConfigurationError:
 
 
 try:
-    assertHave("HAVE_DUNE_UGGRID")
+    # assertHave("HAVE_DUNE_UGGRID") THIS IS ON MY TODO LIST
     def ugGrid(constructor, dimgrid=None, **parameters):
         from .grid_generator import module, getDimgrid
 
