@@ -1,5 +1,7 @@
 # Master (will become release 2.8)
 
+- `IdSet` now exports grid `dimension` and `Codim<cd>::Entity`.
+
 - `UGGrid` index sets can now compute the indices of vertices of edges.
 
 - `UGGrid`: Fixed a bug in the numbering of prism edges.
@@ -11,7 +13,7 @@
   `DUNE_ENABLE_PYTHONBINDINGS` needs to be turned on (default is off).
   Furthermore, flags for either shared library or position independent code
   needs to be used.
-  
+
 - The return type of the `IndexSet::size` methods isn't `IndexType`
   anymore. In general the return type should be an unsigned integral
   type. The actual type is implementation specific. All
