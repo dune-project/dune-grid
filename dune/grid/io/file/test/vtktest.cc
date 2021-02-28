@@ -94,7 +94,7 @@ struct Acc
 };
 
 template< class GridView >
-int doWrite( Dune::VTKChecker& vtkChecker, const std::string& gridViewName, const GridView &gridView, Dune :: VTK :: DataMode dm )
+int doWrite( Dune::VTKChecker& vtkChecker, const std::string& gridViewName, const GridView &gridView, Dune :: VTK :: DataMode dm, const std::string& path = "./" )
 {
   enum { dim = GridView :: dimension };
 
@@ -137,6 +137,8 @@ int doWrite( Dune::VTKChecker& vtkChecker, const std::string& gridViewName, cons
   int result = 0;
   std::string name;
   std::ostringstream prefix;
+  prefix << path << "/";
+
   prefix << "vtktest-" << dim << "D-" << gridViewName << "-" << VTKDataMode(dm);
   int rank = gridView.comm().rank();
 
@@ -181,6 +183,11 @@ int vtkCheck(Dune::VTKChecker& vtkChecker, const std::array<int, dim>& elements,
                        Dune::VTK::conforming ));
   acc(result, doWrite( vtkChecker, "finelevelview", g.levelGridView( g.maxLevel() ),
                        Dune::VTK::nonconforming ));
+
+  // write with filename including a path which is the current directory
+  // this is for testing the parallel version of 'write'
+  acc(result, doWrite( vtkChecker, "leafview", g.leafGridView(), Dune::VTK::conforming, "../test" ));
+  acc(result, doWrite( vtkChecker, "leafview", g.leafGridView(), Dune::VTK::nonconforming, "../test" ));
 
   return result;
 }
