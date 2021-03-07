@@ -447,9 +447,21 @@ namespace Dune
   template<class GridImp, class IdSetImp, class IdTypeImp>
   class IdSet
   {
+    /* We use the remove_const to extract the Type from the mutable class,
+       because the const class is not instantiated yet. */
+    using Traits = typename std::remove_const< GridImp >::type::Traits;
   public:
     //! Type used to represent an id.
     typedef IdTypeImp IdType;
+
+    /** \brief Export the type of the entity used as parameter in the id(...) method */
+    template <int cc>
+    struct Codim {
+      using Entity = typename Traits::template Codim<cc>::Entity;
+    };
+
+    /** \brief dimension of the grid (maximum allowed codimension) */
+    static constexpr auto dimension = std::remove_const< GridImp >::type::dimension;
 
     //! Get id of an entity. This method is simpler to use than the one below.
     template<class Entity>
@@ -465,16 +477,14 @@ namespace Dune
        because the const class is not instantiated yet.
      */
     template<int cc>
-    IdType id (const typename std::remove_const<GridImp>::type::
-               Traits::template Codim<cc>::Entity& e) const
+    IdType id (const typename Codim<cc>::Entity& e) const
     {
       return asImp().template id<cc>(e);
     }
 
     /** \brief Get id of subentity i of co-dimension codim of a co-dimension 0 entity.
      */
-    IdType subId (const typename std::remove_const<GridImp>::type::
-                  Traits::template Codim<0>::Entity& e, int i, unsigned int codim) const
+    IdType subId (const typename Codim<0>::Entity& e, int i, unsigned int codim) const
     {
       return asImp().subId(e,i,codim);
     }
