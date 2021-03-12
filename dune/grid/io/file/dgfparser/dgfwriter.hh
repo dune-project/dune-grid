@@ -127,7 +127,7 @@ namespace Dune
      **/
     template< class... Args >
     auto write ( const std::string &fileName, Args &&... args ) const
-      -> void_t< decltype( this->write( std::declval< std::ostream & >(), std::declval< Args >()... ) ) >
+      -> std::void_t< decltype( this->write( std::declval< std::ostream & >(), std::declval< Args >()... ) ) >
     {
       std::ofstream gridout( fileName );
       if( gridout )

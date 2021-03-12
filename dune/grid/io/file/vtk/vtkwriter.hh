@@ -11,7 +11,7 @@
 #include <sstream>
 #include <iomanip>
 #include <memory>
-
+#include <type_traits>
 #include <vector>
 #include <list>
 #include <map>
@@ -57,7 +57,8 @@ namespace Dune
     {};
 
     template< class F, class E >
-    struct IsBindable< F, E, void_t< decltype( std::declval< F & >().bind( std::declval< const E & >() ) ), decltype( std::declval< F & >().unbind() ) > >
+    struct IsBindable< F, E, std::void_t< decltype( std::declval< F & >().bind( std::declval< const E & >() ) ),
+                                          decltype( std::declval< F & >().unbind() ) > >
       : std::true_type
     {};
 
@@ -68,7 +69,7 @@ namespace Dune
     {};
 
     template< class F >
-    struct HasLocalFunction< F, void_t< decltype( localFunction( std::declval< F& >() ) ) > >
+    struct HasLocalFunction< F, std::void_t< decltype( localFunction( std::declval< F& >() ) ) > >
       : std::true_type
     {};
 
