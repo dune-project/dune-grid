@@ -8,7 +8,6 @@
 #include <dune/common/fmatrix.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/typetraits.hh>
-#include <dune/common/unused.hh>
 
 /*  Interface check for Jacobian related return types
  *  -------------------------------------------------
@@ -124,13 +123,13 @@ namespace Dune
         }
 
         // call norms
-        DUNE_UNUSED real_type frobenius_norm
+        [[maybe_unused]] real_type frobenius_norm
           = jacobian.frobenius_norm();
-        DUNE_UNUSED real_type frobenius_norm2
+        [[maybe_unused]] real_type frobenius_norm2
           = jacobian.frobenius_norm2();
-        DUNE_UNUSED real_type infinity_norm
+        [[maybe_unused]] real_type infinity_norm
           = jacobian.infinity_norm();
-        DUNE_UNUSED real_type infinity_norm_real
+        [[maybe_unused]] real_type infinity_norm_real
           = jacobian.infinity_norm_real();
 
         // cast to FieldMatrix

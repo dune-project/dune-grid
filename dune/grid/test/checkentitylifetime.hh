@@ -14,7 +14,6 @@
 #include <vector>
 
 #include <dune/common/exceptions.hh>
-#include <dune/common/unused.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/rangegenerators.hh>
 

@@ -13,7 +13,6 @@
 
 #include <dune/common/hybridutilities.hh>
 #include <dune/common/typetraits.hh>
-#include <dune/common/unused.hh>
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/datahandleif.hh>
@@ -62,9 +61,8 @@ struct PartitionFilter< Dune::OverlapFront_Partition >
 template<>
 struct PartitionFilter< Dune::All_Partition >
 {
-  static bool contains ( const Dune::PartitionType partitionType )
+  static bool contains ([[maybe_unused]] const Dune::PartitionType partitionType)
   {
-    DUNE_UNUSED_PARAMETER(partitionType);
     return true;
   }
 };
@@ -188,11 +186,10 @@ struct CheckPartitionType< GridView, pitype >::CheckCodim
   }
 
   template< class IdSet >
-  static void check ( const std::false_type &, const GridView &gridView, const IdSet &idSet )
-  {
-    DUNE_UNUSED_PARAMETER(gridView);
-    DUNE_UNUSED_PARAMETER(idSet);
-  }
+  static void check (const std::false_type &,
+                     [[maybe_unused]] const GridView &gridView,
+                     [[maybe_unused]] const IdSet &idSet)
+  {}
 
   static void apply ( const GridView &gridView )
   {
@@ -308,9 +305,8 @@ public:
   }
 
   template< class Entity >
-  std::size_t size ( const Entity &entity ) const
+  std::size_t size ([[maybe_unused]] const Entity &entity) const
   {
-    DUNE_UNUSED_PARAMETER(entity);
     static_assert( (Entity::dimension == dimension), "Entity has invalid dimension." );
     static_assert( (Entity::codimension >= 0) || (Entity::codimension <= dimension), "Entity has invalid codimension." );
     return (contains_[ Entity::codimension ] ? 2 : 0);
