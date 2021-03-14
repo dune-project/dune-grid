@@ -82,8 +82,8 @@ int main(int argc, char** argv)
   Dune::FieldVector<double,4> x({1,2,3,4}); // make a vector
   auto y(x); // copy constructor
   y *= 1.0/3.0; // scaling
-  auto s = x*y; // scalar product
-  auto norm = x.two_norm(); // Euclidean norm
+  [[maybe_unused]] auto s = x*y; // scalar product
+  [[mabye_unused]] auto norm = x.two_norm(); // Euclidean norm
   Dune::FieldMatrix<double,4,4> A({{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}}); // make a matrix
   A.mv(x,y); // matvec: y = Ax
   A.usmv(0.5,x,y); // axpy: y += 0.5*Ax

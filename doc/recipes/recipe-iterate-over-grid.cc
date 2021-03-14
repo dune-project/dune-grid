@@ -74,16 +74,16 @@ int main(int argc, char** argv)
   //! [iterate over codim]
 
   // [iterate over grid view]
-  for (const auto& e : elements(gv)); // codim=0
-  for (const auto& e : vertices(gv)); // codim=dim
-  for (const auto& e : edges(gv));    // codim=dim-1
-  for (const auto& e : facets(gv));   // codim=1
+  for ([[maybe_unused]] const auto& e : elements(gv)); // codim=0
+  for ([[maybe_unused]] const auto& e : vertices(gv)); // codim=dim
+  for ([[maybe_unused]] const auto& e : edges(gv));    // codim=dim-1
+  for ([[maybe_unused]] const auto& e : facets(gv));   // codim=1
   //! [iterate over grid view]
 
   // [access to subentities]
   const int mycodim = 2;
   for (const auto& e : elements(gv))
     for (unsigned int i=0; i<e.subEntities(mycodim); ++i)
-      auto v = e.template subEntity<codim>(i);
+      [[maybe_unused]] auto v = e.template subEntity<codim>(i);
   //! [access to subentities]
 }
