@@ -66,9 +66,8 @@ struct subIndexCheck
 {
 
   template<typename E>
-  void checkEntitySeedRecovery( const Grid& g, const E& e )
+  void checkEntitySeedRecovery([[maybe_unused]] const Grid& g, const E& e)
   {
-    DUNE_UNUSED_PARAMETER(g);
     typedef typename Grid::template Codim< E::codimension >::EntitySeed EntitySeed;
     EntitySeed seed = e.seed();
 
@@ -284,7 +283,7 @@ void assertNeighbor (Grid &g)
 
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
   enum { dim = Grid::dimension };
-  //typedef typename Grid::ctype ct DUNE_UNUSED;
+  // [[maybe_unused]] typedef typename Grid::ctype ct;
 
   typedef typename Grid::GlobalIdSet GlobalIdSet;
   const GlobalIdSet & globalid = g.globalIdSet();
@@ -361,7 +360,7 @@ void assertNeighbor (Grid &g)
         const Intersection& is = *it;
 
         // check intersection copy ctor
-        Intersection DUNE_UNUSED is2 = is;
+        [[maybe_unused]] Intersection is2 = is;
 
         // numbering
         const int numberInSelf = is.indexInInside();
@@ -519,7 +518,7 @@ template <bool checkMark , class Grid>
 void iterate(Grid &g)
 {
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
-  //typedef typename Grid::HierarchicIterator HierarchicIterator DUNE_UNUSED;
+  //[[maybe_unused]] typedef typename Grid::HierarchicIterator HierarchicIterator;
   typedef typename Grid::template Codim<0>::Geometry Geometry;
   int maxLevel = g.maxLevel();
   LevelIterator it = g.levelGridView(maxLevel).template begin<0>();

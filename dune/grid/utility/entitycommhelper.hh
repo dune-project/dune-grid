@@ -4,7 +4,6 @@
 #define DUNE_ENTITYCOMMHELPER_HH
 
 #include <dune/grid/common/gridenums.hh>
-#include <dune/common/unused.hh>
 
 namespace Dune
 {
@@ -72,9 +71,8 @@ namespace Dune
       return (p != FrontEntity) && (p != GhostEntity);
     }
 
-    static bool receive ( const PartitionType p )
+    static bool receive ([[maybe_unused]] const PartitionType p)
     {
-      DUNE_UNUSED_PARAMETER(p);
       return true;
     }
   };
@@ -83,15 +81,13 @@ namespace Dune
   template<>
   struct EntityCommHelper< All_All_Interface >
   {
-    static bool send ( const PartitionType p )
+    static bool send ([[maybe_unused]] const PartitionType p)
     {
-      DUNE_UNUSED_PARAMETER(p);
       return true;
     }
 
-    static bool receive ( const PartitionType p )
+    static bool receive ([[maybe_unused]] const PartitionType p)
     {
-      DUNE_UNUSED_PARAMETER(p);
       return true;
     }
   };

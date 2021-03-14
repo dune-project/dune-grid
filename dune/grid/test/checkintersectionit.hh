@@ -6,7 +6,6 @@
 #include <cmath>
 
 #include <dune/common/test/iteratortest.hh>
-#include <dune/common/unused.hh>
 
 #include <dune/geometry/quadraturerules.hh>
 #include <dune/geometry/referenceelements.hh>
@@ -114,7 +113,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
   typedef typename Intersection::LocalGeometry LocalGeometry;
   typedef typename Intersection::Geometry Geometry;
 
-  DUNE_UNUSED const int dimension = Entity::dimension;
+  [[maybe_unused]] const int dimension = Entity::dimension;
   const int mydimension = Intersection::mydimension;
 
   // check consistency of exported types
@@ -433,7 +432,7 @@ void checkIntersectionIterator ( const GridViewType &view,
 
 
   // check default constructibility of intersections
-  DUNE_UNUSED Intersection default_construct_intersection;
+  [[maybe_unused]] Intersection default_construct_intersection;
 
   // initialize variables for element checks
 

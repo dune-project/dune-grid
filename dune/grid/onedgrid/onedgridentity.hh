@@ -214,14 +214,14 @@ namespace Dune {
 
     /** \brief Returns vertex level index, the arguments are ignored
      */
-    int subLevelIndex (DUNE_UNUSED int i, DUNE_UNUSED unsigned int codim) const
+    int subLevelIndex ([[maybe_unused]] int i, [[maybe_unused]] unsigned int codim) const
     {
       return target_->levelIndex_;
     }
 
     /** \brief Returns vertex leaf index, the arguments are ignored
      */
-    int subLeafIndex (DUNE_UNUSED int i, DUNE_UNUSED unsigned int codim) const
+    int subLeafIndex ([[maybe_unused]] int i, [[maybe_unused]] unsigned int codim) const
     {
       return target_->leafIndex_;
     }

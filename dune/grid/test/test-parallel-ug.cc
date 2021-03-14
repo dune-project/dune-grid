@@ -154,7 +154,7 @@ void checkMappers(const GridView &gridView)
   // make sure the number of entities is the same for
   // gridView.size() and iterating through the grid
   int numEntities = 0;
-  for (DUNE_UNUSED const auto& entity : entities(gridView, Dune::Codim<codim>()))
+  for ([[maybe_unused]] const auto& entity : entities(gridView, Dune::Codim<codim>()))
     ++ numEntities;
   if (numEntities != gridView.size(codim)) {
     DUNE_THROW(InvalidStateException,
