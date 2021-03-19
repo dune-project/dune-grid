@@ -1,5 +1,8 @@
 # Master (will become release 2.8)
 
+- `SingleCodimSingleGeomTypeMapper` and `MultipleCodimMultipleGeomTypeMapper` now have an `update(gridView)`
+  method to update the stored `GridView` and recalculate the indices after mesh adaptation.
+
 - `IdSet` now exports grid `dimension` and `Codim<cd>::Entity`.
 
 - `UGGrid` index sets can now compute the indices of vertices of edges.

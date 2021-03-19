@@ -300,7 +300,29 @@ namespace Dune
       return true;
     }
 
-    /** @brief Recalculates map after mesh adaptation
+    /** @brief Recalculates indices after grid adaptation
+     *
+     * After grid adaptation you need to call this to update
+     * the stored gridview and recalculate the indices.
+     */
+    void update (const GV& gridView)
+    {
+      gridView_ = gridView;
+      update();
+    }
+
+    /** @brief Recalculates indices after grid adaptation
+     *
+     * After grid adaptation you need to call this to update
+     * the stored gridview and recalculate the indices.
+     */
+    void update (GV&& gridView)
+    {
+      gridView_ = std::move(gridView);
+      update();
+    }
+
+    /** @brief Recalculates indices after grid adaptation
      */
     void update ()
     {
@@ -347,7 +369,7 @@ namespace Dune
     // number of data elements required
     unsigned int n;
     // GridView is needed to keep the IndexSet valid
-    const GV gridView_;
+    GV gridView_;
     const typename GV::IndexSet& is;
     // provide an array for the offsets
     std::array<Index, GlobalGeometryTypeIndex::size(GV::dimension)> offsets;
@@ -382,7 +404,21 @@ namespace Dune
      */
     LeafMultipleCodimMultipleGeomTypeMapper (const G& grid, const MCMGLayout& layout)
       : Base(grid.leafGridView(), layout)
+      , gridPtr_(&grid)
     {}
+
+    /** @brief Recalculates indices after grid adaptation
+     *
+     * After grid adaptation you need to call this to update
+     * the stored gridview and recalculate the indices.
+     */
+    void update ()
+    {
+      Base::update(gridPtr_->leafGridView());
+    }
+
+  private:
+    const G* gridPtr_;
   };
 
   /** @brief Multiple codim and multiple geometry type mapper for entities of one level.
@@ -407,7 +443,23 @@ namespace Dune
      */
     LevelMultipleCodimMultipleGeomTypeMapper (const G& grid, int level, const MCMGLayout& layout)
       : Base(grid.levelGridView(level),layout)
+      , gridPtr_(&grid)
+      , level_(level)
     {}
+
+    /** @brief Recalculates indices after grid adaptation
+     *
+     * After grid adaptation you need to call this to update
+     * the stored gridview and recalculate the indices.
+     */
+    void update ()
+    {
+      Base::update(gridPtr_->levelGridView(level_));
+    }
+
+  private:
+    const G* gridPtr_;
+    int level_;
   };
 
   /** @} */

@@ -54,10 +54,10 @@ namespace Dune
        \param gridView A Dune GridView object.
      */
     SingleCodimSingleGeomTypeMapper (const GV& gridView)
-     : is(gridView.indexSet())
+     : is_(&gridView.indexSet())
     {
       // check that grid has only a single geometry type
-      if (is.types(c).size() != 1)
+      if (is_->types(c).size() != 1)
         DUNE_THROW(GridError, "mapper treats only a single codim and a single geometry type");
     }
 
@@ -70,7 +70,7 @@ namespace Dune
     Index index (const EntityType& e) const
     {
       static_assert(EntityType::codimension == c, "Entity of wrong codim passed to SingleCodimSingleGeomTypeMapper");
-      return is.index(e);
+      return is_->index(e);
     }
 
     /** @brief Map subentity of codim 0 entity to array index.
@@ -85,7 +85,7 @@ namespace Dune
     {
       if (codim != c)
         DUNE_THROW(GridError, "Id of wrong codim requested from SingleCodimSingleGeomTypeMapper");
-      return is.subIndex(e,i,codim);
+      return is_->subIndex(e,i,codim);
     }
 
     /** @brief Return total number of entities in the entity set managed by the mapper.
@@ -98,7 +98,7 @@ namespace Dune
      */
     size_type size () const
     {
-      return is.size(c);
+      return is_->size(c);
     }
 
     /** @brief Returns true if the entity is contained in the index set
@@ -128,14 +128,24 @@ namespace Dune
       return true;
     }
 
-    /** @brief Recalculates map after mesh adaptation
+    /** @brief Recalculates indices after grid adaptation
+     *
+     * After grid adaptation you need to call this to update
+     * the index set and recalculate the indices.
+     */
+    void update (const GV& gridView)
+    {
+      is_ = &gridView.indexSet();
+    }
+
+    /** @brief Recalculates indices after grid adaptation
      */
     void update ()
     {     // nothing to do here
     }
 
   private:
-    const typename GV::IndexSet& is;
+    const typename GV::IndexSet* is_;
   };
 
   /** @} */
@@ -158,13 +168,28 @@ namespace Dune
    */
   template <typename G, int c>
   class LeafSingleCodimSingleGeomTypeMapper : public SingleCodimSingleGeomTypeMapper<typename G::LeafGridView,c> {
+    using Base = SingleCodimSingleGeomTypeMapper<typename G::LeafGridView,c>;
   public:
     /** \brief The constructor
      * \param grid A reference to a grid.
      */
     LeafSingleCodimSingleGeomTypeMapper (const G& grid)
-      : SingleCodimSingleGeomTypeMapper<typename G::LeafGridView,c>(grid.leafGridView())
+      : Base(grid.leafGridView())
+      , gridPtr_(&grid)
     {}
+
+    /** @brief Recalculates indices after grid adaptation
+     *
+     * After grid adaptation you need to call this to update
+     * the index set and recalculate the indices.
+     */
+    void update ()
+    {
+      Base::update(gridPtr_->leafGridView());
+    }
+
+  private:
+    const G* gridPtr_;
   };
 
   /** @brief Single codim and single geometry type mapper for entities of one level.
@@ -180,14 +205,31 @@ namespace Dune
    */
   template <typename G, int c>
   class LevelSingleCodimSingleGeomTypeMapper : public SingleCodimSingleGeomTypeMapper<typename G::LevelGridView,c> {
+    using Base = SingleCodimSingleGeomTypeMapper<typename G::LevelGridView,c>;
   public:
     /* @brief The constructor
        @param grid A reference to a grid.
        @param level A valid level of the grid.
      */
     LevelSingleCodimSingleGeomTypeMapper (const G& grid, int level)
-      : SingleCodimSingleGeomTypeMapper<typename G::LevelGridView,c>(grid.levelGridView(level))
+      : Base(grid.levelGridView(level))
+      , gridPtr_(&grid)
+      , level_(level)
     {}
+
+    /** @brief Recalculates indices after grid adaptation
+     *
+     * After grid adaptation you need to call this to update
+     * the index set and recalculate the indices.
+     */
+    void update ()
+    {
+      Base::update(gridPtr_->levelGridView(level_));
+    }
+
+  private:
+    const G* gridPtr_;
+    int level_;
   };
 
   /** @} */
