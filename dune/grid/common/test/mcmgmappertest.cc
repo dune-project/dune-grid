@@ -207,64 +207,78 @@ void checkMixedDataMapper(const Mapper& mapper, const GridView& gridView)
  * \param grid Grid to perform the checks.
  */
 template<typename Grid>
-void checkGrid(const Grid& grid)
+void checkGrid(Grid& grid)
 {
-  // check element mapper
-  // check leafMCMGMapper
-  {
-    LeafMultipleCodimMultipleGeomTypeMapper<Grid>
-    leafMCMGMapper(grid, mcmgElementLayout());
-    checkElementDataMapper(leafMCMGMapper, grid.leafGridView());
-  }
+  using LeafMCMGMapper = LeafMultipleCodimMultipleGeomTypeMapper<Grid>;
+  using LevelMCMGMapper = LevelMultipleCodimMultipleGeomTypeMapper<Grid>;
 
-  // check levelMCMGMapper
-  for (int i = 2; i <= grid.maxLevel(); i++)
-  {
-    {     // check constructor with layout class
-      LevelMultipleCodimMultipleGeomTypeMapper<Grid>
-      levelMCMGMapper(grid, i, mcmgElementLayout());
-      checkElementDataMapper(levelMCMGMapper, grid.levelGridView(i));
-    }
-  }
+  // Create various mappers *******************************************************************
 
-  // check vertex mapper
-  // check leafMCMGMapper
-  {
-    LeafMultipleCodimMultipleGeomTypeMapper<Grid>
-    leafMCMGMapper(grid, mcmgVertexLayout());
-    checkVertexDataMapper(leafMCMGMapper, grid.leafGridView());
-  }
+  // Create element mappers for leaf and levels
+  LeafMCMGMapper leafElementMCMGMapper(grid, mcmgElementLayout());
+  std::vector<LevelMCMGMapper> levelElementMCMGMappers;
+  for (int i = 0; i <= grid.maxLevel(); i++)
+    levelElementMCMGMappers.push_back(LevelMCMGMapper(grid, i, mcmgElementLayout()));
 
-  // check levelMCMGMapper
-  for (int i = 2; i <= grid.maxLevel(); i++)
-  {
-    {     // check constructor with layout class
-      LevelMultipleCodimMultipleGeomTypeMapper<Grid>
-      levelMCMGMapper(grid, i, mcmgVertexLayout());
-      checkVertexDataMapper(levelMCMGMapper, grid.levelGridView(i));
-    }
-  }
+  // Create vertex mappers for leaf and levels
+  LeafMCMGMapper leafVertexMCMGMapper(grid, mcmgVertexLayout());
+  std::vector<LevelMCMGMapper> levelVertexMCMGMappers;
+  for (int i = 0; i <= grid.maxLevel(); i++)
+    levelVertexMCMGMappers.push_back(LevelMCMGMapper(grid, i, mcmgVertexLayout()));
 
-  // check mixed element and edge mapper
+  // Create mixed element and edge mappers for leaf and levels
   const auto elementEdgeLayout = [](GeometryType gt, unsigned int dimgrid) {
     return (gt.dim() == dimgrid)? 3 : (gt.dim() == 1? 2 : 0);
   };
-  // check leafMCMGMapper
-  {   // check constructor with layout class
-    LeafMultipleCodimMultipleGeomTypeMapper<Grid>
-    leafMCMGMapper(grid, elementEdgeLayout);
-    checkMixedDataMapper(leafMCMGMapper, grid.leafGridView());
-  }
+  LeafMCMGMapper leafMixedMCMGMapper(grid, elementEdgeLayout);
+  std::vector<LevelMCMGMapper> levelMixedMCMGMappers;
+  for (int i = 0; i <= grid.maxLevel(); i++)
+    levelMixedMCMGMappers.push_back(LevelMCMGMapper(grid, i, elementEdgeLayout));
 
-  // check levelMCMGMapper
-  for (int i = 2; i <= grid.maxLevel(); i++)
-  {
-    {     // check constructor with layout class
-      LevelMultipleCodimMultipleGeomTypeMapper<Grid>
-      levelMCMGMapper(grid, i, elementEdgeLayout);
-      checkMixedDataMapper(levelMCMGMapper, grid.levelGridView(i));
-    }
-  }
+  // Check mappers *******************************************************************
+
+  checkElementDataMapper(leafElementMCMGMapper, grid.leafGridView());
+  for (std::size_t i = 0; i < levelElementMCMGMappers.size(); i++)
+    checkElementDataMapper(levelElementMCMGMappers[i], grid.levelGridView(i));
+
+  checkVertexDataMapper(leafVertexMCMGMapper, grid.leafGridView());
+  for (std::size_t i = 0; i < levelVertexMCMGMappers.size(); i++)
+    checkVertexDataMapper(levelVertexMCMGMappers[i], grid.levelGridView(i));
+
+  checkMixedDataMapper(leafMixedMCMGMapper, grid.leafGridView());
+  for (std::size_t i = 0; i < levelMixedMCMGMappers.size(); i++)
+    checkMixedDataMapper(levelMixedMCMGMappers[i], grid.levelGridView(i));
+
+  // Refine grid and update mappers *******************************************************************
+
+  grid.globalRefine(1);
+
+  leafElementMCMGMapper.update();
+  for (std::size_t i = 0; i < levelElementMCMGMappers.size(); i++)
+    levelElementMCMGMappers[i].update();
+
+  leafVertexMCMGMapper.update();
+  for (std::size_t i = 0; i < levelVertexMCMGMappers.size(); i++)
+    levelVertexMCMGMappers[i].update();
+
+  leafMixedMCMGMapper.update();
+  for (std::size_t i = 0; i < levelMixedMCMGMappers.size(); i++)
+    levelMixedMCMGMappers[i].update();
+
+  // Check mappers *******************************************************************
+
+  checkElementDataMapper(leafElementMCMGMapper, grid.leafGridView());
+  for (std::size_t i = 0; i < levelElementMCMGMappers.size(); i++)
+    checkElementDataMapper(levelElementMCMGMappers[i], grid.levelGridView(i));
+
+  checkVertexDataMapper(leafVertexMCMGMapper, grid.leafGridView());
+  for (std::size_t i = 0; i < levelVertexMCMGMappers.size(); i++)
+    checkVertexDataMapper(levelVertexMCMGMappers[i], grid.levelGridView(i));
+
+  checkMixedDataMapper(leafMixedMCMGMapper, grid.leafGridView());
+  for (std::size_t i = 0; i < levelMixedMCMGMappers.size(); i++)
+    checkMixedDataMapper(levelMixedMCMGMappers[i], grid.levelGridView(i));
+
 }
 
 int main(int argc, char** argv)
