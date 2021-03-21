@@ -93,7 +93,6 @@ namespace Dune
       typedef typename GridFunctionTraits< GridFunction >::LocalCoordinate LocalCoordinate;
       typedef typename GridFunctionTraits< GridFunction >::LocalFunction LocalFunction;
       typedef typename GridFunctionTraits< GridFunction >::Range Range;
-      typedef typename GridFunctionTraits< GridFunction >::GridView GridView;
 
       typedef pybind11::array_t< typename FieldTraits< LocalCoordinate >::field_type > Array;
 
@@ -146,6 +145,7 @@ namespace Dune
         }, "element"_a, "x"_a );
 
 #if HAVE_DUNE_VTK
+      typedef typename GridFunctionTraits< GridFunction >::GridView GridView;
       using VirtualizedGF = Dune::Vtk::Function<GridView>;
       // register the Function class if not already available
       auto vgfClass = Python::insertClass<VirtualizedGF>(scope,"VtkFunction",
