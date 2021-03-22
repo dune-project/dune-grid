@@ -9,6 +9,8 @@
 #include <utility>
 #include <unordered_map>
 
+#include <dune/common/visibility.hh>
+
 namespace Dune
 {
   class SingletonStorage

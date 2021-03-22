@@ -8,11 +8,13 @@
 #include <type_traits>
 #include <utility>
 
+#include <dune/common/hybridutilities.hh>
 #include <dune/common/typeutilities.hh>
 
 #include <dune/python/common/string.hh>
 #include <dune/python/common/typeregistry.hh>
 #include <dune/python/pybind11/pybind11.h>
+#include <dune/python/pybind11/operators.h>
 
 namespace Dune
 {
