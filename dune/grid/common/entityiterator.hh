@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GRID_ENTITYITERATOR_HH
-#define DUNE_GRID_ENTITYITERATOR_HH
+#ifndef DUNE_GRID_COMMON_ENTITYITERATOR_HH
+#define DUNE_GRID_COMMON_ENTITYITERATOR_HH
 
 #include <cstddef>
 #include <iterator>
@@ -167,4 +167,4 @@ namespace std
 
 } // namespace std
 
-#endif // #ifndef DUNE_GRID_ENTITYITERATOR_HH
+#endif // #ifndef DUNE_GRID_COMMON_ENTITYITERATOR_HH

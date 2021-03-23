@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_CAPABILITIES_HH
-#define DUNE_CAPABILITIES_HH
+#ifndef DUNE_GRID_COMMON_CAPABILITIES_HH
+#define DUNE_GRID_COMMON_CAPABILITIES_HH
 
 /** \file
     \brief A set of traits classes to store static information about grid implementation
@@ -239,4 +239,4 @@ namespace Dune
 
 }
 
-#endif // DUNE_CAPABILITIES_HH
+#endif // DUNE_GRID_COMMON_CAPABILITIES_HH

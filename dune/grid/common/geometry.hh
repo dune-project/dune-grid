@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GRID_GEOMETRY_HH
-#define DUNE_GRID_GEOMETRY_HH
+#ifndef DUNE_GRID_COMMON_GEOMETRY_HH
+#define DUNE_GRID_COMMON_GEOMETRY_HH
 
 /** \file
     \brief Wrapper and interface classes for element geometries
@@ -446,4 +446,4 @@ namespace Dune
 
 } // namespace Dune
 
-#endif // DUNE_GRID_GEOMETRY_HH
+#endif // DUNE_GRID_COMMON_GEOMETRY_HH

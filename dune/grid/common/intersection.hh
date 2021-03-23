@@ -1,8 +1,8 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 
-#ifndef DUNE_GRID_INTERSECTION_HH
-#define DUNE_GRID_INTERSECTION_HH
+#ifndef DUNE_GRID_COMMON_INTERSECTION_HH
+#define DUNE_GRID_COMMON_INTERSECTION_HH
 
 #include <dune/grid/common/grid.hh>
 
@@ -523,4 +523,4 @@ namespace Dune
 
 } // namespace Dune
 
-#endif // DUNE_GRID_INTERSECTION_HH
+#endif // DUNE_GRID_COMMON_INTERSECTION_HH
