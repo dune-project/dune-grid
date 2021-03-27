@@ -121,12 +121,26 @@ int main (int argc, char** argv) try
     grid.globalRefine(1);
 
     LeafSingleCodimSingleGeomTypeMapper<GridType, 0> leafMapper(grid);
-    checkElementDataMapper(leafMapper, grid.leafGridView());
+    std::vector<LevelSingleCodimSingleGeomTypeMapper<GridType, 0>> levelMappers;
+    for (int i=0; i<=grid.maxLevel(); i++)
+      levelMappers.push_back(LevelSingleCodimSingleGeomTypeMapper<GridType, 0>(grid, i));
 
-    for (int i=2; i<=grid.maxLevel(); i++) {
-      LevelSingleCodimSingleGeomTypeMapper<GridType, 0> levelMapper(grid, i);
-      checkElementDataMapper(levelMapper, grid.levelGridView(i));
-    }
+    // Check mappers
+    checkElementDataMapper(leafMapper, grid.leafGridView());
+    for (std::size_t i=0; i<levelMappers.size(); i++)
+      checkElementDataMapper(levelMappers[i], grid.levelGridView(i));
+
+    // Refine grid and update mappers
+    grid.globalRefine(1);
+    leafMapper.update();
+    for (std::size_t i=0; i<levelMappers.size(); i++)
+      levelMappers[i].update();
+
+    // Check mappers
+    checkElementDataMapper(leafMapper, grid.leafGridView());
+    for (std::size_t i=0; i<levelMappers.size(); i++)
+      checkElementDataMapper(levelMappers[i], grid.levelGridView(i));
+
   }
 
   return 0;
