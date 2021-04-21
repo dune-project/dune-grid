@@ -1,5 +1,7 @@
 # Master (will become release 2.8)
 
+- `UGGrid` removes support for `_2` and `_3` macros.
+
 - `SingleCodimSingleGeomTypeMapper` and `MultipleCodimMultipleGeomTypeMapper` now have an `update(gridView)`
   method to update the stored `GridView` and recalculate the indices after mesh adaptation.
 
