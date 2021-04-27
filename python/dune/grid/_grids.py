@@ -1,4 +1,4 @@
-from dune.common.checkconfiguration import assertHave, ConfigurationError
+from dune.common.checkconfiguration import assertCMakeHave, ConfigurationError
 from dune.typeregistry import generateTypeName
 
 def onedGrid(constructor):
@@ -52,26 +52,27 @@ grid_registry = {
         "Yasp"       : yaspGrid,
     }
 
-try:
-    # assertHave("HAVE_ALBERTA") THIS IS ON MY TODO LIST
-    def albertaGrid(constructor, dimgrid=None):
+def albertaGrid(constructor, dimgrid=None, dimworld=None):
+    try:
+        assertCMakeHave("HAVE_ALBERTA")
         from .grid_generator import module, getDimgrid
 
         if not dimgrid:
             dimgrid = getDimgrid(constructor)
+        if dimworld is None:
+            dimworld = dimgrid
         typeName = "Dune::AlbertaGrid< " + str(dimgrid) + " >"
         includes = ["dune/grid/albertagrid.hh", "dune/grid/albertagrid/dgfparser.hh"]
-        gridModule = module(includes, typeName)
-
+        extraCMake = ["add_dune_alberta_flags(TARGET WORLDDIM {})".format(str(dimworld))]
+        gridModule = module(includes, typeName) # , extraCMake=extraCMake)
         return gridModule.reader(constructor).leafView
-    grid_registry["Alberta"] = albertaGrid
-except ConfigurationError:
-    pass
+    except ConfigurationError:
+        pass
+grid_registry["Alberta"] = albertaGrid
 
-
-try:
-    # assertHave("HAVE_DUNE_UGGRID") THIS IS ON MY TODO LIST
-    def ugGrid(constructor, dimgrid=None, **parameters):
+def ugGrid(constructor, dimgrid=None, **parameters):
+    try:
+        assertCMakeHave("HAVE_DUNE_UGGRID")
         from .grid_generator import module, getDimgrid
 
         if not dimgrid:
@@ -81,9 +82,9 @@ try:
         gridModule = module(includes, typeName)
 
         return gridModule.reader(constructor).leafView
-    grid_registry["UG"] = ugGrid
-except ConfigurationError:
-    pass
+    except ConfigurationError:
+        pass
+grid_registry["UG"] = ugGrid
 
 if __name__ == "__main__":
     import doctest
