@@ -27,8 +27,6 @@ namespace Dune
   namespace Alberta
   {
     typedef Dune::IndexStack< int, 100000 > IndexStack;
-
-    extern IndexStack *currentIndexStack;
   }
 
 
@@ -75,6 +73,8 @@ namespace Dune
     struct CoarsenNumbering;
 
     explicit AlbertaGridHierarchicIndexSet ( const DofNumbering &dofNumbering );
+
+    static Alberta::IndexStack *currentIndexStack;
 
   public:
     typedef Alberta::IndexStack IndexStack;
@@ -167,8 +167,8 @@ namespace Dune
       // set global pointer to index stack
       if( !IndexVectorPointer::supportsAdaptationData )
       {
-        assert( Alberta::currentIndexStack == 0 );
-        Alberta::currentIndexStack = indexStack_;
+        assert( currentIndexStack == nullptr );
+        currentIndexStack = indexStack_;
       }
     }
 
@@ -176,7 +176,7 @@ namespace Dune
     {
       // remove global pointer to index stack
       if( !IndexVectorPointer::supportsAdaptationData )
-        Alberta::currentIndexStack = 0;
+        currentIndexStack = nullptr;
     }
 
     void create ();
@@ -197,7 +197,7 @@ namespace Dune
       if( IndexVectorPointer::supportsAdaptationData )
         indexStack = dofVector.template getAdaptationData< IndexStack >();
       else
-        indexStack = &Alberta::currentIndexStack[ codim ];
+        indexStack = &currentIndexStack[ codim ];
       assert( indexStack != 0 );
       return *indexStack;
     }
