@@ -17,17 +17,11 @@ dune_add_library(dunegrid
   ADD_LIBS ${DUNE_LIBS})
 add_dune_ug_flags(dunegrid ${_OBJECT_FLAG} NO_LINK_DUNEGRID)
 
-if(ALBERTA_FOUND)
-foreach(_dim ${ALBERTA_WORLD_DIMS})
-  dune_add_library(dunealbertagrid_${_dim}d APPEND
-    _DUNE_TARGET_OBJECTS:albertagrid_${_dim}d_
-    _DUNE_TARGET_OBJECTS:dgfparser_
-    _DUNE_TARGET_OBJECTS:dgfparserblocks_
-    ADD_LIBS ${DUNE_LIBS})
-  add_dune_alberta_flags(dunealbertagrid_${_dim}d ${_OBJECT_FLAG} NO_LINK_DUNEALBERTAGRID GRIDDIM ${_dim})
-  list(APPEND DUNE_ALBERTA_LIBS dunealbertagrid_${_dim}d)
-endforeach(_dim "${ALBERTA_DIMS}")
-endif(ALBERTA_FOUND)
+if(Alberta_FOUND)
+  foreach(_dim ${ALBERTA_WORLD_DIMS})
+    dune_add_library(dunealbertagrid${_dim}d $<TARGET_OBJECTS:albertagrid${_dim}d> ADD_LIBS dunegrid)
+  endforeach(_dim)
+endif()
 
 install(FILES dunegridam2cmake.lib
   DESTINATION ${CMAKE_INSTALL_BINDIR}/../lib)

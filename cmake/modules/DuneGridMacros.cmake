@@ -14,7 +14,7 @@ set(DUNE_GRID_EXTRA_UTILS "" CACHE BOOL
 find_package(METIS)
 find_package(ParMETIS)
 include(AddParMETISFlags)
-find_package(Alberta)
+find_package(Alberta 3.0)
 include(AddAlbertaFlags)
 include(UseUG)
 find_package(Psurface)

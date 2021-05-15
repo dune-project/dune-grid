@@ -83,53 +83,22 @@ namespace Dune
    *  simplicial mesh in 1, 2 and 3 space dimensions that can be dynamically
    *  adapted by a bisection algorithm.
    *
-   *  Supported ALBERTA versions include 2.0 or higher.
-   *  It can be downloaded from the ALBERTA website (www.alberta-fem.de).
-   *  After installing ALBERTA, just configure DUNE with the --with-alberta
-   *  option and provide the path to ALBERTA.
+   *  Supported ALBERTA versions include 3.0 or higher.
+   *  It can be downloaded from the ALBERTA website
+   *  (https://gitlab.mathematik.uni-stuttgart.de/ians-nmh/alberta/alberta3).
+   *
+   *  After installing ALBERTA, just configure DUNE with the cmake option
+   *  <tt>-DAlberta_ROOT=[path/to/alberta]</tt> and provide the path to ALBERTA.
    *
    *  Each program linking to ALBERTA only supports a fixed dimension of world.
-   *  This is obtained from the <tt>ALBERTA_DIM</tt> preprocessor variable,
-   *  which defaults to <tt>WORLDDIM</tt>.
+   *  This is obtained from the <tt>ALBERTA_DIM</tt> preprocessor variable. This
+   *  variable and all other necessary link flags and libraries are set by the
+   *  cmake function <tt>add_dune_alberta_flags(WORLDDIM [N] [targets]...)</tt>
+   *  with N the world dimension.
    *
-   *  Further installation instructions can be found here:
-   *  http://www.dune-project.org/external_libraries/install_alberta.html
-   *
-   *  If you use automake and want to compile a program maude, the following
-   *  <tt>Makefile.am</tt> snippet might help:
-      \code
-      bin_PROGRAMS = maude
-
-      ALBERTA_DIM = 2
-
-      maude_SOURCES = maude.cc
-      maude_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA_CPPFLAGS)
-      maude_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA_LDFLAGS) $(DUNE_LDFLAGS)
-      maude_LDADD = $(ALBERTA_LIBS) $(DUNE_LIBS)
-      \endcode
-   *  This will compile and link your program with the world dimension
-   *  specified by <tt>WORLDDIM</tt>.
-   *  If you want to use different world dimensions per program, you can use
-   *  the following snippet in your <tt>Makefile.am</tt>:
-      \code
-      bin_PROGRAMS = maude2d maude3d
-
-      maude2d_SOURCES = maude.cc
-      maude2d_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA2D_CPPFLAGS)
-      maude2d_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA2D_LDFLAGS) $(DUNE_LDFLAGS)
-      maude2d_LDADD = $(ALBERTA2D_LIBS) $(DUNE_LIBS)
-
-      maude3d_SOURCES = maude.cc
-      maude3d_CPPFLAGS = $(AM_CPPFLAGS) $(ALBERTA3D_CPPFLAGS)
-      maude3d_LDFLAGS = $(AM_LDFLAGS) $(ALBERTA3D_LDFLAGS) $(DUNE_LDFLAGS)
-      maude3d_LDADD = $(ALBERTA3D_LIBS) $(DUNE_LIBS)
-      \endcode
-   *
-   *  In either case the preprocessor variables <tt>HAVE_ALBERTA</tt>, which
-   *  tells you whether ALBERTA was found by configure, and <tt>ALBERTA_DIM</tt>
-   *  which tells you the dimension of world <em>for this program</em>.
-   *
-   *  For further details look into the <tt>alberta.m4</tt> autoconf snippet.
+   *  CMake sets the config.h variables <tt>HAVE_ALBERTA</tt> that tells you whether
+   *  ALBERTA was found, and <tt>ALBERTA_DIM</tt> compile flags which tells you the
+   *  dimension of world <em>for this program</em>.
    */
   template< int dim, int dimworld = Alberta::dimWorld >
   class AlbertaGrid
