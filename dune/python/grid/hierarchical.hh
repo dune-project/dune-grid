@@ -91,7 +91,8 @@ namespace Dune
       }
 
       template< class Grid >
-      inline static void addGridModificationListener ( const Grid &grid, GridModificationListener<Grid> *listener, pybind11::handle nurse = pybind11::handle() )
+      inline static void addGridModificationListener ( const Grid &grid,
+              GridModificationListener<Grid>* listener, pybind11::handle nurse = pybind11::handle() )
       {
         auto &listeners = gridModificationListeners< Grid >(grid);
         listeners.push_back( listener );
@@ -331,12 +332,13 @@ namespace Dune
         )doc" );
 
       cls.def( "adapt", [] ( Grid &self ) {
-          for( const auto &listener : detail::gridModificationListenersRange( self ) )
+          const auto &range = detail::gridModificationListenersRange(self);
+          for( const auto &listener : range )
             listener->preModification( self );
           self.preAdapt();
           self.adapt();
           self.postAdapt();
-          for( const auto &listener : detail::gridModificationListenersRange( self ) )
+          for( const auto &listener : range )
             listener->postModification( self );
         },
         R"doc(
@@ -363,12 +365,13 @@ namespace Dune
           }
           if (marked.first + marked.second)
           {
-            for( const auto &listener : detail::gridModificationListenersRange( self ) )
+            const auto &range = detail::gridModificationListenersRange(self);
+            for( const auto &listener : range )
               listener->preModification( self );
             self.preAdapt();
             self.adapt();
             self.postAdapt();
-            for( const auto &listener : detail::gridModificationListenersRange( self ) )
+            for( const auto &listener : range )
               listener->postModification( self );
           }
           return marked;
@@ -392,10 +395,11 @@ namespace Dune
         )doc" );
 
       cls.def( "globalRefine", [] ( Grid &self, int level ) {
-          for( const auto &listener : detail::gridModificationListenersRange( self ) )
+          const auto &range = detail::gridModificationListenersRange(self);
+          for( const auto &listener : range )
             listener->preModification( self );
           self.globalRefine( level );
-          for( const auto &listener : detail::gridModificationListenersRange( self ) )
+          for( const auto &listener : range )
             listener->postModification( self );
         }, "iterations"_a = 1,
         R"doc(
@@ -410,10 +414,11 @@ namespace Dune
         )doc" );
 
       cls.def( "loadBalance", [] ( Grid &self ) {
-          for( const auto &listener : detail::gridModificationListenersRange( self ) )
+          const auto &range = detail::gridModificationListenersRange(self);
+          for( const auto &listener : range )
             listener->preModification( self );
           self.loadBalance();
-          for( const auto &listener : detail::gridModificationListenersRange( self ) )
+          for( const auto &listener : range )
             listener->postModification( self );
         },
         R"doc(
