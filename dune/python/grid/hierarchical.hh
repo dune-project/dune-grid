@@ -37,8 +37,6 @@
 #include <dune/python/pybind11/pybind11.h>
 #include <dune/python/pybind11/stl.h>
 
-#include <dune/python/grid/singleton.hh>
-
 namespace Dune
 {
 
@@ -57,45 +55,46 @@ namespace Dune
       virtual void postModification ( const Grid &grid ) {}
     };
 
-
-
     namespace detail
     {
 
       template< class Grid >
-      using GridModificationListeners = std::multimap< const Grid *, GridModificationListener< Grid > * >;
+      using GridModificationListeners = std::vector< GridModificationListener< Grid > * >;
 
       template< class Grid >
-      inline GridModificationListeners< Grid > &gridModificationListeners ()
+      inline GridModificationListeners<Grid> &gridModificationListeners (const Grid &grid)
       {
-        SingletonStorage &singleton = pybind11::cast< SingletonStorage & >( pybind11::module::import( "dune.grid" ).attr( "singleton" ) );
-        return singleton.template instance< GridModificationListeners< Grid > >();
-      }
-
-      template< class Grid >
-      inline static IteratorRange< typename GridModificationListeners< Grid >::iterator > gridModificationListeners ( const Grid &grid )
-      {
-        typedef typename GridModificationListeners< Grid >::iterator Iterator;
-        std::pair< Iterator, Iterator > range = gridModificationListeners< Grid >().equal_range( &grid );
-        return IteratorRange< Iterator >( range.first, range.second );
-      }
-
-      template< class Grid >
-      inline static void addGridModificationListener ( const Grid &grid, GridModificationListener< Grid > *listener, pybind11::handle nurse = pybind11::handle() )
-      {
-        // add listener to list of listeners
-        auto pos = gridModificationListeners< Grid >().insert( std::make_pair( &grid, listener ) );
-
-        // if nurse is given, ensure the listener dies with the nurse
-        if( nurse )
+        pybind11::handle pygrid = pybind11::detail::get_object_handle( &grid, pybind11::detail::get_type_info( typeid( Grid ) ) );
+        if (!pybind11::hasattr(pygrid, "listeners_"))
         {
-          pybind11::cpp_function remove( [ pos ] ( pybind11::handle weakref ) {
-              delete pos->second;
-              gridModificationListeners< Grid >().erase( pos );
+          auto ptr = new detail::GridModificationListeners<Grid>;
+          pybind11::cpp_function cleanup(
+            [ptr](pybind11::handle weakref) {
+              for (auto l : *ptr) delete l;
+              delete ptr;
               weakref.dec_ref();
-            } );
-          pybind11::weakref( nurse, remove ).release();
+            });
+          (void) pybind11::weakref(pygrid, cleanup).release();
+          pygrid.attr("listeners_") = (void*)(ptr);
         }
+        pybind11::handle l = pygrid.attr("listeners_");
+        return *static_cast< detail::GridModificationListeners<Grid>* >(l.cast<void*>());
+      }
+
+      template< class Grid >
+      inline static IteratorRange< typename GridModificationListeners<Grid>::const_iterator >
+      gridModificationListenersRange ( const Grid &grid )
+      {
+        typedef typename GridModificationListeners<Grid>::const_iterator Iterator;
+        const auto& listeners = gridModificationListeners(grid);
+        return IteratorRange< Iterator >(listeners.begin(), listeners.end());
+      }
+
+      template< class Grid >
+      inline static void addGridModificationListener ( const Grid &grid, GridModificationListener<Grid> *listener, pybind11::handle nurse = pybind11::handle() )
+      {
+        auto &listeners = gridModificationListeners< Grid >(grid);
+        listeners.push_back( listener );
       }
 
     } // namespace detail
@@ -332,13 +331,13 @@ namespace Dune
         )doc" );
 
       cls.def( "adapt", [] ( Grid &self ) {
-          for( const auto &listener : detail::gridModificationListeners( self ) )
-            listener.second->preModification( self );
+          for( const auto &listener : detail::gridModificationListenersRange( self ) )
+            listener->preModification( self );
           self.preAdapt();
           self.adapt();
           self.postAdapt();
-          for( const auto &listener : detail::gridModificationListeners( self ) )
-            listener.second->postModification( self );
+          for( const auto &listener : detail::gridModificationListenersRange( self ) )
+            listener->postModification( self );
         },
         R"doc(
           Refine or coarsen the hierarchical grid to match the current marking
@@ -364,13 +363,13 @@ namespace Dune
           }
           if (marked.first + marked.second)
           {
-            for( const auto &listener : detail::gridModificationListeners( self ) )
-              listener.second->preModification( self );
+            for( const auto &listener : detail::gridModificationListenersRange( self ) )
+              listener->preModification( self );
             self.preAdapt();
             self.adapt();
             self.postAdapt();
-            for( const auto &listener : detail::gridModificationListeners( self ) )
-              listener.second->postModification( self );
+            for( const auto &listener : detail::gridModificationListenersRange( self ) )
+              listener->postModification( self );
           }
           return marked;
         },
@@ -393,11 +392,11 @@ namespace Dune
         )doc" );
 
       cls.def( "globalRefine", [] ( Grid &self, int level ) {
-          for( const auto &listener : detail::gridModificationListeners( self ) )
-            listener.second->preModification( self );
+          for( const auto &listener : detail::gridModificationListenersRange( self ) )
+            listener->preModification( self );
           self.globalRefine( level );
-          for( const auto &listener : detail::gridModificationListeners( self ) )
-            listener.second->postModification( self );
+          for( const auto &listener : detail::gridModificationListenersRange( self ) )
+            listener->postModification( self );
         }, "iterations"_a = 1,
         R"doc(
           Refine each leaf element of the grid.
@@ -411,11 +410,11 @@ namespace Dune
         )doc" );
 
       cls.def( "loadBalance", [] ( Grid &self ) {
-          for( const auto &listener : detail::gridModificationListeners( self ) )
-            listener.second->preModification( self );
+          for( const auto &listener : detail::gridModificationListenersRange( self ) )
+            listener->preModification( self );
           self.loadBalance();
-          for( const auto &listener : detail::gridModificationListeners( self ) )
-            listener.second->postModification( self );
+          for( const auto &listener : detail::gridModificationListenersRange( self ) )
+            listener->postModification( self );
         },
         R"doc(
           Redistribute the grid to equilibrate the work load on each process.
@@ -470,7 +469,6 @@ namespace Dune
 
       auto addHAttr = pybind11::module::import( "dune.grid.grid_generator" ).attr("addHAttr");
       addHAttr(module);
-
     }
 
   } // namespace Python

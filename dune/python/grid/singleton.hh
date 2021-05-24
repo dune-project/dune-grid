@@ -1,3 +1,4 @@
+#error SHOULD NOT BE USED
 #ifndef DUNE_GRID_SINGLETON_HH
 #define DUNE_GRID_SINGLETON_HH
 
@@ -39,7 +40,9 @@ namespace Dune
     StorageType storage_;
 
   public:
-    ~SingletonStorage() {}
+    ~SingletonStorage() {
+      storage_.clear();
+    }
     /** \brief return singleton instance of given Object type.
      */
     template <class Object, class... Args>
