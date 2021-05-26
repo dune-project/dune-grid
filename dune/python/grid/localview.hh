@@ -4,7 +4,6 @@
 #include <map>
 
 #include <dune/common/visibility.hh>
-#include <dune/python/grid/singleton.hh>
 
 #include <dune/python/pybind11/pybind11.h>
 
@@ -20,8 +19,7 @@ namespace Dune
       // LocalViewRegistry
       // -----------------
 
-
-      template< class LocalView, class Context >
+      template< class LocalView >
       struct DUNE_PRIVATE LocalViewRegistry
       {
         ~LocalViewRegistry()
@@ -30,6 +28,7 @@ namespace Dune
             i->second = pybind11::object();
           binds_.clear();
         }
+        template <class Context>
         void bind ( pybind11::handle localView, pybind11::object context )
         {
           localView.template cast< LocalView & >().bind( context.template cast< const Context & >() );
@@ -67,14 +66,23 @@ namespace Dune
       // localViewRegsitry
       // -----------------
 
-      template< class LocalView, class Context >
-      inline LocalViewRegistry< LocalView, Context > &localViewRegistry ()
+      template< class LocalView >
+      inline LocalViewRegistry< LocalView > &localViewRegistry (pybind11::handle self)
       {
-        static SingletonStorage &singleton = pybind11::cast< SingletonStorage & >( pybind11::module::import( "dune.grid" ).attr( "singleton" ) );
-        static LocalViewRegistry< LocalView, Context > &instance = singleton.template instance< LocalViewRegistry<LocalView,Context> >();
-        return instance;
+        if (!pybind11::hasattr(self, "registry_"))
+        {
+          auto ptr = new LocalViewRegistry<LocalView>();
+          pybind11::cpp_function storage_cleanup(
+            [ptr](pybind11::handle weakref) {
+              delete ptr;
+              weakref.dec_ref();
+            });
+          (void) pybind11::weakref(self, storage_cleanup).release();
+          self.attr("registry_") = (void*)ptr;
+        }
+        pybind11::handle l = self.attr("registry_");
+        return *static_cast< LocalViewRegistry<LocalView>* >(l.cast<void*>());
       }
-
     } // namespace detail
 
 
@@ -87,9 +95,11 @@ namespace Dune
     {
       using pybind11::operator""_a;
 
-      auto &registry = detail::localViewRegistry< LocalView, Context >();
-      cls.def( "bind", [ &registry ] ( pybind11::handle self, pybind11::object context ) { registry.bind( self, context ); }, "context"_a );
-      cls.def( "unbind", [ &registry ] ( pybind11::handle self ) { registry.unbind( self ); } );
+      cls.def( "bind", [ ] ( pybind11::handle self, pybind11::object context ) {
+        detail::localViewRegistry<LocalView>(self).template
+                   bind<Context>( self, context ); }, "context"_a );
+      cls.def( "unbind", [ ] ( pybind11::handle self ) {
+        detail::localViewRegistry<LocalView>(self).unbind( self ); } );
     }
 
   } // namespace Python

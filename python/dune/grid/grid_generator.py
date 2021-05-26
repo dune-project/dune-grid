@@ -335,6 +335,7 @@ def module(includes, typeName, *args, **kwargs):
         generator = SimpleGenerator("HierarchicalGrid", "Dune::Python")
     includes = includes + ["dune/python/grid/hierarchical.hh"]
     typeHash = "hierarchicalgrid_" + hashIt(typeName)
+    kwargs["dynamicAttr"] = True
     module = generator.load(includes, typeName, typeHash, *args, **kwargs)
     return module
 

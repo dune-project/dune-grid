@@ -19,7 +19,6 @@ set(HEADERS
   object.hh
   range.hh
   simplegridfunction.hh
-  singleton.hh
   vtk.hh
 )
 
