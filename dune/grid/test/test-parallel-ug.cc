@@ -220,7 +220,11 @@ struct checkMappersWrapper<2, 1, GridView>
 
 template <class GridView>
 void testCommunication(const GridView &gridView,
-                       std::bitset<GridView::dimension+1> communicationCodims)
+                       std::bitset<GridView::dimension+1> communicationCodims,
+                       InterfaceType communicationInterface,
+                       CommunicationDirection communicationDirection,
+                       const std::set<PartitionType>& sendingPartitions,
+                       const std::set<PartitionType>& receivingPartitions)
 {
   const int dim = GridView::dimension;
 
@@ -283,10 +287,7 @@ void testCommunication(const GridView &gridView,
 
   // communicate the entities at the interior border to all other
   // processes
-  gridView.communicate(datahandle, Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication);
-
-  PartitionSet sendingPartitions = Dune::Partitions::interior + Dune::Partitions::border;
-  PartitionSet receivingPartitions = Dune::Partitions::all;
+  gridView.communicate(datahandle, communicationInterface, communicationDirection);
 
   // write the partition type of each entity into the corresponding
   // result array
@@ -311,8 +312,8 @@ void testCommunication(const GridView &gridView,
 
           for (const auto& pType : partitionTypes)
             if (pType.first != gridView.comm().rank()
-                && sendingPartitions.contains(entity.partitionType())
-                && receivingPartitions.contains(pType.second))
+                && (sendingPartitions.find(entity.partitionType())!=sendingPartitions.end())
+                && (receivingPartitions.find(pType.second))!=receivingPartitions.end())
               expectedNumberOfGatherCalls++;
 
           if (gatherCounter[mapper.index(entity)] != expectedNumberOfGatherCalls)
@@ -332,8 +333,8 @@ void testCommunication(const GridView &gridView,
 
           for (const auto& pType : partitionTypes)
             if (pType.first != gridView.comm().rank()
-                && receivingPartitions.contains(entity.partitionType())
-                && sendingPartitions.contains(pType.second))
+                && (receivingPartitions.find(entity.partitionType()) != receivingPartitions.end())
+                && (sendingPartitions.find(pType.second) != sendingPartitions.end()))
               expectedNumberOfScatterCalls++;
 
           if (scatterCounter[mapper.index(entity)] != expectedNumberOfScatterCalls)
@@ -587,12 +588,42 @@ void testParallelUG(bool simplexGrid, bool localRefinement, int refinementDim, b
   checkMappersWrapper<dim, 3, LeafGV>::check(leafGridView);
 
   // Test communication
-  // The variable codimSet encodes a set of codimensions as a bitset.
-  // We loop over all possible sets.
-  for (std::size_t codimSet=0; codimSet<(1<<(dim+1)); codimSet++)
+  std::map<InterfaceType, std::set<PartitionType> > sendingPartitions;
+  sendingPartitions[InteriorBorder_InteriorBorder_Interface] = {InteriorEntity, BorderEntity};
+  sendingPartitions[InteriorBorder_All_Interface] = {InteriorEntity, BorderEntity};
+  sendingPartitions[Overlap_OverlapFront_Interface] = {OverlapEntity};
+  sendingPartitions[Overlap_All_Interface] = {OverlapEntity};
+  sendingPartitions[All_All_Interface] = {InteriorEntity, BorderEntity, OverlapEntity, FrontEntity, GhostEntity};
+
+  std::map<InterfaceType, std::set<PartitionType> > receivingPartitions;
+  receivingPartitions[InteriorBorder_InteriorBorder_Interface] = {InteriorEntity, BorderEntity};
+  receivingPartitions[InteriorBorder_All_Interface] = {InteriorEntity, BorderEntity, OverlapEntity, FrontEntity, GhostEntity};
+  receivingPartitions[Overlap_OverlapFront_Interface] = {OverlapEntity, FrontEntity};
+  receivingPartitions[Overlap_All_Interface] = {InteriorEntity, BorderEntity, OverlapEntity, FrontEntity, GhostEntity};
+  receivingPartitions[All_All_Interface] = {InteriorEntity, BorderEntity, OverlapEntity, FrontEntity, GhostEntity};
+
+  // Test all communication interfaces
+  for (auto&& communicationInterface : {InteriorBorder_InteriorBorder_Interface,
+                                        InteriorBorder_All_Interface,
+                                        Overlap_OverlapFront_Interface,
+                                        Overlap_All_Interface,
+                                        All_All_Interface})
   {
-    testCommunication<LevelGV>(level0GridView, std::bitset<dim+1>(codimSet));
-    testCommunication<LeafGV>(leafGridView, std::bitset<dim+1>(codimSet));
+    // The variable codimSet encodes a set of codimensions as a bitset.
+    // We loop over all possible sets.
+    for (std::size_t codimSet=0; codimSet<(1<<(dim+1)); codimSet++)
+    {
+      // TODO: Test BackwardCommunication, too!
+      testCommunication<LevelGV>(level0GridView, std::bitset<dim+1>(codimSet),
+                                 communicationInterface, ForwardCommunication,
+                                 sendingPartitions[communicationInterface],
+                                 receivingPartitions[communicationInterface]);
+
+      testCommunication<LeafGV>(leafGridView, std::bitset<dim+1>(codimSet),
+                                communicationInterface, ForwardCommunication,
+                                sendingPartitions[communicationInterface],
+                                receivingPartitions[communicationInterface]);
+    }
   }
 
   ////////////////////////////////////////////////////
@@ -639,15 +670,29 @@ void testParallelUG(bool simplexGrid, bool localRefinement, int refinementDim, b
   checkMappersWrapper<dim, 2, LeafGV>::check(grid->leafGridView());
   checkMappersWrapper<dim, 3, LeafGV>::check(grid->leafGridView());
 
-  // Test communication
-  // The variable codimSet encodes a set of codimensions as a bitset.
-  // We loop over all possible sets.
-  for (std::size_t codimSet=0; codimSet<(1<<(dim+1)); codimSet++)
+  // Test all communication interfaces
+  for (auto&& communicationInterface : {InteriorBorder_InteriorBorder_Interface,
+                                        InteriorBorder_All_Interface,
+                                        Overlap_OverlapFront_Interface,
+                                        Overlap_All_Interface,
+                                        All_All_Interface})
   {
-    for (int i=0; i<=grid->maxLevel(); i++)
-      testCommunication<LevelGV>(grid->levelGridView(i), std::bitset<dim+1>(codimSet));
+    // The variable codimSet encodes a set of codimensions as a bitset.
+    // We loop over all possible sets.
+    for (std::size_t codimSet=0; codimSet<(1<<(dim+1)); codimSet++)
+    {
+      // TODO: Test BackwardCommunication, too!
+      for (int i=0; i<=grid->maxLevel(); i++)
+        testCommunication<LevelGV>(grid->levelGridView(i), std::bitset<dim+1>(codimSet),
+                                communicationInterface, Dune::ForwardCommunication,
+                                sendingPartitions[communicationInterface],
+                                receivingPartitions[communicationInterface]);
 
-    testCommunication<LeafGV>(leafGridView, std::bitset<dim+1>(codimSet));
+      testCommunication<LeafGV>(leafGridView, std::bitset<dim+1>(codimSet),
+                                communicationInterface, Dune::ForwardCommunication,
+                                sendingPartitions[communicationInterface],
+                                receivingPartitions[communicationInterface]);
+    }
   }
 }
 
