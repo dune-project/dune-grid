@@ -281,6 +281,11 @@ namespace Dune {
       return DDD_GET_IF(Facet_InteriorBorder_All_IF);
     }
 
+    static DDD_IF FacetAllAllIF(DDD_CONTEXT_PARAM)
+    {
+      return DDD_GET_IF(Facet_All_All_IF);
+    }
+
     /*! Master->HGhost/VHGhost */
     static DDD_IF EdgeIF(DDD_CONTEXT_PARAM)
     {

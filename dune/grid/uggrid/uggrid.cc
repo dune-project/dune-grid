@@ -514,6 +514,11 @@ std::vector<typename UG_NS<dim>::DDD_IF> UGGrid<dim>::findDDDInterfaces(Interfac
                                                                         int codim) const
 {
   std::vector<typename UG_NS<dim>::DDD_IF> dddIfaces;
+
+  // UGGrid does not have overlap or front entities
+  if (iftype == Overlap_OverlapFront_Interface || iftype == Overlap_All_Interface)
+    return dddIfaces;
+
   if (codim == 0)
   {
     switch (iftype) {
@@ -579,8 +584,13 @@ std::vector<typename UG_NS<dim>::DDD_IF> UGGrid<dim>::findDDDInterfaces(Interfac
     switch (iftype)
     {
     case InteriorBorder_InteriorBorder_Interface :
+      dddIfaces.push_back(UG_NS<dim>::BorderVectorSymmIF(multigrid_->dddContext()));
+      break;
     case InteriorBorder_All_Interface :
       dddIfaces.push_back(UG_NS<dim>::FacetInteriorBorderAllIF(multigrid_->dddContext()));
+      break;
+    case All_All_Interface :
+      dddIfaces.push_back(UG_NS<dim>::FacetAllAllIF(multigrid_->dddContext()));
       break;
     default :
       DUNE_THROW(GridError,
