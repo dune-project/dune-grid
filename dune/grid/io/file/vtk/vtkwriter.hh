@@ -792,7 +792,8 @@ namespace Dune
      *  For serial runs (commSize=1) it chooses other names without the
      *  "s####-p####-" prefix for the .vtu/.vtp files and omits writing of the
      *  .pvtu/pvtp file however.  For parallel runs (commSize > 1) it is the
-     *  same as a call to pwrite() with path="" and extendpath="".
+     *  same as a call to pwrite() with name and path constructed from
+     *  a given filename possibly containing a path, and extendpath="".
      *
      *  \param[in]  name  basic name to write (may not contain a path)
      *  \param[in]  type  type of output (e.g,, ASCII) (optional)
@@ -865,7 +866,7 @@ namespace Dune
       std::string fileprefix;
       // check if a path was already added to name
       // and if yes find filename without path
-      std::size_t pos = name.rfind('/');
+      auto pos = name.rfind('/');
       if( pos != std::string::npos )
       {
         // extract filename without path
@@ -949,7 +950,8 @@ namespace Dune
      *  For serial runs (commSize=1) it chooses other names without the
      *  "s####-p####-" prefix for the .vtu/.vtp files and omits writing of the
      *  .pvtu/pvtp file however.  For parallel runs (commSize > 1) it is the
-     *  same as a call to pwrite() with path="" and extendpath="".
+     *  same as a call to pwrite() with name and path constructed from
+     *  a given filename possibly containing a path, and extendpath="".
      *
      *  \param name     Base name of the output files.  This should not
      *                  contain any directory part and no filename extensions.
@@ -966,7 +968,25 @@ namespace Dune
       // in the parallel case, just use pwrite, it has all the necessary
       // stuff, so we don't need to reimplement it here.
       if(commSize > 1)
-        return pwrite(name, "", "", type, commRank, commSize);
+      {
+        std::string filename = name;
+        std::string path = std::string("");
+
+        // check if a path was already added to name
+        // and if yes find filename without path
+        auto pos = name.rfind('/');
+        if( pos != std::string::npos )
+        {
+          // extract filename without path
+          filename = name.substr( pos+1 );
+
+          // extract the path and added it before
+          // the magic below is added
+          path = name.substr(0, pos);
+        }
+
+        return pwrite(filename, path, "", type, commRank, commSize);
+      }
 
       // make data mode visible to private functions
       outputtype = type;
