@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GRID_HH
-#define DUNE_GRID_HH
+#ifndef DUNE_GRID_COMMON_GRID_HH
+#define DUNE_GRID_COMMON_GRID_HH
 
 /** \file
     \brief Different resources needed by all grid implementations
@@ -1105,4 +1105,4 @@ namespace Dune {
 #include "entityiterator.hh"
 #include "indexidset.hh"
 
-#endif // #ifndef DUNE_GRID_HH
+#endif // #ifndef DUNE_GRID_COMMON_GRID_HH

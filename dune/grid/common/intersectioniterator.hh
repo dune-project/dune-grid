@@ -1,7 +1,7 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifndef DUNE_GRID_INTERSECTIONITERATOR_HH
-#define DUNE_GRID_INTERSECTIONITERATOR_HH
+#ifndef DUNE_GRID_COMMON_INTERSECTIONITERATOR_HH
+#define DUNE_GRID_COMMON_INTERSECTIONITERATOR_HH
 
 #include <dune/common/iteratorfacades.hh>
 #include <dune/common/proxymemberaccess.hh>
@@ -243,4 +243,4 @@ namespace std
 
 #include "intersection.hh"
 
-#endif // DUNE_GRID_INTERSECTIONITERATOR_HH
+#endif // DUNE_GRID_COMMON_INTERSECTIONITERATOR_HH
