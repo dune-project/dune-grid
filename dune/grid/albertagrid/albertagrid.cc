@@ -359,7 +359,7 @@ namespace Dune
       bool consistent = true;
       for( int codim = 0; codim <= dimension; ++codim )
       {
-        if( leafIndexSet_->size( codim ) == mesh_.size( codim ) )
+        if( int(leafIndexSet_->size( codim )) == mesh_.size( codim ) )
           continue;
         std::cerr << "Incorrect size of leaf index set for codimension "
                   << codim << "!" << std::endl;

@@ -158,7 +158,7 @@ namespace Dune
     {
       IndexType *array = (IndexType *)entityNumbers_[ codim ];
       const IndexType subIndex = array[ dofNumbering_( element, codim, i ) ];
-      assert( (subIndex >= 0) && (subIndex < size( codim )) );
+      assert( (subIndex >= 0) && (subIndex < IndexType(size( codim ))) );
       return subIndex;
     }
 
