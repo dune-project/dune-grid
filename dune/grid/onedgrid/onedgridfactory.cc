@@ -100,7 +100,7 @@ insertionIndex(const typename OneDGrid::LeafIntersection& intersection) const
   return insertionIdx;
 }
 
-ToUniquePtr<OneDGrid> Dune::GridFactory<Dune::OneDGrid>::
+std::unique_ptr<OneDGrid> Dune::GridFactory<Dune::OneDGrid>::
 createGrid()
 {
   // Prevent a crash when this method is called twice in a row
@@ -178,7 +178,7 @@ createGrid()
   // Hand over the grid and delete the member pointer
   auto tmp = grid_;
   grid_ = nullptr;
-  return tmp;
+  return std::unique_ptr<OneDGrid>(tmp);
 }
 
 void Dune::GridFactory<Dune::OneDGrid >::

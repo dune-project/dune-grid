@@ -9,14 +9,13 @@
         using the GridFactory.
  */
 
-#include <dune/common/to_unique_ptr.hh>
-
+#include <memory>
 #include <dune/grid/common/gridfactory.hh>
 
 namespace Dune {
 
   template <class GridType>
-  ToUniquePtr<GridType> make2DHybridTestGrid()
+  std::unique_ptr<GridType> make2DHybridTestGrid()
   {
     static_assert(GridType::dimension == 2,
                   "Instantiate make2dHybridTestGrid only for 2d grids!");
@@ -89,7 +88,7 @@ namespace Dune {
 
 
   template <class GridType>
-  ToUniquePtr<GridType> make3DHybridTestGrid()
+  std::unique_ptr<GridType> make3DHybridTestGrid()
   {
     static_assert(GridType::dimension == 3,
                   "Instantiate make3DHybridTestGrid only for 3d grids!");

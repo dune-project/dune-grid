@@ -215,7 +215,7 @@ insertBoundarySegment(const std::vector<unsigned int>& vertices,
 }
 
 template <int dimworld>
-ToUniquePtr<UGGrid<dimworld>> GridFactory<UGGrid<dimworld> >::
+std::unique_ptr<UGGrid<dimworld>> GridFactory<UGGrid<dimworld> >::
 createGrid()
 {
   // Prevent a crash when this method is called twice in a row
@@ -515,7 +515,7 @@ createGrid()
 
     UGGrid<dimworld>* tmp = grid_;
     grid_ = nullptr;
-    return tmp;
+    return std::unique_ptr<UGGrid<dimworld>>(tmp);
   }
 
   // ////////////////////////////////////////////////
@@ -578,7 +578,7 @@ createGrid()
 
   UGGrid<dimworld>* tmp = grid_;
   grid_ = nullptr;
-  return tmp;
+  return std::unique_ptr<UGGrid<dimworld>>(tmp);
 }
 
 template <int dimworld>
