@@ -18,7 +18,6 @@
 #include <vector>
 
 #include <dune/common/fvector.hh>
-#include <dune/common/to_unique_ptr.hh>
 
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/onedgrid.hh>
@@ -90,7 +89,7 @@ namespace Dune {
     /** \brief Finalize grid creation and hand over the grid
         The receiver takes responsibility of the memory allocated for the grid
      */
-    virtual ToUniquePtr<OneDGrid> createGrid();
+    virtual std::unique_ptr<OneDGrid> createGrid();
 
   private:
 

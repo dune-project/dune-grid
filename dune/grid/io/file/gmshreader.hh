@@ -17,7 +17,6 @@
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/to_unique_ptr.hh>
 
 #include <dune/geometry/type.hh>
 
@@ -867,7 +866,7 @@ namespace Dune
      *    std::unique_ptr<Grid>, and std::shared_ptr<Grid>.  It is scheduled
      *    to be replaced by std::unique_ptr<Grid> eventually.
      */
-    static ToUniquePtr<Grid> read (const std::string& fileName, bool verbose = true, bool insertBoundarySegments=true)
+    static std::unique_ptr<Grid> read (const std::string& fileName, bool verbose = true, bool insertBoundarySegments=true)
     {
       // make a grid factory
       Dune::GridFactory<Grid> factory;
@@ -891,7 +890,7 @@ namespace Dune
                  "the vectors, or use read(GridFactory&, string, "
                  "vector<int>&, vector<int>&, bool, bool) if you do use "
                  "them.")]]
-    static ToUniquePtr<Grid> read (const std::string& fileName,
+    static std::unique_ptr<Grid> read (const std::string& fileName,
                        std::vector<int>& boundarySegmentToPhysicalEntity,
                        std::vector<int>& elementToPhysicalEntity,
                        bool verbose = true, bool insertBoundarySegments=true)

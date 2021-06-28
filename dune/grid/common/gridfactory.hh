@@ -14,7 +14,6 @@
 #define DUNE_FUNCTION_HH_SILENCE_DEPRECATION
 #include <dune/common/function.hh>
 #include <dune/common/fvector.hh>
-#include <dune/common/to_unique_ptr.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/geometry/type.hh>
@@ -198,7 +197,7 @@ namespace Dune
 
        The receiver takes responsibility of the memory allocated for the grid
      */
-    virtual ToUniquePtr<GridType> createGrid() = 0;
+    virtual std::unique_ptr<GridType> createGrid() = 0;
 
     /** \brief obtain an element's insertion index
      *
@@ -368,7 +367,7 @@ namespace Dune
 
        The receiver takes responsibility of the memory allocated for the grid
      */
-    virtual ToUniquePtr<GridType> createGrid() {
+    virtual std::unique_ptr<GridType> createGrid() {
       DUNE_THROW(GridError, "There is no grid factory for this grid type!");
     }
 

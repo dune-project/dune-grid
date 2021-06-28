@@ -1,5 +1,9 @@
 # Master (will become release 2.8)
 
+- Return type of `GridFactory::createGrid()` changed to `std::unique_ptr`. While still the
+  replacement type `ToUniquePtr` from dune-common works, it is marked deprecated and the std
+  implementation should be used directly now.
+
 - `UGGrid` removes support for `_2` and `_3` macros.
 
 - `SingleCodimSingleGeomTypeMapper` and `MultipleCodimMultipleGeomTypeMapper` now have an `update(gridView)`
