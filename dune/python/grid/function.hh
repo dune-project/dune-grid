@@ -77,9 +77,27 @@ namespace Dune
         return callLocalFunction< LocalCoordinate >( std::forward< LocalFunction >( f ), x, PriorityTag< 42 >() );
       }
 
+      template< class GridFunction, class... options >
+      void registerGridFunction ( pybind11::handle scope, pybind11::class_< GridFunction, options... > cls )
+      {
+        using pybind11::operator""_a;
+        typedef typename GridFunctionTraits< GridFunction >::Range Range;
+        cls.def_property_readonly( "grid", [] ( const GridFunction &self ) -> pybind11::handle
+                    { return pybind11::cast(Dune::Python::gridView( self )); } );
+        cls.def_property_readonly( "dimRange", [] ( pybind11::object self ) { return pybind11::int_( DimRange< Range >::value ); } );
+        cls.def( "addToVTKWriter", &addToVTKWriter< GridFunction >, pybind11::keep_alive< 3, 1 >(), "name"_a, "writer"_a, "dataType"_a );
+
+        cls.def( "cellData", [] ( const GridFunction &self, int level ) { return cellData( self, level ); }, "level"_a = 0 );
+        cls.def( "pointData", [] ( const GridFunction &self, int level ) { return pointData( self, level ); }, "level"_a = 0 );
+        cls.def( "polygonData", [] ( const GridFunction &self ) { return polygonData( self ); },
+          R"doc(
+            Store the grid with piecewise constant data in numpy arrays.
+
+            Returns: pair with coordinate array storing the vertex coordinate of each polygon
+                     in the grid and an array with a range type for each polygon.
+          )doc" );
+      }
     } // namespace detail
-
-
 
     // registerGridFunction
     // --------------------
@@ -107,27 +125,11 @@ namespace Dune
         }, "x"_a );
       clsLocalFunction.def_property_readonly( "dimRange", [] ( pybind11::object self ) { return pybind11::int_( DimRange< Range >::value ); } );
 
-      cls.def_property_readonly( "grid", [] ( const GridFunction &self ) { return gridView( self ); } );
-      cls.def_property_readonly( "dimRange", [] ( pybind11::object self ) { return pybind11::int_( DimRange< Range >::value ); } );
-
       cls.def( "localFunction", [] ( const GridFunction &self ) { return localFunction( self ); }, pybind11::keep_alive< 0, 1 >() );
       cls.def( "localFunction", [] ( const GridFunction &self, const Element &element )
           { auto lf = localFunction(self); lf.bind(element); return lf; },
           pybind11::keep_alive< 0, 1 >(),
           pybind11::keep_alive< 0, 2 >() );
-
-      cls.def( "addToVTKWriter", &addToVTKWriter< GridFunction >, pybind11::keep_alive< 3, 1 >(), "name"_a, "writer"_a, "dataType"_a );
-
-      cls.def( "cellData", [] ( const GridFunction &self, int level ) { return cellData( self, level ); }, "level"_a = 0 );
-      cls.def( "pointData", [] ( const GridFunction &self, int level ) { return pointData( self, level ); }, "level"_a = 0 );
-      cls.def( "polygonData", [] ( const GridFunction &self ) { return polygonData( self ); },
-        R"doc(
-          Store the grid with piecewise constant data in numpy arrays.
-
-          Returns: pair with coordinate array storing the vertex coordinate of each polygon
-                   in the grid and an array with a range type for each polygon.
-        )doc" );
-
 
       cls.def( "__call__", [] ( const GridFunction &self, const Element &element, LocalCoordinate &x ) {
           auto lf = localFunction(self);
@@ -143,7 +145,7 @@ namespace Dune
           lf.unbind();
           return y;
         }, "element"_a, "x"_a );
-
+      detail::registerGridFunction(scope,cls);
 #if HAVE_DUNE_VTK
       typedef typename GridFunctionTraits< GridFunction >::GridView GridView;
       using VirtualizedGF = Dune::Vtk::Function<GridView>;
@@ -262,6 +264,8 @@ namespace Dune
       {
         using pybind11::operator""_a;
 
+        typedef typename GridView::template Codim<0>::Entity Entity;
+        typedef typename Entity::Geometry::LocalCoordinate LocalCoordinate;
         typedef PyGridFunctionEvaluator<GridView,dimRange,Evaluate> Evaluator;
         typedef SimpleGridFunction< GridView, Evaluator > GridFunction;
         if (dimRange>0)
@@ -287,12 +291,32 @@ namespace Dune
         {
           Dune::Python::registerGridFunction( scope, gf.first );
           gf.first.def_property_readonly( "scalar", [scalar] ( pybind11::object self ) { return scalar; } );
+          if constexpr (dimRange>0)
+          {
+            typedef typename Dune::Python::stdFunction<GridView,0>::type Evaluate0;
+            detail::registerPyGridFunction< GridView, Evaluate0, 0 >
+                    ( scope, name, true, std::integral_constant< unsigned int, 0 >() );
+            gf.first.def( "__getitem__", [] ( const GridFunction &self, std::size_t c ) {
+              Evaluate0 eval0 = [&self,c](const Entity &e, const LocalCoordinate &x) -> double
+              {
+                auto lf = localFunction(self);
+                lf.bind(e);
+                auto y = detail::callLocalFunction< LocalCoordinate >( lf, x, PriorityTag<2>() );
+                lf.unbind();
+                return y[0];
+              };
+              auto gridFunction = simpleGridFunction( gridView(self),
+                  detail::PyGridFunctionEvaluator< GridView, 0, Evaluate0 >( std::move( eval0 ) )
+                );
+              return gridFunction;
+              // return pybind11::cast( std::move( gridFunction ) );
+            }, pybind11::keep_alive< 0, 1 >() );
+          }
         }
         return gf;
       }
 
     } // namespace detail
-
 
     template< class GridView, class Evaluate, int dimRange >
     auto registerGridFunction ( pybind11::handle scope, std::string name, bool scalar )
@@ -304,7 +328,6 @@ namespace Dune
       static constexpr int value()
       { if constexpr (std::is_convertible_v<Value,double>) return 0; else return Value::dimension; }
     };
-    // template <> struct FunctionRange<double> { static const int value = 0; };
     template< class GridView, class Eval >
     auto registerGridFunction ( pybind11::handle scope, pybind11::object gp, std::string name, Eval eval )
     {
@@ -313,8 +336,9 @@ namespace Dune
       typedef decltype(eval(std::declval<const Entity&>(),std::declval<const LocalCoordinate&>())) Value;
       static constexpr int dimRange = FunctionRange<Value>::value();
       typedef typename Dune::Python::stdFunction<GridView,dimRange>::type Evaluate;
-      Evaluate evaluate(eval);
       registerGridFunction< GridView, Evaluate, dimRange >( scope, name, dimRange==0 );
+
+      Evaluate evaluate(eval);
       const GridView &gridView = gp.cast< const GridView & >();
       auto gridFunction = simpleGridFunction( gridView, detail::PyGridFunctionEvaluator< GridView, dimRange, Evaluate >( std::move( evaluate ) ) );
       return pybind11::cast( std::move( gridFunction ), pybind11::return_value_policy::move, gp );

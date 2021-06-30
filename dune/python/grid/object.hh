@@ -14,43 +14,35 @@ namespace Dune
 
     namespace detail
     {
-
       template< class GridObject >
-      inline static typename GridObject::GridPartType::GridViewType
-      gridView ( const GridObject &gridObject, PriorityTag< 2 > )
-      {
-        typedef typename GridObject::GridPartType::GridViewType GridView;
-        return static_cast< GridView >( gridObject.gridPart() );
-      }
-
-      template< class GridObject >
-      inline static decltype( std::declval< const GridObject & >().entitySet().gridView() )
-      gridView ( const GridObject &gridObject, PriorityTag< 1 > )
-      {
-        return gridObject.entitySet().gridView();
-      }
-
-      template< class GridObject >
-      inline static decltype( std::declval< const GridObject & >().gridView() )
-      gridView ( const GridObject &gridObject, PriorityTag< 0 > )
+      inline static const decltype( std::declval< const GridObject & >().gridView() )&
+      gridView ( const GridObject &gridObject, PriorityTag< 3 > )
       {
         return gridObject.gridView();
       }
-
+      template< class GridObject >
+      inline static const decltype( std::declval< const GridObject & >().entitySet().gridView() )&
+      gridView ( const GridObject &gridObject, PriorityTag< 2 > )
+      {
+        return gridObject.entitySet().gridView();
+      }
+      template< class GridObject >
+      inline static const decltype( std::declval< const typename GridObject::GridPartType & >().gridView() )&
+      gridView ( const GridObject &gridObject, PriorityTag< 1 > )
+      {
+        return gridObject.gridPart().gridView();
+      }
     } // namespace detail
-
 
 
     // gridView
     // --------
 
     template< class GridObject >
-    inline static decltype( auto ) gridView ( const GridObject &gridObject )
+    inline static const auto& gridView ( const GridObject &gridObject )
     {
       return detail::gridView( gridObject, PriorityTag< 42 >() );
     }
-
-
 
     namespace detail
     {
