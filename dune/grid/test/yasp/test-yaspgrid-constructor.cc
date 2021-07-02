@@ -8,7 +8,6 @@
 
 int main(int argc, char** argv)
 {
-#if DUNE_HAVE_CXX_CLASS_TEMPLATE_ARGUMENT_DEDUCTION
   using namespace Dune;
   using DVector = FieldVector<double, 2>;
   using FVector = FieldVector<float, 2>;
@@ -54,8 +53,4 @@ int main(int argc, char** argv)
   }
 
   return 0;
-#else
-  std::cerr << "This test requires support for C++17's class template argument deduction.\n";
-  return 77;
-#endif
 }

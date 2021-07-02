@@ -1870,7 +1870,6 @@ namespace Dune {
   };
 
   // Class template deduction guides
-#if DUNE_HAVE_CXX_CLASS_TEMPLATE_ARGUMENT_DEDUCTION
   template<typename ctype, int dim>
   YaspGrid(FieldVector<ctype, dim>,
            std::array<int, std::size_t{dim}>,
@@ -1897,10 +1896,9 @@ namespace Dune {
            YaspCollectiveCommunication = YaspCollectiveCommunication(),
            const YLoadBalance<int{dim}>* = nullptr)
     -> YaspGrid< int{dim}, TensorProductCoordinates<ctype, int{dim}> >;
-#endif
+
 
   //! Output operator for multigrids
-
   template <int d, class CC>
   std::ostream& operator<< (std::ostream& s, const YaspGrid<d,CC>& grid)
   {
