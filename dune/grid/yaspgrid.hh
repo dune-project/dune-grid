@@ -1867,7 +1867,7 @@ namespace Dune {
            std::bitset<std::size_t{dim}> = std::bitset<std::size_t{dim}>{0ULL},
            int = 1,
            YaspCollectiveCommunication = YaspCollectiveCommunication(),
-           const YLoadBalance<dim>* = nullptr)
+           const YLoadBalance<dim>* = YaspGrid< dim, EquidistantCoordinates<ctype, dim> >::defaultLoadbalancer())
     -> YaspGrid< dim, EquidistantCoordinates<ctype, dim> >;
 
   template<typename ctype, int dim>
@@ -1877,7 +1877,7 @@ namespace Dune {
            std::bitset<std::size_t{dim}> = std::bitset<std::size_t{dim}>{0ULL},
            int = 1,
            YaspCollectiveCommunication = YaspCollectiveCommunication(),
-           const YLoadBalance<dim>* = nullptr)
+           const YLoadBalance<dim>* = YaspGrid< dim, EquidistantOffsetCoordinates<ctype, dim> >::defaultLoadbalancer())
     -> YaspGrid< dim, EquidistantOffsetCoordinates<ctype, dim> >;
 
   template<typename ctype, std::size_t dim>
@@ -1885,7 +1885,7 @@ namespace Dune {
            std::bitset<dim> = std::bitset<dim>{0ULL},
            int = 1,
            YaspCollectiveCommunication = YaspCollectiveCommunication(),
-           const YLoadBalance<int{dim}>* = nullptr)
+           const YLoadBalance<int{dim}>* = YaspGrid< int{dim}, TensorProductCoordinates<ctype, int{dim}> >::defaultLoadbalancer())
     -> YaspGrid< int{dim}, TensorProductCoordinates<ctype, int{dim}> >;
 
 
