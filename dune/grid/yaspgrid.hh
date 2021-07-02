@@ -902,10 +902,6 @@ namespace Dune {
         _L(L), _periodic(periodic), _coarseSize(s), _overlap(overlap),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-      // check whether YaspGrid has been given the correct template parameter
-      static_assert(std::is_same<Coordinates,EquidistantCoordinates<ctype,dim> >::value,
-                    "YaspGrid coordinate container template parameter and given constructor values do not match!");
-
       _levels.resize(1);
 
       iTupel o;
@@ -978,10 +974,6 @@ namespace Dune {
         _periodic(periodic), _coarseSize(s), _overlap(overlap),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-      // check whether YaspGrid has been given the correct template parameter
-      static_assert(std::is_same<Coordinates,EquidistantOffsetCoordinates<ctype,dim> >::value,
-                    "YaspGrid coordinate container template parameter and given constructor values do not match!");
-
       _levels.resize(1);
 
       iTupel o;
@@ -1050,10 +1042,6 @@ namespace Dune {
     {
       if (!Dune::Yasp::checkIfMonotonous(coords))
         DUNE_THROW(Dune::GridError,"Setup of a tensorproduct grid requires monotonous sequences of coordinates.");
-
-      // check whether YaspGrid has been given the correct template parameter
-      static_assert(std::is_same<Coordinates,TensorProductCoordinates<ctype,dim> >::value,
-                    "YaspGrid coordinate container template parameter and given constructor values do not match!");
 
       _levels.resize(1);
 
