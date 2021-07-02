@@ -683,7 +683,7 @@ namespace Dune
    *             for loop.
    */
   template<typename GV, int codim, unsigned int partitions>
-  inline IteratorRange<...> entities(const GV& gv gv, Codim<codim> cd, PartitionSet<partitions> ps);
+  inline IteratorRange<...> entities(const GV& gv, Codim<codim> cd, PartitionSet<partitions> ps);
 
 
   //! Iterates over all entities of a GridView with the given dimension that belong to the given PartitionSet.
