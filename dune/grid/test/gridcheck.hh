@@ -17,8 +17,10 @@
 #include <dune/common/float_cmp.hh>
 #include <dune/common/stdstreams.hh>
 #include <dune/geometry/referenceelements.hh>
+#include <dune/geometry/type.hh>
 #include <dune/grid/common/gridinfo.hh>
 #include <dune/grid/common/capabilities.hh>
+#include <dune/grid/common/rangegenerators.hh>
 
 #include "staticcheck.hh"
 #include "checkindexset.hh"
@@ -84,13 +86,24 @@ struct subIndexCheck
 
     checkEntitySeedRecovery(g,e);
 
-    typedef typename Grid::template Codim< cd >::Entity SubEntity;
-    const int imax = e.subEntities(cd);
-    for( int i = 0; i < imax; ++i )
+    // check subEntity range size
+    if( subEntities(e, Dune::Codim<cd>{}).size() != e.subEntities(cd) )
+    {
+      std::cerr << "Error: Number of subentities in range "
+                << "does not match the number of subentities of the element." << std::endl;
+      assert( false );
+    }
+
+    // We use the both a range-based for loop and an index counter for testing purposes here.
+    // In regular code you will often only need the subIndex in which case an index loop
+    // is more convenient, or you only need the actual sub-entities in which
+    // case the range-based for loop might be more readable.
+    std::size_t subIndex = 0;
+    for (const auto& se : subEntities(e, Dune::Codim<cd>{}))
     {
       // check construction of entities
-      SubEntity se( e.template subEntity< cd >( i ) );
-      assert( se == e.template subEntity< cd >( i ) );
+      auto seCopy = se;
+      assert( seCopy == se );
 
       checkEntitySeedRecovery(g,se);
 
@@ -109,20 +122,21 @@ struct subIndexCheck
         std::cerr << "Error: Level index set does not contain all subentities." << std::endl;
         assert( false );
       }
-      if( levelIndexSet.index( se ) != levelIndexSet.subIndex( e, i, cd ) )
+      if( levelIndexSet.index( se ) != levelIndexSet.subIndex( e, subIndex, cd ) )
       {
         int id_e = levelIndexSet.index( e );
         int id_e_i = levelIndexSet.index( se );
-        int subid_e_i = levelIndexSet.subIndex( e, i, cd );
-        std::cerr << "Error: levelIndexSet.index( *(e.template subEntity< cd >( i ) ) ) "
-                  << "!= levelIndexSet.subIndex( e, i, cd )  "
-                  << "[with cd=" << cd << ", i=" << i << "]" << std::endl;
+        int subid_e_i = levelIndexSet.subIndex( e, subIndex, cd );
+        std::cerr << "Error: levelIndexSet.index( *(e.template subEntity< cd >( subIndex ) ) ) "
+                  << "!= levelIndexSet.subIndex( e, subIndex, cd )  "
+                  << "[with cd=" << cd << ", subIndex=" << subIndex << "]" << std::endl;
         std::cerr << "       ... index( e ) = " << id_e << std::endl;
-        std::cerr << "       ... index( e.subEntity< cd >( i ) ) = " << id_e_i << std::endl;
-        std::cerr << "       ... subIndex( e, i, cd ) = " << subid_e_i << std::endl;
+        std::cerr << "       ... index( e.subEntity< cd >( subIndex ) ) = " << id_e_i << std::endl;
+        std::cerr << "       ... subIndex( e, subIndex, cd ) = " << subid_e_i << std::endl;
         assert( false );
       }
 
+      ++subIndex;
     }
 
     subIndexCheck< cd-1, Grid, Entity, Dune::Capabilities::hasEntity< Grid, cd-1 >::v > sick( g, e );
