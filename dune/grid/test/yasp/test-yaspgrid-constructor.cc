@@ -1,5 +1,6 @@
 #include "config.h"
 
+#include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/fvector.hh>
 #include <dune/grid/yaspgrid.hh>
 
@@ -9,6 +10,8 @@
 int main(int argc, char** argv)
 {
   using namespace Dune;
+  MPIHelper::instance(argc, argv);
+
   using DVector = FieldVector<double, 2>;
   using FVector = FieldVector<float, 2>;
   std::bitset<2> p{0ULL};
