@@ -9,6 +9,7 @@
 
 int main(int argc, char** argv)
 {
+#if __cpp_deduction_guides >= 201611
   using namespace Dune;
   MPIHelper::instance(argc, argv);
 
@@ -56,4 +57,8 @@ int main(int argc, char** argv)
   }
 
   return 0;
+#else
+  std::cerr << "This test requires full support for C++17's class template argument deduction.\n";
+  return 77;
+#endif
 }
