@@ -4,5 +4,6 @@
 #define DUNE_ALBERTAGRID_HH
 #include "albertagrid/agrid.hh"
 #include "albertagrid/gridfactory.hh"
+#include "albertagrid/structuredgridfactory.hh"
 #include "albertagrid/persistentcontainer.hh"
 #endif
