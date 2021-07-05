@@ -108,7 +108,7 @@ namespace Dune
   public:
 
     /** \brief Number type used for indices */
-    typedef IndexType Index;
+    using Index = IndexType;
 
     /** @brief Map entity to array index.
 
@@ -161,7 +161,7 @@ namespace Dune
        \return true if entity is in entity set of the mapper
      */
     template<class EntityType>
-    bool contains (const EntityType& e, int& result) const
+    bool contains (const EntityType& e, IndexType& result) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().contains(e,result )));
       return asImp().contains(e,result );
@@ -177,7 +177,7 @@ namespace Dune
        \param[out] result Filled with array index if entity is contained
        \return true if entity is in entity set of the mapper
      */
-    bool contains (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc, int& result) const
+    bool contains (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc, IndexType& result) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().contains(e,i,cc,result)))
       return asImp().contains(e,i,cc,result);
