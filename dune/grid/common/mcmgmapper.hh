@@ -392,11 +392,12 @@ namespace Dune
   /** @brief Multiple codim and multiple geometry type mapper for leaf entities.
 
      This mapper uses all leaf entities of a certain codimension as its entity set.
-
+     \deprecated Use MultipleCodimMultipleGeomTypeMapper instead
      \tparam G      A %Dune grid type.
    */
   template <typename G>
-  class LeafMultipleCodimMultipleGeomTypeMapper
+  class [[deprecated("Use MultipleCodimMultipleGeomTypeMapper instead! Will be removed after release 2.8.")]]
+  LeafMultipleCodimMultipleGeomTypeMapper
     : public MultipleCodimMultipleGeomTypeMapper<typename G::LeafGridView>
   {
     typedef MultipleCodimMultipleGeomTypeMapper<typename G::LeafGridView> Base;
@@ -431,11 +432,12 @@ namespace Dune
 
 
      This mapper uses all entities of a certain codimension on a given level as its entity set.
-
+     \deprecated Use MultipleCodimMultipleGeomTypeMapper instead
      \tparam G      A %Dune grid type.
    */
   template <typename G>
-  class LevelMultipleCodimMultipleGeomTypeMapper
+  class [[deprecated("Use MultipleCodimMultipleGeomTypeMapper instead! Will be removed after release 2.8.")]]
+  LevelMultipleCodimMultipleGeomTypeMapper
     : public MultipleCodimMultipleGeomTypeMapper<typename G::LevelGridView> {
     typedef MultipleCodimMultipleGeomTypeMapper<typename G::LevelGridView> Base;
   public:

@@ -163,12 +163,13 @@ namespace Dune
      assumed (and checked) that the given grid contains only entities of a single geometry type.
 
      Template parameters are:
-
    * \tparam G A Dune grid type.
    * \tparam c A valid codimension.
+   * \deprecated Use SingleCodimSingleGeomTypeMapper instead
    */
   template <typename G, int c>
-  class LeafSingleCodimSingleGeomTypeMapper : public SingleCodimSingleGeomTypeMapper<typename G::LeafGridView,c> {
+  class [[deprecated("Use SingleCodimSingleGeomTypeMapper instead! Will be removed after release 2.8.")]]
+  LeafSingleCodimSingleGeomTypeMapper : public SingleCodimSingleGeomTypeMapper<typename G::LeafGridView,c> {
     using Base = SingleCodimSingleGeomTypeMapper<typename G::LeafGridView,c>;
   public:
     /** \brief The constructor
@@ -200,12 +201,13 @@ namespace Dune
      assumed (and checked) that the given grid contains only entities of a single geometry type.
 
      Template parameters are:
-
    * \tparam G A Dune grid type.
    * \tparam c A valid codimension.
+   * \deprecated Use SingleCodimSingleGeomTypeMapper instead
    */
   template <typename G, int c>
-  class LevelSingleCodimSingleGeomTypeMapper : public SingleCodimSingleGeomTypeMapper<typename G::LevelGridView,c> {
+  class [[deprecated("Use SingleCodimSingleGeomTypeMapper instead! Will be removed after release 2.8.")]]
+  LevelSingleCodimSingleGeomTypeMapper : public SingleCodimSingleGeomTypeMapper<typename G::LevelGridView,c> {
     using Base = SingleCodimSingleGeomTypeMapper<typename G::LevelGridView,c>;
   public:
     /* @brief The constructor
