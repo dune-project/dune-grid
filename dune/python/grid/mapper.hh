@@ -315,7 +315,8 @@ namespace Dune
           detail::registerMapperSubIndex< Entity >( cls );
         } );
 
-      cls.def( "update", [] ( Mapper &self ) { self.update(); },
+      // see comment added to __init__ method for some details on reference counting
+      cls.def( "update", [] ( Mapper &self, GridView &grid ) { self.update(grid); },
         R"doc(
           Update the mapper after a grid modification.
 
@@ -397,15 +398,21 @@ namespace Dune
       using pybind11::operator""_a;
 
       registerMapper<GridView>(cls);
-      cls.def( pybind11::init( [] ( const GridView &grid, pybind11::object layout ) {
-          return makeMultipleCodimMultipleGeomTypeMapper( grid, layout );
+      // Remark: the gridView is kept alive although the Mapper stores a
+      // copy - this is done to keep the underlying hierarchical grid alive
+      // during the whole life time of the mapper. For this reason the
+      // 'update(GV)' method does not add a keep_alive reference to the GV.
+      // If the update method is called with a GV belonging to a different
+      // HGrid this will cause havoc...
+      cls.def( pybind11::init( [] ( const GridView &gridView, pybind11::object layout ) {
+          return makeMultipleCodimMultipleGeomTypeMapper( gridView, layout );
         } ), pybind11::keep_alive< 1, 2 >(), "grid"_a, "layout"_a,
         R"doc(
           Set up a mapper to attach data to a grid. The layout argument defines how many
           degrees of freedom to assign to each subentity of a geometry type.
 
           Args:
-              grid:       grid to set the mapper up for
+              gridView:   grid view to set the mapper up for
               layout:     function, dict, tuple, or list defining the number of indices to reserve
                           for each geometry type.
                           0 or `False`: do not attach any, `True` can be used instead of 1.
