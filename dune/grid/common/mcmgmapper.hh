@@ -157,7 +157,7 @@ namespace Dune
       , is(gridView_.indexSet())
       , layout_(layout)
     {
-      update();
+      update(gridView);
     }
 
     /*!
@@ -308,7 +308,7 @@ namespace Dune
     void update (const GV& gridView)
     {
       gridView_ = gridView;
-      update();
+      update_();
     }
 
     /** @brief Recalculates indices after grid adaptation
@@ -319,12 +319,22 @@ namespace Dune
     void update (GV&& gridView)
     {
       gridView_ = std::move(gridView);
-      update();
+      update_();
     }
 
     /** @brief Recalculates indices after grid adaptation
      */
+    [[deprecated("Use update(gridView) instead! Will be removed after release 2.8.")]]
     void update ()
+    {
+      update_();
+    }
+
+    const MCMGLayout &layout () const { return layout_; }
+    const GridView &gridView () const { return gridView_; }
+
+  private:
+    void update_()
     {
       n = 0;
 
@@ -355,10 +365,6 @@ namespace Dune
       }
     }
 
-    const MCMGLayout &layout () const { return layout_; }
-    const GridView &gridView () const { return gridView_; }
-
-  private:
     Index offset(GeometryType gt) const
       { return offsets[GlobalGeometryTypeIndex::index(gt)]; }
     Index blockSize(GeometryType gt) const
