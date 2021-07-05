@@ -3,8 +3,9 @@
 #ifndef DUNE_GRID_COMMON_MAPPER_HH
 #define DUNE_GRID_COMMON_MAPPER_HH
 
-#include <iostream>
+#include <utility>
 
+#include <dune/common/std/type_traits.hh>
 #include <dune/common/bartonnackmanifcheck.hh>
 
 /** @file
@@ -104,7 +105,11 @@ namespace Dune
      \todo IndexType should be extracted from MapperImp, but gcc doesn't let me
    */
   template <typename G, typename MapperImp, typename IndexType=int>
-  class Mapper {
+  class Mapper
+  {
+    template<class T, class GV>
+    using UpdateDetector = decltype(std::declval<T>().update(std::declval<GV>()));
+
   public:
 
     /** \brief Number type used for indices */
@@ -185,6 +190,19 @@ namespace Dune
 
     /** @brief Reinitialize mapper after grid has been modified.
      */
+    template <class GridView>
+    void update (GridView&& gridView)
+    {
+      // remove check after deprecation period is over
+      if constexpr (Std::is_detected_v<UpdateDetector, MapperImp, GridView>)
+        CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().update(std::forward<GridView>(gridView))));
+      else
+        asImp().update();
+    }
+
+    /** @brief Reinitialize mapper after grid has been modified.
+     */
+    [[deprecated("Use update(gridView) instead! Will be removed after release 2.8. Mappers have to implement update(gridView).")]]
     void update ()
     {
       CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().update()));
