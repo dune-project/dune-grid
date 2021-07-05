@@ -46,21 +46,23 @@ struct MCMGElementEdgeLayout
  * \brief Check whether the index created for element data is unique,
  * consecutive and starting from zero.
  */
-template <class Mapper, class GridView>
-void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
+template <class G, class M, class I, class GridView>
+void checkElementDataMapper(const Dune::Mapper<G, M, I>& mapper, const GridView& gridView)
 {
-  size_t min = 1;
-  size_t max = 0;
+  using Mapper = Dune::Mapper<G, M, I>;
+  using Index = typename Mapper::Index;
+  Index min = 1;
+  Index max = 0;
   std::set<int> indices;
 
   for (const auto& element : elements(gridView))
   {
-    size_t index = mapper.index(element);
+    const auto index = mapper.index(element);
     min = std::min(min, index);
     max = std::max(max, index);
-    std::pair<std::set<int>::iterator, bool> status = indices.insert(index);
+    [[maybe_unused]] const auto [it, wasInserted] = indices.insert(index);
 
-    if (!status.second)       // not inserted because already existing
+    if (!wasInserted) // not inserted because already existing
       DUNE_THROW(GridError, "Mapper element index is not unique!");
   }
 
@@ -75,12 +77,12 @@ void checkElementDataMapper(const Mapper& mapper, const GridView& gridView)
  * \brief Check whether the index created for vertex data is consecutive
  * and starting from zero.
  */
-template <class Mapper, class GridView>
-void checkVertexDataMapper(const Mapper& mapper, const GridView& gridView)
+template <class G, class M, class I, class GridView>
+void checkVertexDataMapper(const Dune::Mapper<G, M, I>& mapper, const GridView& gridView)
 {
   const size_t dim = GridView::dimension;
-
-  typedef typename Mapper::Index Index;
+  using Mapper = Dune::Mapper<G, M, I>;
+  using Index = typename Mapper::Index;
 
   Index min = 1;
   Index max = 0;
@@ -122,11 +124,12 @@ void checkVertexDataMapper(const Mapper& mapper, const GridView& gridView)
 /*!
  * \brief Check whether the index created for element and edge data is
  * unique, consecutive and starting from zero.
+ * \note Tests the multiple indices per entity interface (types/indices) specific to the MCMGMapper
  */
 template <class Mapper, class GridView>
 void checkMixedDataMapper(const Mapper& mapper, const GridView& gridView)
 {
-  typedef typename Mapper::Index Index;
+  using Index = typename Mapper::Index;
   const size_t dim = GridView::dimension;
 
   Index min = 1;
@@ -155,9 +158,9 @@ void checkMixedDataMapper(const Mapper& mapper, const GridView& gridView)
     max = std::max(max, *(block.end())-1);
     for (Index i : block)
     {
-      std::pair<std::set<int>::iterator, bool> status = indices.insert(i);
+      [[maybe_unused]] const auto [it, wasInserted] = indices.insert(i);
 
-      if (!status.second)       // not inserted because already existing
+      if (!wasInserted) // not inserted because already existing
         DUNE_THROW(GridError, "Mapper mixed index is not unique for elements!");
     }
 
@@ -201,6 +204,10 @@ void checkMixedDataMapper(const Mapper& mapper, const GridView& gridView)
   }
 }
 
+template <class G, class M, class I, class GV>
+void update(Dune::Mapper<G, M, I>& mapper, const GV& gv)
+{ mapper.update(gv); }
+
 /*!
  * \brief Run checks for a given grid.
  *
@@ -209,31 +216,31 @@ void checkMixedDataMapper(const Mapper& mapper, const GridView& gridView)
 template<typename Grid>
 void checkGrid(Grid& grid)
 {
-  using LeafMCMGMapper = LeafMultipleCodimMultipleGeomTypeMapper<Grid>;
-  using LevelMCMGMapper = LevelMultipleCodimMultipleGeomTypeMapper<Grid>;
+  using LeafMCMGMapper = MultipleCodimMultipleGeomTypeMapper<typename Grid::LeafGridView>;
+  using LevelMCMGMapper = MultipleCodimMultipleGeomTypeMapper<typename Grid::LevelGridView>;
 
   // Create various mappers *******************************************************************
 
   // Create element mappers for leaf and levels
-  LeafMCMGMapper leafElementMCMGMapper(grid, mcmgElementLayout());
+  LeafMCMGMapper leafElementMCMGMapper(grid.leafGridView(), mcmgElementLayout());
   std::vector<LevelMCMGMapper> levelElementMCMGMappers;
   for (int i = 0; i <= grid.maxLevel(); i++)
-    levelElementMCMGMappers.push_back(LevelMCMGMapper(grid, i, mcmgElementLayout()));
+    levelElementMCMGMappers.emplace_back(grid.levelGridView(i), mcmgElementLayout());
 
   // Create vertex mappers for leaf and levels
-  LeafMCMGMapper leafVertexMCMGMapper(grid, mcmgVertexLayout());
+  LeafMCMGMapper leafVertexMCMGMapper(grid.leafGridView(), mcmgVertexLayout());
   std::vector<LevelMCMGMapper> levelVertexMCMGMappers;
   for (int i = 0; i <= grid.maxLevel(); i++)
-    levelVertexMCMGMappers.push_back(LevelMCMGMapper(grid, i, mcmgVertexLayout()));
+    levelVertexMCMGMappers.emplace_back(grid.levelGridView(i), mcmgVertexLayout());
 
   // Create mixed element and edge mappers for leaf and levels
   const auto elementEdgeLayout = [](GeometryType gt, unsigned int dimgrid) {
     return (gt.dim() == dimgrid)? 3 : (gt.dim() == 1? 2 : 0);
   };
-  LeafMCMGMapper leafMixedMCMGMapper(grid, elementEdgeLayout);
+  LeafMCMGMapper leafMixedMCMGMapper(grid.leafGridView(), elementEdgeLayout);
   std::vector<LevelMCMGMapper> levelMixedMCMGMappers;
   for (int i = 0; i <= grid.maxLevel(); i++)
-    levelMixedMCMGMappers.push_back(LevelMCMGMapper(grid, i, elementEdgeLayout));
+    levelMixedMCMGMappers.emplace_back(grid.levelGridView(i), elementEdgeLayout);
 
   // Check mappers *******************************************************************
 
@@ -253,17 +260,17 @@ void checkGrid(Grid& grid)
 
   grid.globalRefine(1);
 
-  leafElementMCMGMapper.update();
+  update(leafElementMCMGMapper, grid.leafGridView());
   for (std::size_t i = 0; i < levelElementMCMGMappers.size(); i++)
-    levelElementMCMGMappers[i].update();
+    update(levelElementMCMGMappers[i], grid.levelGridView(i));
 
-  leafVertexMCMGMapper.update();
+  update(leafVertexMCMGMapper, grid.leafGridView());
   for (std::size_t i = 0; i < levelVertexMCMGMappers.size(); i++)
-    levelVertexMCMGMappers[i].update();
+    update(levelVertexMCMGMappers[i], grid.levelGridView(i));
 
-  leafMixedMCMGMapper.update();
+  update(leafMixedMCMGMapper, grid.leafGridView());
   for (std::size_t i = 0; i < levelMixedMCMGMappers.size(); i++)
-    levelMixedMCMGMappers[i].update();
+    update(levelMixedMCMGMappers[i], grid.levelGridView(i));
 
   // Check mappers *******************************************************************
 
