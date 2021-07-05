@@ -5,7 +5,6 @@
 
 #include <utility>
 
-#include <dune/common/std/type_traits.hh>
 #include <dune/common/bartonnackmanifcheck.hh>
 
 /** @file
@@ -107,9 +106,6 @@ namespace Dune
   template <typename G, typename MapperImp, typename IndexType=int>
   class Mapper
   {
-    template<class T, class GV>
-    using UpdateDetector = decltype(std::declval<T>().update(std::declval<GV>()));
-
   public:
 
     /** \brief Number type used for indices */
@@ -193,11 +189,7 @@ namespace Dune
     template <class GridView>
     void update (GridView&& gridView)
     {
-      // remove check after deprecation period is over
-      if constexpr (Std::is_detected_v<UpdateDetector, MapperImp, GridView>)
-        CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().update(std::forward<GridView>(gridView))));
-      else
-        asImp().update();
+      CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().update(std::forward<GridView>(gridView))));
     }
 
     /** @brief Reinitialize mapper after grid has been modified.
