@@ -45,6 +45,10 @@
   implementations in `dune-grid` now return `std::size_t`, following
   our approach to make all size information be unsigned.
 
+- The grid capability `hasEntityIterator` now defaults to whatever
+  the capability `hasEntity` specifies. Most grid manager implementers
+  now only need to implement/specialize `hasEntity`.
+
 ## Deprecations and removals
 
 - Remove `Intersection`'s deprecated enums `dimension` and

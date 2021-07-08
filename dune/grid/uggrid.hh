@@ -748,6 +748,17 @@ namespace Dune {
     };
 
     /**
+     * \brief Set default for hasEntityIterator to false
+     * UGGrid can currently only iterate over elements and vertices
+     * \ingroup UGGrid
+     **/
+    template<int dim, int codim>
+    struct hasEntityIterator<UGGrid<dim>, codim>
+    {
+      static const bool v = false;
+    };
+
+    /**
      * \brief UGGrid can iterate over codim=0 entities (elements)
      * \ingroup UGGrid
      **/
