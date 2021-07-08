@@ -9,6 +9,17 @@
 - `SingleCodimSingleGeomTypeMapper` and `MultipleCodimMultipleGeomTypeMapper` now have an `update(gridView)`
   method to update the stored `GridView` and recalculate the indices after mesh adaptation.
 
+- The `update()` member function of mappers is deprecated. Use the new
+  member function `update(gridView)` with a grid view argument when updating
+  the mapper after the grid or grid view changes. The interface
+  change reflects that grid view has value semantics.
+
+- The "convenience" classes `LeafSingleCodimSingleGeomTypeMapper`,
+  `LevelSingleCodimSingleGeomTypeMapper`, `LeafMultipleCodimMultipleGeomTypeMapper`,
+  `LevelMultipleCodimMultipleGeomTypeMapper` have been deprecated since they
+  don't comply with the new mapper interface.
+  Just use `SingleCodimSingleGeomTypeMapper` and `MultipleCodimMultipleGeomTypeMapper`.
+
 - `IdSet` now exports grid `dimension` and `Codim<cd>::Entity`.
 
 - `UGGrid` index sets can now compute the indices of vertices of edges.
