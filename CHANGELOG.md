@@ -28,6 +28,10 @@
 
 - Various bugs have been fixed in the `UGGrid` subdomain communication implementation.
 
+- `YaspGrid` now supports class template argument deduction
+   (https://en.cppreference.com/w/cpp/language/class_template_argument_deduction)
+   if you have a C++17-CTAD-compatible compiler (gcc >= 8, clang 5)
+
 - Python bindings have been moved from the `dune-python` module which is now
   obsolete. To activate Python bindings the CMake flag
   `DUNE_ENABLE_PYTHONBINDINGS` needs to be turned on (default is off).

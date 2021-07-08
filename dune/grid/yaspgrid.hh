@@ -890,9 +890,11 @@ namespace Dune {
      *  @param comm the collective communication object for this grid. An MPI communicator can be given here.
      *  @param lb pointer to an overloaded YLoadBalance instance
      */
+    template<class C = Coordinates,
+             typename std::enable_if_t< std::is_same_v<C, EquidistantCoordinates<ctype,dim> >, int> = 0>
     YaspGrid (Dune::FieldVector<ctype, dim> L,
-              std::array<int, dim> s,
-              std::bitset<dim> periodic = std::bitset<dim>(0ULL),
+              std::array<int, std::size_t{dim}> s,
+              std::bitset<std::size_t{dim}> periodic = std::bitset<std::size_t{dim}>{0ULL},
               int overlap = 1,
               CollectiveCommunicationType comm = CollectiveCommunicationType(),
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
@@ -900,10 +902,6 @@ namespace Dune {
         _L(L), _periodic(periodic), _coarseSize(s), _overlap(overlap),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-      // check whether YaspGrid has been given the correct template parameter
-      static_assert(std::is_same<Coordinates,EquidistantCoordinates<ctype,dim> >::value,
-                    "YaspGrid coordinate container template parameter and given constructor values do not match!");
-
       _levels.resize(1);
 
       iTupel o;
@@ -962,10 +960,12 @@ namespace Dune {
      *  @param comm the collective communication object for this grid. An MPI communicator can be given here.
      *  @param lb pointer to an overloaded YLoadBalance instance
      */
+    template<class C = Coordinates,
+             typename std::enable_if_t< std::is_same_v<C, EquidistantOffsetCoordinates<ctype,dim> >, int> = 0>
     YaspGrid (Dune::FieldVector<ctype, dim> lowerleft,
               Dune::FieldVector<ctype, dim> upperright,
-              std::array<int, dim> s,
-              std::bitset<dim> periodic = std::bitset<dim>(0ULL),
+              std::array<int, std::size_t{dim}> s,
+              std::bitset<std::size_t{dim}> periodic = std::bitset<std::size_t{dim}>(0ULL),
               int overlap = 1,
               CollectiveCommunicationType comm = CollectiveCommunicationType(),
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
@@ -974,10 +974,6 @@ namespace Dune {
         _periodic(periodic), _coarseSize(s), _overlap(overlap),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
-      // check whether YaspGrid has been given the correct template parameter
-      static_assert(std::is_same<Coordinates,EquidistantOffsetCoordinates<ctype,dim> >::value,
-                    "YaspGrid coordinate container template parameter and given constructor values do not match!");
-
       _levels.resize(1);
 
       iTupel o;
@@ -1033,8 +1029,10 @@ namespace Dune {
      *  @param comm the collective communication object for this grid. An MPI communicator can be given here.
      *  @param lb pointer to an overloaded YLoadBalance instance
      */
-    YaspGrid (std::array<std::vector<ctype>, dim> coords,
-              std::bitset<dim> periodic = std::bitset<dim>(0ULL),
+    template<class C = Coordinates,
+             typename std::enable_if_t< std::is_same_v<C, TensorProductCoordinates<ctype,dim> >, int> = 0>
+    YaspGrid (std::array<std::vector<ctype>, std::size_t{dim}> coords,
+              std::bitset<std::size_t{dim}> periodic = std::bitset<std::size_t{dim}>(0ULL),
               int overlap = 1,
               CollectiveCommunicationType comm = CollectiveCommunicationType(),
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
@@ -1044,10 +1042,6 @@ namespace Dune {
     {
       if (!Dune::Yasp::checkIfMonotonous(coords))
         DUNE_THROW(Dune::GridError,"Setup of a tensorproduct grid requires monotonous sequences of coordinates.");
-
-      // check whether YaspGrid has been given the correct template parameter
-      static_assert(std::is_same<Coordinates,TensorProductCoordinates<ctype,dim> >::value,
-                    "YaspGrid coordinate container template parameter and given constructor values do not match!");
 
       _levels.resize(1);
 
@@ -1150,8 +1144,8 @@ namespace Dune {
      *           You can safely use it through BackupRestoreFacility. All other
      *           use is not supported for the moment.
      */
-    YaspGrid (std::array<std::vector<ctype>, dim> coords,
-              std::bitset<dim> periodic,
+    YaspGrid (std::array<std::vector<ctype>, std::size_t{dim}> coords,
+              std::bitset<std::size_t{dim}> periodic,
               int overlap,
               CollectiveCommunicationType comm,
               std::array<int,dim> coarseSize,
@@ -1866,8 +1860,37 @@ namespace Dune {
     bool adaptActive;
   };
 
-  //! Output operator for multigrids
+#if __cpp_deduction_guides >= 201611
+  // Class template deduction guides
+  template<typename ctype, int dim>
+  YaspGrid(FieldVector<ctype, dim>,
+           std::array<int, std::size_t{dim}>,
+           std::bitset<std::size_t{dim}> = std::bitset<std::size_t{dim}>{0ULL},
+           int = 1,
+           YaspCollectiveCommunication = YaspCollectiveCommunication(),
+           const YLoadBalance<dim>* = YaspGrid< dim, EquidistantCoordinates<ctype, dim> >::defaultLoadbalancer())
+    -> YaspGrid< dim, EquidistantCoordinates<ctype, dim> >;
 
+  template<typename ctype, int dim>
+  YaspGrid(FieldVector<ctype, dim>,
+           FieldVector<ctype, dim>,
+           std::array<int, std::size_t{dim}>,
+           std::bitset<std::size_t{dim}> = std::bitset<std::size_t{dim}>{0ULL},
+           int = 1,
+           YaspCollectiveCommunication = YaspCollectiveCommunication(),
+           const YLoadBalance<dim>* = YaspGrid< dim, EquidistantOffsetCoordinates<ctype, dim> >::defaultLoadbalancer())
+    -> YaspGrid< dim, EquidistantOffsetCoordinates<ctype, dim> >;
+
+  template<typename ctype, std::size_t dim>
+  YaspGrid(std::array<std::vector<ctype>, dim>,
+           std::bitset<dim> = std::bitset<dim>{0ULL},
+           int = 1,
+           YaspCollectiveCommunication = YaspCollectiveCommunication(),
+           const YLoadBalance<int{dim}>* = YaspGrid< int{dim}, TensorProductCoordinates<ctype, int{dim}> >::defaultLoadbalancer())
+    -> YaspGrid< int{dim}, TensorProductCoordinates<ctype, int{dim}> >;
+#endif
+
+  //! Output operator for multigrids
   template <int d, class CC>
   std::ostream& operator<< (std::ostream& s, const YaspGrid<d,CC>& grid)
   {
