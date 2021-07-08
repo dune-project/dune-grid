@@ -30,7 +30,7 @@ Copyright holders:
 2015          Angela Klewinghaus
 2003--2021    Robert Klöfkorn
 2017          Marcel Koch
-2018--2020    Timo Koch
+2018--2021    Timo Koch
 2005--2007    Sreejith Pulloor Kuttanikkad
 2009--2013    Andreas Lauser
 2017--2018    Tobias Leibner
