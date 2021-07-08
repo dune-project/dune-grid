@@ -3,7 +3,7 @@
 #ifndef DUNE_GRID_COMMON_MAPPER_HH
 #define DUNE_GRID_COMMON_MAPPER_HH
 
-#include <iostream>
+#include <utility>
 
 #include <dune/common/bartonnackmanifcheck.hh>
 
@@ -104,11 +104,12 @@ namespace Dune
      \todo IndexType should be extracted from MapperImp, but gcc doesn't let me
    */
   template <typename G, typename MapperImp, typename IndexType=int>
-  class Mapper {
+  class Mapper
+  {
   public:
 
     /** \brief Number type used for indices */
-    typedef IndexType Index;
+    using Index = IndexType;
 
     /** @brief Map entity to array index.
 
@@ -161,7 +162,7 @@ namespace Dune
        \return true if entity is in entity set of the mapper
      */
     template<class EntityType>
-    bool contains (const EntityType& e, int& result) const
+    bool contains (const EntityType& e, IndexType& result) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().contains(e,result )));
       return asImp().contains(e,result );
@@ -177,7 +178,7 @@ namespace Dune
        \param[out] result Filled with array index if entity is contained
        \return true if entity is in entity set of the mapper
      */
-    bool contains (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc, int& result) const
+    bool contains (const typename G::Traits::template Codim<0>::Entity& e, int i, int cc, IndexType& result) const
     {
       CHECK_INTERFACE_IMPLEMENTATION((asImp().contains(e,i,cc,result)))
       return asImp().contains(e,i,cc,result);
@@ -185,6 +186,15 @@ namespace Dune
 
     /** @brief Reinitialize mapper after grid has been modified.
      */
+    template <class GridView>
+    void update (GridView&& gridView)
+    {
+      CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().update(std::forward<GridView>(gridView))));
+    }
+
+    /** @brief Reinitialize mapper after grid has been modified.
+     */
+    [[deprecated("Use update(gridView) instead! Will be removed after release 2.8. Mappers have to implement update(gridView).")]]
     void update ()
     {
       CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().update()));

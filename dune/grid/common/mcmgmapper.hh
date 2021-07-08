@@ -157,7 +157,7 @@ namespace Dune
       , is(gridView_.indexSet())
       , layout_(layout)
     {
-      update();
+      update(gridView);
     }
 
     /*!
@@ -308,7 +308,7 @@ namespace Dune
     void update (const GV& gridView)
     {
       gridView_ = gridView;
-      update();
+      update_();
     }
 
     /** @brief Recalculates indices after grid adaptation
@@ -319,12 +319,22 @@ namespace Dune
     void update (GV&& gridView)
     {
       gridView_ = std::move(gridView);
-      update();
+      update_();
     }
 
     /** @brief Recalculates indices after grid adaptation
      */
+    [[deprecated("Use update(gridView) instead! Will be removed after release 2.8.")]]
     void update ()
+    {
+      update_();
+    }
+
+    const MCMGLayout &layout () const { return layout_; }
+    const GridView &gridView () const { return gridView_; }
+
+  private:
+    void update_()
     {
       n = 0;
 
@@ -355,10 +365,6 @@ namespace Dune
       }
     }
 
-    const MCMGLayout &layout () const { return layout_; }
-    const GridView &gridView () const { return gridView_; }
-
-  private:
     Index offset(GeometryType gt) const
       { return offsets[GlobalGeometryTypeIndex::index(gt)]; }
     Index blockSize(GeometryType gt) const
@@ -386,11 +392,12 @@ namespace Dune
   /** @brief Multiple codim and multiple geometry type mapper for leaf entities.
 
      This mapper uses all leaf entities of a certain codimension as its entity set.
-
+     \deprecated Use MultipleCodimMultipleGeomTypeMapper instead
      \tparam G      A %Dune grid type.
    */
   template <typename G>
-  class LeafMultipleCodimMultipleGeomTypeMapper
+  class [[deprecated("Use MultipleCodimMultipleGeomTypeMapper instead! Will be removed after release 2.8.")]]
+  LeafMultipleCodimMultipleGeomTypeMapper
     : public MultipleCodimMultipleGeomTypeMapper<typename G::LeafGridView>
   {
     typedef MultipleCodimMultipleGeomTypeMapper<typename G::LeafGridView> Base;
@@ -425,11 +432,12 @@ namespace Dune
 
 
      This mapper uses all entities of a certain codimension on a given level as its entity set.
-
+     \deprecated Use MultipleCodimMultipleGeomTypeMapper instead
      \tparam G      A %Dune grid type.
    */
   template <typename G>
-  class LevelMultipleCodimMultipleGeomTypeMapper
+  class [[deprecated("Use MultipleCodimMultipleGeomTypeMapper instead! Will be removed after release 2.8.")]]
+  LevelMultipleCodimMultipleGeomTypeMapper
     : public MultipleCodimMultipleGeomTypeMapper<typename G::LevelGridView> {
     typedef MultipleCodimMultipleGeomTypeMapper<typename G::LevelGridView> Base;
   public:
