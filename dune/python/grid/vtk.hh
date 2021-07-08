@@ -93,7 +93,7 @@ namespace Dune
               writer.write( name, outputType );
             },
             pybind11::arg("name"),
-            pybind11::arg("outputType")=VTK::ascii );
+            pybind11::arg("outputType")=VTK::appendedraw );
 
         cls.def( "write",
             [] ( Writer &writer, const std::string &name, int number, Dune::VTK::OutputType outputType ) {
@@ -102,7 +102,7 @@ namespace Dune
             },
             pybind11::arg("name"),
             pybind11::arg("number"),
-            pybind11::arg("outputType")=VTK::ascii );
+            pybind11::arg("outputType")=VTK::appendedraw );
       }
 
       {
@@ -116,7 +116,7 @@ namespace Dune
               writer.write( name, outputType );
             },
             pybind11::arg("name"),
-            pybind11::arg("outputType")=VTK::ascii );
+            pybind11::arg("outputType")=VTK::appendedraw );
 
         cls.def( "write",
             [] ( Writer &writer, const std::string &name, int number ) {
@@ -132,7 +132,7 @@ namespace Dune
             },
             pybind11::arg("name"),
             pybind11::arg("number"),
-            pybind11::arg("outputType")=VTK::ascii );
+            pybind11::arg("outputType")=VTK::appendedraw );
       }
     }
 
