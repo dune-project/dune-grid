@@ -472,10 +472,6 @@ namespace Dune
     }
 
     //! Get id of an entity of codim cc. Unhandy because template parameter must be supplied explicitly.
-    /*
-       We use the remove_const to extract the Type from the mutable class,
-       because the const class is not instantiated yet.
-     */
     template<int cc>
     IdType id (const typename Codim<cc>::Entity& e) const
     {
