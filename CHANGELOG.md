@@ -1,5 +1,8 @@
 # Master (will become release 2.8)
 
+- Specialization of `StructuredGridFactory` for `AlbertaGrid` is added to address the special
+  numbering requirements of that grid.
+
 - Return type of `GridFactory::createGrid()` changed to `std::unique_ptr`. While still the
   replacement type `ToUniquePtr` from dune-common works, it is marked deprecated and the std
   implementation should be used directly now.
