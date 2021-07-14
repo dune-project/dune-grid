@@ -54,10 +54,11 @@ namespace Dune
        \param gridView A Dune GridView object.
      */
     SingleCodimSingleGeomTypeMapper (const GV& gridView)
-     : is_(&gridView.indexSet())
+    : gridView_(gridView)
+    , indexSet_(&gridView_.indexSet())
     {
       // check that grid has only a single geometry type
-      if (is_->types(c).size() != 1)
+      if (indexSet_->types(c).size() != 1)
         DUNE_THROW(GridError, "mapper treats only a single codim and a single geometry type");
     }
 
@@ -70,7 +71,7 @@ namespace Dune
     Index index (const EntityType& e) const
     {
       static_assert(EntityType::codimension == c, "Entity of wrong codim passed to SingleCodimSingleGeomTypeMapper");
-      return is_->index(e);
+      return indexSet_->index(e);
     }
 
     /** @brief Map subentity of codim 0 entity to array index.
@@ -85,7 +86,7 @@ namespace Dune
     {
       if (codim != c)
         DUNE_THROW(GridError, "Id of wrong codim requested from SingleCodimSingleGeomTypeMapper");
-      return is_->subIndex(e,i,codim);
+      return indexSet_->subIndex(e,i,codim);
     }
 
     /** @brief Return total number of entities in the entity set managed by the mapper.
@@ -98,7 +99,7 @@ namespace Dune
      */
     size_type size () const
     {
-      return is_->size(c);
+      return indexSet_->size(c);
     }
 
     /** @brief Returns true if the entity is contained in the index set
@@ -131,11 +132,23 @@ namespace Dune
     /** @brief Recalculates indices after grid adaptation
      *
      * After grid adaptation you need to call this to update
-     * the index set and recalculate the indices.
+     * the stored gridview and recalculate the indices.
      */
     void update (const GV& gridView)
     {
-      is_ = &gridView.indexSet();
+      gridView_ = gridView;
+      indexSet_ = &gridView_.indexSet();
+    }
+
+    /** @brief Recalculates indices after grid adaptation
+     *
+     * After grid adaptation you need to call this to update
+     * the stored gridview and recalculate the indices.
+     */
+    void update (GV&& gridView)
+    {
+      gridView_ = std::move(gridView);
+      indexSet_ = &gridView_.indexSet();
     }
 
     /** @brief Recalculates indices after grid adaptation
@@ -146,7 +159,8 @@ namespace Dune
     }
 
   private:
-    const typename GV::IndexSet* is_;
+    GV gridView_;
+    const typename GV::IndexSet* indexSet_;
   };
 
   /** @} */
