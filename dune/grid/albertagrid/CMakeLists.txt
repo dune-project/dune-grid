@@ -62,6 +62,7 @@ set(HEADERS
   gridview.hh
   persistentcontainer.hh
   backuprestore.hh
+  structuredgridfactory.hh
   geometryreference.hh)
 
 install(FILES ${HEADERS}
