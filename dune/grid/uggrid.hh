@@ -51,6 +51,7 @@
 #define UG_DIM_2
 // And include all necessary UG headers
 #include "uggrid/ugincludes.hh"
+#undef DUNE_UGINCLUDES_HH
 
 // Wrap a few large UG macros by functions before they get undef'ed away.
 // Here: The 2d-version of the macros
@@ -81,6 +82,7 @@
 
 #define UG_DIM_3
 #include "uggrid/ugincludes.hh"
+#undef DUNE_UGINCLUDES_HH
 
 // Wrap a few large UG macros by functions before they get undef'ed away.
 // This time it's the 3d-versions.
