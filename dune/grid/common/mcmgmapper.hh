@@ -154,7 +154,7 @@ namespace Dune
      */
     MultipleCodimMultipleGeomTypeMapper(const GV& gridView, const MCMGLayout& layout)
       : gridView_(gridView)
-      , is(gridView_.indexSet())
+      , indexSet_(&gridView_.indexSet())
       , layout_(layout)
     {
       update(gridView);
@@ -172,7 +172,7 @@ namespace Dune
     {
       const GeometryType gt = e.type();
       assert(offset(gt) != invalidOffset);
-      return is.index(e)*blockSize(gt) + offset(gt);
+      return indexSet_->index(e)*blockSize(gt) + offset(gt);
     }
 
     /** @brief Map subentity of codim 0 entity to starting index in array for dof block
@@ -190,7 +190,7 @@ namespace Dune
         ReferenceElements<double,GV::dimension>::general(eType).type(i,codim) ;
       //GeometryType gt=ReferenceElements<double,GV::dimension>::general(e.type()).type(i,codim);
       assert(offset(gt) != invalidOffset);
-      return is.subIndex(e, i, codim)*blockSize(gt) + offset(gt);
+      return indexSet_->subIndex(e, i, codim)*blockSize(gt) + offset(gt);
     }
 
     /** @brief Return total number of entities in the entity set managed by the mapper.
@@ -230,7 +230,7 @@ namespace Dune
     template<class EntityType>
     IntegralRange<Index> indices (const EntityType& e) const
     {
-      if(!is.contains(e) || offset(e.type()) == invalidOffset)
+      if(!indexSet_->contains(e) || offset(e.type()) == invalidOffset)
         return {0,0};
       Index start = index(e);
       return {start, start+blockSize(e.type())};
@@ -271,7 +271,7 @@ namespace Dune
     template<class EntityType>
     bool contains (const EntityType& e, Index& result) const
     {
-      if(!is.contains(e) || offset(e.type()) == invalidOffset)
+      if(!indexSet_->contains(e) || offset(e.type()) == invalidOffset)
       {
         result = 0;
         return false;
@@ -296,7 +296,7 @@ namespace Dune
         ReferenceElements<double,GV::dimension>::general(eType).type(i,cc) ;
       if (offset(gt) == invalidOffset)
         return false;
-      result = is.subIndex(e, i, cc)*blockSize(gt) + offset(gt);
+      result = indexSet_->subIndex(e, i, cc)*blockSize(gt) + offset(gt);
       return true;
     }
 
@@ -308,6 +308,7 @@ namespace Dune
     void update (const GV& gridView)
     {
       gridView_ = gridView;
+      indexSet_ = &gridView_.indexSet();
       update_();
     }
 
@@ -319,6 +320,7 @@ namespace Dune
     void update (GV&& gridView)
     {
       gridView_ = std::move(gridView);
+      indexSet_ = &gridView_.indexSet();
       update_();
     }
 
@@ -344,7 +346,7 @@ namespace Dune
       for (unsigned int codim = 0; codim <= GV::dimension; ++codim)
       {
         // walk over all geometry types in the codimension
-        for (const GeometryType& gt : is.types(codim)) {
+        for (const GeometryType& gt : indexSet_->types(codim)) {
           Index offset;
           size_t block = layout()(gt, GV::Grid::dimension);
 
@@ -352,7 +354,7 @@ namespace Dune
           // and store geometry type
           if (block) {
             offset = n;
-            n += is.size(gt) * block;
+            n += indexSet_->size(gt) * block;
             myTypes_[codim].push_back(gt);
           }
           else {
@@ -376,7 +378,7 @@ namespace Dune
     unsigned int n;
     // GridView is needed to keep the IndexSet valid
     GV gridView_;
-    const typename GV::IndexSet& is;
+    const typename GV::IndexSet* indexSet_;
     // provide an array for the offsets
     std::array<Index, GlobalGeometryTypeIndex::size(GV::dimension)> offsets;
     std::array<Index, GlobalGeometryTypeIndex::size(GV::dimension)> blocks;
