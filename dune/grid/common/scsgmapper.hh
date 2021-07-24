@@ -26,9 +26,7 @@ namespace Dune
    *
    * In this implementation of a mapper the entity set used as domain for the map consists
    * of the entities of a given codimension c for all entities in the given index set. The index
-   * set may only contain entities of a single geometry type, otherwise an exception is thrown. This
-   * version is usually not used directly but is used to implement versions for leafwise and levelwise
-   * entity sets.
+   * set may only contain entities of a single geometry type, otherwise an exception is thrown.
    *
    * \tparam GV A Dune grid view type
    *
