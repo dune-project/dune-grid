@@ -37,12 +37,6 @@ namespace Dune
    * You can also specify the exact type of the variable, but it is normally much easier to let the compiler
    * do that for you using `auto`.
    *
-   * \note We are aware that people like Bjarne Stroustrup and Herb
-   *       Sutter advertise the use `auto&&`. Sadly GCC prior to version 6 has a bug (see
-   *       https://gcc.gnu.org/bugzilla/show_bug.cgi?id=63506), which
-   *       prevents the use of `auto&&` in template functions. For this reason
-   *       we currently advice the use of `const auto&`.
-   *
    * For those interested in the technical details, the compiler has translated the loop into
    * something resembling this (not quite, but we'll forget about the minor details here):
    *
@@ -81,8 +75,6 @@ namespace Dune
                  << vertex.geometry().center() << std::endl;
      }
      \endcode
-   *
-   * \note As explained above, **always** use `const auto&` for the type of the Entity!
    *
    * There are also functions for iterating over facets() and edges() as well as generic entities() functions,
    * which allow you to specify a numeric codimension or dimension.
@@ -691,7 +683,7 @@ namespace Dune
    *             for loop.
    */
   template<typename GV, int codim, unsigned int partitions>
-  inline IteratorRange<...> entities(const GV& gv gv, Codim<codim> cd, PartitionSet<partitions> ps);
+  inline IteratorRange<...> entities(const GV& gv, Codim<codim> cd, PartitionSet<partitions> ps);
 
 
   //! Iterates over all entities of a GridView with the given dimension that belong to the given PartitionSet.
