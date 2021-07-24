@@ -116,9 +116,7 @@ namespace Dune
    *
    * In this implementation of a mapper the entity set used as domain for the map consists
    * of the entities of a subset of codimensions in the given index set. The index
-   * set may contain entities of several geometry types. This
-   * version is usually not used directly but is used to implement versions for leafwise and levelwise
-   * entity sets.
+   * set may contain entities of several geometry types.
    *
    * The geometry types to be included in the mapper are selected using a
    * layout functional (\ref MCMGLayout) that is passed to the constructor.
