@@ -317,7 +317,7 @@ namespace Dune
       Library< dimWorld >::boundaryCount = 0;
       Library< dimWorld >::projectionFactory = &projectionFactory;
       Library< dimWorld >::create( *this, macroData, &initNodeProjection< ProjectionFactory > );
-      Library< dimWorld >::projectionFactory = 0;
+      Library< dimWorld >::projectionFactory = nullptr;
       return Library< dimWorld >::boundaryCount;
     }
 
