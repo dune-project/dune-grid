@@ -876,20 +876,25 @@ namespace Dune
       return factory.createGrid();
     }
 
-    /** \todo doc me
+    /**
+     * \brief Read Gmsh file, possibly with data
+     * \param fileName                        Name of the file to read from.
+     * \param boundarySegmentToPhysicalEntity Container to fill with boundary segment
+     *                                        physical entity data (if insertBoundarySegments=true)
+     * \param elementToPhysicalEntity         Container to fill with element physical entity data
+     * \param verbose                         Whether to be chatty
+     * \param insertBoundarySegments          Whether boundary segments are inserted into the factory
      *
-     * \return The return type is a special pointer type that casts into Grid*,
-     *    std::unique_ptr<Grid>, and std::shared_ptr<Grid>.  It is scheduled
-     *    to be replaced by std::unique_ptr<Grid> eventually.
+     * \note When insertBoundarySegments=false there is no way to correctly use the values returned
+     *       in boundarySegmentToPhysicalEntity. Make sure to set insertBoundarySegments=true if you
+     *       intent to do this. An alternative is to use the other overloads which provide compile-time
+     *       checking of the provided parameter combinations.
+     *
+     * \todo This interface is error-prone and should not be exposed to the user. However, the
+     *       compile-time overloads may not provide sufficient runtime flexibility in all cases.
+     *       Therefore this interface is kept until a better interface can be agreed on.
+     *       See https://gitlab.dune-project.org/core/dune-grid/-/issues/107
      */
-    [[deprecated("Deprecated after Dune 2.7 (ca. 2020-02): This method is "
-                 "deprecated, see "
-                 "https://gitlab.dune-project.org/flyspray/FS/issues/1698, as "
-                 "it does not allow for relating the data to entities. Please "
-                 "use read(string, bool, bool) (if you don't use the data in "
-                 "the vectors, or use read(GridFactory&, string, "
-                 "vector<int>&, vector<int>&, bool, bool) if you do use "
-                 "them.")]]
     static std::unique_ptr<Grid> read (const std::string& fileName,
                        std::vector<int>& boundarySegmentToPhysicalEntity,
                        std::vector<int>& elementToPhysicalEntity,
@@ -951,15 +956,26 @@ namespace Dune
               boundarySegmentData.flag_ || boundarySegmentData.data_);
     }
 
-    /** \todo doc me */
-    [[deprecated("Deprecated after Dune 2.7 (ca. 2020-02): The "
-                 "insertBoundarySegments argument for this overload of the "
-                 "read method is deprecated, please omit it.  See "
-                 "https://gitlab.dune-project.org/flyspray/FS/issues/1698.  "
-                 "When setting insertBoundarySegments=false there is no way "
-                 "to correctly use the data returned in "
-                 "boundarySegmentToPhysicalEntity, which makes using the old "
-                 "method error-prone.")]]
+    /**
+     * \brief Read Gmsh file, possibly with data
+     * \param factory                         The GridFactory to fill.
+     * \param fileName                        Name of the file to read from.
+     * \param boundarySegmentToPhysicalEntity Container to fill with boundary segment
+     *                                        physical entity data (if insertBoundarySegments=true)
+     * \param elementToPhysicalEntity         Container to fill with element physical entity data
+     * \param verbose                         Whether to be chatty
+     * \param insertBoundarySegments          Whether boundary segments are inserted into the factory
+     *
+     * \note When insertBoundarySegments=false there is no way to correctly use the values returned
+     *       in boundarySegmentToPhysicalEntity. Make sure to set insertBoundarySegments=true if you
+     *       intent to do this. An alternative is to use the other overloads which provide compile-time
+     *       checking of the provided parameter combinations.
+     *
+     * \todo This interface is error-prone and should not be exposed to the user. However, the
+     *       compile-time overloads may not provide sufficient runtime flexibility in all cases.
+     *       Therefore this interface is kept until a better interface can be agreed on.
+     *       See https://gitlab.dune-project.org/core/dune-grid/-/issues/107
+     */
     static void read (Dune::GridFactory<Grid>& factory,
                       const std::string& fileName,
                       std::vector<int>& boundarySegmentToPhysicalEntity,
