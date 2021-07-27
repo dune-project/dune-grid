@@ -63,12 +63,12 @@ namespace Dune
       }
 
       template< class MessageBuffer, class HostEntity >
-      void scatter ( MessageBuffer &buffer, const HostEntity &hostEntity, size_t size )
+      void scatter ( MessageBuffer &buffer, const HostEntity &hostEntity, size_t size_ )
       {
         typedef typename Grid::Traits::template Codim< HostEntity::codimension >::Entity Entity;
         typedef typename Grid::Traits::template Codim< HostEntity::codimension >::EntityImpl EntityImpl;
         Entity entity( EntityImpl( grid_, hostEntity ) );
-        wrappedHandle_.scatter( buffer, entity, size );
+        wrappedHandle_.scatter( buffer, entity, size_ );
       }
 
     private:
