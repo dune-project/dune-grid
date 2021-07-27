@@ -158,7 +158,7 @@ namespace Dune
 
   template< int dim, int dimworld >
   inline DGFGridFactory< AlbertaGrid< dim, dimworld > >
-  ::DGFGridFactory ( std::istream &input, MPICommunicatorType comm )
+  ::DGFGridFactory ( std::istream &input, MPICommunicatorType /* comm */ )
     : dgf_( 0, 1 )
   {
     input.clear();
@@ -171,7 +171,7 @@ namespace Dune
 
   template< int dim, int dimworld >
   inline DGFGridFactory< AlbertaGrid< dim, dimworld > >
-  ::DGFGridFactory ( const std::string &filename, MPICommunicatorType comm )
+  ::DGFGridFactory ( const std::string &filename, MPICommunicatorType /* comm */ )
     : dgf_( 0, 1 )
   {
     std::ifstream input( filename.c_str() );

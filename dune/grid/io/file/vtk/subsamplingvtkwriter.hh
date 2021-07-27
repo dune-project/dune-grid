@@ -169,7 +169,7 @@ namespace Dune
 
   protected:
     //! count the vertices, cells and corners
-    virtual void countEntities(int &nvertices, int &ncells, int &ncorners);
+    virtual void countEntities(int &nvertices_, int &ncells_, int &ncorners_);
 
     //! write cell data
     virtual void writeCellData(VTK::VTUWriter& writer);
@@ -202,18 +202,18 @@ namespace Dune
 
   //! count the vertices, cells and corners
   template <class GridView>
-  void SubsamplingVTKWriter<GridView>::countEntities(int &nvertices, int &ncells, int &ncorners)
+  void SubsamplingVTKWriter<GridView>::countEntities(int &nvertices_, int &ncells_, int &ncorners_)
   {
-    nvertices = 0;
-    ncells = 0;
-    ncorners = 0;
+    nvertices_ = 0;
+    ncells_ = 0;
+    ncorners_ = 0;
     for (CellIterator it=this->cellBegin(); it!=cellEnd(); ++it)
     {
       Refinement &refinement = buildRefinement<dim, ctype>(it->type(), subsampledGeometryType(it->type()));
 
-      ncells += refinement.nElements(intervals);
-      nvertices += refinement.nVertices(intervals);
-      ncorners += refinement.nElements(intervals) * refinement.eBegin(intervals).vertexIndices().size();
+      ncells_ += refinement.nElements(intervals);
+      nvertices_ += refinement.nVertices(intervals);
+      ncorners_ += refinement.nElements(intervals) * refinement.eBegin(intervals).vertexIndices().size();
     }
   }
 

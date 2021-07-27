@@ -50,7 +50,7 @@ public:
      @param[in]  xi     point in local coordinates of the reference element of e
      \return            value of the component
    */
-  virtual double evaluate (int comp, const Entity& e,
+  virtual double evaluate ([[maybe_unused]] int comp, const Entity& e,
                            const Dune::FieldVector<DT,n>& xi) const
   {
     Dune::FieldVector<DT,n> global = e.geometry().global( xi );

@@ -24,16 +24,16 @@ namespace Dune
   {
 
     template<class S>
-    static void writeOrigin(S& s, const Coordinates& coord)
+    static void writeOrigin(S& /* s */, const Coordinates& /* coord */)
     {}
 
     template<class S>
-    static void readOrigin(S& s, Dune::FieldVector<typename Coordinates::ctype,Coordinates::dimension>& coord)
+    static void readOrigin(S& /* s */, Dune::FieldVector<typename Coordinates::ctype,Coordinates::dimension>& /* coord */)
     {}
 
     template<typename... A>
     static typename Dune::YaspGrid<Coordinates::dimension,Coordinates>* createGrid(
-      const Dune::FieldVector<typename Coordinates::ctype,Coordinates::dimension>& lowerleft, A... args)
+      const Dune::FieldVector<typename Coordinates::ctype,Coordinates::dimension>& /* lowerleft */, A... args)
     {
       return new Dune::YaspGrid<Coordinates::dimension,Coordinates>(args...);
     }

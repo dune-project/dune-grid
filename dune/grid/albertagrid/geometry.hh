@@ -190,7 +190,7 @@ namespace Dune
     }
 
     /** \brief integration element of the geometry mapping */
-    ctype integrationElement ( const LocalCoordinate &local ) const
+    ctype integrationElement ( [[maybe_unused]] const LocalCoordinate &local ) const
     {
       return integrationElement();
     }
@@ -210,7 +210,7 @@ namespace Dune
 
     /** \brief transposed of the geometry mapping's Jacobian */
     const JacobianTransposed &
-    jacobianTransposed ( const LocalCoordinate &local ) const
+    jacobianTransposed ( [[maybe_unused]] const LocalCoordinate &local ) const
     {
       return jacobianTransposed();
     }
@@ -224,7 +224,7 @@ namespace Dune
 
     /** \brief transposed inverse of the geometry mapping's Jacobian */
     const JacobianInverseTransposed &
-    jacobianInverseTransposed ( const LocalCoordinate &local ) const
+    jacobianInverseTransposed ( [[maybe_unused]] const LocalCoordinate &local ) const
     {
       return jacobianInverseTransposed();
     }

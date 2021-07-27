@@ -40,7 +40,7 @@ namespace Dune {
 
 
     //! \todo Please doc me !
-    explicit IdentityGridHierarchicIterator(const GridImp* identityGrid, const Entity& startEntity, int maxLevel, bool endDummy) :
+    explicit IdentityGridHierarchicIterator(const GridImp* identityGrid, const Entity& startEntity, int maxLevel, [[maybe_unused]] bool endDummy) :
       identityGrid_(identityGrid),
       hostHierarchicIterator_(startEntity.impl().hostEntity_.hend(maxLevel))
     {}

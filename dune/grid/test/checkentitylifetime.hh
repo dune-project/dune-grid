@@ -83,7 +83,8 @@ bool checkEntityLifetimeForCodim(GV gv, std::size_t check_element_count, Dune::C
 }
 
 template<typename GV, int codim>
-bool checkEntityLifetimeForCodim(GV gv, const std::size_t check_element_count, Dune::Codim<codim>, std::false_type)
+bool checkEntityLifetimeForCodim(GV, const std::size_t,
+                                 Dune::Codim<codim>, std::false_type)
 {
   std::cout << "SKIPPING lifetime / consistency check for missing entities, codim " << codim << std::endl;
   return false;
@@ -118,7 +119,7 @@ namespace {
   }
 
   template<typename... T>
-  void invoke(T&&... t)
+  void invoke(T&&...)
   {}
 
   template<typename GV, std::size_t... codim>

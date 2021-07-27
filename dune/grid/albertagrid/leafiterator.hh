@@ -70,7 +70,7 @@ namespace Dune
 
     //! Constructor making begin iterator (which is the end iterator in this case)
     AlbertaGridLeafIterator ( const GridImp &grid,
-                              const MarkerVector *vec,
+                              const MarkerVector *,
                               int level )
       : Base( grid, level )
     {}

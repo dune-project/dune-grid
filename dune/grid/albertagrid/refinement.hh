@@ -297,7 +297,7 @@ namespace Dune
       typedef Real LocalVector[ dim ];
 
       static const LocalVector &
-      coordinate ( int child, int orientation, int i )
+      coordinate ( int child, int /* orientation */, int i )
       {
         static const Real coords[ 2 ][ dim+1 ][ dim ]
           = { { {0.0}, {0.5} }, { {0.5}, {1.0} } };
@@ -314,7 +314,7 @@ namespace Dune
       typedef Real LocalVector[ dim ];
 
       static const LocalVector &
-      coordinate ( int child, int orientation, int i )
+      coordinate ( int child, int /* orientation */, int i )
       {
         static const Real coords[ 2 ][ dim+1 ][ dim ]
           = { { {0.0, 1.0}, {0.0, 0.0}, {0.5, 0.0} },

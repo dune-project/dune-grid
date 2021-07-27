@@ -172,7 +172,7 @@ namespace Dune
     }
 
     template< class Entity >
-    std::vector<double> &parameter ( const Entity &entity )
+    std::vector<double> &parameter ( const Entity & )
     {
       return emptyParam;
     }
@@ -374,7 +374,7 @@ namespace Dune
     }
 
     template< class Entity >
-    std::vector<double> &parameter ( const Entity &entity )
+    std::vector<double> &parameter ( [[maybe_unused]] const Entity &entity )
     {
       return emptyParam;
     }

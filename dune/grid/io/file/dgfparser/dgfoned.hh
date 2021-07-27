@@ -129,7 +129,7 @@ namespace Dune
 
     /** \brief return empty vector */
     template< int codim >
-    std::vector< double > &parameter ( const typename Grid::Codim< codim >::Entity &element )
+    std::vector< double > &parameter ( [[maybe_unused]] const typename Grid::Codim< codim >::Entity &element )
     {
       return emptyParameters_;
     }
@@ -142,7 +142,7 @@ namespace Dune
 
     /** \brief return invalid default value */
     template< class GG, class II >
-    const DGFBoundaryParameter::type &boundaryParameter ( const Dune::Intersection< GG, II > &intersection ) const
+    const DGFBoundaryParameter::type &boundaryParameter ( [[maybe_unused]] const Dune::Intersection< GG, II > &intersection ) const
     {
       return DGFBoundaryParameter::defaultValue();
     }
@@ -160,7 +160,7 @@ namespace Dune
   // Implementation of DGFGridFactory< OneDGrid >
   // --------------------------------------------
 
-  inline void DGFGridFactory< OneDGrid >::generate ( std::istream &input, MPICommunicatorType comm )
+  inline void DGFGridFactory< OneDGrid >::generate ( std::istream &input, [[maybe_unused]] MPICommunicatorType comm )
   {
     // try to open interval block
     dgf::IntervalBlock intervalBlock( input );

@@ -53,7 +53,7 @@
 int main(int argc, char** argv)
 {
   // Maybe initialize Mpi
-  Dune::MPIHelper& helper = Dune::MPIHelper::instance(argc, argv);
+  [[maybe_unused]] Dune::MPIHelper& helper = Dune::MPIHelper::instance(argc, argv);
 
   // [set up grid]
   const int dim = 4;

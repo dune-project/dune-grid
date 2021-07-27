@@ -45,7 +45,7 @@ namespace Dune
       return Impl<GridType>::generate(*this,filename_,MPICOMM_);
     }
   private:
-    static int rank( MPICommunicatorType MPICOMM )
+    static int rank( [[maybe_unused]] MPICommunicatorType MPICOMM )
     {
       int rank = 0;
 #if HAVE_MPI
@@ -53,7 +53,7 @@ namespace Dune
 #endif
       return rank;
     }
-    static int size( MPICommunicatorType MPICOMM )
+    static int size( [[maybe_unused]] MPICommunicatorType MPICOMM )
     {
       int size = 1;
 #if HAVE_MPI

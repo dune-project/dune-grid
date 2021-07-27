@@ -193,17 +193,17 @@ namespace Dune {
     }
 
     //! return outer normal
-    FieldVector<typename GridImp::ctype, dimworld> outerNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
+    FieldVector<typename GridImp::ctype, dimworld> outerNormal ([[maybe_unused]] const FieldVector<typename GridImp::ctype, dim-1>&  local ) const {
       return centerUnitOuterNormal();
     }
 
     //! Return outer normal scaled with the integration element
-    FieldVector<typename GridImp::ctype, dimworld> integrationOuterNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
+    FieldVector<typename GridImp::ctype, dimworld> integrationOuterNormal ([[maybe_unused]] const FieldVector<typename GridImp::ctype, dim-1>& local ) const {
       return centerUnitOuterNormal();
     }
 
     //! return unit outer normal
-    FieldVector<typename GridImp::ctype, dimworld> unitOuterNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
+    FieldVector<typename GridImp::ctype, dimworld> unitOuterNormal ([[maybe_unused]] const FieldVector<typename GridImp::ctype, dim-1>& local ) const {
       return centerUnitOuterNormal();
     }
 
@@ -451,18 +451,18 @@ namespace Dune {
     }
 
     //! return outer normal
-    FieldVector<typename GridImp::ctype, dimworld> outerNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
+    FieldVector<typename GridImp::ctype, dimworld> outerNormal ([[maybe_unused]] const FieldVector<typename GridImp::ctype, dim-1>& local) const {
       return centerUnitOuterNormal();
     }
 
     //! Return outer normal scaled with the integration element
-    FieldVector<typename GridImp::ctype, dimworld> integrationOuterNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const
+    FieldVector<typename GridImp::ctype, dimworld> integrationOuterNormal ([[maybe_unused]] const FieldVector<typename GridImp::ctype, dim-1>& local) const
     {
       return centerUnitOuterNormal();
     }
 
     //! return unit outer normal
-    FieldVector<typename GridImp::ctype, dimworld> unitOuterNormal (const FieldVector<typename GridImp::ctype, dim-1>& local) const {
+    FieldVector<typename GridImp::ctype, dimworld> unitOuterNormal ([[maybe_unused]] const FieldVector<typename GridImp::ctype, dim-1>& local) const {
       return centerUnitOuterNormal();
     }
 

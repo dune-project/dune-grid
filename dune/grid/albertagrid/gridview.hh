@@ -211,16 +211,16 @@ namespace Dune
     }
 
     /** \brief Return size of the overlap region for a given codim on the grid view.  */
-    int overlapSize ( int codim ) const { return 0; }
+    int overlapSize ( [[maybe_unused]] int codim ) const { return 0; }
 
     /** \brief Return size of the ghost region for a given codim on the grid view.  */
-    int ghostSize ( int codim ) const { return 0; }
+    int ghostSize ( [[maybe_unused]] int codim ) const { return 0; }
 
     /** communicate data on this view */
     template< class DataHandleImp, class DataType >
-    void communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
-                       InterfaceType iftype,
-                       CommunicationDirection dir ) const
+    void communicate ( [[maybe_unused]] CommDataHandleIF< DataHandleImp, DataType > &data,
+                       [[maybe_unused]] InterfaceType iftype,
+                       [[maybe_unused]] CommunicationDirection dir ) const
     {}
 
   private:
@@ -419,16 +419,16 @@ namespace Dune
     }
 
     /** \brief Return size of the overlap region for a given codim on the grid view.  */
-    int overlapSize ( int codim ) const { return 0; }
+    int overlapSize ( [[maybe_unused]] int codim ) const { return 0; }
 
     /** \brief Return size of the ghost region for a given codim on the grid view.  */
-    int ghostSize ( int codim ) const { return 0; }
+    int ghostSize ( [[maybe_unused]] int codim ) const { return 0; }
 
     /** communicate data on this view */
     template< class DataHandleImp, class DataType >
-    void communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
-                       InterfaceType iftype,
-                       CommunicationDirection dir ) const
+    void communicate ( [[maybe_unused]] CommDataHandleIF< DataHandleImp, DataType > &data,
+                       [[maybe_unused]] InterfaceType iftype,
+                       [[maybe_unused]] CommunicationDirection dir ) const
     {}
 
   private:

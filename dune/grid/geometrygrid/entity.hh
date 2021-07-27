@@ -768,14 +768,14 @@ namespace Dune
 
       Entity () : Base() {}
 
-      Entity ( const Grid &grid, const HostEntity &hostEntity ) : Base( grid, hostEntity ) {}
-      Entity ( const Grid &grid, HostEntity&& hostEntity ) : Base( grid, std::move( hostEntity ) ) {}
-      Entity ( const GeometryImpl &geo, const HostEntity& hostEntity ) : Base( geo, hostEntity ) {}
-      Entity ( const GeometryImpl &geo, HostEntity &&hostEntity ) : Base( geo, std::move( hostEntity ) ) {}
+      Entity ( const Grid &g, const HostEntity &hostE ) : Base( g, hostE ) {}
+      Entity ( const Grid &g, HostEntity&& hostE ) : Base( g, std::move( hostE ) ) {}
+      Entity ( const GeometryImpl &geo, const HostEntity& hostE ) : Base( geo, hostE ) {}
+      Entity ( const GeometryImpl &geo, HostEntity &&hostE ) : Base( geo, std::move( hostE ) ) {}
 
-      Entity ( const Grid &grid, const EntitySeed &seed ) : Base( grid, seed ) {}
+      Entity ( const Grid &g, const EntitySeed &seed ) : Base( g, seed ) {}
 
-      Entity ( const Grid &grid, const HostEntity &hostEntity, int i ) : Base( grid, hostEntity )
+      Entity ( const Grid &g, const HostEntity &hostE, int i ) : Base( g, hostE )
       {
         assert( i == 0 );
       }
