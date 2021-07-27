@@ -47,7 +47,7 @@ namespace Dune
     /** \brief write DuneBoundaryProjection's data to stream buffer
      *  \param buffer buffer to store data
      */
-    virtual void backup( ObjectStreamType& buffer ) const
+    virtual void backup( [[maybe_unused]] ObjectStreamType& buffer ) const
     {
       DUNE_THROW(NotImplemented,"DuneBoundaryProjection::backup not overloaded!");
     }

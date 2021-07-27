@@ -321,7 +321,7 @@ namespace Dune
     template< class CoordFunctionInterface >
     struct AdaptCoordFunction
     {
-      static void adapt ( CoordFunctionInterface &coordFunction )
+      static void adapt ( CoordFunctionInterface & )
       {}
     };
 

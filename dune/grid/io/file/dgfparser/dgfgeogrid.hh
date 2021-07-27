@@ -83,7 +83,7 @@ namespace Dune
   template< class HostGrid, class CoordFunction >
   struct DGFCoordFunctionFactory< HostGrid, CoordFunction, false >
   {
-    static CoordFunction *create ( std::istream &input, const HostGrid &hostGrid )
+    static CoordFunction *create ( std::istream &, const HostGrid & )
     {
       return new CoordFunction;
     }
@@ -93,7 +93,7 @@ namespace Dune
   template< class HostGrid, class CoordFunction >
   struct DGFCoordFunctionFactory< HostGrid, CoordFunction, true >
   {
-    static CoordFunction *create ( std::istream &input, const HostGrid &hostGrid )
+    static CoordFunction *create ( std::istream &, const HostGrid &hostGrid )
     {
       return new CoordFunction( hostGrid );
     }

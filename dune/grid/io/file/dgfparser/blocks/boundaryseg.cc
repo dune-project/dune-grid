@@ -13,7 +13,7 @@ namespace Dune
     // BoundarySegBlock
     // ----------------
 
-    BoundarySegBlock :: BoundarySegBlock ( std :: istream &in, int pnofvtx,
+    BoundarySegBlock :: BoundarySegBlock ( std :: istream &in, int /* pnofvtx */,
                                            int pdimworld,bool psimplexgrid )
       : BasicBlock(in,"boundarysegments"),
         dimworld(pdimworld),

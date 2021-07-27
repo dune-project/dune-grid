@@ -68,7 +68,7 @@
 int main(int argc, char** argv)
 {
   // Maybe initialize Mpi
-  Dune::MPIHelper& helper = Dune::MPIHelper::instance(argc, argv);
+  [[maybe_unused]] Dune::MPIHelper& helper = Dune::MPIHelper::instance(argc, argv);
 
   // [set up grid]
   const int dim = 4;
@@ -83,7 +83,7 @@ int main(int argc, char** argv)
   auto y(x); // copy constructor
   y *= 1.0/3.0; // scaling
   [[maybe_unused]] auto s = x*y; // scalar product
-  [[mabye_unused]] auto norm = x.two_norm(); // Euclidean norm
+  [[maybe_unused]] auto norm = x.two_norm(); // Euclidean norm
   Dune::FieldMatrix<double,4,4> A({{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}}); // make a matrix
   A.mv(x,y); // matvec: y = Ax
   A.usmv(0.5,x,y); // axpy: y += 0.5*Ax

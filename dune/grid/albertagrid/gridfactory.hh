@@ -504,7 +504,7 @@ namespace Dune
         return false;
     }
 
-    bool hasProjection ( const ElementInfo &elementInfo ) const
+    bool hasProjection ( const ElementInfo & /* elementInfo */ ) const
     {
       return bool( gridFactory().globalProjection_ );
     }
@@ -523,7 +523,7 @@ namespace Dune
       return Projection( gridFactory().globalProjection_ );
     };
 
-    Projection projection ( const ElementInfo &elementInfo ) const
+    Projection projection ( const ElementInfo & /* elementInfo */ ) const
     {
       assert( gridFactory().globalProjection_ );
       return Projection( gridFactory().globalProjection_ );

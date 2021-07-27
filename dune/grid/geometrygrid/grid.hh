@@ -394,14 +394,14 @@ namespace Dune
       update();
     }
 
-    bool mark ( int refCount, const typename Codim< 0 >::Entity &entity )
+    bool mark ( int refCount, const typename Codim< 0 >::Entity &entity_ )
     {
-      return hostGrid().mark( refCount, getHostEntity< 0 >( entity ) );
+      return hostGrid().mark( refCount, getHostEntity< 0 >( entity_ ) );
     }
 
-    int getMark ( const typename Codim< 0 >::Entity &entity ) const
+    int getMark ( const typename Codim< 0 >::Entity &entity_ ) const
     {
-      return hostGrid().getMark( getHostEntity< 0 >( entity ) );
+      return hostGrid().getMark( getHostEntity< 0 >( entity_ ) );
     }
 
     bool preAdapt ()

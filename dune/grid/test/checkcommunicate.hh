@@ -85,13 +85,13 @@ public:
   {}
 
   //! returns true if data for this codim should be communicated
-  bool contains (int dim, int codim) const
+  bool contains ([[maybe_unused]] int dim, int codim) const
   {
     return (codim==cdim_);
   }
 
   //! returns true if size per entity of given dim and codim is a constant
-  bool fixedSize (int dim, int codim) const
+  bool fixedSize ([[maybe_unused]] int dim, [[maybe_unused]] int codim) const
   {
     // this problem is a fixed size problem,
     // but to simulate also non-fixed size problems
@@ -242,7 +242,7 @@ class CheckCommunication
   }
 
   // compute the data on the upwind entities
-  void project ( int dataSize, ArrayType &data, ArrayType &weight, int rank )
+  void project ( int dataSize, ArrayType &data, ArrayType &weight, int /* rank */ )
   {
     // set initial data
     for(int i=0 ; i<dataSize; ++i)
@@ -345,7 +345,7 @@ class CheckCommunication
   // difference in the function values.
   // if testweight is true an error is printed for each
   // flag not equal to 1
-  ctype test ( int dataSize, ArrayType &data, ArrayType &weight, bool testweight )
+  ctype test ( int /* dataSize */, ArrayType &data, ArrayType &weight, bool testweight )
   {
     const int rank = gridView_.comm().rank();
     const int size = gridView_.comm().size();
@@ -522,7 +522,7 @@ template< class GridView, class OutputStream >
 class CheckCommunication< GridView, -1, OutputStream >
 {
 public:
-  CheckCommunication ( const GridView &gridView, OutputStream &sout, int level )
+  CheckCommunication ( const GridView &, OutputStream &, int)
   {}
 };
 

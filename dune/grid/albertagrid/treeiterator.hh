@@ -113,8 +113,10 @@ namespace Dune
   struct AlbertaMarkerVector< dim, dimworld >::NoMarkSubEntities
   {
     template< int firstCodim, class Iterator >
-    static void mark ( const DofNumbering &dofNumbering, int *(&marker)[ dimension + 1 ],
-                       const Iterator &begin, const Iterator &end )
+    static void mark ( [[maybe_unused]] const DofNumbering & dofNumbering,
+                       [[maybe_unused]] int *(&marker)[ dimension + 1 ],
+                       [[maybe_unused]] const Iterator &begin,
+                       [[maybe_unused]] const Iterator &end )
     {}
   };
 
@@ -463,7 +465,7 @@ namespace Dune
 
   template< int codim, class GridImp, bool leafIterator >
   inline void AlbertaGridTreeIterator< codim, GridImp, leafIterator >
-  ::goNext ( const std::integral_constant< int, 0 > cdVariable,
+  ::goNext ( const std::integral_constant< int, 0 > /* cdVariable */,
              ElementInfo &elementInfo )
   {
     assert( stopAtElement( elementInfo ) );

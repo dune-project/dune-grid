@@ -1387,27 +1387,27 @@ namespace Dune {
     }
 
     //! return size (= distance in graph) of overlap region
-    int overlapSize (int level, int codim) const
+    int overlapSize (int level, [[maybe_unused]] int codim) const
     {
       YGridLevelIterator g = begin(level);
       return g->overlapSize;
     }
 
     //! return size (= distance in graph) of overlap region
-    int overlapSize (int codim) const
+    int overlapSize ([[maybe_unused]] int odim) const
     {
       YGridLevelIterator g = begin(maxLevel());
       return g->overlapSize;
     }
 
     //! return size (= distance in graph) of ghost region
-    int ghostSize (int level, int codim) const
+    int ghostSize ([[maybe_unused]] int level, [[maybe_unused]] int codim) const
     {
       return 0;
     }
 
     //! return size (= distance in graph) of ghost region
-    int ghostSize (int codim) const
+    int ghostSize ([[maybe_unused]] int codim) const
     {
       return 0;
     }

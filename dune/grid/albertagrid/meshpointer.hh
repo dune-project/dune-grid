@@ -127,7 +127,7 @@ namespace Dune
 
     private:
       static ALBERTA NODE_PROJECTION *
-      initNodeProjection ( Mesh *mesh, ALBERTA MACRO_EL *macroElement, int n );
+      initNodeProjection ( [[maybe_unused]] Mesh *mesh, ALBERTA MACRO_EL *macroElement, int n );
       template< class ProjectionProvider >
       static ALBERTA NODE_PROJECTION *
       initNodeProjection ( Mesh *mesh, ALBERTA MACRO_EL *macroElement, int n );

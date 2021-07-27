@@ -437,7 +437,7 @@ namespace Dune
    * \related Geometry
    */
   template< int mydim, int cdim, class GridImp, template< int, int, class > class GeometryImp, typename Impl>
-  auto referenceElement(const Geometry<mydim,cdim,GridImp,GeometryImp>& geo, const Impl& impl)
+  auto referenceElement(const Geometry<mydim,cdim,GridImp,GeometryImp>& geo, const Impl&)
     -> decltype(referenceElement<typename GridImp::ctype,mydim>(geo.type()))
   {
     using Geo = Geometry<mydim,cdim,GridImp,GeometryImp>;

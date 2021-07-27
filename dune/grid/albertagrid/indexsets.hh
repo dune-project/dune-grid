@@ -479,7 +479,7 @@ namespace Dune
     {
       const IndexType *const array = indices_[ codim ];
       const IndexType subIndex = array[ dofNumbering_( element, codim, i ) ];
-      assert( (subIndex >= 0) && (subIndex < size( codim )) );
+      assert( (subIndex >= 0) && (static_cast<unsigned int>(subIndex) < size( codim )) );
       return subIndex;
     }
 
