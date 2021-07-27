@@ -51,7 +51,7 @@ namespace Dune
      *  \param d the direction to be used
      *  \param i the global coordinate index where to return the meshsize
      */
-    inline ct meshsize(int d, int i) const
+    inline ct meshsize(int d, [[maybe_unused]] int i) const
     {
       return _h[d];
     }
@@ -155,7 +155,7 @@ namespace Dune
       *  \param d the direction to be used
       *  \param i the global coordinate index where to return the meshsize
       */
-     inline ct meshsize(int d, int i) const
+     inline ct meshsize(int d, [[maybe_unused]] int i) const
      {
        return _h[d];
      }

@@ -38,7 +38,7 @@ namespace Dune {
         \param identityGrid  pointer to IdentityGrid instance
         \param level         grid level on which the iterator shall be created
      */
-    explicit IdentityGridLevelIterator(const GridImp* identityGrid, int level, bool endDummy)
+    explicit IdentityGridLevelIterator(const GridImp* identityGrid, int level, [[maybe_unused]] bool endDummy)
     : identityGrid_(identityGrid),
       hostLevelIterator_(identityGrid->hostgrid_->levelGridView(level).template end<codim,pitype>())
     {}

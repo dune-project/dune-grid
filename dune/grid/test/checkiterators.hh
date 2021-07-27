@@ -17,7 +17,7 @@ template<class T>
 class NoopFunctor {
 public:
   NoopFunctor() {}
-  void operator()(const T& t){}
+  void operator()(const T& ){}
 };
 
 // CheckCodimIterators

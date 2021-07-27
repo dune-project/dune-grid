@@ -253,7 +253,7 @@ namespace Dune
 
 
 
-      void ConstantExpression::evaluate ( const Vector &argument, Vector &result ) const
+      void ConstantExpression::evaluate ( const Vector & /* argument */, Vector &result ) const
       {
         result = value_;
       }

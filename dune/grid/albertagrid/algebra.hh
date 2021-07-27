@@ -25,7 +25,7 @@ namespace Dune
 
 
     template< class K, int m >
-    inline static K determinant ( const FieldMatrix< K, 0, m > &matrix )
+    inline static K determinant ( [[maybe_unused]] const FieldMatrix< K, 0, m > &matrix )
     {
       return K( 1 );
     }
@@ -76,8 +76,8 @@ namespace Dune
 
 
     template< class K, int m >
-    inline static K invert ( const FieldMatrix< K, 0, m > &matrix,
-                             FieldMatrix< K, m, 0 > &inverse )
+    inline static K invert ( [[maybe_unused]] const FieldMatrix< K, 0, m > &matrix,
+                             [[maybe_unused]] FieldMatrix< K, m, 0 > &inverse )
     {
       return K( 1 );
     }

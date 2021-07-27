@@ -75,9 +75,9 @@ namespace Dune
     NormalVector centerOuterNormal () const;
     NormalVector centerUnitOuterNormal () const;
 
-    NormalVector integrationOuterNormal ( const LocalCoordType &local ) const;
-    NormalVector outerNormal ( const LocalCoordType &local ) const;
-    NormalVector unitOuterNormal ( const LocalCoordType &local ) const;
+    NormalVector integrationOuterNormal ( [[maybe_unused]] const LocalCoordType &local ) const;
+    NormalVector outerNormal ( [[maybe_unused]] const LocalCoordType &local ) const;
+    NormalVector unitOuterNormal ( [[maybe_unused]] const LocalCoordType &local ) const;
 
 
     AlbertaTransformation transformation () const;

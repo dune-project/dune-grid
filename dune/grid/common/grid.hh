@@ -941,7 +941,7 @@ namespace Dune {
 
     /*! \brief default implementation of load balance does nothing and returns false */
     template<class DataHandle>
-    bool loadBalance (DataHandle& data)
+    bool loadBalance ([[maybe_unused]] DataHandle& data)
     {
       return false;
     }

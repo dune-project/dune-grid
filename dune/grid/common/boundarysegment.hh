@@ -109,7 +109,7 @@ namespace Dune {
     /** \brief write BoundarySegment's data to stream buffer
      *  \param buffer buffer to store data
      */
-    virtual void backup( ObjectStreamType& buffer ) const
+    virtual void backup( [[maybe_unused]] ObjectStreamType& buffer ) const
     {
       DUNE_THROW(NotImplemented,"BoundarySegment::backup needs to be overloaded!");
     }

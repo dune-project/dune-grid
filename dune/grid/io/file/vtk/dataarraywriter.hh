@@ -117,10 +117,10 @@ namespace Dune
        *                  for the actual data.
        */
       AsciiDataArrayWriter(std::ostream& theStream, std::string name,
-                           int ncomps, const Indent& indent_, Precision prec)
-        : DataArrayWriter(prec), s(theStream), counter(0), numPerLine(12), indent(indent_)
+                           int ncomps, const Indent& indent_, Precision prec_)
+        : DataArrayWriter(prec_), s(theStream), counter(0), numPerLine(12), indent(indent_)
       {
-        s << indent << "<DataArray type=\"" << toString(prec) << "\" "
+        s << indent << "<DataArray type=\"" << toString(prec_) << "\" "
           << "Name=\"" << name << "\" ";
         s << "NumberOfComponents=\"" << ncomps << "\" ";
         s << "format=\"ascii\">\n";
@@ -206,10 +206,10 @@ namespace Dune
        *                  for the actual data.
        */
       BinaryDataArrayWriter(std::ostream& theStream, std::string name,
-                            int ncomps, int nitems, const Indent& indent_, Precision prec)
-        : DataArrayWriter(prec), s(theStream), b64(theStream), indent(indent_)
+                            int ncomps, int nitems, const Indent& indent_, Precision prec_)
+        : DataArrayWriter(prec_), s(theStream), b64(theStream), indent(indent_)
       {
-        s << indent << "<DataArray type=\"" << toString(prec) << "\" "
+        s << indent << "<DataArray type=\"" << toString(prec_) << "\" "
           << "Name=\"" << name << "\" ";
         s << "NumberOfComponents=\"" << ncomps << "\" ";
         s << "format=\"binary\">\n";
@@ -217,7 +217,7 @@ namespace Dune
         // write indentation for the data chunk
         s << indent+1;
         // store size, needs to be exactly 32 bit
-        std::uint32_t size = ncomps*nitems*typeSize(prec);
+        std::uint32_t size = ncomps*nitems*typeSize(prec_);
         b64.write(size);
         b64.flush();
       }
@@ -280,15 +280,15 @@ namespace Dune
        */
       AppendedRawDataArrayWriter(std::ostream& s, std::string name,
                                  int ncomps, unsigned nitems, unsigned& offset,
-                                 const Indent& indent, Precision prec)
-      : DataArrayWriter(prec)
+                                 const Indent& indent, Precision prec_)
+      : DataArrayWriter(prec_)
       {
-        s << indent << "<DataArray type=\"" << toString(prec) << "\" "
+        s << indent << "<DataArray type=\"" << toString(prec_) << "\" "
           << "Name=\"" << name << "\" ";
         s << "NumberOfComponents=\"" << ncomps << "\" ";
         s << "format=\"appended\" offset=\""<< offset << "\" />\n";
         offset += 4; // header
-        offset += ncomps*nitems*typeSize(prec);
+        offset += ncomps*nitems*typeSize(prec_);
       }
 
       //! whether calls to write may be skipped
@@ -296,11 +296,11 @@ namespace Dune
 
     private:
       //! write one data element to output stream (noop)
-      void writeFloat64 (double data) final {}
-      void writeFloat32 (float data) final {}
-      void writeInt32 (std::int32_t data) final {}
-      void writeUInt32 (std::uint32_t data) final {}
-      void writeUInt8 (std::uint8_t data) final {}
+      void writeFloat64 (double) final {}
+      void writeFloat32 (float) final {}
+      void writeInt32 (std::int32_t) final {}
+      void writeUInt32 (std::uint32_t) final {}
+      void writeUInt8 (std::uint8_t) final {}
     };
 
     //! a streaming writer for data array tags, uses appended base64 format
@@ -322,15 +322,15 @@ namespace Dune
        */
       AppendedBase64DataArrayWriter(std::ostream& s, std::string name,
                                     int ncomps, unsigned nitems,
-                                    unsigned& offset, const Indent& indent, Precision prec)
-      : DataArrayWriter(prec)
+                                    unsigned& offset, const Indent& indent, Precision prec_)
+      : DataArrayWriter(prec_)
       {
-        s << indent << "<DataArray type=\"" << toString(prec) << "\" "
+        s << indent << "<DataArray type=\"" << toString(prec_) << "\" "
           << "Name=\"" << name << "\" ";
         s << "NumberOfComponents=\"" << ncomps << "\" ";
         s << "format=\"appended\" offset=\""<< offset << "\" />\n";
         offset += 8; // header
-        std::size_t bytes = ncomps*nitems*typeSize(prec);
+        std::size_t bytes = ncomps*nitems*typeSize(prec_);
         offset += bytes/3*4;
         if(bytes%3 != 0)
           offset += 4;
@@ -341,11 +341,11 @@ namespace Dune
 
     private:
       //! write one data element to output stream (noop)
-      void writeFloat64 (double data) final {}
-      void writeFloat32 (float data) final {}
-      void writeInt32 (std::int32_t data) final {}
-      void writeUInt32 (std::uint32_t data) final {}
-      void writeUInt8 (std::uint8_t data) final {}
+      void writeFloat64 (double) final {}
+      void writeFloat32 (float) final {}
+      void writeInt32 (std::int32_t) final {}
+      void writeUInt32 (std::uint32_t) final {}
+      void writeUInt8 (std::uint8_t) final {}
     };
 
     //////////////////////////////////////////////////////////////////////
@@ -365,11 +365,11 @@ namespace Dune
        *                  point data.
        */
       NakedBase64DataArrayWriter(std::ostream& theStream, int ncomps,
-                                 int nitems, Precision prec)
-        : DataArrayWriter(prec), b64(theStream)
+                                 int nitems, Precision prec_)
+        : DataArrayWriter(prec_), b64(theStream)
       {
         // store size
-        std::uint32_t size = ncomps*nitems*typeSize(prec);
+        std::uint32_t size = ncomps*nitems*typeSize(prec_);
         b64.write(size);
         b64.flush();
       }
@@ -415,10 +415,10 @@ namespace Dune
        *                  point data.
        */
       NakedRawDataArrayWriter(std::ostream& theStream, int ncomps,
-                              int nitems, Precision prec)
-        : DataArrayWriter(prec), s(theStream)
+                              int nitems, Precision prec_)
+        : DataArrayWriter(prec_), s(theStream)
       {
-        s.write((unsigned int)(ncomps*nitems*typeSize(prec)));
+        s.write((unsigned int)(ncomps*nitems*typeSize(prec_)));
       }
 
     private:

@@ -54,7 +54,7 @@ namespace Dune
        * abstract so derived classes don't have to override it if they don't
        * need it.
        */
-      virtual void write(const Cell& cell, const Domain& xl) {
+      virtual void write(const Cell& /* cell */, const Domain& /* xl */) {
         DUNE_THROW(NotImplemented, "FunctionWriterBase::write(const Cell&, "
                    "const Domain&): Either the derived class " <<
                    typeid(*this).name() << " failed to implement this method "
@@ -280,7 +280,7 @@ namespace Dune
         return !arraywriter->writeIsNoop();
       }
       //! write at the given corner
-      virtual void write(const Cell& cell, unsigned cornerIndex)
+      virtual void write(const Cell& /* cell */, unsigned /* cornerIndex */)
       {
         arraywriter->write(counter);
         ++counter;

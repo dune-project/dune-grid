@@ -237,7 +237,7 @@ namespace Dune
 
   template< int dim, class Grid >
   inline void AlbertaGridEntity< 0, dim, Grid >
-    ::setElement ( const ElementInfo &elementInfo, int subEntity )
+  ::setElement ( const ElementInfo &elementInfo, int /* subEntity */ )
   {
     elementInfo_ = elementInfo;
   }

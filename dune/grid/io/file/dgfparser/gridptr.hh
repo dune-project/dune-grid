@@ -635,36 +635,36 @@ namespace Dune
         return (codim == 1) || ((codim == dimension) && (gridPtr_.nofVtxParam_ > 0)) || ((codim == 0) && (gridPtr_.nofElParam_ > 0));
       }
 
-      bool fixedSize (int dim, int codim) const { return false; }
+      bool fixedSize (int /* dim */, int /* codim */) const { return false; }
 
       template< class Entity >
       std::size_t size ( const Entity &entity ) const
       {
-        std::size_t size = 0;
+        std::size_t totalSize = 0;
 
         // do not use a switch statement, because dimension == 1 is possible
         if( (Entity::codimension == 0) && (gridPtr_.nofElParam_ > 0) )
         {
           assert( elData_[ idSet_.id( entity ) ].size() == static_cast< std::size_t >( gridPtr_.nofElParam_ ) );
           for( double &v : elData_[ idSet_.id( entity ) ] )
-            size += dataSize( v );
+            totalSize += dataSize( v );
         }
 
         if( (Entity::codimension == dimension) && (gridPtr_.nofVtxParam_ > 0) )
         {
           assert( vtxData_[ idSet_.id( entity ) ].size() == static_cast< std::size_t >( gridPtr_.nofVtxParam_ ) );
           for( double &v : vtxData_[ idSet_.id( entity ) ] )
-            size += dataSize( v );
+            totalSize += dataSize( v );
         }
 
         if( Entity::codimension == 1 )
         {
           const auto bndData = bndData_.find( idSet_.id( entity ) );
           if( bndData != bndData_.end() )
-            size += dataSize( bndData->second.first ) + dataSize( bndData->second.second );
+            totalSize += dataSize( bndData->second.first ) + dataSize( bndData->second.second );
         }
 
-        return size;
+        return totalSize;
       }
 
       template< class Buffer, class Entity >
@@ -728,7 +728,7 @@ namespace Dune
 
     private:
       template< class T >
-      static std::enable_if_t< std::is_trivially_copyable< T >::value, std::size_t > dataSize ( const T &value )
+      static std::enable_if_t< std::is_trivially_copyable< T >::value, std::size_t > dataSize ( const T & /* value */ )
       {
         return sizeof( T );
       }

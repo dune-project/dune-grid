@@ -63,16 +63,16 @@ namespace Dune
       }
 
       template< class MessageBuffer, class HostEntity >
-      void scatter ( MessageBuffer &buffer, const HostEntity &hostEntity, size_t size )
+      void scatter ( MessageBuffer &buffer, const HostEntity &hostEntity, size_t size_ )
       {
         typedef typename Grid::Traits::template Codim< HostEntity::codimension >::Entity Entity;
         typedef typename Grid::Traits::template Codim< HostEntity::codimension >::EntityImpl EntityImpl;
         Entity entity( EntityImpl( grid_, hostEntity ) );
-        wrappedHandle_.scatter( buffer, entity, size );
+        wrappedHandle_.scatter( buffer, entity, size_ );
       }
 
     private:
-      static void assertHostEntity ( int dim, int codim )
+      static void assertHostEntity ( int , int codim )
       {
         if( !Capabilities::CodimCache< Grid >::hasHostEntity( codim ) )
           DUNE_THROW( NotImplemented, "Host grid has no entities for codimension " << codim << "." );

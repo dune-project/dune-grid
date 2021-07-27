@@ -184,7 +184,7 @@ namespace Dune
 
   template< class Grid >
   inline typename AlbertaGridIntersectionBase< Grid >::NormalVector
-  AlbertaGridIntersectionBase< Grid >::integrationOuterNormal ( const LocalCoordType &local ) const
+  AlbertaGridIntersectionBase< Grid >::integrationOuterNormal ( const LocalCoordType & ) const
   {
     return centerIntegrationOuterNormal();
   }
@@ -192,7 +192,7 @@ namespace Dune
 
   template< class Grid >
   inline typename AlbertaGridIntersectionBase< Grid >::NormalVector
-  AlbertaGridIntersectionBase< Grid >::outerNormal( const LocalCoordType &local ) const
+  AlbertaGridIntersectionBase< Grid >::outerNormal( const LocalCoordType & ) const
   {
     return centerOuterNormal();
   }
@@ -200,7 +200,7 @@ namespace Dune
 
   template< class Grid >
   inline typename AlbertaGridIntersectionBase< Grid >::NormalVector
-  AlbertaGridIntersectionBase< Grid >::unitOuterNormal ( const LocalCoordType &local ) const
+  AlbertaGridIntersectionBase< Grid >::unitOuterNormal ( const LocalCoordType & ) const
   {
     return centerUnitOuterNormal();
   }
