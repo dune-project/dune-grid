@@ -72,7 +72,7 @@ namespace Dune
       }
 
     private:
-      static void assertHostEntity ( int dim, int codim )
+      static void assertHostEntity ( int , int codim )
       {
         if( !Capabilities::CodimCache< Grid >::hasHostEntity( codim ) )
           DUNE_THROW( NotImplemented, "Host grid has no entities for codimension " << codim << "." );

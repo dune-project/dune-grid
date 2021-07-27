@@ -260,15 +260,15 @@ namespace Dune
     bool geomTypesError = false;
 
     // Check whether all entries in the official geometry types list are contained in our self-computed one
-    for( auto it = types.begin(); it != types.end(); ++it )
-      if( geometryTypes.find( *it ) == geometryTypes.end() )
+    for( auto itT = types.begin(); itT != types.end(); ++itT )
+      if( geometryTypes.find( *itT ) == geometryTypes.end() )
         geomTypesError = true;
 
 
     // And vice versa
-    for( std::set<GeometryType>::iterator it = geometryTypes.begin(); it != geometryTypes.end(); ++it )
+    for( std::set<GeometryType>::iterator itG = geometryTypes.begin(); itG != geometryTypes.end(); ++itG )
     {
-      if( std::find( types.begin(), types.end(), *it ) == types.end() )
+      if( std::find( types.begin(), types.end(), *itG ) == types.end() )
         geomTypesError = true;
     }
 
@@ -278,12 +278,12 @@ namespace Dune
 
       std::cerr << "There is a mismatch in the list of geometry types of codim " << codim << "." << std::endl;
       std::cerr << "Geometry types present in the grid are:" << std::endl;
-      for (std::set<GeometryType>::iterator it = geometryTypes.begin(); it!=geometryTypes.end(); ++it)
-        std::cerr << "  " << *it << std::endl;
+      for (std::set<GeometryType>::iterator itG = geometryTypes.begin(); itG!=geometryTypes.end(); ++itG)
+        std::cerr << "  " << *itG << std::endl;
 
       std::cerr << std::endl << "but the method types() returned:" << std::endl;
-      for( auto it = types.begin(); it != types.end(); ++it )
-        std::cerr << "  " << *it << std::endl;
+      for( auto itT = types.begin(); itT != types.end(); ++itT )
+        std::cerr << "  " << *itT << std::endl;
 
       DUNE_THROW(GridError, "!");
     }
@@ -292,11 +292,11 @@ namespace Dune
     // check size of index set
     int gridsize = 0;
     {
-      typedef typename GridView :: template Codim< codim > :: Iterator IteratorType;
+      using  IteratorTypeV = typename GridView :: template Codim< codim > :: Iterator;
 
       int count = 0;
-      const IteratorType endit = view.template end< codim >();
-      for( IteratorType it = view.template begin< codim >(); it != endit; ++it )
+      const IteratorTypeV enditV = view.template end< codim >();
+      for( IteratorTypeV itV = view.template begin< codim >(); itV != enditV; ++itV )
         ++count;
 
       int lsetsize = lset.size(codim);
@@ -311,21 +311,20 @@ namespace Dune
     }
 
     {
-      typedef typename GridView :: template Codim< 0 > :: Iterator Iterator;
-      typedef typename Grid :: Traits :: LocalIdSet LocalIdSetType;
-      typedef typename LocalIdSetType :: IdType IdType;
-
+      using IteratorTypeC  = typename GridView :: template Codim< 0 > :: Iterator;
+      using LocalIdSetType = typename Grid :: Traits :: LocalIdSet;
+      using IdType = typename LocalIdSetType :: IdType;
       std::set< IdType > entityfound;
 
-      const Iterator endit = view.template end< 0 >();
-      Iterator it = view.template begin< 0 >();
-      if( it == endit )
+      const IteratorTypeC enditC = view.template end< 0 >();
+      auto itC = view.template begin< 0 >();
+      if( itC == enditC )
         return;
 
-      const LocalIdSetType &localIdSet = grid.localIdSet();
-      for( ; it != endit; ++it )
+      const auto &localIdSet = grid.localIdSet();
+      for( ; itC != enditC; ++itC )
       {
-        const typename std::iterator_traits<Iterator>::value_type &entity = *it;
+        const auto &entity = *itC;
         if( !lset.contains( entity ) )
         {
           std::cerr << "Error: IndexSet does not contain all entities." << std::endl;
@@ -334,7 +333,7 @@ namespace Dune
         const int subcount = entity.subEntities(codim);
         for( int i = 0; i < subcount; ++i )
         {
-          const IdType id = localIdSet.id( entity.template subEntity< codim >( i ) );
+          const auto id = localIdSet.id( entity.template subEntity< codim >( i ) );
           entityfound.insert( id );
         }
       }
@@ -361,18 +360,18 @@ namespace Dune
     // setup vertex map , store vertex coords for vertex number
     {
       unsigned int count = 0;
-      typedef typename GridView :: template Codim< dim > :: Iterator VxIterator;
-      const VxIterator end = view.template end< dim >();
-      for( VxIterator it = view.template begin< dim >(); it != end; ++it )
+      using VxIterator = typename GridView :: template Codim< dim > :: Iterator;
+      const VxIterator endV = view.template end< dim >();
+      for( auto itV = view.template begin< dim >(); itV != endV; ++itV )
       {
         ++count;
         // get coordinates of vertex
-        FieldVector< coordType, dimworld > vx ( it->geometry().corner( 0 ) );
+        FieldVector< coordType, dimworld > vx ( itV->geometry().corner( 0 ) );
 
         // get index of vertex
         sout << "Vertex " << vx << "\n";
-        assert( lset.contains ( *it ) );
-        int idx = lset.index( *it );
+        assert( lset.contains ( *itV ) );
+        int idx = lset.index( *itV );
 
         sout << "Vertex " << idx << " = [" << vx << "]\n";
 
@@ -424,20 +423,20 @@ namespace Dune
     }
 
     {
-      typedef typename GridView :: template Codim< 0 > :: Iterator Iterator;
-      const Iterator endit = view.template end< 0 >();
-      for( Iterator it = view.template begin< 0 >(); it != endit; ++it )
+      using Iterator = typename GridView :: template Codim< 0 > :: Iterator;
+      const Iterator enditC = view.template end< 0 >();
+      for( Iterator itC = view.template begin< 0 >(); itC != enditC; ++itC )
       {
         // if (it->partitionType()==4) continue;
         sout << "****************************************\n";
-        sout << "Element = " << lset.index(*it) << " on level " << it->level () << "\n";
+        sout << "Element = " << lset.index(*itC) << " on level " << itC->level () << "\n";
         sout << "Vertices      = [";
-        int svx = it->subEntities(dim);
+        int svx = itC->subEntities(dim);
 
         // print all vertex numbers
         for( int i = 0; i < svx; ++i )
         {
-          const typename IndexSetType::IndexType idx = lset.subIndex( *it, i, dim );
+          const typename IndexSetType::IndexType idx = lset.subIndex( *itC, i, dim );
           sout << idx << (i < svx-1 ? ", " : "]\n");
         }
 
@@ -447,7 +446,7 @@ namespace Dune
         {
           // get entity pointer of sub entity codim=dim (Vertex)
           typedef typename GridView::template Codim< dim >::Entity VertexE;
-          VertexE vxE = it->template subEntity< dim >( i );
+          VertexE vxE = itC->template subEntity< dim >( i );
 
           // get coordinates of entity pointer
           FieldVector< coordType, dimworld > vx( vxE.geometry().corner( 0 ) );
@@ -455,7 +454,7 @@ namespace Dune
           // output vertex coordinates
           sout << vx << (i < svx-1 ? ", " : "]\n");
 
-          const typename IndexSetType::IndexType vxidx = lset.subIndex( *it, i, dim );
+          const typename IndexSetType::IndexType vxidx = lset.subIndex( *itC, i, dim );
 
           // the subIndex and the index for subEntity must be the same
           if( vxidx != lset.index( vxE ) )
@@ -471,7 +470,7 @@ namespace Dune
           {
             std::cerr << "Error: Inconsistent map of global vertex " << vxidx
                       << ": " << vxcheck << " != " << vx
-                      << "  (type = " << it->partitionType() << ")" << std::endl;
+                      << "  (type = " << itC->partitionType() << ")" << std::endl;
             assert( compareVec( vxcheck, vx ) );
           }
         }
@@ -479,7 +478,7 @@ namespace Dune
         ////////////////////////////////////////////////////////////
         // check sub entities
         ////////////////////////////////////////////////////////////
-        checkSubEntity< codim >( grid, *it, lset, sout,
+        checkSubEntity< codim >( grid, *itC, lset, sout,
                                  setOfVerticesPerSubEntity, subEntityPerSetOfVertices, vertexCoordsMap );
 
         // check neighbors
@@ -489,8 +488,8 @@ namespace Dune
 
           if( !levelIndex || EnableLevelIntersectionIteratorCheck< typename GridView::Grid >::v )
           {
-            const IntersectionIterator endnit = view.iend( *it );
-            for( IntersectionIterator nit = view.ibegin( *it ); nit != endnit; ++nit )
+            const IntersectionIterator endnit = view.iend( *itC );
+            for( IntersectionIterator nit = view.ibegin( *itC ); nit != endnit; ++nit )
             {
               if( !nit->neighbor() )
                 continue;

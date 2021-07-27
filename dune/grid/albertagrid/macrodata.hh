@@ -220,7 +220,8 @@ namespace Dune
 
       static bool checkNeighbors ( const MacroData &macroData );
       static void markLongestEdge ( MacroData &macroData );
-      static void setOrientation ( MacroData &macroData, const Real orientation );
+      static void setOrientation ( [[maybe_unused]] MacroData &macroData,
+                                   [[maybe_unused]] const Real orientation );
 
     private:
       static Real edgeLength ( const MacroData &macroData, const ElementId &e, int edge );

@@ -1230,29 +1230,29 @@ namespace Dune
     }
 
     //! count the vertices, cells and corners
-    virtual void countEntities(int &nvertices, int &ncells, int &ncorners)
+    virtual void countEntities(int &nvertices_, int &ncells_, int &ncorners_)
     {
-      nvertices = 0;
-      ncells = 0;
-      ncorners = 0;
+      nvertices_ = 0;
+      ncells_ = 0;
+      ncorners_ = 0;
       for (CellIterator it=cellBegin(); it!=cellEnd(); ++it)
       {
-        ncells++;
+        ncells_++;
         // because of the use of vertexmapper->map(), this iteration must be
         // in the order of Dune's numbering.
         const int subEntities = it->subEntities(n);
         for (int i=0; i<subEntities; ++i)
         {
-          ncorners++;
+          ncorners_++;
           if (datamode == VTK::conforming)
           {
             int alpha = vertexmapper->subIndex(*it,i,n);
             if (number[alpha]<0)
-              number[alpha] = nvertices++;
+              number[alpha] = nvertices_++;
           }
           else
           {
-            nvertices++;
+            nvertices_++;
           }
         }
       }

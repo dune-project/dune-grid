@@ -73,7 +73,7 @@ TestSuite testEntityShiftTable(std::vector<unsigned long long> const* reference 
   return t;
 }
 
-int main(int argc, char** argv)
+int main(int argc, char** /* argv */)
 {
   bool dump = false;
   if (argc > 1)

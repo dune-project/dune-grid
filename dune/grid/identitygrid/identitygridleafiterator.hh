@@ -39,7 +39,7 @@ namespace Dune {
      *  \param endDummy      Here only to distinguish it from the other constructor
      *  \param identityGrid  pointer to grid instance
      */
-    explicit IdentityGridLeafIterator(const GridImp* identityGrid, bool endDummy) :
+    explicit IdentityGridLeafIterator(const GridImp* identityGrid, [[maybe_unused]] bool endDummy) :
       identityGrid_(identityGrid),
       hostLeafIterator_(identityGrid->hostgrid_->leafGridView().template end<codim,pitype>())
     {}

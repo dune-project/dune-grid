@@ -232,15 +232,15 @@ namespace Dune
     }
 
     //! evaluate
-    double evaluate (int comp, const Entity& e,
+    double evaluate ([[maybe_unused]] int comp, const Entity& e,
                      const Dune::FieldVector<ctype,dim>& xi) const override
     {
-      const unsigned int dim = Entity::mydimension;
+      const unsigned int myDim = Entity::mydimension;
       const unsigned int nVertices = e.subEntities(dim);
 
       std::vector<FieldVector<ctype,1> > cornerValues(nVertices);
       for (unsigned i=0; i<nVertices; ++i)
-        cornerValues[i] = v[mapper.subIndex(e,i,dim)*ncomps_+mycomp_];
+        cornerValues[i] = v[mapper.subIndex(e,i,myDim)*ncomps_+mycomp_];
 
       // (Ab)use the MultiLinearGeometry class to do multi-linear interpolation between scalars
       const MultiLinearGeometry<ctype,dim,1> interpolation(e.type(), cornerValues);

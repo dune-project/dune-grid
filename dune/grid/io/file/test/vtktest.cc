@@ -61,8 +61,8 @@ public:
      @param[in]  xi     point in local coordinates of the reference element of e
      \return            value of the component
    */
-  virtual double evaluate (int comp, const Entity& e,
-                           const Dune::FieldVector<DT,n>& xi) const
+  virtual double evaluate (int comp, [[maybe_unused]] const Entity& e,
+                           [[maybe_unused]] const Dune::FieldVector<DT,n>& xi) const
   {
     return comp*0.1;
   }

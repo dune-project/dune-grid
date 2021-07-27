@@ -557,9 +557,9 @@ namespace Dune
     // generic-case: This is not supposed to be used at runtime.
     template <class E, class V, class V2>
     void boundarysegment_insert(
-      const V& nodes,
-      const E& elementDofs,
-      const V2& vertices
+      const V&,
+      const E&,
+      const V2&
       )
     {
       DUNE_THROW(Dune::IOError, "tried to create a 3D boundary segment in a non-3D Grid");

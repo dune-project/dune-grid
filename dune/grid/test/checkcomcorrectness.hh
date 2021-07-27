@@ -39,24 +39,24 @@ namespace Dune {
         : public Dune::CommDataHandleIF<SymmetryVerifyingDataHandle,std::size_t>
       {
 
-        bool contains(int dim, int codim) const
+        bool contains(int /* dim */, int codim) const
         {
           return codim == _codim;
         }
 
-        bool fixedSize(int dim, int codim) const
+        bool fixedSize(int /* dim */, int /* codim */) const
         {
           return _fixed_size;
         }
 
         template<typename E>
-        std::size_t size(const E& e) const
+        std::size_t size(const E&) const
         {
           return _writes_per_cell;
         }
 
         template<typename Buf, typename E>
-        void gather(Buf& buf, const E& e) const
+        void gather(Buf& buf, const E&) const
         {
           for (std::size_t i = 0; i < _writes_per_cell; ++i)
             buf.write(std::size_t(42));
@@ -64,7 +64,7 @@ namespace Dune {
         }
 
         template<typename Buf, typename E>
-        void scatter(Buf& buf, const E& e, std::size_t n) const
+        void scatter(Buf& buf, const E&, std::size_t n) const
         {
           assert(_writes_per_cell == n);
           for (std::size_t i = 0; i < _writes_per_cell; ++i)
@@ -111,18 +111,18 @@ namespace Dune {
       {
         using ctype = typename GV::ctype;
 
-        bool contains(int dim, int codim) const
+        bool contains([[maybe_unused]] int dim, int codim) const
         {
           return codim == _codim;
         }
 
-        bool fixedSize(int dim, int codim) const
+        bool fixedSize([[maybe_unused]] int dim, [[maybe_unused]] int codim) const
         {
           return true;
         }
 
         template<typename E>
-        std::size_t size(const E& e) const
+        std::size_t size([[maybe_unused]] const E& e) const
         {
           return 1;
         }
@@ -141,7 +141,7 @@ namespace Dune {
         }
 
         template<typename Buf, typename E>
-        void scatter(Buf& buf, const E& e, std::size_t n) const
+        void scatter(Buf& buf, const E& e, [[maybe_unused]] std::size_t n) const
         {
           assert(_allowed_reads.count(e.partitionType()) > 0);
           typename E::Geometry::GlobalCoordinate data;
@@ -297,7 +297,7 @@ namespace Dune {
           gv.communicate(dh,InteriorBorder_InteriorBorder_Interface,ForwardCommunication);
           dh.verify(
             codim,
-            [](PartitionType partition, bool write_allowed, bool read_allowed, std::size_t writes, std::size_t reads)
+            [](PartitionType partition, bool /* write_allowed */, bool /* read_allowed */, [[maybe_unused]] std::size_t writes, [[maybe_unused]] std::size_t reads)
             {
               if (partition == BorderEntity)
                 {
@@ -320,9 +320,9 @@ namespace Dune {
 
       // Statically iterate over all codimensions
       template<typename GV, int cd>
-      void check_communication_correctness_iter(GV gv, Codim<cd> codim, std::true_type, std::true_type) {}
+      void check_communication_correctness_iter(GV, Codim<cd>, std::true_type, std::true_type) {}
       template<typename GV, int cd>
-      void check_communication_correctness_iter(GV gv, Codim<cd> codim, std::false_type, std::true_type) {}
+      void check_communication_correctness_iter(GV, Codim<cd>, std::false_type, std::true_type) {}
 
       template<typename GV, int cd>
       void check_communication_correctness_iter(GV gv, Codim<cd> codim, std::true_type, std::false_type) {

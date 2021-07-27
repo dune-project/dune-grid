@@ -533,7 +533,8 @@ namespace Dune
       static const int minTwist = 0;
       static const int maxTwist = 0;
 
-      static int twist ( const Element *element, int subEntity )
+      static int twist ( [[maybe_unused]] const Element *element,
+                         [[maybe_unused]] int subEntity )
       {
         assert( (subEntity >= 0) && (subEntity < numSubEntities) );
         return 0;
@@ -569,7 +570,8 @@ namespace Dune
       static const int minTwist = 0;
       static const int maxTwist = 0;
 
-      static int twist ( const Element *element, int subEntity )
+      static int twist ( [[maybe_unused]] const Element *element,
+                         [[maybe_unused]] int subEntity )
       {
         assert( subEntity == 0 );
         return 0;
@@ -612,7 +614,8 @@ namespace Dune
       static const int minTwist = 0;
       static const int maxTwist = 0;
 
-      static int twist ( const Element *element, int subEntity )
+      static int twist ( [[maybe_unused]] const Element *element,
+                         [[maybe_unused]] int subEntity )
       {
         assert( subEntity == 0 );
         return 0;

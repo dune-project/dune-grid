@@ -134,7 +134,7 @@ struct subIndexCheck
 template <class Grid, class Entity, bool doCheck>
 struct subIndexCheck<-1, Grid, Entity, doCheck>
 {
-  subIndexCheck (const Grid & g, const Entity & e)
+  subIndexCheck (const Grid & /* g */, const Entity & /* e */)
   {
     return;
   }
@@ -292,10 +292,10 @@ void assertNeighbor (Grid &g)
 
   GridView gridView = g.levelGridView( 0 );
 
-  LevelIterator e = g.levelGridView(0).template begin<0>();
+  LevelIterator eit = g.levelGridView(0).template begin<0>();
   const LevelIterator eend = g.levelGridView(0).template end<0>();
 
-  LevelIterator next = e;
+  LevelIterator next = eit;
   if (next != eend)
   {
     ++next;
@@ -324,9 +324,9 @@ void assertNeighbor (Grid &g)
     }
 
     // iterate over level
-    for (; e != eend; ++e)
+    for (; eit != eend; ++eit)
     {
-      const Entity &entity = *e;
+      const Entity &entity = *eit;
 
       const bool isGhost = (entity.partitionType() == Dune::GhostEntity);
 
@@ -420,11 +420,11 @@ void assertNeighbor (Grid &g)
 
           // numbering
           const int indexInOutside = it->indexInOutside();
-          const int numFaces = outside.subEntities(1);
-          if( (indexInOutside < 0) || (indexInOutside >= numFaces) )
+          const int outNumFaces = outside.subEntities(1);
+          if( (indexInOutside < 0) || (indexInOutside >= outNumFaces) )
           {
             std :: cout << "Error: Invalid indexInOutside: " << indexInOutside
-                        << " (should be between 0 and " << (numFaces-1) << ")"
+                        << " (should be between 0 and " << (outNumFaces-1) << ")"
                         << std :: endl;
             assert( false );
           }
@@ -437,12 +437,12 @@ void assertNeighbor (Grid &g)
 
             typedef typename Grid::template Codim< 0 >
             ::template Partition< pitype >::LevelIterator
-            LevelIterator;
+            LevelIteratorI;
 
             const int level = entity.level();
             bool foundNeighbor = false;
-            LevelIterator nit = g.levelGridView(level).template begin< 0, pitype >();
-            const LevelIterator nend = g.levelGridView(level).template end< 0, pitype > ();
+            LevelIteratorI nit = g.levelGridView(level).template begin< 0, pitype >();
+            const LevelIteratorI nend = g.levelGridView(level).template end< 0, pitype > ();
             for( ; nit != nend; ++nit )
             {
               if( nit->partitionType() != Dune::InteriorEntity )

@@ -48,7 +48,7 @@ namespace Dune
       {}
 
       // note: GlobalVector is an array type; global is the return value
-      void operator() ( const ElementInfo &elementInfo, const LocalVector local,
+      void operator() ( const ElementInfo & /* elementInfo */, const LocalVector /* local */,
                         GlobalVector global ) const
       {
         GlobalCoordinate x;

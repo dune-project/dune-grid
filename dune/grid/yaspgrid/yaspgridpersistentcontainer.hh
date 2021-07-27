@@ -62,7 +62,7 @@ namespace Dune
     }
 
     /** \copydoc IndexSet::size */
-    std::size_t size (int codim) const
+    std::size_t size (int /* codim */) const
     {
       if (_grid.indexsets.size()+1 != _offsets.size())
         recomputeOffsets();
