@@ -17,16 +17,6 @@ namespace Dune
 
     template< int dim >
     template< int dimWorld >
-    unsigned int MeshPointer< dim >::Library< dimWorld >::boundaryCount = 0;
-
-    template< int dim >
-    template< int dimWorld >
-    const void *MeshPointer< dim >::Library< dimWorld >::projectionFactory = 0;
-
-
-
-    template< int dim >
-    template< int dimWorld >
     void MeshPointer< dim >::Library< dimWorld >
     ::create ( MeshPointer &ptr, const MacroData< dim > &macroData,
                ALBERTA NODE_PROJECTION *(*initNodeProjection)( Mesh *, ALBERTA MACRO_EL *, int ) )
