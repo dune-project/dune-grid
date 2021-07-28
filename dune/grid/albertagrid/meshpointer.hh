@@ -146,8 +146,8 @@ namespace Dune
     {
       typedef Alberta::MeshPointer< dim > MeshPointer;
 
-      static unsigned int boundaryCount;
-      static const void *projectionFactory;
+      static inline unsigned int boundaryCount = 0;
+      static inline const void *projectionFactory = nullptr;
 
       static void
       create ( MeshPointer &ptr, const MacroData< dim > &macroData,
@@ -317,7 +317,7 @@ namespace Dune
       Library< dimWorld >::boundaryCount = 0;
       Library< dimWorld >::projectionFactory = &projectionFactory;
       Library< dimWorld >::create( *this, macroData, &initNodeProjection< ProjectionFactory > );
-      Library< dimWorld >::projectionFactory = 0;
+      Library< dimWorld >::projectionFactory = nullptr;
       return Library< dimWorld >::boundaryCount;
     }
 
