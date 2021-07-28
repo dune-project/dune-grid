@@ -102,7 +102,7 @@ struct subIndexCheck
     for (const auto& se : subEntities(e, Dune::Codim<cd>{}))
     {
       // check construction of entities
-      auto seCopy = se;
+      [[maybe_unused]] auto seCopy = se;
       assert( seCopy == se );
 
       checkEntitySeedRecovery(g,se);
