@@ -20,7 +20,11 @@ namespace Dune {
       {
         assert(bufferSize_ >= size);
         memcpy(&x, data_+bufferSize_-size, size);
-        resize(bufferSize_-size);
+        // decrease size without shrinking the allocated buffer
+        bufferSize_ =- size;
+        // if all item are read, deallocate the buffer
+        if (bufferSize_ == 0)
+          resize(0);
       }
 
       void write(const DataType& x)
