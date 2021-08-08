@@ -55,7 +55,7 @@ namespace Dune {
     GridFactory(OneDGrid* grid);
 
     /** \brief Destructor */
-    ~GridFactory<Dune::OneDGrid>();
+    ~GridFactory();
 
     /** \brief Insert a vertex into the coarse grid */
     virtual void insertVertex(const FieldVector<ctype,1>& pos);
