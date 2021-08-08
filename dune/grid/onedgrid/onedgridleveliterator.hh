@@ -36,7 +36,7 @@ namespace Dune {
   protected:
 
     /** \brief Constructor from a given iterator */
-    OneDGridLevelIterator<codim,pitype, GridImp>(OneDEntityImp<dim-codim>* it)
+    OneDGridLevelIterator(OneDEntityImp<dim-codim>* it)
     {
       virtualEntity_.impl().setToTarget(it);
     }
