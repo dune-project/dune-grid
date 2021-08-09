@@ -30,7 +30,7 @@ GridFactory(OneDGrid* grid) :
 }
 
 Dune::GridFactory<Dune::OneDGrid>::
-~GridFactory<Dune::OneDGrid>()
+~GridFactory()
 {
   if (grid_ && factoryOwnsGrid_)
     delete grid_;
