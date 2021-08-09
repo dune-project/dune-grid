@@ -918,7 +918,7 @@ namespace Dune
         if (elements[i].size()!=size_t(dimw+1))
           continue;
         double o=testTriang(i);
-        if (o*orientation<0) { // wrong orientation
+        if (o*int(orientation)<0) { // wrong orientation
           // dverb << "Reorientation of simplex " << i << std::endl;
           int tmp=elements[i][use1];
           elements[i][use1] = elements[i][use2];
@@ -944,7 +944,7 @@ namespace Dune
         n[1] = -((p1[2]-p0[2]) *(p2[0]-p0[0]) - (p2[2]-p0[2]) *(p1[0]-p0[0])) ;
         n[2] = -((p1[0]-p0[0]) *(p2[1]-p0[1]) - (p2[0]-p0[0]) *(p1[1]-p0[1])) ;
         double test = n[0]*(q[0]-p0[0])+n[1]*(q[1]-p0[1])+n[2]*(q[2]-p0[2]);
-        bool reorient = (test*orientation<0);
+        bool reorient = (test*int(orientation)<0);
         if (reorient)
         {
           // reorient element first
