@@ -1,4 +1,6 @@
-# Master (will become release 2.8)
+# Master (will become release 2.9)
+
+# Release 2.8
 
 - Specialization of `StructuredGridFactory` for `AlbertaGrid` is added to address the special
   numbering requirements of that grid.
