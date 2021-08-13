@@ -1,10 +1,10 @@
 Module: dune-grid
-Version: 2.8-git
+Version: 2.9-git
 Author: The Dune Core developers
 Maintainer: dune-devel@lists.dune-project.org
 Description: module providing main interfaces for setting and traversing grids
 URL: https://gitlab.dune-project.org/core/dune-grid
 Python-Requires:
-Depends: dune-geometry (>= 2.8)
-Suggests: dune-uggrid (>=2.8)
+Depends: dune-geometry (>= 2.9)
+Suggests: dune-uggrid (>=2.9)
 Whitespace-Hook: Yes
