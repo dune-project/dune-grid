@@ -821,11 +821,11 @@ namespace Dune
      *       boundarySegmentToPhysicalEntity is discarded if boundary segments
      *       are not inserted.
      */
-    static void do_read(Dune::GridFactory<GridType> &factory,
-                        const std::string &fileName,
-                        std::vector<int>& boundarySegmentToPhysicalEntity,
-                        std::vector<int>& elementToPhysicalEntity,
-                        bool verbose, bool insertBoundarySegments)
+    static void doRead(Dune::GridFactory<GridType> &factory,
+                       const std::string &fileName,
+                       std::vector<int>& boundarySegmentToPhysicalEntity,
+                       std::vector<int>& elementToPhysicalEntity,
+                       bool verbose, bool insertBoundarySegments)
     {
       // register boundary segment to boundary segment factory for possible load balancing
       // this needs to be done on all cores since the type might not be known otherwise
@@ -860,12 +860,12 @@ namespace Dune
      * function.  It expects an rvalue argument, that is turned into an
      * lvalue.  For instance:
      * ```c++
-     * do_read(factory, fileName, discarded(std::vector<int>{}),
-     *         discarded(std::vector<int>{}));
+     * doRead(factory, fileName, discarded(std::vector<int>{}),
+     *        discarded(std::vector<int>{}));
      * ```
      * Here, the vectors are constructed as rvalues, passed through
      * `discarded()` which turns them into lvalues, so they can be arguments
-     * to `do_read()`.  `do_read()` will fill them with some data, and they
+     * to `doRead()`.  `doRead()` will fill them with some data, and they
      * will be destroyed at the end of the full-expression containing the
      * function call.
      *
@@ -934,8 +934,10 @@ namespace Dune
       // make a grid factory
       Dune::GridFactory<Grid> factory;
 
-      do_read(factory, fileName, boundarySegmentToPhysicalEntity,
-              elementToPhysicalEntity, verbose, insertBoundarySegments);
+      doRead(
+        factory, fileName, boundarySegmentToPhysicalEntity,
+        elementToPhysicalEntity, verbose, insertBoundarySegments
+      );
 
       return factory.createGrid();
     }
@@ -944,8 +946,10 @@ namespace Dune
     static void read (Dune::GridFactory<Grid>& factory, const std::string& fileName,
                       bool verbose = true, bool insertBoundarySegments=true)
     {
-      do_read(factory, fileName, discarded(std::vector<int>{}),
-              discarded(std::vector<int>{}), verbose, insertBoundarySegments);
+      doRead(
+        factory, fileName, discarded(std::vector<int>{}),
+        discarded(std::vector<int>{}), verbose, insertBoundarySegments
+      );
     }
 
     //! read Gmsh file, possibly with data
@@ -978,13 +982,15 @@ namespace Dune
                       DataArg elementData,
                       bool verbose=true)
     {
-      do_read(factory, fileName,
-              boundarySegmentData.data_
-                ? *boundarySegmentData.data_ : discarded(std::vector<int>{}),
-              elementData.data_
-                ? *elementData.data_ : discarded(std::vector<int>{}),
-              verbose,
-              boundarySegmentData.flag_ || boundarySegmentData.data_);
+      doRead(
+        factory, fileName,
+        boundarySegmentData.data_
+          ? *boundarySegmentData.data_ : discarded(std::vector<int>{}),
+        elementData.data_
+          ? *elementData.data_ : discarded(std::vector<int>{}),
+        verbose,
+        boundarySegmentData.flag_ || boundarySegmentData.data_
+      );
     }
 
     /**
@@ -1013,8 +1019,10 @@ namespace Dune
                       std::vector<int>& elementToPhysicalEntity,
                       bool verbose, bool insertBoundarySegments)
     {
-      do_read(factory, fileName, boundarySegmentToPhysicalEntity,
-              elementToPhysicalEntity, verbose, insertBoundarySegments);
+      doRead(
+        factory, fileName, boundarySegmentToPhysicalEntity,
+        elementToPhysicalEntity, verbose, insertBoundarySegments
+      );
     }
 
     //! Dynamic Gmsh reader interface
@@ -1174,9 +1182,11 @@ namespace Dune
       const bool readBoundaryData = options & Opts::readBoundaryData;
       const bool readElementData = options & Opts::readElementData;
 
-      do_read(factory, fileName, boundarySegmentIndexToGmshPhysicalEntity_,
-              elementIndexToGmshPhysicalEntity_, verbose,
-              readBoundaryData || insertBoundarySegments);
+      doRead(
+        factory, fileName, boundarySegmentIndexToGmshPhysicalEntity_,
+        elementIndexToGmshPhysicalEntity_, verbose,
+        readBoundaryData || insertBoundarySegments
+      );
 
       // clear unwanted data
       if (!readBoundaryData)
