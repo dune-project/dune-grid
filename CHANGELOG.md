@@ -54,6 +54,16 @@
   the capability `hasEntity` specifies. Most grid manager implementers
   now only need to implement/specialize `hasEntity`.
 
+- Add a new range generator `subEntities` that allows to iterate over the sub-entities
+  of a specified codimension for a given element (codim-0 entity)
+  ```cpp
+  for (const auto& vertex : subEntities(element, Codim<dim>))
+    std::cout << vertex.geometry().corner(0) << "\n";
+  ```
+  The returned range is sized, i.e. `subEntities(element, Codim<dim>).size()`
+  returns the number of vertices in the element and is equivalent to
+  `referenceElement(element).size(dim)`.
+
 ## Deprecations and removals
 
 - Remove `Intersection`'s deprecated enums `dimension` and
