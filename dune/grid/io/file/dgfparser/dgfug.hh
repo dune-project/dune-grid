@@ -55,7 +55,7 @@ namespace Dune
 
 
 
-#if ENABLE_UG
+#if HAVE_DUNE_UGGRID
   template< int dim >
   struct DGFGridInfo< UGGrid< dim > >
   {
@@ -228,7 +228,7 @@ namespace Dune
     GridFactory< UGGrid< dim > > factory_;
     DuneGridFormatParser dgf_;
   };
-#endif // #if ENABLE_UG
+#endif // #if HAVE_DUNE_UGGRID
 
 } // namespace Dune
 

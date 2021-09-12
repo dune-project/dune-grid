@@ -55,9 +55,8 @@
    application uses the ALBERTA_CPPFLAGS */
 #cmakedefine HAVE_ALBERTA ENABLE_ALBERTA
 
-/* This is only true if UG was found by configure _and_ if the application
-   uses the UG_CPPFLAGS */
-#cmakedefine HAVE_UG ENABLE_UG
+/* Alias for HAVE_DUNE_UGGRID for backwards compatibility */
+#define HAVE_UG HAVE_DUNE_UGGRID
 
 /* Define to 1 if you have mkstemp function */
 #cmakedefine01 HAVE_MKSTEMP

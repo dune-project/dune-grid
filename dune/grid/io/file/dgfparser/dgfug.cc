@@ -71,7 +71,7 @@ namespace Dune
   // Implementation of DGFGridFactory< UGGrid >
   // -------------------------------------------
 
-#if ENABLE_UG
+#if HAVE_DUNE_UGGRID
   template< int dim >
   void DGFGridFactory< UGGrid< dim > >::generate ( std::istream &input )
   {
@@ -117,6 +117,6 @@ namespace Dune
 
   template void DGFGridFactory< UGGrid< 2 > >::generate ( std::istream &input );
   template void DGFGridFactory< UGGrid< 3 > >::generate ( std::istream &input );
-#endif // #if ENABLE_UG
+#endif // #if HAVE_DUNE_UGGRID
 
 } // namespace Dune
