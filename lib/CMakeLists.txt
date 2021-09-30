@@ -19,7 +19,9 @@ add_dune_ug_flags(dunegrid ${_OBJECT_FLAG} NO_LINK_DUNEGRID)
 
 if(Alberta_FOUND)
   foreach(_dim ${ALBERTA_WORLD_DIMS})
-    dune_add_library(dunealbertagrid${_dim}d $<TARGET_OBJECTS:albertagrid${_dim}d> ADD_LIBS dunegrid)
+    dune_add_library(dunealbertagrid${_dim}d $<TARGET_OBJECTS:albertagrid${_dim}d>
+      ADD_LIBS Alberta::AlbertaGrid_${_dim}d dunegrid
+      NO_MODULE_LIBRARY)
   endforeach(_dim)
 endif()
 
