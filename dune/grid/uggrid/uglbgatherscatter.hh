@@ -21,7 +21,7 @@ namespace Dune {
         assert(bufferSize_ >= size);
         memcpy(&x, data_+bufferSize_-size, size);
         // decrease size without shrinking the allocated buffer
-        bufferSize_ =- size;
+        bufferSize_ -= size;
         // if all item are read, deallocate the buffer
         if (bufferSize_ == 0)
           resize(0);
