@@ -1,5 +1,11 @@
 # Master (will become release 2.9)
 
+## Deprecations and removals
+
+- Support for PSurface has been removed.
+
+- Support for AmiraMesh has been removed.
+
 # Release 2.8
 
 - Specialization of `StructuredGridFactory` for `AlbertaGrid` is added to address the special

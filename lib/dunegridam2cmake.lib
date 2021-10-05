@@ -14,7 +14,7 @@
 #
 
 dune_grid_options_am2cmake(){
-    CMAKE_PACKAGES="AmiraMesh Alberta Psurface UG"
+    CMAKE_PACKAGES="Alberta UG"
     default_am2cmake_options $CMAKE_PACKAGES
 
     # Check for --enable-extra-utils

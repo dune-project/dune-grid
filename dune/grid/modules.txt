@@ -83,9 +83,6 @@
         /** @defgroup DGFGridParameter DGF grid parameter for different grids 
             @ingroup DuneGridFormatParser */
 
-        /** @defgroup AmiraMesh AmiraMesh
-            @ingroup IO */
-
         /** @defgroup VTK Visualization ToolKit (VTK)
             @ingroup IO */
         

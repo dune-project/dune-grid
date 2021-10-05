@@ -46,5 +46,4 @@ PREDEFINED            += \
                          HAVE_ALBERTA:=1 \
                          HAVE_UG:=1
 
-EXCLUDE               += \
-                         @top_srcdir@/dune/grid/io/file/amiramesh/psurface.cc
+#EXCLUDE               +=
