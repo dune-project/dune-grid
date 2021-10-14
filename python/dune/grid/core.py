@@ -16,12 +16,20 @@ class CartesianDomain(tuple):
         try:
             periodic = parameters["periodic"]
             if any(periodic):
+                dim = len(lower)
+                # create identity matrix in comma separated rows
+                eye = ""
+                for i in range(dim):
+                    for j in range(dim):
+                        eye += " 1" if i == j else " 0"
+                    eye += " + " if i == dim-1 else ", "
+
                 dgf += "PERIODICFACETRANSFORMATION\n"
                 for i,p in enumerate(periodic):
                     if p:
-                        dgf += "1 0, 0 1 + "
+                        dgf += eye
                         dgf += " ".join([str(upper[i]-lower[i]) if i==j
-                            else "0" for j in range(len(lower))])
+                            else "0" for j in range(dim)])
                         dgf += "\n"
                 dgf += "#\n"
         except KeyError:
