@@ -36,7 +36,7 @@ dune_add_test(SOURCES test-ug.cc
               CMAKE_GUARD dune-uggrid_FOUND)
 
 dune_add_test(SOURCES test-parallel-ug.cc
-              CMAKE_GUARD dune-uggrid_FOUND
+              CMAKE_GUARD dune-uggrid_FOUND AND MPI_FOUND
               MPI_RANKS 1 2 3 4 8
               TIMEOUT 300)
 
