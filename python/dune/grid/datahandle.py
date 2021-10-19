@@ -10,6 +10,6 @@ def load(includes, typeName, *args):
     return generator.load(includes, typeName, moduleName, *args)
 
 def dataHandle(mapper,array,function):
-    typeName = "Dune::Python::NumPyCommDataHandle< " + mapper._typeName + ", double, std::function<double(double,double)> >"
-    includes = mapper._includes
+    typeName = "Dune::Python::NumPyCommDataHandle< " + mapper.cppTypeName + ", double, std::function<double(double,double)> >"
+    includes = mapper.cppIncludes
     return load(includes, typeName).DataHandle(mapper,array,function)
