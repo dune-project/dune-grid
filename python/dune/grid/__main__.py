@@ -1,7 +1,7 @@
 import os
 
 path = os.path.join( os.path.dirname(__file__), "tutorial" )
-execute  = "cp -rH " + path + " "
+execute  = "cp -RL " + path + " "
 execute += "grid_tutorial"
 status = os.system(execute)
 if status != 0: raise RuntimeError(status)
