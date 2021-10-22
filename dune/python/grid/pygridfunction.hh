@@ -42,8 +42,8 @@ namespace Dune
       // friend PyGridFunction<GridFunction> localFunction ( const PyGridFunction &gf ) { return PyGridFunction( gf ); }
 
     protected:
-      typename GridFunction::LocalFunction lf_;
       pybind11::object pyObj_;
+      typename GridFunction::LocalFunction lf_;
     };
 
     // pyGridFunction

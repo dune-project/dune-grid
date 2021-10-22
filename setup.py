@@ -1,3 +1,4 @@
+import os, sys
 try:
     from dune.packagemetadata import metaData
 except ImportError:

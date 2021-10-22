@@ -129,15 +129,15 @@ def indexSet(gv):
     try:
         return gv._indexSet
     except TypeError:
-        includes = gv._includes + ["dune/python/grid/indexset.hh"]
-        typeName = gv._typeName+"::IndexSet"
+        includes = gv.cppIncludes + ["dune/python/grid/indexset.hh"]
+        typeName = gv.cppTypeName+"::IndexSet"
         moduleName = "indexset_" + hashIt(typeName)
         module = isGenerator.load(includes, typeName, moduleName)
         return gv._indexSet
 mcmgGenerator = SimpleGenerator("MultipleCodimMultipleGeomTypeMapper", "Dune::Python")
 def mapper(gv,layout):
-    includes = gv._includes + ["dune/python/grid/mapper.hh"]
-    typeName = "Dune::MultipleCodimMultipleGeomTypeMapper< "+gv._typeName+" >"
+    includes = gv.cppIncludes + ["dune/python/grid/mapper.hh"]
+    typeName = "Dune::MultipleCodimMultipleGeomTypeMapper< "+gv.cppTypeName+" >"
     moduleName = "mcmgmapper_" + hashIt(typeName)
     module = mcmgGenerator.load(includes, typeName, moduleName)
     return gv._mapper(layout)
@@ -176,7 +176,7 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
             else:
                 source += "#include <"+includefile+">\n"
                 includes += [includefile]
-        includes += gv._includes
+        includes += gv.cppIncludes
         argTypes = []
         for arg in args:
             t,i = cppType(arg)
@@ -200,9 +200,9 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
 
         source += "PYBIND11_MODULE( " + moduleName + ", module )\n"
         source += "{\n"
-        source += "  module.def( \"gf\", [module] ( "+gv._typeName + " &gv"+"".join([", "+argTypes[i] + " arg" + str(i) for i in range(len(argTypes))]) + " ) {\n"
-        source += "      auto callback="+callback+"<"+gv._typeName+">( "+",".join(["arg"+str(i) for i in range(len(argTypes))]) +"); \n"
-        source += "      return Dune::Python::registerGridFunction<"+gv._typeName+",decltype(callback)>(module,pybind11::cast(gv),\"tmp\",callback);\n"
+        source += "  module.def( \"gf\", [module] ( "+gv.cppTypeName + " &gv"+"".join([", "+argTypes[i] + " arg" + str(i) for i in range(len(argTypes))]) + " ) {\n"
+        source += "      auto callback="+callback+"<"+gv.cppTypeName+">( "+",".join(["arg"+str(i) for i in range(len(argTypes))]) +"); \n"
+        source += "      return Dune::Python::registerGridFunction<"+gv.cppTypeName+",decltype(callback)>(module,pybind11::cast(gv),\"tmp\",callback);\n"
         source += "    },"
         source += "    "+",".join(["pybind11::keep_alive<0,"+str(i+1)+">()" for i in range(len(argTypes)+1)])
         source += ");\n"
@@ -244,9 +244,9 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
             # unique header key is added further down
             source  = '#include <config.h>\n\n'
             source += '#define USING_DUNE_PYTHON 1\n\n'
-            includes = gv._includes
+            includes = gv.cppIncludes
 
-            signature = gv._typeName+"::gf<"+str(dimRange)+">"
+            signature = gv.cppTypeName+"::gf<"+str(dimRange)+">"
             moduleName = "gf_" + hashIt(signature) + "_" + hashIt(source)
 
             # add unique header guard with moduleName
@@ -264,7 +264,7 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
             source += "PYBIND11_MODULE( " + moduleName + ", module )\n"
             source += "{\n"
             source += "  typedef pybind11::function Evaluate;\n";
-            source += "  Dune::Python::registerGridFunction< "+gv._typeName+", Evaluate, "+str(dimRange)+" >( module, \"gf\", "+scalar+" );\n"
+            source += "  Dune::Python::registerGridFunction< "+gv.cppTypeName+", Evaluate, "+str(dimRange)+" >( module, \"gf\", "+scalar+" );\n"
             source += "}\n"
             source += "#endif\n"
             gfModule = builder.load(moduleName, source, signature)
@@ -313,8 +313,8 @@ def addHAttr(module):
 
 gvGenerator = SimpleGenerator("GridView", "Dune::Python")
 def levelView(hgrid,level):
-    includes = hgrid._includes + ["dune/python/grid/gridview.hh"]
-    typeName = "typename "+hgrid._typeName+"::LevelGridView"
+    includes = hgrid.cppIncludes + ["dune/python/grid/gridview.hh"]
+    typeName = "typename "+hgrid.cppTypeName+"::LevelGridView"
     moduleName = "view_" + hashIt(typeName)
     module = gvGenerator.load(includes, typeName, moduleName)
     addAttr(module, module.GridView)
@@ -322,8 +322,8 @@ def levelView(hgrid,level):
 
 pcGenerator = SimpleGenerator("PersistentContainer", "Dune::Python")
 def persistentContainer(hgrid,codim,dimension):
-    includes = hgrid._includes + ["dune/python/grid/persistentcontainer.hh"]
-    typeName = "Dune::PersistentContainer<"+hgrid._typeName+", Dune::FieldVector<double,"+str(dimension)+">>"
+    includes = hgrid.cppIncludes + ["dune/python/grid/persistentcontainer.hh"]
+    typeName = "Dune::PersistentContainer<"+hgrid.cppTypeName+", Dune::FieldVector<double,"+str(dimension)+">>"
     moduleName = "persistentcontainer_" + hashIt(typeName)
     module = pcGenerator.load(includes, typeName, moduleName)
     return module.PersistentContainer(hgrid,codim)
