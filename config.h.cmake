@@ -39,15 +39,6 @@
 /* Define to the revision of dune-grid */
 #define DUNE_GRID_VERSION_REVISION ${DUNE_GRID_VERSION_REVISION}
 
-/* Define to 1 if psurface library is found */
-#cmakedefine HAVE_PSURFACE 1
-
-/* Define to 1 if AmiraMesh library is found */
-#cmakedefine HAVE_AMIRAMESH 1
-
-/* Define to 1 if you have at least psurface version 2.0 */
-#cmakedefine HAVE_PSURFACE_2_0 1
-
 /* Alberta version found by configure, either 0x200 for 2.0 or 0x300 for 3.0 */
 #cmakedefine DUNE_ALBERTA_VERSION @DUNE_ALBERTA_VERSION@
 

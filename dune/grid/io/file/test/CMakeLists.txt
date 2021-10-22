@@ -22,9 +22,6 @@ dune_add_test(SOURCES vtktest.cc
 
 dune_add_test(SOURCES vtksequencetest.cc)
 
-dune_add_test(SOURCES amirameshtest.cc
-              CMAKE_GUARD AMIRAMESH_FOUND)
-
 dune_add_test(SOURCES starcdreadertest.cc
               COMPILE_DEFINITIONS DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
               CMAKE_GUARD dune-uggrid_FOUND)
