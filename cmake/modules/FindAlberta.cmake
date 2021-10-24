@@ -37,12 +37,17 @@ The following variables may be set to influence this module's behavior:
   Alberta using pkg-config. This variable is automatically if `find_package`
   if invoked with flag `QUIET`.
 
+``ALBERTA_MAX_WORLD_DIM``
+  Maximal world dimension to check for Alberta library. Default: 3.
+
 #]=======================================================================]
 
 # text for feature summary
 include(FeatureSummary)
 set_package_properties("Alberta" PROPERTIES
   DESCRIPTION "An adaptive hierarchical finite element toolbox and grid manager")
+
+set(ALBERTA_MAX_WORLD_DIM "3" CACHE STRING "Maximal world dimension to check for Alberta library.")
 
 set(ALBERTA_WORLD_DIMS)
 set(ALBERTA_GRID_VERSION)
@@ -51,7 +56,7 @@ set(ALBERTA_GRID_PREFIX)
 # search for Alberta using pkg-config
 find_package(PkgConfig)
 if(PkgConfig_FOUND)
-  foreach(dim RANGE 1 9)
+  foreach(dim RANGE 1 ${ALBERTA_MAX_WORLD_DIM})
     if(Alberta_FIND_VERSION)
       set(ALBERTA_GRID_DIM_MODULE "alberta-grid_${dim}d>=${Alberta_FIND_VERSION}")
     else()

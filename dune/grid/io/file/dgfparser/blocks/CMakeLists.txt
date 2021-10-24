@@ -1,6 +1,5 @@
-dune_add_library(dgfparserblocks
-  OBJECT
-  SOURCES basic.cc  boundarydom.cc  boundaryseg.cc
+target_sources(dunegrid PRIVATE
+    basic.cc  boundarydom.cc  boundaryseg.cc
     cube.cc  dim.cc  general.cc  gridparameter.cc
     interval.cc  periodicfacetrans.cc projection.cc simplex.cc  simplexgeneration.cc  vertex.cc)
 #add_dune_mpi_flags(dgfparserblocks)
