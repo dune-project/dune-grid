@@ -33,6 +33,7 @@ dune_add_test(SOURCES testiteratorranges.cc)
 dune_add_test(SOURCES test-hierarchicsearch.cc)
 
 dune_add_test(SOURCES test-ug.cc
+              LINK_LIBRARIES dunegrid
               CMAKE_GUARD dune-uggrid_FOUND)
 
 dune_add_test(SOURCES test-parallel-ug.cc
@@ -41,9 +42,11 @@ dune_add_test(SOURCES test-parallel-ug.cc
               TIMEOUT 300)
 
 dune_add_test(SOURCES test-loadbalancing.cc
+              LINK_LIBRARIES dunegrid
               CMAKE_GUARD dune-uggrid_FOUND)
 
 dune_add_test(SOURCES issue-53-uggrid-intersections.cc
+              LINK_LIBRARIES dunegrid
               CMAKE_GUARD dune-uggrid_FOUND)
 
 # The alberta tests are only alibi-ported, until the  grid and world dimension
