@@ -20,4 +20,5 @@ set(GRIDS
   twotets.geo
   twotets.msh
   unitcube.msh)
+dune_symlink_to_source_files(FILES ${GRIDS})
 install(FILES ${GRIDS} DESTINATION ${CMAKE_INSTALL_DOCDIR}/grids/gmsh)
