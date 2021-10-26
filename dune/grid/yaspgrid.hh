@@ -2043,6 +2043,15 @@ namespace Dune {
       static const bool v = true;
     };
 
+    /** \brief YaspGrid is viewThreadSafe
+       \ingroup YaspGrid
+     */
+    template<int dim, class Coordinates>
+    struct viewThreadSafe< YaspGrid<dim, Coordinates> >
+    {
+      static const bool v = true;
+    };
+
   }
 
 } // end namespace
