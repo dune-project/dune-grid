@@ -1,21 +1,13 @@
 add_subdirectory(test)
 
 if(Alberta_FOUND)
-  set(ALBERTAGRID_SOURCES
-    dgfparser.cc
-    elementinfo.cc
-    indexsets.cc
-    macrodata.cc
-    meshpointer.cc)
-
-  # Create dimension dependent alberta libraries:
-  # Note, all libraries and flags are set PRIVATE only to not mix up
-  # flags when linked together.
   foreach(_dim ${ALBERTA_WORLD_DIMS})
-    add_library(albertagrid${_dim}d OBJECT ${ALBERTAGRID_SOURCES})
-    target_link_libraries(albertagrid${_dim}d PRIVATE Alberta::AlbertaGrid_${_dim}d)
-    target_include_directories(albertagrid${_dim}d PRIVATE ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR})
-    target_compile_definitions(albertagrid${_dim}d PRIVATE ALBERTA_DIM=${_dim} ENABLE_ALBERTA HAVE_CONFIG_H)
+    target_sources(dunealbertagrid${_dim}d PRIVATE
+      dgfparser.cc
+      elementinfo.cc
+      indexsets.cc
+      macrodata.cc
+      meshpointer.cc)
   endforeach(_dim)
 endif()
 

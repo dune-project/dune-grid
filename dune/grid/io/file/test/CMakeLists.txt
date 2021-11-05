@@ -23,6 +23,7 @@ dune_add_test(SOURCES vtktest.cc
 dune_add_test(SOURCES vtksequencetest.cc)
 
 dune_add_test(SOURCES starcdreadertest.cc
+              LINK_LIBRARIES dunegrid
               COMPILE_DEFINITIONS DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
               CMAKE_GUARD dune-uggrid_FOUND)
 
@@ -35,6 +36,7 @@ dune_add_test(NAME gmshtest-onedgrid
 
 dune_add_test(NAME gmshtest-uggrid
               SOURCES gmshtest.cc
+              LINK_LIBRARIES dunegrid
               COMPILE_DEFINITIONS GMSH_UGGRID
                                   DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
               CMAKE_GUARD dune-uggrid_FOUND)

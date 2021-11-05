@@ -1,10 +1,17 @@
 # Master (will become release 2.9)
 
+- The `FindAlberta.cmake` module only searches for world dimension libraries up to dim 3. This
+  can be increased by setting the CMake variable `ALBERTA_MAX_WORLD_DIM`
+
 ## Deprecations and removals
 
 - Support for PSurface has been removed.
 
 - Support for AmiraMesh has been removed.
+
+- The CMake function `add_dune_ug_flags` is deprecated. It should not be used since
+  all flags are already set automatically. Also the package flags for the UG grid are
+  not registered any more.
 
 # Release 2.8
 

@@ -1,12 +1,9 @@
-# set up project
-project("dune-grid" C CXX)
-
-# general stuff
 cmake_minimum_required(VERSION 3.13)
+project("dune-grid" C CXX)
 
 if(NOT (dune-common_DIR OR dune-common_ROOT OR
         "${CMAKE_PREFIX_PATH}" MATCHES ".*dune-common.*"))
-    string(REPLACE  ${CMAKE_PROJECT_NAME} dune-common dune-common_DIR
+    string(REPLACE  ${PROJECT_NAME} dune-common dune-common_DIR
       ${PROJECT_BINARY_DIR})
 endif()
 
@@ -21,14 +18,29 @@ include(DuneMacros)
 # start a dune project with information from dune.module
 dune_project()
 
+# create the dune library for dune-grid
+dune_add_library(dunegrid)
+target_link_libraries(dunegrid PUBLIC ${DUNE_LIBS})
+
+# create a dune library for the albertagrid
+if(Alberta_FOUND)
+  foreach(_dim ${ALBERTA_WORLD_DIMS})
+    dune_add_library(dunealbertagrid${_dim}d NO_MODULE_LIBRARY)
+    target_link_libraries(dunealbertagrid${_dim}d PUBLIC
+      dunegrid Alberta::AlbertaGrid_${_dim}d)
+    target_compile_definitions(dunealbertagrid${_dim}d PUBLIC
+      ALBERTA_DIM=${_dim} ENABLE_ALBERTA=1)
+  endforeach(_dim)
+endif()
+
+
 add_subdirectory("dune")
 add_subdirectory("doc")
-add_subdirectory("lib")
 add_subdirectory("src")
 add_subdirectory("cmake/modules")
 
 # if Python bindings are enabled, include necessary sub directories.
-if( DUNE_ENABLE_PYTHONBINDINGS )
+if(DUNE_ENABLE_PYTHONBINDINGS)
   add_subdirectory("python")
 endif()
 
