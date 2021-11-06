@@ -54,11 +54,11 @@ namespace Dune
       \param subEntityPerSetOfVertices The reverse: a map that associates a subEntity to a vector of vertex indices
       \param vertexCoordsMap Map that associates vertex positions to indices (integers)
    */
-  template <int codim, class GridType,
+  template <int codim, class GridType, class Entity,
       class IndexSetType, class OutputStreamImp,
       class MapType1 , class MapType2 , class MapType3 >
   void checkSubEntity ( const GridType &,
-                        const typename GridType::template Codim<0>::Entity &en , const IndexSetType & lset,
+                        const Entity &en , const IndexSetType & lset,
                         OutputStreamImp & sout , MapType1 & setOfVerticesPerSubEntity ,
                         MapType2 & subEntityPerSetOfVertices,
                         const MapType3 & vertexCoordsMap )
@@ -125,8 +125,7 @@ namespace Dune
       // Check whether we get the same index if we
       // -- ask for the subEntity itself and then its index
       // -- ask for the subIndex directly
-      typedef typename GridType::template Codim< codim >::Entity SubE;
-      SubE subE = en.template subEntity< codim >( subEntity );
+      const auto& subE = en.template subEntity< codim >( subEntity );
 
       if( lset.subIndex( en, subEntity, codim ) != lset.index( subE) )
       {
