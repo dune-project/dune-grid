@@ -316,12 +316,17 @@ def addHAttr(module):
     addAttr(module, module.LeafGrid)
 
 gvGenerator = SimpleGenerator("GridView", "Dune::Python")
-def levelView(hgrid,level):
-    includes = hgrid.cppIncludes + ["dune/python/grid/gridview.hh"]
-    typeName = "typename "+hgrid.cppTypeName+"::LevelGridView"
+def viewModule(includes, typeName, *args, **kwargs):
+    includes = includes + ["dune/python/grid/gridview.hh"]
     moduleName = "view_" + hashIt(typeName)
-    module = gvGenerator.load(includes, typeName, moduleName)
+    module = gvGenerator.load(includes, typeName, moduleName, *args, **kwargs)
     addAttr(module, module.GridView)
+    return module
+
+def levelView(hgrid,level):
+    includes = hgrid.cppIncludes
+    typeName = "typename "+hgrid.cppTypeName+"::LevelGridView"
+    viewModule(includes, typeName)
     return hgrid._levelView(level)
 
 pcGenerator = SimpleGenerator("PersistentContainer", "Dune::Python")
