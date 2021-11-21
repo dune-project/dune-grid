@@ -1,7 +1,7 @@
 import os, inspect
 from ..generator.generator import SimpleGenerator
 from dune.common.hashit import hashIt
-from dune.common import _raise, FieldVector
+from dune.common import FieldVector
 from dune.common.utility import isString
 from dune.deprecate import deprecated
 from dune.grid import gridFunction, DataType
@@ -294,8 +294,12 @@ def addAttr(module, cls):
         setattr(cls, "plot", plot)
         setattr(cls, "triangulation", triangulation)
     else:
-        setattr(cls, "plot", lambda *arg,**kwarg: _raise(AttributeError("plot only implemented on 2D grids")))
-        setattr(cls, "triangulation", lambda *arg,**kwarg: _raise(AttributeError("triangulation only implemented on 2d grid")))
+        def throwFunc(msg):
+            def throw(*args, **kwargs):
+                raise AttributeError(msg)
+            return throw
+        setattr(cls, "plot", throwFunc("plot(...) only implemented on 2D grids"))
+        setattr(cls, "triangulation", throwFunc("triangulation(...) only implemented on 2d grid"))
 
     cls.indexSet = property(indexSet)
     setattr(cls,"mapper",mapper)
