@@ -27,10 +27,10 @@ namespace Dune
         return gridObject.entitySet().gridView();
       }
       template< class GridObject >
-      inline static const decltype( std::declval< const typename GridObject::GridPartType & >().gridView() )&
+      inline static const decltype( std::declval< const typename GridObject::GridPartType::GridViewType & >() )&
       gridView ( const GridObject &gridObject, PriorityTag< 1 > )
       {
-        return gridObject.gridPart().gridView();
+        return gridObject.gridPart();
       }
     } // namespace detail
 
