@@ -52,9 +52,11 @@ grid_registry = {
         "Yasp"       : yaspGrid,
     }
 
-def albertaGrid(constructor, dimgrid=None, dimworld=None):
-    try:
-        assertCMakeHave("HAVE_ALBERTA")
+from dune.packagemetadata import getCMakeFlags
+try:
+    if not getCMakeFlags()["HAVE_ALBERTA"]:
+        raise KeyError
+    def albertaGrid(constructor, dimgrid=None, dimworld=None):
         from .grid_generator import module, getDimgrid
 
         if not dimgrid:
@@ -66,8 +68,12 @@ def albertaGrid(constructor, dimgrid=None, dimworld=None):
         extraCMake = ["add_dune_alberta_flags(TARGET WORLDDIM {})".format(str(dimworld))]
         gridModule = module(includes, typeName) # , extraCMake=extraCMake)
         return gridModule.reader(constructor).leafView
-    except ConfigurationError:
-        pass
+except KeyError:
+    def albertaGrid(constructor, dimgrid=None, dimworld=None):
+        print("""
+Alberta was not found during the configuration of dune-grid.
+To use 'albertaGrid' install the alberta package first and then reinstall the dune-grid package.
+""")
 grid_registry["Alberta"] = albertaGrid
 
 def ugGrid(constructor, dimgrid=None, **parameters):
