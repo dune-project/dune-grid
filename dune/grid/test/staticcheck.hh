@@ -31,20 +31,20 @@ struct GeometryInterface
 
     using ctype [[maybe_unused]] = typename Geometry::ctype;
 
-    geo.type();
-    geo.affine();
-    geo.corners();
-    geo.corner( 0 );
+    [[maybe_unused]] const Dune::GeometryType geoType = geo.type();
+    [[maybe_unused]] const bool affinity = geo.affine();
+    [[maybe_unused]] const int numCorners = geo.corners();
+    [[maybe_unused]] const typename Geometry::GlobalCoordinate cornerCoord = geo.corner( 0 );
 
     typename Geometry::LocalCoordinate v(0.0);
-    geo.global(v);
+    [[maybe_unused]] const typename Geometry::GlobalCoordinate coord = geo.global(v);
     typename Geometry::GlobalCoordinate g(0.0);
-    geo.local(g);
-    geo.integrationElement(v);
-    geo.jacobianTransposed( v );
-    geo.jacobianInverseTransposed( v );
-    geo.jacobian( v );
-    geo.jacobianInverse( v );
+    [[maybe_unused]] const typename Geometry::LocalCoordinate locCoord = geo.local(g);
+    [[maybe_unused]] const ctype vol = geo.integrationElement(v);
+    [[maybe_unused]] const typename Geometry::JacobianTransposed jT = geo.jacobianTransposed( v );
+    [[maybe_unused]] const typename Geometry::JacobianInverseTransposed jInvT = geo.jacobianInverseTransposed( v );
+    [[maybe_unused]] const typename Geometry::Jacobian j = geo.jacobian( v );
+    [[maybe_unused]] const typename Geometry::JacobianInverse iInv = geo.jacobianInverse( v );
   }
 
   GeometryInterface ()
@@ -67,9 +67,9 @@ void DoEntityInterfaceCheck (Entity &e)
   using EntitySeed [[maybe_unused]] = typename Entity::EntitySeed;
 
   // methods on each entity
-  e.level();
-  e.partitionType();
-  e.geometry();
+  [[maybe_unused]] const int lvl = e.level();
+  [[maybe_unused]] const Dune::PartitionType pT = e.partitionType();
+  [[maybe_unused]] const Geometry geo = e.geometry();
 
   // check interface of attached element-interface
   GeometryInterface< typename Entity::Geometry, Entity::codimension, Entity::dimension >();
@@ -85,7 +85,7 @@ struct ZeroEntityMethodCheck
     // check types
     using HierarchicIterator [[maybe_unused]] = typename Entity::HierarchicIterator;
 
-    e.subEntities(cd);
+    [[maybe_unused]] const unsigned int subE = e.subEntities(cd);
     e.template subEntity<cd>(0);
 
     // recursively check on
@@ -130,8 +130,8 @@ struct ZeroEntityMethodCheck<Grid, 0, true>
     // check types
     using HierarchicIterator [[maybe_unused]] = typename Entity::HierarchicIterator;
 
-    e.subEntities(0);
-    e.template subEntity<0>(0);
+    [[maybe_unused]] const unsigned int subE = e.subEntities(0);
+    [[maybe_unused]] const Entity ent = e.template subEntity<0>(0);
 
   }
   ZeroEntityMethodCheck ()
@@ -180,29 +180,35 @@ struct IntersectionIteratorInterface
 
     // state
     typedef typename IntersectionIterator::Intersection Intersection;
+    using Entity = typename Grid::template Codim<0>::Entity;
+    using Geometry = typename Grid::template Codim<1>::Geometry;
+    using LocalGeometry = typename Grid::template Codim<1>::LocalGeometry;
     const Intersection &inter = *i;
-    inter.boundary();
-    inter.neighbor();
+    [[maybe_unused]] const bool isBoundary = inter.boundary();
+    [[maybe_unused]] const bool hasNeighbor = inter.neighbor();
 
-    inter.boundarySegmentIndex();
+    [[maybe_unused]] const std::size_t bSI = inter.boundarySegmentIndex();
 
     // neighbouring elements
-    inter.inside();
-    if(inter.neighbor()) inter.outside();
+    [[maybe_unused]] const Entity innerE = inter.inside();
+    if(inter.neighbor())
+        [[maybe_unused]] const Entity outerE = inter.outside();
 
     // geometry
-    inter.geometryInInside();
-    if(inter.neighbor()) inter.geometryInOutside();
-    inter.geometry();
+    [[maybe_unused]] const LocalGeometry locGeoInside = inter.geometryInInside();
+    if(inter.neighbor())
+        [[maybe_unused]] const LocalGeometry locGeoOutside = inter.geometryInOutside();
+    [[maybe_unused]] const Geometry geo = inter.geometry();
 
-    inter.indexInInside();
-    if(inter.neighbor()) inter.indexInOutside();
+    [[maybe_unused]] const int indexInside = inter.indexInInside();
+    if(inter.neighbor())
+        [[maybe_unused]] const int indexOutside = inter.indexInOutside();
 
     typename Intersection::LocalCoordinate v(0);
-
-    inter.outerNormal(v);
-    inter.integrationOuterNormal(v);
-    inter.unitOuterNormal(v);
+    using GlobalCoordinate = typename Intersection::GlobalCoordinate;
+    [[maybe_unused]] const GlobalCoordinate outerNormal = inter.outerNormal(v);
+    [[maybe_unused]] const GlobalCoordinate integrationOuterNormal = inter.integrationOuterNormal(v);
+    [[maybe_unused]] const GlobalCoordinate unitOuterNormal = inter.unitOuterNormal(v);
   }
   IntersectionIteratorInterface ()
   {
@@ -302,8 +308,8 @@ struct EntityInterface<Grid, 0, dim, true>
     e.hend(0);
 
     // adaption
-    e.isNew();
-    e.mightVanish();
+    [[maybe_unused]] const bool isNew = e.isNew();
+    [[maybe_unused]] const bool mightVanish = e.mightVanish();
 
     // recursively check sub-entities
     EntityInterface<Grid, 1, dim,
@@ -408,8 +414,8 @@ struct GridViewInterface
 
     gv.grid();
 
-    gv.size( 0 );
-    gv.size( Dune::GeometryTypes::cube( GridView::dimension ) );
+    [[maybe_unused]] const int elementsInGrid = gv.size( 0 );
+    [[maybe_unused]] const int cubesInGrid = gv.size( Dune::GeometryTypes::cube( GridView::dimension ) );
 
     gv.template begin< 0 >();
     gv.template end< 0 >();
@@ -461,10 +467,10 @@ struct GridViewInterface
     gv.template begin< 0, Dune::Ghost_Partition >();
     gv.template end< 0, Dune::Ghost_Partition >();
 
-    gv.overlapSize( 0 );
-    gv.ghostSize( 0 );
+    [[maybe_unused]] const bool overlapSize = gv.overlapSize( 0 );
+    [[maybe_unused]] const bool ghostSize = gv.ghostSize( 0 );
 
-    gv.comm();
+    [[maybe_unused]] const Communication gcomm =gv.comm();
   }
 
   GridViewInterface () : c( check ) {}
@@ -491,15 +497,15 @@ struct GridInterface
     leafGridView(g);
 
     // check for member functions
-    g.maxLevel();
+    [[maybe_unused]] const int maxLvl = g.maxLevel();
     // number of grid entities of a given codim on a given level
-    g.size(0,0);
+    [[maybe_unused]] const int numLevelEntities = g.size(0,0);
     // number of leaf entities per codim in this process
-    g.size(0);
+    [[maybe_unused]] const int numLeafEntities = g.size(0);
     // number of entities per level and geometry type in this process
-    g.size(0, Dune::GeometryTypes::cube(Grid::dimension));
+    [[maybe_unused]] const int cubeLevelEntities = g.size(0, Dune::GeometryTypes::cube(Grid::dimension));
     // number of leaf entities per geometry type in this process
-    g.size(Dune::GeometryTypes::cube(Grid::dimension));
+    [[maybe_unused]] const int cubeLeafEntities = g.size(Dune::GeometryTypes::cube(Grid::dimension));
 
     // check for iterator functions
     g.levelGridView(0).template begin<0>();
@@ -542,11 +548,11 @@ struct GridInterface
       // Instantiate all methods of LocalIdSet
       /** \todo Test for subindex is missing, because I don't know yet
           how to test for the existence of certain codims */
-      g.localIdSet().id( *g.levelGridView( 0 ).template begin< 0 >() );
+      [[maybe_unused]] const typename LocalIdSet::IdType idL = g.localIdSet().id( *g.levelGridView( 0 ).template begin< 0 >() );
       // Instantiate all methods of GlobalIdSet
       /** \todo Test for subindex is missing, because I don't know yet
           how to test for the existence of certain codims */
-      g.globalIdSet().id( *g.levelGridView( 0 ).template begin< 0 >() );
+      [[maybe_unused]] const typename GlobalIdSet::IdType idG = g.globalIdSet().id( *g.levelGridView( 0 ).template begin< 0 >() );
     }
     // recursively check entity-interface
     // ... we only allow grids with codim 0 entities

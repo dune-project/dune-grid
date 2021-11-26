@@ -352,7 +352,7 @@ void assertNeighbor (Grid &g)
       const bool isGhost = (entity.partitionType() == Dune::GhostEntity);
 
       // call global id
-      globalid.id( entity );
+      [[maybe_unused]] const typename GlobalIdSet::IdType idG = globalid.id( entity );
 
       const int numFaces = entity.subEntities(1);
       // flag vector for elements faces
@@ -401,7 +401,7 @@ void assertNeighbor (Grid &g)
         // index / id of boundary segment
         if( it->boundary() )
         {
-          it->boundarySegmentIndex();
+          [[maybe_unused]] const std::size_t bSI = it->boundarySegmentIndex();
         }
 
         // check id
@@ -415,9 +415,10 @@ void assertNeighbor (Grid &g)
         // normal vectors
         typename IntersectionIterator::Intersection::LocalCoordinate v(0);
 
-        it->outerNormal(v);
-        it->integrationOuterNormal(v);
-        it->unitOuterNormal(v);
+        using GlobalCoordinate = typename IntersectionIterator::Intersection::GlobalCoordinate;
+        [[maybe_unused]] const GlobalCoordinate outerNormal = it->outerNormal(v);
+        [[maybe_unused]] const GlobalCoordinate integrationOuterNormal = it->integrationOuterNormal(v);
+        [[maybe_unused]] const GlobalCoordinate unitOuterNormal = it->unitOuterNormal(v);
 
         if( isGhost && !it->neighbor() )
         {
@@ -508,15 +509,15 @@ struct CheckMark
   {
     // last marker is 0, so the grid is not changed after this check
     const int refCount[4] = {1,0,-1,0};
-    for(int k=0; k<4; ++k)
+    for(int k : refCount)
     {
       // mark entity
-      bool marked = grid.mark( refCount[k] , *it );
+      bool marked = grid.mark( k , *it );
       // if element was marked, check that the marker was set correctly
       if(marked)
       {
         // now getMark should return the mark we just set, otherwise error
-        if( grid.getMark( *it ) < refCount[k] )
+        if( grid.getMark( *it ) < k )
           DUNE_THROW(CheckError,"mark/getMark method not working correctly!");
       }
     }
@@ -581,14 +582,14 @@ void iterate(Grid &g)
         DUNE_THROW(CheckError, "|| geom.local(geom.global(" << origin
                                                             << ")) - origin || != 0 ( || " << result << " - origin || ) = " << error);
       };
-      geo.integrationElement( origin );
+      [[maybe_unused]] const typename Geometry::ctype iE = geo.integrationElement( origin );
 
       if((int)Geometry::coorddimension == (int)Geometry::mydimension)
-        geo.jacobianInverseTransposed( origin );
+          [[maybe_unused]] const typename Geometry::JacobianInverseTransposed jInvT = geo.jacobianInverseTransposed( origin );
     }
 
-    geo.corners();
-    geo.corner( 0 );
+    [[maybe_unused]] const int numCorners = geo.corners();
+    [[maybe_unused]] const typename Geometry::GlobalCoordinate cornerCoord = geo.corner( 0 );
   }
 
   typedef typename Grid::template Codim<0>::LeafIterator LeafIterator;
@@ -624,14 +625,14 @@ void iterate(Grid &g)
         DUNE_THROW(CheckError, "|| geom.local(geom.global(" << origin
                                                             << ")) - origin || != 0 ( || " << result << " - origin || ) = " << error);
       }
-      lit->geometry().integrationElement(origin);
+      [[maybe_unused]] const typename Geometry::ctype iE = lit->geometry().integrationElement(origin);
       if((int)Geometry::coorddimension == (int)Geometry::mydimension)
-        lit->geometry().jacobianInverseTransposed(origin);
+          [[maybe_unused]] const typename Geometry::JacobianInverseTransposed jInvT =  lit->geometry().jacobianInverseTransposed(origin);
     }
 
-    lit->geometry().type();
-    lit->geometry().corners();
-    lit->geometry().corner( 0 );
+    [[maybe_unused]] const Dune::GeometryType geoType = lit->geometry().type();
+    [[maybe_unused]] const int numCorners = lit->geometry().corners();
+    [[maybe_unused]] const typename Geometry::GlobalCoordinate cornerCoord =lit->geometry().corner( 0 );
   }
 
 }
@@ -1070,8 +1071,8 @@ void gridcheck (Grid &g)
       g.levelGridView( g.maxLevel() ).template end<0>();
     for (; it != end; ++it)
     {
-      g.globalIdSet().subId(*it,0,dim);
-      if(g.globalIdSet().subId(*it,0,dim) != g.globalIdSet().id(it->template subEntity<dim>(0)))
+      const typename Grid::GlobalIdSet::IdType idG = g.globalIdSet().subId(*it,0,dim);
+      if(idG != g.globalIdSet().id(it->template subEntity<dim>(0)))
       {
         std::cerr << "Error: Inconsistent global subId for vertex 0 (id(subEntity)=" << g.globalIdSet().id(it->template subEntity<dim>(0))
                   << ", subId=" << g.globalIdSet().subId(*it,0,dim) << ") of cell " << g.globalIdSet().id(*it) << std::endl;
