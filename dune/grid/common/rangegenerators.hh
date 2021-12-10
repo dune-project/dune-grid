@@ -117,7 +117,7 @@ namespace Dune
        do_stuff();
        for (const auto& i : intersections(gv,e))
        {
-         if (e.boundary())
+         if (i.boundary())
            ++count;
        }
      }
