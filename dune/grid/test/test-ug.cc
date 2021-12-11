@@ -12,6 +12,7 @@
    Instantiate UG-Grid and feed it to the generic gridcheck()
  */
 #include <dune/grid/uggrid.hh>
+#include <dune/grid/io/file/gmshreader.hh>
 #include <doc/grids/gridfactory/hybridtestgrids.hh>
 
 #include "gridcheck.hh"
@@ -109,6 +110,50 @@ void makeHalfCircleQuad(Dune::UGGrid<2>& grid, bool boundarySegments, bool param
 
 }
 
+
+// compute boundary length of a given mesh
+double integrateBoundary(const Dune::UGGrid<2>& grid)
+{
+  double len = 0.0;
+  auto && gv = grid.leafGridView();
+  for (const auto& e : elements(gv))
+  {
+    for (const auto& i : intersections(gv,e))
+    {
+      if (i.boundary())
+        len += i.geometry().volume();
+    }
+  }
+  return len;
+}
+
+
+// test approximation to a curved boundary: refine, compare with the
+// exact length and check the expected 2nd order convergence rate
+void testGeometryApproximation(Dune::UGGrid<2>& grid, double exact, bool verbose = false)
+{
+    double len = integrateBoundary(grid);
+    if (verbose)
+      std::cout << "boundary length: " << len << "\t" << exact << std::endl;
+    double eoc = 0.0;
+    for (unsigned int l = 0; l < 5; l++)
+    {
+      grid.globalRefine(1);
+      double len_refined = integrateBoundary(grid);
+      double err0 = std::abs(len-exact);
+      double err  = std::abs(len_refined-exact);
+      eoc  = std::log2(err0/err); // h0/h = 2
+      if (verbose)
+        std::cout << "boundary length: " << len_refined
+                  << "\t" << exact
+                  << "\terr=" << err
+                  << "\teoc=" << eoc << std::endl;
+      len = len_refined;
+    }
+    // we expect 2nd order convergence
+    if (Dune::FloatCmp::ne(eoc,2.0,0.02))
+      DUNE_THROW(Dune::GridError, "Geometry approximation does not show expected 2nd order convergence");
+}
 
 template <class GridType >
 void markOne ( GridType & grid , int num , int ref )
@@ -284,6 +329,49 @@ int main (int argc , char **argv) try
 
     }
 
+  }
+
+  // ////////////////////////////////////////////////////////////////////////
+  //   Check refinement to boundary (exact circle geometry).
+  //   Upon refinement new vertices should be moved towards the exact geomtry,
+  //   so that the boundary is better resolved
+  // ////////////////////////////////////////////////////////////////////////
+  {
+    // geometry is a half circle with radius 15, so the exact length
+    // of the boundary is $`R \cdot \pi + 2 R`$
+    double exact = (M_PI + 2.0) * 15.0;
+    testGeometryApproximation(gridWithParametrization, exact);
+  }
+
+  // ////////////////////////////////////////////////////////////////////////
+  //   Check refinement to boundary (quadratic gmsh boundary)
+  //   upon refinement new vertices should be moved towards the exact geomtry,
+  //   so that the boundary is better resolved
+  // ////////////////////////////////////////////////////////////////////////
+  {
+    Dune::GridFactory<Dune::UGGrid<2>> gridFactory;
+    const std::string path(DUNE_GRID_EXAMPLE_GRIDS_PATH);
+    const std::string inputName(path+"gmsh/circle2ndorder.msh");
+    std::cout << "Reading mesh file " << inputName << std::endl;
+    auto reader = Dune::GmshReader<Dune::UGGrid<2>>(inputName, gridFactory);
+    auto gmshgrid = gridFactory.createGrid();
+    // 1/6 of a circle as 2nd order polynomial:
+    /* the following python code can be used to compute the exact solution below:
+         import sympy
+         from sympy import *
+         tau = sympy.symbols('τ')
+         N = 6 # segments
+         t = [0, pi/N, 2*pi/N]
+         x = list(map(sin, t))
+         y = list(map(cos, t))
+         px  = interpolate(list(zip(t,x)),tau)
+         py  = interpolate(list(zip(t,y)),tau)
+         V = simplify(sqrt(diff(px,tau)**2+diff(py,tau)**2)) # det(J)
+         len = N * integrate(V, (tau,0,t[-1]))
+         print(simplify(len), " = ", len.evalf())
+     */
+    double exact = 6.27593206157460;
+    testGeometryApproximation(*gmshgrid, exact);
   }
 
   // ////////////////////////////////////////////////////////////////////////
