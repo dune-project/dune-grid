@@ -59,7 +59,7 @@ namespace Dune
 
       template< class Grid, int codim >
       struct canIterate
-        : public std::integral_constant< bool, hasEntity< Grid, codim >::v >
+        : public std::integral_constant< bool, hasEntityIterator< Grid, codim >::v >
       {};
 
     } // namespace Capabilities
