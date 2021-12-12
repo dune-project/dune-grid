@@ -18,3 +18,7 @@ dune_python_add_test(NAME pybackrest1
                      SCRIPT backrest1.py
                      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                      LABELS quick)
+dune_python_add_test(NAME pytestug
+                     SCRIPT test-ug.py
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                     LABELS quick)
