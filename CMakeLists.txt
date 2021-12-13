@@ -33,6 +33,8 @@ if(Alberta_FOUND)
   endforeach(_dim)
 endif()
 
+# create alias HAVE_UG
+set(HAVE_UG ${HAVE_DUNE_UGGRID})
 
 add_subdirectory("dune")
 add_subdirectory("doc")
