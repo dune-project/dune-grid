@@ -19,7 +19,7 @@
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/grid.hh>
 
-#if HAVE_UG || DOXYGEN
+#if HAVE_DUNE_UGGRID || DOXYGEN
 
 #ifdef ModelP
 #include <dune/common/parallel/mpicommunication.hh>
@@ -811,5 +811,5 @@ namespace Dune {
 
 } // namespace Dune
 
-#endif   // HAVE_UG || DOXYGEN
+#endif   // HAVE_DUNE_UGGRID || DOXYGEN
 #endif   // DUNE_UGGRID_HH

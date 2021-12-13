@@ -21,7 +21,7 @@
 #include <dune/grid/geometrygrid.hh>
 #include <dune/grid/geometrygrid/cachedcoordfunction.hh>
 #include <dune/grid/io/file/dgfparser.hh>
-#if HAVE_UG
+#if HAVE_DUNE_UGGRID
 #include <dune/grid/uggrid.hh>
 #include <dune/grid/io/file/dgfparser/dgfug.hh>
 #endif

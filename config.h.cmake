@@ -46,9 +46,6 @@
    application uses the ALBERTA_CPPFLAGS */
 #cmakedefine HAVE_ALBERTA ENABLE_ALBERTA
 
-/* Alias for HAVE_DUNE_UGGRID for backwards compatibility */
-#define HAVE_UG HAVE_DUNE_UGGRID
-
 /* Define to 1 if you have mkstemp function */
 #cmakedefine01 HAVE_MKSTEMP
 

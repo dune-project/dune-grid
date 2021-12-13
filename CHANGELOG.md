@@ -13,6 +13,9 @@
   all flags are already set automatically. Also the package flags for the UG grid are
   not registered any more.
 
+- The `dune-uggrid` module does not set the preprocessor flag `HAVE_UG` anymore.
+  Use `HAVE_DUNE_UGGRID` instead.
+
 # Release 2.8
 
 - Specialization of `StructuredGridFactory` for `AlbertaGrid` is added to address the special

@@ -71,18 +71,18 @@ void checkIndexSet(const GridView& gridView,
 
 int main(int argc, char* argv[]) try
 {
-#if HAVE_UG
+#if HAVE_DUNE_UGGRID
   Dune::MPIHelper& mpiHelper =
-#endif // #if HAVE_UG
+#endif
   MPIHelper::instance(argc, argv);
 
   ////////////////////////////////////////////////////
   //  Create a distributed YaspGrid
   ////////////////////////////////////////////////////
 
-#if HAVE_UG
+#if HAVE_DUNE_UGGRID
   static const int dim = 2;
-#endif // #if HAVE_UG
+#endif
   // Disable the YaspGrid test for the time being.  It crashes in many situations
   // and I suspect that that's caused by bugs in YaspGrid.  I'll need to investigate that.
 #if 0
@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) try
   GridView gridView = grid.leafGridView();
 #endif
 
-#if HAVE_UG
+#if HAVE_DUNE_UGGRID
   typedef UGGrid<dim> GridType;
 
   std::array<unsigned int,dim> elements = { {8, 8} };

@@ -16,7 +16,7 @@
 #include <dune/common/std/type_traits.hh>
 
 // dune grid includes
-#if HAVE_UG
+#if HAVE_DUNE_UGGRID
 #include <dune/grid/uggrid.hh>
 #endif
 #if HAVE_ALBERTA

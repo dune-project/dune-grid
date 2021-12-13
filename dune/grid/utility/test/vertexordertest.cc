@@ -302,12 +302,12 @@ try {
 
   std::cout << "= Testing 2D" << std::endl;
 
-#if HAVE_UG
+#if HAVE_DUNE_UGGRID
   std::cout << "== Testing UGGrid<2> with simplices" << std::endl;
   testVertexOrderByIdCubes<Dune::UGGrid<2> >(result);
   std::cout << "== Testing UGGrid<2> with cubes" << std::endl;
   testVertexOrderByIdSimplices<Dune::UGGrid<2> >(result);
-#endif // HAVE_UG
+#endif
 
   //////////////////////////////////////////////////////////////////////
   //   Test 3d grids
@@ -315,12 +315,12 @@ try {
 
   std::cout << "= Testing 3D" << std::endl;
 
-#if HAVE_UG
+#if HAVE_DUNE_UGGRID
   std::cout << "== Testing UGGrid<3> with simplices" << std::endl;
   testVertexOrderByIdCubes<Dune::UGGrid<3> >(result);
   std::cout << "== Testing UGGrid<3> with cubes" << std::endl;
   testVertexOrderByIdSimplices<Dune::UGGrid<3> >(result);
-#endif // HAVE_UG
+#endif
 
   return result;
 }
