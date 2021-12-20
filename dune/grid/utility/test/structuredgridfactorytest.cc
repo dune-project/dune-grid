@@ -14,7 +14,7 @@
 #include <dune/common/test/testsuite.hh>
 #include <dune/grid/onedgrid.hh>
 #include <dune/grid/yaspgrid.hh>
-#if HAVE_UG
+#if HAVE_DUNE_UGGRID
 #include <dune/grid/uggrid.hh>
 #endif
 
@@ -122,7 +122,7 @@ try {
   }
 
   // Test creation of 2d cube grid using UG
-#if HAVE_UG
+#if HAVE_DUNE_UGGRID
   typedef UGGrid<2> QuadrilateralGridType;
 
   std::shared_ptr<QuadrilateralGridType> quadrilateralGrid = StructuredGridFactory<QuadrilateralGridType>::createCubeGrid(FieldVector<double,2>(0),
@@ -139,7 +139,7 @@ try {
 
 
   // Test creation of 2d triangle grid using UG
-#if HAVE_UG
+#if HAVE_DUNE_UGGRID
   typedef UGGrid<2> TriangleGridType;
 
   std::shared_ptr<TriangleGridType> triangleGrid = StructuredGridFactory<TriangleGridType>::createSimplexGrid(FieldVector<double,2>(0),
@@ -160,7 +160,7 @@ try {
   // /////////////////////////////////////////////////////////////////////////////
 
   // Test creation of 3d cube grids
-#if HAVE_UG
+#if HAVE_DUNE_UGGRID
   typedef UGGrid<3> HexahedralGridType;
 
   std::array<unsigned int,3> elements3d;
@@ -181,7 +181,7 @@ try {
 #endif
 
   // Test creation of 3d simplex grids
-#if HAVE_UG
+#if HAVE_DUNE_UGGRID
   typedef UGGrid<3> TetrahedralGridType;
 
   std::shared_ptr<TetrahedralGridType> tetrahedralGrid = StructuredGridFactory<TetrahedralGridType>::createSimplexGrid(FieldVector<double,3>(0),

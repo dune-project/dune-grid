@@ -11,7 +11,7 @@
 
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/grid/onedgrid.hh>
-#if HAVE_UG
+#if HAVE_DUNE_UGGRID
 #include <dune/grid/uggrid.hh>
 #endif
 #include <dune/grid/yaspgrid.hh>
@@ -47,7 +47,7 @@ try {
     std::cout << "OneDgrid with " << grid->size(0) << " cells created." << std::endl;
   }
 
-#if HAVE_UG
+#if HAVE_DUNE_UGGRID
   // Test UGGrid
   TensorGridFactory<UGGrid<2> > fac3;
   fillFactory(fac3);

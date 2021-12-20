@@ -44,6 +44,6 @@ IMAGE_PATH            += \
 
 PREDEFINED            += \
                          HAVE_ALBERTA:=1 \
-                         HAVE_UG:=1
+                         HAVE_DUNE_UGGRID:=1
 
 #EXCLUDE               +=
