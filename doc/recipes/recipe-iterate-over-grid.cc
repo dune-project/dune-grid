@@ -10,7 +10,7 @@
  * can be used.
  * \snippet recipe-iterate-over-grid.cc set up grid
  *
- * Grids in Dune are hierachical, i.e. they are organized into levels
+ * Grids in Dune are hierarchical, i.e. they are organized into levels
  * (originating from refinement) and entities that are not further refined.
  * Each of these subsets is accessible via Dune::GridView and iteration over
  * is possible only over grid views. So we extract the Dune::LeafGridView:
