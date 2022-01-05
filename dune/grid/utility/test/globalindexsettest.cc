@@ -64,7 +64,7 @@ void checkIndexSet(const GridView& gridView,
 
   if (gridView.comm().rank()==0)
     for (size_t i=0; i<indicesGlobal.size(); i++)
-      if ( indicesGlobal[i] != i )
+      if ( (size_t) indicesGlobal[i] != i )
         DUNE_THROW(Exception, i << "th global index is not " << i);
 
 }

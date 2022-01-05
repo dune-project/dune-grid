@@ -50,13 +50,13 @@ int main()
   {
     Analytical a({1., 2., 3.});
     Analytical b = a;
-    Analytical c(b);
+    [[maybe_unused]] Analytical c(b);
   }
 
   {
     Discrete a({1., 2., 3.});
     Discrete b = a;
-    Discrete c(b);
+    [[maybe_unused]] Discrete c(b);
   }
 
   return 0;
