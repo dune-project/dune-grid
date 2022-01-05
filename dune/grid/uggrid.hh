@@ -130,9 +130,9 @@ int Dune::UGMessageBuffer<DataHandle,GridDim,codim>::level = -1;
 namespace Dune {
 
 #ifdef ModelP
-    using UGCollectiveCommunication = CollectiveCommunication<MPI_Comm>;
+    using UGCollectiveCommunication = Communication<MPI_Comm>;
 #else
-    using UGCollectiveCommunication = CollectiveCommunication<No_Comm>;
+    using UGCollectiveCommunication = Communication<No_Comm>;
 #endif
 
   template<int dim>

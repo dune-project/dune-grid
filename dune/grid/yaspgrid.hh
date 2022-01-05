@@ -79,9 +79,9 @@ namespace Dune {
 namespace Dune {
 
 #if HAVE_MPI
-  using YaspCollectiveCommunication = CollectiveCommunication<MPI_Comm>;
+  using YaspCollectiveCommunication = Communication<MPI_Comm>;
 #else
-  using YaspCollectiveCommunication = CollectiveCommunication<No_Comm>;
+  using YaspCollectiveCommunication = Communication<No_Comm>;
 #endif
 
   template<int dim, class Coordinates>

@@ -211,7 +211,7 @@ int main(int argc, char **argv)
 
     acc(result, vtkChecker.check());
 
-    mpiHelper.getCollectiveCommunication().allreduce<Acc>(&result, 1);
+    mpiHelper.getCommunication().allreduce<Acc>(&result, 1);
 
     return result;
 

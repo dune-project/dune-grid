@@ -59,7 +59,7 @@ namespace Dune
         typename HostGrid::Traits::GlobalIdSet::IdType,
         IdentityGridLocalIdSet< const IdentityGrid<HostGrid> >,
         typename HostGrid::Traits::LocalIdSet::IdType,
-        CollectiveCommunication<No_Comm>,
+        Communication<No_Comm>,
         DefaultLevelGridViewTraits,
         DefaultLeafGridViewTraits,
         IdentityGridEntitySeed
@@ -378,7 +378,7 @@ namespace Dune
 
 
     /** \brief dummy collective communication */
-    const CollectiveCommunication<No_Comm>& comm () const
+    const Communication<No_Comm>& comm () const
     {
       return ccobj;
     }
@@ -434,7 +434,7 @@ namespace Dune
     }
 
     //! \todo Please doc me !
-    CollectiveCommunication<No_Comm> ccobj;
+    Communication<No_Comm> ccobj;
 
     //! Our set of level indices
     std::vector<IdentityGridLevelIndexSet<const IdentityGrid<HostGrid> >*> levelIndexSets_;

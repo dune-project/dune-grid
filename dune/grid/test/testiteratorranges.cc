@@ -179,7 +179,7 @@ int main(int argc , char **argv) {
     // Initialize MPI, if present
 
     Dune::MPIHelper::instance(argc, argv);
-    check_yasp_3d(rank0Stream(std::cout,Dune::MPIHelper::getCollectiveCommunication()));
+    check_yasp_3d(rank0Stream(std::cout,Dune::MPIHelper::getCommunication()));
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
