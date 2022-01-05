@@ -12,7 +12,6 @@
 #include <string>
 #include <vector>
 
-#include <dune/common/std/make_array.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
@@ -203,13 +202,12 @@ int main(int argc, char **argv)
                 << std::endl;
 
     int result = 0; // pass by default
-    using Dune::Std::make_array;
 
     Dune::VTKChecker vtkChecker;
 
-    acc(result, vtkCheck<1>(vtkChecker, make_array(8), {1.0}));
-    acc(result, vtkCheck<2>(vtkChecker, make_array(8,4), {1.0, 2.0}));
-    acc(result, vtkCheck<3>(vtkChecker, make_array(8,4,4), {1.0, 2.0, 3.0}));
+    acc(result, vtkCheck<1>(vtkChecker, std::array{8}, {1.0}));
+    acc(result, vtkCheck<2>(vtkChecker, std::array{8, 4}, {1.0, 2.0}));
+    acc(result, vtkCheck<3>(vtkChecker, std::array{8, 4, 4}, {1.0, 2.0, 3.0}));
 
     acc(result, vtkChecker.check());
 
