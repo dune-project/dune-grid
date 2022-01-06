@@ -14,8 +14,8 @@
 #include <dune/grid/common/grid.hh>     // the grid base classes
 #include <dune/grid/common/capabilities.hh> // the capabilities
 #include <dune/common/hybridutilities.hh>
-#include <dune/common/power.hh>
 #include <dune/common/bigunsignedint.hh>
+#include <dune/common/math.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/common/reservedvector.hh>
 #include <dune/common/parallel/communication.hh>
@@ -79,9 +79,9 @@ namespace Dune {
 namespace Dune {
 
 #if HAVE_MPI
-  using YaspCollectiveCommunication = CollectiveCommunication<MPI_Comm>;
+  using YaspCollectiveCommunication = Communication<MPI_Comm>;
 #else
-  using YaspCollectiveCommunication = CollectiveCommunication<No_Comm>;
+  using YaspCollectiveCommunication = Communication<No_Comm>;
 #endif
 
   template<int dim, class Coordinates>
@@ -189,33 +189,33 @@ namespace Dune {
       Coordinates coords;
 
       std::array<YGrid, dim+1> overlapfront;
-      std::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power> overlapfront_data;
+      std::array<YGridComponent<Coordinates>, Dune::power(2,dim)> overlapfront_data;
       std::array<YGrid, dim+1> overlap;
-      std::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power> overlap_data;
+      std::array<YGridComponent<Coordinates>, Dune::power(2,dim)> overlap_data;
       std::array<YGrid, dim+1> interiorborder;
-      std::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power> interiorborder_data;
+      std::array<YGridComponent<Coordinates>, Dune::power(2,dim)> interiorborder_data;
       std::array<YGrid, dim+1> interior;
-      std::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power> interior_data;
+      std::array<YGridComponent<Coordinates>, Dune::power(2,dim)> interior_data;
 
       std::array<YGridList<Coordinates>,dim+1> send_overlapfront_overlapfront;
-      std::array<std::deque<Intersection>, StaticPower<2,dim>::power>  send_overlapfront_overlapfront_data;
+      std::array<std::deque<Intersection>, Dune::power(2,dim)>  send_overlapfront_overlapfront_data;
       std::array<YGridList<Coordinates>,dim+1> recv_overlapfront_overlapfront;
-      std::array<std::deque<Intersection>, StaticPower<2,dim>::power>  recv_overlapfront_overlapfront_data;
+      std::array<std::deque<Intersection>, Dune::power(2,dim)>  recv_overlapfront_overlapfront_data;
 
       std::array<YGridList<Coordinates>,dim+1> send_overlap_overlapfront;
-      std::array<std::deque<Intersection>, StaticPower<2,dim>::power>  send_overlap_overlapfront_data;
+      std::array<std::deque<Intersection>, Dune::power(2,dim)>  send_overlap_overlapfront_data;
       std::array<YGridList<Coordinates>,dim+1> recv_overlapfront_overlap;
-      std::array<std::deque<Intersection>, StaticPower<2,dim>::power>  recv_overlapfront_overlap_data;
+      std::array<std::deque<Intersection>, Dune::power(2,dim)>  recv_overlapfront_overlap_data;
 
       std::array<YGridList<Coordinates>,dim+1> send_interiorborder_interiorborder;
-      std::array<std::deque<Intersection>, StaticPower<2,dim>::power>  send_interiorborder_interiorborder_data;
+      std::array<std::deque<Intersection>, Dune::power(2,dim)>  send_interiorborder_interiorborder_data;
       std::array<YGridList<Coordinates>,dim+1> recv_interiorborder_interiorborder;
-      std::array<std::deque<Intersection>, StaticPower<2,dim>::power>  recv_interiorborder_interiorborder_data;
+      std::array<std::deque<Intersection>, Dune::power(2,dim)>  recv_interiorborder_interiorborder_data;
 
       std::array<YGridList<Coordinates>,dim+1> send_interiorborder_overlapfront;
-      std::array<std::deque<Intersection>, StaticPower<2,dim>::power>  send_interiorborder_overlapfront_data;
+      std::array<std::deque<Intersection>, Dune::power(2,dim)>  send_interiorborder_overlapfront_data;
       std::array<YGridList<Coordinates>,dim+1> recv_overlapfront_interiorborder;
-      std::array<std::deque<Intersection>, StaticPower<2,dim>::power>  recv_overlapfront_interiorborder_data;
+      std::array<std::deque<Intersection>, Dune::power(2,dim)>  recv_overlapfront_interiorborder_data;
 
       // general
       YaspGrid<dim,Coordinates>* mg;  // each grid level knows its multigrid
@@ -325,30 +325,32 @@ namespace Dune {
       g.coords = coords;
       g.keepOverlap = keep_ovlp;
 
-      // set the inserting positions in the corresponding arrays of YGridLevelStructure
-      typename std::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power>::iterator overlapfront_it = g.overlapfront_data.begin();
-      typename std::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power>::iterator overlap_it = g.overlap_data.begin();
-      typename std::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power>::iterator interiorborder_it = g.interiorborder_data.begin();
-      typename std::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power>::iterator interior_it = g.interior_data.begin();
+      using Dune::power;
 
-      typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
+      // set the inserting positions in the corresponding arrays of YGridLevelStructure
+      typename std::array<YGridComponent<Coordinates>, power(2,dim)>::iterator overlapfront_it = g.overlapfront_data.begin();
+      typename std::array<YGridComponent<Coordinates>, power(2,dim)>::iterator overlap_it = g.overlap_data.begin();
+      typename std::array<YGridComponent<Coordinates>, power(2,dim)>::iterator interiorborder_it = g.interiorborder_data.begin();
+      typename std::array<YGridComponent<Coordinates>, power(2,dim)>::iterator interior_it = g.interior_data.begin();
+
+      typename std::array<std::deque<Intersection>, power(2,dim)>::iterator
         send_overlapfront_overlapfront_it = g.send_overlapfront_overlapfront_data.begin();
-      typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
+      typename std::array<std::deque<Intersection>, power(2,dim)>::iterator
         recv_overlapfront_overlapfront_it = g.recv_overlapfront_overlapfront_data.begin();
 
-      typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
+      typename std::array<std::deque<Intersection>, power(2,dim)>::iterator
         send_overlap_overlapfront_it = g.send_overlap_overlapfront_data.begin();
-      typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
+      typename std::array<std::deque<Intersection>, power(2,dim)>::iterator
         recv_overlapfront_overlap_it = g.recv_overlapfront_overlap_data.begin();
 
-      typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
+      typename std::array<std::deque<Intersection>, power(2,dim)>::iterator
         send_interiorborder_interiorborder_it = g.send_interiorborder_interiorborder_data.begin();
-      typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
+      typename std::array<std::deque<Intersection>, power(2,dim)>::iterator
         recv_interiorborder_interiorborder_it = g.recv_interiorborder_interiorborder_data.begin();
 
-      typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
+      typename std::array<std::deque<Intersection>, power(2,dim)>::iterator
         send_interiorborder_overlapfront_it = g.send_interiorborder_overlapfront_data.begin();
-      typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator
+      typename std::array<std::deque<Intersection>, power(2,dim)>::iterator
         recv_overlapfront_interiorborder_it = g.recv_overlapfront_interiorborder_data.begin();
 
       // have a null array for constructor calls around
@@ -1419,7 +1421,7 @@ namespace Dune {
 
       // sum over all components of the codimension
       int count = 0;
-      typedef typename std::array<YGridComponent<Coordinates>, StaticPower<2,dim>::power>::iterator DAI;
+      typedef typename std::array<YGridComponent<Coordinates>, Dune::power(2,dim)>::iterator DAI;
       for (DAI it = g->overlapfront[codim].dataBegin(); it != g->overlapfront[codim].dataEnd(); ++it)
         count += it->totalsize();
 

@@ -286,7 +286,7 @@ namespace Dune
       DUNE_THROW( NotImplemented, "insertion indices have not yet been implemented." );
     }
 
-    using Communication = Dune::CollectiveCommunication<typename MPIHelper::MPICommunicator>;
+    using Communication = Dune::Communication<typename MPIHelper::MPICommunicator>;
 
     /** \brief Return the Communication used by the grid factory
      *

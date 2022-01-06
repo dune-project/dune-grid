@@ -9,7 +9,7 @@
 #include <deque>
 
 #include <dune/common/fvector.hh>
-#include <dune/common/power.hh>
+#include <dune/common/math.hh>
 #include <dune/common/streamoperators.hh>
 
 /** \file
@@ -793,7 +793,7 @@ namespace Dune {
     friend class YGrid<Coordinates>::Iterator;
     DAI _begin;
     DAI _end;
-    std::array<int,StaticPower<2,dim>::power> _shiftmapping;
+    std::array<int,Dune::power(2,dim)> _shiftmapping;
     std::vector<typename YGridComponent<Coordinates>::Iterator> _itbegins;
     std::vector<typename YGridComponent<Coordinates>::Iterator> _itends;
     std::vector<int> _indexOffset;
@@ -836,7 +836,7 @@ namespace Dune {
     };
 
     // define data array iterator type
-    typedef typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator DAI;
+    typedef typename std::array<std::deque<Intersection>, Dune::power(2,dim)>::iterator DAI;
 
     // iterator that allows to iterate over a concatenation of deques. namely those
     // that belong to the same codimension.
@@ -930,7 +930,7 @@ namespace Dune {
     }
 
     //! set start iterator in the data array
-    void setBegin(typename std::array<std::deque<Intersection>, StaticPower<2,dim>::power>::iterator begin)
+    void setBegin(typename std::array<std::deque<Intersection>, Dune::power(2,dim)>::iterator begin)
     {
       _begin = begin;
     }

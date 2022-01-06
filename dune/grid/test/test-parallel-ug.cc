@@ -79,7 +79,7 @@ public:
 
     userDataSend_[mapper_.index(e)][0] = x;
     dverb << "Process "
-              << Dune::MPIHelper::getCollectiveCommunication().rank()+1
+              << Dune::MPIHelper::getCommunication().rank()+1
               << " sends for entity "
               << mapper_.index(e)
               << ": "
@@ -102,7 +102,7 @@ public:
     userDataReceive_[mapper_.index(e)][0] = x;
     scatterCounter_[mapper_.index(e)]++;
     dverb << "Process "
-              << Dune::MPIHelper::getCollectiveCommunication().rank()+1
+              << Dune::MPIHelper::getCommunication().rank()+1
               << " received for entity "
               << mapper_.index(e)
               << ": "

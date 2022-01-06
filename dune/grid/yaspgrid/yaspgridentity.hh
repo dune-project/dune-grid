@@ -3,6 +3,8 @@
 #ifndef DUNE_GRID_YASPGRIDENTITY_HH
 #define DUNE_GRID_YASPGRIDENTITY_HH
 
+#include <dune/common/math.hh>
+
 /** \file
  * \brief the YaspEntity class and its specializations
  *
@@ -39,6 +41,7 @@ namespace Dune {
       }
 
       // the actual implementation
+      [[deprecated("Use binomial from dune-common's math.hh")]]
       static constexpr int binomial(int d, int c)
       {
         long binomial=1;
@@ -56,7 +59,7 @@ namespace Dune {
       // compute binomial(r, c) and advance row `r` and column `c`
       static constexpr int nextValue(int& r, int& c)
         {
-          const auto result = binomial(r, c);
+          const auto result = Dune::binomial(r, c);
 
           c += 1;
           if (c > r) {
@@ -159,7 +162,7 @@ namespace Dune {
         }
 
       static constexpr std::array<int,dim+1> _offsets = computeOffsets(std::make_index_sequence<dim+1>{});
-      static constexpr std::array<unsigned char,StaticPower<3,dim>::power> _values = computeValues(std::make_index_sequence<StaticPower<3,dim>::power>{});
+      static constexpr std::array<unsigned char,Dune::power(3,dim)> _values = computeValues(std::make_index_sequence<Dune::power(3,dim)>{});
 
     };
 
@@ -167,7 +170,7 @@ namespace Dune {
     template<typename F, int dim>
     constexpr std::array<int,dim+1> EntityShiftTable<F, dim>::_offsets;
     template<typename F, int dim>
-    constexpr std::array<unsigned char,StaticPower<3,dim>::power> EntityShiftTable<F, dim>::_values;
+    constexpr std::array<unsigned char,Dune::power(3,dim)> EntityShiftTable<F, dim>::_values;
 #endif
 
     // functor for doing the actual entity shift calculation

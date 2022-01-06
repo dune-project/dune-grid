@@ -146,7 +146,7 @@ int main(int argc, char** argv)
       grid->postAdapt();
     }
 
-    mpihelper.getCollectiveCommunication().barrier();
+    mpihelper.getCommunication().barrier();
 
     // Repartition
     float itr = 1000; // ratio of inter-processor communication time compared to data redistribution time

@@ -10,7 +10,7 @@
 
 #include<array>
 
-#include<dune/common/power.hh>
+#include<dune/common/math.hh>
 
 namespace Dune
 {
@@ -98,7 +98,7 @@ namespace Dune
     virtual void loadbalance (const iTupel& size, int P, iTupel& dims) const
     {
       for(int i=1; i<=P; ++i)
-        if(Power<d>::eval(i)==P) {
+        if(Dune::power(i, d) == P) {
           std::fill(dims.begin(), dims.end(),i);
           return;
         }

@@ -172,7 +172,7 @@ namespace Dune
       return centroid_;
     }
 
-    /** \brief map a point from the refence element to the geometry */
+    /** \brief map a point from the reference element to the geometry */
     GlobalCoordinate global ( const LocalCoordinate &local ) const;
 
     /** \brief map a point from the geometry to the reference element */
@@ -378,7 +378,7 @@ namespace Dune
       return centroid_;
     }
 
-    /** \brief map a point from the refence element to the geometry */
+    /** \brief map a point from the reference element to the geometry */
     GlobalCoordinate global ( const LocalCoordinate &local ) const;
 
     /** \brief map a point from the geometry to the reference element */
