@@ -4,6 +4,7 @@
 #define DUNE_GRID_YASPGRIDENTITY_HH
 
 #include <dune/common/math.hh>
+#include <dune/geometry/type.hh>
 
 /** \file
  * \brief the YaspEntity class and its specializations
@@ -296,6 +297,14 @@ namespace Dune {
       return Geometry(_geometry);
     }
 
+    /** \brief Return the name of the reference element. The type can
+        be used to access the Dune::ReferenceElement.
+     */
+    constexpr GeometryType type () const
+    {
+      return GeometryTypes::cube(Geometry::mydimension);
+    }
+
     /*! Return number of subentities with codimension cc.
      *
      * That number is (dim over (dim-codim)) times 2^codim
@@ -526,6 +535,14 @@ namespace Dune {
 
       GeometryImpl _geometry(ll,ur);
       return Geometry( _geometry );
+    }
+
+    /** \brief Return the name of the reference element. The type can
+        be used to access the Dune::ReferenceElement.
+     */
+    constexpr GeometryType type () const
+    {
+      return GeometryTypes::cube(Geometry::mydimension);
     }
 
     /*! Return number of subentities with codimension cc.
@@ -856,6 +873,14 @@ namespace Dune {
     Geometry geometry () const {
       GeometryImpl _geometry((_it).lowerleft());
       return Geometry( _geometry );
+    }
+
+    /** \brief Return the name of the reference element. The type can
+        be used to access the Dune::ReferenceElement.
+     */
+    constexpr GeometryType type () const
+    {
+      return GeometryTypes::cube(Geometry::mydimension);
     }
 
     //! return partition type attribute
