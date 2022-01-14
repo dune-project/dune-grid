@@ -201,10 +201,12 @@ insertBoundarySegment(const std::vector<unsigned int>& vertices,
   for (size_t i=vertices.size(); i<dimworld*2-2; i++)
     segmentVertices[i] = -1;
 
-  // DUNE --> UG vertex renumbering for quadrilateral boundary segments
-  if (vertices.size()==4) {
-    segmentVertices[2] = vertices[3];
-    segmentVertices[3] = vertices[2];
+  // DUNE --> UG vertex renumbering for quadrilateral boundary segments (3D only)
+  if constexpr (dimworld == 3) {
+    if (vertices.size()==4) {
+      segmentVertices[2] = vertices[3];
+      segmentVertices[3] = vertices[2];
+    }
   }
 
   boundarySegmentVertices_.push_back(segmentVertices);
