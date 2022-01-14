@@ -198,7 +198,7 @@ namespace Dune
     /** \brief volume of geometry */
     ctype volume () const
     {
-      return integrationElement() / ctype( Factorial< mydimension >::factorial );
+      return integrationElement() / ctype( factorial(mydimension) );
     }
 
     /** \brief transposed of the geometry mapping's Jacobian
@@ -403,7 +403,7 @@ namespace Dune
     /** \brief volume of geometry */
     ctype volume () const
     {
-      return integrationElement() / ctype( Factorial< mydimension >::factorial );
+      return integrationElement() / ctype( factorial(mydimension) );
     }
 
     /** \brief transposed of the geometry mapping's Jacobian
