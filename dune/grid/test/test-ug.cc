@@ -129,7 +129,7 @@ void markOne ( GridType & grid , int num , int ref )
 void generalTests(bool greenClosure)
 {
   // /////////////////////////////////////////////////////////////////
-  //   Prelude: the UGGrid implementation relies on the face that std::array,
+  //   Prelude: the UGGrid implementation relies on the fact that std::array,
   //   Dune::FieldVector, and C-arrays have the same memory layout.  Here
   //   we make sure this is really so.
   // /////////////////////////////////////////////////////////////////
