@@ -60,7 +60,8 @@ int main (int argc, char *argv[])
   DeformationFunction deformation;
   DeformedGridType defGrid(grid,deformation);
 
-  LeafMultipleCodimMultipleGeomTypeMapper<DeformedGridType> mapper(defGrid, mcmgElementLayout());
+  using GV = typename DeformedGridType::LeafGridView;
+  MultipleCodimMultipleGeomTypeMapper<GV> mapper(defGrid.leafGridView(), mcmgElementLayout());
 
   //grid.globalRefine(1);
   //defGrid.update();
