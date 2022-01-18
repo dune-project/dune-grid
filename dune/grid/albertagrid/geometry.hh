@@ -28,10 +28,10 @@ namespace Dune
   {
     typedef typename std::remove_const< GridImp >::type Grid;
 
-    static const int dimension = Grid::dimension;
-    static const int codimension = codim;
-    static const int mydimension = dimension - codimension;
-    static const int coorddimension = Grid::dimensionworld;
+    static constexpr int dimension = Grid::dimension;
+    static constexpr int codimension = codim;
+    static constexpr int mydimension = dimension - codimension;
+    static constexpr int coorddimension = Grid::dimensionworld;
 
     typedef Alberta::Real ctype;
 
@@ -110,16 +110,16 @@ namespace Dune
     typedef GridImp Grid;
 
     // dimension of barycentric coordinates
-    static const int dimbary = mydim + 1;
+    static constexpr int dimbary = mydim + 1;
 
   public:
     //! type of coordinates
     typedef Alberta::Real ctype;
 
-    static const int dimension = Grid :: dimension;
-    static const int mydimension = mydim;
-    static const int codimension = dimension - mydimension;
-    static const int coorddimension = cdim;
+    static constexpr int dimension = Grid :: dimension;
+    static constexpr int mydimension = mydim;
+    static constexpr int codimension = dimension - mydimension;
+    static constexpr int coorddimension = cdim;
 
     typedef FieldVector< ctype, mydimension > LocalCoordinate;
     typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
@@ -128,7 +128,7 @@ namespace Dune
     typedef FieldMatrix< ctype, coorddimension, mydimension > JacobianInverseTransposed;
 
   private:
-    static const int numCorners = mydimension + 1;
+    static constexpr int numCorners = mydimension + 1;
 
     typedef FieldMatrix< ctype, numCorners, coorddimension > CoordMatrix;
 
@@ -198,7 +198,7 @@ namespace Dune
     /** \brief volume of geometry */
     ctype volume () const
     {
-      return integrationElement() / ctype( Factorial< mydimension >::factorial );
+      return integrationElement() / ctype( factorial(mydimension) );
     }
 
     /** \brief transposed of the geometry mapping's Jacobian
@@ -309,7 +309,7 @@ namespace Dune
     typedef AlbertaGrid< dim, cdim > Grid;
 
     // dimension of barycentric coordinates
-    static const int dimbary = dim + 1;
+    static constexpr int dimbary = dim + 1;
 
     typedef Alberta::ElementInfo< dim > ElementInfo;
 
@@ -317,10 +317,10 @@ namespace Dune
     //! type of coordinates
     typedef Alberta::Real ctype;
 
-    static const int dimension = Grid::dimension;
-    static const int mydimension = dimension;
-    static const int codimension = dimension - mydimension;
-    static const int coorddimension = cdim;
+    static constexpr int dimension = Grid::dimension;
+    static constexpr int mydimension = dimension;
+    static constexpr int codimension = dimension - mydimension;
+    static constexpr int coorddimension = cdim;
 
     typedef FieldVector< ctype, mydimension > LocalCoordinate;
     typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
@@ -329,7 +329,7 @@ namespace Dune
     typedef FieldMatrix< ctype, coorddimension, mydimension > JacobianInverseTransposed;
 
   private:
-    static const int numCorners = mydimension + 1;
+    static constexpr int numCorners = mydimension + 1;
 
     typedef FieldMatrix< ctype, numCorners, coorddimension > CoordMatrix;
 
@@ -403,7 +403,7 @@ namespace Dune
     /** \brief volume of geometry */
     ctype volume () const
     {
-      return integrationElement() / ctype( Factorial< mydimension >::factorial );
+      return integrationElement() / ctype( factorial(mydimension) );
     }
 
     /** \brief transposed of the geometry mapping's Jacobian
@@ -475,7 +475,7 @@ namespace Dune
   public:
     typedef typename Grid::ctype ctype;
 
-    static const int dimension = Grid::dimension;
+    static constexpr int dimension = Grid::dimension;
 
     template< int codim >
     struct Codim
@@ -486,12 +486,12 @@ namespace Dune
     typedef typename Codim< 0 >::LocalGeometry LocalElementGeometry;
     typedef typename Codim< 1 >::LocalGeometry LocalFaceGeometry;
 
-    static const int numChildren = 2;
-    static const int numFaces = dimension + 1;
+    static constexpr int numChildren = 2;
+    static constexpr int numFaces = dimension + 1;
 
-    static const int minFaceTwist = Alberta::Twist< dimension, dimension-1 >::minTwist;
-    static const int maxFaceTwist = Alberta::Twist< dimension, dimension-1 >::maxTwist;
-    static const int numFaceTwists = maxFaceTwist - minFaceTwist + 1;
+    static constexpr int minFaceTwist = Alberta::Twist< dimension, dimension-1 >::minTwist;
+    static constexpr int maxFaceTwist = Alberta::Twist< dimension, dimension-1 >::maxTwist;
+    static constexpr int numFaceTwists = maxFaceTwist - minFaceTwist + 1;
 
   private:
     struct GeoInFatherCoordReader;
