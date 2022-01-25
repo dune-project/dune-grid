@@ -6,6 +6,7 @@ import sys
 base = "../../../doc/grids/gmsh/"
 reader = (dune.grid.reader.gmsh, base+"circle2ndorder.msh")
 grid = dune.grid.ugGrid(reader, dimgrid=2)
+# we either have UG, ot this test should not be run at all 
 assert(grid)
 
 exact = 6.27593206157460
