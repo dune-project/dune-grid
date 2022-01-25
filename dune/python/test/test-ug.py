@@ -3,6 +3,12 @@ import dune.common
 import dune.grid
 import sys
 
+# initialize MPI *if present*
+try:
+    import mpi4py
+except ImportError as exception:
+    pass
+
 base = "../../../doc/grids/gmsh/"
 reader = (dune.grid.reader.gmsh, base+"circle2ndorder.msh")
 grid = dune.grid.ugGrid(reader, dimgrid=2)
