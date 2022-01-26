@@ -76,9 +76,11 @@ To use 'albertaGrid' install the alberta package first and then reinstall the du
 """)
 grid_registry["Alberta"] = albertaGrid
 
-def ugGrid(constructor, dimgrid=None, **parameters):
-    try:
-        assertCMakeHave("HAVE_DUNE_UGGRID")
+from dune.packagemetadata import getCMakeFlags
+try:
+    if not getCMakeFlags()["HAVE_DUNE_UGGRID"]:
+        raise KeyError
+    def ugGrid(constructor, dimgrid=None, **parameters):
         from .grid_generator import module, getDimgrid
 
         if not dimgrid:
@@ -88,8 +90,12 @@ def ugGrid(constructor, dimgrid=None, **parameters):
         gridModule = module(includes, typeName)
 
         return gridModule.reader(constructor).leafView
-    except ConfigurationError:
-        pass
+except KeyError:
+    def ugGrid(constructor, dimgrid=None, **parameters):
+        print("""
+UGGrid was not found during the configuration of dune-grid.
+To use 'ugGrid' install the dune-uggrid package first and then reinstall the dune-grid package.
+""")
 grid_registry["UG"] = ugGrid
 
 if __name__ == "__main__":

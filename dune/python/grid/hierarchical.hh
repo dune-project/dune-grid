@@ -162,7 +162,7 @@ namespace Dune
     inline static std::unique_ptr< Grid > readGmsh ( const std::string &fileName )
     {
       Dune::GridFactory< Grid > gridFactory;
-      Dune::GmshReader< Grid >::read( gridFactory, fileName, false, false );
+      Dune::GmshReader< Grid >::read( gridFactory, fileName, false );
       return std::unique_ptr< Grid >( gridFactory.createGrid() );
     }
 
