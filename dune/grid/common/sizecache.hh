@@ -260,10 +260,14 @@ namespace Dune {
         ++overall;
       }
 
+#ifndef NDEBUG
       int sumtypes = 0;
-      for(size_t i=0; i<types; ++i) sumtypes += typeSizes[i];
+      for(size_t i=0; i<types; ++i)
+        sumtypes += typeSizes[i];
 
       assert( overall == sumtypes );
+#endif
+
       return overall;
     }
 
