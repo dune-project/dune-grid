@@ -159,8 +159,11 @@ namespace Dune
     //! type of local id set
     typedef typename Traits::LocalIdSet LocalIdSet;
 
-    //! type of collective communication
-    typedef typename Traits::CollectiveCommunication CollectiveCommunication;
+    //! type of communication
+    typedef typename Traits::Communication Communication;
+
+    [[deprecated("Use Communication instead!")]]
+    typedef Communication CollectiveCommunication;
 
   private:
     //! type of LeafIterator
@@ -398,9 +401,9 @@ namespace Dune
     //! clean up some markers
     void postAdapt();
 
-    /** \brief return reference to collective communication, if MPI found
+    /** \brief return reference to communication, if MPI found
      * this is specialisation for MPI */
-    const CollectiveCommunication &comm () const
+    const Communication &comm () const
     {
       return comm_;
     }
@@ -549,8 +552,8 @@ namespace Dune
     // pointer to an Albert Mesh, which contains the data
     MeshPointer mesh_;
 
-    // collective communication
-    CollectiveCommunication comm_;
+    // communication
+    Communication comm_;
 
     // maximum level of the mesh
     int maxlevel_;

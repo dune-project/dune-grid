@@ -80,7 +80,7 @@ namespace Dune
     // type of grid
     typedef typename Dune::YaspGrid<dim, Coordinates> Grid;
     typedef typename Grid::ctype ctype;
-    typedef typename Grid::Traits::CollectiveCommunication Comm;
+    typedef typename Grid::Traits::Communication Comm;
 
     /** \copydoc Dune::BackupRestoreFacility::backup(grid,filename)  */
     static void backup ( const Grid &grid, const std::string &filename )
@@ -218,7 +218,7 @@ namespace Dune
   {
     // type of grid
     typedef YaspGrid<dim,TensorProductCoordinates<ctype,dim> > Grid;
-    typedef typename Grid::Traits::CollectiveCommunication Comm;
+    typedef typename Grid::Traits::Communication Comm;
 
     /** \copydoc Dune::BackupRestoreFacility::backup(grid,filename)  */
     static void backup ( const Grid &grid, const std::string &filename )

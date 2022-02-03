@@ -106,7 +106,10 @@ namespace Dune
         typedef GeoGrid::IdSet< const Grid, typename HostGrid::Traits::LocalIdSet >
         LocalIdSet;
 
-        typedef typename HostGrid::Traits::CollectiveCommunication CollectiveCommunication;
+        typedef typename HostGrid::Traits::Communication Communication;
+
+        [[deprecated("Use Communication instead!")]]
+        typedef Communication CollectiveCommunication;
 
         typedef Dune::GridView< GeoGrid::GridViewTraits< typename HostGrid::LeafGridView, CoordFunction, Allocator > > LeafGridView;
         typedef Dune::GridView< GeoGrid::GridViewTraits< typename HostGrid::LevelGridView, CoordFunction, Allocator > > LevelGridView;

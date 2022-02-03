@@ -262,7 +262,7 @@ namespace Dune {
       return (insertionIndex( intersection ) < boundarySegmentVertices_.size());
     }
 
-    using Communication = typename UGGrid<dimworld>::CollectiveCommunication;
+    using Communication = typename UGGrid<dimworld>::Communication;
 
     /** \brief Return the Communication used by the grid factory
      *
