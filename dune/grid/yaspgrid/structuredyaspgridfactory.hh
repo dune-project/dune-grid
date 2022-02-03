@@ -68,9 +68,9 @@ namespace Dune
               unconditionally throws a GridError.
      */
     static std::unique_ptr<GridType>
-    createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
-                      const FieldVector<ctype,dimworld>& upperRight,
-                      const std::array<unsigned int,dim>& elements)
+    createSimplexGrid(const FieldVector<ctype,dimworld>&,
+                      const FieldVector<ctype,dimworld>&,
+                      const std::array<unsigned int,dim>&)
     {
       DUNE_THROW(GridError, className<StructuredGridFactory>()
                  << "::createSimplexGrid(): Simplices are not supported "
@@ -117,9 +117,9 @@ namespace Dune
               unconditionally throws a GridError.
      */
     static std::unique_ptr<GridType>
-    createSimplexGrid(const FieldVector<ctype,dimworld>& lowerLeft,
-                      const FieldVector<ctype,dimworld>& upperRight,
-                      const std::array<unsigned int,dim>& elements)
+    createSimplexGrid(const FieldVector<ctype,dimworld>&,
+                      const FieldVector<ctype,dimworld>&,
+                      const std::array<unsigned int,dim>&)
     {
       DUNE_THROW(GridError, className<StructuredGridFactory>()
                  << "::createSimplexGrid(): Simplices are not supported "

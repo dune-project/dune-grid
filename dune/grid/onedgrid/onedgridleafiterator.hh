@@ -84,10 +84,10 @@ namespace Dune {
     // /////////////////////////////////////
     //   Data members
     // /////////////////////////////////////
-    const GridImp* grid_;
+    const GridImp* grid_ = nullptr;
 
     //! The entity that the iterator is pointing to
-    Entity virtualEntity_;
+    Entity virtualEntity_ = {};
   };
 
 }  // namespace Dune
