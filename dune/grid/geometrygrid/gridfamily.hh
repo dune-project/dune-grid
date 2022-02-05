@@ -108,6 +108,9 @@ namespace Dune
 
         typedef typename HostGrid::Traits::Communication Communication;
 
+        /**
+         * \deprecated Use Communication instead! Will be removed after Dune 2.9.
+         */
         [[deprecated("Use Communication instead!")]]
         typedef Communication CollectiveCommunication;
 

@@ -511,6 +511,8 @@ namespace Dune {
      */
     typedef typename GridFamily::Traits::Communication Communication;
 
+    /** \deprecated Use Communication instead! Will be removed after Dune 2.9.
+     */
     [[deprecated("Use Communication instead!")]]
     typedef Communication CollectiveCommunication;
 
@@ -1056,6 +1058,7 @@ namespace Dune {
     /** \brief The type of the communication. */
     typedef CCType Communication;
 
+    /** \deprecated Use Communication instead! Will be removed after Dune 2.9. */
     [[deprecated("Use Communication instead!")]]
     typedef Communication CollectiveCommunication;
   };
