@@ -6,10 +6,10 @@
 #include <dune/grid/onedgrid/onedgridfactory.hh>
 #include <dune/grid/onedgrid/onedgridindexsets.hh>
 
-using namespace Dune;
+namespace Dune
+{
 
-
-Dune::GridFactory<Dune::OneDGrid >::
+GridFactory<Dune::OneDGrid >::
 GridFactory() :
   factoryOwnsGrid_(true),
   vertexIndex_(0)
@@ -19,7 +19,7 @@ GridFactory() :
   createBegin();
 }
 
-Dune::GridFactory<Dune::OneDGrid >::
+GridFactory<Dune::OneDGrid >::
 GridFactory(OneDGrid* grid) :
   factoryOwnsGrid_(false),
   vertexIndex_(0)
@@ -29,20 +29,20 @@ GridFactory(OneDGrid* grid) :
   createBegin();
 }
 
-Dune::GridFactory<Dune::OneDGrid>::
+GridFactory<Dune::OneDGrid>::
 ~GridFactory()
 {
   if (grid_ && factoryOwnsGrid_)
     delete grid_;
 }
 
-void Dune::GridFactory<Dune::OneDGrid>::
+void GridFactory<Dune::OneDGrid>::
 insertVertex(const Dune::FieldVector<GridFactory<OneDGrid >::ctype,1>& pos)
 {
   vertexPositions_.insert(std::make_pair(pos, vertexIndex_++));
 }
 
-void Dune::GridFactory<Dune::OneDGrid>::
+void GridFactory<Dune::OneDGrid>::
 insertElement(const GeometryType& type,
               const std::vector<unsigned int>& vertices)
 {
@@ -57,7 +57,7 @@ insertElement(const GeometryType& type,
   elements_.back()[1] = vertices[1];
 }
 
-void Dune::GridFactory<Dune::OneDGrid>::
+void GridFactory<Dune::OneDGrid>::
 insertBoundarySegment(const std::vector<unsigned int>& vertices)
 {
   if (vertices.size() != 1)
@@ -66,14 +66,14 @@ insertBoundarySegment(const std::vector<unsigned int>& vertices)
   boundarySegments_.push_back(vertices[0]);
 }
 
-void Dune::GridFactory<Dune::OneDGrid>::
+void GridFactory<Dune::OneDGrid>::
 insertBoundarySegment(const std::vector<unsigned int>& vertices,
                       const std::shared_ptr<BoundarySegment<1> > & /* boundarySegment */)
 {
   insertBoundarySegment(vertices);
 }
 
-bool Dune::GridFactory<Dune::OneDGrid>::
+bool GridFactory<Dune::OneDGrid>::
 wasInserted(const typename OneDGrid::LeafIntersection& intersection) const
 {
   bool inserted(false);
@@ -87,7 +87,7 @@ wasInserted(const typename OneDGrid::LeafIntersection& intersection) const
   return inserted;
 }
 
-unsigned int Dune::GridFactory<Dune::OneDGrid>::
+unsigned int GridFactory<Dune::OneDGrid>::
 insertionIndex(const typename OneDGrid::LeafIntersection& intersection) const
 {
   unsigned int insertionIdx(0);
@@ -100,7 +100,7 @@ insertionIndex(const typename OneDGrid::LeafIntersection& intersection) const
   return insertionIdx;
 }
 
-std::unique_ptr<OneDGrid> Dune::GridFactory<Dune::OneDGrid>::
+std::unique_ptr<OneDGrid> GridFactory<Dune::OneDGrid>::
 createGrid()
 {
   // Prevent a crash when this method is called twice in a row
@@ -181,8 +181,10 @@ createGrid()
   return std::unique_ptr<OneDGrid>(tmp);
 }
 
-void Dune::GridFactory<Dune::OneDGrid >::
+void GridFactory<Dune::OneDGrid >::
 createBegin()
 {
   vertexPositions_.clear();
 }
+
+} // namespace Dune
