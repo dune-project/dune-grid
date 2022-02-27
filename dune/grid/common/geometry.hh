@@ -279,9 +279,6 @@ namespace Dune
 
     //@}
 
-    /** delete assignment operator */
-    const Geometry &operator= ( const Geometry &rhs ) = delete;
-
   protected:
 
     Implementation realGeometry;
