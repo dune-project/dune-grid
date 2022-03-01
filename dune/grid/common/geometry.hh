@@ -11,6 +11,8 @@
 
 #include <dune/common/fmatrix.hh>
 #include <dune/common/typetraits.hh>
+#include <dune/common/transpose.hh>
+#include <dune/common/std/type_traits.hh>
 
 #include <dune/geometry/referenceelements.hh>
 
@@ -125,6 +127,42 @@ namespace Dune
      * .
      */
     typedef typename Implementation::JacobianTransposed JacobianTransposed;
+
+  private:
+
+    template<class Implementation_T>
+    using JacobianInverseOfImplementation = decltype(typename Implementation_T::JacobianInverse{std::declval<Implementation_T>().jacobianInverse(std::declval<LocalCoordinate>())});
+
+    using JacobianInverseDefault = decltype(transpose(std::declval<JacobianInverseTransposed>()));
+
+    template<class Implementation_T>
+    using JacobianOfImplementation = decltype(typename Implementation_T::Jacobian{std::declval<Implementation_T>().jacobian(std::declval<LocalCoordinate>())});
+
+    using JacobianDefault = decltype(transpose(std::declval<JacobianTransposed>()));
+
+  public:
+
+    /**
+     * \brief type of jacobian inverse
+     *
+     * The exact type is implementation-dependent.
+     * However, it is guaranteed to have the following properties:
+     * - You can multilply it from the right to a suitable FieldMatrix
+     * - It is copy constructible and copy assignable.
+     * .
+     */
+    using JacobianInverse = Std::detected_or_t<JacobianInverseDefault, JacobianInverseOfImplementation, Implementation>;
+
+    /**
+     * \brief type of jacobian
+     *
+     * The exact type is implementation-dependent.
+     * However, it is guaranteed to have the following properties:
+     * - You can multilply it from the right to a suitable FieldMatrix
+     * - It is copy constructible and copy assignable.
+     * .
+     */
+    using Jacobian = Std::detected_or_t<JacobianDefault, JacobianOfImplementation, Implementation>;
 
     /** \brief Return the type of the reference element. The type can
        be used to access the Dune::ReferenceElement.
@@ -267,6 +305,55 @@ namespace Dune
     {
       return impl().jacobianInverseTransposed(local);
     }
+
+    /** \brief Return the Jacobian
+     *
+     *  The Jacobian is defined in the documentation of
+     *  \ref Dune::Geometry::integrationElement "integrationElement".
+     *
+     *  \param[in]  local  position \f$x\in D\f$
+     *
+     *  \return \f$J_g(x)\f$
+     *
+     *  \note The exact return type is implementation defined.
+     */
+    Jacobian jacobian ( const LocalCoordinate& local ) const
+    {
+      if constexpr(Std::is_detected_v<JacobianOfImplementation, Implementation>)
+        return impl().jacobian(local);
+      else
+        return transpose(jacobianTransposed(local));
+    }
+
+    /** \brief Return inverse of Jacobian
+     *
+     *  The Jacobian is defined in the documentation of
+     *  \ref Dune::Geometry::integrationElement "integrationElement".
+     *
+     *  \param[in]  local  position \f$x\in D\f$
+     *  \return \f$J_g^{-1}(x)\f$
+     *
+     *  The use of this function is to compute the jacobians of some function
+     *  \f$f : W \to \textbf{R}\f$ at some position \f$y=g(x)\f$, where
+     *  \f$x\in D\f$ and \f$g\f$ the transformation of the Geometry.
+     *  When we set \f$\hat{f}(x) = f(g(x))\f$ and apply the chain rule we obtain
+     *  \f[\nabla f(g(x)) = J_{\hat{f}}(x) J_g^{-1}(x).\f]
+     *
+     *  \note In the non-quadratic case \f$\textrm{cdim} \neq \textrm{mydim}\f$, the
+     *        pseudoinverse of \f$J_g(x)\f$ is returned.
+     *        This means that its transposed is inverse for all tangential vectors in
+     *        \f$g(x)\f$ while mapping all normal vectors to zero.
+     *
+     *  \note The exact return type is implementation defined.
+     */
+    JacobianInverse jacobianInverse ( const LocalCoordinate &local ) const
+    {
+      if constexpr(Std::is_detected_v<JacobianInverseOfImplementation, Implementation>)
+        return impl().jacobianInverse(local);
+      else
+        return transpose(jacobianInverseTransposed(local));
+    }
+
     //===========================================================
     /** @name Interface for grid implementers
      */
