@@ -463,7 +463,11 @@ void checkIntersectionIterator ( const GridViewType &view,
 
     // check if conforming() method is compatible with static information on grid view
     if( GridViewType::conforming && !intersection.conforming() )
-      DUNE_THROW( Dune::GridError, "Non-conforming intersection found in a conforming grid view." );
+      DUNE_THROW( Dune::GridError, "Non-conforming intersection found in a conforming grid view (static)." );
+
+    // check if conforming() method is compatible with dynamic information on grid view
+    if( view.isConforming() && !intersection.conforming() )
+      DUNE_THROW( Dune::GridError, "Non-conforming intersection found in a conforming grid view (dynamic)." );
 
     // check symmetry of 'has-intersection-with'-relation
 

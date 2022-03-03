@@ -960,6 +960,12 @@ typename std::enable_if<Grid::dimension == 3, void>::type checkCodim1Mapping(con
   }
 }
 
+template <class GridView>
+void checkConforming(const GridView& view)
+{
+  view.isConforming();
+}
+
 template<class Grid>
 typename std::enable_if<Grid::dimension != 3, void>::type checkCodim1Mapping(const Grid &/*g*/)
 {}
@@ -1024,6 +1030,10 @@ void gridcheck (Grid &g)
   checkFatherLevel(g);
   checkFatherLevel(cg);
   checkCodim1Mapping(g);
+
+  // check conforming
+  checkConforming( g.levelGridView( 0 ) );
+  checkConforming( g.leafGridView() );
 
   // check geometries of macro level and leaf level
   Dune::GeometryChecker<Grid> checker;
