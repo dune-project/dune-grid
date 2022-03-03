@@ -41,6 +41,8 @@ struct GeometryInterface
     geo.integrationElement(v);
     geo.jacobianTransposed( v );
     geo.jacobianInverseTransposed( v );
+    geo.jacobian( v );
+    geo.jacobianInverse( v );
   }
 
   GeometryInterface ()
