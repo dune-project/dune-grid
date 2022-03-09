@@ -1,5 +1,10 @@
 # Master (will become release 2.9)
 
+- The `Geometry` interface was extended by methods `jacobian(local)` and `jacobianInverse(local)`
+  and corresponding typedefs `Jacobian` and `JacobianInverse`. All grid implementations need to
+  provide the new interface. For transition, the methods and typedefs are default-implemented
+  in the `Dune::Geometry` interface class which is used for all grid geometries.
+
 - The `Geometry::integrationElement` now needs to return the type `Volume`
   instead of `ctype`. Note that this may be different from `ctype` if the grid
   supports typed dimensions. In such a case, `ctype` is a length, and not
