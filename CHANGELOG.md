@@ -3,6 +3,11 @@
 - The `FindAlberta.cmake` module only searches for world dimension libraries up to dim 3. This
   can be increased by setting the CMake variable `ALBERTA_MAX_WORLD_DIM`
 
+- A method `GridView::isConforming()` was added
+  indicating whether a given grid view is representing a conforming grid.
+  For some grid implementations this could vary from the compile time static
+  `GridView::conforming` depending on run time parameters.
+
 ## Deprecations and removals
 
 - Support for PSurface has been removed.

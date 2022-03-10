@@ -153,6 +153,8 @@ namespace Dune
         return indexSet_;
       }
 
+      bool isConforming() const { return hostGridView().isConforming(); }
+
       int size ( int codim ) const
       {
         return hostGridView().size( codim );

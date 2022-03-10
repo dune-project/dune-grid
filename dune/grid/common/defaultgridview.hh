@@ -115,6 +115,9 @@ namespace Dune
       return grid().levelIndexSet( level_ );
     }
 
+    /** \brief return true if current state of grid view represents a conforming grid */
+    bool isConforming() const { return bool(Traits::conforming); }
+
     /** \brief obtain number of entities in a given codimension */
     int size ( int codim ) const
     {
@@ -296,6 +299,9 @@ namespace Dune
     {
       return grid().leafIndexSet();
     }
+
+    /** \brief return true if current state of grid view represents a conforming grid */
+    bool isConforming() const { return bool(Traits::conforming); }
 
     /** \brief obtain number of entities in a given codimension */
     int size ( int codim ) const
