@@ -345,6 +345,7 @@ def module(includes, typeName, *args, **kwargs):
     includes = includes + ["dune/python/grid/hierarchical.hh"]
     typeHash = "hierarchicalgrid_" + hashIt(typeName)
     kwargs["dynamicAttr"] = True
+    kwargs["holder"] = "std::shared_ptr"
     module = generator.load(includes, typeName, typeHash, *args, **kwargs)
     return module
 

@@ -113,9 +113,9 @@ namespace Dune
           std::ostringstream stream;
           BackupRestoreFacility< Grid >::backup( self, stream );
           return stream.str();
-        }, [] ( pybind11::bytes state ) -> std::unique_ptr< Grid > {
+        }, [] ( pybind11::bytes state ) -> std::shared_ptr< Grid > {
           std::istringstream stream( state );
-          return std::unique_ptr< Grid >( BackupRestoreFacility< Grid >::restore( stream ) );
+          return std::shared_ptr< Grid >( BackupRestoreFacility< Grid >::restore( stream ) );
         } ) );
     }
 
@@ -136,19 +136,19 @@ namespace Dune
     // -------
 
     template< class Grid >
-    inline static std::unique_ptr< Grid > readDGF ( const std::string &fileName )
+    inline static std::shared_ptr< Grid > readDGF ( const std::string &fileName )
     {
       DGFGridFactory< Grid > dgfFactory( fileName );
-      std::unique_ptr< Grid > grid( dgfFactory.grid() );
+      std::shared_ptr< Grid > grid( dgfFactory.grid() );
       grid->loadBalance();
       return grid;
     }
 
     template< class Grid >
-    inline static std::unique_ptr< Grid > readDGF ( std::istream &input )
+    inline static std::shared_ptr< Grid > readDGF ( std::istream &input )
     {
       DGFGridFactory< Grid > dgfFactory( input );
-      std::unique_ptr< Grid > grid( dgfFactory.grid() );
+      std::shared_ptr< Grid > grid( dgfFactory.grid() );
       grid->loadBalance();
       return grid;
     }
@@ -159,15 +159,15 @@ namespace Dune
     // --------
 
     template< class Grid, std::enable_if_t< Capabilities::HasGridFactory< Grid >::value, int > = 0 >
-    inline static std::unique_ptr< Grid > readGmsh ( const std::string &fileName )
+    inline static std::shared_ptr< Grid > readGmsh ( const std::string &fileName )
     {
       Dune::GridFactory< Grid > gridFactory;
       Dune::GmshReader< Grid >::read( gridFactory, fileName, false );
-      return std::unique_ptr< Grid >( gridFactory.createGrid() );
+      return std::shared_ptr< Grid >( gridFactory.createGrid() );
     }
 
     template< class Grid, std::enable_if_t< !Capabilities::HasGridFactory< Grid >::value, int > = 0 >
-    inline static std::unique_ptr< Grid > readGmsh ( const std::string &fileName )
+    inline static std::shared_ptr< Grid > readGmsh ( const std::string &fileName )
     {
       throw std::invalid_argument( "Can only read Gmsh files into grids supporting the GridFactory concept." );
     }
@@ -178,7 +178,7 @@ namespace Dune
     // ------
 
     template< class Grid >
-    inline static std::unique_ptr< Grid > reader ( const std::tuple< Reader, std::string > &args )
+    inline static std::shared_ptr< Grid > reader ( const std::tuple< Reader, std::string > &args )
     {
       switch( std::get< 0 >( args ) )
       {
@@ -210,7 +210,7 @@ namespace Dune
 
     template< class Grid >
     inline static auto reader ( const StructuredReader< Grid > &args, PriorityTag< 1 > )
-      -> std::enable_if_t< Capabilities::HasStructuredGridFactory< Grid >::value, std::unique_ptr< Grid > >
+      -> std::enable_if_t< Capabilities::HasStructuredGridFactory< Grid >::value, std::shared_ptr< Grid > >
     {
       using std::get;
 
@@ -226,34 +226,34 @@ namespace Dune
     }
 
     template< class Grid >
-    inline static std::unique_ptr< Grid > reader ( const StructuredReader< Grid > &args, PriorityTag< 0 > )
+    inline static std::shared_ptr< Grid > reader ( const StructuredReader< Grid > &args, PriorityTag< 0 > )
     {
       throw pybind11::value_error( "Can only create structured grids for grids supporting the GridFactory concept." );
     }
 
     template< class Grid >
-    inline static std::unique_ptr< Grid > reader ( const StructuredReader< Grid > &args )
+    inline static std::shared_ptr< Grid > reader ( const StructuredReader< Grid > &args )
     {
       return reader< Grid >( args, PriorityTag< 42 >() );
     }
 
     template< class Grid >
     inline static auto reader ( const pybind11::dict &args, PriorityTag< 1 > )
-      -> std::enable_if_t< Capabilities::HasGridFactory< Grid >::value, std::unique_ptr< Grid > >
+      -> std::enable_if_t< Capabilities::HasGridFactory< Grid >::value, std::shared_ptr< Grid > >
     {
       GridFactory< Grid > factory;
       fillGridFactory( args, factory );
-      return std::unique_ptr< Grid >( factory.createGrid() );
+      return std::shared_ptr< Grid >( factory.createGrid() );
     }
 
     template< class Grid >
-    inline static std::unique_ptr< Grid > reader ( const pybind11::dict &args, PriorityTag< 0 > )
+    inline static std::shared_ptr< Grid > reader ( const pybind11::dict &args, PriorityTag< 0 > )
     {
       throw pybind11::value_error( "Can only read Python dictionaries into grids supporting the GridFactory concept." );
     }
 
     template< class Grid >
-    inline static std::unique_ptr< Grid > reader ( const pybind11::dict &args )
+    inline static std::shared_ptr< Grid > reader ( const pybind11::dict &args )
     {
       return reader< Grid >( args, PriorityTag< 42 >() );
     }
