@@ -22,6 +22,7 @@
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
 #include <dune/grid/io/file/gmshreader.hh>
 #include <dune/grid/utility/structuredgridfactory.hh>
+#include <dune/grid/yaspgrid.hh>
 
 #include <dune/python/common/mpihelper.hh>
 #include <dune/python/common/typeregistry.hh>
@@ -464,6 +465,10 @@ namespace Dune
       auto addHAttr = pybind11::module::import( "dune.grid.grid_generator" ).attr("addHAttr");
       addHAttr(module);
     }
+
+    //! \brief export the C++ type used for the structuredGrid
+    template<unsigned int dim>
+    using StructuredGrid = Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double, dim>>;
 
   } // namespace Python
 
