@@ -1,4 +1,6 @@
 import math
+import sys, os
+basedir = os.path.dirname(sys.argv[0])
 
 # example of how to perform operations on a given grid
 def runOnGrid(grid):
@@ -22,20 +24,36 @@ def runOnGrid(grid):
             l2norm2 += f(e,x)**2*w*geo.integrationElement(x)
     print("integral of grid function=",math.sqrt(l2norm2))
 
-# constructed a Cartesian grid
+# construct ugGrid and yaspGrid via file reader
+print ("constructe an unstructured Grid (ugGrid) via file reader")
+from dune.grid import ugGrid, reader
+mshfile = basedir + "/../../../../doc/grids/gmsh/circle1storder.msh"
+unstructuredGrid = ugGrid( (reader.gmsh, mshfile), dimgrid=2 )
+unstructuredGrid.plot()
+runOnGrid(unstructuredGrid)
+
+print ("constructe a Grid via file reader")
+from dune.grid import yaspGrid, reader
+mshfile = basedir + "/../../../../doc/grids/dgf/test2d_offset.dgf"
+dgfgrid = yaspGrid( (reader.dgf, mshfile), dimgrid=2 )
+dgfgrid.plot()
+runOnGrid(dgfgrid)
+
+# constructe a Cartesian grid
+print ("constructe a Cartesian grid")
 from dune.grid import structuredGrid
 grid = structuredGrid([-1,-1],[1,1],[10,10])
 print("number of elements of Cartesian grid:",grid.size(0))
 grid.plot()
 runOnGrid(grid)
 
-# constructed YaspGrids with different coordinate types
+# constructe YaspGrids with different coordinate types
 # yaspGrid allows to specify the coordinate type
-from dune.grid import tensorProductCoordinates
-from dune.grid import yaspGrid
+print ("constructed YaspGrids with tensor product coordinate type")
+from dune.grid import yaspGrid, tensorProductCoordinates
 import numpy as np
 coords = tensorProductCoordinates([np.array([1,2,3,4]), np.array([10,11,33,44])], ctype='float')
 ygrid = yaspGrid(coords)
-print("number of elements of tensor YsapGrid grid:",ygrid.size(0))
+print("number of elements of tensor YaspGrid grid:",ygrid.size(0))
 ygrid.plot()
 runOnGrid(ygrid)
