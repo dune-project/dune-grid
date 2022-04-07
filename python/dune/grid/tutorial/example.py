@@ -29,7 +29,7 @@ def runOnGrid(grid):
 # construct ugGrid and yaspGrid via file reader
 from dune.grid import ugGrid, reader
 print ("constructe an unstructured Grid (ugGrid) via file reader")
-mshfile = os.path.join(griddir, "gmsh/circle1storder.msh")
+mshfile = os.path.join(griddir, "circle1storder.msh")
 unstructuredGrid = ugGrid( (reader.gmsh, mshfile), dimgrid=2 )
 if not unstructuredGrid:
     print ("WARNING: skipped ugGrid example, as dune-uggrid is not installed")
@@ -40,6 +40,7 @@ else:
 print ("constructe a Grid via file reader")
 from dune.grid import yaspGrid, reader
 mshfile = os.path.join(griddir, "test2d_offset.dgf")
+print(mshfile)
 dgfgrid = yaspGrid( (reader.dgf, mshfile), dimgrid=2 )
 dgfgrid.plot()
 runOnGrid(dgfgrid)
