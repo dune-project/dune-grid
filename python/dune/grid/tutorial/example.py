@@ -2,7 +2,7 @@ import math
 import sys, os
 
 # find grid files relative to example.py script
-griddir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), "../../../../doc/grids/"))
+griddir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), "."))
 
 # example of how to perform operations on a given grid
 def runOnGrid(grid):
@@ -39,7 +39,7 @@ else:
 
 print ("constructe a Grid via file reader")
 from dune.grid import yaspGrid, reader
-mshfile = os.path.join(griddir, "dgf/test2d_offset.dgf")
+mshfile = os.path.join(griddir, "test2d_offset.dgf")
 dgfgrid = yaspGrid( (reader.dgf, mshfile), dimgrid=2 )
 dgfgrid.plot()
 runOnGrid(dgfgrid)
