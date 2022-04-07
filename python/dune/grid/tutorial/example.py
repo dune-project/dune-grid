@@ -25,12 +25,15 @@ def runOnGrid(grid):
     print("integral of grid function=",math.sqrt(l2norm2))
 
 # construct ugGrid and yaspGrid via file reader
-print ("constructe an unstructured Grid (ugGrid) via file reader")
 from dune.grid import ugGrid, reader
+print ("constructe an unstructured Grid (ugGrid) via file reader")
 mshfile = basedir + "/../../../../doc/grids/gmsh/circle1storder.msh"
 unstructuredGrid = ugGrid( (reader.gmsh, mshfile), dimgrid=2 )
-unstructuredGrid.plot()
-runOnGrid(unstructuredGrid)
+if not unstructuredGrid:
+    print ("WARNING: skipped ugGrid example, as dune-uggrid is not installed")
+else:
+    unstructuredGrid.plot()
+    runOnGrid(unstructuredGrid)
 
 print ("constructe a Grid via file reader")
 from dune.grid import yaspGrid, reader
