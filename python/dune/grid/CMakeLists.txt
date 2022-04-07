@@ -1,3 +1,4 @@
+add_subdirectory(tutorial)
 add_python_targets(grid
   __init__
   __main__

@@ -1,6 +1,8 @@
 import math
 import sys, os
-basedir = os.path.dirname(sys.argv[0])
+
+# find grid files relative to example.py script
+griddir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), "../../../../doc/grids/"))
 
 # example of how to perform operations on a given grid
 def runOnGrid(grid):
@@ -27,7 +29,7 @@ def runOnGrid(grid):
 # construct ugGrid and yaspGrid via file reader
 from dune.grid import ugGrid, reader
 print ("constructe an unstructured Grid (ugGrid) via file reader")
-mshfile = basedir + "/../../../../doc/grids/gmsh/circle1storder.msh"
+mshfile = os.path.join(griddir, "gmsh/circle1storder.msh")
 unstructuredGrid = ugGrid( (reader.gmsh, mshfile), dimgrid=2 )
 if not unstructuredGrid:
     print ("WARNING: skipped ugGrid example, as dune-uggrid is not installed")
@@ -37,7 +39,7 @@ else:
 
 print ("constructe a Grid via file reader")
 from dune.grid import yaspGrid, reader
-mshfile = basedir + "/../../../../doc/grids/dgf/test2d_offset.dgf"
+mshfile = os.path.join(griddir, "dgf/test2d_offset.dgf")
 dgfgrid = yaspGrid( (reader.dgf, mshfile), dimgrid=2 )
 dgfgrid.plot()
 runOnGrid(dgfgrid)
