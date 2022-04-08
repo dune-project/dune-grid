@@ -2,7 +2,7 @@ import math
 import sys, os
 
 # find grid files relative to example.py script
-griddir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), "."))
+griddir = os.path.dirname(sys.argv[0])
 
 # example of how to perform operations on a given grid
 def runOnGrid(grid):

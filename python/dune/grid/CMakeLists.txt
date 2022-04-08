@@ -8,7 +8,6 @@ add_python_targets(grid
   map
   datahandle
 )
-dune_symlink_to_source_files(FILES tutorial)
 dune_add_pybind11_module(NAME _grid)
 set_property(TARGET _grid PROPERTY LINK_LIBRARIES dunecommon dunegeometry dunegrid APPEND)
 if(SKBUILD)
