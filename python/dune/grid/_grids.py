@@ -181,16 +181,16 @@ def yaspGrid(constructor, dimgrid=None, coordinates="equidistant", ctype="double
     if isinstance(constructor, CartesianDomain):
         # retrieve parameters from constructor.param
         ctype_     = constructor.param.get("ctype", ctype)
-        if ctype == ctype_:
+        if ctype != ctype_:
             print("WARNING: yaspGrid: ctype Parameter of CartesianDomain overwritten by explicit parameter")
             ctype = ctype_
         periodic_   = constructor.param.get("periodic", periodic)
-        if periodic == periodic_:
+        if periodic != periodic_:
             print("WARNING: yaspGrid: periodic Parameter of CartesianDomain overwritten by explicit parameter")
             periodic = periodic_
         overlap_    = constructor.param.get("overlap", overlap)
-        if ctype == ctype_:
-            print("WARNING: yaspGrid: ctype Parameter of CartesianDomain overwritten by explicit parameter")
+        if overlap != overlap_:
+            print("WARNING: yaspGrid: overlap Parameter of CartesianDomain overwritten by explicit parameter")
             ctype = ctype_
         constructor = equidistantOffsetCoordinates(
             lowerleft  = constructor.lower,
