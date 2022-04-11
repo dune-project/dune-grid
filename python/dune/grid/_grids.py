@@ -56,7 +56,7 @@ def onedGrid(constructor):
     return gridModule.reader(constructor).leafView
 
 def moduleYaspCoordinates(dim, ctype="double"):
-    moduleName = "yaspcoordinates_dim{dim}".format(ct = ctype, dim = dim)
+    moduleName = "yaspcoordinates_dim{dim}_ct{ct}".format(ct = ctype, dim = dim)
     source = """
 #include <dune/python/pybind11/pybind11.h>
 #include <dune/python/pybind11/numpy.h>
@@ -94,6 +94,7 @@ auto registerCoords(py::module module, std::string name)
 PYBIND11_MODULE({moduleName}, module)
 {{
   // make sure FieldVector is known to pybind11
+  addToTypeRegistry<{ct}>(GenerateTypeName("{ct}"));
   registerFieldVector<{ct},{dim}>(module);
 
   // EquidistantCoordinates(const Dune::FieldVector<ct,dim>& upperRight, const std::array<int,dim>& s)
@@ -113,18 +114,18 @@ PYBIND11_MODULE({moduleName}, module)
 
 """.format(moduleName = moduleName, ct = ctype, dim = dim)
     from dune.generator import builder
-    module = builder.load(moduleName, source, "yasp coordinates dim={dim}".format(dim = dim)) # , self.typeName[0], extraCMake)
+    module = builder.load(moduleName, source, "yasp coordinates dim={dim} ctype={ct}".format(ct = ctype, dim = dim))
     return module
 
 def equidistantOffsetCoordinates(lowerleft, upperright, elements, ctype='double'):
     import numpy as np
     dim = len(elements)
-    mod = moduleYaspCoordinates(dim)
+    mod = moduleYaspCoordinates(dim,ctype)
     coords_ = mod.EquidistantOffsetCoordinates
     # make sure we have float values
     dtype = coords_.numpy_ctype
-    lowerleft = np.array(lowerleft, dtype=np.float64)
-    upperright = np.array(upperright, dtype=np.float64)
+    lowerleft = np.array(lowerleft, dtype=dtype)
+    upperright = np.array(upperright, dtype=dtype)
     assert(len(lowerleft) == dim)
     assert(len(upperright) == dim)
     return coords_(lowerleft, upperright, elements)
@@ -132,24 +133,28 @@ def equidistantOffsetCoordinates(lowerleft, upperright, elements, ctype='double'
 def equidistantCoordinates(upperright, elements):
     import numpy as np
     dim = len(elements)
-    # make sure we have float values
-    upperright = np.array(upperright, dtype=np.float64)
-    assert(len(upperright) == dim)
-    mod = moduleYaspCoordinates(dim)
+    mod = moduleYaspCoordinates(dim,ctype)
     coords_ = mod.EquidistantCoordinates
+    # make sure we have float values
+    dtype = coords_.numpy_ctype
+    upperright = np.array(upperright, dtype=dtype)
+    assert(len(upperright) == dim)
     return coords_(upperright, elements)
 
 def tensorProductCoordinates(coords, offset=None, ctype='double'):
+    import numpy as np
     dim = len(coords)
-    mod = moduleYaspCoordinates(dim)
+    mod = moduleYaspCoordinates(dim,ctype)
     coords_ = mod.TensorProductCoordinates
     if offset is None:
         offset = [0,]*dim
     if len(offset) != dim:
         raise ValueError("tensorProductCoordinates: offset parameter has wrong size")
+    dtype = coords_.numpy_ctype
+    coords = np.array(coords, dtype=dtype)
     return coords_(coords,offset)
 
-def yaspGrid(constructor, dimgrid=None, coordinates="equidistant", ctype="double",
+def yaspGrid(constructor, dimgrid=None, coordinates="equidistant", ctype=None,
              periodic=None, overlap=None, **param):
     """create a Dune::YaspGrid
 
@@ -161,7 +166,7 @@ def yaspGrid(constructor, dimgrid=None, coordinates="equidistant", ctype="double
                     or a reader object that can be called via gridModule.reader(constructor)
        dimgrid:     explicitly specify the dimension of the grid (should only be set if using a reader)
        coordinates: explicitly specify coordinates template parameter (deprecated, and ignored)
-       ctype:       explicitly specify grids C++ ctype template parameter (should only be set if using a reader)
+       ctype:       explicitly specify grids C++ ctype template parameter (should only be set if using a reader, default: double)
        periodic:    boolean list specifying periodicity per dimension (default: no periodicity)
        overlap:     size of overlap for periodic or parallel grids (default: 1)
 
@@ -179,25 +184,40 @@ def yaspGrid(constructor, dimgrid=None, coordinates="equidistant", ctype="double
     #### we try to guess what kind of "constructor" we are using now
     # CartesianDomain
     if isinstance(constructor, CartesianDomain):
-        # retrieve parameters from constructor.param
+        # retrieve parameters from constructor.param, explicit parameters take precedence
         ctype_     = constructor.param.get("ctype", ctype)
-        if ctype != ctype_:
-            print("WARNING: yaspGrid: ctype Parameter of CartesianDomain overwritten by explicit parameter")
+        if not ctype:
             ctype = ctype_
-        periodic_   = constructor.param.get("periodic", periodic)
-        if periodic != periodic_:
-            print("WARNING: yaspGrid: periodic Parameter of CartesianDomain overwritten by explicit parameter")
-            periodic = periodic_
-        overlap_    = constructor.param.get("overlap", overlap)
-        if overlap != overlap_:
-            print("WARNING: yaspGrid: overlap Parameter of CartesianDomain overwritten by explicit parameter")
-            ctype = ctype_
+        else:
+            if ctype != ctype_:
+                print("WARNING: yaspGrid: ctype Parameter of CartesianDomain overwritten by explicit parameter")
+        if not ctype:
+            ctype = "double" # default is doubel
+        print(ctype)
+        print(ctype_)
+        print("...")
+        # ---
+        periodic_  = constructor.param.get("periodic", periodic)
+        if not periodic:
+            periodic = periodic_ # if periodic is not gieven on the command line, we use the parameter from CartesianDomain
+        else:
+            if periodic != periodic_:
+                print("WARNING: yaspGrid: periodic Parameter of CartesianDomain overwritten by explicit parameter")
+        # ---
+        overlap_   = constructor.param.get("overlap", overlap)
+        if not overlap:
+            overlap = overlap_ # if overlap is not gieven on the command line, we use the parameter from CartesianDomain
+        else:
+            if overlap != overlap_:
+                print("WARNING: yaspGrid: overlap Parameter of CartesianDomain overwritten by explicit parameter")
+        # ---
         constructor = equidistantOffsetCoordinates(
             lowerleft  = constructor.lower,
             upperright = constructor.upper,
             elements   = constructor.division,
             ctype      = ctype
         )
+        print(constructor.ctype)
 
     from dune.grid import reader
     # Coordinate object
@@ -208,9 +228,13 @@ def yaspGrid(constructor, dimgrid=None, coordinates="equidistant", ctype="double
                 raise ValueError("yaspGrid: parameter dimgrid can only be specified, when using a reader")
         else:
             dimgrid = dimgrid_
-        if (ctype != constructor.ctype):
-            raise ValueError("yaspGrid: ctype is specified via coordinate object and can not be overwritten")
+        if ctype:
+            if ctype != constructor.ctype:
+                print(ctype)
+                print(constructor.ctype)
+                raise ValueError("yaspGrid: ctype is specified via coordinate object and can not be overwritten")
         ctype = constructor.ctype
+        print("CTYPE: %s" % ctype)
         coordinates_type = constructor.typeName
         dimgrid    = getDimgrid(constructor)
         if periodic is None:
@@ -219,13 +243,15 @@ def yaspGrid(constructor, dimgrid=None, coordinates="equidistant", ctype="double
             overlap   = 1
     # Reader
     elif isinstance(constructor, tuple) and isinstance(constructor[0], reader):
-        mod = moduleYaspCoordinates(dimgrid)
+        if not ctype:
+            ctype = "double"
+        if not dimgrid:
+            raise ValueError("yaspGrid: parameter dimgrid must be specified, when using a reader")
+        mod = moduleYaspCoordinates(dimgrid,ctype)
         # reader only works with EquidistantOffsetCoordinates or EquidistantCoordinates
         coords = mod.EquidistantOffsetCoordinates
         coordinates_type = coords.typeName
         useReader = True
-        if not dimgrid:
-            raise ValueError("yaspGrid: parameter dimgrid must be specified, when using a reader")
         # periodic and overlap are (if required) defined by the DGF reader
         periodic   = None
         overlap   = None
