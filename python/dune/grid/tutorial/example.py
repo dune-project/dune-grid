@@ -28,7 +28,7 @@ def runOnGrid(grid):
 
 # construct ugGrid and yaspGrid via file reader
 from dune.grid import ugGrid, reader
-print ("constructe an unstructured Grid (ugGrid) via file reader")
+print ("construct an unstructured Grid (ugGrid) via file reader")
 mshfile = os.path.join(griddir, "circle1storder.msh")
 unstructuredGrid = ugGrid( (reader.gmsh, mshfile), dimgrid=2 )
 if not unstructuredGrid:
@@ -37,7 +37,7 @@ else:
     unstructuredGrid.plot()
     runOnGrid(unstructuredGrid)
 
-print ("constructe a Grid via file reader")
+print ("construct a Grid via file reader")
 from dune.grid import yaspGrid, reader
 mshfile = os.path.join(griddir, "test2d_offset.dgf")
 print(mshfile)
@@ -45,17 +45,17 @@ dgfgrid = yaspGrid( (reader.dgf, mshfile), dimgrid=2 )
 dgfgrid.plot()
 runOnGrid(dgfgrid)
 
-# constructe a Cartesian grid
-print ("constructe a Cartesian grid")
+# construct a Cartesian grid
+print ("construct a Cartesian grid")
 from dune.grid import structuredGrid
 grid = structuredGrid([-1,-1],[1,1],[10,10])
 print("number of elements of Cartesian grid:",grid.size(0))
 grid.plot()
 runOnGrid(grid)
 
-# constructe YaspGrids with different coordinate types
+# construct YaspGrids with different coordinate types
 # yaspGrid allows to specify the coordinate type
-print ("constructed YaspGrids with tensor product coordinate type")
+print ("construct a YaspGrid with tensor product coordinate type")
 from dune.grid import yaspGrid, tensorProductCoordinates
 import numpy as np
 coords = tensorProductCoordinates([np.array([1,2,3,4]), np.array([10,11,33,44])], ctype='float')
@@ -63,3 +63,13 @@ ygrid = yaspGrid(coords)
 print("number of elements of tensor YaspGrid grid:",ygrid.size(0))
 ygrid.plot()
 runOnGrid(ygrid)
+
+# create a YaspGrid for a cartesian domain with non-standard overlap and periodicity
+print ("construct a YaspGrid as a CartesianDomain with non-standard overlap and periodicity")
+from dune.grid import yaspGrid, cartesianDomain
+dim = 2
+cartDomain = cartesianDomain([-10]*dim,[10]*dim, [20]*dim, periodic=[True]*dim, overlap=2)
+p_grid = yaspGrid( cartDomain, dimgrid=dim) #, ctype='float' )
+print("number of elements of periodic YaspGrid grid:",p_grid.size(0))
+p_grid.plot()
+runOnGrid(p_grid)
