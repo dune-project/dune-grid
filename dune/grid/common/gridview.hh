@@ -200,7 +200,7 @@ namespace Dune
       else
       {
         // otherwise default to static conforming flag
-        return isConformingDefaultImplementation();
+        return this->isConformingDefaultImplementation();
       }
     }
 
