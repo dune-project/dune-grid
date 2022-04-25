@@ -18,10 +18,7 @@
 #include <dune/common/exceptions.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/rangegenerators.hh>
-
-#if __cpp_concepts > 202002L && __cpp_lib_concepts > 202002L
-#include <dune/grid/concepts/grid.hh>
-#endif
+#include <dune/grid/concepts.hh>
 
 #if not defined(DUNE_ENTITY_LIFETIME_CHECK_ELEMENT_COUNT)
 #define DUNE_ENTITY_LIFETIME_CHECK_ELEMENT_COUNT 32
@@ -57,7 +54,7 @@ bool checkEntityLifetimeForCodim(GV gv, std::size_t check_element_count, Dune::C
     std::size_t i = 0;
     for (const auto& e : entities(gv,Dune::Codim<codim>()))
       {
-#if __cpp_concepts > 202002L && __cpp_lib_concepts > 202002L
+#if DUNE_GRID_HAVE_CONCEPTS
         static_assert(Dune::Concept::Entity<std::decay_t<decltype(e)>>);
 #endif
         if (++i > check_element_count)
@@ -89,7 +86,7 @@ bool checkEntityLifetimeForCodim(GV gv, std::size_t check_element_count, Dune::C
           " (" << entity_list[i].geometry().corner(0) << " != " << coords[i] << ")");
     }
 
-#if __cpp_concepts > 202002L && __cpp_lib_concepts > 202002L
+#if DUNE_GRID_HAVE_CONCEPTS
   static_assert(Dune::Concept::GridView<GV>);
   static_assert(Dune::Concept::IndexSet<typename GV::IndexSet>);
   static_assert(Dune::Concept::IdSet<typename GV::Grid::LocalIdSet>);

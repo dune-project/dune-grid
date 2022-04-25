@@ -17,12 +17,7 @@
 
 #include <dune/common/exceptions.hh>
 
-#if __cpp_concepts > 202002L && __cpp_lib_concepts > 202002L
-#include <dune/grid/concepts/entity.hh>
-#include <dune/grid/concepts/entityiterator.hh>
-#include <dune/grid/concepts/intersection.hh>
-#include <dune/grid/concepts/intersectioniterator.hh>
-#endif
+#include <dune/grid/concepts.hh>
 
 template<typename GV>
 void checkIntersectionLifetime(GV gv, std::size_t check_element_count = 32)
@@ -51,7 +46,7 @@ void checkIntersectionLifetime(GV gv, std::size_t check_element_count = 32)
 
   auto intersection_iterator = gv.ibegin(*entity_iterator);
 
-#if __cpp_concepts > 202002L && __cpp_lib_concepts > 202002L
+#if DUNE_GRID_HAVE_CONCEPTS
   static_assert(Dune::Concept::EntityIterator<decltype(entity_iterator)>);
   static_assert(Dune::Concept::IntersectionIterator<decltype(intersection_iterator)>);
   static_assert(Dune::Concept::Entity<std::decay_t<decltype(*entity_iterator)>>);
@@ -72,7 +67,7 @@ void checkIntersectionLifetime(GV gv, std::size_t check_element_count = 32)
         for (const auto& is : intersections(gv,e))
           {
 
-#if __cpp_concepts > 202002L && __cpp_lib_concepts > 202002L
+#if DUNE_GRID_HAVE_CONCEPTS
             static_assert(Dune::Concept::Entity<std::decay_t<decltype(e)>>);
             static_assert(Dune::Concept::Intersection<std::decay_t<decltype(is)>>);
 #endif
