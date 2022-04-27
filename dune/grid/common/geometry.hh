@@ -199,7 +199,7 @@ namespace Dune
        efficiency. For example in an equidistant structured mesh it may be as
        simple as \f$h^\textrm{mydim}\f$.
      */
-    ctype integrationElement (const LocalCoordinate& local) const
+    Volume integrationElement (const LocalCoordinate& local) const
     {
       return impl().integrationElement( local );
     }

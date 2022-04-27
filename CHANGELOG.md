@@ -1,5 +1,10 @@
 # Master (will become release 2.9)
 
+- The `Geometry::integrationElement` now needs to return the type `Volume`
+  instead of `ctype`. Note that this may be different from `ctype` if the grid
+  supports typed dimensions. In such a case, `ctype` is a length, and not
+  appropriate for a volume quantity.
+
 - The `FindAlberta.cmake` module only searches for world dimension libraries up to dim 3. This
   can be increased by setting the CMake variable `ALBERTA_MAX_WORLD_DIM`
 
