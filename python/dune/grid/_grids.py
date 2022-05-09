@@ -193,9 +193,6 @@ def yaspGrid(constructor, dimgrid=None, coordinates="equidistant", ctype=None,
                 print("WARNING: yaspGrid: ctype Parameter of CartesianDomain overwritten by explicit parameter")
         if not ctype:
             ctype = "double" # default is doubel
-        print(ctype)
-        print(ctype_)
-        print("...")
         # ---
         periodic_  = constructor.param.get("periodic", periodic)
         if not periodic:
@@ -217,7 +214,6 @@ def yaspGrid(constructor, dimgrid=None, coordinates="equidistant", ctype=None,
             elements   = constructor.division,
             ctype      = ctype
         )
-        print(constructor.ctype)
 
     from dune.grid import reader
     # Coordinate object
@@ -230,11 +226,8 @@ def yaspGrid(constructor, dimgrid=None, coordinates="equidistant", ctype=None,
             dimgrid = dimgrid_
         if ctype:
             if ctype != constructor.ctype:
-                print(ctype)
-                print(constructor.ctype)
                 raise ValueError("yaspGrid: ctype is specified via coordinate object and can not be overwritten")
         ctype = constructor.ctype
-        print("CTYPE: %s" % ctype)
         coordinates_type = constructor.typeName
         dimgrid    = getDimgrid(constructor)
         if periodic is None:
