@@ -22,6 +22,7 @@
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
 #include <dune/grid/io/file/gmshreader.hh>
 #include <dune/grid/utility/structuredgridfactory.hh>
+#include <dune/grid/yaspgrid.hh>
 
 #include <dune/python/common/mpihelper.hh>
 #include <dune/python/common/typeregistry.hh>
@@ -132,28 +133,17 @@ namespace Dune
 
 
 
-    // readDGF
+    // readDGF (input can be either an filename string or an input stream)
     // -------
 
-    template< class Grid >
-    inline static std::shared_ptr< Grid > readDGF ( const std::string &fileName )
-    {
-      DGFGridFactory< Grid > dgfFactory( fileName );
-      std::shared_ptr< Grid > grid( dgfFactory.grid() );
-      grid->loadBalance();
-      return grid;
-    }
-
-    template< class Grid >
-    inline static std::shared_ptr< Grid > readDGF ( std::istream &input )
+    template< class Grid, typename In >
+    inline static std::shared_ptr< Grid > readDGF ( In &input )
     {
       DGFGridFactory< Grid > dgfFactory( input );
       std::shared_ptr< Grid > grid( dgfFactory.grid() );
       grid->loadBalance();
       return grid;
     }
-
-
 
     // readGmsh
     // --------
@@ -475,6 +465,10 @@ namespace Dune
       auto addHAttr = pybind11::module::import( "dune.grid.grid_generator" ).attr("addHAttr");
       addHAttr(module);
     }
+
+    //! \brief export the C++ type used for the structuredGrid
+    template<unsigned int dim>
+    using StructuredGrid = Dune::YaspGrid<dim, Dune::EquidistantOffsetCoordinates<double, dim>>;
 
   } // namespace Python
 

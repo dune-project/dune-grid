@@ -13,6 +13,8 @@
   For some grid implementations this could vary from the compile time static
   `GridView::conforming` depending on run time parameters.
 
+- The Python bindings now support tensorproduct coordinates of `YaspGrid`
+
 ## Deprecations and removals
 
 - Support for PSurface has been removed.

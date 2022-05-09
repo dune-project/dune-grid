@@ -276,12 +276,6 @@ namespace Dune
     boundaryDomainBlock_ = new dgf::BoundaryDomBlock( gridin, dimension );
   }
 
-  template <typename ctype, int dim>
-  struct DGFGridInfo< YaspGrid<dim , EquidistantCoordinates<ctype, dim> > > {
-    static int refineStepsForHalf() {return 1;}
-    static double refineWeight() {return std::pow(0.5,dim);}
-  };
-
   /*!
    * \brief Grid factory for YaspGrid with equidistant coordinates.
    */
@@ -479,8 +473,26 @@ namespace Dune
     boundaryDomainBlock_ = new dgf::BoundaryDomBlock( gridin, dimension );
   }
 
-  template <typename ctype, int dim>
-  struct DGFGridInfo< YaspGrid<dim, EquidistantOffsetCoordinates<ctype, dim> > > {
+  /*!
+   * \brief Placeholder for grid factory for YaspGrid with tensor product coordinates.
+   *
+   * currently tensor product coordinates are currently not supported. Triggers a run time error.
+   */
+  template< class ctype, int dim >
+  class DGFGridFactory< Dune::YaspGrid<dim, Dune::TensorProductCoordinates<ctype, dim> > >
+  {
+    using Grid = Dune::YaspGrid<dim, Dune::TensorProductCoordinates<ctype, dim> >;
+  public:
+    template< typename In >
+    DGFGridFactory ( const In & ) {}
+    Grid *grid()
+    {
+      throw std::invalid_argument( "Tensor product coordinates for YaspGrid are currently not supported via the DGFGridFactory" );
+    }
+  };
+
+  template <typename Coordinates, int dim>
+  struct DGFGridInfo< YaspGrid<dim , Coordinates> > {
     static int refineStepsForHalf() {return 1;}
     static double refineWeight() {return std::pow(0.5,dim);}
   };
