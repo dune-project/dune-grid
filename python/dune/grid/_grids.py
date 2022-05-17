@@ -11,8 +11,14 @@ class CartesianDomain(tuple):
         dgf += " ".join([str(x) for x in division]) + "\n"
         dgf += "#\n"
         dgf += "GRIDPARAMETER\n"
+        foundRefEdge = False
         for key in parameters:
+            if key.lower() == 'refinementedge':
+                foundRefEdge = True
             dgf += key + " " + str(parameters[key]) + "\n"
+        # set default value for refinementedge if not provided to avoid warning
+        if not foundRefEdge:
+            dgf += "REFINEMENTEDGE ARBITRARY\n"
         dgf += "#\n"
         try:
             periodic = parameters["periodic"]
