@@ -135,8 +135,8 @@ namespace Dune
   void checkGeometryLifetime (const GV &gridView)
   {
     typedef typename GV::ctype ctype;
-    enum { dim  = GV::dimension };
-    enum { dimw = GV::dimensionworld };
+    constexpr static int dim  = GV::dimension;
+    constexpr static int dimw = GV::dimensionworld;
 
     const FieldVector<ctype, dim> pos(0.2);
 

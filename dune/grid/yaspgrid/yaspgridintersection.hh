@@ -18,8 +18,8 @@ namespace Dune {
   template<class GridImp>
   class YaspIntersection
   {
-    enum { dim=GridImp::dimension };
-    enum { dimworld=GridImp::dimensionworld };
+    constexpr static int dim = GridImp::dimension;
+    constexpr static int dimworld = GridImp::dimensionworld;
     typedef typename GridImp::ctype ctype;
 
     typedef typename GridImp::Traits::template Codim< 1 >::GeometryImpl GeometryImpl;

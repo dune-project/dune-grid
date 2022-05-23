@@ -72,7 +72,7 @@ namespace Dune
       };
     };
 
-    enum { conforming = true };
+    constexpr static bool conforming = true;
   };
 
   /** \brief Implementation class of LevelGridViews for OneDGrid */
@@ -101,7 +101,7 @@ namespace Dune
     template< int cd >
     struct Codim : public Traits :: template Codim<cd> {};
 
-    enum { conforming = Traits :: conforming };
+    constexpr static bool conforming = Traits :: conforming;
 
     OneDGridLevelGridView ( const Grid &grid, int level )
       : grid_( &grid ),
@@ -253,7 +253,7 @@ namespace Dune
       };
     };
 
-    enum { conforming = true };
+    constexpr static bool conforming = true;
   };
 
   /** \brief Implementation class of LeafGridViews for UGGrid */
@@ -282,7 +282,7 @@ namespace Dune
     template< int cd >
     struct Codim : public Traits :: template Codim<cd> {};
 
-    enum { conforming = Traits :: conforming };
+    constexpr static bool conforming = Traits :: conforming;
 
   public:
     OneDGridLeafGridView ( const Grid &grid )

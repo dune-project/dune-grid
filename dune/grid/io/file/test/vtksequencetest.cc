@@ -51,8 +51,8 @@ class VTKVectorFunction
   : public Dune :: VTKWriter< GridView > :: VTKFunction
 {
   // extract types
-  enum { n = GridView :: dimension };
-  enum { w = GridView :: dimensionworld };
+  constexpr static int n = GridView :: dimension;
+  constexpr static int w = GridView :: dimensionworld;
   typedef typename GridView :: Grid :: ctype DT;
   typedef typename GridView :: template Codim< 0 > :: Entity Entity;
   double time_;
@@ -90,7 +90,7 @@ template< class GridView >
 std::string doWrite( const GridView &gridView, Dune::VTK::DataMode dm,
                      bool testRestart = false)
 {
-  enum { dim = GridView :: dimension };
+  constexpr static int dim = GridView :: dimension;
 
   const typename GridView :: IndexSet &is = gridView.indexSet();
   std::vector<int> vertexdata(is.size(dim),dim);

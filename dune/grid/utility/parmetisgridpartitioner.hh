@@ -44,9 +44,7 @@ namespace Dune
     typedef float real_type;
 #endif // PARMETIS_MAJOR_VERSION > 3
 
-    enum {
-      dimension = GridView::dimension
-    };
+    constexpr static int dimension = GridView::dimension;
 
 
     /** \brief Create an initial partitioning of a Dune grid, i.e., not taking into account communication cost

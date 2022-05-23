@@ -24,14 +24,14 @@ namespace Dune {
   class OneDGridLevelIterator
   {
   public:
-    enum {dim=GridImp::dimension};
+    constexpr static int dim = GridImp::dimension;
     friend class OneDGrid;
     friend class OneDGridEntity<codim,dim,GridImp>;
     friend class OneDGridEntity<0,dim,GridImp>;
     friend class OneDGridLevelGridView<GridImp>;
 
     typedef typename GridImp::template Codim<codim>::Entity Entity;
-    enum {codimension = codim};
+    constexpr static int codimension = codim;
 
   protected:
 

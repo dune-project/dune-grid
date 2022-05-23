@@ -17,10 +17,10 @@ namespace Dune {
   class OneDGridEntitySeed
   {
     // grid dimension
-    enum { dim = GridImp::dimension };
+    constexpr static int dim = GridImp::dimension;
   public:
 
-    enum { codimension = codim };
+    constexpr static int codimension = codim;
 
     //! default construct an invalid entity seed
     OneDGridEntitySeed ()

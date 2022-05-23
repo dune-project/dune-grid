@@ -15,7 +15,7 @@ namespace Dune {
   class UGGridLevelIntersectionIterator
   {
 
-    enum {dim=GridImp::dimension};
+    constexpr static int dim = GridImp::dimension;
 
     friend class UGGridEntity<0,dim,GridImp>;
 
@@ -63,7 +63,7 @@ namespace Dune {
   class UGGridLeafIntersectionIterator
   {
 
-    enum {dim=GridImp::dimension};
+    constexpr static int dim = GridImp::dimension;
 
     friend class UGGridEntity<0,dim,GridImp>;
 

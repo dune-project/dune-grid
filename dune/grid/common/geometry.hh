@@ -86,10 +86,11 @@ namespace Dune
      **/
     const Implementation &impl () const { return realGeometry; }
 
-    //! @brief export geometry dimension
-    enum { mydimension=mydim /*!< geometry dimension */ };
-    //! @brief export coordinate dimension
-    enum { coorddimension=cdim /*!< dimension of embedding coordinate system */ };
+    //! @brief geometry dimension
+    constexpr static int mydimension = mydim;
+
+    //! @brief dimension of embedding coordinate system
+    constexpr static int coorddimension = cdim;
 
     //! define type used for coordinates in grid module
     typedef typename GridImp::ctype ctype;
@@ -356,7 +357,7 @@ namespace Dune
   class GeometryDefaultImplementation<0,cdim,GridImp,GeometryImp>
   {
     // my dimension
-    enum { mydim = 0 };
+    constexpr static int mydim = 0;
 
   public:
     static const int mydimension = mydim;

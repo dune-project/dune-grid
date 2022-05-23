@@ -162,7 +162,7 @@ struct ZeroEntityMethodCheck<Grid, 0, false>
 template <class Grid,class IntersectionIterator>
 struct IntersectionIteratorInterface
 {
-  enum { dim = Grid::dimension };
+  constexpr static int dim = Grid::dimension;
   typedef typename Grid::ctype ct;
 
   static void check (IntersectionIterator &i)

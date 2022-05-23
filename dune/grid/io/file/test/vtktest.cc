@@ -36,7 +36,7 @@ class VTKVectorFunction
   : public Dune :: VTKWriter< GridView > :: VTKFunction
 {
   // extract types
-  enum { n = GridView :: dimension };
+  constexpr static int n = GridView :: dimension;
   typedef typename GridView :: Grid :: ctype DT;
   typedef typename GridView :: template Codim< 0 > :: Entity Entity;
   const std::string type_;
@@ -95,7 +95,7 @@ struct Acc
 template< class GridView >
 int doWrite( Dune::VTKChecker& vtkChecker, const std::string& gridViewName, const GridView &gridView, Dune :: VTK :: DataMode dm, const std::string& path = "./" )
 {
-  enum { dim = GridView :: dimension };
+  constexpr static int dim = GridView :: dimension;
 
   Dune :: VTKWriter< GridView > vtk( gridView, dm );
 

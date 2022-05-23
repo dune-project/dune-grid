@@ -32,10 +32,10 @@ namespace Dune
   class HierarchicSearch
   {
     //! get dimension from the grid
-    enum {dim=Grid::dimension};
+    constexpr static int dim = Grid::dimension;
 
     //! get world dimension from the grid
-    enum {dimw=Grid::dimensionworld};
+    constexpr static int dimw = Grid::dimensionworld;
 
     //! get coord type from the grid
     typedef typename Grid::ctype ct;

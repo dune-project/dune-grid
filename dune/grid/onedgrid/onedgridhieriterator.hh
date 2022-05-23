@@ -25,7 +25,7 @@ namespace Dune {
   template<class GridImp>
   class OneDGridHierarchicIterator
   {
-    enum { dim = GridImp::dimension };
+    constexpr static int dim = GridImp::dimension;
     friend class OneDGridEntity<0,dim,GridImp>;
 
     // Stack entry
@@ -36,7 +36,7 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
     //! We iterating only over elements
-    enum {codimension = 0};
+    constexpr static int codimension = 0;
 
     //! Constructor
     OneDGridHierarchicIterator(int maxlevel)

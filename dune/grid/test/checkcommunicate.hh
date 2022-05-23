@@ -218,8 +218,8 @@ class CheckCommunication
 
   typedef typename GridView :: template Codim< cdim > :: Entity SubEntity;
 
-  enum { dimworld = Grid :: dimensionworld };
-  enum { dim = Grid :: dimension };
+  constexpr static int dimworld = Grid :: dimensionworld;
+  constexpr static int dim = Grid :: dimension;
 
   typedef typename Grid :: ctype ctype;
 

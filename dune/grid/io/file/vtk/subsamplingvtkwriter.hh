@@ -37,8 +37,8 @@ namespace Dune
     : public VTKWriter<GridView>
   {
     typedef VTKWriter<GridView> Base;
-    enum { dim = GridView::dimension };
-    enum { dimw = GridView::dimensionworld };
+    constexpr static int dim = GridView::dimension;
+    constexpr static int dimw = GridView::dimensionworld;
     typedef typename GridView::Grid::ctype ctype;
     typedef typename GridView::template Codim< 0 >::Entity Entity;
     typedef VirtualRefinement<dim, ctype> Refinement;

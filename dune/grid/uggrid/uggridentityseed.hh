@@ -15,11 +15,11 @@ namespace Dune {
   class UGGridEntitySeed
   {
     // grid dimension
-    enum { dim = GridImp::dimension };
+    constexpr static int dim = GridImp::dimension;
   public:
 
     //! codimension of underlying entity
-    enum { codimension = codim };
+    constexpr static int codimension = codim;
 
     //! default construct an invalid entity seed
     UGGridEntitySeed ()

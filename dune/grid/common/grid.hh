@@ -380,17 +380,11 @@ namespace Dune {
     //@{
     //===========================================================
 
-    //! A constant that exports the template parameter dim
-    enum {
-      //! \brief The dimension of the grid
-      dimension=dim
-    };
+    //! \brief The dimension of the grid
+    constexpr static int dimension = dim;
 
-    //! A constant that exports the template parameter dimworld
-    enum {
-      //! \brief The dimension of the world the grid lives in.
-      dimensionworld=dimworld
-    };
+    //! \brief The dimension of the world the grid lives in.
+    constexpr static int dimensionworld = dimworld;
     //@}
 
     //===========================================================

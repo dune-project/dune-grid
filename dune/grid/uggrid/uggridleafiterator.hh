@@ -17,7 +17,7 @@ namespace Dune {
   template<int codim, PartitionIteratorType pitype, class GridImp>
   class UGGridLeafIterator
   {
-    enum {dim = GridImp::dimension};
+    constexpr static int dim = GridImp::dimension;
 
     // The type of the UG entity we're pointing to
     typedef typename UG_NS<dim>::template Entity<codim>::T UGEntity;
@@ -25,7 +25,7 @@ namespace Dune {
   public:
 
     typedef typename GridImp::template Codim<codim>::Entity Entity;
-    enum {codimension = codim};
+    constexpr static int codimension = codim;
 
     /** \brief Constructor setting up a 'begin' iterator
      */

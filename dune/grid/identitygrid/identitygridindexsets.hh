@@ -27,7 +27,7 @@ namespace Dune {
     typedef typename std::remove_const<GridImp>::type::HostGridType HostGrid;
     typedef typename HostGrid::LevelGridView::IndexSet::Types Types;
 
-    enum {dim = GridImp::dimension};
+    constexpr static int dim = GridImp::dimension;
 
     //! get index of an entity
     template<int codim>
@@ -109,7 +109,7 @@ namespace Dune {
      * We use the remove_const to extract the Type from the mutable class,
      * because the const class is not instantiated yet.
      */
-    enum {dim = std::remove_const<GridImp>::type::dimension};
+    constexpr static int dim = std::remove_const<GridImp>::type::dimension;
 
 
     //! constructor stores reference to a grid and level

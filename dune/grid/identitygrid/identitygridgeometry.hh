@@ -25,8 +25,8 @@ namespace Dune {
   public:
 
     // The codimension of this entitypointer wrt the host grid
-    enum {CodimInHostGrid = GridImp::HostGridType::dimension - mydim};
-    enum {DimensionWorld = GridImp::HostGridType::dimensionworld};
+    constexpr static int CodimInHostGrid = GridImp::HostGridType::dimension - mydim;
+    constexpr static int DimensionWorld = GridImp::HostGridType::dimensionworld;
 
     // select appropriate hostgrid geometry via typeswitch
     typedef typename GridImp::HostGridType::Traits::template Codim<CodimInHostGrid>::Geometry HostGridGeometryType;

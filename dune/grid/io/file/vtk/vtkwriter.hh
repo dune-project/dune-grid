@@ -101,8 +101,8 @@ namespace Dune
     // extract types
     typedef typename GridView::Grid Grid;
     typedef typename GridView::ctype DT;
-    enum { n = GridView::dimension };
-    enum { w = GridView::dimensionworld };
+    constexpr static int n = GridView::dimension;
+    constexpr static int w = GridView::dimensionworld;
 
     typedef typename GridView::template Codim< 0 >::Entity Cell;
     typedef typename GridView::template Codim< n >::Entity Vertex;

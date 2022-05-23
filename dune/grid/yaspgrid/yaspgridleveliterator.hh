@@ -16,9 +16,9 @@ namespace Dune {
   class YaspLevelIterator
   {
     //! know your own dimension
-    enum { dim=GridImp::dimension };
+    constexpr static int dim = GridImp::dimension;
     //! know your own dimension of world
-    enum { dimworld=GridImp::dimensionworld };
+    constexpr static int dimworld = GridImp::dimensionworld;
     typedef typename GridImp::ctype ctype;
   public:
     typedef typename GridImp::template Codim<codim>::Entity Entity;

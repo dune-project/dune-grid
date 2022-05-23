@@ -118,21 +118,17 @@ namespace Dune
       };
     }; //: public Traits :: template Codim<cd> {};
 
-    enum {
-      /** \brief Export if this grid view is conforming */
-      conforming = Traits :: conforming
-    };
+    /** \brief Export if this grid view is conforming */
+    constexpr static bool conforming = Traits :: conforming;
 
     /** \brief type used for coordinates in grid */
     typedef typename Grid::ctype ctype;
 
-    enum { //! \brief The dimension of the grid
-      dimension = Grid :: dimension
-    };
+    //! \brief The dimension of the grid
+    constexpr static int dimension = Grid :: dimension;
 
-    enum { //! \brief The dimension of the world the grid lives in
-      dimensionworld = Grid :: dimensionworld
-    };
+    //! \brief The dimension of the world the grid lives in
+    constexpr static int dimensionworld = Grid :: dimensionworld;
 
   public:
 

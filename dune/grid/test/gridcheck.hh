@@ -296,7 +296,7 @@ void assertNeighbor (Grid &g)
   typedef typename GridView::IntersectionIterator IntersectionIterator;
 
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
-  enum { dim = Grid::dimension };
+  constexpr static int dim = Grid::dimension;
   // [[maybe_unused]] typedef typename Grid::ctype ct;
 
   typedef typename Grid::GlobalIdSet GlobalIdSet;
@@ -979,8 +979,8 @@ void gridcheck (Grid &g)
    */
   GridInterface<Grid>();
 
-  enum { dim      = Grid :: dimension };
-  enum { dimworld = Grid :: dimensionworld };
+  constexpr static int dim = Grid :: dimension;
+  constexpr static int dimworld = Grid :: dimensionworld;
   typedef typename Grid  :: ctype ctype;
   typedef typename Grid  :: GridFamily GridFamily;
 

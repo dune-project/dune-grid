@@ -100,18 +100,14 @@ namespace Dune
     //! \brief The corresponding entity seed (for storage of entities)
     typedef typename GridImp::template Codim<cd>::EntitySeed EntitySeed;
 
-    enum {
-      //! \brief Know your own codimension.
-      codimension=cd
-    };
-    enum {
-      //! \brief Know the grid dimension.
-      dimension=dim
-    };
-    enum {
-      //! \brief Dimensionality of the reference element of the entity.
-      mydimension=dim-cd
-    };
+    //! \brief Know your own codimension.
+    constexpr static int codimension = cd;
+
+    //! \brief Know the grid dimension.
+    constexpr static int dimension = dim;
+
+    //! \brief Dimensionality of the reference element of the entity.
+    constexpr static int mydimension = dim - cd;
     //@}
 
 
@@ -291,18 +287,14 @@ namespace Dune
     /** \brief The HierarchicIterator type*/
     typedef typename GridImp::HierarchicIterator HierarchicIterator;
 
-    enum {
-      //! Know your own codimension
-      codimension=0
-    };
-    enum {
-      //! Know the grid's dimension
-      dimension=dim
-    };
-    enum {
-      /** \brief Know dimension of the entity */
-      mydimension=dim
-    };
+    //! Know your own codimension
+    constexpr static int codimension = 0;
+
+    //! Know the grid's dimension
+    constexpr static int dimension = dim;
+
+    /** \brief Know dimension of the entity */
+    constexpr static int mydimension = dim;
     //@}
 
 
@@ -548,13 +540,13 @@ namespace Dune
   {
   public:
     //! know your own codimension
-    enum { codimension=cd };
+    constexpr static int codimension = cd;
 
     //! Dimension of the grid
-    enum { dimension=dim };
+    constexpr static int dimension = dim;
 
     /** \brief Know dimension of the entity */
-    enum { mydimension=dim-cd };
+    constexpr static int mydimension = dim - cd;
 
     //! \brief The corresponding entity seed (for storage of entities)
     typedef typename GridImp::template Codim<cd>::EntitySeed EntitySeed;
@@ -609,13 +601,13 @@ namespace Dune
   {
   public:
     //! know your own codimension
-    enum { codimension=0 };
+    constexpr static int codimension = 0;
 
     //! Dimension of the grid
-    enum { dimension=dim };
+    constexpr static int dimension = dim;
 
     /** \brief Know dimension of the entity */
-    enum { mydimension=dim };
+    constexpr static int mydimension = dim;
 
     //! \brief The corresponding entity seed (for storage of entities)
     typedef typename GridImp::template Codim<0>::EntitySeed EntitySeed;
