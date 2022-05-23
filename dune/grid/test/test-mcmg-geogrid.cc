@@ -66,6 +66,6 @@ int main (int argc, char *argv[])
   //grid.globalRefine(1);
   //defGrid.update();
 
-  mapper.update();
+  mapper.update(defGrid.leafGridView());
 
 }
