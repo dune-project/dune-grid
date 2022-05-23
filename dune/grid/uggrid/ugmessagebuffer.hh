@@ -165,6 +165,10 @@ namespace Dune {
       if (duneDataHandle_->fixedSize(gridDim, codim))
       {
         auto element = gv.template begin<0, InteriorBorder_Partition>();
+        if (element == gv.template end<0, InteriorBorder_Partition>())
+        {
+          return 0;
+        }
         return sizeof(DataType)
                * duneDataHandle_->size(element->template subEntity<codim>(0));
       }
