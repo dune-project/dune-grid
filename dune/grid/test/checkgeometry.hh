@@ -136,7 +136,6 @@ namespace Dune
   {
     typedef typename GV::ctype ctype;
     constexpr static int dim  = GV::dimension;
-    constexpr static int dimw = GV::dimensionworld;
 
     const FieldVector<ctype, dim> pos(0.2);
 
@@ -147,6 +146,7 @@ namespace Dune
     if( it == end ) return ;
 
     #ifndef NDEBUG
+    constexpr static int dimw = GV::dimensionworld;
     const FieldVector<ctype, dimw> glob = it->geometry().global(pos);
     #endif
 
