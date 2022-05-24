@@ -29,7 +29,7 @@ namespace Dune {
 
     typedef typename GridView::Grid::ctype ctype;
 
-    enum {dimworld = GridView::dimensionworld};
+    constexpr static int dimworld = GridView::dimensionworld;
 
   public:
     GnuplotWriter (const GridView & gv) : _is(gv.indexSet()), _gv(gv)

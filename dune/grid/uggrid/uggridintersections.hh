@@ -18,8 +18,8 @@ namespace Dune {
   class UGGridLevelIntersection
   {
   public:
-    enum {dim=GridImp::dimension};
-    enum {dimworld=GridImp::dimensionworld};
+    constexpr static int dim = GridImp::dimension;
+    constexpr static int dimworld = GridImp::dimensionworld;
 
   private:
     friend class UGGridEntity<0,dim,GridImp>;
@@ -193,9 +193,9 @@ namespace Dune {
   class UGGridLeafIntersection
   {
 
-    enum {dim=GridImp::dimension};
+    constexpr static int dim = GridImp::dimension;
 
-    enum {dimworld=GridImp::dimensionworld};
+    constexpr static int dimworld = GridImp::dimensionworld;
 
     friend class UGGridEntity<0,dim,GridImp>;
 

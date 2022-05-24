@@ -25,7 +25,7 @@ class VTKVectorFunction
   : public Dune :: VTKWriter< GridView > :: VTKFunction
 {
   // extract types
-  enum { n = GridView :: dimension };
+  constexpr static int n = GridView :: dimension;
   typedef typename GridView :: Grid :: ctype DT;
   typedef typename GridView :: template Codim< 0 > :: Entity Entity;
   const std::string type_;
@@ -88,7 +88,7 @@ int doWrite( Dune::VTKChecker& vtkChecker, const std::string& gridViewName,
              const std::string &refinementName,
              Dune::RefinementIntervals intervals )
 {
-  enum { dim = GridView :: dimension };
+  constexpr static int dim = GridView :: dimension;
 
   Dune :: SubsamplingVTKWriter< GridView > vtk( gridView, intervals, coerceToSimplex);
 

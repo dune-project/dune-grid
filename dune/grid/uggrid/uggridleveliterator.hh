@@ -21,7 +21,7 @@ namespace Dune {
   template<int codim, PartitionIteratorType pitype, class GridImp>
   class UGGridLevelIterator
   {
-    enum {dim = GridImp::dimension};
+    constexpr static int dim = GridImp::dimension;
 
     friend class UGGridEntity<codim,GridImp::dimension,GridImp>;
     friend class UGGridEntity<0,    GridImp::dimension,GridImp>;
@@ -32,7 +32,7 @@ namespace Dune {
   public:
 
     typedef typename GridImp::template Codim<codim>::Entity Entity;
-    enum {codimension = codim};
+    constexpr static int codimension = codim;
 
     //! Constructor
     explicit UGGridLevelIterator() : gridImp_(nullptr)

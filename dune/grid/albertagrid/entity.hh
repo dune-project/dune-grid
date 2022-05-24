@@ -44,7 +44,7 @@ namespace Dune
   {
     typedef AlbertaGridEntity< codim, dim, Grid > This;
 
-    enum { dimworld = Grid::dimensionworld };
+    constexpr static int dimworld = Grid::dimensionworld;
     friend class AlbertaGrid< dim, dimworld >;
     friend class AlbertaGridEntity< 0, dim, Grid >;
 

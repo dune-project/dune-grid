@@ -60,7 +60,7 @@ public:
 template< class GridView >
 void doWrite( const GridView &gridView )
 {
-  enum { dim = GridView :: dimension };
+  constexpr static int dim = GridView :: dimension;
 
   Dune::VTK::NonConformingBoundaryWriter< GridView > vtk( gridView );
 

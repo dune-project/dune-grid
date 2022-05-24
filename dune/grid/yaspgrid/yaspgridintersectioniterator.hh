@@ -18,7 +18,7 @@ namespace Dune {
   template<class GridImp>
   class YaspIntersectionIterator
   {
-    enum { dim=GridImp::dimension };
+    constexpr static int dim = GridImp::dimension;
   public:
     // types used from grids
     typedef Dune::YaspIntersection< GridImp > IntersectionImp;

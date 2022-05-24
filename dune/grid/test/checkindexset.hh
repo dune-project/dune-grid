@@ -63,7 +63,7 @@ namespace Dune
                         MapType2 & subEntityPerSetOfVertices,
                         const MapType3 & vertexCoordsMap )
   {
-    enum { dim = GridType::dimension };
+    constexpr static int dim = GridType::dimension;
     const int dimworld = GridType::dimensionworld;
     typedef typename GridType::ctype coordType;
 
@@ -224,8 +224,8 @@ namespace Dune
   void checkIndexSetForCodim ( const Grid &grid, const GridView &view,
                                OutputStream &sout, bool levelIndex )
   {
-    enum { dim = Grid :: dimension };
-    enum { dimworld = Grid :: dimensionworld };
+    constexpr static int dim = Grid :: dimension;
+    constexpr static int dimworld = Grid :: dimensionworld;
 
     typedef typename Grid :: ctype coordType;
 

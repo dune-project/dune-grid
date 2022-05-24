@@ -75,7 +75,7 @@ namespace Dune
     static const int dimension = GridType::dimension;
 
     /** \brief The grid world dimension */
-    enum {dimworld = GridType::dimensionworld};
+    constexpr static int dimworld = GridType::dimensionworld;
 
     /** \brief Type used by the grid for coordinates */
     typedef typename GridType::ctype ctype;
@@ -314,7 +314,7 @@ namespace Dune
     typedef GridFactoryInterface<GridType> Base;
 
     /** \brief The grid world dimension */
-    enum {dimworld = GridType::dimensionworld};
+    constexpr static int dimworld = GridType::dimensionworld;
 
     /** \brief Type used by the grid for coordinates */
     typedef typename GridType::ctype ctype;

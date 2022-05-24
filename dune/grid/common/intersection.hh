@@ -201,11 +201,11 @@ namespace Dune
     /** \brief Codim 1 geometry returned by geometryInInside() and geometryInOutside() */
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
 
-    //! @brief Export dimension of the intersection
-    enum { mydimension=GridImp::dimension-1 /*!< intersection's dimension */ };
+    //! @brief dimension of the intersection
+    constexpr static int mydimension = GridImp::dimension - 1;
 
-    //! @brief Export dimension of world
-    enum { dimensionworld=GridImp::dimensionworld /*!< dimension of world */ };
+    //! @brief dimension of world
+    constexpr static int dimensionworld = GridImp::dimensionworld;
 
     //! Type of individual coefficients of coordinate vectors
     typedef typename GridImp::ctype ctype;
@@ -480,8 +480,8 @@ namespace Dune
   template< class GridImp, class IntersectionImp >
   class IntersectionDefaultNormalVectors
   {
-    enum { dim=GridImp::dimension };
-    enum { dimworld=GridImp::dimensionworld };
+    constexpr static int dim = GridImp::dimension;
+    constexpr static int dimworld = GridImp::dimensionworld;
     typedef typename GridImp::ctype ct;
   public:
 

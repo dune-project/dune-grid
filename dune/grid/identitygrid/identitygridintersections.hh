@@ -34,9 +34,9 @@ namespace Dune {
 
     friend struct HostGridAccess< typename std::remove_const< GridImp >::type >;
 
-    enum {dim=GridImp::dimension};
+    constexpr static int dim = GridImp::dimension;
 
-    enum {dimworld=GridImp::dimensionworld};
+    constexpr static int dimworld = GridImp::dimensionworld;
 
     // The type used to store coordinates
     typedef typename GridImp::ctype ctype;
@@ -193,9 +193,9 @@ namespace Dune {
 
     friend struct HostGridAccess< typename std::remove_const< GridImp >::type >;
 
-    enum {dim=GridImp::dimension};
+    constexpr static int dim = GridImp::dimension;
 
-    enum {dimworld=GridImp::dimensionworld};
+    constexpr static int dimworld = GridImp::dimensionworld;
 
     // The type used to store coordinates
     typedef typename GridImp::ctype ctype;

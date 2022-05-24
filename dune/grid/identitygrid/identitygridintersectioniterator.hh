@@ -26,9 +26,9 @@ namespace Dune {
   class IdentityGridLeafIntersectionIterator
   {
 
-    enum {dim=GridImp::dimension};
+    constexpr static int dim = GridImp::dimension;
 
-    enum {dimworld=GridImp::dimensionworld};
+    constexpr static int dimworld = GridImp::dimensionworld;
 
     // The type used to store coordinates
     typedef typename GridImp::ctype ctype;
@@ -80,9 +80,9 @@ namespace Dune {
   template<class GridImp>
   class IdentityGridLevelIntersectionIterator
   {
-    enum {dim=GridImp::dimension};
+    constexpr static int dim = GridImp::dimension;
 
-    enum {dimworld=GridImp::dimensionworld};
+    constexpr static int dimworld = GridImp::dimensionworld;
 
     // The type used to store coordinates
     typedef typename GridImp::ctype ctype;

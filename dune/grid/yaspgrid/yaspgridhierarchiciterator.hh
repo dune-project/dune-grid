@@ -16,7 +16,7 @@ namespace Dune {
   template<class GridImp>
   class YaspHierarchicIterator
   {
-    enum { dim=GridImp::dimension };
+    constexpr static int dim = GridImp::dimension;
 
     typedef YaspEntity<0,GridImp::dimension,GridImp> YaspEntityImp;
 

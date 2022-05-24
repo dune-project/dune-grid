@@ -40,7 +40,7 @@ namespace Dune
   {
   public:
     typedef typename GridView::ctype ctype;
-    enum { dim = GridView::dimension };
+    constexpr static int dim = GridView::dimension;
     typedef typename GridView::template Codim< 0 >::Entity Entity;
 
     //! return number of components (1 for scalar valued functions, 3 for

@@ -30,7 +30,7 @@ namespace Dune {
 
   public:
 
-    enum {codimension = codim};
+    constexpr static int codimension = codim;
 
     /**
      * \brief Construct an empty (i.e. isValid() == false) seed.

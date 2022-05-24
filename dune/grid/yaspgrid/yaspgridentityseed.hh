@@ -15,11 +15,11 @@ namespace Dune {
   class YaspEntitySeed
   {
     //! know your own dimension
-    enum { dim=GridImp::dimension };
+    constexpr static int dim = GridImp::dimension;
 
   public:
-    //! codimension of entity pointer
-    enum { codimension = codim };
+    //! codimension of entity
+    constexpr static int codimension = codim;
 
     //! default construct an invalid entity seed
     YaspEntitySeed ()

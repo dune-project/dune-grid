@@ -75,7 +75,7 @@ namespace Dune {
       if (e.level() != level_)
         return false;
 
-      enum { cd = EntityType::codimension };
+      constexpr static int cd = EntityType::codimension;
       typedef typename GridImp::template Codim<cd>::template Partition<All_Partition>::LevelIterator IteratorType;
       IteratorType iend = grid_->levelGridView(level_).template end<cd,All_Partition>();
       for (IteratorType it = grid_->levelGridView(level_).template begin<cd,All_Partition>();
@@ -224,7 +224,7 @@ namespace Dune {
     template <class EntityType>
     bool contains (const EntityType& e) const
     {
-      enum { cd = EntityType::codimension };
+      constexpr static int cd = EntityType::codimension;
       for (const auto& entity : entities(grid_.leafGridView(), Codim<cd>()))
       {
         if (entity.level() == e.level() && this->template index<cd>(entity) == this->template index<cd>(e))

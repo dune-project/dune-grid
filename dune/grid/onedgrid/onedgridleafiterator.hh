@@ -15,14 +15,14 @@ namespace Dune {
   template<int codim, PartitionIteratorType pitype, class GridImp>
   class OneDGridLeafIterator
   {
-    enum {dim = GridImp::dimension};
+    constexpr static int dim = GridImp::dimension;
 
     friend class OneDGridEntity<codim,dim,GridImp>;
 
   public:
 
     typedef typename GridImp::template Codim<codim>::Entity Entity;
-    enum {codimension = codim};
+    constexpr static int codimension = codim;
 
     OneDGridLeafIterator(const GridImp& grid) : grid_(&grid) {
 

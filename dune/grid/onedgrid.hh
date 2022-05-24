@@ -91,8 +91,8 @@ namespace Dune {
   class OneDGrid : public GridDefaultImplementation <1, 1,typename OneDGridGeometry<0,1,OneDGrid>::ctype, OneDGridFamily>
   {
     // Grid and world dimension are hardwired in this grid
-    enum {dim = 1};
-    enum {dimworld = 1};
+    constexpr static int dim = 1;
+    constexpr static int dimworld = 1;
 
     template <int , PartitionIteratorType, class >
     friend class OneDGridLevelIterator;

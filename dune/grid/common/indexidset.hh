@@ -126,7 +126,7 @@ namespace Dune
     template<class Entity>
     IndexType index (const Entity& e) const
     {
-      enum { cc = Entity::codimension };
+      constexpr static int cc = Entity::codimension;
       CHECK_INTERFACE_IMPLEMENTATION((asImp().template index<cc>(e)));
       return asImp().template index<cc>(e);
     }
@@ -468,7 +468,7 @@ namespace Dune
     template<class Entity>
     IdType id (const Entity& e) const
     {
-      enum { cc = Entity::codimension };
+      constexpr static int cc = Entity::codimension;
       return asImp().template id<cc>(e);
     }
 

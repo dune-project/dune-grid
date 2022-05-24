@@ -31,10 +31,10 @@ namespace Dune {
   {
     typedef SizeCache<GridImp> ThisType;
     //! our dimension
-    enum { dim    = GridImp::dimension   };
+    constexpr static int dim = GridImp::dimension;
 
     //! number of codims
-    enum { nCodim = GridImp::dimension+1 };
+    constexpr static int nCodim = GridImp::dimension + 1;
 
     // type of grid
     typedef GridImp GridType;

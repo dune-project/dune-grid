@@ -430,7 +430,7 @@ namespace Dune {
   class YaspEntity<0,dim,GridImp>
     : public EntityDefaultImplementation <0,dim,GridImp,YaspEntity>
   {
-    enum { dimworld = GridImp::dimensionworld };
+    constexpr static int dimworld = GridImp::dimensionworld;
 
     typedef typename GridImp::Traits::template Codim< 0 >::GeometryImpl GeometryImpl;
 
@@ -809,7 +809,7 @@ namespace Dune {
   class YaspEntity<dim,dim,GridImp>
     : public EntityDefaultImplementation <dim,dim,GridImp,YaspEntity>
   {
-    enum { dimworld = GridImp::dimensionworld };
+    constexpr static int dimworld = GridImp::dimensionworld;
 
     template<int, PartitionIteratorType, typename>
     friend class YaspLevelIterator;

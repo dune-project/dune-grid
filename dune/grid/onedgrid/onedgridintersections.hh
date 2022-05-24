@@ -15,8 +15,8 @@ namespace Dune {
   template<class GridImp>
   class OneDGridLevelIntersection
   {
-    enum { dim=GridImp::dimension };
-    enum { dimworld=GridImp::dimensionworld };
+    constexpr static int dim = GridImp::dimension;
+    constexpr static int dimworld = GridImp::dimensionworld;
 
     // The corresponding iterator needs to access all members
     friend class OneDGridLevelIntersectionIterator<GridImp>;
@@ -229,8 +229,8 @@ namespace Dune {
   template<class GridImp>
   class OneDGridLeafIntersection
   {
-    enum { dim=GridImp::dimension };
-    enum { dimworld=GridImp::dimensionworld };
+    constexpr static int dim = GridImp::dimension;
+    constexpr static int dimworld = GridImp::dimensionworld;
 
     // The corresponding iterator needs to access all members
     friend class OneDGridLeafIntersectionIterator<GridImp>;

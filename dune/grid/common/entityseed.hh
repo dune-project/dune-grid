@@ -25,7 +25,7 @@ namespace Dune {
   public:
 
     //! codimension of underlying entity
-    enum { codimension = EntitySeedImp::codimension };
+    constexpr static int codimension = EntitySeedImp::codimension;
 
     /**
      * \brief type of underlying implementation

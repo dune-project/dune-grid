@@ -35,7 +35,7 @@ namespace Dune {
     typedef typename GridImp::template Codim<0>::Entity Entity;
 
     //! iterate only over elements
-    enum {codimension = 0};
+    constexpr static int codimension = 0;
 
     //! the default Constructor
     UGGridHierarchicIterator(int maxLevel, const GridImp* gridImp)

@@ -22,7 +22,7 @@ namespace Dune {
 
   public:
 
-    enum {codimension = codim};
+    constexpr static int codimension = codim;
 
     typedef typename GridImp::template Codim<codim>::Entity Entity;
 

@@ -64,7 +64,7 @@ namespace Dune
         };
       };
 
-      enum { conforming = Capabilities :: isLevelwiseConforming< Grid > :: v };
+      constexpr static bool conforming = Capabilities :: isLevelwiseConforming< Grid > :: v;
     };
 
 
@@ -96,7 +96,7 @@ namespace Dune
       template< int cd >
       struct Codim : public Traits :: template Codim<cd> {};
 
-      enum { conforming = Traits :: conforming };
+      constexpr static bool conforming = Traits :: conforming;
 
       static constexpr int dimension = Grid::dimension;
 
@@ -128,6 +128,11 @@ namespace Dune
       int size ( const GeometryType &type ) const
       {
         return grid().size( level_, type );
+      }
+
+      bool isConforming() const
+      {
+        return Traits::conforming;
       }
 
       /** \brief obtain begin iterator for this view */
@@ -266,7 +271,7 @@ namespace Dune
         };
       };
 
-      enum { conforming = Capabilities :: isLeafwiseConforming< Grid > :: v };
+      constexpr static bool conforming = Capabilities :: isLeafwiseConforming< Grid > :: v;
     };
 
 
@@ -298,7 +303,7 @@ namespace Dune
       template< int cd >
       struct Codim : public Traits :: template Codim<cd> {};
 
-      enum { conforming = Traits :: conforming };
+      constexpr static bool conforming = Traits :: conforming;
 
       static constexpr int dimension = Grid::dimension;
 
