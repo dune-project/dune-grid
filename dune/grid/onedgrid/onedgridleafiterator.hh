@@ -36,7 +36,7 @@ namespace Dune {
     }
 
     //! Constructor
-    OneDGridLeafIterator()
+    OneDGridLeafIterator() : grid_(nullptr)
     {
       this->virtualEntity_.impl().setToTarget(OneDGridNullIteratorFactory<1-codim>::null());
     }
