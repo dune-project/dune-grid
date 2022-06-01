@@ -337,6 +337,11 @@ namespace Dune
         return grid().size( type );
       }
 
+      bool isConforming() const
+      {
+        return Traits::conforming;
+      }
+
       /** \brief obtain begin iterator for this view */
       template< int cd >
       typename Codim< cd > :: Iterator begin () const
