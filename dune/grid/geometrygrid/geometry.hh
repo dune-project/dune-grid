@@ -124,6 +124,9 @@ namespace Dune
 
       typedef typename Mapping::JacobianTransposed JacobianTransposed;
       typedef typename Mapping::JacobianInverseTransposed JacobianInverseTransposed;
+      typedef typename Mapping::Jacobian Jacobian;
+      typedef typename Mapping::JacobianInverse JacobianInverse;
+
 
       Geometry () : grid_( nullptr ), mapping_( nullptr ) {}
 
@@ -197,6 +200,9 @@ namespace Dune
 
       JacobianTransposed jacobianTransposed ( const LocalCoordinate &local ) const { return mapping_->jacobianTransposed( local ); }
       JacobianInverseTransposed jacobianInverseTransposed ( const LocalCoordinate &local ) const { return mapping_->jacobianInverseTransposed( local ); }
+
+      Jacobian jacobian ( const LocalCoordinate &local ) const { return mapping_->jacobian( local ); }
+      JacobianInverse jacobianInverse ( const LocalCoordinate &local ) const { return mapping_->jacobianInverse( local ); }
 
       const Grid &grid () const { assert( grid_ ); return *grid_; }
 
