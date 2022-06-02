@@ -140,6 +140,17 @@ namespace Dune
 
     using JacobianDefault = decltype(transpose(std::declval<JacobianTransposed>()));
 
+
+    [[deprecated("Geometry implementatons are required to provide a jacobian(local) method. The default implementation is deprecated and will be removed after release 2.9")]]
+    auto deprecatedDefaultJacobian ( const LocalCoordinate& local ) const {
+      return transpose(jacobianTransposed(local));
+    }
+
+    [[deprecated("Geometry implementatons are required to provide a jacobianInverse(local) method. The default implementation is deprecated and will be removed after release 2.9")]]
+    auto deprecatedDefaultJacobianInverse ( const LocalCoordinate& local ) const {
+      return transpose(jacobianInverseTransposed(local));
+    }
+
   public:
 
     /**
@@ -322,7 +333,7 @@ namespace Dune
       if constexpr(Std::is_detected_v<JacobianOfImplementation, Implementation>)
         return impl().jacobian(local);
       else
-        return transpose(jacobianTransposed(local));
+        return deprecatedDefaultJacobian(local);
     }
 
     /** \brief Return inverse of Jacobian
@@ -351,7 +362,7 @@ namespace Dune
       if constexpr(Std::is_detected_v<JacobianInverseOfImplementation, Implementation>)
         return impl().jacobianInverse(local);
       else
-        return transpose(jacobianInverseTransposed(local));
+        return deprecatedDefaultJacobianInverse(local);
     }
 
     //===========================================================
