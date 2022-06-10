@@ -140,6 +140,17 @@ namespace Dune
 
     using JacobianDefault = decltype(transpose(std::declval<JacobianTransposed>()));
 
+
+    [[deprecated("Geometry implementatons are required to provide a jacobian(local) method. The default implementation is deprecated and will be removed after release 2.9")]]
+    auto deprecatedDefaultJacobian ( const LocalCoordinate& local ) const {
+      return transpose(jacobianTransposed(local));
+    }
+
+    [[deprecated("Geometry implementatons are required to provide a jacobianInverse(local) method. The default implementation is deprecated and will be removed after release 2.9")]]
+    auto deprecatedDefaultJacobianInverse ( const LocalCoordinate& local ) const {
+      return transpose(jacobianInverseTransposed(local));
+    }
+
   public:
 
     /**
@@ -322,7 +333,7 @@ namespace Dune
       if constexpr(Std::is_detected_v<JacobianOfImplementation, Implementation>)
         return impl().jacobian(local);
       else
-        return transpose(jacobianTransposed(local));
+        return deprecatedDefaultJacobian(local);
     }
 
     /** \brief Return inverse of Jacobian
@@ -351,7 +362,7 @@ namespace Dune
       if constexpr(Std::is_detected_v<JacobianInverseOfImplementation, Implementation>)
         return impl().jacobianInverse(local);
       else
-        return transpose(jacobianInverseTransposed(local));
+        return deprecatedDefaultJacobianInverse(local);
     }
 
     //===========================================================
@@ -403,6 +414,12 @@ namespace Dune
     //! type of jacobian transposed
     typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
 
+    //! type of jacobian inverse
+    typedef FieldMatrix< ctype, mydim, cdim > JacobianInverse;
+
+    //! type of jacobian
+    typedef FieldMatrix< ctype, cdim, mydim > Jacobian;
+
     //! return volume of the geometry
     Volume volume () const
     {
@@ -434,6 +451,18 @@ namespace Dune
       return asImp().global(refElement.position(0,0));
     }
 
+    //! Return the Jacobian
+    Jacobian jacobian ( const LocalCoordinate& local ) const
+    {
+      return asImp().jacobianTransposed(local).transposed();
+    }
+
+    //! Return inverse of Jacobian
+    JacobianInverse jacobianInverse ( const LocalCoordinate &local ) const
+    {
+      return asImp().jacobianInverseTransposed(local).transposed();
+    }
+
   private:
     //!  Barton-Nackman trick
     GeometryImp<mydim,cdim,GridImp>& asImp () {return static_cast<GeometryImp<mydim,cdim,GridImp>&>(*this);}
@@ -463,6 +492,12 @@ namespace Dune
     //! type of jacobian transposed
     typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
 
+    //! type of jacobian inverse
+    typedef FieldMatrix< ctype, mydim, cdim > JacobianInverse;
+
+    //! type of jacobian
+    typedef FieldMatrix< ctype, cdim, mydim > Jacobian;
+
     //! return the only coordinate
     FieldVector<ctype, cdim> global (const FieldVector<ctype, mydim>& local) const
     {
@@ -485,6 +520,18 @@ namespace Dune
     FieldVector<ctype, cdim> center () const
     {
       return asImp().corner(0);
+    }
+
+    //! Return the Jacobian
+    Jacobian jacobian ( const LocalCoordinate& local ) const
+    {
+      return asImp().jacobianTransposed(local).transposed();
+    }
+
+    //! Return inverse of Jacobian
+    JacobianInverse jacobianInverse ( const LocalCoordinate &local ) const
+    {
+      return asImp().jacobianInverseTransposed(local).transposed();
     }
 
   private:
