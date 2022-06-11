@@ -36,6 +36,34 @@ namespace Dune
     typedef typename Implementation::JacobianInverseTransposed JacobianInverseTransposed;
     typedef typename Implementation::JacobianTransposed JacobianTransposed;
 
+  private:
+
+    template<class Implementation_T>
+    using JacobianInverseOfImplementation = decltype(typename Implementation_T::JacobianInverse{std::declval<Implementation_T>().jacobianInverse(std::declval<LocalCoordinate>())});
+
+    using JacobianInverseDefault = decltype(transpose(std::declval<JacobianInverseTransposed>()));
+
+    template<class Implementation_T>
+    using JacobianOfImplementation = decltype(typename Implementation_T::Jacobian{std::declval<Implementation_T>().jacobian(std::declval<LocalCoordinate>())});
+
+    using JacobianDefault = decltype(transpose(std::declval<JacobianTransposed>()));
+
+
+    [[deprecated("Geometry implementatons are required to provide a jacobian(local) method. The default implementation is deprecated and will be removed after release 2.9")]]
+    auto deprecatedDefaultJacobian ( const LocalCoordinate& local ) const {
+      return transpose(jacobianTransposed(local));
+    }
+
+    [[deprecated("Geometry implementatons are required to provide a jacobianInverse(local) method. The default implementation is deprecated and will be removed after release 2.9")]]
+    auto deprecatedDefaultJacobianInverse ( const LocalCoordinate& local ) const {
+      return transpose(jacobianInverseTransposed(local));
+    }
+
+  public:
+
+    using Jacobian = Std::detected_or_t<JacobianDefault, JacobianOfImplementation, Implementation>;
+    using JacobianInverse = Std::detected_or_t<JacobianInverseDefault, JacobianInverseOfImplementation, Implementation>;
+
     explicit GeometryReference ( const Implementation &impl )
       : impl_( &impl )
     {}
@@ -73,6 +101,22 @@ namespace Dune
     JacobianInverseTransposed jacobianInverseTransposed ( const LocalCoordinate &local ) const
     {
       return impl().jacobianInverseTransposed( local );
+    }
+
+    Jacobian jacobian ( const LocalCoordinate& local ) const
+    {
+      if constexpr(Std::is_detected_v<JacobianOfImplementation, Implementation>)
+        return impl().jacobian(local);
+      else
+        return deprecatedDefaultJacobian(local);
+    }
+
+    JacobianInverse jacobianInverse ( const LocalCoordinate &local ) const
+    {
+      if constexpr(Std::is_detected_v<JacobianInverseOfImplementation, Implementation>)
+        return impl().jacobianInverse(local);
+      else
+        return deprecatedDefaultJacobianInverse(local);
     }
 
     const Implementation &impl () const { return *impl_; }
