@@ -127,6 +127,9 @@ namespace Dune
     typedef FieldMatrix< ctype, mydimension, coorddimension > JacobianTransposed;
     typedef FieldMatrix< ctype, coorddimension, mydimension > JacobianInverseTransposed;
 
+    typedef FieldMatrix< ctype, coorddimension, mydimension > Jacobian;
+    typedef FieldMatrix< ctype, mydimension, coorddimension > JacobianInverse;
+
   private:
     static constexpr int numCorners = mydimension + 1;
 
@@ -229,6 +232,18 @@ namespace Dune
       return jacobianInverseTransposed();
     }
 
+    /** \brief geometry mapping's Jacobian */
+    Jacobian jacobian ( const LocalCoordinate &local ) const
+    {
+      return jacobianTransposed(local).transposed();
+    }
+
+    /** \brief inverse of the geometry mapping's Jacobian */
+    JacobianInverse jacobianInverse ( const LocalCoordinate &local ) const
+    {
+      return jacobianInverseTransposed(local).transposed();
+    }
+
     //***********************************************************************
     //  Methods that not belong to the Interface, but have to be public
     //***********************************************************************
@@ -327,6 +342,9 @@ namespace Dune
 
     typedef FieldMatrix< ctype, mydimension, coorddimension > JacobianTransposed;
     typedef FieldMatrix< ctype, coorddimension, mydimension > JacobianInverseTransposed;
+
+    typedef FieldMatrix< ctype, coorddimension, mydimension > Jacobian;
+    typedef FieldMatrix< ctype, mydimension, coorddimension > JacobianInverse;
 
   private:
     static constexpr int numCorners = mydimension + 1;
@@ -438,6 +456,18 @@ namespace Dune
     jacobianInverseTransposed ( const LocalCoordinate &local ) const
     {
       return jacobianInverseTransposed();
+    }
+
+    /** \brief geometry mapping's Jacobian */
+    Jacobian jacobian ( const LocalCoordinate &local ) const
+    {
+      return jacobianTransposed(local).transposed();
+    }
+
+    /** \brief inverse of the geometry mapping's Jacobian */
+    JacobianInverse jacobianInverse ( const LocalCoordinate &local ) const
+    {
+      return jacobianInverseTransposed(local).transposed();
     }
 
     //***********************************************************************
