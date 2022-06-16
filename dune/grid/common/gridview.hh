@@ -118,7 +118,7 @@ namespace Dune
       };
     }; //: public Traits :: template Codim<cd> {};
 
-    /** \brief Export if this grid view is conforming */
+    /** \brief Export if this grid view is guaranteed conforming */
     constexpr static bool conforming = Traits :: conforming;
 
     /** \brief type used for coordinates in grid */
