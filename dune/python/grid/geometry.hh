@@ -52,7 +52,7 @@ namespace Dune
         auto y = ret.template mutable_unchecked< 3 >();
         if( x.shape( 1 ) != g.shape( 2 ) )
           std::cout << x.shape( 1 ) << " " << g.shape( 2 ) << std::endl;
-        if( x.shape( 0 ) != LocalCoordinate::size() )
+        if( x.shape( 0 ) != ssize_t(LocalCoordinate::size()) )
           std::cout << x.shape( 0 ) << " " << Geometry::LocalCoordinate::size() << std::endl;
 
         for( ssize_t p = 0; p < g.shape( 2 ); ++p )
