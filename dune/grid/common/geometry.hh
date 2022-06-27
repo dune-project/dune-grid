@@ -140,14 +140,25 @@ namespace Dune
 
     using JacobianDefault = decltype(transpose(std::declval<JacobianTransposed>()));
 
+    auto jacobianImpl ( const LocalCoordinate &local, std::true_type /*implDetected*/ ) const
+    {
+      return impl().jacobian(local);
+    }
 
     [[deprecated("Geometry implementatons are required to provide a jacobian(local) method. The default implementation is deprecated and will be removed after release 2.9")]]
-    auto deprecatedDefaultJacobian ( const LocalCoordinate& local ) const {
+    auto jacobianImpl ( const LocalCoordinate &local, std::false_type /*implNotDetected*/ ) const
+    {
       return transpose(jacobianTransposed(local));
     }
 
+    auto jacobianInverseImpl ( const LocalCoordinate &local, std::true_type /*implDetected*/ ) const
+    {
+      return impl().jacobianInverse(local);
+    }
+
     [[deprecated("Geometry implementatons are required to provide a jacobianInverse(local) method. The default implementation is deprecated and will be removed after release 2.9")]]
-    auto deprecatedDefaultJacobianInverse ( const LocalCoordinate& local ) const {
+    auto jacobianInverseImpl ( const LocalCoordinate &local, std::false_type /*implNotDetected*/ ) const
+    {
       return transpose(jacobianInverseTransposed(local));
     }
 
@@ -330,10 +341,8 @@ namespace Dune
      */
     Jacobian jacobian ( const LocalCoordinate& local ) const
     {
-      if constexpr(Std::is_detected_v<JacobianOfImplementation, Implementation>)
-        return impl().jacobian(local);
-      else
-        return deprecatedDefaultJacobian(local);
+      auto implDetected = Std::is_detected<JacobianOfImplementation, Implementation>{};
+      return jacobianImpl(local, implDetected);
     }
 
     /** \brief Return inverse of Jacobian
@@ -359,10 +368,8 @@ namespace Dune
      */
     JacobianInverse jacobianInverse ( const LocalCoordinate &local ) const
     {
-      if constexpr(Std::is_detected_v<JacobianInverseOfImplementation, Implementation>)
-        return impl().jacobianInverse(local);
-      else
-        return deprecatedDefaultJacobianInverse(local);
+      auto implDetected = Std::is_detected<JacobianInverseOfImplementation, Implementation>{};
+      return jacobianInverseImpl(local, implDetected);
     }
 
     //===========================================================
