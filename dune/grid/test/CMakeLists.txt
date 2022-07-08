@@ -34,6 +34,7 @@ dune_add_test(SOURCES test-hierarchicsearch.cc)
 
 dune_add_test(SOURCES test-ug.cc
               LINK_LIBRARIES dunegrid
+              COMPILE_DEFINITIONS DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
               CMAKE_GUARD dune-uggrid_FOUND)
 
 dune_add_test(SOURCES test-parallel-ug.cc
