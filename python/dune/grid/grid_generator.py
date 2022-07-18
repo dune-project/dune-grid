@@ -8,6 +8,7 @@ from dune.grid import gridFunction, DataType
 from dune.grid import OutputType
 from dune.generator.algorithm import cppType
 from dune.generator import builder
+from dune.deprecate import deprecated
 
 def getDimgrid(constructor):
     dimgrid = None
@@ -29,7 +30,7 @@ def triangulation(grid, level=0):
     if grid.dimGrid != 2:
         raise Exception("Grid must be 2-dimensional for use as matplotlib triangulation.")
     from matplotlib.tri import Triangulation
-    x, triangles = grid.tesselate(level)
+    x, triangles = grid.tessellate(level)
     return Triangulation(x[:,0], x[:,1], triangles)
 
 _writeVTKDispatcher = []
@@ -289,6 +290,11 @@ def addAttr(module, cls):
     setattr(cls, "writeVTK", writeVTK)
     setattr(cls, "sequencedVTK", sequencedVTK)
     setattr(cls, "_functions", {})
+    @deprecated(name="dune.grid.GridView.tesselate", msg="Use 'tessellate' (note spelling)")
+    def tesselate(gv, *args,**kwargs):
+        return gv.tessellate(*args,**kwargs)
+    setattr(cls,"tesselate", tesselate)
+    [[deprecated("use 'tessellate' (note spelling)")]]
 
     if cls.dimension == 2:
         setattr(cls, "plot", plot)
