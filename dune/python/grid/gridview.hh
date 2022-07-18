@@ -380,12 +380,12 @@ namespace Dune
                    the format `[ [x_1,y_1], [x_2,y_2], ..., [x_N,y_N] ]` for example
                    in 2d.
         )doc" );
-      cls.def( "tesselate", [] ( const GridView &self, int level ) { return tesselate( self, level ); }, "level"_a = 0,
+      cls.def( "tessellate", [] ( const GridView &self, int level ) { return tessellate( self, level ); }, "level"_a = 0,
         R"doc(
-          Generated a possibly refined tesselation using only simplices.
+          Generated a possibly refined tessellation using only simplices.
 
           Args:
-              level: virtual refinement level to use to generate the tesselation
+              level: virtual refinement level to use to generate the tessellation
 
           Returns: (coordinates,simplices) where coordinates is a `numpy` array
                    of the vertex coodinates

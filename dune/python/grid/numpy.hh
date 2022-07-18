@@ -121,10 +121,9 @@ namespace Dune
 
     // tessellate
     // ----------
-
     template< class GridView, unsigned int partitions >
     inline static std::pair< pybind11::array_t< typename GridView::ctype >, pybind11::array_t< int > >
-    tesselate ( const GridView &gridView, RefinementIntervals intervals, PartitionSet< partitions > ps )
+    tessellate ( const GridView &gridView, RefinementIntervals intervals, PartitionSet< partitions > ps )
     {
       typedef typename GridView::ctype ctype;
 
@@ -160,9 +159,9 @@ namespace Dune
 
     template< class GridView, unsigned int partitions >
     inline static std::pair< pybind11::array_t< typename GridView::ctype >, pybind11::array_t< int > >
-    tesselate ( const GridView &gridView, int level, PartitionSet< partitions > ps )
+    tessellate ( const GridView &gridView, int level, PartitionSet< partitions > ps )
     {
-      return tesselate( gridView, refinementLevels( level ), ps );
+      return tessellate( gridView, refinementLevels( level ), ps );
     }
 
     template< class GridView, unsigned int partitions >
@@ -254,16 +253,16 @@ namespace Dune
 
     template< class GridView, unsigned int partitions >
     inline static std::pair< pybind11::array_t< typename GridView::ctype >, pybind11::array_t< int > >
-    tesselate ( const GridView &gridView, PartitionSet< partitions > ps )
+    tessellate ( const GridView &gridView, PartitionSet< partitions > ps )
     {
-      return tesselate( gridView, 0, ps );
+      return tessellate( gridView, 0, ps );
     }
 
     template< class GridView >
     inline static std::pair< pybind11::array_t< typename GridView::ctype >, pybind11::array_t< int > >
-    tesselate ( const GridView &gridView, int level = 0 )
+    tessellate ( const GridView &gridView, int level = 0 )
     {
-      return tesselate( gridView, level, Partitions::all );
+      return tessellate( gridView, level, Partitions::all );
     }
 
     template< class GridView >
@@ -367,6 +366,29 @@ namespace Dune
     {
       return cellData( gridFunction, level, Partitions::all );
     }
+
+
+    // deprecated tesselate (note spelling) functions
+    template< class GridView, unsigned int partitions >
+    [[deprecated("use 'tessellate' (note spelling)")]]
+    inline static std::pair< pybind11::array_t< typename GridView::ctype >, pybind11::array_t< int > >
+    tesselate ( const GridView &gridView, RefinementIntervals intervals, PartitionSet< partitions > ps )
+    { return tessellate( gridView, intervals, ps); }
+    template< class GridView, unsigned int partitions >
+    [[deprecated("use 'tessellate' (note spelling)")]]
+    inline static std::pair< pybind11::array_t< typename GridView::ctype >, pybind11::array_t< int > >
+    tesselate ( const GridView &gridView, int level, PartitionSet< partitions > ps )
+    { return tessellate( gridView, level, ps); }
+    template< class GridView, unsigned int partitions >
+    [[deprecated("use 'tessellate' (note spelling)")]]
+    inline static std::pair< pybind11::array_t< typename GridView::ctype >, pybind11::array_t< int > >
+    tesselate ( const GridView &gridView, PartitionSet< partitions > ps )
+    { return tessellate( gridView, ps); }
+    template< class GridView >
+    [[deprecated("use 'tessellate' (note spelling)")]]
+    inline static std::pair< pybind11::array_t< typename GridView::ctype >, pybind11::array_t< int > >
+    tesselate ( const GridView &gridView, int level = 0 )
+    { tessellate(gridView, level); }
 
   } // namespace FemPy
 
