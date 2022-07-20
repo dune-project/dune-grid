@@ -5,6 +5,7 @@
 
 //- system headers
 #include <fstream>
+#include <iterator>
 
 //- Dune headers
 #include <dune/common/exceptions.hh>
@@ -111,7 +112,7 @@ namespace Dune
         stream << (grid.isPeriodic(i) ? "1 " : "0 ");
       stream << std::endl << "Overlap: " << grid.overlapSize(0,0) << std::endl;
       stream << "KeepPhysicalOverlap: ";
-      for (typename Grid::YGridLevelIterator i=++grid.begin(); i != grid.end(); ++i)
+      for (typename Grid::YGridLevelIterator i=std::next(grid.begin()); i != grid.end(); ++i)
         stream << (i->keepOverlap ? "1" : "0") << " ";
       stream << std::endl;
       stream << "Coarse Size: ";
@@ -248,7 +249,7 @@ namespace Dune
         stream << (grid.isPeriodic(i) ? "1 " : "0 ");
       stream << std::endl << "Overlap: " << grid.overlapSize(0,0) << std::endl;
       stream << "KeepPhysicalOverlap: ";
-      for (typename Grid::YGridLevelIterator i=++grid.begin(); i != grid.end(); ++i)
+      for (typename Grid::YGridLevelIterator i=std::next(grid.begin()); i != grid.end(); ++i)
         stream << (i->keepOverlap ? "1" : "0") << " ";
       stream << std::endl;
       stream << "Coarse Size: ";

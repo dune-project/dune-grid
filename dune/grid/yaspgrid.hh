@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <iostream>
+#include <iterator>
 #include <vector>
 #include <algorithm>
 #include <stack>
@@ -292,7 +293,7 @@ namespace Dune {
     {
       if (i<0 || i>maxLevel())
         DUNE_THROW(GridError, "level not existing");
-      return _levels.begin()+i;
+      return std::next(_levels.begin(), i);
     }
 
     //! return iterator pointing to one past the finest level
