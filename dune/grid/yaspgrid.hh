@@ -284,7 +284,7 @@ namespace Dune {
     //! return iterator pointing to coarsest level
     YGridLevelIterator begin () const
     {
-      return YGridLevelIterator(_levels,0);
+      return _levels.begin();
     }
 
     //! return iterator pointing to given level
@@ -292,13 +292,13 @@ namespace Dune {
     {
       if (i<0 || i>maxLevel())
         DUNE_THROW(GridError, "level not existing");
-      return YGridLevelIterator(_levels,i);
+      return _levels.begin()+i;
     }
 
     //! return iterator pointing to one past the finest level
     YGridLevelIterator end () const
     {
-      return YGridLevelIterator(_levels,maxLevel()+1);
+      return _levels.end();
     }
 
     // static method to create the default load balance strategy
