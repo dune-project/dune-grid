@@ -69,8 +69,8 @@ namespace Dune {
     //  private data
     //**********************************************************
 
-    const GridImp* identityGrid_;
-    HostLeafIntersectionIterator hostIterator_;
+    const GridImp* identityGrid_ = nullptr;
+    HostLeafIntersectionIterator hostIterator_ = {};
   };
 
 
@@ -121,8 +121,8 @@ namespace Dune {
   private:
 
 
-    const GridImp* identityGrid_;
-    HostLevelIntersectionIterator hostIterator_;
+    const GridImp* identityGrid_ = nullptr;
+    HostLevelIntersectionIterator hostIterator_ = {};
 
   };
 
