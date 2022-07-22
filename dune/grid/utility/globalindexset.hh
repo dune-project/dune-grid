@@ -138,7 +138,7 @@ namespace Dune
          *
          *  Note: Only the sender side needs to know this size. */
         template<class EntityType>
-        size_t size (EntityType& e) const
+        std::size_t size (EntityType& e) const
         {
           return 1 ;
         }
@@ -155,7 +155,7 @@ namespace Dune
          * \param n The number of objects sent by the sender
          */
         template<class MessageBuffer, class EntityType>
-        void scatter (MessageBuffer& buff, const EntityType& e, size_t n)
+        void scatter (MessageBuffer& buff, const EntityType& e, std::size_t n)
         {
           DataType x;
           buff.read(x);
@@ -206,13 +206,13 @@ namespace Dune
       }
 
       /** \brief Which rank is the i-th entity assigned to? */
-      int owner(size_t i)
+      int owner(std::size_t i)
       {
         return assignment_[i];
       }
 
       /** \brief Report the number of entities assigned to the rank 'rank' */
-      size_t numOwners(int rank) const
+      std::size_t numOwners(int rank) const
       {
         return std::count(assignment_.begin(), assignment_.end(), rank);
       }
@@ -247,7 +247,7 @@ namespace Dune
        * \note Only the sender side needs to know this size.
        */
       template<class EntityType>
-      size_t size (EntityType& e) const
+      std::size_t size (EntityType& e) const
       {
         return 1;
       }
@@ -269,7 +269,7 @@ namespace Dune
        * \param n The number of objects sent by the sender
        */
       template<class MessageBuffer, class EntityType>
-      void scatter (MessageBuffer& buff, const EntityType& entity, size_t n)
+      void scatter (MessageBuffer& buff, const EntityType& entity, std::size_t n)
       {
         Index x;
         buff.read(x);
@@ -411,7 +411,7 @@ namespace Dune
 
       for(Iterator iter = gridview_.template begin<0>();iter!=gridview_.template end<0>(); ++iter)
       {
-        for (size_t i=0; i<iter->subEntities(codim_); i++)
+        for (std::size_t i=0; i<iter->subEntities(codim_); i++)
         {
           IdType id=globalIdSet.subId(*iter,i,codim_);
 
