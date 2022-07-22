@@ -420,8 +420,8 @@ namespace Dune {
     YGLI& gridlevel() { return _g; }
     const GridImp * yaspgrid() const { return _g->mg; }
     protected:
-    I _it;               // position in the grid level
-    YGLI _g;               // access to grid level
+    I _it = {};               // position in the grid level
+    YGLI _g = {};               // access to grid level
   };
 
 
@@ -799,8 +799,8 @@ namespace Dune {
       return _g->overlapfront[cc].superindex(coord,which);
     }
 
-    I _it;         // position in the grid level
-    YGLI _g;         // access to grid level
+    I _it = {};         // position in the grid level
+    YGLI _g = {};         // access to grid level
   };
 
 
@@ -966,8 +966,8 @@ namespace Dune {
 
     const GridImp * yaspgrid() const { return _g->mg; }
   protected:
-    I _it;               // position in the grid level
-    YGLI _g;               // access to grid level
+    I _it = {};               // position in the grid level
+    YGLI _g = {};               // access to grid level
   };
 
 }   // namespace Dune
