@@ -1,8 +1,7 @@
 add_subdirectory(dune)
 
-dune_python_install_package(
+dune_python_configure_bindings(
   PATH "."
-  DEPENDS _grid
   CMAKE_METADATA_FLAGS DUNE_OPTS_FILE HAVE_ALBERTA HAVE_DUNE_UGGRID
 )
 if(POLICY CMP0087)
