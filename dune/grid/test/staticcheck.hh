@@ -454,7 +454,7 @@ struct GridViewInterface
     // parallel interface
     using GhostIterator [[maybe_unused]] = typename GridView::template Codim< 0 >::template
       Partition< Dune::Ghost_Partition >::Iterator;
-    using CollectiveCommunication [[maybe_unused]] = typename GridView::CollectiveCommunication;
+    using Communication [[maybe_unused]] = typename GridView::Communication;
 
     gv.template begin< 0, Dune::Ghost_Partition >();
     gv.template end< 0, Dune::Ghost_Partition >();

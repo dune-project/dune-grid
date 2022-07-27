@@ -88,8 +88,11 @@ namespace Dune
     /** \brief type of the intersection iterator */
     typedef typename Traits :: IntersectionIterator IntersectionIterator;
 
-    /** \brief type of the collective communication */
-    typedef typename Traits :: CollectiveCommunication CollectiveCommunication;
+    /** \brief type of the communication */
+    typedef typename Traits :: Communication Communication;
+
+    /** \brief type of the communication */
+    typedef Communication CollectiveCommunication;
 
     /** \brief A struct that collects all associated types of one implementation
                from the Traits class.
@@ -256,8 +259,8 @@ namespace Dune
       return impl().iend(entity);
     }
 
-    /** \brief obtain collective communication object */
-    const CollectiveCommunication &comm () const
+    /** \brief obtain communication object */
+    const Communication &comm () const
     {
       return impl().comm();
     }

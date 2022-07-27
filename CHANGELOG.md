@@ -26,6 +26,10 @@
 
 - Support for AmiraMesh has been removed.
 
+- Following the deprecation of `CollectiveCommunication` in dune-common, grids define
+  the type `Communication`. The type `CollectiveCommunication` is deprecated and
+  will be removed after Dune 2.9.
+
 - The CMake function `add_dune_ug_flags` is deprecated. It should not be used since
   all flags are already set automatically. Also the package flags for the UG grid are
   not registered any more.
