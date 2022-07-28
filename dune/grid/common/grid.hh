@@ -14,6 +14,7 @@
 // dune-common includes
 #include <dune/common/fvector.hh>
 #include <dune/common/typetraits.hh>
+#include <dune/common/typeutilities.hh>
 
 // dune-geometry includes
 #include <dune/geometry/type.hh>
@@ -505,16 +506,24 @@ namespace Dune {
      */
     typedef typename GridFamily::Traits::LocalIdSet LocalIdSet;
 
+  protected:
+    template <class T>
+    using Communication_t = typename T::Communication;
+    template <class T>
+    using DeprecatedCollectiveCommunication_t = typename T::CollectiveCommunication;
+  public:
     /*! \brief A type that is a model of Dune::Communication.
        It provides a portable way for communication on the set
        of processes used by the grid.
      */
-    typedef typename GridFamily::Traits::Communication Communication;
+    // if this line produces a warning then the Communication typedef is missing
+    // in the GridFamily
+    using Communication = detected_or_fallback_t< DeprecatedCollectiveCommunication_t,
+                                                  Communication_t, typename GridFamily::Traits>;
 
-    /** \deprecated Use Communication instead! Will be removed after Dune 2.9.
+    /** \deprecated Use Communication instead! Will be removed at some point in the future.
      */
-    [[deprecated("Use Communication instead!")]]
-    typedef Communication CollectiveCommunication;
+    using CollectiveCommunication [[deprecated("CollectiveCommunication is deprecated, use Communication instead!")]] = Communication;
 
     //! Define type used for coordinates in grid module
     typedef ct ctype;
@@ -1058,7 +1067,7 @@ namespace Dune {
     /** \brief The type of the communication. */
     typedef CCType Communication;
 
-    /** \deprecated Use Communication instead! Will be removed after Dune 2.9. */
+    /** \deprecated Use Communication instead! Will be removed at some point in the future. */
     [[deprecated("Use Communication instead!")]]
     typedef Communication CollectiveCommunication;
   };
