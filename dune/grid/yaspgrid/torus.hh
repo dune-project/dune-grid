@@ -40,7 +40,7 @@ namespace Dune
      - Provide means to partition a grid to the torus.
 
    */
-  template<class Communication, int d>
+  template<class CollectiveCommunication, int d>
   class Torus {
   public:
     //! type used to pass tupels in and out
@@ -66,7 +66,7 @@ namespace Dune
     {}
 
     //! make partitioner from communicator and coarse mesh size
-    Torus (Communication comm, int tag, iTupel size, const YLoadBalance<d>* lb)
+    Torus (CollectiveCommunication comm, int tag, iTupel size, const YLoadBalance<d>* lb)
       : _comm(comm), _tag(tag)
     {
       // determine dimensions
@@ -119,7 +119,7 @@ namespace Dune
     }
 
     //! return communicator
-    Communication comm () const
+    CollectiveCommunication comm () const
     {
       return _comm;
     }
@@ -519,7 +519,7 @@ namespace Dune
 
     }
 
-    Communication _comm;
+    CollectiveCommunication _comm;
 
     iTupel _dims;
     iTupel _increment;
@@ -535,8 +535,8 @@ namespace Dune
   };
 
   //! Output operator for Torus
-  template <class Communication, int d>
-  inline std::ostream& operator<< (std::ostream& s, const Torus<Communication, d> & t)
+  template <class CollectiveCommunication, int d>
+  inline std::ostream& operator<< (std::ostream& s, const Torus<CollectiveCommunication, d> & t)
   {
     t.print(s);
     return s;

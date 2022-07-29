@@ -130,9 +130,9 @@ int Dune::UGMessageBuffer<DataHandle,GridDim,codim>::level = -1;
 namespace Dune {
 
 #ifdef ModelP
-    using UGCommunication = Communication<MPI_Comm>;
+    using UGCollectiveCommunication = Communication<MPI_Comm>;
 #else
-    using UGCommunication = Communication<No_Comm>;
+    using UGCollectiveCommunication = Communication<No_Comm>;
 #endif
 
   template<int dim>
@@ -154,7 +154,7 @@ namespace Dune {
         typename UG_NS<dim>::UG_ID_TYPE,
         UGGridIdSet< const UGGrid<dim> >,
         typename UG_NS<dim>::UG_ID_TYPE,
-        UGCommunication,
+        UGCollectiveCommunication,
         UGGridLevelGridViewTraits,
         UGGridLeafGridViewTraits,
         UGGridEntitySeed,
@@ -265,7 +265,7 @@ namespace Dune {
 
     /** \brief Default constructor
      */
-    UGGrid(UGCommunication comm = {});
+    UGGrid(UGCollectiveCommunication comm = {});
 
     //! Destructor
     ~UGGrid()  noexcept(false);
@@ -544,8 +544,8 @@ namespace Dune {
       return true;
     }
 
-    /** the communication */
-    const UGCommunication& comm () const
+    /** the collective communication */
+    const UGCollectiveCommunication& comm () const
     {
       return ccobj_;
     }
@@ -661,8 +661,8 @@ namespace Dune {
     /** \brief UG multigrid, which contains the actual grid hierarchy structure */
     typename UG_NS<dim>::MultiGrid* multigrid_;
 
-    /** \brief The communication object. */
-    UGCommunication ccobj_;
+    /** \brief The collective communication object. */
+    UGCollectiveCommunication ccobj_;
 
     /** \brief Recomputes entity indices after the grid was changed
         \param setLevelZero If this is false, level indices of the level 0 are not touched

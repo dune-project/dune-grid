@@ -33,7 +33,7 @@ template<> int UGGrid<3>::numOfUGGrids = 0;
 
 
 template <int dim>
-UGGrid < dim >::UGGrid(UGCommunication comm)
+UGGrid < dim >::UGGrid(UGCollectiveCommunication comm)
   : multigrid_(nullptr),
     ccobj_(comm),
     leafIndexSet_(*this),

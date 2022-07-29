@@ -55,13 +55,7 @@ namespace Dune
       < const Grid, GeoGrid::IntersectionIterator< const Grid, HostIntersectionIterator >, GeoGrid::Intersection< const Grid, HostIntersection > >
       IntersectionIterator;
 
-      typedef typename HostGridView::Communication Communication;
-
-      /**
-       * \deprecated Use Communication instead! Will be removed after Dune 2.9.
-       */
-      [[deprecated("Use Communication instead!!")]]
-      typedef Communication CollectiveCommunication;
+      typedef typename HostGridView::CollectiveCommunication CollectiveCommunication;
 
       template< int codim >
       struct Codim
@@ -108,13 +102,7 @@ namespace Dune
 
       typedef typename Traits::IntersectionIterator IntersectionIterator;
 
-      typedef typename Traits::Communication Communication;
-
-      /**
-       * \deprecated Use Communication instead! Will be removed after Dune 2.9.
-       */
-      [[deprecated("Use Communication instead!!")]]
-      typedef Communication CollectiveCommunication;
+      typedef typename Traits::CollectiveCommunication CollectiveCommunication;
 
       template< int codim >
       struct Codim
@@ -213,7 +201,7 @@ namespace Dune
         return IntersectionIteratorImpl( entity, hostGridView().iend( entity.impl().hostEntity() ) );
       }
 
-      const Communication &comm () const
+      const CollectiveCommunication &comm () const
       {
         return hostGridView().comm();
       }

@@ -295,7 +295,7 @@ namespace Dune {
 
     // dummy parallel functions
 
-    const Communication &comm () const
+    const CollectiveCommunication &comm () const
     {
       return ccobj;
     }
@@ -323,7 +323,7 @@ namespace Dune {
       return std::get<1>(entityImps_[level]);
     }
 
-    Communication ccobj;
+    CollectiveCommunication ccobj;
 
     /** \brief Update all indices and ids */
     void setIndices();
