@@ -80,15 +80,15 @@ namespace Dune {
 namespace Dune {
 
 #if HAVE_MPI
-  using YaspCollectiveCommunication = Communication<MPI_Comm>;
+  using YaspCommunication = Communication<MPI_Comm>;
 #else
-  using YaspCollectiveCommunication = Communication<No_Comm>;
+  using YaspCommunication = Communication<No_Comm>;
 #endif
 
   template<int dim, class Coordinates>
   struct YaspGridFamily
   {
-    typedef YaspCollectiveCommunication CCType;
+    typedef YaspCommunication CCType;
 
     typedef GridTraits<dim,                                     // dimension of the grid
         dim,                                                    // dimension of the world space
@@ -171,7 +171,7 @@ namespace Dune {
   public:
     //! Type used for coordinates
     typedef typename Coordinates::ctype ctype;
-    typedef YaspCollectiveCommunication CollectiveCommunicationType;
+    typedef YaspCommunication CommunicationType;
 
 #ifndef DOXYGEN
     typedef typename Dune::YGrid<Coordinates> YGrid;
@@ -236,7 +236,7 @@ namespace Dune {
 #endif
 
     //! return reference to torus
-    const Torus<CollectiveCommunicationType, dim>& torus () const
+    const Torus<CommunicationType, dim>& torus () const
     {
       return _torus;
     }
@@ -571,7 +571,7 @@ namespace Dune {
 
       // fill send buffers; iterate over all neighboring processes
       // non-periodic case is handled automatically because intersection will be zero
-      for (typename Torus<CollectiveCommunicationType,dim>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
+      for (typename Torus<CommunicationType,dim>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
       {
         // determine if we communicate with this neighbor (and what)
         bool skip = false;
@@ -615,35 +615,35 @@ namespace Dune {
       }
 
       // issue send requests for sendgrid being sent to all neighbors
-      for (typename Torus<CollectiveCommunicationType,dim>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
+      for (typename Torus<CommunicationType,dim>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
       {
         mpifriendly_send_sendgrid[i.index()] = mpifriendly_ygrid(send_sendgrid[i.index()]);
         _torus.send(i.rank(), &mpifriendly_send_sendgrid[i.index()], sizeof(mpifriendly_ygrid));
       }
 
       // issue recv requests for sendgrids of neighbors
-      for (typename Torus<CollectiveCommunicationType,dim>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
+      for (typename Torus<CommunicationType,dim>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
         _torus.recv(i.rank(), &mpifriendly_recv_sendgrid[i.index()], sizeof(mpifriendly_ygrid));
 
       // exchange the sendgrids
       _torus.exchange();
 
       // issue send requests for recvgrid being sent to all neighbors
-      for (typename Torus<CollectiveCommunicationType,dim>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
+      for (typename Torus<CommunicationType,dim>::ProcListIterator i=_torus.sendbegin(); i!=_torus.sendend(); ++i)
       {
         mpifriendly_send_recvgrid[i.index()] = mpifriendly_ygrid(send_recvgrid[i.index()]);
         _torus.send(i.rank(), &mpifriendly_send_recvgrid[i.index()], sizeof(mpifriendly_ygrid));
       }
 
       // issue recv requests for recvgrid of neighbors
-      for (typename Torus<CollectiveCommunicationType,dim>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
+      for (typename Torus<CommunicationType,dim>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
         _torus.recv(i.rank(), &mpifriendly_recv_recvgrid[i.index()], sizeof(mpifriendly_ygrid));
 
       // exchange the recvgrid
       _torus.exchange();
 
       // process receive buffers and compute intersections
-      for (typename Torus<CollectiveCommunicationType,dim>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
+      for (typename Torus<CommunicationType,dim>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
       {
         // what must be sent to this neighbor
         Intersection send_intersection;
@@ -719,13 +719,13 @@ namespace Dune {
      *  @param coordinates Object that stores or computes the vertex coordinates
      *  @param periodic tells if direction is periodic or not
      *  @param overlap size of overlap on coarsest grid (same in all directions)
-     *  @param comm the collective communication object for this grid. An MPI communicator can be given here.
+     *  @param comm the communication object for this grid. An MPI communicator can be given here.
      *  @param lb pointer to an overloaded YLoadBalance instance
      */
     YaspGrid (const Coordinates& coordinates,
               std::bitset<dim> periodic = std::bitset<dim>(0ULL),
               int overlap = 1,
-              CollectiveCommunicationType comm = CollectiveCommunicationType(),
+              CommunicationType comm = CommunicationType(),
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : ccobj(comm)
       , leafIndexSet_(*this)
@@ -890,7 +890,7 @@ namespace Dune {
      *  @param s number of cells on coarse mesh in each direction
      *  @param periodic tells if direction is periodic or not
      *  @param overlap size of overlap on coarsest grid (same in all directions)
-     *  @param comm the collective communication object for this grid. An MPI communicator can be given here.
+     *  @param comm the communication object for this grid. An MPI communicator can be given here.
      *  @param lb pointer to an overloaded YLoadBalance instance
      */
     template<class C = Coordinates,
@@ -899,7 +899,7 @@ namespace Dune {
               std::array<int, std::size_t{dim}> s,
               std::bitset<std::size_t{dim}> periodic = std::bitset<std::size_t{dim}>{0ULL},
               int overlap = 1,
-              CollectiveCommunicationType comm = CollectiveCommunicationType(),
+              CommunicationType comm = CommunicationType(),
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : ccobj(comm), _torus(comm,tag,s,lb), leafIndexSet_(*this),
         _L(L), _periodic(periodic), _coarseSize(s), _overlap(overlap),
@@ -960,7 +960,7 @@ namespace Dune {
      *  @param s number of cells on coarse mesh in each direction
      *  @param periodic tells if direction is periodic or not
      *  @param overlap size of overlap on coarsest grid (same in all directions)
-     *  @param comm the collective communication object for this grid. An MPI communicator can be given here.
+     *  @param comm the communication object for this grid. An MPI communicator can be given here.
      *  @param lb pointer to an overloaded YLoadBalance instance
      */
     template<class C = Coordinates,
@@ -970,7 +970,7 @@ namespace Dune {
               std::array<int, std::size_t{dim}> s,
               std::bitset<std::size_t{dim}> periodic = std::bitset<std::size_t{dim}>(0ULL),
               int overlap = 1,
-              CollectiveCommunicationType comm = CollectiveCommunicationType(),
+              CommunicationType comm = CommunicationType(),
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : ccobj(comm), _torus(comm,tag,s,lb), leafIndexSet_(*this),
         _L(upperright - lowerleft),
@@ -1029,7 +1029,7 @@ namespace Dune {
      *  @param coords coordinate vectors to be used for coarse grid
      *  @param periodic tells if direction is periodic or not
      *  @param overlap size of overlap on coarsest grid (same in all directions)
-     *  @param comm the collective communication object for this grid. An MPI communicator can be given here.
+     *  @param comm the communication object for this grid. An MPI communicator can be given here.
      *  @param lb pointer to an overloaded YLoadBalance instance
      */
     template<class C = Coordinates,
@@ -1037,7 +1037,7 @@ namespace Dune {
     YaspGrid (std::array<std::vector<ctype>, std::size_t{dim}> coords,
               std::bitset<std::size_t{dim}> periodic = std::bitset<std::size_t{dim}>(0ULL),
               int overlap = 1,
-              CollectiveCommunicationType comm = CollectiveCommunicationType(),
+              CommunicationType comm = CommunicationType(),
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : ccobj(comm), _torus(comm,tag,Dune::Yasp::sizeArray<dim>(coords),lb),
         leafIndexSet_(*this), _periodic(periodic), _overlap(overlap),
@@ -1150,7 +1150,7 @@ namespace Dune {
     YaspGrid (std::array<std::vector<ctype>, std::size_t{dim}> coords,
               std::bitset<std::size_t{dim}> periodic,
               int overlap,
-              CollectiveCommunicationType comm,
+              CommunicationType comm,
               std::array<int,dim> coarseSize,
               const YLoadBalance<dim>* lb = defaultLoadbalancer())
       : ccobj(comm), _torus(comm,tag,coarseSize,lb), leafIndexSet_(*this),
@@ -1746,9 +1746,9 @@ namespace Dune {
       return leafIndexSet_;
     }
 
-    /*! @brief return a collective communication object
+    /*! @brief return a communication object
      */
-    const CollectiveCommunicationType& comm () const
+    const CommunicationType& comm () const
     {
       return ccobj;
     }
@@ -1844,9 +1844,9 @@ namespace Dune {
       DUNE_THROW(GridError, "YaspLevelIterator with this codim or partition type not implemented");
     }
 
-    CollectiveCommunicationType ccobj;
+    CommunicationType ccobj;
 
-    Torus<CollectiveCommunicationType,dim> _torus;
+    Torus<CommunicationType,dim> _torus;
 
     std::vector< std::shared_ptr< YaspIndexSet<const YaspGrid<dim,Coordinates>, false > > > indexsets;
     YaspIndexSet<const YaspGrid<dim,Coordinates>, true> leafIndexSet_;
@@ -1870,7 +1870,7 @@ namespace Dune {
            std::array<int, std::size_t{dim}>,
            std::bitset<std::size_t{dim}> = std::bitset<std::size_t{dim}>{0ULL},
            int = 1,
-           YaspCollectiveCommunication = YaspCollectiveCommunication(),
+           YaspCommunication = YaspCommunication(),
            const YLoadBalance<dim>* = YaspGrid< dim, EquidistantCoordinates<ctype, dim> >::defaultLoadbalancer())
     -> YaspGrid< dim, EquidistantCoordinates<ctype, dim> >;
 
@@ -1880,7 +1880,7 @@ namespace Dune {
            std::array<int, std::size_t{dim}>,
            std::bitset<std::size_t{dim}> = std::bitset<std::size_t{dim}>{0ULL},
            int = 1,
-           YaspCollectiveCommunication = YaspCollectiveCommunication(),
+           YaspCommunication = YaspCommunication(),
            const YLoadBalance<dim>* = YaspGrid< dim, EquidistantOffsetCoordinates<ctype, dim> >::defaultLoadbalancer())
     -> YaspGrid< dim, EquidistantOffsetCoordinates<ctype, dim> >;
 
@@ -1888,7 +1888,7 @@ namespace Dune {
   YaspGrid(std::array<std::vector<ctype>, dim>,
            std::bitset<dim> = std::bitset<dim>{0ULL},
            int = 1,
-           YaspCollectiveCommunication = YaspCollectiveCommunication(),
+           YaspCommunication = YaspCommunication(),
            const YLoadBalance<int{dim}>* = YaspGrid< int{dim}, TensorProductCoordinates<ctype, int{dim}> >::defaultLoadbalancer())
     -> YaspGrid< int{dim}, TensorProductCoordinates<ctype, int{dim}> >;
 #endif

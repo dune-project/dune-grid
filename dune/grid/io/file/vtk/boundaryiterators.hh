@@ -170,7 +170,7 @@ namespace Dune {
       typedef CornerIterator PointIterator;
 
       typedef NonConformingConnectivityWriter<Cell> ConnectivityWriter;
-      typedef typename GV::CollectiveCommunication CollectiveCommunication;
+      typedef typename GV::Communication Communication;
 
       explicit NonConformingBoundaryIteratorFactory(const GV& gv_)
         : gv(gv_)
@@ -196,7 +196,7 @@ namespace Dune {
       ConnectivityWriter makeConnectivity() const {
         return ConnectivityWriter();
       }
-      const CollectiveCommunication& comm() const {
+      const Communication& comm() const {
         return gv.comm();
       }
     };

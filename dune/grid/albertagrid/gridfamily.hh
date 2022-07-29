@@ -143,7 +143,13 @@ namespace Dune
       typedef IdSet<GridImp,IdSetImp,IdType> GlobalIdSet;
       typedef IdSet<GridImp,IdSetImp,IdType> LocalIdSet;
 
-      typedef Dune::Communication< No_Comm > CollectiveCommunication;
+      typedef Dune::Communication< No_Comm > Communication;
+
+      /**
+       * \deprecated Use Communication instead! Will be removed after Dune 2.9.
+       */
+      [[deprecated("Use Communication instead!")]]
+      typedef Communication CollectiveCommunication;
     };
   };
 

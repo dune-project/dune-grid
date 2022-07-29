@@ -377,7 +377,7 @@ namespace Dune
 #endif
 
 
-    /** \brief dummy collective communication */
+    /** \brief dummy communication */
     const Communication<No_Comm>& comm () const
     {
       return ccobj;
