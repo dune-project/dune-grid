@@ -24,7 +24,7 @@ namespace Dune
      fulfilled.
 
      \tparam MessageBufferImp Implementation of message buffer used by the grids' communication method
-     \ingroup GICommunication
+     \ingroup GICollectiveCommunication
    */
   template <class MessageBufferImp>
   class MessageBufferIF
@@ -69,7 +69,7 @@ namespace Dune
 
      \tparam DataHandleImp implementation of the users data handle
      \tparam DataTypeImp type of data that are going to be communicated which is exported as \c DataType (for example double)
-     \ingroup GICommunication
+     \ingroup GICollectiveCommunication
    */
   template <class DataHandleImp, class DataTypeImp>
   class CommDataHandleIF

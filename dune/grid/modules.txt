@@ -3,7 +3,7 @@
    documentation within the Grid group. It works like this:
 
    @defgroup commands appear only in this file here which is
-   parsed before the other files (because it is mentioned first
+   parsed before the other files (because it is mentioned first 
    in the Doxyfile).
 
    Only @addtogroup is used in the code documentation.
@@ -20,7 +20,7 @@
       @ingroup GridInterface */
   /** @defgroup GIGridView GridView
       @ingroup GridInterface */
-  /** @defgroup GIEntity Entity
+  /** @defgroup GIEntity Entity 
       @ingroup GridInterface */
   /** @defgroup GIGeometry Geometry
       @ingroup GridInterface */
@@ -32,7 +32,7 @@
       @ingroup GridInterface */
   /** @defgroup IndexIdSets IndexSet and IdSet
 	  @ingroup GridInterface */
-  /** @defgroup GICommunication Communication
+  /** @defgroup GICollectiveCommunication CollectiveCommunication
       @ingroup GridInterface */
   /** @defgroup GIMiscellaneous Miscellaneous
 	  @ingroup GridInterface */
@@ -56,10 +56,10 @@
   /** \defgroup IdentityGrid IdentityGrid
     \ingroup GridImplementations */
 
-	/** @defgroup OneDGrid OneDGrid
+	/** @defgroup OneDGrid OneDGrid 
 		@ingroup GridImplementations */
 
-	/** @defgroup UGGrid UGGrid
+	/** @defgroup UGGrid UGGrid 
 		@ingroup GridImplementations */
 
 	/** @defgroup YaspGrid YaspGrid
@@ -80,12 +80,12 @@
         /** @defgroup DuneGridFormatParser The Dune Grid Format (DGF)
             @ingroup IO */
 
-        /** @defgroup DGFGridParameter DGF grid parameter for different grids
+        /** @defgroup DGFGridParameter DGF grid parameter for different grids 
             @ingroup DuneGridFormatParser */
 
         /** @defgroup VTK Visualization ToolKit (VTK)
             @ingroup IO */
-
+        
         /** @defgroup Gnuplot Gnuplot
             @ingroup IO */
 
@@ -99,7 +99,7 @@
      @defgroup GridPart Grid Parts
      @ingroup Grid
   */
-
+  
   /**
 	 @defgroup GridDevel Grid Developer API
 	 @ingroup Grid

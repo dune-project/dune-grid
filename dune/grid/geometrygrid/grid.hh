@@ -208,12 +208,7 @@ namespace Dune
     typedef typename Traits::ctype ctype;
 
     //! communicator with all other processes having some part of the grid
-    typedef typename Traits::Communication Communication;
-
-    /** \deprecated Use Communication instead! Will be removed after Dune 2.9.
-     */
-    [[deprecated("Use Communication instead!!")]]
-    typedef Communication CollectiveCommunication;
+    typedef typename Traits::CollectiveCommunication CollectiveCommunication;
 
     /** \} */
 
@@ -429,15 +424,15 @@ namespace Dune
     /** \name Parallel Data Distribution and Communication Methods
      *  \{ */
 
-    /** \brief obtain Communication object
+    /** \brief obtain CollectiveCommunication object
      *
-     *  The Communication object should be used to globally
+     *  The CollectiveCommunication object should be used to globally
      *  communicate information between all processes sharing this grid.
      *
-     *  \note The Communication object returned is identical to the
+     *  \note The CollectiveCommunication object returned is identical to the
      *        one returned by the host grid.
      */
-    const Communication &comm () const
+    const CollectiveCommunication &comm () const
     {
       return hostGrid().comm();
     }

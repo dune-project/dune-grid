@@ -42,7 +42,7 @@ namespace Dune {
 
       typedef ConformingConnectivityWriter<ConformingVolumeIteratorFactory<GV>
           > ConnectivityWriter;
-      typedef typename GV::Communication Communication;
+      typedef typename GV::CollectiveCommunication CollectiveCommunication;
 
       explicit ConformingVolumeIteratorFactory(const GV& gv_)
         : gv(gv_)
@@ -72,7 +72,7 @@ namespace Dune {
       ConnectivityWriter makeConnectivity() const {
         return ConnectivityWriter(*this);
       }
-      const Communication& comm() const {
+      const CollectiveCommunication& comm() const {
         return gv.comm();
       }
     };
@@ -95,7 +95,7 @@ namespace Dune {
       typedef CornerIterator PointIterator;
 
       typedef NonConformingConnectivityWriter<Cell> ConnectivityWriter;
-      typedef typename GV::Communication Communication;
+      typedef typename GV::CollectiveCommunication CollectiveCommunication;
 
       explicit NonConformingVolumeIteratorFactory(const GV& gv_)
         : gv(gv_)
@@ -121,7 +121,7 @@ namespace Dune {
       ConnectivityWriter makeConnectivity() const {
         return ConnectivityWriter();
       }
-      const Communication& comm() const {
+      const CollectiveCommunication& comm() const {
         return gv.comm();
       }
     };
