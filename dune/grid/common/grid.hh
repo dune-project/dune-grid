@@ -511,13 +511,14 @@ namespace Dune {
     using Communication_t = typename T::Communication;
     template <class T>
     using DeprecatedCollectiveCommunication_t = typename T::CollectiveCommunication;
+
   public:
     /*! \brief A type that is a model of Dune::Communication.
        It provides a portable way for communication on the set
        of processes used by the grid.
      */
     // if this line produces a warning then the Communication typedef is missing
-    // in the GridFamily
+    // in the GridFamily::Traits
     using Communication = detected_or_fallback_t< DeprecatedCollectiveCommunication_t,
                                                   Communication_t, typename GridFamily::Traits>;
 
