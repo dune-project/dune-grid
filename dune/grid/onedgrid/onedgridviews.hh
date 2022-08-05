@@ -48,6 +48,10 @@ namespace Dune
     /** \brief type of the communication */
     typedef typename Grid :: Traits :: Communication Communication;
 
+    /** \deprecated Use Communication instead! Will be removed after Dune 2.9. */
+    [[deprecated("Use Communication instead!")]]
+    typedef Communication CollectiveCommunication;
+
     template< int cd >
     struct Codim
     {
@@ -96,6 +100,10 @@ namespace Dune
 
     /** \brief type of the communication */
     typedef typename Traits :: Communication Communication;
+
+    /** \deprecated Use Communication instead! Will be removed after Dune 2.9. */
+    [[deprecated("Use Communication instead!")]]
+    typedef Communication CollectiveCommunication;
 
     /** \brief Codim Structure */
     template< int cd >
@@ -230,6 +238,10 @@ namespace Dune
     /** \brief type of the communication */
     typedef typename Grid :: Traits :: Communication Communication;
 
+    /** \deprecated Use Communication instead! Will be removed after Dune 2.9. */
+    [[deprecated("Use Communication instead!")]]
+    typedef Communication CollectiveCommunication;
+
     template< int cd >
     struct Codim
     {
@@ -277,6 +289,10 @@ namespace Dune
 
     /** \brief type of the communication */
     typedef typename Traits :: Communication Communication;
+
+    /** \deprecated Use Communication instead! Will be removed after Dune 2.9. */
+    [[deprecated("Use Communication instead!")]]
+    typedef Communication CollectiveCommunication;
 
     /** \brief Codim Structure */
     template< int cd >
