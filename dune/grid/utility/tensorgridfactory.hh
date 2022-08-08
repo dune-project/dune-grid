@@ -39,7 +39,7 @@ namespace Dune
   class TensorGridFactory
   {
   public:
-    typedef typename Grid::Traits::CollectiveCommunication Comm;
+    typedef typename Grid::Traits::Communication Comm;
     typedef typename Grid::ctype ctype;
     static const int dim = Grid::dimension;
 
@@ -303,7 +303,7 @@ namespace Dune
   class TensorGridFactoryCreator
   {
   public:
-    typedef typename Grid::Traits::CollectiveCommunication Comm;
+    typedef typename Grid::Traits::Communication Comm;
     typedef typename Grid::ctype ctype;
     static const int dim = Grid::dimension;
 
@@ -387,7 +387,7 @@ namespace Dune
   {
   public:
     typedef YaspGrid<dim, TensorProductCoordinates<ctype, dim> > Grid;
-    typedef typename Grid::CollectiveCommunication Comm;
+    typedef typename Grid::Communication Comm;
 
     TensorGridFactoryCreator(const TensorGridFactory<Grid>& factory) : _factory(factory) {}
 

@@ -5,6 +5,7 @@
 
 #include <typeinfo>
 
+#include <dune/common/std/type_traits.hh>
 #include <dune/common/iteratorrange.hh>
 #include <dune/common/parallel/future.hh>
 
@@ -88,8 +89,25 @@ namespace Dune
     /** \brief type of the intersection iterator */
     typedef typename Traits :: IntersectionIterator IntersectionIterator;
 
-    /** \brief type of the collective communication */
-    typedef typename Traits :: CollectiveCommunication CollectiveCommunication;
+  protected:
+    template <class T>
+    using Communication_t = typename T :: Communication;
+    template <class T>
+    using DeprecatedCollectiveCommunication_t = typename T :: CollectiveCommunication;
+
+  public:
+    /*! \brief A type that is a model of Dune::Communication.
+       It provides a portable way for communication on the set
+       of processes used by the grid.
+     */
+    // if this line produces a warning then the Communication typedef is missing
+    // in the Traits
+    using Communication = detected_or_fallback_t<DeprecatedCollectiveCommunication_t,
+                                                 Communication_t, Traits>;
+
+    /** \deprecated Use Communication instead! Will be removed after Dune 2.9.
+     */
+    using CollectiveCommunication [[deprecated("CollectiveCommunication is deprecated, use Communication instead!")]] = Communication;
 
     /** \brief A struct that collects all associated types of one implementation
                from the Traits class.
@@ -256,8 +274,8 @@ namespace Dune
       return impl().iend(entity);
     }
 
-    /** \brief obtain collective communication object */
-    const CollectiveCommunication &comm () const
+    /** \brief obtain communication object */
+    const Communication &comm () const
     {
       return impl().comm();
     }

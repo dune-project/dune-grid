@@ -99,7 +99,7 @@ namespace Dune
     typedef typename GridView::Grid::GlobalIdSet::IdType IdType;
     typedef typename GridView::Traits::template Codim<0>::Iterator Iterator;
 
-    typedef typename Grid::CollectiveCommunication CollectiveCommunication;
+    typedef typename Grid::Communication Communication;
 
     typedef std::map<IdType,Index> MapId2Index;
     typedef std::map<Index,Index>    IndexMap;
@@ -343,7 +343,7 @@ namespace Dune
       nGlobalEntity_ = gridview.comm().template sum<int>(nLocalEntity);
 
       /* communicate the number of locally owned entities to all other processes so that the respective offset
-       * can be calculated on the respective processor; we use the Dune mpi collective communication facility
+       * can be calculated on the respective processor; we use the Dune mpi communication facility
        * for this; first, we gather the number of locally owned entities on the root process and, second, we
        * broadcast the array to all processes where the respective offset can be calculated. */
 

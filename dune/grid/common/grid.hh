@@ -14,6 +14,7 @@
 // dune-common includes
 #include <dune/common/fvector.hh>
 #include <dune/common/typetraits.hh>
+#include <dune/common/typeutilities.hh>
 
 // dune-geometry includes
 #include <dune/geometry/type.hh>
@@ -183,7 +184,7 @@ namespace Dune {
 
          - Dune::GeometryType defines names for the reference elements.
 
-         - Dune::CollectiveCommunication defines an interface to global communication
+         - Dune::Communication defines an interface to global communication
          operations in a portable and transparent way. In particular also for sequential grids.
 
 
@@ -505,11 +506,25 @@ namespace Dune {
      */
     typedef typename GridFamily::Traits::LocalIdSet LocalIdSet;
 
-    /*! \brief A type that is a model of Dune::CollectiveCommunication.
-       It provides a portable way for collective communication on the set
+  protected:
+    template <class T>
+    using Communication_t = typename T::Communication;
+    template <class T>
+    using DeprecatedCollectiveCommunication_t = typename T::CollectiveCommunication;
+
+  public:
+    /*! \brief A type that is a model of Dune::Communication.
+       It provides a portable way for communication on the set
        of processes used by the grid.
      */
-    typedef typename GridFamily::Traits::CollectiveCommunication CollectiveCommunication;
+    // if this line produces a warning then the Communication typedef is missing
+    // in the GridFamily::Traits
+    using Communication = detected_or_fallback_t< DeprecatedCollectiveCommunication_t,
+                                                  Communication_t, typename GridFamily::Traits>;
+
+    /** \deprecated Use Communication instead! Will be removed at some point in the future.
+     */
+    using CollectiveCommunication [[deprecated("CollectiveCommunication is deprecated, use Communication instead!")]] = Communication;
 
     //! Define type used for coordinates in grid module
     typedef ct ctype;
@@ -715,8 +730,8 @@ namespace Dune {
     //@{
     //===========================================================
 
-    //! return const reference to a collective communication object. The return type is a model of Dune::CollectiveCommunication.
-    const CollectiveCommunication &comm () const
+    //! return const reference to a communication object. The return type is a model of Dune::Communication.
+    const Communication &comm () const
     {
       CHECK_INTERFACE_IMPLEMENTATION(asImp().comm());
       return asImp().comm();
@@ -955,7 +970,7 @@ namespace Dune {
      \tparam dimw Dimension of the world that the grid is embedded in
      \tparam GIDType Type used for global ids
      \tparam LIDType Type used for local ids
-     \tparam CCType CollectiveCommunication implementation class
+     \tparam CCType Communication implementation class
    */
   template <int dim, int dimw, class GridImp,
       template<int,int,class> class GeometryImp,
@@ -1050,8 +1065,12 @@ namespace Dune {
     /** \brief The type of the local id set. */
     typedef IdSet<const GridImp,LocalIdSetImp,LIDType> LocalIdSet;
 
-    /** \brief The type of the collective communication. */
-    typedef CCType CollectiveCommunication;
+    /** \brief The type of the communication. */
+    typedef CCType Communication;
+
+    /** \deprecated Use Communication instead! Will be removed at some point in the future. */
+    [[deprecated("Use Communication instead!")]]
+    typedef Communication CollectiveCommunication;
   };
 
   // Definition of capabilities for the interface class
