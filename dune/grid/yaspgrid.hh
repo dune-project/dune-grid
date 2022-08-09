@@ -171,6 +171,8 @@ namespace Dune {
   public:
     //! Type used for coordinates
     typedef typename Coordinates::ctype ctype;
+    [[deprecated("Use CommunicationType. Will be removed after release 2.9")]]
+    typedef YaspCommunication CollectiveCommunicationType;
     typedef YaspCommunication CommunicationType;
 
 #ifndef DOXYGEN
