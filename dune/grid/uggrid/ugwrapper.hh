@@ -1151,7 +1151,6 @@ namespace Dune {
                                                   left,             //  id of left subdomain
                                                   right,             //  id of right subdomain
                                                   index,         // Index of the segment
-                                                  UG_NAMESPACE ::NON_PERIODIC, // I don't know what this means
                                                   point,
                                                   alpha,
                                                   beta,
