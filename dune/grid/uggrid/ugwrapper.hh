@@ -123,6 +123,12 @@ namespace Dune {
         dddIf, dddIfDir, s, gather, scatter);
     }
 
+#if DUNE_UGGRID_DDD_InfoProcListRange
+    static auto DDD_InfoProcListRange(DDD::DDDContext& context, DDD_HEADER* hdr) noexcept
+    {
+      return UG_NAMESPACE::DDD_InfoProcListRange(context, hdr);
+    }
+#else
     static int *DDD_InfoProcList(
 #if DUNE_UGGRID_HAVE_DDDCONTEXT
                              DDD::DDDContext& context,
@@ -136,6 +142,7 @@ namespace Dune {
       return UG_NAMESPACE::DDD_InfoProcList(hdr);
 #endif
     }
+#endif
 
     static DDD_IF_DIR IF_FORWARD()
     {
