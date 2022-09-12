@@ -141,6 +141,28 @@ namespace Dune {
 
 #ifndef ModelP
       result.push_back(std::make_pair(0, InteriorEntity));
+#elif DUNE_UGGRID_DDD_InfoProcListRange
+      const auto range = UG_NS<dim>::DDD_InfoProcListRange(gridImp_->multigrid_->dddContext(), UG_NS<dim>::ParHdr(target_));
+      for (auto&& [rank, priority] : range)
+      {
+        if (priority == UG_NS<dim>::PrioHGhost || priority == UG_NS<dim>::PrioVGhost || priority == UG_NS<dim>::PrioVHGhost)
+          result.push_back(std::make_pair(rank, GhostEntity));
+        else
+        {
+          // The entity is not ghost.  If it is (UG)PrioBorder somewhere, it is (Dune)Border.
+          // Otherwise it is (Dune)Interior.
+          bool hasBorderCopy = false;
+          for (auto&& [rank2, priority2] : range) {
+            if (priority2 == UG_NS<dim>::PrioBorder)
+            {
+              hasBorderCopy = true;
+              break;
+            }
+          }
+
+          result.push_back(std::make_pair(rank, (hasBorderCopy) ? BorderEntity : InteriorEntity));
+        }
+      }
 #else
       int *plist = UG_NS<dim>::DDD_InfoProcList(gridImp_->multigrid_->dddContext(),
                                                 UG_NS<dim>::ParHdr(target_));
@@ -176,12 +198,21 @@ namespace Dune {
     // \todo Unify with the following method
     bool hasBorderCopy() const
     {
+#if DUNE_UGGRID_DDD_InfoProcListRange
+      for (auto&& [rank, priority] : UG_NS<dim>::DDD_InfoProcListRange(
+             gridImp_->multigrid_->dddContext(),
+             UG_NS<dim>::ParHdr(target_))) {
+        if (priority == UG_NS<dim>::PrioBorder)
+          return true;
+      }
+#else
       int  *plist = UG_NS<dim>::DDD_InfoProcList(
         gridImp_->multigrid_->dddContext(),
         UG_NS<dim>::ParHdr(target_));
       for (int i = 0; plist[i] >= 0; i += 2)
         if (plist[i + 1] == UG_NS<dim>::PrioBorder)
           return true;
+#endif
 
       return false;
     }
@@ -361,6 +392,14 @@ namespace Dune {
 
 #ifndef ModelP
       result.push_back(std::make_pair(0, InteriorEntity));
+#elif DUNE_UGGRID_DDD_InfoProcListRange
+      for (auto&& [rank, priority] : UG_NS<dim>::DDD_InfoProcListRange(
+             gridImp_->multigrid_->dddContext(), &target_->ge.ddd)) {
+        if (priority == UG_NS<dim>::PrioHGhost || priority == UG_NS<dim>::PrioVGhost || priority == UG_NS<dim>::PrioVHGhost)
+          result.push_back(std::make_pair(rank, GhostEntity));
+        else
+          result.push_back(std::make_pair(rank, InteriorEntity));
+      }
 #else
       int *plist = UG_NS<dim>::DDD_InfoProcList(gridImp_->multigrid_->dddContext(),
                                                 &target_->ge.ddd);
