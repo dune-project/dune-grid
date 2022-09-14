@@ -49,25 +49,44 @@ namespace Dune
       double opt=1E100;
       iTupel trydims;
 
-      optimize_dims(d-1,size,P,dims,trydims,opt);
+      dims.fill(-1);
+
+      int overlap = 1;
+      optimize_dims(d-1,size,P,dims,trydims,opt,overlap);
+      if (dims[0] == -1)
+        DUNE_THROW(Dune::GridError, "Failed to find a suitable partition");
     }
   private:
-    void optimize_dims (int i, const iTupel& size, int P, iTupel& dims, iTupel& trydims, double &opt ) const
+    void optimize_dims (int i, const iTupel& size, int P, iTupel& dims, iTupel& trydims, double &opt, int overlap ) const
     {
       if (i>0) // test all subdivisions recursively
       {
         for (int k=1; k<=P; k++)
-          if (P%k==0)
+          if (
+            P%k==0 // k devides P
+            and (
+              k == 1 // no neighbors
+              or
+              size[i] / k >= 2*overlap // size sufficient for overlap
+              )
+            )
           {
             // P divisible by k
             trydims[i] = k;
-            optimize_dims(i-1,size,P/k,dims,trydims,opt);
+            optimize_dims(i-1,size,P/k,dims,trydims,opt,overlap);
           }
       }
       else
       {
         // found a possible combination
-        trydims[0] = P;
+        if (
+          P == 1 // no neighbors
+          or
+          size[0] / P >= 2*overlap // size sufficient for overlap
+          )
+          trydims[0] = P;
+        else
+          return;
 
         // check for optimality
         double m = -1.0;
