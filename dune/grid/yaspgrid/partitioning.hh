@@ -17,16 +17,37 @@
 namespace Dune
 {
 
+  namespace Yasp
+  {
+
+    /** \brief a base class for the yaspgrid partitioning strategy
+     * The name might be irritating. It will probably change to YaspPartitionerBase
+     * in a 3.0 release.
+     */
+    template<int d>
+    class Partitioning
+    {
+    public:
+      typedef std::array<int, d> iTupel;
+      virtual ~Partitioning() {}
+      virtual void partition(const iTupel&, int, iTupel&, int) const = 0;
+    };
+
+  }
+
   /** \brief a base class for the yaspgrid partitioning strategy
    * The name might be irritating. It will probably change to YaspPartitionerBase
    * in a 3.0 release.
    */
   template<int d>
-  class YLoadBalance
+  class YLoadBalance : public Yasp::Partitioning<d>
   {
   public:
     typedef std::array<int, d> iTupel;
     virtual ~YLoadBalance() {}
+    void partition (const iTupel& size, int P, iTupel& dims, int overlap) const {
+      this->loadbalance(size,P,dims);
+    }
     virtual void loadbalance(const iTupel&, int, iTupel&) const = 0;
   };
 
@@ -44,14 +65,19 @@ namespace Dune
      * \param [in] size Number of elements in each coordinate direction, for the entire grid
      * \param [in] P Number of processors
      */
-    virtual void loadbalance (const iTupel& size, int P, iTupel& dims) const
+    void loadbalance (const iTupel& size, int P, iTupel& dims) const final
+    {
+      int overlap = 1;
+      this->partition(size,P,dims,overlap);
+    }
+    void partition (const iTupel& size, int P, iTupel& dims, int overlap) const final
     {
       double opt=1E100;
       iTupel trydims;
 
+      trydims.fill(-1);
       dims.fill(-1);
 
-      int overlap = 1;
       optimize_dims(d-1,size,P,dims,trydims,opt,overlap);
       if (dims[0] == -1)
         DUNE_THROW(Dune::GridError, "Failed to find a suitable partition");
