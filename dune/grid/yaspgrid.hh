@@ -308,6 +308,7 @@ namespace Dune {
     }
 
     // static method to create the default load balance strategy
+    [[deprecated("use defaultPartitioner")]]
     static const YLoadBalanceDefault<dim>* defaultLoadbalancer()
     {
       static YLoadBalanceDefault<dim> lb;
@@ -317,7 +318,7 @@ namespace Dune {
     // static method to create the default partitioning strategy
     static const Yasp::Partitioning<dim>* defaultPartitioner()
     {
-      static YLoadBalanceDefault<dim> lb;
+      static Yasp::DefaultPartitioning<dim> lb;
       return & lb;
     }
 
