@@ -13,6 +13,7 @@
 
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/float_cmp.hh>
+#include <dune/common/stdstreams.hh>
 #include <dune/geometry/referenceelements.hh>
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/mcmgmapper.hh>
