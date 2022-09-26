@@ -1,4 +1,7 @@
 #!/usr/bin/perl -w
+# SPDX-FileCopyrightInfo: Copyright (C) DUNE Project contributors, see file LICENSE.md in module root
+# SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
+
 
 # TODO: Detect location of UG from the DUNE build system
 $UGROOT = "/home/sander/uginst";

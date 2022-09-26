@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (C) DUNE Project contributors, see file LICENSE.md in module root
+# SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
+
 dune_python_add_test(NAME pytest_gf1
                      SCRIPT test_gf1.py
                      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

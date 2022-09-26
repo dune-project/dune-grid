@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) DUNE Project contributors, see file LICENSE.md in module root
+// SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 // -*- tab-width: 4; indent-tabs-mode: nil -*-
 
 // Based on: Boilerplate tutorial poisson_uniform.cc

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) DUNE Project contributors, see file COPYING in module root
+// SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 /**
  * \page recipe-iterate-over-grid Iterating over a grid
  *

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (C) DUNE Project contributors, see file LICENSE.md in module root
+# SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
+
 set(GRIDS
   grid-1-1.amc
   grid-1-2.amc

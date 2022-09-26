@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (C) DUNE Project contributors, see file LICENSE.md in module root
+# SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
+
 # TODO when porting this file to dune_add_test, the GMSH test needed to be adapted.
 # It previously relied on the flags added to the executable to switch different grid types.
 # I have adapted it quickly by adding a preprocesor variable. This could be and should
