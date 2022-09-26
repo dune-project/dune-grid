@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright © DUNE Project contributors, see file LICENSE.md in module root
+// SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 // -*- mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=2 sw=2 sts=2:
 #ifndef DUNE_POLYHEDRON_HH
