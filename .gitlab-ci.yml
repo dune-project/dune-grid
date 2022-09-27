@@ -55,3 +55,12 @@ ubuntu:18.04 clang-5-17:
     DUNECI_TOOLCHAIN: clang-5-17
     DUNECI_CMAKE_FLAGS: "-DDUNE_ENABLE_PYTHONBINDINGS=OFF"
   tags: [duneci]
+
+reuse:
+  image:
+    name: docker.io/fsfe/reuse:latest
+    entrypoint: [""]
+  tags: [duneci]
+  before_script: ""
+  script:
+    - reuse lint
