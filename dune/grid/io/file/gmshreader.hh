@@ -325,13 +325,16 @@ namespace Dune
     //   readfile(file, 1, "%s\n", buf);
     // to skip the rest of of the line -- that will only skip the next
     // whitespace-separated word!  Use skipline() instead.
-    void readfile(FILE * file, int cnt, const char * format,
-                  void* t1, void* t2 = 0, void* t3 = 0, void* t4 = 0,
-                  void* t5 = 0, void* t6 = 0, void* t7 = 0, void* t8 = 0,
-                  void* t9 = 0, void* t10 = 0)
+    void readfile(FILE * file, int cnt, const char * format, ...)
+#ifdef __GNUC__
+      __attribute__((format(scanf, 4, 5)))
+#endif
     {
+      std::va_list ap;
+      va_start(ap, format);
       off_t pos = ftello(file);
-      int c = fscanf(file, format, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10);
+      int c = std::vfscanf(file, format, ap);
+      va_end(ap);
       if (c != cnt)
         DUNE_THROW(Dune::IOError, "Error parsing " << fileName << " "
                    "file pos " << pos
