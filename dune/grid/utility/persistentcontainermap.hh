@@ -85,7 +85,7 @@ namespace Dune
     void resize ( const Value &value = Value() )
     {
       Hybrid::forEach( std::make_index_sequence< Grid::dimension+1 >{},
-        [ & ]( auto i ){ if( i == this->codimension() ) this->template resize< i >( value ); } );
+        [ & ]( auto i ){ if( int(i) == this->codimension() ) this->template resize< i >( value ); } );
     }
 
     void shrinkToFit () {}
