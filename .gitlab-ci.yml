@@ -57,6 +57,7 @@ ubuntu:18.04 clang-5-17:
   tags: [duneci]
 
 reuse:
+  stage: .pre
   image:
     name: docker.io/fsfe/reuse:latest
     entrypoint: [""]
