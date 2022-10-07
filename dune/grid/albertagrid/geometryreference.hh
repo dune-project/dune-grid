@@ -51,11 +51,13 @@ namespace Dune
     using JacobianDefault = decltype(transpose(std::declval<JacobianTransposed>()));
 
 
+    template <class I = Implementation>
     [[deprecated("Geometry implementatons are required to provide a jacobian(local) method. The default implementation is deprecated and will be removed after release 2.9")]]
     auto deprecatedDefaultJacobian ( const LocalCoordinate& local ) const {
       return transpose(jacobianTransposed(local));
     }
 
+    template <class I = Implementation>
     [[deprecated("Geometry implementatons are required to provide a jacobianInverse(local) method. The default implementation is deprecated and will be removed after release 2.9")]]
     auto deprecatedDefaultJacobianInverse ( const LocalCoordinate& local ) const {
       return transpose(jacobianInverseTransposed(local));
