@@ -271,10 +271,6 @@ namespace Dune
     {}
 
 
-    /** \brief destructor
-     */
-    ~GeometryGrid ()
-    {}
 
     /** \} */
 
