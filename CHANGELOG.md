@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: Copyright © DUNE Project contributors, see file LICENSE.md in module root
+SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
+-->
+
 # Master (will become release 2.9)
 
 - The `Geometry` interface was extended by methods `jacobian(local)` and `jacobianInverse(local)`

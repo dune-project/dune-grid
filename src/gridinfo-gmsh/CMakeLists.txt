@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright © DUNE Project contributors, see file LICENSE.md in module root
+# SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
+
 if(ALBERTA_2D_LIB_FOUND AND ENABLE_GRID_EXTRA_UTILS)
   add_executable(dune-gridinfo-gmsh-alberta-2d gridinfo-gmsh-alberta-2d.cc)
   target_link_libraries(dune-gridinfo-gmsh-alberta-2d PRIVATE dunegrid)

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightInfo: Copyright © DUNE Project contributors, see file LICENSE.md in module root
+// SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 cl1 = 1;
 Point(1) = {0, 0, 0, cl1};
 Point(2) = {1, 0, 0, cl1};
