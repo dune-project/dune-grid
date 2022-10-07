@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (C) DUNE Project contributors, see file LICENSE.md in module root
+# SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
+
 import pickle
 import dune.generator # needed to set path to 'dune.generated' - could be moved to 'import dune'
 [a,string,otherHGrid,value] = pickle.load(open("dumpA","rb"))
