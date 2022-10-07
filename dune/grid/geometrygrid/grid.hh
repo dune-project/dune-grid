@@ -234,7 +234,7 @@ namespace Dune
     GeometryGrid ( HostGrid &hostGrid, CoordFunction &coordFunction, const Allocator &allocator = Allocator() )
       : hostGrid_( Dune::stackobject_to_shared_ptr(hostGrid) ),
         coordFunction_( Dune::stackobject_to_shared_ptr(coordFunction) ),
-        levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
+        levelIndexSets_( hostGrid_->maxLevel()+1 ),
         storageAllocator_( allocator )
     {}
 
@@ -250,7 +250,7 @@ namespace Dune
     GeometryGrid ( std::shared_ptr<HostGrid> hostGrid, std::shared_ptr<CoordFunction> coordFunction, const Allocator &allocator = Allocator() )
       : hostGrid_( hostGrid ),
         coordFunction_( coordFunction ),
-        levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
+        levelIndexSets_( hostGrid_->maxLevel()+1 ),
         storageAllocator_( allocator )
     {}
 
@@ -266,21 +266,11 @@ namespace Dune
     GeometryGrid ( std::shared_ptr<HostGrid> hostGrid, const Allocator &allocator = Allocator() )
       : hostGrid_( hostGrid ),
         coordFunction_( std::make_shared<CoordFunction>( this->hostGrid() ) ),
-        levelIndexSets_( hostGrid_->maxLevel()+1, nullptr, allocator ),
+        levelIndexSets_( hostGrid_->maxLevel()+1 ),
         storageAllocator_( allocator )
     {}
 
 
-    /** \brief destructor
-     */
-    ~GeometryGrid ()
-    {
-      for( unsigned int i = 0; i < levelIndexSets_.size(); ++i )
-      {
-        if( levelIndexSets_[ i ] )
-          delete( levelIndexSets_[ i ] );
-      }
-    }
 
     /** \} */
 
@@ -380,11 +370,11 @@ namespace Dune
                                                                       << " requested." );
       }
 
-      LevelIndexSet *&levelIndexSet = levelIndexSets_[ level ];
-      if( !levelIndexSet )
-        levelIndexSet = new LevelIndexSet( hostGrid().levelIndexSet( level ) );
-      assert( levelIndexSet );
-      return *levelIndexSet;
+      auto& levelIndexSetPtr = levelIndexSets_[ level ];
+      if( !levelIndexSetPtr )
+        levelIndexSetPtr = std::make_unique<LevelIndexSet>( hostGrid().levelIndexSet( level ) );
+      assert( levelIndexSetPtr );
+      return *levelIndexSetPtr;
     }
 
     const LeafIndexSet &leafIndexSet () const
@@ -569,15 +559,7 @@ namespace Dune
       // adapt the coordinate function
       GeoGrid::AdaptCoordFunction< typename CoordFunction::Interface >::adapt( coordFunction() );
 
-      const int newNumLevels = maxLevel()+1;
-      const int oldNumLevels = levelIndexSets_.size();
-
-      for( int i = newNumLevels; i < oldNumLevels; ++i )
-      {
-        if( levelIndexSets_[ i ] )
-          delete levelIndexSets_[ i ];
-      }
-      levelIndexSets_.resize( newNumLevels, nullptr );
+      levelIndexSets_.resize( maxLevel()+1 );
     }
 
 
@@ -610,7 +592,7 @@ namespace Dune
   private:
     std::shared_ptr<HostGrid> const hostGrid_;
     std::shared_ptr<CoordFunction> coordFunction_;
-    mutable std::vector< LevelIndexSet *, typename std::allocator_traits<Allocator>::template rebind_alloc< LevelIndexSet * > > levelIndexSets_;
+    mutable std::vector<std::unique_ptr<LevelIndexSet>> levelIndexSets_;
     mutable LeafIndexSet leafIndexSet_;
     mutable GlobalIdSet globalIdSet_;
     mutable LocalIdSet localIdSet_;
