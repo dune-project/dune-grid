@@ -63,10 +63,10 @@ void run_test (const Dune::Yasp::Partitioning<d>& partitioner, const std::array<
              d == 2 ? size[0]*size[1] :
              d == 3 ? size[0]*size[1]*size[2] : 0;
   int maxO = d == 1 ? size[0]/2 :
-             d == 2 ? std::min({size[0], size[1]})/2 :
-             d == 3 ? std::min({size[0], size[1], size[2]})/2 : 0;
+             d == 2 ? std::max({size[0], size[1]})/2 :
+             d == 3 ? std::max({size[0], size[1], size[2]})/2 : 0;
 
-  for (int o = 0; o < maxO; ++o) {
+  for (int o = 0; o <= maxO; ++o) {
     for (int p = 1; p <= maxP; ++p) {
       std::array<int,d> dims;
       bool failed = false;
