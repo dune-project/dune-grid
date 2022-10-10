@@ -56,8 +56,8 @@ void old_partition (const std::array<int,d>& size, int P, std::array<int,d>& dim
 }
 
 
-template <std::size_t d, class Partitioner>
-void test2 (const Partitioner& partitioner, const std::array<int,d>& size)
+template <std::size_t d>
+void run_test (const Dune::Yasp::Partitioning<d>& partitioner, const std::array<int,d>& size)
 {
   int maxP = d == 1 ? size[0] :
              d == 2 ? size[0]*size[1] :
@@ -98,16 +98,16 @@ void test (const Partitioner& partitioner)
   int maxS = 4;
   if constexpr (d == 1) {
     for (int s0 = 1; s0 <= maxS; ++s0)
-      test2<1>(partitioner,{s0});
+      run_test<1>(partitioner,{s0});
   } else if constexpr (d == 2) {
     for (int s0 = 1; s0 <= maxS; ++s0)
       for (int s1 = 1; s1 <= maxS; ++s1)
-        test2<2>(partitioner,{s0,s1});
+        run_test<2>(partitioner,{s0,s1});
   } else if constexpr (d == 3) {
     for (int s0 = 1; s0 <= maxS; ++s0)
       for (int s1 = 1; s1 <= maxS; ++s1)
         for (int s2 = 1; s2 <= maxS; ++s2)
-          test2<3>(partitioner,{s0,s1,s2});
+          run_test<3>(partitioner,{s0,s1,s2});
   }
 }
 
