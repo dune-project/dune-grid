@@ -6,6 +6,7 @@ from .map import MultipleCodimMultipleGeomTypeMapper as Mapper
 
 def cartesianDomain(lower, upper, division, **parameters):
     return CartesianDomain(lower,upper,division,**parameters)
+
 def structuredGrid(lower,upper,division,**parameters):
     from ._grids import yaspGrid
     domain = cartesianDomain(lower, upper, division, **parameters)
