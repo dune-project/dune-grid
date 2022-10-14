@@ -42,6 +42,9 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 - The `dune-uggrid` module does not set the preprocessor flag `HAVE_UG` anymore.
   Use `HAVE_DUNE_UGGRID` instead.
 
+- The `YLoadBalance` interface is deprecated, as well the
+  implementations. Users should switch to `Yasp::Partitioning`.
+
 # Release 2.8
 
 - Specialization of `StructuredGridFactory` for `AlbertaGrid` is added to address the special

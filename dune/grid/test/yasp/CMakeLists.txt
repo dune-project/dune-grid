@@ -21,6 +21,8 @@ dune_add_test(NAME test-yaspgrid-backuprestore-tensor
 
 dune_add_test(SOURCES test-yaspgrid-entityshifttable.cc)
 
+dune_add_test(SOURCES test-yaspgrid-partitioner.cc)
+
 dune_add_test(NAME test-yaspgrid-tensorgridfactory
               SOURCES test-yaspgrid-tensorgridfactory.cc
               MPI_RANKS 1 2

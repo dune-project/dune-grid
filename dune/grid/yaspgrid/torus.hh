@@ -68,11 +68,11 @@ namespace Dune
     {}
 
     //! make partitioner from communicator and coarse mesh size
-    Torus (Communication comm, int tag, iTupel size, const YLoadBalance<d>* lb)
+    Torus (Communication comm, int tag, iTupel size, int overlap, const Yasp::Partitioning<d>* partitioner)
       : _comm(comm), _tag(tag)
     {
       // determine dimensions
-      lb->loadbalance(size, _comm.size(), _dims);
+      partitioner->partition(size, _comm.size(), _dims, overlap);
 
       // compute increments for lexicographic ordering
       int inc = 1;
