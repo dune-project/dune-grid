@@ -308,9 +308,17 @@ namespace Dune {
     }
 
     // static method to create the default load balance strategy
+    [[deprecated("use defaultPartitioner")]]
     static const YLoadBalanceDefault<dim>* defaultLoadbalancer()
     {
       static YLoadBalanceDefault<dim> lb;
+      return & lb;
+    }
+
+    // static method to create the default partitioning strategy
+    static const Yasp::Partitioning<dim>* defaultPartitioner()
+    {
+      static Yasp::DefaultPartitioning<dim> lb;
       return & lb;
     }
 
@@ -725,13 +733,13 @@ namespace Dune {
      *  @param periodic tells if direction is periodic or not
      *  @param overlap size of overlap on coarsest grid (same in all directions)
      *  @param comm the communication object for this grid. An MPI communicator can be given here.
-     *  @param lb pointer to an overloaded YLoadBalance instance
+     *  @param partitioner pointer to an overloaded Yasp::Partitioning instance
      */
     YaspGrid (const Coordinates& coordinates,
               std::bitset<dim> periodic = std::bitset<dim>(0ULL),
               int overlap = 1,
               Communication comm = Communication(),
-              const YLoadBalance<dim>* lb = defaultLoadbalancer())
+              const Yasp::Partitioning<dim>* partitioner = defaultPartitioner())
       : ccobj(comm)
       , leafIndexSet_(*this)
       , _periodic(periodic)
@@ -747,7 +755,7 @@ namespace Dune {
         _coarseSize[i] = coordinates.size(i);
 
       // Construct the communication torus
-      _torus = decltype(_torus)(comm,tag,_coarseSize,lb);
+      _torus = decltype(_torus)(comm,tag,_coarseSize,overlap,partitioner);
 
       iTupel o;
       std::fill(o.begin(), o.end(), 0);
@@ -896,7 +904,7 @@ namespace Dune {
      *  @param periodic tells if direction is periodic or not
      *  @param overlap size of overlap on coarsest grid (same in all directions)
      *  @param comm the communication object for this grid. An MPI communicator can be given here.
-     *  @param lb pointer to an overloaded YLoadBalance instance
+     *  @param partitioner pointer to an overloaded Yasp::Partitioning instance
      */
     template<class C = Coordinates,
              typename std::enable_if_t< std::is_same_v<C, EquidistantCoordinates<ctype,dim> >, int> = 0>
@@ -905,8 +913,8 @@ namespace Dune {
               std::bitset<std::size_t{dim}> periodic = std::bitset<std::size_t{dim}>{0ULL},
               int overlap = 1,
               Communication comm = Communication(),
-              const YLoadBalance<dim>* lb = defaultLoadbalancer())
-      : ccobj(comm), _torus(comm,tag,s,lb), leafIndexSet_(*this),
+              const Yasp::Partitioning<dim>* partitioner = defaultPartitioner())
+      : ccobj(comm), _torus(comm,tag,s,overlap,partitioner), leafIndexSet_(*this),
         _L(L), _periodic(periodic), _coarseSize(s), _overlap(overlap),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
@@ -924,7 +932,7 @@ namespace Dune {
       for (int i=0; i<dim; i++)
       {
         // find out whether the grid is too small to
-        int toosmall = (s_interior[i] / 2 <= overlap) &&    // interior is very small
+        int toosmall = (s_interior[i] < 2*overlap) &&    // interior is very small
             (periodic[i] || (s_interior[i] != s[i]));    // there is an overlap in that direction
         // communicate the result to all those processes to have all processors error out if one process failed.
         int global = 0;
@@ -966,7 +974,7 @@ namespace Dune {
      *  @param periodic tells if direction is periodic or not
      *  @param overlap size of overlap on coarsest grid (same in all directions)
      *  @param comm the communication object for this grid. An MPI communicator can be given here.
-     *  @param lb pointer to an overloaded YLoadBalance instance
+     *  @param partitioner pointer to an overloaded Yasp::Partitioning instance
      */
     template<class C = Coordinates,
              typename std::enable_if_t< std::is_same_v<C, EquidistantOffsetCoordinates<ctype,dim> >, int> = 0>
@@ -976,8 +984,8 @@ namespace Dune {
               std::bitset<std::size_t{dim}> periodic = std::bitset<std::size_t{dim}>(0ULL),
               int overlap = 1,
               Communication comm = Communication(),
-              const YLoadBalance<dim>* lb = defaultLoadbalancer())
-      : ccobj(comm), _torus(comm,tag,s,lb), leafIndexSet_(*this),
+              const Yasp::Partitioning<dim>* partitioner = defaultPartitioner())
+      : ccobj(comm), _torus(comm,tag,s,overlap,partitioner), leafIndexSet_(*this),
         _L(upperright - lowerleft),
         _periodic(periodic), _coarseSize(s), _overlap(overlap),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
@@ -996,7 +1004,7 @@ namespace Dune {
       for (int i=0; i<dim; i++)
       {
         // find out whether the grid is too small to
-        int toosmall = (s_interior[i] / 2 <= overlap) &&    // interior is very small
+        int toosmall = (s_interior[i] < 2*overlap) &&    // interior is very small
             (periodic[i] || (s_interior[i] != s[i]));    // there is an overlap in that direction
         // communicate the result to all those processes to have all processors error out if one process failed.
         int global = 0;
@@ -1035,7 +1043,7 @@ namespace Dune {
      *  @param periodic tells if direction is periodic or not
      *  @param overlap size of overlap on coarsest grid (same in all directions)
      *  @param comm the communication object for this grid. An MPI communicator can be given here.
-     *  @param lb pointer to an overloaded YLoadBalance instance
+     *  @param partitioner pointer to an overloaded Yasp::Partitioning instance
      */
     template<class C = Coordinates,
              typename std::enable_if_t< std::is_same_v<C, TensorProductCoordinates<ctype,dim> >, int> = 0>
@@ -1043,8 +1051,8 @@ namespace Dune {
               std::bitset<std::size_t{dim}> periodic = std::bitset<std::size_t{dim}>(0ULL),
               int overlap = 1,
               Communication comm = Communication(),
-              const YLoadBalance<dim>* lb = defaultLoadbalancer())
-      : ccobj(comm), _torus(comm,tag,Dune::Yasp::sizeArray<dim>(coords),lb),
+              const Yasp::Partitioning<dim>* partitioner = defaultPartitioner())
+      : ccobj(comm), _torus(comm,tag,Dune::Yasp::sizeArray<dim>(coords),overlap,partitioner),
         leafIndexSet_(*this), _periodic(periodic), _overlap(overlap),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {
@@ -1071,7 +1079,7 @@ namespace Dune {
       for (int i=0; i<dim; i++)
       {
         // find out whether the grid is too small to
-        int toosmall = (s_interior[i] / 2 <= overlap) &&               // interior is very small
+        int toosmall = (s_interior[i] < 2*overlap) &&               // interior is very small
              (periodic[i] || (s_interior[i] != _coarseSize[i]));    // there is an overlap in that direction
         // communicate the result to all those processes to have all processors error out if one process failed.
         int global = 0;
@@ -1145,7 +1153,7 @@ namespace Dune {
      *  @param periodic tells if direction is periodic or not
      *  @param overlap size of overlap on coarsest grid (same in all directions)
      *  @param coarseSize the coarse size of the global grid
-     *  @param lb pointer to an overloaded YLoadBalance instance
+     *  @param partitioner pointer to an overloaded Yasp::Partitioning instance
      *
      *  @warning The construction of overlapping coordinate ranges is
      *           an error-prone procedure. For this reason, it is kept private.
@@ -1157,8 +1165,8 @@ namespace Dune {
               int overlap,
               Communication comm,
               std::array<int,dim> coarseSize,
-              const YLoadBalance<dim>* lb = defaultLoadbalancer())
-      : ccobj(comm), _torus(comm,tag,coarseSize,lb), leafIndexSet_(*this),
+              const Yasp::Partitioning<dim>* partitioner = defaultPartitioner())
+      : ccobj(comm), _torus(comm,tag,coarseSize,overlap,partitioner), leafIndexSet_(*this),
         _periodic(periodic), _coarseSize(coarseSize), _overlap(overlap),
         keep_ovlp(true), adaptRefCount(0), adaptActive(false)
     {

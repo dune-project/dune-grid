@@ -201,7 +201,7 @@ namespace Dune
       for (int i=0; i<dim; i++)
         length[i] *= coarseSize[i];
 
-      YaspFixedSizePartitioner<dim> lb(torus_dims);
+      Yasp::FixedSizePartitioning<dim> lb(torus_dims);
 
       Grid* grid = MaybeHaveOrigin<Coordinates>::createGrid(origin, length, coarseSize, periodic, overlap, comm, &lb);
 
@@ -343,7 +343,7 @@ namespace Dune
         }
       }
 
-      YaspFixedSizePartitioner<dim> lb(torus_dims);
+      Yasp::FixedSizePartitioning<dim> lb(torus_dims);
       Grid* grid = new Grid(coords, periodic, overlap, comm, coarseSize, &lb);
 
       for (int i=0; i<refinement; ++i)
