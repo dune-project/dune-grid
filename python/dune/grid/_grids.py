@@ -5,14 +5,43 @@ from dune.common.checkconfiguration import assertCMakeHave, ConfigurationError
 from dune.typeregistry import generateTypeName
 
 class CartesianDomain(tuple):
-    def __new__ (cls, lower,upper,division,**parameters):
+    @staticmethod
+    def bndDomain(lower, upper):
+        bnd = ""
+        lower = list(lower)
+        upper = list(upper)
+        dim = len(lower)
+        for i in range(dim):
+            l = lower.copy()
+            u = upper.copy()
+            l[i] -= 1e-5
+            u[i] = lower[i]
+
+            bnd += str(2*i+1) + " " + " ".join(str(x) for x in l) +\
+                                " " + " ".join(str(x) for x in u) + "\n"
+            l = lower.copy()
+            u = upper.copy()
+            l[i] = upper[i]
+            u[i] = upper[i] + 1e-5
+            bnd += str(2*i+2) + " " + " ".join(str(x) for x in l) +\
+                                " " + " ".join(str(x) for x in u) + "\n"
+        return bnd
+
+    def __new__ (cls, lower,upper,division,boundary=True,**parameters):
         from ._grid import reader
+
         dgf = "DGF\n"
         dgf += "INTERVAL\n"
         dgf += " ".join([str(x) for x in lower]) + "\n"
         dgf += " ".join([str(x) for x in upper]) + "\n"
         dgf += " ".join([str(x) for x in division]) + "\n"
         dgf += "#\n"
+
+        if boundary:
+            dgf += "BOUNDARYDOMAIN\n"
+            dgf += CartesianDomain.bndDomain(lower,upper)
+            dgf += "#\n"
+
         dgf += "GRIDPARAMETER\n"
         foundRefEdge = False
         for key in parameters:
@@ -46,12 +75,13 @@ class CartesianDomain(tuple):
             pass
         return super(CartesianDomain, cls).__new__(cls,
                        tuple( (reader.dgfString, dgf) ) )
-    def __init__(self,lower,upper,division,**parameters):
+    def __init__(self,lower,upper,division,boundary=True,**parameters):
         self.dimgrid = len(lower)
         self.lower = lower
         self.upper = upper
         self.division = division
         self.param = parameters
+        self.boundaryWasSet = boundary
     def dimgrid(self):
         return self.dimgrid
 
