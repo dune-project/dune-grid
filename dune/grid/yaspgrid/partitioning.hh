@@ -229,7 +229,7 @@ DUNE_NO_DEPRECATED_BEGIN
    * \deprecated use FixedSizePartitioning
    */
   template<int d>
-  class YaspFixedSizePartitioner : public YLoadBalance<d>
+  class YaspFixedSizePartitioner : public YLoadBalanceForward<d>
   {
   public:
     typedef std::array<int, d> iTupel;
