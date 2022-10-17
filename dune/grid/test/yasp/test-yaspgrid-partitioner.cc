@@ -121,5 +121,34 @@ int main (int argc , char **argv)
   Dune::Yasp::DefaultPartitioning<2> p2; test<2>(p2);
   Dune::Yasp::DefaultPartitioning<3> p3; test<3>(p3);
 
+  // Test construction of partitioners
+  {
+    Dune::Yasp::PowerDPartitioning<1> ylbp1;
+    Dune::Yasp::PowerDPartitioning<2> ylbp2;
+    Dune::Yasp::PowerDPartitioning<3> ylbp3;
+
+    Dune::Yasp::FixedSizePartitioning<1> yfsp1(std::array<int,1>{1});
+    Dune::Yasp::FixedSizePartitioning<2> yfsp2(std::array<int,2>{1,1});
+    Dune::Yasp::FixedSizePartitioning<3> yfsp3(std::array<int,3>{1,1,1});
+  }
+
+DUNE_NO_DEPRECATED_BEGIN
+  // deprecated partitioners
+  {
+    Dune::YLoadBalanceDefault<1> ylbd1;
+    Dune::YLoadBalanceDefault<2> ylbd2;
+    Dune::YLoadBalanceDefault<3> ylbd3;
+
+    Dune::YLoadBalancePowerD<1> ylbp1;
+    Dune::YLoadBalancePowerD<2> ylbp2;
+    Dune::YLoadBalancePowerD<3> ylbp3;
+
+    Dune::YaspFixedSizePartitioner<1> yfsp1(std::array<int,1>{1});
+    Dune::YaspFixedSizePartitioner<2> yfsp2(std::array<int,2>{1,1});
+    Dune::YaspFixedSizePartitioner<3> yfsp3(std::array<int,3>{1,1,1});
+  }
+DUNE_NO_DEPRECATED_END
+
+
   return 0;
 }
