@@ -809,6 +809,14 @@ namespace Dune {
       static const bool v = false;
     };
 
+    /** \brief UGGrid is thread-safe for grid views
+       \ingroup UGGrid
+     */
+    template<int dim>
+    struct viewThreadSafe< UGGrid<dim> > {
+      static const bool v = true;
+    };
+
   }
 
 } // namespace Dune
