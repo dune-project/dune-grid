@@ -2,5 +2,5 @@
 # SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 
 [build-system]
-requires = ['dune-geometry>=2.8.0.dev0', 'numpy', 'pip', 'setuptools', 'wheel', 'scikit-build', 'cmake', 'ninja', 'requests']
+requires = ['dune-geometry@git+https://gitlab.dune-project.org/core/dune-geometry.git', 'numpy', 'pip', 'setuptools', 'wheel', 'scikit-build', 'cmake', 'ninja', 'requests']
 build-backend = 'setuptools.build_meta'
