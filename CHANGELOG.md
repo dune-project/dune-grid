@@ -3,7 +3,7 @@ SPDX-FileCopyrightText: Copyright (C) DUNE Project contributors, see file LICENS
 SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 -->
 
-# Master (will become release 2.9)
+# Release 2.9
 
 - The `Geometry` interface was extended by methods `jacobian(local)` and `jacobianInverse(local)`
   and corresponding typedefs `Jacobian` and `JacobianInverse`. All grid implementations need to
