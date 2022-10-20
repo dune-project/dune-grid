@@ -6,25 +6,28 @@ from dune.typeregistry import generateTypeName
 
 class CartesianDomain(tuple):
     @staticmethod
-    def bndDomain(lower, upper):
+    def bndDomain(lower, upper, division, tol = 1e-4 ):
         bnd = ""
         lower = list(lower)
         upper = list(upper)
         dim = len(lower)
         for i in range(dim):
+            # compute epsilon
+            eps = tol * abs(upper[i] - lower[i]) / division[i]
+
             l = lower.copy()
             u = upper.copy()
-            l[i] -= 1e-5
+            l[i] -= 1e2 * eps
             u[i] = lower[i]
 
-            bnd += str(2*i+1) + " " + " ".join(str(x) for x in l) +\
-                                " " + " ".join(str(x) for x in u) + "\n"
+            bnd += str(2*i+1) + " " + " ".join(str((x-eps)) for x in l) +\
+                                " " + " ".join(str((x+eps)) for x in u) + "\n"
             l = lower.copy()
             u = upper.copy()
             l[i] = upper[i]
-            u[i] = upper[i] + 1e-5
-            bnd += str(2*i+2) + " " + " ".join(str(x) for x in l) +\
-                                " " + " ".join(str(x) for x in u) + "\n"
+            u[i] = upper[i] + 1e2 * eps
+            bnd += str(2*i+2) + " " + " ".join(str(x-eps) for x in l) +\
+                                " " + " ".join(str(x+eps) for x in u) + "\n"
         return bnd
 
     def __new__ (cls, lower,upper,division,boundary=True,**parameters):
@@ -39,7 +42,7 @@ class CartesianDomain(tuple):
 
         if boundary:
             dgf += "BOUNDARYDOMAIN\n"
-            dgf += CartesianDomain.bndDomain(lower,upper)
+            dgf += CartesianDomain.bndDomain(lower,upper, division)
             dgf += "#\n"
 
         dgf += "GRIDPARAMETER\n"
