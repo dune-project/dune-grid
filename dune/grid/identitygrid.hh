@@ -385,6 +385,22 @@ namespace Dune
       return ccobj;
     }
 
+    /** \brief Communicate data of level gridView */
+    template <class DataHandle>
+    void communicate (DataHandle& handle, InterfaceType iftype,
+                      CommunicationDirection dir, int level) const
+    {
+      hostgrid_->levelGridView(level).communicate(handle,iftype,dir);
+    }
+
+    /** \brief Communicate data of leaf gridView */
+    template <class DataHandle>
+    void communicate (DataHandle& handle, InterfaceType iftype,
+                      CommunicationDirection dir) const
+    {
+      hostgrid_->leafGridView().communicate(handle,iftype,dir);
+    }
+
 
     // **********************************************************
     // End of Interface Methods
