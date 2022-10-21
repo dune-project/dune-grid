@@ -73,6 +73,12 @@ class CartesianDomain(tuple):
                 dgf += "#\n"
         except KeyError:
             pass
+
+        # print dgf file if verbosity was enabled
+        if "verbose" in parameters:
+            if parameters["verbose"]:
+                print(dgf)
+
         return super(CartesianDomain, cls).__new__(cls,
                        tuple( (reader.dgfString, dgf) ) )
     def __init__(self,lower,upper,division,boundary=True,**parameters):
