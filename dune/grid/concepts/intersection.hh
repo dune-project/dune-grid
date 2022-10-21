@@ -5,6 +5,10 @@
 #ifndef DUNE_GRID_CONCEPTS_INTERSECTION_HH
 #define DUNE_GRID_CONCEPTS_INTERSECTION_HH
 
+#include <concepts>
+#include <cstddef>
+
+#include <dune/geometry/type.hh>
 #include <dune/grid/concepts/entity.hh>
 #include <dune/grid/concepts/geometry.hh>
 
@@ -16,37 +20,30 @@ namespace Dune::Concept {
  * @details Dune::Grid::Intersection is a template for this model
  */
 template<class I>
-concept Intersection = requires(I i, typename I::LocalCoordinate local)
+concept Intersection = std::regular<I> && requires(const I i, typename I::LocalCoordinate local)
 {
   requires EntityGeneral<typename I::Entity>;
   requires Geometry<typename I::Geometry>;
   requires Geometry<typename I::LocalGeometry>;
   typename I::ctype;
-  { I::mydimension                  } -> std::convertible_to<int                            >;
-  { I::dimensionworld               } -> std::convertible_to<int                            >;
-  { i.boundary()                    } -> std::convertible_to<bool                           >;
-  { i.boundarySegmentIndex()        } -> std::convertible_to<size_t                         >;
-  { i.neighbor()                    } -> std::convertible_to<bool                           >;
-  { i.inside()                      } -> std::convertible_to<typename I::Entity             >;
-  { i.outside()                     } -> std::convertible_to<typename I::Entity             >;
-  { i.conforming()                  } -> std::convertible_to<bool                           >;
-  { i.geometryInInside()            } -> std::convertible_to<typename I::LocalGeometry      >;
-  { i.geometryInOutside()           } -> std::convertible_to<typename I::LocalGeometry      >;
-  { i.geometry()                    } -> std::convertible_to<typename I::Geometry           >;
-  { i.type()                        } -> std::convertible_to<Dune::GeometryType             >;
-  { i.indexInInside()               } -> std::convertible_to<int                            >;
-  { i.indexInOutside()              } -> std::convertible_to<int                            >;
-  { i.outerNormal(local)            } -> std::convertible_to<typename I::GlobalCoordinate   >;
-  { i.integrationOuterNormal(local) } -> std::convertible_to<typename I::GlobalCoordinate   >;
-  { i.unitOuterNormal(local)        } -> std::convertible_to<typename I::GlobalCoordinate   >;
-  { i.centerUnitOuterNormal()       } -> std::convertible_to<typename I::GlobalCoordinate   >;
-  { i==i                            } -> std::convertible_to<bool                           >;
-  { i!=i                            } -> std::convertible_to<bool                           >;
-  requires std::default_initializable<I>;
-  requires std::copy_constructible<I>;
-  requires std::move_constructible<I>;
-  i = i;
-  i = std::move(i);
+  { I::mydimension                  } -> std::convertible_to<int>;
+  { I::dimensionworld               } -> std::convertible_to<int>;
+  { i.boundary()                    } -> std::convertible_to<bool>;
+  { i.boundarySegmentIndex()        } -> std::convertible_to<std::size_t>;
+  { i.neighbor()                    } -> std::convertible_to<bool>;
+  { i.inside()                      } -> std::convertible_to<typename I::Entity>;
+  { i.outside()                     } -> std::convertible_to<typename I::Entity>;
+  { i.conforming()                  } -> std::convertible_to<bool>;
+  { i.geometryInInside()            } -> std::convertible_to<typename I::LocalGeometry>;
+  { i.geometryInOutside()           } -> std::convertible_to<typename I::LocalGeometry>;
+  { i.geometry()                    } -> std::convertible_to<typename I::Geometry>;
+  { i.type()                        } -> std::convertible_to<Dune::GeometryType>;
+  { i.indexInInside()               } -> std::convertible_to<int>;
+  { i.indexInOutside()              } -> std::convertible_to<int>;
+  { i.outerNormal(local)            } -> std::convertible_to<typename I::GlobalCoordinate>;
+  { i.integrationOuterNormal(local) } -> std::convertible_to<typename I::GlobalCoordinate>;
+  { i.unitOuterNormal(local)        } -> std::convertible_to<typename I::GlobalCoordinate>;
+  { i.centerUnitOuterNormal()       } -> std::convertible_to<typename I::GlobalCoordinate>;
 };
 
 } // end namespace Dune::Concept

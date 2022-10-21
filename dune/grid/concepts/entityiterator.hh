@@ -5,6 +5,9 @@
 #ifndef DUNE_GRID_CONCEPTS_ENTITY_ITERATOR_HH
 #define DUNE_GRID_CONCEPTS_ENTITY_ITERATOR_HH
 
+#include <concepts>
+#include <iterator>
+
 #include <dune/grid/concepts/entity.hh>
 
 namespace Dune::Concept {
@@ -15,11 +18,9 @@ namespace Dune::Concept {
  * @details Dune::EntityIterator is a template for this model
  */
 template<class It>
-concept EntityIterator = requires(It it)
+concept EntityIterator = std::forward_iterator<It> && std::default_initializable<It> && requires
 {
   requires Entity<typename It::Entity>;
-  requires std::forward_iterator<It>;
-  requires std::default_initializable<It>;
 };
 
 } // end namespace Dune::Concept

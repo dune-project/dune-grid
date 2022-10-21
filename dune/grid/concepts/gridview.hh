@@ -5,27 +5,30 @@
 #ifndef DUNE_GRID_CONCEPTS_GRIDVIEW_HH
 #define DUNE_GRID_CONCEPTS_GRIDVIEW_HH
 
-#include <dune/grid/concepts/entityset.hh>
+#include <concepts>
 
 #include <dune/grid/common/capabilities.hh>
+#include <dune/grid/common/gridenums.hh>
+#include <dune/grid/concepts/entityset.hh>
 
 #include <dune/common/indices.hh>
 
 namespace Dune::Concept {
-
 namespace Impl {
 
-  template<class ES, int codim,  Dune::PartitionIteratorType partition>
-  concept EntityPartitionSpan = requires(ES es) {
-    requires EntityIterator<typename ES::template Codim<codim>::template Partition<partition>::Iterator>;
-    { es.template begin<codim,partition>()  } -> std::convertible_to< typename ES::template Codim<codim>::template Partition<partition>::Iterator>;
-    { es.template end<codim,partition>()    } -> std::convertible_to< typename ES::template Codim<codim>::template Partition<partition>::Iterator>;
+  template<class ES, int codim,  Dune::PartitionIteratorType partition,
+    class Iterator = typename ES::template Codim<codim>::template Partition<partition>::Iterator>
+  concept EntityPartitionSpan = requires(const ES es)
+  {
+    requires EntityIterator<Iterator>;
+    { es.template begin<codim,partition>() } -> std::convertible_to<Iterator>;
+    { es.template end<codim,partition>()   } -> std::convertible_to<Iterator>;
   };
 
 
   template<class ES, int codim>
-  concept EntitySetAllPartitions = requires(ES es) {
-    requires EntitySet<ES,codim>;
+  concept EntitySetAllPartitions = EntitySet<ES,codim> && requires
+  {
     requires EntityPartitionSpan<ES,codim,Dune::PartitionIteratorType::InteriorBorder_Partition>;
     requires EntityPartitionSpan<ES,codim,Dune::PartitionIteratorType::Overlap_Partition>;
     requires EntityPartitionSpan<ES,codim,Dune::PartitionIteratorType::OverlapFront_Partition>;
@@ -42,7 +45,7 @@ namespace Impl {
     requires (not Dune::Capabilities::hasEntityIterator<Grid,codim>::v)
   void requireEntitySetAllPartitions() {}
 
-}
+} // end namespace Impl
 
 /**
  * @brief Model of a grid view
@@ -50,10 +53,8 @@ namespace Impl {
  * @details Dune::GridView is a template for this model
  */
 template<class GV>
-concept GridView = requires(std::make_integer_sequence<int,GV::dimension+1> dims)
+concept GridView = EntitySet<GV,0> && requires(std::make_integer_sequence<int,GV::dimension+1> dims)
 {
-  requires EntitySet<GV,0>;
-
   []<int... d>(std::integer_sequence<int,d...>) requires
     requires { (Impl::requireEntitySetAllPartitions<GV,typename GV::Grid,(GV::dimension-d)>(),...); }{} (dims);
 };

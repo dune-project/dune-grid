@@ -5,6 +5,7 @@
 #ifndef DUNE_GRID_CONCEPTS_ARCHETYPES_MESSAGEBUFFER_HH
 #define DUNE_GRID_CONCEPTS_ARCHETYPES_MESSAGEBUFFER_HH
 
+#ifndef DOXYGEN
 namespace Dune::Concept::Archetypes {
 
 template <class DataType>
@@ -15,6 +16,6 @@ struct MessageBuffer
 };
 
 } // end namespace Dune::Concept::Archetypes
-
+#endif // DOXYGEN
 
 #endif // DUNE_GRID_CONCEPTS_ARCHETYPES_MESSAGEBUFFER_HH

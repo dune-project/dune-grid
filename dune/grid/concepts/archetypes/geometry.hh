@@ -9,6 +9,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/geometry/type.hh>
 
+#ifndef DOXYGEN
 namespace Dune::Concept::Archetypes {
 
 struct ReferenceElement {};
@@ -20,9 +21,9 @@ struct Geometry
   static constexpr int coorddimension = cdim;
 
   using ctype = double;
+  using Volume = ctype;
   using LocalCoordinate = Dune::FieldVector<ctype, mydim>;
   using GlobalCoordinate = Dune::FieldVector<ctype, cdim>;
-  using Volume = ctype;
   using Jacobian = Dune::FieldMatrix<ctype, cdim, mydim>;
   using JacobianTransposed = Dune::FieldMatrix<ctype, mydim, cdim>;
   using JacobianInverse = Dune::FieldMatrix<ctype, mydim, cdim>;
@@ -30,25 +31,26 @@ struct Geometry
 
   Dune::GeometryType type () const;
   bool affine () const;
-  int corners() const;
+  int corners () const;
 
-  GlobalCoordinate corner(int i) const;
-  GlobalCoordinate global(const LocalCoordinate&) const;
-  LocalCoordinate local(const GlobalCoordinate&) const;
-  GlobalCoordinate center() const;
+  GlobalCoordinate corner (int i) const;
+  GlobalCoordinate global (const LocalCoordinate& local) const;
+  LocalCoordinate local (const GlobalCoordinate& global) const;
+  GlobalCoordinate center () const;
 
-  Volume integrationElement(const LocalCoordinate&) const;
-  Volume volume() const;
+  Volume integrationElement (const LocalCoordinate& local) const;
+  Volume volume () const;
 
-  Jacobian jacobian(const LocalCoordinate&) const;
-  JacobianTransposed jacobianTransposed(const LocalCoordinate&) const;
-  JacobianInverse jacobianInverse(const LocalCoordinate&) const;
-  JacobianInverseTransposed jacobianInverseTransposed(const LocalCoordinate&) const;
-
-  friend Archetypes::ReferenceElement referenceElement(const Geometry&) { return Archetypes::ReferenceElement{}; }
+  Jacobian jacobian (const LocalCoordinate& local) const;
+  JacobianTransposed jacobianTransposed (const LocalCoordinate& local) const;
+  JacobianInverse jacobianInverse (const LocalCoordinate& local) const;
+  JacobianInverseTransposed jacobianInverseTransposed (const LocalCoordinate& local) const;
 };
 
-} // end namespace Dune::Concept::Archetypes
+template <int mydim, int cdim>
+Archetypes::ReferenceElement referenceElement (const Geometry<mydim,cdim>& g);
 
+} // end namespace Dune::Concept::Archetypes
+#endif // DOXYGEN
 
 #endif // DUNE_GRID_CONCEPTS_ARCHETYPES_GEOMETRY_HH

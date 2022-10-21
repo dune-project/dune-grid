@@ -36,14 +36,17 @@
 #if DUNE_GRID_HAVE_CONCEPTS
 
 // Include all concept headers
+#include <dune/grid/concepts/datahandle.hh>
 #include <dune/grid/concepts/entity.hh>
 #include <dune/grid/concepts/entityiterator.hh>
+#include <dune/grid/concepts/entityset.hh>
+#include <dune/grid/concepts/geometry.hh>
+#include <dune/grid/concepts/grid.hh>
+#include <dune/grid/concepts/gridview.hh>
+#include <dune/grid/concepts/indexidset.hh>
 #include <dune/grid/concepts/intersection.hh>
 #include <dune/grid/concepts/intersectioniterator.hh>
-#include <dune/grid/concepts/geometry.hh>
-#include <dune/grid/concepts/indexset.hh>
-#include <dune/grid/concepts/gridview.hh>
-#include <dune/grid/concepts/grid.hh>
+#include <dune/grid/concepts/messagebuffer.hh>
 
 #endif // DUNE_GRID_HAVE_CONCEPTS
 

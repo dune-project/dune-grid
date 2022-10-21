@@ -5,6 +5,9 @@
 #ifndef DUNE_GRID_CONCEPTS_INTERSECTION_ITERATOR_HH
 #define DUNE_GRID_CONCEPTS_INTERSECTION_ITERATOR_HH
 
+#include <concepts>
+#include <iterator>
+
 #include <dune/grid/concepts/intersection.hh>
 
 namespace Dune::Concept {
@@ -15,11 +18,9 @@ namespace Dune::Concept {
  * @details Dune::IntersectionIterator is a template for this model
  */
 template<class It>
-concept IntersectionIterator = requires(It it)
+concept IntersectionIterator = std::forward_iterator<It> && std::default_initializable<It> && requires
 {
   requires Intersection<typename It::Intersection>;
-  requires std::forward_iterator<It>;
-  requires std::default_initializable<It>;
 };
 
 } // end namespace Dune::Concept

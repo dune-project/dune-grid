@@ -13,17 +13,14 @@ namespace Dune::Concept {
  * @brief Model of a message buffer
  * @ingroup GridConcepts
  */
-template<class MB, class T>
-concept MessageBuffer = requires(MB mb, T& val)
+template<class MB, class DataType>
+concept MessageBuffer = requires(MB mb, DataType& data)
 {
-  mb.write(val);
-  mb.read(val);
+  mb.write(data);
+  mb.read(data);
 };
 
 static_assert(Concept::MessageBuffer<Archetypes::MessageBuffer<unsigned char>, unsigned char>);
-
-} // namespace Archetypes
-
 
 } // end namespace Dune::Concept
 

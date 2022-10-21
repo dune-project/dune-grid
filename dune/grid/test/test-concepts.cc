@@ -19,7 +19,7 @@
 #include <dune/grid/albertagrid.hh>
 #endif
 
-#if HAVE_UG
+#if HAVE_DUNE_UGGRID
 #include <dune/grid/uggrid.hh>
 #endif
 
@@ -42,8 +42,7 @@ int main ( int argc, char **argv )
   static_assert(Dune::Concept::Grid< Dune::AlbertaGrid<3,3> >);
 #endif
 
-#if HAVE_UG
-  static_assert(Dune::Concept::Grid< Dune::UGGrid<1> >);
+#if HAVE_DUNE_UGGRID
   static_assert(Dune::Concept::Grid< Dune::UGGrid<2> >);
   static_assert(Dune::Concept::Grid< Dune::UGGrid<3> >);
 #endif

@@ -9,9 +9,10 @@ install(FILES
     geometry.hh
     grid.hh
     gridview.hh
-    indexset.hh
+    indexidset.hh
     intersection.hh
     intersectioniterator.hh
+    messagebuffer.hh
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/concepts)
 
 add_subdirectory(archetypes)
