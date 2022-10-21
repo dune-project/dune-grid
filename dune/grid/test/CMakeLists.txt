@@ -3,6 +3,8 @@
 
 add_subdirectory(yasp)
 
+dune_add_test(SOURCES test-concepts.cc)
+
 dune_add_test(SOURCES geometrygrid-coordfunction-copyconstructor.cc)
 
 dune_add_test(NAME test-geogrid-yaspgrid

@@ -36,7 +36,6 @@ int main ( int argc, char **argv )
   Dune::MPIHelper::instance( argc, argv );
 
   static_assert(Dune::Concept::Grid< Dune::OneDGrid >);
-
   static_assert(Dune::Concept::Grid< Dune::YaspGrid<1> >);
   static_assert(Dune::Concept::Grid< Dune::YaspGrid<2> >);
   static_assert(Dune::Concept::Grid< Dune::YaspGrid<3> >);
