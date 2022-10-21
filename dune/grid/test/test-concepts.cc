@@ -1,20 +1,14 @@
+// SPDX-FileCopyrightText: Copyright © DUNE Project contributors, see file LICENSE.md in module root
+// SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-// check whether c++20 concept can be used
-#if DUNE_HAVE_CXX_UNEVALUATED_CONTEXT_LAMBDA
-  #if __has_include(<version>) && __has_include(<concepts>)
-    #include <version>
-    #if  __cpp_concepts >= 201907L && __cpp_lib_concepts >= 202002L
-      #define DUNE_ENABLE_CONCEPTS 1
-    #endif
-  #endif
-#endif
+#include <dune/grid/concepts.hh>
 
-#if DUNE_ENABLE_CONCEPTS
+#if DUNE_GRID_HAVE_CONCEPTS
 
 #include <dune/grid/onedgrid.hh>
 #include <dune/grid/geometrygrid.hh>
@@ -29,7 +23,6 @@
 #include <dune/grid/uggrid.hh>
 #endif
 
-#include <dune/grid/concepts/grid.hh>
 
 int main ( int argc, char **argv )
 {
@@ -61,11 +54,11 @@ int main ( int argc, char **argv )
 
 }
 
-#else // DUNE_ENABLE_CONCEPTS
+#else // DUNE_GRID_HAVE_CONCEPTS
 
 int main()
 {
   return 77;
 }
 
-#endif // DUNE_ENABLE_CONCEPTS
+#endif // DUNE_GRID_HAVE_CONCEPTS
