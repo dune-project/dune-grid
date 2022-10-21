@@ -11,6 +11,7 @@
 #include <dune/grid/concepts/intersectioniterator.hh>
 #include <dune/grid/concepts/geometry.hh>
 #include <dune/grid/concepts/indexset.hh>
+#include <dune/grid/concepts/archetypes/datahandle.hh>
 
 #include <dune/grid/common/gridenums.hh>
 
@@ -36,7 +37,12 @@ namespace Impl {
     { es.comm()             } -> std::convertible_to< typename ES::CollectiveCommunication  >;
     { es.overlapSize(codim) } -> std::convertible_to< int                                   >;
     { es.ghostSize(codim)   } -> std::convertible_to< int                                   >;
-    //! gv.communicate(std::declval<Handler&>(),std::declval<Dune::InterfaceType>(), std::declval<CommunicationDirection>()), // FIXME use a default handler to instantiate this function
+
+    requires requires(Archetypes::CommDataHandle<typename ES::ctype>& handle,
+                      InterfaceType iface, CommunicationDirection dir)
+    {
+      es.communicate(handle, iface, dir);
+    };
     requires std::copy_constructible<ES>;
   };
 

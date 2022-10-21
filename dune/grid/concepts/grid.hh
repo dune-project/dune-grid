@@ -13,6 +13,8 @@
 #include <dune/grid/concepts/indexset.hh>
 #include <dune/grid/concepts/gridview.hh>
 
+#include <dune/grid/concepts/archetypes/datahandle.hh>
+
 #include <dune/grid/common/gridenums.hh>
 
 #include <dune/common/indices.hh>
@@ -69,7 +71,9 @@ namespace Dune::Concept {
  * @details Dune::Grid is a template for this model
  */
 template<class G>
-concept Grid = requires(G g, int level, int codim, int refCount, Dune::GeometryType type, const typename G::template Codim<0>::Entity& entity)
+concept Grid = requires(G g, int level, int codim, int refCount,
+                        Dune::GeometryType type,
+                        const typename G::template Codim<0>::Entity& entity)
 {
   { G::dimension      } -> std::convertible_to<int>;
   { G::dimensionworld } -> std::convertible_to<int>;
@@ -106,7 +110,11 @@ concept Grid = requires(G g, int level, int codim, int refCount, Dune::GeometryT
   { g.adapt()                 } -> std::convertible_to< bool                                >;
   { g.comm()                  } -> std::convertible_to< typename G::CollectiveCommunication >;
   { g.loadBalance()           } -> std::convertible_to< bool                                >;
-  //! requireConvertible<bool>(g.loadBalance(/*data*/ std::declval<DataHandle&>())) // FIXME use a default handler to instantiate this function
+  requires requires(Archetypes::CommDataHandle<typename G::ctype>& handle,
+                    InterfaceType iface, CommunicationDirection dir)
+  {
+    { g.loadBalance(handle) } -> std::convertible_to< bool >;
+  };
   g.globalRefine(refCount);
   g.postAdapt();
 };

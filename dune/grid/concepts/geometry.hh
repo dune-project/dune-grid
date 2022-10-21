@@ -5,12 +5,18 @@
 #ifndef DUNE_GRID_CONCEPTS_GEOMETRY_HH
 #define DUNE_GRID_CONCEPTS_GEOMETRY_HH
 
+#include <dune/common/fmatrix.hh>
+#include <dune/common/fvector.hh>
 #include <dune/geometry/type.hh>
+#include <dune/grid/concepts/archetypes/geometry.hh>
 
 namespace Dune::Concept {
 
 template<class R>
 concept ReferenceElement = true;
+
+static_assert(ReferenceElement< Archetypes::ReferenceElement >);
+
 
 /**
  * @brief Model of a geometry object
@@ -38,6 +44,8 @@ concept Geometry = requires(const G& g, typename G::GlobalCoordinate global, typ
   { g.jacobianInverseTransposed(local)  } -> std::convertible_to<typename G::JacobianInverseTransposed>;
   { referenceElement(g)                 } -> ReferenceElement;
 };
+
+static_assert(Geometry< Archetypes::Geometry<2,3> >);
 
 } // end namespace Dune::Concept
 
