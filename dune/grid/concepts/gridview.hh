@@ -23,20 +23,22 @@ namespace Impl {
 
   template<class GV, int codim, Dune::PartitionIteratorType partition,
     class Traits = typename GV::template Codim<codim>::template Partition<partition>>
-  concept GridViewPartition = requires(const GV gv)
+  concept GridViewPartition =
+    EntityIterator<typename Traits::Iterator> &&
+  requires(const GV gv)
   {
-    requires EntityIterator<typename Traits::Iterator>;
     { gv.template begin<codim,partition>() } -> std::convertible_to<typename Traits::Iterator>;
     { gv.template end<codim,partition>()   } -> std::convertible_to<typename Traits::Iterator>;
   };
 
   template<class GV, int codim,
     class Traits = typename GV::template Codim<codim>>
-  concept GridViewCodim = requires(const GV gv)
+  concept GridViewCodim =
+    Geometry<typename Traits::Geometry> &&
+    Geometry<typename Traits::LocalGeometry> &&
+    EntityIterator<typename Traits::Iterator> &&
+  requires(const GV gv)
   {
-    requires Geometry<typename Traits::Geometry>;
-    requires Geometry<typename Traits::LocalGeometry>;
-    requires EntityIterator<typename Traits::Iterator>;
     { gv.template begin<codim>() } -> std::convertible_to<typename Traits::Iterator>;
     { gv.template end<codim>()   } -> std::convertible_to<typename Traits::Iterator>;
 
@@ -80,11 +82,11 @@ namespace Impl {
  */
 template<class GV>
 concept GridView = std::copyable<GV> &&
+  IndexSet<typename GV::IndexSet> &&
+  Intersection<typename GV::Intersection> &&
+  IntersectionIterator<typename GV::IntersectionIterator> &&
 requires(const GV gv, int codim, Dune::GeometryType type)
 {
-  requires IndexSet<typename GV::IndexSet>;
-  requires Intersection<typename GV::Intersection>;
-  requires IntersectionIterator<typename GV::IntersectionIterator>;
   typename GV::Traits;
   typename GV::ctype;
   { GV::conforming        } -> std::convertible_to<bool>;

@@ -18,10 +18,10 @@ namespace Dune::Concept {
  * @details Dune::IntersectionIterator is a template for this model
  */
 template<class It>
-concept IntersectionIterator = std::forward_iterator<It> && std::default_initializable<It> && requires
-{
-  requires Intersection<typename It::Intersection>;
-};
+concept IntersectionIterator =
+  std::forward_iterator<It> &&
+  std::default_initializable<It> &&
+  Intersection<typename It::Intersection>;
 
 } // end namespace Dune::Concept
 

@@ -34,35 +34,30 @@
 namespace Dune::Concept {
 namespace Impl {
 
-  template<class G, int codim,
-    class Traits   = typename G::template Codim<codim>,
-    class Interior = typename Traits::template Partition<Dune::PartitionIteratorType::Interior_Partition>,
-    class IBorder  = typename Traits::template Partition<Dune::PartitionIteratorType::InteriorBorder_Partition>,
-    class Overlap  = typename Traits::template Partition<Dune::PartitionIteratorType::Overlap_Partition>,
-    class OFront   = typename Traits::template Partition<Dune::PartitionIteratorType::OverlapFront_Partition>,
-    class All      = typename Traits::template Partition<Dune::PartitionIteratorType::All_Partition>,
-    class Ghost    = typename Traits::template Partition<Dune::PartitionIteratorType::Ghost_Partition>>
-  concept GridCodim = requires(const G cg, const typename Traits::EntitySeed& seed)
-  {
-    requires Geometry<typename Traits::Geometry>;
-    requires Geometry<typename Traits::LocalGeometry>;
-    requires EntityIterator<typename Traits::LevelIterator>;
-    requires EntityIterator<typename Traits::LeafIterator>;
-    requires EntityIterator<typename Interior::LevelIterator>;
-    requires EntityIterator<typename Interior::LeafIterator>;
-    requires EntityIterator<typename IBorder::LevelIterator>;
-    requires EntityIterator<typename IBorder::LeafIterator>;
-    requires EntityIterator<typename Overlap::LevelIterator>;
-    requires EntityIterator<typename Overlap::LeafIterator>;
-    requires EntityIterator<typename OFront::LevelIterator>;
-    requires EntityIterator<typename OFront::LeafIterator>;
-    requires EntityIterator<typename All::LevelIterator>;
-    requires EntityIterator<typename All::LeafIterator>;
-    requires EntityIterator<typename Ghost::LevelIterator>;
-    requires EntityIterator<typename Ghost::LeafIterator>;
+  template<class G, int codim, Dune::PartitionIteratorType partition,
+    class Traits = typename G::template Codim<codim>::template Partition<partition>>
+  concept GridCodimPartition =
+    EntityIterator<typename Traits::LevelIterator> &&
+    EntityIterator<typename Traits::LeafIterator>;
 
-    requires Entity<typename Traits::Entity>;
-    requires EntitySeed<typename Traits::EntitySeed>;
+  template<class G, int codim>
+  concept GridCodimAllPartitions =
+    GridCodimPartition<G,codim,Dune::PartitionIteratorType::Interior_Partition> &&
+    GridCodimPartition<G,codim,Dune::PartitionIteratorType::InteriorBorder_Partition> &&
+    GridCodimPartition<G,codim,Dune::PartitionIteratorType::Overlap_Partition> &&
+    GridCodimPartition<G,codim,Dune::PartitionIteratorType::OverlapFront_Partition> &&
+    GridCodimPartition<G,codim,Dune::PartitionIteratorType::All_Partition> &&
+    GridCodimPartition<G,codim,Dune::PartitionIteratorType::Ghost_Partition>;
+
+  template<class G, int codim,
+    class Traits = typename G::template Codim<codim>>
+  concept GridCodim =
+    Geometry<typename Traits::Geometry> &&
+    Geometry<typename Traits::LocalGeometry> &&
+    Entity<typename Traits::Entity> &&
+    EntitySeed<typename Traits::EntitySeed> &&
+  requires(const G cg, const typename Traits::EntitySeed& seed)
+  {
     { cg.entity(seed) } -> std::convertible_to<typename Traits::Entity>;
 
     requires (not Dune::Capabilities::canCommunicate<G,codim>::v) ||
@@ -70,11 +65,10 @@ namespace Impl {
       {
         { g.loadBalance(handle) } -> std::convertible_to<bool>;
       };
-  };
-
+  } && GridCodimAllPartitions<G,codim>;
 
   template<class G, int dim>
-  concept AllGridCodims = requires(std::make_integer_sequence<int,dim+1> codims)
+  concept GridAllCodims = requires(std::make_integer_sequence<int,dim+1> codims)
   {
     []<int... cc>(std::integer_sequence<int,cc...>)
         requires (GridCodim<G,cc> &&...) {} (codims);
@@ -89,26 +83,26 @@ namespace Impl {
  * @details Dune::Grid is a template for this model
  */
 template<class G>
-concept Grid = requires(const G cg, int level, int codim, Dune::GeometryType type)
+concept Grid =
+  GridView<typename G::LeafGridView> &&
+  GridView<typename G::LevelGridView> &&
+  Intersection<typename G::LeafIntersection> &&
+  Intersection<typename G::LevelIntersection> &&
+  IntersectionIterator<typename G::LeafIntersectionIterator> &&
+  IntersectionIterator<typename G::LevelIntersectionIterator> &&
+  IndexSet<typename G::LevelIndexSet> &&
+  IndexSet<typename G::LeafIndexSet> &&
+  IdSet<typename G::GlobalIdSet> &&
+  IdSet<typename G::LocalIdSet> &&
+requires(const G cg, int level, int codim, Dune::GeometryType type)
 {
   // static constants
   { G::dimension      } -> std::convertible_to<int>;
   { G::dimensionworld } -> std::convertible_to<int>;
 
   // type and concepts requirements
-  requires GridView<typename G::LeafGridView>;
-  requires GridView<typename G::LevelGridView>;
-  requires Intersection<typename G::LeafIntersection>;
-  requires Intersection<typename G::LevelIntersection>;
-  requires IntersectionIterator<typename G::LeafIntersectionIterator>;
-  requires IntersectionIterator<typename G::LevelIntersectionIterator>;
-  requires IndexSet<typename G::LevelIndexSet>;
-  requires IndexSet<typename G::LeafIndexSet>;
-  requires IdSet<typename G::GlobalIdSet>;
-  requires IdSet<typename G::LocalIdSet>;
   requires std::same_as<G,typename G::LeafGridView::Grid>;
   requires std::same_as<G,typename G::LevelGridView::Grid>;
-  requires Impl::AllGridCodims<G,G::dimension>;
   typename G::ctype;
   typename G::HierarchicIterator;
 
@@ -138,7 +132,7 @@ concept Grid = requires(const G cg, int level, int codim, Dune::GeometryType typ
     g.globalRefine(refCount);
     g.postAdapt();
   };
-};
+} && Impl::GridAllCodims<G,G::dimension>;
 
 } // end namespace Dune::Concept
 

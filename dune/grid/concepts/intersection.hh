@@ -20,11 +20,12 @@ namespace Dune::Concept {
  * @details Dune::Grid::Intersection is a template for this model
  */
 template<class I>
-concept Intersection = std::regular<I> && requires(const I i, typename I::LocalCoordinate local)
+concept Intersection = std::regular<I> &&
+  EntityGeneral<typename I::Entity> &&
+  Geometry<typename I::Geometry> &&
+  Geometry<typename I::LocalGeometry> &&
+requires(const I i, typename I::LocalCoordinate local)
 {
-  requires EntityGeneral<typename I::Entity>;
-  requires Geometry<typename I::Geometry>;
-  requires Geometry<typename I::LocalGeometry>;
   typename I::ctype;
   { I::mydimension                  } -> std::convertible_to<int>;
   { I::dimensionworld               } -> std::convertible_to<int>;
