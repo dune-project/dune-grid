@@ -303,6 +303,23 @@ namespace Dune {
     }
 
 
+    /** \brief Communicate data of level gridView */
+    template <class DataHandle>
+    void communicate (DataHandle& /*handle*/, InterfaceType /*iftype*/,
+                      CommunicationDirection /*dir*/, int /*level*/) const
+    {
+      DUNE_THROW(Dune::NotImplemented, "communicate() for OneDGrid not implemented");
+    }
+
+    /** \brief Communicate data of leaf gridView */
+    template <class DataHandle>
+    void communicate (DataHandle& /*handle*/, InterfaceType /*iftype*/,
+                      CommunicationDirection /*dir*/) const
+    {
+      DUNE_THROW(Dune::NotImplemented, "communicate() for OneDGrid not implemented");
+    }
+
+
   private:
 
     /** \brief Get vertex lists directly -- makes the code more readable */
