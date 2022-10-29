@@ -17,6 +17,8 @@
 
 #include <dune/common/exceptions.hh>
 
+#include <dune/grid/concepts.hh>
+
 template<typename GV>
 void checkIntersectionLifetime(GV gv, std::size_t check_element_count = 32)
 {
@@ -40,6 +42,17 @@ void checkIntersectionLifetime(GV gv, std::size_t check_element_count = 32)
   std::vector<std::vector<typename GV::Intersection> > intersection_list;
   std::vector<std::vector<typename GV::Intersection::Geometry::GlobalCoordinate> > coords;
 
+  auto entity_iterator = gv.template begin<0>();
+
+  auto intersection_iterator = gv.ibegin(*entity_iterator);
+
+#if DUNE_GRID_HAVE_CONCEPTS
+  static_assert(Dune::Concept::EntityIterator<decltype(entity_iterator)>);
+  static_assert(Dune::Concept::IntersectionIterator<decltype(intersection_iterator)>);
+  static_assert(Dune::Concept::Entity<std::decay_t<decltype(*entity_iterator)>>);
+  static_assert(Dune::Concept::Intersection<std::decay_t<decltype(*intersection_iterator)>>);
+#endif
+
   // store indices + entities + intersections + coordinates
   {
     std::size_t i = 0;
@@ -53,6 +66,12 @@ void checkIntersectionLifetime(GV gv, std::size_t check_element_count = 32)
         coords.push_back({});
         for (const auto& is : intersections(gv,e))
           {
+
+#if DUNE_GRID_HAVE_CONCEPTS
+            static_assert(Dune::Concept::Entity<std::decay_t<decltype(e)>>);
+            static_assert(Dune::Concept::Intersection<std::decay_t<decltype(is)>>);
+#endif
+
             indices.back().push_back(is.indexInInside());
             intersection_list.back().push_back(is);
             coords.back().push_back(is.geometry().corner(0));

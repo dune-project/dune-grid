@@ -9,6 +9,7 @@ INPUT                 += @srcdir@/mainpage.txt \
                          @top_srcdir@/dune/grid/albertagrid \
                          @top_srcdir@/dune/grid/albertagrid.hh \
                          @top_srcdir@/dune/grid/common \
+                         @top_srcdir@/dune/grid/concepts \
                          @top_srcdir@/dune/grid/geometrygrid.hh \
                          @top_srcdir@/dune/grid/geometrygrid \
                          @top_srcdir@/dune/grid/identitygrid.hh \
