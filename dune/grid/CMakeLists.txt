@@ -15,6 +15,7 @@ add_subdirectory(yaspgrid)
 
 install(FILES
   albertagrid.hh
+  concepts.hh
   geometrygrid.hh
   identitygrid.hh
   onedgrid.hh
