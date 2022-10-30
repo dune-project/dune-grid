@@ -217,6 +217,9 @@ namespace Dune
     std::vector< GeometryType > geomTypes_[ dimension+1 ];
   };
 
+  template< int dim, int dimworld >
+  Alberta::IndexStack* AlbertaGridHierarchicIndexSet<dim,dimworld>::currentIndexStack = nullptr;
+
 
 
   // AlbertaGridHierarchicIndexSet::InitEntityNumber
