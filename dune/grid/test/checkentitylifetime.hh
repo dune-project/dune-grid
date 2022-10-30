@@ -39,10 +39,8 @@ bool checkEntityLifetimeForCodim(GV gv, std::size_t check_element_count, Dune::C
                 << " entities" << std::endl;
       check_element_count = gv.size(codim);
     }
-  using Iterator = typename GV::template Codim<codim>::Iterator;
   auto& index_set = gv.indexSet();
   auto& id_set = gv.grid().localIdSet();
-  Iterator entity_iterator = gv.template begin<codim>();
 
   std::vector<typename GV::IndexSet::IndexType> indices;
   std::vector<typename GV::Grid::LocalIdSet::IdType> ids;
@@ -87,6 +85,7 @@ bool checkEntityLifetimeForCodim(GV gv, std::size_t check_element_count, Dune::C
     }
 
 #if DUNE_GRID_HAVE_CONCEPTS
+  using Iterator = typename GV::template Codim<codim>::Iterator;
   static_assert(Dune::Concept::GridView<GV>);
   static_assert(Dune::Concept::IndexSet<typename GV::IndexSet>);
   static_assert(Dune::Concept::IdSet<typename GV::Grid::LocalIdSet>);
