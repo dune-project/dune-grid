@@ -42,15 +42,13 @@ void checkIntersectionLifetime(GV gv, std::size_t check_element_count = 32)
   std::vector<std::vector<typename GV::Intersection> > intersection_list;
   std::vector<std::vector<typename GV::Intersection::Geometry::GlobalCoordinate> > coords;
 
-  auto entity_iterator = gv.template begin<0>();
-
-  auto intersection_iterator = gv.ibegin(*entity_iterator);
-
 #if DUNE_GRID_HAVE_CONCEPTS
-  static_assert(Dune::Concept::EntityIterator<decltype(entity_iterator)>);
-  static_assert(Dune::Concept::IntersectionIterator<decltype(intersection_iterator)>);
-  static_assert(Dune::Concept::Entity<std::decay_t<decltype(*entity_iterator)>>);
-  static_assert(Dune::Concept::Intersection<std::decay_t<decltype(*intersection_iterator)>>);
+  using EntityIterator = decltype(gv.template begin<0>());
+  using IntersectionIterator = decltype(gv.ibegin(*std::declval<EntityIterator>()));
+  static_assert(Dune::Concept::EntityIterator<EntityIterator>);
+  static_assert(Dune::Concept::IntersectionIterator<IntersectionIterator>);
+  static_assert(Dune::Concept::Entity<std::decay_t<decltype(*std::declval<EntityIterator>())>>);
+  static_assert(Dune::Concept::Intersection<std::decay_t<decltype(*std::declval<IntersectionIterator>())>>);
 #endif
 
   // store indices + entities + intersections + coordinates
