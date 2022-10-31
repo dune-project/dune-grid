@@ -10,6 +10,7 @@
 
 #include <dune/common/indices.hh>
 #include <dune/common/concepts/container.hh>
+#include <dune/common/concepts/hashable.hh>
 #include <dune/geometry/type.hh>
 #include <dune/grid/concepts/entity.hh>
 
@@ -64,8 +65,8 @@ namespace Impl {
   concept IdSetEntityCodim = Entity<typename IS::template Codim<codim>::Entity> &&
     requires(const IS is, const typename IS::template Codim<codim>::Entity& entity)
   {
-    { is.template id<codim>(entity) } -> std::convertible_to<typename IS::IdType>;
-    { is.id(entity)                 } -> std::convertible_to<typename IS::IdType>;
+    { is.template id<codim>(entity) } -> std::same_as<typename IS::IdType>;
+    { is.id(entity)                 } -> std::same_as<typename IS::IdType>;
   };
 
   template<class IS, int first, int last>
@@ -84,9 +85,11 @@ namespace Impl {
  * for this model
  */
 template<class IS>
-concept IdSet = requires(const IS is, const typename IS::template Codim<0>::Entity& entity, int i, unsigned int codim)
+concept IdSet = requires(const IS is, const typename IS::template Codim<0>::Entity& entity, int i, unsigned int cc)
 {
-  { is.subId(entity,i,codim) } -> std::convertible_to<typename IS::IdType>;
+  requires Hashable<typename IS::IdType>;
+  requires std::totally_ordered<typename IS::IdType>;
+  { is.subId(entity,i,cc) } -> std::same_as<typename IS::IdType>;
 } &&
 Impl::IdSetEntityCodim<IS,0> &&
 Impl::IdSetEntityAllCodims<IS,1,IS::dimension+1>;
