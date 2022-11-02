@@ -111,7 +111,10 @@ namespace Dune {
         bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+dim>,
         CCType,
         DefaultLevelGridViewTraits, DefaultLeafGridViewTraits,
-        YaspEntitySeed>
+        YaspEntitySeed,
+        YaspGeometry,
+        unsigned int,
+        std::array<GeometryType,1>>
     Traits;
   };
 

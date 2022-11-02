@@ -989,7 +989,11 @@ namespace Dune {
       template<class> class LevelGridViewTraits,
       template<class> class LeafGridViewTraits,
       template<int,class> class EntitySeedImp,
-      template<int,int,class> class LocalGeometryImp = GeometryImp
+      template<int,int,class> class LocalGeometryImp = GeometryImp,
+      class LevelIndexType = unsigned int,
+      class LevelGeometryTypes = std::vector<GeometryType>,
+      class LeafIndexType = LevelIndexType,
+      class LeafGeometryTypes = LevelGeometryTypes
       >
   struct GridTraits
   {
@@ -1059,9 +1063,9 @@ namespace Dune {
     typedef Dune::GridView< LevelGridViewTraits< const GridImp > > LevelGridView;
 
     /** \brief The type of the level index set. */
-    typedef IndexSet<const GridImp,LevelIndexSetImp> LevelIndexSet;
+    typedef IndexSet<const GridImp,LevelIndexSetImp,LevelIndexType,LevelGeometryTypes> LevelIndexSet;
     /** \brief The type of the leaf index set. */
-    typedef IndexSet<const GridImp,LeafIndexSetImp> LeafIndexSet;
+    typedef IndexSet<const GridImp,LeafIndexSetImp,LeafIndexType,LeafGeometryTypes> LeafIndexSet;
     /** \brief The type of the global id set. */
     typedef IdSet<const GridImp,GlobalIdSetImp,GIDType> GlobalIdSet;
     /** \brief The type of the local id set. */

@@ -21,10 +21,10 @@ namespace Dune {
    */
   template<class GridImp, bool isLeafIndexSet>
   class YaspIndexSet
-    : public IndexSet< GridImp, YaspIndexSet< GridImp, isLeafIndexSet >, unsigned int >
+    : public IndexSet< GridImp, YaspIndexSet< GridImp, isLeafIndexSet >, unsigned int, std::array<GeometryType, 1> >
   {
     typedef YaspIndexSet< GridImp, isLeafIndexSet > This;
-    typedef IndexSet< GridImp, This, unsigned int > Base;
+    typedef IndexSet< GridImp, This, unsigned int, std::array<GeometryType, 1> > Base;
 
   public:
     typedef typename Base::IndexType IndexType;
@@ -95,7 +95,10 @@ namespace Dune {
     }
 
     //! obtain all geometry types of entities in domain
-    std::vector< GeometryType > types ( int codim ) const { return mytypes[ codim ]; }
+    static constexpr std::array<GeometryType, 1> types (int codim)
+    {
+      return { GeometryTypes::cube(GridImp::dimension - codim) };
+    }
 
   private:
     const GridImp& grid;

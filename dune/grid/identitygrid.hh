@@ -64,7 +64,12 @@ namespace Dune
         Communication<No_Comm>,
         DefaultLevelGridViewTraits,
         DefaultLeafGridViewTraits,
-        IdentityGridEntitySeed
+        IdentityGridEntitySeed,
+        IdentityGridGeometry,
+        typename HostGrid::Traits::LevelIndexSet::IndexType,
+        typename HostGrid::Traits::LevelIndexSet::Types,
+        typename HostGrid::Traits::LeafIndexSet::IndexType,
+        typename HostGrid::Traits::LeafIndexSet::Types
         > Traits;
 
   };
