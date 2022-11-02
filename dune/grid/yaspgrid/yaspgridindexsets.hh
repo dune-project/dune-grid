@@ -94,13 +94,8 @@ namespace Dune {
         : e.level() == level;
     }
 
+    //! obtain all geometry types of entities in domain
     std::vector< GeometryType > types ( int codim ) const { return mytypes[ codim ]; }
-
-    //! deliver all geometry types used in this grid
-    const std::vector<GeometryType>& geomTypes (int codim) const
-    {
-      return mytypes[codim];
-    }
 
   private:
     const GridImp& grid;

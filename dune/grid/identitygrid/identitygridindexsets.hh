@@ -59,13 +59,6 @@ namespace Dune {
       return grid_->hostgrid_->levelIndexSet(level_).size(type);
     }
 
-
-    /** \brief Deliver all geometry types used in this grid */
-    const std::vector<GeometryType>& geomTypes (int codim) const
-    {
-      return grid_->hostgrid_->levelIndexSet(level_).geomTypes(codim);
-    }
-
     /** \brief Deliver all geometry types used in this grid */
     Types types (int codim) const
     {
@@ -155,13 +148,6 @@ namespace Dune {
     std::size_t size (int codim) const
     {
       return grid_->hostgrid_->leafIndexSet().size(codim);
-    }
-
-
-    /** \brief Deliver all geometry types used in this grid */
-    const std::vector<GeometryType>& geomTypes (int codim) const
-    {
-      return grid_->hostgrid_->leafIndexSet().geomTypes(codim);
     }
 
     /** \brief Deliver all geometry types used in this grid */

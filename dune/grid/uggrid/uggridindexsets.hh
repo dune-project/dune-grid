@@ -197,13 +197,8 @@ namespace Dune {
       DUNE_THROW(NotImplemented, "Wrong codim!");
     }
 
+    //! obtain all geometry types of entities in domain
     std::vector< GeometryType > types ( int codim ) const { return myTypes_[ codim ]; }
-
-    /** \brief Deliver all geometry types used in this grid */
-    const std::vector<GeometryType>& geomTypes (int codim) const
-    {
-      return myTypes_[codim];
-    }
 
     /** \brief Return true if e is contained in the index set.
 
@@ -391,19 +386,13 @@ namespace Dune {
     std::size_t size (int codim) const
     {
       int s=0;
-      const std::vector<GeometryType>& geomTs = geomTypes(codim);
-      for (unsigned int i=0; i<geomTs.size(); ++i)
-        s += size(geomTs[i]);
+      for (GeometryType gt : types(codim))
+        s += size(gt);
       return s;
     }
 
+    //! obtain all geometry types of entities in domain
     std::vector< GeometryType > types ( int codim ) const { return myTypes_[ codim ]; }
-
-    /** deliver all geometry types used in this grid */
-    const std::vector<GeometryType>& geomTypes (int codim) const
-    {
-      return myTypes_[codim];
-    }
 
     /** \brief Return true if e is contained in the index set.
 

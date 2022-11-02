@@ -127,10 +127,7 @@ namespace Dune
   AlbertaGridHierarchicIndexSet< dim, dimworld >
   ::AlbertaGridHierarchicIndexSet ( const DofNumbering &dofNumbering )
     : dofNumbering_( dofNumbering )
-  {
-    for( int codim = 0; codim <= dimension; ++codim )
-      geomTypes_[ codim ].push_back( GeometryTypes::simplex( dimension - codim ) );
-  }
+  {}
 
 
   template< int dim, int dimworld >

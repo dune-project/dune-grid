@@ -314,14 +314,9 @@ namespace Dune
     {
       using SizeType = std::decay_t<decltype( Base::size( Dune::GeometryType() ) )>;
 
-      const std::vector< GeometryType > &geomTs = asImp().geomTypes( codim );
-      typedef typename std::vector< GeometryType >::const_iterator Iterator;
-
-      const Iterator end = geomTs.end();
-
       SizeType s ( 0 );
-      for( Iterator it = geomTs.begin() ; it != end; ++it )
-        s += Base::size( *it );
+      for(GeometryType gt : types(codim))
+        s += Base::size(gt);
 
       return s;
     }

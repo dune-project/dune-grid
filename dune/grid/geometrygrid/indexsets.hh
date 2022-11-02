@@ -87,11 +87,6 @@ namespace Dune
 
       Types types ( int codim ) const { return hostIndexSet().types( codim ); }
 
-      const std::vector< GeometryType > &geomTypes ( int codim ) const
-      {
-        return hostIndexSet().geomTypes( codim );
-      }
-
       explicit operator bool () const { return bool( hostIndexSet_ ); }
 
       void reset () { hostIndexSet_ = nullptr; }
