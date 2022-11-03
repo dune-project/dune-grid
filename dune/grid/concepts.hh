@@ -39,7 +39,6 @@
 #include <dune/grid/concepts/datahandle.hh>
 #include <dune/grid/concepts/entity.hh>
 #include <dune/grid/concepts/entityiterator.hh>
-#include <dune/grid/concepts/entityset.hh>
 #include <dune/grid/concepts/geometry.hh>
 #include <dune/grid/concepts/grid.hh>
 #include <dune/grid/concepts/gridview.hh>
