@@ -5,7 +5,6 @@ install(FILES
     datahandle.hh
     entity.hh
     entityiterator.hh
-    entityset.hh
     geometry.hh
     grid.hh
     gridview.hh
