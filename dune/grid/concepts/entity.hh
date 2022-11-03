@@ -22,9 +22,8 @@ namespace Dune::Concept {
  * @details Dune::EntitySeed is a template for this model
  */
 template<class S>
-concept EntitySeed = requires(const S seed)
+concept EntitySeed = std::semiregular<S> && requires(const S seed)
 {
-  requires std::default_initializable<S>;
   { S::codimension  } -> std::convertible_to<int>;
   { seed.isValid()  } -> std::convertible_to<bool>;
 };
