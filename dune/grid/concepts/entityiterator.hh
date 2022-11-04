@@ -18,10 +18,10 @@ namespace Dune::Concept {
  * @details Dune::EntityIterator is a template for this model
  */
 template<class It>
-concept EntityIterator = std::forward_iterator<It> && std::default_initializable<It> && requires
-{
-  requires Entity<typename It::Entity>;
-};
+concept EntityIterator =
+  std::forward_iterator<It> &&
+  std::default_initializable<It> &&
+  Entity<typename It::Entity>;
 
 } // end namespace Dune::Concept
 

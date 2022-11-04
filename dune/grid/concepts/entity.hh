@@ -37,10 +37,11 @@ static_assert(EntitySeed< Archetypes::EntitySeed<0> >);
  * @details Dune::Entity is a template for this model.
  */
 template<class E>
-concept EntityGeneral = std::regular<E> && requires(const E e, unsigned int codim)
+concept EntityGeneral = std::regular<E> &&
+  Geometry<typename E::Geometry> &&
+  EntitySeed<typename E::EntitySeed> &&
+requires(const E e, unsigned int codim)
 {
-  requires Geometry<typename E::Geometry>;
-  requires EntitySeed<typename E::EntitySeed>;
   requires E::mydimension == (E::dimension - E::codimension);
   { e.level()            } -> std::convertible_to<int>;
   { e.partitionType()    } -> std::convertible_to<Dune::PartitionType>;
@@ -61,11 +62,11 @@ namespace Impl {
     { e.template subEntity<codim>(subEntity) } -> EntityGeneral;
   };
 
-  template<class E, int dim>
-  concept AllEntityCodimsExtended = requires(std::make_integer_sequence<int,dim+1> codims)
+  template<class E, int first, int last>
+  concept EntityAllCodimsExtended = requires(std::make_integer_sequence<int,last-first> codims)
   {
-    []<int... cc>(std::integer_sequence<int,cc...>)
-        requires (Impl::EntityCodimExtended<E,cc> &&...) {} (codims);
+    []<int... c>(std::integer_sequence<int,c...>)
+        requires (EntityCodimExtended<E,(first+c)> &&...) {} (codims);
   };
 
 } // end namespace Impl
@@ -76,10 +77,11 @@ namespace Impl {
  * @details Dune::Entity of codimension 0 is a template for this model.
  */
 template<class E>
-concept EntityExtended = EntityGeneral<E> && requires(const E e, int maxLevel)
+concept EntityExtended = EntityGeneral<E> &&
+  Geometry<typename E::LocalGeometry> &&
+requires(const E e, int maxLevel)
 {
   requires (E::codimension == 0);
-  requires Geometry<typename E::LocalGeometry>;
   { e.father()                   } -> std::convertible_to<E>;
   { e.hasFather()                } -> std::convertible_to<bool>;
   { e.isLeaf()                   } -> std::convertible_to<bool>;
@@ -90,9 +92,11 @@ concept EntityExtended = EntityGeneral<E> && requires(const E e, int maxLevel)
   { e.isNew()                    } -> std::convertible_to<bool>;
   { e.mightVanish()              } -> std::convertible_to<bool>;
   { e.hasBoundaryIntersections() } -> std::convertible_to<bool>;
-  requires Impl::AllEntityCodimsExtended<E, E::dimension>;
+
   requires std::same_as<E, typename E::template Codim<0>::Entity>;
-};
+} &&
+Impl::EntityCodimExtended<E,0> &&
+Impl::EntityAllCodimsExtended<E,1,E::dimension+1>;
 
 /**
  * @brief Model of a grid entity

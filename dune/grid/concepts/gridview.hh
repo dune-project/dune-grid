@@ -23,20 +23,30 @@ namespace Impl {
 
   template<class GV, int codim, Dune::PartitionIteratorType partition,
     class Traits = typename GV::template Codim<codim>::template Partition<partition>>
-  concept GridViewPartition = requires(const GV gv)
+  concept GridViewPartition =
+    EntityIterator<typename Traits::Iterator> &&
+  requires(const GV gv)
   {
-    requires EntityIterator<typename Traits::Iterator>;
     { gv.template begin<codim,partition>() } -> std::convertible_to<typename Traits::Iterator>;
     { gv.template end<codim,partition>()   } -> std::convertible_to<typename Traits::Iterator>;
   };
 
+  template<class GV, int codim>
+  concept GridViewAllPartitions =
+    GridViewPartition<GV,codim,Dune::PartitionIteratorType::InteriorBorder_Partition> &&
+    GridViewPartition<GV,codim,Dune::PartitionIteratorType::Overlap_Partition> &&
+    GridViewPartition<GV,codim,Dune::PartitionIteratorType::OverlapFront_Partition> &&
+    GridViewPartition<GV,codim,Dune::PartitionIteratorType::All_Partition> &&
+    GridViewPartition<GV,codim,Dune::PartitionIteratorType::Ghost_Partition>;
+
   template<class GV, int codim,
     class Traits = typename GV::template Codim<codim>>
-  concept GridViewCodim = requires(const GV gv)
+  concept GridViewCodim =
+    Geometry<typename Traits::Geometry> &&
+    Geometry<typename Traits::LocalGeometry> &&
+    EntityIterator<typename Traits::Iterator> &&
+  requires(const GV gv)
   {
-    requires Geometry<typename Traits::Geometry>;
-    requires Geometry<typename Traits::LocalGeometry>;
-    requires EntityIterator<typename Traits::Iterator>;
     { gv.template begin<codim>() } -> std::convertible_to<typename Traits::Iterator>;
     { gv.template end<codim>()   } -> std::convertible_to<typename Traits::Iterator>;
 
@@ -45,30 +55,22 @@ namespace Impl {
       { gv.ibegin(entity) } -> std::convertible_to<typename GV::IntersectionIterator>;
       { gv.iend(entity)   } -> std::convertible_to<typename GV::IntersectionIterator>;
     };
-  };
-
-  template<class GV, int codim>
-  concept GridViewAllPartitions = GridViewCodim<GV,codim> &&
-    GridViewPartition<GV,codim,Dune::PartitionIteratorType::InteriorBorder_Partition> &&
-    GridViewPartition<GV,codim,Dune::PartitionIteratorType::Overlap_Partition> &&
-    GridViewPartition<GV,codim,Dune::PartitionIteratorType::OverlapFront_Partition> &&
-    GridViewPartition<GV,codim,Dune::PartitionIteratorType::All_Partition> &&
-    GridViewPartition<GV,codim,Dune::PartitionIteratorType::Ghost_Partition>;
+  } && GridViewAllPartitions<GV,codim>;
 
   template<class GV, class Grid, int codim>
     requires Dune::Capabilities::hasEntityIterator<Grid,codim>::v
   void requireGridViewCodim()
-    requires GridViewAllPartitions<GV,codim> {}
+    requires GridViewCodim<GV,codim> {}
 
   template<class GV, class Grid, int codim>
     requires (not Dune::Capabilities::hasEntityIterator<Grid,codim>::v)
   void requireGridViewCodim() {}
 
-  template <class GV, int dim>
-  concept GridViewAllCodims = requires(std::make_integer_sequence<int,dim+1> dims)
+  template <class GV, int first, int last>
+  concept GridViewAllCodims = requires(std::make_integer_sequence<int,last-first> codims)
   {
-    []<int... d>(std::integer_sequence<int,d...>) requires
-      requires { (requireGridViewCodim<GV,typename GV::Grid,(dim-d)>(),...); } {} (dims);
+    []<int... c>(std::integer_sequence<int,c...>) requires
+      requires { (requireGridViewCodim<GV,typename GV::Grid,(first+c)>(),...); } {} (codims);
   };
 
 } // end namespace Impl
@@ -80,11 +82,11 @@ namespace Impl {
  */
 template<class GV>
 concept GridView = std::copyable<GV> &&
+  IndexSet<typename GV::IndexSet> &&
+  Intersection<typename GV::Intersection> &&
+  IntersectionIterator<typename GV::IntersectionIterator> &&
 requires(const GV gv, int codim, Dune::GeometryType type)
 {
-  requires IndexSet<typename GV::IndexSet>;
-  requires Intersection<typename GV::Intersection>;
-  requires IntersectionIterator<typename GV::IntersectionIterator>;
   typename GV::Traits;
   typename GV::ctype;
   { GV::conforming        } -> std::convertible_to<bool>;
@@ -103,7 +105,9 @@ requires(const GV gv, int codim, Dune::GeometryType type)
   {
     gv.communicate(handle, iface, dir);
   };
-} && Impl::GridViewAllCodims<GV, GV::dimension>;
+} &&
+Impl::GridViewCodim<GV,0> &&
+Impl::GridViewAllCodims<GV,1,GV::dimension+1>;
 
 }  // end namespace Dune::Concept
 

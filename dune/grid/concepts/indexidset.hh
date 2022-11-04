@@ -17,9 +17,8 @@ namespace Impl {
 
   template<class IS, int codim,
     class E = typename IS::template Codim<codim>::Entity>
-  concept IndexSetEntityCodim = requires(const IS is, int i, unsigned int sub_codim, const E& entity)
+  concept IndexSetEntityCodim = Entity<E> && requires(const IS is, int i, unsigned int sub_codim, const E& entity)
   {
-    requires Entity<E>;
     { is.template index<codim>(entity)                  } -> std::convertible_to<typename IS::IndexType>;
     { is.index(entity)                                  } -> std::convertible_to<typename IS::IndexType>;
     { is.template subIndex<codim>(entity, i, sub_codim) } -> std::convertible_to<typename IS::IndexType>;
@@ -27,11 +26,11 @@ namespace Impl {
     { is.contains(entity)                               } -> std::convertible_to<bool>;
   };
 
-  template<class IS, int dim>
-  concept AllIndexSetEntityCodims = requires(std::make_integer_sequence<int,dim+1> codims)
+  template<class IS, int first, int last>
+  concept IndexSetEntityAllCodims = requires(std::make_integer_sequence<int,last-first> codims)
   {
-    []<int... cc>(std::integer_sequence<int,cc...>)
-        requires (IndexSetEntityCodim<IS,cc> &&...) {} (codims);
+    []<int... c>(std::integer_sequence<int,c...>)
+        requires (IndexSetEntityCodim<IS,(first+c)> &&...) {} (codims);
   };
 
 } // end namespace Impl
@@ -51,26 +50,26 @@ concept IndexSet = requires(const IS is, Dune::GeometryType type, int sub_codim)
   { is.size(sub_codim)  } -> std::convertible_to<typename IS::IndexType>;
   requires std::integral<typename IS::IndexType>;
   typename IS::Types;
-  requires Impl::AllIndexSetEntityCodims<IS, IS::dimension>;
-};
+} &&
+Impl::IndexSetEntityCodim<IS,0> &&
+Impl::IndexSetEntityAllCodims<IS,1,IS::dimension+1>;
 
 
 namespace Impl {
 
   template<class IS, int codim,
     class E = typename IS::template Codim<codim>::Entity>
-  concept IdSetEntityCodim = requires(const IS is, const E& entity)
+  concept IdSetEntityCodim = Entity<E> && requires(const IS is, const E& entity)
   {
-    requires Entity<E>;
     { is.template id<codim>(entity) } -> std::convertible_to<typename IS::IdType>;
     { is.id(entity)                 } -> std::convertible_to<typename IS::IdType>;
   };
 
-  template<class IS, int dim>
-  concept AllIdSetEntityCodims = requires(std::make_integer_sequence<int,dim+1> codims)
+  template<class IS, int first, int last>
+  concept IdSetEntityAllCodims = requires(std::make_integer_sequence<int,last-first> codims)
   {
-    []<int... cc>(std::integer_sequence<int,cc...>)
-        requires (IdSetEntityCodim<IS,cc> &&...) {} (codims);
+    []<int... c>(std::integer_sequence<int,c...>)
+        requires (IdSetEntityCodim<IS,(first+c)> &&...) {} (codims);
   };
 
 } // end namespace Impl
@@ -85,8 +84,9 @@ template<class IS>
 concept IdSet = requires(const IS is, const typename IS::template Codim<0>::Entity& entity, int i, unsigned int codim)
 {
   { is.subId(entity,i,codim) } -> std::convertible_to<typename IS::IdType>;
-  requires Impl::AllIdSetEntityCodims<IS, IS::dimension>;
-};
+} &&
+Impl::IdSetEntityCodim<IS,0> &&
+Impl::IdSetEntityAllCodims<IS,1,IS::dimension+1>;
 
 } // end namespace Dune::Concept
 
