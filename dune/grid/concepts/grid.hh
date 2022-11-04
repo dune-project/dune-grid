@@ -67,11 +67,11 @@ namespace Impl {
       };
   } && GridCodimAllPartitions<G,codim>;
 
-  template<class G, int dim>
-  concept GridAllCodims = requires(std::make_integer_sequence<int,dim+1> codims)
+  template<class G, int first, int last>
+  concept GridAllCodims = requires(std::make_integer_sequence<int,last-first> codims)
   {
-    []<int... cc>(std::integer_sequence<int,cc...>)
-        requires (GridCodim<G,cc> &&...) {} (codims);
+    []<int... c>(std::integer_sequence<int,c...>)
+        requires (GridCodim<G,(first+c)> &&...) {} (codims);
   };
 
 } // end namespace Impl
@@ -132,7 +132,9 @@ requires(const G cg, int level, int codim, Dune::GeometryType type)
     g.globalRefine(refCount);
     g.postAdapt();
   };
-} && Impl::GridAllCodims<G,G::dimension>;
+} &&
+Impl::GridCodim<G,0> &&
+Impl::GridAllCodims<G,1,G::dimension+1>;
 
 } // end namespace Dune::Concept
 

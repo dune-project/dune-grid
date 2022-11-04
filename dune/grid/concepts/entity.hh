@@ -62,11 +62,11 @@ namespace Impl {
     { e.template subEntity<codim>(subEntity) } -> EntityGeneral;
   };
 
-  template<class E, int dim>
-  concept EntityAllCodimsExtended = requires(std::make_integer_sequence<int,dim+1> dims)
+  template<class E, int first, int last>
+  concept EntityAllCodimsExtended = requires(std::make_integer_sequence<int,last-first> codims)
   {
-    []<int... d>(std::integer_sequence<int,d...>)
-        requires (EntityCodimExtended<E,(dim-d)> &&...) {} (dims);
+    []<int... c>(std::integer_sequence<int,c...>)
+        requires (EntityCodimExtended<E,(first+c)> &&...) {} (codims);
   };
 
 } // end namespace Impl
@@ -94,7 +94,9 @@ requires(const E e, int maxLevel)
   { e.hasBoundaryIntersections() } -> std::convertible_to<bool>;
 
   requires std::same_as<E, typename E::template Codim<0>::Entity>;
-} && Impl::EntityAllCodimsExtended<E, E::dimension>;
+} &&
+Impl::EntityCodimExtended<E,0> &&
+Impl::EntityAllCodimsExtended<E,1,E::dimension+1>;
 
 /**
  * @brief Model of a grid entity
