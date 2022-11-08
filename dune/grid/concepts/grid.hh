@@ -78,9 +78,25 @@ namespace Impl {
 
 
 /**
- * @brief Model of a grid
- * @ingroup GridConcepts
- * @details Dune::Grid is a template for this model
+ * \brief Requirements for implementations of the Dune::Grid interface.
+ * \ingroup GridConcepts
+ *
+ * The `Grid` concept defines interface requirements of a parallel, in general
+ * nonconforming, locally refined and hierarchical finite element mesh.
+ * It consists of sub-concepts for `Dune::Concept::GridView`, `Dune::Concept::IndexSet`,
+ * `Dune::Concept::IdSet`, and `Dune::Concept::Intersection`.
+ *
+ * See \ref Dune::Grid for an "abstract" interface definition of this concept.
+ *
+ * \par Models:
+ * - `Dune::AlbertaGrid<dim,dow>`
+ * - `Dune::GeometryGrid<G,F>` if `G` is a model of `Dune::Concept::Grid`.
+ * - `Dune::IdentityGrid<G>` if `G` is a model of `Dune::Concept::Grid`.
+ * - `Dune::OneDGrid`
+ * - `Dune::UGGrid<dim>`
+ * - `Dune::YaspGrid<dim, Coordinates>`
+ *
+ * \hideinitializer
  */
 template<class G>
 concept Grid =
