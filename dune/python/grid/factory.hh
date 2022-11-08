@@ -111,7 +111,7 @@ namespace Dune
             insertVertices( data.template cast< pybind11::buffer >().request(), factory );
             return;
           }
-          catch( const pybind11::error_already_set & )
+          catch (const pybind11::type_error &)
           {}
 
           try
@@ -191,7 +191,7 @@ namespace Dune
             insertElements( type, data.template cast< pybind11::buffer >().request(), factory );
             return;
           }
-          catch( const pybind11::error_already_set & )
+          catch (const pybind11::type_error &)
           {}
 
           try
