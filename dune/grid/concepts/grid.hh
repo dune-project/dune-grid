@@ -25,6 +25,7 @@
 
 
 /*!@defgroup GridConcepts Grid Concepts
+ * @ingroup Grid
  * @{
  * @par Description
  *  This group gathers several concepts related to grids.
