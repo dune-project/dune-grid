@@ -35,11 +35,10 @@
 namespace Dune::Concept {
 namespace Impl {
 
-  template<class G, int codim, Dune::PartitionIteratorType partition,
-    class Traits = typename G::template Codim<codim>::template Partition<partition>>
+  template<class G, int codim, Dune::PartitionIteratorType partition>
   concept GridCodimPartition =
-    EntityIterator<typename Traits::LevelIterator> &&
-    EntityIterator<typename Traits::LeafIterator>;
+    EntityIterator<typename G::template Codim<codim>::template Partition<partition>::LevelIterator> &&
+    EntityIterator<typename G::template Codim<codim>::template Partition<partition>::LeafIterator>;
 
   template<class G, int codim>
   concept GridCodimAllPartitions =
@@ -50,16 +49,15 @@ namespace Impl {
     GridCodimPartition<G,codim,Dune::PartitionIteratorType::All_Partition> &&
     GridCodimPartition<G,codim,Dune::PartitionIteratorType::Ghost_Partition>;
 
-  template<class G, int codim,
-    class Traits = typename G::template Codim<codim>>
+  template<class G, int codim>
   concept GridCodim =
-    Geometry<typename Traits::Geometry> &&
-    Geometry<typename Traits::LocalGeometry> &&
-    Entity<typename Traits::Entity> &&
-    EntitySeed<typename Traits::EntitySeed> &&
-  requires(const G cg, const typename Traits::EntitySeed& seed)
+    Geometry<typename G::template Codim<codim>::Geometry> &&
+    Geometry<typename G::template Codim<codim>::LocalGeometry> &&
+    Entity<typename G::template Codim<codim>::Entity> &&
+    EntitySeed<typename G::template Codim<codim>::EntitySeed> &&
+  requires(const G cg, const typename G::template Codim<codim>::EntitySeed& seed)
   {
-    { cg.entity(seed) } -> std::convertible_to<typename Traits::Entity>;
+    { cg.entity(seed) } -> std::convertible_to<typename G::template Codim<codim>::Entity>;
 
     requires (not Dune::Capabilities::canCommunicate<G,codim>::v) ||
       requires(G g, Archetypes::CommDataHandle<std::byte>& handle)

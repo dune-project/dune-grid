@@ -21,14 +21,13 @@
 namespace Dune::Concept {
 namespace Impl {
 
-  template<class GV, int codim, Dune::PartitionIteratorType partition,
-    class Traits = typename GV::template Codim<codim>::template Partition<partition>>
+  template<class GV, int codim, Dune::PartitionIteratorType partition>
   concept GridViewPartition =
-    EntityIterator<typename Traits::Iterator> &&
+    EntityIterator<typename GV::template Codim<codim>::template Partition<partition>::Iterator> &&
   requires(const GV gv)
   {
-    { gv.template begin<codim,partition>() } -> std::convertible_to<typename Traits::Iterator>;
-    { gv.template end<codim,partition>()   } -> std::convertible_to<typename Traits::Iterator>;
+    { gv.template begin<codim,partition>() } -> std::convertible_to<typename GV::template Codim<codim>::template Partition<partition>::Iterator>;
+    { gv.template end<codim,partition>()   } -> std::convertible_to<typename GV::template Codim<codim>::template Partition<partition>::Iterator>;
   };
 
   template<class GV, int codim>
@@ -39,18 +38,17 @@ namespace Impl {
     GridViewPartition<GV,codim,Dune::PartitionIteratorType::All_Partition> &&
     GridViewPartition<GV,codim,Dune::PartitionIteratorType::Ghost_Partition>;
 
-  template<class GV, int codim,
-    class Traits = typename GV::template Codim<codim>>
+  template<class GV, int codim>
   concept GridViewCodim =
-    Geometry<typename Traits::Geometry> &&
-    Geometry<typename Traits::LocalGeometry> &&
-    EntityIterator<typename Traits::Iterator> &&
+    Geometry<typename GV::template Codim<codim>::Geometry> &&
+    Geometry<typename GV::template Codim<codim>::LocalGeometry> &&
+    EntityIterator<typename GV::template Codim<codim>::Iterator> &&
   requires(const GV gv)
   {
-    { gv.template begin<codim>() } -> std::convertible_to<typename Traits::Iterator>;
-    { gv.template end<codim>()   } -> std::convertible_to<typename Traits::Iterator>;
+    { gv.template begin<codim>() } -> std::convertible_to<typename GV::template Codim<codim>::Iterator>;
+    { gv.template end<codim>()   } -> std::convertible_to<typename GV::template Codim<codim>::Iterator>;
 
-    requires (codim != 0) || requires(const typename Traits::Entity& entity)
+    requires (codim != 0) || requires(const typename GV::template Codim<codim>::Entity& entity)
     {
       { gv.ibegin(entity) } -> std::convertible_to<typename GV::IntersectionIterator>;
       { gv.iend(entity)   } -> std::convertible_to<typename GV::IntersectionIterator>;
