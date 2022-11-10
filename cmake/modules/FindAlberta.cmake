@@ -35,6 +35,15 @@ The following variables may be set to influence this module's behavior:
   An environmental variable to influence the search procedure of pkg-config
   for finding Alberta.
 
+``Alberta_ROOT``
+  A directory that contains the sub directories `lib/pkgconfig` with
+  pkg-config files as above. This directory takes precedence over any system
+  path that also contains Alberta pkg-config files.
+
+``Alberta_DEBUG``
+  If set to `true` try to find and use the debugging library. This requires
+  that a corresponding `alberta-grid_[n]d_debug.pc` file can be found.
+
 ``Alberta_FIND_QUIETLY``
   If set to `ON` do not print detailed information during search for
   Alberta using pkg-config. This variable is automatically if `find_package`
@@ -52,6 +61,11 @@ set_package_properties("Alberta" PROPERTIES
 
 set(ALBERTA_MAX_WORLD_DIM "3" CACHE STRING "Maximal world dimension to check for Alberta library.")
 
+if(Alberta_DEBUG)
+  set(ALBERTA_DBG "_debug")
+  mark_as_advanced(ALBERTA_DBG)
+endif()
+
 set(ALBERTA_WORLD_DIMS)
 set(ALBERTA_GRID_VERSION)
 set(ALBERTA_GRID_PREFIX)
@@ -59,23 +73,34 @@ set(ALBERTA_GRID_PREFIX)
 # search for Alberta using pkg-config
 find_package(PkgConfig)
 if(PkgConfig_FOUND)
+  if(Alberta_ROOT)
+    find_path(Alberta_PKG_CONFIG_PATH
+      NAMES alberta-utilities.pc alberta-utilities_debug.pc
+      HINTS ${Alberta_ROOT}
+      PATH_SUFFIXES lib/pkgconfig
+      NO_DEFAULT_PATH)
+  endif()
+  set(ENV{PKG_CONFIG_PATH} "${Alberta_PKG_CONFIG_PATH}:$ENV{PKG_CONFIG_PATH}")
   foreach(dim RANGE 1 ${ALBERTA_MAX_WORLD_DIM})
-    if(Alberta_FIND_VERSION)
-      set(ALBERTA_GRID_DIM_MODULE "alberta-grid_${dim}d>=${Alberta_FIND_VERSION}")
-    else()
-      set(ALBERTA_GRID_DIM_MODULE "alberta-grid_${dim}d")
-    endif()
+    set(ALBERTA_PKGS "alberta-grid_${dim}d${ALBERTA_DBG}" "alberta-grid_${dim}d")
+    list(REMOVE_DUPLICATES ALBERTA_PKGS)
+    foreach(pkg ${ALBERTA_PKGS})
+      if(Alberta_FIND_VERSION)
+        string(APPEND pkg ">=${Alberta_FIND_VERSION}")
+      endif()
 
-    if(Alberta_FIND_QUIETLY)
-      pkg_check_modules(Alberta${dim}d ${ALBERTA_GRID_DIM_MODULE} QUIET IMPORTED_TARGET GLOBAL)
-    else()
-      pkg_check_modules(Alberta${dim}d ${ALBERTA_GRID_DIM_MODULE} IMPORTED_TARGET GLOBAL)
-    endif()
-    if(Alberta${dim}d_FOUND)
-      list(APPEND ALBERTA_WORLD_DIMS ${dim})
-      set(ALBERTA_GRID_VERSION ${Alberta${dim}d_VERSION})
-      set(ALBERTA_GRID_PREFIX ${Alberta${dim}d_PREFIX})
-    endif()
+      if(Alberta_FIND_QUIETLY)
+        pkg_check_modules(Alberta${dim}d QUIET IMPORTED_TARGET GLOBAL ${pkg})
+      else()
+        pkg_check_modules(Alberta${dim}d IMPORTED_TARGET GLOBAL ${pkg})
+      endif()
+      if(Alberta${dim}d_FOUND)
+        list(APPEND ALBERTA_WORLD_DIMS ${dim})
+        set(ALBERTA_GRID_VERSION ${Alberta${dim}d_VERSION})
+        set(ALBERTA_GRID_PREFIX ${Alberta${dim}d_PREFIX})
+        break()
+      endif()
+    endforeach(pkg)
   endforeach(dim)
 endif()
 
