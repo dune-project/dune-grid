@@ -7,7 +7,7 @@ FindAlberta
 
 Find Alberta, an Adaptive multiLevel finite element toolbox using Bisectioning
 refinement and Error control by Residual Techniques for scientific Applications.
-(see https://gitlab.mathematik.uni-stuttgart.de/ians-nmh/alberta/alberta3)
+(see https://gitlab.com/alberta-fem/alberta3)
 
 Imported targets
 ^^^^^^^^^^^^^^^^
@@ -57,6 +57,7 @@ The following variables may be set to influence this module's behavior:
 # text for feature summary
 include(FeatureSummary)
 set_package_properties("Alberta" PROPERTIES
+  URL "https://gitlab.com/alberta-fem/alberta3"
   DESCRIPTION "An adaptive hierarchical finite element toolbox and grid manager")
 
 set(ALBERTA_MAX_WORLD_DIM "3" CACHE STRING "Maximal world dimension to check for Alberta library.")
