@@ -61,11 +61,6 @@ set_package_properties("Alberta" PROPERTIES
 
 set(ALBERTA_MAX_WORLD_DIM "3" CACHE STRING "Maximal world dimension to check for Alberta library.")
 
-if(Alberta_DEBUG)
-  set(ALBERTA_DBG "_debug")
-  mark_as_advanced(ALBERTA_DBG)
-endif()
-
 set(ALBERTA_WORLD_DIMS)
 set(ALBERTA_GRID_VERSION)
 set(ALBERTA_GRID_PREFIX)
@@ -73,17 +68,15 @@ set(ALBERTA_GRID_PREFIX)
 # search for Alberta using pkg-config
 find_package(PkgConfig)
 if(PkgConfig_FOUND)
+  set(_old_cmake_prefix_path ${CMAKE_PREFIX_PATH})
   if(Alberta_ROOT)
-    find_path(Alberta_PKG_CONFIG_PATH
-      NAMES alberta-utilities.pc alberta-utilities_debug.pc
-      HINTS ${Alberta_ROOT}
-      PATH_SUFFIXES lib/pkgconfig
-      NO_DEFAULT_PATH)
+    list(APPEND CMAKE_PREFIX_PATH ${Alberta_ROOT})
   endif()
-  set(ENV{PKG_CONFIG_PATH} "${Alberta_PKG_CONFIG_PATH}:$ENV{PKG_CONFIG_PATH}")
   foreach(dim RANGE 1 ${ALBERTA_MAX_WORLD_DIM})
-    set(ALBERTA_PKGS "alberta-grid_${dim}d${ALBERTA_DBG}" "alberta-grid_${dim}d")
-    list(REMOVE_DUPLICATES ALBERTA_PKGS)
+    set(ALBERTA_PKGS "alberta-grid_${dim}d")
+    if(Alberta_DEBUG)
+      list(INSERT ALBERTA_PKGS 0 "alberta-grid_${dim}d_debug")
+    endif()
     foreach(pkg ${ALBERTA_PKGS})
       if(Alberta_FIND_VERSION)
         string(APPEND pkg ">=${Alberta_FIND_VERSION}")
@@ -102,6 +95,7 @@ if(PkgConfig_FOUND)
       endif()
     endforeach(pkg)
   endforeach(dim)
+  set(CMAKE_PREFIX_PATH ${_old_cmake_prefix_path})
 endif()
 
 include(FindPackageHandleStandardArgs)
