@@ -17,8 +17,12 @@ set(DUNE_GRID_EXTRA_UTILS "" CACHE BOOL
 find_package(METIS)
 find_package(ParMETIS)
 include(AddParMETISFlags)
+
 find_package(Alberta 3.0)
 include(AddAlbertaFlags)
+set_package_properties(Alberta PROPERTIES TYPE OPTIONAL
+  PURPOSE "Provides the grid manager AlbertaGrid and file reader AlbertaReader")
+
 include(UseUG)
 
 set(DEFAULT_DGF_GRIDDIM 1)
