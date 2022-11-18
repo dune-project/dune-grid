@@ -112,13 +112,31 @@ namespace Dune
     inline static std::enable_if_t< Capabilities::hasBackupRestoreFacilities< Grid >::v >
     registerHierarchicalGridPicklingSupport ( pybind11::class_< Grid, options... > cls, PriorityTag< 1 > )
     {
-      cls.def( pybind11::pickle( [] ( const Grid &self ) -> pybind11::bytes {
+      cls.def( pybind11::pickle( [](const pybind11::object &self) { // __getstate__
+          Grid& grid = self.cast<Grid&>();
           std::ostringstream stream;
-          BackupRestoreFacility< Grid >::backup( self, stream );
-          return stream.str();
-        }, [] ( pybind11::bytes state ) -> std::shared_ptr< Grid > {
+          BackupRestoreFacility< Grid >::backup( grid, stream );
+          /*
+          pybind11::dict d;
+          if (pybind11::hasattr(self, "__dict__")) {
+            d = self.attr("__dict__");
+          }
+          return pybind11::make_tuple(pybind11::bytes(stream.str()),d);
+          */
+          return pybind11::make_tuple(pybind11::bytes(stream.str()));
+        }, [] ( pybind11::tuple t) { // __setstate__
+          if (t.size() != 1)
+            throw std::runtime_error("Invalid state in HGrid::setstate with "+std::to_string(t.size())+"arguments!");
+          pybind11::bytes state = t[0];
           std::istringstream stream( state );
-          return std::shared_ptr< Grid >( BackupRestoreFacility< Grid >::restore( stream ) );
+          /*
+          auto py_state = t[1].cast<pybind11::dict>();
+          return std::make_pair(
+               std::shared_ptr< Grid >( BackupRestoreFacility< Grid >::restore( stream ) ),
+               py_state);
+          */
+          return std::shared_ptr< Grid >(
+                    BackupRestoreFacility< Grid >::restore( stream ) );
         } ) );
     }
 

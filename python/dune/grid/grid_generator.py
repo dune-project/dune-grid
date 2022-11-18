@@ -321,15 +321,12 @@ def addHAttr(module):
         dune.geometry.module(d)
     setattr(module.HierarchicalGrid,"levelView",levelView)
     setattr(module.HierarchicalGrid,"persistentContainer",persistentContainer)
-    # setattr(module.HierarchicalGrid,"backup",backup)
-    addAttr(module, module.LeafGrid)
 
 gvGenerator = SimpleGenerator("GridView", "Dune::Python")
 def viewModule(includes, typeName, *args, **kwargs):
     includes = includes + ["dune/python/grid/gridview.hh"]
     moduleName = "view_" + hashIt(typeName)
     module = gvGenerator.load(includes, typeName, moduleName, *args, **kwargs)
-    addAttr(module, module.GridView)
     return module
 
 def levelView(hgrid,level):
