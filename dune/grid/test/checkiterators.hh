@@ -90,13 +90,11 @@ inline void CheckCodimIterators< GridView, codim, true >
   const auto &idSet = gridView.grid().localIdSet();
 
   std::map< IdType, int > count;
-  int size = 0;
 
   const auto codimEnd = gridView.template end< codim >();
   for( auto it = gridView.template begin< codim >(); it != codimEnd; ++it )
   {
     ++count[ idSet.id( *it ) ];
-    ++size;
   }
 
   const auto elementEnd = gridView.template end< 0 >();
