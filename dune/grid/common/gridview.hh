@@ -205,18 +205,25 @@ namespace Dune
       return impl().size( type );
     }
 
+  private:
+
+    template<class I>
+    using HasIsConformingMethod = decltype(std::declval<I>().isConforming());
+
+  public:
+
     /** \brief return true if current state of grid view represents a conforming grid */
     bool isConforming () const
     {
       // if implementation provides a method isConforming, call it
-      if constexpr ( CheckIsConformingImpl< Implementation >::type::value )
+      if constexpr (Std::is_detected_v<HasIsConformingMethod, Implementation>)
       {
         return impl().isConforming();
       }
       else
       {
         // otherwise default to static conforming flag
-        return this->isConformingDefaultImplementation();
+        return bool(conforming);
       }
     }
 
@@ -354,25 +361,6 @@ namespace Dune
       impl().communicate(data,iftype,dir);
       return DeprecatedMethodEmptyFuture();
     }
-
-    template <class M>
-    class CheckIsConformingImpl
-    {
-      // check for 'bool isConforming () const'
-      template <class T, class R> static std::true_type testSignature(R (T::*)() const);
-
-      template <class T>
-      static decltype(testSignature(&T::isConforming)) test(std::nullptr_t);
-
-      template <class T>
-      static std::false_type test(...);
-
-    public:
-      using type = decltype(test<M>(nullptr));
-    };
-
-    [[deprecated("GridView implementation is missing a method 'bool isConforming() const'")]]
-    bool isConformingDefaultImplementation() const { return bool(conforming); }
 
     Implementation impl_;
   };
