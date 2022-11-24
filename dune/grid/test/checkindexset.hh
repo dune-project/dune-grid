@@ -240,7 +240,7 @@ namespace Dune
     sout <<"\n\nStart consistency check of index set \n\n";
 
     // ////////////////////////////////////////////////////////////////
-    //   Check whether geomTypes() returns correct result
+    //   Check whether types() returns correct result
     // ////////////////////////////////////////////////////////////////
 
     std :: set< GeometryType > geometryTypes;

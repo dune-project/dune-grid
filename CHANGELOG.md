@@ -7,6 +7,11 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 
 ## Changelog
 
+- Removed the deprecated method `geomTypes()` from all the grid (indexset) implementations since
+  they are neither used no supported b the grid interface since ages. Use `types()` instead. Note,
+  that `types()` returns `IndexSet::Types` that might be different from `std::vector<GeometryType>`
+  and also is returned by values instead of reference.
+
 - Provide `communicate()` method in `OneDGrid` and `IdentityGrid`
 
 - Grid concepts are here! A `Grid` can now be inspected and also its components checked for valid

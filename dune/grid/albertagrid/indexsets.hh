@@ -131,17 +131,11 @@ namespace Dune
       return indexStack_[ codim ].size();
     }
 
+    //! obtain all geometry types of entities in domain
     Types types ( int codim ) const
     {
       assert( (codim >= 0) && (codim <= dimension) );
       return {{ GeometryTypes::simplex( dimension - codim ) }};
-    }
-
-    //! return geometry types this set has indices for
-    const std::vector< GeometryType > &geomTypes( int codim ) const
-    {
-      assert( (codim >= 0) && (codim <= dimension) );
-      return geomTypes_[ codim ];
     }
 
     IndexType subIndex ( const ElementInfo &elementInfo, int i, unsigned int codim ) const
@@ -212,9 +206,6 @@ namespace Dune
 
     // dof vectors storing the (persistent) numbering
     IndexVectorPointer entityNumbers_[ dimension+1 ];
-
-    // all geometry types contained in the grid
-    std::vector< GeometryType > geomTypes_[ dimension+1 ];
   };
 
   template< int dim, int dimworld >
@@ -364,7 +355,6 @@ namespace Dune
       for( int codim = 0; codim <= dimension; ++codim )
       {
         indices_[ codim ] = 0;
-        geomTypes_[ codim ].push_back( GeometryTypes::simplex( dimension - codim ) );
       }
     }
 
@@ -436,12 +426,6 @@ namespace Dune
       return {{ GeometryTypes::simplex( dimension - codim ) }};
     }
 
-    const std::vector< GeometryType > &geomTypes( int codim ) const
-    {
-      assert( (codim >= 0) && (codim <= dimension) );
-      return geomTypes_[ codim ];
-    }
-
     template< class Iterator >
     void update ( const Iterator &begin, const Iterator &end )
     {
@@ -496,9 +480,6 @@ namespace Dune
 
     // the size of each codimension
     IndexType size_[ dimension+1 ];
-
-    // all geometry types contained in the grid
-    std::vector< GeometryType > geomTypes_[ dimension+1 ];
   };
 
 

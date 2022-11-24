@@ -57,13 +57,8 @@ namespace Dune {
       return grid_->size(level_,codim);
     }
 
+    //! obtain all geometry types of entities in domain
     std::vector< GeometryType > types ( int codim ) const { return myTypes_[ codim ]; }
-
-    /** \brief Deliver all geometry types used in this grid */
-    const std::vector<GeometryType>& geomTypes (int codim) const
-    {
-      return myTypes_[codim];
-    }
 
     /** \brief Return true if e is contained in the index set.
 
@@ -210,13 +205,8 @@ namespace Dune {
       return 0;
     }
 
+    //! obtain all geometry types of entities in domain
     std::vector< GeometryType > types ( int codim ) const { return myTypes_[ codim ]; }
-
-    /** deliver all geometry types used in this grid */
-    const std::vector<GeometryType>& geomTypes (int codim) const
-    {
-      return myTypes_[codim];
-    }
 
     /** \brief Return true if e is contained in the index set.
 
