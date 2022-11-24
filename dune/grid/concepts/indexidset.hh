@@ -9,6 +9,7 @@
 #include <type_traits>
 
 #include <dune/common/indices.hh>
+#include <dune/common/concepts/container.hh>
 #include <dune/geometry/type.hh>
 #include <dune/grid/concepts/entity.hh>
 
@@ -17,13 +18,13 @@ namespace Impl {
 
   template<class IS, int codim>
   concept IndexSetEntityCodim = Entity<typename IS::template Codim<codim>::Entity> &&
-    requires(const IS is, int i, unsigned int sub_codim, const typename IS::template Codim<codim>::Entity& entity)
+    requires(const IS is, int i, unsigned int cc, const typename IS::template Codim<codim>::Entity& entity)
   {
-    { is.template index<codim>(entity)                  } -> std::convertible_to<typename IS::IndexType>;
-    { is.index(entity)                                  } -> std::convertible_to<typename IS::IndexType>;
-    { is.template subIndex<codim>(entity, i, sub_codim) } -> std::convertible_to<typename IS::IndexType>;
-    { is.subIndex(entity, i, sub_codim)                 } -> std::convertible_to<typename IS::IndexType>;
-    { is.contains(entity)                               } -> std::convertible_to<bool>;
+    { is.template index<codim>(entity)         } -> std::same_as<typename IS::IndexType>;
+    { is.index(entity)                         } -> std::same_as<typename IS::IndexType>;
+    { is.template subIndex<codim>(entity,i,cc) } -> std::same_as<typename IS::IndexType>;
+    { is.subIndex(entity,i,cc)                 } -> std::same_as<typename IS::IndexType>;
+    { is.contains(entity)                      } -> std::convertible_to<bool>;
   };
 
   template<class IS, int first, int last>
@@ -42,14 +43,16 @@ namespace Impl {
  * for this model
  */
 template<class IS>
-concept IndexSet = requires(const IS is, Dune::GeometryType type, int sub_codim)
+concept IndexSet = requires(const IS is, Dune::GeometryType type, int codim)
 {
-  { IS::dimension       } -> std::convertible_to<int>;
-  { is.types(sub_codim) } -> std::convertible_to<typename IS::Types>;
-  { is.size(type)       } -> std::convertible_to<typename IS::IndexType>;
-  { is.size(sub_codim)  } -> std::convertible_to<typename IS::IndexType>;
+  { IS::dimension   } -> std::convertible_to<int>;
+
+  requires RandomAccessContainer<typename IS::Types>;
+  { is.types(codim) } -> std::same_as<typename IS::Types>;
+
   requires std::integral<typename IS::IndexType>;
-  typename IS::Types;
+  { is.size(type)   } -> std::convertible_to<typename IS::IndexType>;
+  { is.size(codim)  } -> std::convertible_to<typename IS::IndexType>;
 } &&
 Impl::IndexSetEntityCodim<IS,0> &&
 Impl::IndexSetEntityAllCodims<IS,1,IS::dimension+1>;
