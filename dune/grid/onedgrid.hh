@@ -69,7 +69,10 @@ namespace Dune {
         Communication<No_Comm>,
         OneDGridLevelGridViewTraits,
         OneDGridLeafGridViewTraits,
-        OneDGridEntitySeed>
+        OneDGridEntitySeed,
+        OneDGridGeometry,
+        unsigned int,
+        std::array<GeometryType,1> >
     Traits;
   };
 

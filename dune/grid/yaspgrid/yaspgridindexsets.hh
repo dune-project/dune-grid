@@ -21,10 +21,10 @@ namespace Dune {
    */
   template<class GridImp, bool isLeafIndexSet>
   class YaspIndexSet
-    : public IndexSet< GridImp, YaspIndexSet< GridImp, isLeafIndexSet >, unsigned int >
+    : public IndexSet< GridImp, YaspIndexSet< GridImp, isLeafIndexSet >, unsigned int, std::array<GeometryType, 1> >
   {
     typedef YaspIndexSet< GridImp, isLeafIndexSet > This;
-    typedef IndexSet< GridImp, This, unsigned int > Base;
+    typedef IndexSet< GridImp, This, unsigned int, std::array<GeometryType, 1> > Base;
 
   public:
     typedef typename Base::IndexType IndexType;
@@ -37,10 +37,6 @@ namespace Dune {
         level( l )
     {
       assert(not isLeafIndexSet);
-
-      // contains a single element type;
-      for (int codim=0; codim<=GridImp::dimension; codim++)
-        mytypes[codim].push_back(GeometryTypes::cube(GridImp::dimension-codim));
     }
 
     /** \brief Level grid view constructor stores reference to a grid and level */
@@ -48,10 +44,6 @@ namespace Dune {
       : grid( g )
     {
       assert(isLeafIndexSet);
-
-      // contains a single element type;
-      for (int codim=0; codim<=GridImp::dimension; codim++)
-        mytypes[codim].push_back(GeometryTypes::cube(GridImp::dimension-codim));
     }
 
     //! get index of an entity
@@ -95,12 +87,14 @@ namespace Dune {
     }
 
     //! obtain all geometry types of entities in domain
-    std::vector< GeometryType > types ( int codim ) const { return mytypes[ codim ]; }
+    static constexpr std::array<GeometryType, 1> types (int codim)
+    {
+      return { GeometryTypes::cube(GridImp::dimension - codim) };
+    }
 
   private:
     const GridImp& grid;
     int level;
-    std::vector<GeometryType> mytypes[std::remove_const<GridImp>::type::dimension+1];
   };
 
 }   // namespace Dune

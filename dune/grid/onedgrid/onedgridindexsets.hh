@@ -19,7 +19,8 @@
 namespace Dune {
 
   template<class GridImp>
-  class OneDGridLevelIndexSet : public IndexSet<GridImp,OneDGridLevelIndexSet<GridImp> >
+  class OneDGridLevelIndexSet :
+    public IndexSet<GridImp,OneDGridLevelIndexSet<GridImp>,unsigned int,std::array<GeometryType,1> >
   {
   public:
 
@@ -58,7 +59,10 @@ namespace Dune {
     }
 
     //! obtain all geometry types of entities in domain
-    std::vector< GeometryType > types ( int codim ) const { return myTypes_[ codim ]; }
+    static constexpr std::array<GeometryType, 1> types (int codim)
+    {
+      return { GeometryTypes::cube(1-codim) };
+    }
 
     /** \brief Return true if e is contained in the index set.
 
@@ -89,22 +93,6 @@ namespace Dune {
 
       numVertices_ = numVertices;
       numElements_ = numElements;
-
-      // ///////////////////////////////////////////////
-      //   Update the list of geometry types present
-      // ///////////////////////////////////////////////
-      if (numElements_>0) {
-        myTypes_[0].resize(1);
-        myTypes_[0][0] = GeometryTypes::line;
-      } else
-        myTypes_[0].resize(0);
-
-      if (numVertices_>0) {
-        myTypes_[1].resize(1);
-        myTypes_[1][0] = GeometryTypes::vertex;
-      } else
-        myTypes_[1].resize(0);
-
     }
 
     /** \todo Should be private */
@@ -139,14 +127,11 @@ namespace Dune {
 
     int numElements_;
     int numVertices_;
-
-    /** \brief The GeometryTypes present for each codim */
-    std::vector<GeometryType> myTypes_[2];
   };
 
   template<class GridImp>
   class OneDGridLeafIndexSet :
-    public IndexSet<GridImp,OneDGridLeafIndexSet<GridImp> >
+    public IndexSet<GridImp,OneDGridLeafIndexSet<GridImp>,unsigned int,std::array<GeometryType,1> >
   {
   public:
     //! constructor stores reference to a grid and level
@@ -206,7 +191,10 @@ namespace Dune {
     }
 
     //! obtain all geometry types of entities in domain
-    std::vector< GeometryType > types ( int codim ) const { return myTypes_[ codim ]; }
+    static constexpr std::array<GeometryType, 1> types (int codim)
+    {
+      return { GeometryTypes::cube(1-codim) };
+    }
 
     /** \brief Return true if e is contained in the index set.
 
@@ -230,22 +218,6 @@ namespace Dune {
 
       numVertices_ = numVertices;
       numElements_ = numElements;
-
-      // ///////////////////////////////////////////////
-      //   Update the list of geometry types present
-      // ///////////////////////////////////////////////
-      if (numElements_>0) {
-        myTypes_[0].resize(1);
-        myTypes_[0][0] = GeometryTypes::line;
-      } else
-        myTypes_[0].resize(0);
-
-      if (numVertices_>0) {
-        myTypes_[1].resize(1);
-        myTypes_[1][0] = GeometryTypes::vertex;
-      } else
-        myTypes_[1].resize(0);
-
     }
 
     /** \todo Should be private */
@@ -289,9 +261,6 @@ namespace Dune {
 
     int numElements_;
     int numVertices_;
-
-    /** \brief The GeometryTypes present for each codim */
-    std::vector<GeometryType> myTypes_[2];
   };
 
 
