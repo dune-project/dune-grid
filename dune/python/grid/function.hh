@@ -86,6 +86,8 @@ namespace Dune
         typedef typename GridFunctionTraits< GridFunction >::Range Range;
         cls.def_property_readonly( "grid", [] ( const GridFunction &self ) -> pybind11::handle
                     { return pybind11::cast(Dune::Python::gridView( self )); } );
+        cls.def_property_readonly( "gridView", [] ( const GridFunction &self ) -> pybind11::handle
+                    { return pybind11::cast(Dune::Python::gridView( self )); } );
         cls.def_property_readonly( "dimRange", [] ( pybind11::object self ) { return pybind11::int_( DimRange< Range >::value ); } );
         cls.def( "addToVTKWriter", &addToVTKWriter< GridFunction >, pybind11::keep_alive< 3, 1 >(), "name"_a, "writer"_a, "dataType"_a );
 
@@ -231,6 +233,7 @@ namespace Dune
           return pybind11::cast< pybind11::array_t< double > >( evaluate_( entity, x ) );
         }
 
+        pybind11::function evaluate() const { return evaluate_; }
       private:
         pybind11::function evaluate_;
       };
@@ -252,6 +255,8 @@ namespace Dune
         {
           return evaluate_( entity, x );
         }
+
+        Evaluate evaluate() const { return evaluate_; }
       private:
         Evaluate evaluate_;
       };
@@ -288,6 +293,29 @@ namespace Dune
               return new GridFunction( gridView,
                          PyGridFunctionEvaluator<GridView,dimRange,Evaluate>(callable) );
               }), "gridView"_a, "callable"_a, pybind11::keep_alive<1,2>() );
+        gf.first.def( pybind11::pickle( [](const pybind11::object &self) { // __getstate__
+            GridFunction& gv = self.cast<GridFunction&>();
+            /* Return a tuple that fully encodes the state of the object */
+            pybind11::dict d;
+            if (pybind11::hasattr(self, "__dict__")) {
+              d = self.attr("__dict__");
+            }
+            return pybind11::make_tuple(gv.gridView(),gv.localEvaluator().evaluate(),d);
+          },
+        [](pybind11::tuple t) { // __setstate__
+            if (t.size() != 3)
+                throw std::runtime_error("Invalid state in GridFunction::setstate with "+std::to_string(t.size())+"arguments!");
+            pybind11::handle pygv = t[0];
+            GridView& gv = pygv.cast<GridView&>();
+            pybind11::handle pyeval = t[1];
+            Evaluate callable = pyeval.cast<Evaluate>();
+            /* Create a new C++ instance */
+            auto py_state = t[2].cast<pybind11::dict>();
+            return std::make_pair(
+                   new GridFunction(gv,PyGridFunctionEvaluator<GridView,dimRange,Evaluate>(callable)),
+                   py_state);
+          }
+        ),pybind11::keep_alive<1,2>());
 
         if (gf.second)
         {

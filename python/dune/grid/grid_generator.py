@@ -145,6 +145,10 @@ def mapper(gv,layout):
     moduleName = "mcmgmapper_" + hashIt(typeName)
     module = mcmgGenerator.load(includes, typeName, moduleName)
     return gv._mapper(layout)
+
+import functools
+def gfPlot(gf, *args, **kwargs):
+    gf.gridView.plot(gf,*args,**kwargs)
 def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=None):
     if name is None:
         name = "tmp"+str(gv._gfCounter)
@@ -281,9 +285,7 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
             else:
                 gv.__class__._functions[dimRange] = gfFunc
         gf = gv.__class__._functions[dimRange](gv,callback)
-    def gfPlot(gf, *args, **kwargs):
-        gf.grid.plot(gf,*args,**kwargs)
-    gf.plot = gfPlot.__get__(gf)
+    gf.plot = functools.partial(gfPlot, gf)
     gf.name = name
     gf.order = order
     return gf
