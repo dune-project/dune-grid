@@ -520,7 +520,7 @@ namespace Dune
       if constexpr (Capabilities :: hasEntityIterator< Grid, codim>::v)
         checkIndexSetForCodim< codim >( grid, view, sout, levelIndex );
       else
-        derr << "WARNING: Entities for codim " << codim
+        derr << "WARNING: Entities for codim " << int(codim)
              << " are not being tested!" << std::endl;
     });
   }
