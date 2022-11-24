@@ -37,10 +37,6 @@ namespace Dune {
         level( l )
     {
       assert(not isLeafIndexSet);
-
-      // contains a single element type;
-      for (int codim=0; codim<=GridImp::dimension; codim++)
-        mytypes[codim].push_back(GeometryTypes::cube(GridImp::dimension-codim));
     }
 
     /** \brief Level grid view constructor stores reference to a grid and level */
@@ -48,10 +44,6 @@ namespace Dune {
       : grid( g )
     {
       assert(isLeafIndexSet);
-
-      // contains a single element type;
-      for (int codim=0; codim<=GridImp::dimension; codim++)
-        mytypes[codim].push_back(GeometryTypes::cube(GridImp::dimension-codim));
     }
 
     //! get index of an entity
@@ -103,7 +95,6 @@ namespace Dune {
   private:
     const GridImp& grid;
     int level;
-    std::vector<GeometryType> mytypes[std::remove_const<GridImp>::type::dimension+1];
   };
 
 }   // namespace Dune
