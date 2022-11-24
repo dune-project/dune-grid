@@ -14,6 +14,8 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 
 - Provide `communicate()` method in `OneDGrid` and `IdentityGrid`
 
+- Change the `IndexSet::Types` type of `OndDGrid` and `YaspGrid` to `std::array<GeometryType,1>`.
+
 - Grid concepts are here! A `Grid` can now be inspected and also its components checked for valid
   interfaces at compilation time using c++20 concepts. Note, this feature is still in development and
   might be subject to changes.
