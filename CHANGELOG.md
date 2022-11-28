@@ -20,10 +20,16 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
   interfaces at compilation time using c++20 concepts. Note, this feature is still in development and
   might be subject to changes.
 
+- Improve pickling support (GridViews and some GridFunction objects can now be pickled).
+
+- Add a prototype reader for Paraview directly based on the Python bindings.
+  This is added to the tutorial and only demonstrates how a reader could be implemented.
+  GridViews and GridFunctions can be pickled and then read into Paraview without going through vtu.
+  As an example manipulation the subsampling level can be adjusted directly in Paraview so that higher order functions can be visualized.
 
 # Release 2.9
-
 - UGGrid is now thread safe on the grid view.
+
 - The `Geometry` interface was extended by methods `jacobian(local)` and `jacobianInverse(local)`
   and corresponding typedefs `Jacobian` and `JacobianInverse`. All grid implementations need to
   provide the new interface. For transition, the methods and typedefs are default-implemented

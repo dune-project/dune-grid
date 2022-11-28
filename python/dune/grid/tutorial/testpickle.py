@@ -14,7 +14,7 @@ from dune.grid import cartesianDomain, gridFunction
 def test(fileName):
     # at the moment only locally defined gridfunctions can be pickled also
     # function needs to be defined outside of 'main' for unpickling
-    from picklefunc import globalF
+    from picklefunc import globalF, localF
     grid = view( cartesianDomain([-2,-2,-2],[2,2,2],[3,3,3]) )
     grid.hierarchicalGrid.globalRefine(2)
     if Marker is not None:
@@ -28,8 +28,9 @@ def test(fileName):
             grid.hierarchicalGrid.adapt()
     print("size of adapted grid:", grid.size(0))
 
-    # make glibalF into a gridFunction
-    gf = gridFunction(grid, name="gf", order=3)(globalF)
+    # make localF into a gridFunction
+    gf = gridFunction(grid, name="gf", order=3)(localF)
+    # glabal version does not work: gf = gridFunction(grid, name="gf", order=3)(globalF)
     with open(fileName,"wb") as f:
         dune.common.pickle.dump([gf],f)
 

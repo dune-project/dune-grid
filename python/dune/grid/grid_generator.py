@@ -149,6 +149,9 @@ def mapper(gv,layout):
 import functools
 def gfPlot(gf, *args, **kwargs):
     gf.gridView.plot(gf,*args,**kwargs)
+def callbackFunction(callback_,e,x):
+    return callback_(e.geometry.toGlobal(x))
+
 def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=None):
     if name is None:
         name = "tmp"+str(gv._gfCounter)
@@ -220,7 +223,8 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
     else:
         if len(inspect.signature(callback).parameters) == 1: # global function, turn into a local function
             callback_ = callback
-            callback = lambda e,x: callback_(e.geometry.toGlobal(x))
+            # callback = lambda e,x: callback_(e.geometry.toGlobal(x))
+            callback = functools.partial(callbackFunction, callback_)
         else:
             callback_ = None
         if dimRange is None:
