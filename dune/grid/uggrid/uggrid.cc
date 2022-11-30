@@ -608,7 +608,7 @@ std::vector<typename UG_NS<dim>::DDD_IF> UGGrid<dim>::findDDDInterfaces(Interfac
   }
 
   return dddIfaces;
-};
+}
 #endif // ModelP
 
 

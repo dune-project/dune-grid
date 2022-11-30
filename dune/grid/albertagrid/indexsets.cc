@@ -13,9 +13,6 @@
 
 namespace Dune
 {
-  template< int dim, int dimworld >
-  Alberta::IndexStack* AlbertaGridHierarchicIndexSet<dim,dimworld>::currentIndexStack = nullptr;
-
   // Implementation of AlbertaGridHierarchicIndexSet::CreateEntityNumbers
   // --------------------------------------------------------------------
 
