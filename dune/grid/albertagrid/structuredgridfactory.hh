@@ -55,18 +55,21 @@ namespace Dune
     using ctype = typename GridType::ctype;
 
     // Insert new elements into the grid by splitting the given cube with corners `vertices` into
-    // a curresponding number of simplices.
+    // a corresponding number of simplices.
     static void insertElement (GridFactory<GridType>& factory,
       const GeometryType& type,
       const std::vector<unsigned int>& vertices)
     {
       // triangulation of reference cube
       static const auto reference_cubes = std::make_tuple(
-        /*1d*/ std::array{std::array{0,1}},
-        /*2d*/ std::array{std::array{3,0,1}, std::array{0,3,2}},
-        /*3d*/ std::array{std::array{0,7,3,1}, std::array{0,7,5,1},
-                          std::array{0,7,5,4}, std::array{0,7,3,2},
-                          std::array{0,7,6,2}, std::array{0,7,6,4}} );
+        /*1d*/ std::array<std::array<int,2>,1>{
+          std::array<int,2>{0,1}},
+        /*2d*/ std::array<std::array<int,3>,2>{
+          std::array<int,3>{3,0,1}, std::array<int,3>{0,3,2}},
+        /*3d*/ std::array<std::array<int,4>,6>{
+          std::array<int,4>{0,7,3,1}, std::array<int,4>{0,7,5,1},
+          std::array<int,4>{0,7,5,4}, std::array<int,4>{0,7,3,2},
+          std::array<int,4>{0,7,6,2}, std::array<int,4>{0,7,6,4}} );
 
       const auto& simplices = std::get<dim-1>(reference_cubes);
       std::vector<unsigned int> corners(dim+1);
