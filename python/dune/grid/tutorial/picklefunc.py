@@ -9,3 +9,11 @@ def localF(e,y):
     x = e.geometry.toGlobal(y)
     x -= [0.1,0.1,0.1]
     return numpy.sin( (x[0]*x[1]*x[2])*numpy.pi )
+
+class TimeDependent:
+    def __init__(self):
+        self.t = 0
+    def __call__(self,e,y):
+        x = e.geometry.toGlobal(y)
+        x -= [0.1,0.1,0.1]
+        return numpy.sin( (x[0]*x[1]+self.t*x[1])*numpy.pi )

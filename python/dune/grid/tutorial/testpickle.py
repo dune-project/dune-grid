@@ -14,7 +14,7 @@ from dune.grid import cartesianDomain, gridFunction
 def test(fileName):
     # at the moment only locally defined gridfunctions can be pickled also
     # function needs to be defined outside of 'main' for unpickling
-    from picklefunc import globalF, localF
+    from picklefunc import globalF, localF, TimeDependent
     grid = view( cartesianDomain([-2,-2,-2],[2,2,2],[3,3,3]) )
     grid.hierarchicalGrid.globalRefine(2)
     if Marker is not None:
@@ -31,12 +31,24 @@ def test(fileName):
     # make localF into a gridFunction
     gf = gridFunction(grid, name="gf", order=3)(localF)
     # glabal version does not work: gf = gridFunction(grid, name="gf", order=3)(globalF)
-    with open(fileName,"wb") as f:
+    with open(fileName+".dbf","wb") as f:
         dune.common.pickle.dump([gf],f)
 
+    func = TimeDependent()
+    timeGf = gridFunction(grid, name="gf", order=3)(func.__call__)
+
+    series = dune.common.pickle.SeriesPickler(fileName+"_ts", [timeGf])
+
+    tsps = [0,0.1,0.4,0.8,2,4]
+    for i,tsp in enumerate(tsps):
+        func.t = tsp
+        series.dump({"time":tsp})
+
+
+fbase = "dump.test"
 if len(sys.argv)<2 or (not sys.argv[1] == 'load'):
-    test("dump.dbf")
+    test(fbase)
 else:
-    with open("dump.dbf","rb") as f:
+    with open(fbase+".dbf","rb") as f:
         dump = dune.common.pickle.load(f)
     dump[0].plot()
