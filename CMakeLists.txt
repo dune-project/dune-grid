@@ -33,6 +33,10 @@ if(Alberta_FOUND)
       dunegrid Alberta::AlbertaGrid_${_dim}d)
     target_compile_definitions(dunealbertagrid${_dim}d PUBLIC
       ALBERTA_DIM=${_dim} ENABLE_ALBERTA=1)
+    if(Alberta_DEBUG)
+      target_compile_definitions(dunealbertagrid${_dim}d PUBLIC
+        ALBERTA_DEBUG=1)
+    endif()
   endforeach(_dim)
 endif()
 
