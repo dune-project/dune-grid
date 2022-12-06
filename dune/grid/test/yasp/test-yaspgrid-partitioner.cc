@@ -6,6 +6,7 @@
 #include <config.h>
 
 #include <array>
+#include <cassert>
 #include <iostream>
 
 #include <dune/common/filledarray.hh>
