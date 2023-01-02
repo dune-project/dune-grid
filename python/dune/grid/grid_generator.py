@@ -145,6 +145,13 @@ def mapper(gv,layout):
     moduleName = "mcmgmapper_" + hashIt(typeName)
     module = mcmgGenerator.load(includes, typeName, moduleName)
     return gv._mapper(layout)
+
+import functools
+def gfPlot(gf, *args, **kwargs):
+    gf.gridView.plot(gf,*args,**kwargs)
+def callbackFunction(callback_,e,x):
+    return callback_(e.geometry.toGlobal(x))
+
 def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=None):
     if name is None:
         name = "tmp"+str(gv._gfCounter)
@@ -216,7 +223,8 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
     else:
         if len(inspect.signature(callback).parameters) == 1: # global function, turn into a local function
             callback_ = callback
-            callback = lambda e,x: callback_(e.geometry.toGlobal(x))
+            # callback = lambda e,x: callback_(e.geometry.toGlobal(x))
+            callback = functools.partial(callbackFunction, callback_)
         else:
             callback_ = None
         if dimRange is None:
@@ -281,9 +289,7 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
             else:
                 gv.__class__._functions[dimRange] = gfFunc
         gf = gv.__class__._functions[dimRange](gv,callback)
-    def gfPlot(gf, *args, **kwargs):
-        gf.grid.plot(gf,*args,**kwargs)
-    gf.plot = gfPlot.__get__(gf)
+    gf.plot = functools.partial(gfPlot, gf)
     gf.name = name
     gf.order = order
     return gf
@@ -321,15 +327,12 @@ def addHAttr(module):
         dune.geometry.module(d)
     setattr(module.HierarchicalGrid,"levelView",levelView)
     setattr(module.HierarchicalGrid,"persistentContainer",persistentContainer)
-    # setattr(module.HierarchicalGrid,"backup",backup)
-    addAttr(module, module.LeafGrid)
 
 gvGenerator = SimpleGenerator("GridView", "Dune::Python")
 def viewModule(includes, typeName, *args, **kwargs):
     includes = includes + ["dune/python/grid/gridview.hh"]
     moduleName = "view_" + hashIt(typeName)
     module = gvGenerator.load(includes, typeName, moduleName, *args, **kwargs)
-    addAttr(module, module.GridView)
     return module
 
 def levelView(hgrid,level):

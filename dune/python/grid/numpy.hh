@@ -344,7 +344,7 @@ namespace Dune
 
       auto lf = localFunction( gridFunction );
       std::vector< Range > values;
-      auto refLevel = refinementLevels(0);
+      auto refLevel = refinementLevels(level);
       for( const Element &element : entities( gv, Dune::Codim< Element::codimension >(), ps ) )
       {
         lf.bind( element );

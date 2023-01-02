@@ -111,12 +111,50 @@ namespace Dune
       void registerGridViewConstructorFromGrid ( pybind11::class_< GridView, options... > &cls, PriorityTag< 2 > )
       {
         cls.def( pybind11::init( [] ( typename GridView::Grid &grid ) { return new GridView( grid.leafGridView() ); } ), pybind11::keep_alive< 1, 2 >() );
+        cls.def( pybind11::pickle( [](const pybind11::object &self) { // __getstate__
+            GridView& gv = self.cast<GridView&>();
+            /* Return a tuple that fully encodes the state of the object */
+            pybind11::dict d;
+            if (pybind11::hasattr(self, "__dict__")) {
+              d = self.attr("__dict__");
+            }
+            return pybind11::make_tuple(gv.grid(),d);
+          },
+        [](pybind11::tuple t) { // __setstate__
+            if (t.size() != 2)
+                throw std::runtime_error("Invalid state in GridView::setstate with "+std::to_string(t.size())+"arguments!");
+            pybind11::handle pyHg = t[0];
+            typename GridView::Grid& hg = pyHg.cast<typename GridView::Grid&>();
+            /* Create a new C++ instance */
+            auto py_state = t[1].cast<pybind11::dict>();
+            return std::make_pair(new GridView(hg.leafGridView()), py_state);
+          }
+        ),pybind11::keep_alive<1,2>());
       }
 
       template< class GridView, class... options, std::enable_if_t< std::is_constructible< GridView, typename GridView::Grid & >::value, int > = 0 >
       void registerGridViewConstructorFromGrid ( pybind11::class_< GridView, options... > &cls, PriorityTag< 1 > )
       {
         cls.def( pybind11::init( [] ( typename GridView::Grid &grid ) { return new GridView( grid ); } ), pybind11::keep_alive< 1, 2 >() );
+        cls.def( pybind11::pickle( [](const pybind11::object &self) { // __getstate__
+            GridView& gv = self.cast<GridView&>();
+            /* Return a tuple that fully encodes the state of the object */
+            pybind11::dict d;
+            if (pybind11::hasattr(self, "__dict__")) {
+              d = self.attr("__dict__");
+            }
+            return pybind11::make_tuple(gv.grid(),d);
+          },
+        [](pybind11::tuple t) { // __setstate__
+            if (t.size() != 2)
+                throw std::runtime_error("Invalid state in GridView::setstate with "+std::to_string(t.size())+"arguments!");
+            pybind11::handle pyHg = t[0];
+            typename GridView::Grid& hg = pyHg.cast<typename GridView::Grid&>();
+            /* Create a new C++ instance */
+            auto py_state = t[1].cast<pybind11::dict>();
+            return std::make_pair(new GridView(hg), py_state);
+          }
+        ),pybind11::keep_alive<1,2>());
       }
 
       template< class GridView, class... options >
@@ -439,6 +477,8 @@ namespace Dune
         vgfClass.first.def("name",[](VirtualizedGF &self) { return self.name(); });
       }
 #endif
+      auto addAttr = pybind11::module::import( "dune.grid.grid_generator" ).attr("addAttr");
+      addAttr(scope, cls);
     }
 
   } // namespace Python
