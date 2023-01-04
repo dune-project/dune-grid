@@ -103,6 +103,11 @@ struct subIndexCheck
     std::size_t subIndex = 0;
     for (const auto& se : subEntities(e, Dune::Codim<cd>{}))
     {
+      auto se1 = se;
+      auto se2 = se;
+      se1 = se2;
+      se1 = std::move(se2);
+
       // check construction of entities
       [[maybe_unused]] auto seCopy = se;
       assert( seCopy == se );
