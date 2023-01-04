@@ -253,6 +253,21 @@ namespace Dune {
       return getTarget() == other.getTarget();
     }
 
+    //! Copy assignment operator from an existing entity.
+    UGGridEntity& operator=(const UGGridEntity& other)
+    {
+      target_ = other.target_;
+      gridImp_ = other.gridImp_;
+      if constexpr (codim==dim)
+        geo_ = other.geo_;
+      else
+        geo_ = std::make_unique<GeometryImpl>(*other.geo_);
+      return *this;
+    }
+
+    //! Move assignment operator from an existing entity.
+    UGGridEntity& operator=(UGGridEntity&& other) = default;
+
   private:
     /** \brief Set this entity to a particular UG entity */
     void setToTarget(typename UG_NS<dim>::template Entity<codim>::T* target,const GridImp* gridImp) {
