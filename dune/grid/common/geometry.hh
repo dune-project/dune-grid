@@ -171,7 +171,7 @@ namespace Dune
      *
      * The exact type is implementation-dependent.
      * However, it is guaranteed to have the following properties:
-     * - You can multilply it from the right to a suitable FieldMatrix
+     * - You can multiply it from the right to a suitable FieldMatrix
      * - It is copy constructible and copy assignable.
      * .
      */
@@ -182,7 +182,7 @@ namespace Dune
      *
      * The exact type is implementation-dependent.
      * However, it is guaranteed to have the following properties:
-     * - You can multilply it from the right to a suitable FieldMatrix
+     * - You can multiply it from the right to a suitable FieldMatrix
      * - It is copy constructible and copy assignable.
      * .
      */
