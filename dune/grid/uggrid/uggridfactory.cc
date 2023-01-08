@@ -629,7 +629,7 @@ createBegin()
 
 
 
-// Explicit template instatiation
+// Explicit template instantiation
 template class GridFactory<UGGrid<2> >;
 template class GridFactory<UGGrid<3> >;
 

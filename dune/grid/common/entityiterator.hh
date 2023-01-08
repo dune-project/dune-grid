@@ -56,7 +56,7 @@ namespace Dune
 
     typedef typename Grid::template Codim< codim >::Entity Entity;
 
-    /** \brief Type of the reference used when derefencing the Ptr */
+    /** \brief Type of the reference used when dereferencing the Ptr */
     typedef typename std::conditional<
       std::is_lvalue_reference<
         decltype(realIterator.dereference())
@@ -144,7 +144,7 @@ namespace Dune
     EntityIterator ( )
     {}
 
-    /** \brief copy constructor from implementaton */
+    /** \brief copy constructor from implementation */
     EntityIterator ( const IteratorImp &imp )
       : realIterator( imp )
     {}

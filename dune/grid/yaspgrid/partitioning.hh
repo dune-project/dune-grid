@@ -74,7 +74,7 @@ namespace Dune
         {
           for (int k=1; k<=P; k++)
             if (
-              P%k==0 // k devides P
+              P%k==0 // k divides P
               and (
                 k == 1 // no neighbors
                 or

@@ -204,7 +204,7 @@ namespace Dune {
     // The type used to store coordinates
     typedef typename GridImp::ctype UGCtype;
 
-    // An element face identfied by the element and a face number
+    // An element face identified by the element and a face number
     typedef std::pair<const typename UG_NS<dim>::Element*, int> Face;
 
     // The corresponding iterator needs to access all members

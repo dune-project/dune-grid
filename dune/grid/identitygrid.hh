@@ -143,7 +143,7 @@ namespace Dune
       setIndices();
     }
 
-    //! Desctructor
+    //! Destructor
     ~IdentityGrid()
     {
       // Delete level index sets
@@ -311,7 +311,7 @@ namespace Dune
      * The parameter is currently ignored
      *
      * \return <ul>
-     * <li> true, if marking was succesfull </li>
+     * <li> true, if marking was successful </li>
      * <li> false, if marking was not possible </li>
      * </ul>
      */

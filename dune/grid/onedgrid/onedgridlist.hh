@@ -137,7 +137,7 @@ namespace Dune {
       if (i==0)
         return;
 
-      // handle pointers to predecessor and succesor
+      // handle pointers to predecessor and successor
       if (i->succ_!=0)
         i->succ_->pred_ = i->pred_;
       if (i->pred_!=0)

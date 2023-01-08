@@ -158,7 +158,7 @@ namespace Dune {
       return _shift[i];
     }
 
-    //! Return shift tupel
+    //! Return shift tuple
     const std::bitset<d>& shift () const
     {
       return _shift;
@@ -199,7 +199,7 @@ namespace Dune {
       return _size[i];
     }
 
-    //! retrun size
+    //! return size
     iTupel size () const
     {
       return _size;
@@ -248,7 +248,7 @@ namespace Dune {
       return true;
     }
 
-    //! given a tupel compute its index in the lexicographic numbering
+    //! given a tuple compute its index in the lexicographic numbering
     int index (const iTupel& coord) const
     {
       int index = (coord[d-1]-_origin[d-1]);
@@ -833,7 +833,7 @@ namespace Dune {
       int rank;
       /** \brief Manhattan distance to the other grid */
       int distance;
-      /** \brief a YGrid stub, that acts wraps above YGrid Component and handels the index offset */
+      /** \brief a YGrid stub, that acts wraps above YGrid Component and handles the index offset */
       YGrid<Coordinates> yg;
     };
 

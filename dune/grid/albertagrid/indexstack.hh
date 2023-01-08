@@ -31,7 +31,7 @@ namespace Dune {
       //! Returns true if the stack is full
       bool full () const { return this->size() >= length; }
 
-      //! standard psuh method
+      //! standard push method
       void push( const T& t )  { BaseType :: push_back( t ); }
 
       //! Removes and returns the uppermost object from the stack

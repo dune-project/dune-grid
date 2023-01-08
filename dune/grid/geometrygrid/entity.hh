@@ -278,7 +278,7 @@ namespace Dune
         return hostEntity_;
       }
 
-      /** \brief initiliaze an entity
+      /** \brief initialize an entity
        *
        *  \param[in]  hostEntity  reference to the host entity
        *
@@ -601,7 +601,7 @@ namespace Dune
 
       int subEntity () const { return subEntity_; }
 
-      /** \brief initiliaze an entity
+      /** \brief initialize an entity
        *
        *  \param[in]  hostElement  reference to the host element
        *

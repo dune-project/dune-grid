@@ -289,12 +289,12 @@ namespace Dune
               return self.contains( entity );
             }, "entity"_a,
             R"doc(
-              check wheter an entity is in the domain of the index set
+              check whether an entity is in the domain of the index set
 
               Args:
                   entity:   entity to check for
 
-              Returns: True, if the entity if in the domain, False otherwise
+              Returns: True, if the entity is in the domain, False otherwise
             )doc" );
 
           detail::registerSubIndex< Entity >( cls );

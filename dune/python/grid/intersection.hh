@@ -53,7 +53,7 @@ namespace Dune
         cls.def_property_readonly( "geometryInInside", &Intersection::geometryInInside );
         cls.def_property_readonly( "indexInInside", &Intersection::indexInInside );
 
-        // information on ouside entity
+        // information on outside entity
         cls.def_property_readonly( "outside", [] ( const Intersection &i ) {
               return (i.neighbor() ? pybind11::cast( i.outside() ) : pybind11::none());
             } );

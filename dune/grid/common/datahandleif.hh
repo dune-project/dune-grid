@@ -38,7 +38,7 @@ namespace Dune
 
     /** @brief just wraps the call of the internal buffer method write
        which writes the data of type T from the buffer by using the
-       assigment operator of T
+       assignment operator of T
        @param val reference to object that is written
      */
     template <class T>
@@ -49,7 +49,7 @@ namespace Dune
 
     /** @brief just wraps the call of the internal buffer method read
        which reads the data of type T from the buffer by using the
-       assigment operator of T
+       assignment operator of T
        @param val reference to object that is read
 
        The method is not const, because calling it advances the iterator
@@ -65,7 +65,7 @@ namespace Dune
 
   /** @brief CommDataHandleIF describes the features of a data handle for
      communication in parallel runs using the Grid::communicate methods.
-     Here the Barton-Nackman trick is used to interprete data handle objects
+     Here the Barton-Nackman trick is used to interpret data handle objects
      as its interface. Therefore usable data handle classes need to be
      derived from this class.
 

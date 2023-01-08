@@ -1103,14 +1103,14 @@ namespace Dune {
 
   //! for creation of an engine interface object like Entity or Geometry
   //! one has to derive a class to create the object because the
-  //! contructors of the interface object classes are protected
+  //! constructors of the interface object classes are protected
   //! therefore here a generic implementation for this object creation is
   //! provided
   template <class InterfaceType>
   struct MakeableInterfaceObject : public InterfaceType
   {
     typedef typename InterfaceType::Implementation ImplementationType;
-    //! create interface object by calling the contructor of the base class
+    //! create interface object by calling the constructor of the base class
     explicit MakeableInterfaceObject ( const ImplementationType &realImp )
       : InterfaceType( realImp )
     {}

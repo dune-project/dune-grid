@@ -26,7 +26,7 @@
  *
  * First we demonstrate how to compute an approximation to the
  * integral by using the simple midpoint rule. This means traversing all elements,
- * evalute the function at the barycenter of the element, multiplying with the
+ * evaluate the function at the barycenter of the element, multiplying with the
  * volume of the element and summing up:
  * \snippet recipe-integration.cc integration with midpoint rule
  *

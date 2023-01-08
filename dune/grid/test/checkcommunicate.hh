@@ -21,7 +21,7 @@
  *  For a fixed codimension c and a fixed upwind direction u, the test works
  *  as follows:
  *    1) In the center of all upwind codim c subentities of the interioir codim 0
- *       leaf entites a function is stored. Also a flag is set to 1.
+ *       leaf entities a function is stored. Also a flag is set to 1.
  *       The computation is also performed on the subentities of the physical
  *       boundary.
  *    -> For all leaf subentities of codim c the flag should be set to 1
@@ -505,7 +505,7 @@ public:
 
     if( skipCheck )
     {
-      std :: cerr << "Codim " << cdim << ": Test skiped because of empty set of overlap and ghosts !" << std :: endl;
+      std :: cerr << "Codim " << cdim << ": Test skipped because of empty set of overlap and ghosts!" << std :: endl;
     }
     else if ( ! checkCommunication() )
     {

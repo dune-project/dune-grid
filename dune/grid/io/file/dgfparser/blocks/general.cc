@@ -59,7 +59,7 @@ namespace Dune
           int x;
           if( !getnextentry( x ) )
           {
-            // if we don't find another entry thats it
+            // if we don't find another entry that's it
             map.resize( count );
             break ;
           }
@@ -130,7 +130,7 @@ namespace Dune
         int idx;
         if( !getnextentry( idx ) )
         {
-          // if no entry is avialable and n > 0
+          // if no entry is available and n > 0
           // just resize the element vector
           if( n > 0 )
           {

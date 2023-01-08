@@ -563,7 +563,7 @@ namespace Dune
           switch(type) {
           case ascii :
           case base64 :
-            break; // invlid in appended mode
+            break; // invalid in appended mode
           case appendedraw :
             return new NakedRawDataArrayWriter(stream, ncomps, nitems, prec);
           case appendedbase64 :

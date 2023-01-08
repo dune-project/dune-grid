@@ -88,7 +88,7 @@ namespace Dune {
      * If `physicalBoundaries` is not empty, also the boundaries are written to the file with
      * the corresponding physical value.
      *
-     * The physicalBoundaries vector need to be sorted according to the interesection
+     * The physicalBoundaries vector need to be sorted according to the intersection
      * boundary segment index.
      */
     void outputElements(std::ofstream& file, const std::vector<int>& physicalEntities, const std::vector<int>& physicalBoundaries) const {
@@ -209,7 +209,7 @@ namespace Dune {
      * If the optional parameter `physicalBoundaries` is provided, also the boundaries
      * are written on file with the corresponding physical value.
      *
-     * The physicalBoundaries vector need to be sorted according to the interesection boundary
+     * The physicalBoundaries vector need to be sorted according to the intersection boundary
      * segment index.
      *
      * Throws an IOError if file could not be opened or an unsupported element type is

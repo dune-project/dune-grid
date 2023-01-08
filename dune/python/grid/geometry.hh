@@ -110,7 +110,7 @@ namespace Dune
 
         cls.doc() = R"doc(
             A geometry describes a map from the reference domain into a
-            Euclidian space, where the reference domain is given by the
+            Euclidean space, where the reference domain is given by the
             reference element.
             The mapping is required to be one-to-one.
 
@@ -118,7 +118,7 @@ namespace Dune
             The image of a local point is called its (global) position.
 
             Note: The image of the mapping may be a submanifold of the
-                  Euclidian space.
+                  Euclidean space.
           )doc";
 
         cls.def( "corner", [] ( const Geometry &self, int i ) {

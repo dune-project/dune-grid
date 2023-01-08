@@ -128,7 +128,7 @@ namespace Dune
    * <h2>Sub-entities</h2>
    *
    * The grid interface allows to iterate over sub-entities of a given
-   * codim-0-entity, sub-entities being entities contained in the given entitiy
+   * codim-0-entity, sub-entities being entities contained in the given entity
    * with a codimension equal (returns the entity itself) or larger than
    * the given entity.
    *

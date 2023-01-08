@@ -16,7 +16,7 @@
 namespace Dune {
 
   /**
-   * @brief Writer for the ouput of grid functions in the vtk format.
+   * @brief Writer for the output of grid functions in the vtk format.
    * @ingroup VTK
    *
    * Writes arbitrary grid functions (living on cells or vertices of a grid)

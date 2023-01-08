@@ -389,7 +389,7 @@ namespace Dune {
        method. Depending on the codimentsion of \c en the method returns either
        the element or vertex parameters of that entity in the DGF file.
        The number of parameters for a given
-       codimension can be retrived using the method
+       codimension can be retrieved using the method
        Dune::GridPtr<GridType>::nofParameters.
        In the case of parallel runs only the process with rank zero reads the
        dgf file and thus the parameters are only available on that processor.
@@ -448,7 +448,7 @@ namespace Dune {
               is also passed to tetgen/triangle together with the parameters - if
               given. Note that a triangle can only handle one region attribute in
               its .poly files so that only the first parameter is the \b simplex
-              or \b cube block can be retrived.
+              or \b cube block can be retrieved.
          .
 
          Some identifiers can be
@@ -464,7 +464,7 @@ namespace Dune {
          In this case the grid is constructed using two calls to Tetgen/Triangle.           The details of the call are logged in the \b dgfparser.log file.
 
         \e Note: vertex parameters are interpolated in triangle but tetgen
-                  assigns a zero to all newly inserted vertices; therfore quality
+                  assigns a zero to all newly inserted vertices; therefore quality
                   enhancement and vertex parameters should not be combined in 3d.
                   On the other hand element parameters and boundary ids can be
                   used together with quality enhancement.

@@ -257,7 +257,7 @@ namespace Dune {
       return intersection.boundarySegmentIndex();
     }
 
-    /** \brief Return true if the intersection has been explictily insterted into the factory */
+    /** \brief Return true if the intersection has been explicitly inserted into the factory */
     virtual bool
     wasInserted ( const typename UGGrid<dimworld>::LeafIntersection &intersection ) const
     {

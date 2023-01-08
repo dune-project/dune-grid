@@ -158,7 +158,7 @@ namespace Dune
           Python::GenerateTypeName("Dune::Vtk::Function",MetaType<GridView>()),
           Python::IncludeFiles{"dune/vtk/function.hh"});
       vgfClass.first.def( pybind11::init( [] ( GridFunction &gf ) {
-          // TODO: perhpas grid functions should just have a name attribute in general
+          // TODO: perhaps grid functions should just have a name attribute in general
           return new VirtualizedGF( pyGridFunction(gf), "tmp" );
         } ) );
       pybind11::implicitly_convertible<GridFunction,VirtualizedGF>();

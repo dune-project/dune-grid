@@ -384,7 +384,7 @@ namespace Dune {
       // determine at where we have overlap and how big the size of the overlap partition is
       for (int i=0; i<dim; i++)
       {
-        // the coordinate container has been contructed to hold the entire grid on
+        // the coordinate container has been constructed to hold the entire grid on
         // this processor, including overlap. this is the element size.
         s_overlap[i] = g.coords.size(i);
 
@@ -521,7 +521,7 @@ namespace Dune {
           ++recv_overlapfront_interiorborder_it;
         }
 
-        // set end iterators in the corresonding ygrids
+        // set end iterators in the corresponding ygrids
         g.overlapfront[codim].finalize(overlapfront_it);
         g.overlap[codim].finalize(overlap_it);
         g.interiorborder[codim].finalize(interiorborder_it);
@@ -1576,7 +1576,7 @@ namespace Dune {
         cnt=0;
         for (ListIt is=sendlist->begin(); is!=sendlist->end(); ++is)
         {
-          // allocate send buffer for sizes per entitiy
+          // allocate send buffer for sizes per entity
           size_t *buf = new size_t[is->grid.totalsize()];
           send_sizes[cnt] = buf;
 

@@ -56,6 +56,21 @@ ubuntu:18.04 clang-5-17:
     DUNECI_CMAKE_FLAGS: "-DDUNE_ENABLE_PYTHONBINDINGS=OFF"
   tags: [duneci]
 
+# Check for spelling mistakes in text
+code-spelling-check:
+  stage: .pre
+  # Avoid the global 'before_script'
+  before_script: ""
+  image: registry.dune-project.org/docker/ci/debian:11
+  tags: [duneci]
+  script:
+  # * Codespell-versions after Debian 11 seem to work without ignoring 'ba'.
+  # * Currently the Python code contains methods that are named "tesselate"
+  #   (instead of the correct "tessellate").  These are deprecated and will
+  #   be removed eventually.  Until then, we have to ignore "tesselate".
+  - codespell
+    --ignore-words-list ba,deques,nin,iiterator,nd,ot,tesselate
+
 reuse:
   stage: .pre
   image:

@@ -549,7 +549,7 @@ struct GridInterface
       g.globalIdSet().id( *g.levelGridView( 0 ).template begin< 0 >() );
     }
     // recursively check entity-interface
-    // ... we only allow grids with codim 0 zero entites
+    // ... we only allow grids with codim 0 entities
     static_assert((Dune::Capabilities::hasEntity<Grid, 0>::v),"Grid must have codim 0 entities");
     static_assert((Dune::Capabilities::hasEntity<const Grid, 0>::v),"Grid must have codim 0 entities");
 
