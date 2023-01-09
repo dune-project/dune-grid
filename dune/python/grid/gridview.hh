@@ -428,7 +428,7 @@ namespace Dune
               level: virtual refinement level to use to generate the tessellation
 
           Returns: (coordinates,simplices) where coordinates is a `numpy` array
-                   of the vertex coodinates
+                   of the vertex coordinates
                    (e.g. in 2d `[ [x_1,y_1], [x_2,y_2], ..., [x_N,y_N] ]` )
                    and simplices is a `numpy` array of the vertices of the simplices
                    (e.g. in 2d `[s_11,s_12,s_13], [s_21,s_22,s_23], ..., [s_N1,s_N2,s_N3] ]` )

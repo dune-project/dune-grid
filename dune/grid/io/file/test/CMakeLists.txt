@@ -3,7 +3,7 @@
 
 # TODO when porting this file to dune_add_test, the GMSH test needed to be adapted.
 # It previously relied on the flags added to the executable to switch different grid types.
-# I have adapted it quickly by adding a preprocesor variable. This could be and should
+# I have adapted it quickly by adding a preprocessor variable. This could be and should
 # be done more nicely.
 #
 

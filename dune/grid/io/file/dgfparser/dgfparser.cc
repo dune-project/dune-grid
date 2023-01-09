@@ -303,7 +303,7 @@ namespace Dune
                 << "File is not in DuneGridFormat. Exiting parser..."
                 << std::endl;
       return false;
-    } // not a DGF file, prehaps native file format
+    } // not a DGF file, perhaps native file format
 
     // initialize variables
     cube2simplex = false;
@@ -456,7 +456,7 @@ namespace Dune
     delete info;
     info = 0;
     // we made it -
-    // although prehaps a few boundary segments are still without id :-<
+    // although perhaps a few boundary segments are still without id :-<
     return true;
   }
 
@@ -803,14 +803,14 @@ namespace Dune
     if (!node) {
       DUNE_THROW(DGFException,
                  "could not find file " << nodename
-                                        << " prehaps something went wrong with Tetgen/Triangle?");
+                                        << " perhaps something went wrong with Tetgen/Triangle?");
     }
     dverb << "opening " << elename << "\n";
     std::ifstream ele(elename.c_str());
     if (!ele) {
       DUNE_THROW(DGFException,
                  "could not find file " << elename
-                                        << " prehaps something went wrong with Tetgen/Triangle?");
+                                        << " perhaps something went wrong with Tetgen/Triangle?");
     }
     {
       dverb << "calculating offset from " << name << " .... offset = ";

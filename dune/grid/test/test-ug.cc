@@ -283,7 +283,7 @@ int main (int argc , char **argv) try
   generalTests(false);
 
   // ////////////////////////////////////////////////////////////////////////////
-  //   Test whether I can create a grid with explict boundary segment ordering,
+  //   Test whether I can create a grid with explicit boundary segment ordering,
   //   but not parametrization functions (only 2d, so far)
   // ////////////////////////////////////////////////////////////////////////////
 
@@ -335,7 +335,7 @@ int main (int argc , char **argv) try
 
   // ////////////////////////////////////////////////////////////////////////
   //   Check refinement to boundary (exact circle geometry).
-  //   Upon refinement new vertices should be moved towards the exact geomtry,
+  //   Upon refinement new vertices should be moved towards the exact geometry,
   //   so that the boundary is better resolved
   // ////////////////////////////////////////////////////////////////////////
   {
@@ -347,7 +347,7 @@ int main (int argc , char **argv) try
 
   // ////////////////////////////////////////////////////////////////////////
   //   Check refinement to boundary (quadratic gmsh boundary)
-  //   upon refinement new vertices should be moved towards the exact geomtry,
+  //   upon refinement new vertices should be moved towards the exact geometry,
   //   so that the boundary is better resolved
   // ////////////////////////////////////////////////////////////////////////
   {

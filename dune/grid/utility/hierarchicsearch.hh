@@ -90,7 +90,7 @@ namespace Dune
         LocalCoordinate local = geo.local(global);
         if (referenceElement( geo ).checkInside(local))
         {
-          // return if we found the leaf, else search through the child entites
+          // return if we found the leaf, else search through the child entities
           if( indexSet_.contains( child ) )
             return child;
           else
@@ -162,7 +162,7 @@ namespace Dune
         if( (int(dim) != int(dimw)) && ((geo.global( local ) - global).two_norm() > 1e-8) )
           continue;
 
-        // return if we found the leaf, else search through the child entites
+        // return if we found the leaf, else search through the child entities
         if( indexSet_.contains( entity ) )
           return entity;
         else

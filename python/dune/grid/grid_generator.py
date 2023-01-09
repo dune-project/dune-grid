@@ -229,7 +229,7 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
             callback_ = None
         if dimRange is None:
             # if no `dimRange` attribute is set on the callback,
-            # try to evaluate the function to determin the dimension of
+            # try to evaluate the function to determine the dimension of
             # the return value. This can fail if the function is singular in
             # the computational domain in which case an exception is raised
             e = gv.elements.__iter__().__next__()
@@ -239,7 +239,7 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
                 try:
                     y = callback(e,e.referenceElement.position(0,2))
                 except ArithmeticError:
-                    raise TypeError("can not determin dimension of range of "+
+                    raise TypeError("Cannot determine dimension of range of "+
                       "given grid function due to arithmetic exceptions being "+
                       "raised. Add a `dimRange` parameter to the grid function to "+
                       "solve this issue - set `dimRange`=0 for a scalar function.")

@@ -82,7 +82,7 @@ namespace Dune {
     virtual void insertBoundarySegment(const std::vector<unsigned int>& vertices,
                                        const std::shared_ptr<BoundarySegment<1> >& boundarySegment);
 
-    /** \brief Return true if the intersection has been explictily insterted into the factory */
+    /** \brief Return true if the intersection has been explicitly inserted into the factory */
     virtual bool wasInserted(const typename OneDGrid::LeafIntersection& intersection) const;
 
     /** \brief Return the number of the intersection in the order of insertion into the factory */

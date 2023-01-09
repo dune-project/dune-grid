@@ -156,7 +156,7 @@ namespace Dune
     // on what type the elements were generated
     bool simplexgrid;
 
-    // true if grid is generated using the intervall Block
+    // true if grid is generated using the interval Block
     bool cube2simplex;
 
     // parameters on elements

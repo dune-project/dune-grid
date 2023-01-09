@@ -79,7 +79,7 @@ namespace Dune
 
     AlbertaGridEntity ();
 
-    //! contructor
+    //! constructor
     AlbertaGridEntity ( const Grid &grid, const ElementInfo &elementInfo, int subEntity );
 
     //! level of this element
@@ -278,7 +278,7 @@ namespace Dune
 
     /*! Intra-level access to intersection with neighboring elements.
        A neighbor is an entity of codimension 0
-       which has an entity of codimension 1 in commen with this entity. Access to neighbors
+       which has an entity of codimension 1 in common with this entity. Access to neighbors
        is provided using iterators. This allows meshes to be nonmatching. Returns iterator
        referencing the first neighbor. */
     AlbertaGridLeafIntersectionIterator ileafbegin () const;

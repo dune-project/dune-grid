@@ -140,7 +140,7 @@ namespace Dune {
       {
         if (isLeaf)
         {
-          // isLeaf is true, i.e. we either are a top-level leaf oder or a copy of one.
+          // isLeaf is true, i.e. we either are a top-level leaf or a copy of one.
           // If we are are lower-level copy then both of our end nodes have children,
           // and these two children are connected.
           auto nodeA = ugEP->links[0].nbnode;

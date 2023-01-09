@@ -240,7 +240,7 @@ def yaspGrid(constructor, dimgrid=None, coordinates="equidistant", ctype=None,
             if ctype != ctype_:
                 print("WARNING: yaspGrid: ctype Parameter of CartesianDomain overwritten by explicit parameter")
         if not ctype:
-            ctype = "double" # default is doubel
+            ctype = "double" # default is double
         # ---
         periodic_  = constructor.param.get("periodic", periodic)
         if not periodic:

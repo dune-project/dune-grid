@@ -12,7 +12,7 @@ Vertex       % some additional points
  1.25 1.25   % and one outside of the interval
 #
 Simplexgenerator
-min-angle 30    % quality enhancment
+min-angle 30    % quality enhancement
 max-area 0.01   % area restriction
 display 0       % show result using Triangle viewer
 

@@ -96,7 +96,7 @@ wall transformations:
 # -1  0  0
 #  0 -1  0
  
-# Combinatorical face transformations. These, too, can be omitted.
+# Combinatorial face transformations. These, too, can be omitted.
 #
 # You will observe that there are "duplicate lines" below. Indeed, but
 # this does not matter: you really have to group the vertex-mappings

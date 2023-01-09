@@ -105,7 +105,7 @@ namespace Dune
 
       //! construct a CornerIterator
       /**
-       * \param cellit   The begin iterator of the undelying range.
+       * \param cellit   The begin iterator of the underlying range.
        * \param cellend  The end iterator of the underlying range.
        * \param is_      A reference to the indexset to use.
        */

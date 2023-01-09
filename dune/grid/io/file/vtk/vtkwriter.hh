@@ -84,7 +84,7 @@ namespace Dune
   class VTKSequenceWriter;
 
   /**
-   * @brief Writer for the ouput of grid functions in the vtk format.
+   * @brief Writer for the output of grid functions in the vtk format.
    * @ingroup VTK
    *
    * Writes arbitrary grid functions (living on cells or vertices of a grid)
@@ -1024,7 +1024,7 @@ namespace Dune
      *                   piece as well as the parallel collection file.
      * \param path       Directory where to put the parallel collection
      *                   (.pvtu/.pvtp) file.  If it is relative, it is taken
-     *                   realtive to the current directory.
+     *                   relative to the current directory.
      * \param extendpath Directory where to put the piece file (.vtu/.vtp) of
      *                   this process.  If it is relative, it is taken
      *                   relative to the directory denoted by path.

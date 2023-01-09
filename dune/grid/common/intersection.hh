@@ -109,12 +109,12 @@ namespace Dune
        following guidelines:
        - We require differently constructed geometries outside the domain
        - The kind of construction depends on the discrete problem
-       - Therefor these constructions can't be part of the Grid interface
+       - Therefore these constructions can't be part of the Grid interface
        - Utility classes are required to do this construction
        - The utility classes must be parameterized with the intersection (in our
          case the Intersection)
        - The utility classes return a suitable transformation of the inner()
-         entitys geometry (with respect to the intersection), e.g.,
+         entity's geometry (with respect to the intersection), e.g.,
          reflection at the intersection
          point reflection
          reflection combined with translation...

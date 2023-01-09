@@ -101,7 +101,7 @@ namespace Dune
       // destructor
       ~mygrid_ptr() { removeObj(); }
 
-      // assigment operator
+      // assignment operator
       mygrid_ptr& operator = ( const mygrid_ptr& other )
       {
         assignObj( other );

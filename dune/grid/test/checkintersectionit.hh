@@ -188,7 +188,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
         std::cerr << "       inside()->geometry().global( intersection.geometryInInside().global( x ) ) != intersection.geometry().global( x )" << std::endl;
         std::cerr << "       x = " << pt << std::endl;
-        std::cerr << "       interesction.geometry() = " << geometry.corner( 0 );
+        std::cerr << "       intersection.geometry() = " << geometry.corner( 0 );
         for( int i = 1; i < geometry.corners(); ++i )
           std::cerr << " | " << geometry.corner( i );
         std::cerr << std::endl;
@@ -441,7 +441,7 @@ void checkIntersectionIterator ( const GridViewType &view,
   bool hasBoundaryIntersection = false;
   typename Intersection::GlobalCoordinate sumNormal( ctype( 0 ) );
 
-  // check wether intersection iterator is a forward iterator
+  // check whether intersection iterator is a forward iterator
   NoopFunctor< Intersection > op;
   if( 0 != testForwardIterator( view.ibegin( *eIt ), view.iend( *eIt ), op ) )
     DUNE_THROW( Dune::Exception, "IntersectionIterator does not fulfill the forward iterator concept" );
@@ -504,7 +504,7 @@ void checkIntersectionIterator ( const GridViewType &view,
 
         if( oiit->boundary() != intersection.boundary() )
         {
-          std::cerr << "Error: symmetric intersection found, but with incorrect boudary flag." << std::endl;
+          std::cerr << "Error: symmetric intersection found, but with incorrect boundary flag." << std::endl;
           std::cerr << "       (from inside: boundary = " << intersection.boundary()
                     << ", from outside: boundary = " << oiit->boundary() << ")." << std::endl;
           assert( false );

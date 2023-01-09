@@ -80,7 +80,7 @@ namespace Dune
      * \param[in]  newElemOrder  vector providing a new ordering for the elements in the given GridView
      * \param[in]  boundaryData  callable attaching boundary data to each intersection
      * \param[in]  addParams     additional data to write to dgf file, such as projections etc.
-     *                           (defaults to an emoty data stream)
+     *                           (defaults to an empty data stream)
      **/
     template< class BoundaryData >
     void write ( std::ostream &gridout, const std::vector< Index > &newElemOrder, BoundaryData &&boundaryData, const std::stringstream &addParams = std::stringstream() ) const;
@@ -102,7 +102,7 @@ namespace Dune
      * \param      gridout       std::ostream to write the grid to
      * \param[in]  newElemOrder  vector providing a new ordering for the elements in the given GridView
      * \param[in]  addParams     additional data to write to dgf file, such as projections etc.
-     *                           (defaults to an emoty data stream)
+     *                           (defaults to an empty data stream)
      **/
     void write ( std::ostream &gridout, const std::vector< Index > &newElemOrder, const std::stringstream &addParams = std::stringstream() ) const
     {

@@ -27,7 +27,7 @@
  *      \varphi
  *    \end{array}\right).
  *  \f]
- *  Though YaspGrid can only model plane, Carthesian grids, using GeometryGrid
+ *  Though YaspGrid can only model planar, Cartesian grids, using GeometryGrid
  *  we have obtained a nonplanar surface grid with quadrilateral elements.
  *
  *  \section features Features

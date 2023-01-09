@@ -68,7 +68,7 @@ namespace Dune
 
     // construction
 
-    /** \brief constuctor
+    /** \brief constructor
      *
      *  \param[in]  grid       reference to the grid to attach data to
      *  \param[in]  codim      codimension to attach data to

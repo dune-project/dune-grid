@@ -98,7 +98,7 @@ namespace Dune
 
       //! construct a CornerIterator
       /**
-       * \param cellit_  The begin iterator of the undelying range.
+       * \param cellit_  The begin iterator of the underlying range.
        * \param cellend_ The end iterator of the underlying range.
        * \param vtkIndex VTKIndex of the currently pointed to corner.
        */

@@ -285,7 +285,7 @@ namespace Dune
           }
         }
 
-        // check wheter no boundary domain found
+        // check whether no boundary domain found
         if( index.empty() )
           return default_;
 

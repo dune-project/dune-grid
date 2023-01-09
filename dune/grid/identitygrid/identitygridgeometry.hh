@@ -54,7 +54,7 @@ namespace Dune {
       return hostGeometry_.type();
     }
 
-    // return wether we have an affine mapping
+    // return whether we have an affine mapping
     bool affine() const {
       return hostGeometry_.affine();
     }

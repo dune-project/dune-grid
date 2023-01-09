@@ -20,7 +20,7 @@ namespace Dune
      \tparam GridImp Type that is a model of Dune::Grid
      \tparam IntersectionIteratorImp Class template that is a model of Dune::IntersectionIterator
 
-     @warning The number of neigbors may be different from the number of
+     @warning The number of neighbors may differ from the number of
      faces/edges of an element!
 
      <h2>Overview</h2>

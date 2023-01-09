@@ -173,12 +173,12 @@ namespace CheckEntitySeed // don't blur namespace Dune
     {
       // compare entities
       if( !Equals< Entity >::apply( e1, e2 ) )
-        output << "Warning: Entities do not conincide" << std::endl;
+        output << "Warning: Entities do not coincide" << std::endl;
 
       // compare geometries
       const double eps = 1e-10;
       if( !GeometryEquals< Geometry >::apply( e1.geometry(), e2.geometry(), eps ) )
-        output << "Warning: Geometries do not conincide" << std::endl;
+        output << "Warning: Geometries do not coincide" << std::endl;
     }
 
   };

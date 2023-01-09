@@ -88,7 +88,7 @@ namespace Dune
 
     //! determine a type to safely put another type into a stream
     /**
-     * This is mainly interating for character types which should print as
+     * This is mainly interesting for character types which should print as
      * their integral value, not as a character.
      */
     template<typename T>

@@ -51,7 +51,7 @@ namespace Dune
       GridParameterBlock(const GridParameterBlock&);
 
     public:
-      //! constructor: read commmon parameters
+      //! constructor: read common parameters
       GridParameterBlock ( std::istream &in );
 
       //! return the name of the grid

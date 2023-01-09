@@ -72,7 +72,7 @@ namespace Dune
 
   /** \class AlbertaGrid
    *  \brief [<em> provides \ref Dune::Grid </em>]
-   *  \brief simplicial grid imlementation from the ALBERTA finite element
+   *  \brief Simplicial grid implementation from the ALBERTA finite element
    *         toolbox
    *  \ingroup GridImplementations
    *  \ingroup AlbertaGrid
@@ -288,7 +288,7 @@ namespace Dune
      */
     AlbertaGrid ( const std::string &macroGridFileName );
 
-    /** \brief desctructor */
+    /** \brief destructor */
     ~AlbertaGrid ();
 
     //! Return maximum level defined in this grid. Levels are numbered
@@ -514,7 +514,7 @@ namespace Dune
     void removeMesh();
 
     //***********************************************************************
-    //  MemoryManagement for Entitys and Geometrys
+    //  MemoryManagement for Entities and Geometries
     //**********************************************************************
     typedef MakeableInterfaceObject< typename Traits::template Codim< 0 >::Entity >
     EntityObject;

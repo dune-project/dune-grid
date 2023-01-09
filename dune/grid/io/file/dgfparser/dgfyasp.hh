@@ -263,7 +263,7 @@ namespace Dune
       }
       if( (numDirs != 1) || (abs( abs( trafo.shift[ dir ] ) - lang[ dir ] ) >= 1e-10) )
       {
-        std::cerr << "Tranformation '" << trafo
+        std::cerr << "Transformation '" << trafo
                   << "' does not map boundaries on boundaries." << std::endl;
       }
       else
@@ -457,7 +457,7 @@ namespace Dune
       if ( (numDirs != 1)
           || (abs( abs( trafo.shift[ dir ] ) - abs( upper[ dir ] - lower[ dir ] ) ) >= 1e-10) )
       {
-        std::cerr << "Tranformation '" << trafo
+        std::cerr << "Transformation '" << trafo
                   << "' does not map boundaries on boundaries." << std::endl;
       }
       else

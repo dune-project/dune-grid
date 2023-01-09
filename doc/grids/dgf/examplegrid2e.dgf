@@ -26,7 +26,7 @@ boundarydomain
 default 1
 #
 Simplexgenerator
-min-angle 30    % quality enhancment
+min-angle 30    % quality enhancement
 max-area 0.01   % area restriction
 display 0       % show result using Triangle viewer
 % to use Triangle from a certain path, uncomment this path line

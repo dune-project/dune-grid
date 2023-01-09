@@ -199,7 +199,7 @@ namespace Dune
         Logger logger( "dune.grid" );
         entry.first.def( "__call__", [ logger ] ( pybind11::object self ) {
             logger.warning( "The methods elements, facets, edges, and vertices have been converted to properties." );
-            logger.warning( "Please remove the trailing parentesis." );
+            logger.warning( "Please remove the trailing parenthesis." );
             return self;
           } );
         entry.first.def( "__call__", [ logger ] ( pybind11::object self, PartitionIteratorType pitype ) {

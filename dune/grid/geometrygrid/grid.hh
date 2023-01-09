@@ -289,7 +289,7 @@ namespace Dune
       return hostGrid().maxLevel();
     }
 
-    /** \brief obtain number of entites on a level
+    /** \brief obtain number of entities on a level
      *
      *  \param[in]  level  level to consider
      *  \param[in]  codim  codimension to consider
@@ -313,7 +313,7 @@ namespace Dune
       return leafGridView().size( codim );
     }
 
-    /** \brief obtain number of entites on a level
+    /** \brief obtain number of entities on a level
      *
      *  \param[in]  level  level to consider
      *  \param[in]  type   geometry type to consider
@@ -440,7 +440,7 @@ namespace Dune
     /** \brief rebalance the load each process has to handle
      *
      *  A parallel grid is redistributed such that each process has about
-     *  the same load (e.g., the same number of leaf entites).
+     *  the same load (e.g., the same number of leaf entities).
      *
      *  \note DUNE does not specify, how the load is measured.
      *
@@ -457,7 +457,7 @@ namespace Dune
     /** \brief rebalance the load each process has to handle
      *
      *  A parallel grid is redistributed such that each process has about
-     *  the same load (e.g., the same number of leaf entites).
+     *  the same load (e.g., the same number of leaf entities).
      *
      *  The data handle is used to communicate the data associated with
      *  entities that move from one process to another.
@@ -625,7 +625,7 @@ namespace Dune
 
     /** \brief type of world geometry
      *
-     *  Models the geomtry mapping of the entity, i.e., the mapping from the
+     *  Models the geometry mapping of the entity, i.e., the mapping from the
      *  reference element into world coordinates.
      *
      *  The geometry is a model of Dune::Geometry, implemented through the
@@ -635,7 +635,7 @@ namespace Dune
 
     /** \brief type of local geometry
      *
-     *  Models the geomtry mapping into the reference element of dimension
+     *  Models the geometry mapping into the reference element of dimension
      *  \em dimension.
      *
      *  The local geometry is a model of Dune::Geometry, implemented through
@@ -661,7 +661,7 @@ namespace Dune
 
     /** \brief type of leaf iterator
      *
-     *  This iterator enumerates the entites of codimension \em codim of a
+     *  This iterator enumerates the entities of codimension \em codim of a
      *  grid level.
      *
      *  The level iterator is a model of Dune::LevelIterator.
@@ -670,7 +670,7 @@ namespace Dune
 
     /** \brief type of level iterator
      *
-     *  This iterator enumerates the entites of codimension \em codim of the
+     *  This iterator enumerates the entities of codimension \em codim of the
      *  leaf grid.
      *
      *  The leaf iterator is a model of Dune::LeafIterator.

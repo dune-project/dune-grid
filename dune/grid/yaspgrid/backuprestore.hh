@@ -16,7 +16,7 @@
 #include <dune/grid/yaspgrid.hh>
 
 // bump this version number up if you introduce any changes
-// to the outout format of the YaspGrid BackupRestoreFacility.
+// to the output format of the YaspGrid BackupRestoreFacility.
 #define YASPGRID_BACKUPRESTORE_FORMAT_VERSION 2
 
 namespace Dune

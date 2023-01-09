@@ -1158,7 +1158,7 @@ namespace Dune
       if (extractedElementData_)
         DUNE_THROW(Dune::InvalidStateException,
           "The element data has already been extracted from this GmshReader "
-          << "via a function call to reader.extractElementData(). Use the extraced data or "
+          << "via a function call to reader.extractElementData(). Use the extracted data or "
           << "read the grid data from file again by constructing a new reader."
         );
     }
@@ -1175,7 +1175,7 @@ namespace Dune
       if (extractedBoundaryData_)
         DUNE_THROW(Dune::InvalidStateException,
           "The boundary data has already been extracted from this GmshReader "
-          << "via a function call to reader.extractBoundaryData(). Use the extraced data or "
+          << "via a function call to reader.extractBoundaryData(). Use the extracted data or "
           << "read the grid data from file again by constructing a new reader."
         );
     }

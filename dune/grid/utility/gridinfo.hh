@@ -119,7 +119,7 @@ namespace Dune {
      * prefix>
      * \endverbatim
      *
-     * If \c gridName, \c gridViewName, or \c partitionName is emtpy, the
+     * If \c gridName, \c gridViewName, or \c partitionName is empty, the
      * corresponding line is not printed and no extra indentation is added for
      * the subsequent lines.
      */

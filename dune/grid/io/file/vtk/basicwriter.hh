@@ -136,18 +136,16 @@ namespace Dune
       //
 
       static std::string getFirstScalar(const WriterList& data) {
-        const WIterator& wend = data.end();
-        for(WIterator wit = data.begin(); wit != wend; ++wit)
-          if((*wit)->ncomps() == 1)
-            return (*wit)->name();
+        for(auto&& d : data)
+          if (d->ncomps() == 1)
+            return d->name();
         return "";
       }
 
       static std::string getFirstVector(const WriterList& data) {
-        const WIterator& wend = data.end();
-        for(WIterator wit = data.begin(); wit != wend; ++wit)
-          if((*wit)->ncomps() == 3)
-            return (*wit)->name();
+        for(auto&& d : data)
+          if (d->ncomps() == 3)
+            return d->name();
         return "";
       }
 
@@ -156,9 +154,9 @@ namespace Dune
 
         vtuWriter.beginCellData(getFirstScalar(cellData),
                                 getFirstVector(cellData));
-        const WIterator& wend = cellData.end();
-        for(WIterator wit = cellData.begin(); wit != wend; ++wit)
-          writeCellFunction(vtuWriter, **wit, ncells);
+
+        for (auto&& cD : cellData)
+          writeCellFunction(vtuWriter, *cd, ncells);
         vtuWriter.endCellData();
       }
 
@@ -167,9 +165,9 @@ namespace Dune
 
         vtuWriter.beginPointData(getFirstScalar(pointData),
                                  getFirstVector(pointData));
-        const WIterator& wend = pointData.end();
-        for(WIterator wit = pointData.begin(); wit != wend; ++wit)
-          writePointFunction(vtuWriter, **wit, npoints);
+
+        for (auto&& pD : pointData)
+          writePointFunction(vtuWriter, *pD, npoints);
         vtuWriter.endPointData();
       }
 
@@ -377,7 +375,7 @@ namespace Dune
        *                   piece as well as the parallel collection file.
        * \param path       Directory where to put the parallel collection
        *                   (.pvtu/.pvtp) file.  If it is relative, it is taken
-       *                   realtive to the current directory.
+       *                   relative to the current directory.
        * \param extendpath Directory where to put the piece file (.vtu/.vtp) of
        *                   this process.  If it is relative, it is taken
        *                   relative to the directory denoted by path.
