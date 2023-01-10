@@ -156,7 +156,7 @@ namespace Dune
                                 getFirstVector(cellData));
 
         for (auto&& cD : cellData)
-          writeCellFunction(vtuWriter, *cd, ncells);
+          writeCellFunction(vtuWriter, *cD, ncells);
         vtuWriter.endCellData();
       }
 
