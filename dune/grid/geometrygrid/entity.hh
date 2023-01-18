@@ -670,7 +670,7 @@ namespace Dune
 
     private:
       PartitionType
-      vertexPartitionType ( Dune::Transitional::ReferenceElement< ctype, Dim<dimension> > refElement, int i ) const
+      vertexPartitionType ( typename Dune::ReferenceElements< ctype, dimension >::ReferenceElement refElement, int i ) const
       {
         const int j = refElement.subEntity( subEntity_, codimension, i, dimension );
         return hostElement().template subEntity< dimension >( j ).partitionType();

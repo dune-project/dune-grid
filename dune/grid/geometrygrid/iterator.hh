@@ -50,7 +50,7 @@ namespace Dune
 
       typedef typename std::remove_const< Grid >::type::ctype ctype;
       typedef typename std::remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
-      typedef Transitional::ReferenceElement< ctype, Dim<dimension> > RefElement;
+      typedef typename ReferenceElements< ctype, dimension >::ReferenceElement RefElement;
 
       static bool apply ( const RefElement &refElement,
                           const Element &element, int subEntity )
@@ -77,7 +77,7 @@ namespace Dune
 
       typedef typename std::remove_const< Grid >::type::ctype ctype;
       typedef typename std::remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
-      typedef Transitional::ReferenceElement< ctype, Dim<dimension> > RefElement;
+      typedef typename ReferenceElements< ctype, dimension >::ReferenceElement RefElement;
 
       static bool apply ( const RefElement &refElement,
                           const Element &element, int subEntity )
@@ -96,7 +96,7 @@ namespace Dune
 
       typedef typename std::remove_const< Grid >::type::ctype ctype;
       typedef typename std::remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
-      typedef Transitional::ReferenceElement< ctype, Dim<dimension> > RefElement;
+      typedef typename ReferenceElements< ctype, dimension >::ReferenceElement RefElement;
 
       static bool apply ( const RefElement &refElement,
                           const Element &element, int subEntity )
@@ -126,7 +126,7 @@ namespace Dune
 
       typedef typename std::remove_const< Grid >::type::ctype ctype;
       typedef typename std::remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
-      typedef Transitional::ReferenceElement< ctype, Dim<dimension> > RefElement;
+      typedef typename ReferenceElements< ctype, dimension >::ReferenceElement RefElement;
 
       static bool apply ( const RefElement &refElement,
                           const Element &element, int subEntity )
@@ -145,7 +145,7 @@ namespace Dune
 
       typedef typename std::remove_const< Grid >::type::ctype ctype;
       typedef typename std::remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
-      typedef Transitional::ReferenceElement< ctype, Dim<dimension> > RefElement;
+      typedef typename ReferenceElements< ctype, dimension >::ReferenceElement RefElement;
 
       static bool apply ( const RefElement &refElement,
                           const Element &element, int subEntity )
@@ -164,7 +164,7 @@ namespace Dune
 
       typedef typename std::remove_const< Grid >::type::ctype ctype;
       typedef typename std::remove_const< Grid >::type::Traits::template Codim< 0 >::Entity Element;
-      typedef Transitional::ReferenceElement< ctype, Dim<dimension> > RefElement;
+      typedef typename ReferenceElements< ctype, dimension >::ReferenceElement RefElement;
 
       static bool apply ( const RefElement &refElement,
                           const Element &element, int subEntity )
