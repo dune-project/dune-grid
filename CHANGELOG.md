@@ -27,6 +27,11 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
   GridViews and GridFunctions can be pickled and then read into Paraview without going through vtu.
   As an example manipulation the subsampling level can be adjusted directly in Paraview so that higher order functions can be visualized.
 
+## Deprecations and removals
+
+- Deprecated `CommDataHandleIF::fixedsize()` has beend removed. Use `fixedSize()` with capital
+  S instead.
+
 # Release 2.9
 - UGGrid is now thread safe on the grid view.
 
