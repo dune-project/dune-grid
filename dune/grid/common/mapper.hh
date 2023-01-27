@@ -194,14 +194,6 @@ namespace Dune
       CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().update(std::forward<GridView>(gridView))));
     }
 
-    /** @brief Reinitialize mapper after grid has been modified.
-     */
-    [[deprecated("Use update(gridView) instead! Will be removed after release 2.8. Mappers have to implement update(gridView).")]]
-    void update ()
-    {
-      CHECK_AND_CALL_INTERFACE_IMPLEMENTATION((asImp().update()));
-    }
-
   private:
     //!  Barton-Nackman trick
     MapperImp& asImp () {return static_cast<MapperImp &> (*this);}
