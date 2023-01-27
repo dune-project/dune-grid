@@ -31,6 +31,16 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 
 - Deprecated `CommDataHandleIF::fixedsize()` has beend removed. Use `fixedSize()` with capital
   S instead.
+- Deprecated `update()` member function of mappers have been removed. Use the
+  member function `update(gridView)` with a grid view argument when updating
+  the mapper after the grid or grid view changes. The interface
+  change reflects that grid view has value semantics.
+
+- The deprecated convenience classes `LeafSingleCodimSingleGeomTypeMapper`,
+  `LevelSingleCodimSingleGeomTypeMapper`, `LeafMultipleCodimMultipleGeomTypeMapper`,
+  `LevelMultipleCodimMultipleGeomTypeMapper` have been removed since they
+  don't comply with the new mapper interface.
+  Just use `SingleCodimSingleGeomTypeMapper` and `MultipleCodimMultipleGeomTypeMapper`.
 
 # Release 2.9
 - UGGrid is now thread safe on the grid view.

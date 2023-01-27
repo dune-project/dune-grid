@@ -324,14 +324,6 @@ namespace Dune
       update_();
     }
 
-    /** @brief Recalculates indices after grid adaptation
-     */
-    [[deprecated("Use update(gridView) instead! Will be removed after release 2.8.")]]
-    void update ()
-    {
-      update_();
-    }
-
     const MCMGLayout &layout () const { return layout_; }
     const GridView &gridView () const { return gridView_; }
 
@@ -384,92 +376,6 @@ namespace Dune
     std::array<Index, GlobalGeometryTypeIndex::size(GV::dimension)> blocks;
     const MCMGLayout layout_;     // get layout object
     std::vector<GeometryType> myTypes_[GV::dimension+1];
-  };
-
-  //////////////////////////////////////////////////////////////////////
-  //
-  //  Leaf and level mapper
-  //
-
-  /** @brief Multiple codim and multiple geometry type mapper for leaf entities.
-
-     This mapper uses all leaf entities of a certain codimension as its entity set.
-     \deprecated Use MultipleCodimMultipleGeomTypeMapper instead
-     \tparam G      A %Dune grid type.
-   */
-  template <typename G>
-  class [[deprecated("Use MultipleCodimMultipleGeomTypeMapper instead! Will be removed after release 2.8.")]]
-  LeafMultipleCodimMultipleGeomTypeMapper
-    : public MultipleCodimMultipleGeomTypeMapper<typename G::LeafGridView>
-  {
-    typedef MultipleCodimMultipleGeomTypeMapper<typename G::LeafGridView> Base;
-  public:
-
-    /**
-     * \brief constructor
-     *
-     * \param grid   reference to the grid
-     * \param layout layout functional describing which geometry types to include in the map.
-     */
-    LeafMultipleCodimMultipleGeomTypeMapper (const G& grid, const MCMGLayout& layout)
-      : Base(grid.leafGridView(), layout)
-      , gridPtr_(&grid)
-    {}
-
-    /** @brief Recalculates indices after grid adaptation
-     *
-     * After grid adaptation you need to call this to update
-     * the stored gridview and recalculate the indices.
-     */
-    void update ()
-    {
-      Base::update(gridPtr_->leafGridView());
-    }
-
-  private:
-    const G* gridPtr_;
-  };
-
-  /** @brief Multiple codim and multiple geometry type mapper for entities of one level.
-
-
-     This mapper uses all entities of a certain codimension on a given level as its entity set.
-     \deprecated Use MultipleCodimMultipleGeomTypeMapper instead
-     \tparam G      A %Dune grid type.
-   */
-  template <typename G>
-  class [[deprecated("Use MultipleCodimMultipleGeomTypeMapper instead! Will be removed after release 2.8.")]]
-  LevelMultipleCodimMultipleGeomTypeMapper
-    : public MultipleCodimMultipleGeomTypeMapper<typename G::LevelGridView> {
-    typedef MultipleCodimMultipleGeomTypeMapper<typename G::LevelGridView> Base;
-  public:
-
-    /**
-     * \brief constructor
-     *
-     * \param grid   reference to the grid
-     * \param level  valid level of the grid
-     * \param layout layout functional describing which geometry types to include in the map.
-     */
-    LevelMultipleCodimMultipleGeomTypeMapper (const G& grid, int level, const MCMGLayout& layout)
-      : Base(grid.levelGridView(level),layout)
-      , gridPtr_(&grid)
-      , level_(level)
-    {}
-
-    /** @brief Recalculates indices after grid adaptation
-     *
-     * After grid adaptation you need to call this to update
-     * the stored gridview and recalculate the indices.
-     */
-    void update ()
-    {
-      Base::update(gridPtr_->levelGridView(level_));
-    }
-
-  private:
-    const G* gridPtr_;
-    int level_;
   };
 
   /** @} */
