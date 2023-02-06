@@ -3,6 +3,7 @@
 
 from dune.common.checkconfiguration import assertCMakeHave, ConfigurationError
 from dune.typeregistry import generateTypeName
+from mpi4py import MPI
 
 class CartesianDomain(tuple):
     @staticmethod
@@ -203,7 +204,7 @@ def tensorProductCoordinates(coords, offset=None, ctype='double'):
     return coords_(coords,offset)
 
 def yaspGrid(constructor, dimgrid=None, coordinates="equidistant", ctype=None,
-             periodic=None, overlap=None, **param):
+             periodic=None, overlap=None, communicator=MPI.COMM_WORLD, **param):
     """create a Dune::YaspGrid
 
        constructor: a Yaspgrod coordinates object
@@ -296,27 +297,34 @@ def yaspGrid(constructor, dimgrid=None, coordinates="equidistant", ctype=None,
         # periodic and overlap are (if required) defined by the DGF reader
         periodic   = None
         overlap   = None
+        # check that Communicator uses default value
+        if communicator != MPI.COMM_WORLD:
+            raise ValueError("yaspGrid: construction via reader does not support user defined communicator")
     else:
         raise ValueError("yaspGrid: unsupported constructor parameter " + str(constructor))
 
     # compile YaspGrid for a given dimension & coordinate type
-    includes = ["dune/grid/yaspgrid.hh", "dune/grid/io/file/dgfparser/dgfyasp.hh"]
+    includes = ["dune/grid/yaspgrid.hh", "dune/grid/io/file/dgfparser/dgfyasp.hh", "mpi4py/mpi4py.h"]
     gridTypeName, _ = generateTypeName("Dune::YaspGrid", str(dimgrid), coordinates_type)
     ctor = Constructor(
             [ "const " + coordinates_type + "& coordinates",
               'std::array<bool, '+str(dimgrid)+'> periodic',
-              'int overlap' ],
+              'int overlap',
+              'pybind11::object py_comm'],
             [ 'std::bitset<'+str(dimgrid)+'> periodic_;',
               'for (int i=0;i<'+str(dimgrid)+';++i) periodic_.set(i,periodic[i]);',
-              'return new DuneType(coordinates,periodic_,overlap);' ],
-            [ '"coordinates"_a', '"periodic"_a', '"overlap"_a' ])
+              'import_mpi4py();' # import C symbol of mpi4py (see https://enccs.se/news/2021/03/mpi-hybrid-c-python-code/)
+              'MPI_Comm* comm_p = PyMPIComm_Get(py_comm.ptr());',
+              'Dune::Communication<MPI_Comm> communicator(*comm_p);',
+              'return new DuneType(coordinates,periodic_,overlap,communicator);'],
+            [ '"coordinates"_a', '"periodic"_a', '"overlap"_a', '"communicator"_a' ])
     gridModule = module(includes, gridTypeName, ctor)
 
     # read the grid either via reader or create it directly...
     if useReader:
-        return gridModule.reader(constructor).leafView
+        return gridModule.reader(constructor).leafView # readers don't support custom communicator
     else:
-        return gridModule.HierarchicalGrid(constructor,periodic,overlap).leafView
+        return gridModule.HierarchicalGrid(constructor,periodic,overlap,communicator).leafView
 
 grid_registry = {
         "OneD"       : onedGrid,
