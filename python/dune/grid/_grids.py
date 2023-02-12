@@ -2,16 +2,9 @@
 # SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 
 from dune.common.checkconfiguration import assertCMakeHave, ConfigurationError
+from dune.common import comm as defaultCommunicator
 from dune.typeregistry import generateTypeName
 from dune.packagemetadata import getCMakeFlags
-
-if getCMakeFlags()["HAVE_MPI"]:
-    from mpi4py import MPI
-    withMPI = True
-    defaultCommunicator = MPI.COMM_WORLD
-else:
-    withMPI = False
-    defaultCommunicator = None
 
 class CartesianDomain(tuple):
     @staticmethod
@@ -312,24 +305,16 @@ def yaspGrid(constructor, dimgrid=None, coordinates="equidistant", ctype=None,
         raise ValueError("yaspGrid: unsupported constructor parameter " + str(constructor))
 
     # compile YaspGrid for a given dimension & coordinate type
-    includes = ["dune/grid/yaspgrid.hh", "dune/grid/io/file/dgfparser/dgfyasp.hh"]
+    includes = ["dune/grid/yaspgrid.hh", "dune/grid/io/file/dgfparser/dgfyasp.hh", "dune/common/parallel/mpihelper.hh"]
     gridTypeName, _ = generateTypeName("Dune::YaspGrid", str(dimgrid), coordinates_type)
     setupPeriodic = [ 'std::bitset<'+str(dimgrid)+'> periodic_;',
                       'for (int i=0;i<'+str(dimgrid)+';++i) periodic_.set(i,periodic[i]);']
-    if withMPI:
-        includes.append("mpi4py/mpi4py.h")
-        generator = setupPeriodic + ['import_mpi4py();', # import C symbol of mpi4py (see https://enccs.se/news/2021/03/mpi-hybrid-c-python-code/)
-                                     'MPI_Comm* comm_p = PyMPIComm_Get(py_comm.ptr());',
-                                     'Dune::Communication<MPI_Comm> communicator(*comm_p);',
-                                     'return new DuneType(coordinates,periodic_,overlap,communicator);']
-
-    else:
-        generator = setupPeriodic + [ 'return new DuneType(coordinates,periodic_,overlap);']
+    generator = setupPeriodic + [ 'return new DuneType(coordinates,periodic_,overlap,communicator);' ]
     ctor = Constructor(
         [ "const " + coordinates_type + "& coordinates",
           'std::array<bool, '+str(dimgrid)+'> periodic',
           'int overlap',
-          'pybind11::object py_comm'],
+          'Dune::Communication< Dune::MPIHelper::MPICommunicator > communicator'],
         generator,
         [ '"coordinates"_a', '"periodic"_a', '"overlap"_a', '"communicator"_a' ])
     gridModule = module(includes, gridTypeName, ctor)
