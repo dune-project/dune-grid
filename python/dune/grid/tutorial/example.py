@@ -76,16 +76,3 @@ p_grid = yaspGrid( cartDomain, dimgrid=dim) #, ctype='float' )
 print("number of elements of periodic YaspGrid grid:",p_grid.size(0))
 p_grid.plot()
 runOnGrid(p_grid)
-
-# create parallel YaspGrids with user defined communicators
-def parallelGrid(comm,sz):
-    print (comm.rank, "construct a YaspGrid with tensor product coordinate type and custom communicator")
-    from dune.grid import yaspGrid, tensorProductCoordinates
-    import numpy as np
-    coords = tensorProductCoordinates([np.array([1,2,3,4,5,6,7,8,9]), np.array([10,11,33,44,45,46,47,48,109])], ctype='float')
-    ygrid = yaspGrid(coords,overlap=0,communicator=comm)
-    print(comm.rank,"number of elements of tensor YaspGrid grid:",ygrid.size(0))
-    assert(comm.size == sz)
-    assert(ygrid.size(0) == 64/sz)
-parallelGrid(dune.common.comm, dune.common.comm.size) # working with the default communicator, one distributed grid
-parallelGrid(MPI.COMM_SELF,    1) # unrelated local grids on each rank

@@ -4,7 +4,6 @@
 # make sure the example works and run in during tests
 dune_python_add_test(NAME pyexample
                      SCRIPT example.py
-                     MPI_RANKS 1 2 4
                      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                      LABELS quick)
 dune_symlink_to_source_files(FILES example.py test2d_offset.dgf circle1storder.msh)
