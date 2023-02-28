@@ -2,9 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 
 from dune.common.checkconfiguration import assertCMakeHave, ConfigurationError
-from dune.common import comm as defaultCommunicator
 from dune.typeregistry import generateTypeName
-from dune.packagemetadata import getCMakeFlags
 
 class CartesianDomain(tuple):
     @staticmethod
@@ -205,7 +203,7 @@ def tensorProductCoordinates(coords, offset=None, ctype='double'):
     return coords_(coords,offset)
 
 def yaspGrid(constructor, dimgrid=None, coordinates="equidistant", ctype=None,
-             periodic=None, overlap=None, communicator=defaultCommunicator, **param):
+             periodic=None, overlap=None, **param):
     """create a Dune::YaspGrid
 
        constructor: a Yaspgrod coordinates object
@@ -298,38 +296,34 @@ def yaspGrid(constructor, dimgrid=None, coordinates="equidistant", ctype=None,
         # periodic and overlap are (if required) defined by the DGF reader
         periodic   = None
         overlap   = None
-        # check that Communicator uses default value
-        if communicator != defaultCommunicator:
-            raise ValueError("yaspGrid: construction via reader does not support user defined communicator")
     else:
         raise ValueError("yaspGrid: unsupported constructor parameter " + str(constructor))
 
     # compile YaspGrid for a given dimension & coordinate type
-    includes = ["dune/grid/yaspgrid.hh", "dune/grid/io/file/dgfparser/dgfyasp.hh", "dune/common/parallel/mpihelper.hh"]
+    includes = ["dune/grid/yaspgrid.hh", "dune/grid/io/file/dgfparser/dgfyasp.hh"]
     gridTypeName, _ = generateTypeName("Dune::YaspGrid", str(dimgrid), coordinates_type)
-    setupPeriodic = [ 'std::bitset<'+str(dimgrid)+'> periodic_;',
-                      'for (int i=0;i<'+str(dimgrid)+';++i) periodic_.set(i,periodic[i]);']
-    generator = setupPeriodic + [ 'return new DuneType(coordinates,periodic_,overlap,communicator);' ]
     ctor = Constructor(
-        [ "const " + coordinates_type + "& coordinates",
-          'std::array<bool, '+str(dimgrid)+'> periodic',
-          'int overlap',
-          'Dune::Communication< Dune::MPIHelper::MPICommunicator > communicator'],
-        generator,
-        [ '"coordinates"_a', '"periodic"_a', '"overlap"_a', '"communicator"_a' ])
+            [ "const " + coordinates_type + "& coordinates",
+              'std::array<bool, '+str(dimgrid)+'> periodic',
+              'int overlap' ],
+            [ 'std::bitset<'+str(dimgrid)+'> periodic_;',
+              'for (int i=0;i<'+str(dimgrid)+';++i) periodic_.set(i,periodic[i]);',
+              'return new DuneType(coordinates,periodic_,overlap);' ],
+            [ '"coordinates"_a', '"periodic"_a', '"overlap"_a' ])
     gridModule = module(includes, gridTypeName, ctor)
 
     # read the grid either via reader or create it directly...
     if useReader:
-        return gridModule.reader(constructor).leafView # readers don't support custom communicator
+        return gridModule.reader(constructor).leafView
     else:
-        return gridModule.HierarchicalGrid(constructor,periodic,overlap,communicator).leafView
+        return gridModule.HierarchicalGrid(constructor,periodic,overlap).leafView
 
 grid_registry = {
         "OneD"       : onedGrid,
         "Yasp"       : yaspGrid,
     }
 
+from dune.packagemetadata import getCMakeFlags
 try:
     if not getCMakeFlags()["HAVE_ALBERTA"]:
         raise KeyError
