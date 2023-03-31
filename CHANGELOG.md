@@ -20,6 +20,8 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
   interfaces at compilation time using c++20 concepts. Note, this feature is still in development and
   might be subject to changes.
 
+## Python
+
 - Improve pickling support (GridViews and some GridFunction objects can now be pickled).
 
 - Add a prototype reader for Paraview directly based on the Python bindings.
