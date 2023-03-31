@@ -94,11 +94,15 @@ namespace Dune
         typedef typename Geometry::ctype ctype;
         typedef FieldVector< ctype, mydimension > LocalCoordinate;
         typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
+        typedef FieldMatrix< ctype, coorddimension, mydimension > Jacobian;
         typedef FieldMatrix< ctype, mydimension, coorddimension > JacobianTransposed;
+        typedef FieldMatrix< ctype, mydimension, coorddimension > JacobianInverse;
         typedef FieldMatrix< ctype, coorddimension, mydimension > JacobianInverseTransposed;
         registerFieldVecMat<LocalCoordinate>::apply();
         registerFieldVecMat<GlobalCoordinate>::apply();
+        registerFieldVecMat<Jacobian>::apply();
         registerFieldVecMat<JacobianTransposed>::apply();
+        registerFieldVecMat<JacobianInverse>::apply();
         registerFieldVecMat<JacobianInverseTransposed>::apply();
 
         typedef pybind11::array_t< ctype > Array;
@@ -251,6 +255,28 @@ namespace Dune
             return vectorize( [ &self ] ( const LocalCoordinate &x ) { return self.integrationElement( x ); }, x );
           } );
 
+        cls.def( "jacobian", [] ( const Geometry &self, const LocalCoordinate &x ) {
+            return static_cast< Jacobian >( self.jacobian( x ) );
+          }, "x"_a,
+          R"doc(
+            obtain the Jacobian of this mapping in a local point
+
+            The Jacobian describes the push-forward for tangential
+            vectors from the reference domain to the image of this map.
+
+            Args:
+                x:    local point
+
+            Returns:
+                Jacobian matrix in x
+
+            Note: This method may be used in vectorized form by passing in a
+                  NumPy array for 'x'.
+          )doc" );
+        cls.def( "jacobian", [] ( const Geometry &self, Array x ) {
+            return vectorize( [ &self ] ( const LocalCoordinate &x ) { return static_cast< Jacobian >( self.jacobian( x ) ); }, x );
+          } );
+
         cls.def( "jacobianTransposed", [] ( const Geometry &self, const LocalCoordinate &x ) {
             return static_cast< JacobianTransposed >( self.jacobianTransposed( x ) );
           }, "x"_a,
@@ -274,6 +300,28 @@ namespace Dune
           )doc" );
         cls.def( "jacobianTransposed", [] ( const Geometry &self, Array x ) {
             return vectorize( [ &self ] ( const LocalCoordinate &x ) { return static_cast< JacobianTransposed >( self.jacobianTransposed( x ) ); }, x );
+          } );
+
+        cls.def( "jacobianInverse", [] ( const Geometry &self, const LocalCoordinate &x ) {
+            return static_cast< JacobianInverseTransposed >( self.jacobianInverseTransposed( x ) );
+          }, "x"_a,
+          R"doc(
+            obtain inverse Jacobian of this mapping in a local point
+
+            The inverse Jacobian describes the push-forward of cotangential
+            vectors from the reference domain to the image of this map.
+
+            Args:
+                x:    local point
+
+            Returns:
+                Inverse Jacobian matrix in x
+
+            Note: This method may be used in vectorized form by passing in a
+                  NumPy array for 'x'.
+          )doc" );
+        cls.def( "jacobianInverse", [] ( const Geometry &self, Array x ) {
+            return vectorize( [ &self ] ( const LocalCoordinate &x ) { return static_cast< JacobianInverse >( self.jacobianInverse( x ) ); }, x );
           } );
 
         cls.def( "jacobianInverseTransposed", [] ( const Geometry &self, const LocalCoordinate &x ) {
