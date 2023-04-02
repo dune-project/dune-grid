@@ -147,7 +147,7 @@ namespace Dune
       return impl().jacobian(local);
     }
 
-    [[deprecated("Geometry implementatons are required to provide a jacobian(local) method. The default implementation is deprecated and will be removed after release 2.9")]]
+    [[deprecated("Geometry implementations are required to provide a jacobian(local) method. The default implementation is deprecated and will be removed after release 2.9")]]
     auto jacobianImpl ( const LocalCoordinate &local, std::false_type /*implNotDetected*/ ) const
     {
       return transpose(jacobianTransposed(local));
@@ -158,7 +158,7 @@ namespace Dune
       return impl().jacobianInverse(local);
     }
 
-    [[deprecated("Geometry implementatons are required to provide a jacobianInverse(local) method. The default implementation is deprecated and will be removed after release 2.9")]]
+    [[deprecated("Geometry implementations are required to provide a jacobianInverse(local) method. The default implementation is deprecated and will be removed after release 2.9")]]
     auto jacobianInverseImpl ( const LocalCoordinate &local, std::false_type /*implNotDetected*/ ) const
     {
       return transpose(jacobianInverseTransposed(local));

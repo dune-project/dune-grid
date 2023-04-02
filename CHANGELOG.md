@@ -8,17 +8,19 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 ## Changelog
 
 - Removed the deprecated method `geomTypes()` from all the grid (indexset) implementations since
-  they are neither used no supported b the grid interface since ages. Use `types()` instead. Note,
-  that `types()` returns `IndexSet::Types` that might be different from `std::vector<GeometryType>`
-  and also is returned by values instead of reference.
+  they have not been used nor supported by the grid interface for ages. Use `types()` instead. Note
+  that `types()` returns an object of type `IndexSet::Types`, which might not be `std::vector<GeometryType>`.
+  Also, the object is returned by value instead of by reference.
 
 - Provide `communicate()` method in `OneDGrid` and `IdentityGrid`
 
 - Change the `IndexSet::Types` type of `OndDGrid` and `YaspGrid` to `std::array<GeometryType,1>`.
 
 - Grid concepts are here! A `Grid` can now be inspected and also its components checked for valid
-  interfaces at compilation time using c++20 concepts. Note, this feature is still in development and
+  interfaces at compilation time using c++20 concepts. Note that, this feature is still in development and
   might be subject to changes.
+
+## Python
 
 - Improve pickling support (GridViews and some GridFunction objects can now be pickled).
 
@@ -29,7 +31,7 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 
 ## Deprecations and removals
 
-- Deprecated `CommDataHandleIF::fixedsize()` has beend removed. Use `fixedSize()` with capital
+- Deprecated `CommDataHandleIF::fixedsize()` has been removed. Use `fixedSize()` with capital
   S instead.
 - Deprecated `update()` member function of mappers have been removed. Use the
   member function `update(gridView)` with a grid view argument when updating
