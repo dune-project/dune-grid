@@ -22,7 +22,7 @@ include(DuneMacros)
 dune_project()
 
 # create the dune library for dune-grid
-dune_add_library(dunegrid)
+dune_add_library(dunegrid EXPORT_NAME Grid)
 target_link_libraries(dunegrid PUBLIC ${DUNE_LIBS})
 
 # create a dune library for the albertagrid
