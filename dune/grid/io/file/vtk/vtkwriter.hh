@@ -1127,7 +1127,6 @@ namespace Dune
            ++it)
       {
         unsigned writecomps = it->fieldInfo().size();
-        if(writecomps == 2) writecomps = 3;
         writer.addArray(it->name(), writecomps, it->fieldInfo().precision());
       }
       writer.endPointData();
@@ -1144,7 +1143,6 @@ namespace Dune
            ++it)
       {
         unsigned writecomps = it->fieldInfo().size();
-        if(writecomps == 2) writecomps = 3;
         writer.addArray(it->name(), writecomps, it->fieldInfo().precision());
       }
       writer.endCellData();
