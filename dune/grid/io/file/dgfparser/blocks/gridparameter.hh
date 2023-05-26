@@ -39,12 +39,14 @@ namespace Dune
       static const Flags foundName = 1 << 0;
       static const Flags foundDumpFileName = 1 << 1;
       static const Flags foundLongestEdge = 1 << 5;
+      static const Flags foundCompatible = 1 << 13;
 
     protected:
       Flags foundFlags_; // supportFlags, this block was created with
       std::string name_; // name of the grid
       std::string dumpFileName_; // name of the grid
-      bool markLongestEdge_; // Mark longest edge for AlbertaGrid
+      bool markLongestEdge_; // Mark longest edge for AlbertaGrid or ALUGrid
+      bool bisectionCompatibility_; // true if grid is compatible (bisection refinement works)
 
     private:
       // copy not implemented
@@ -86,6 +88,17 @@ namespace Dune
                 << "defaulting to 'ARBITRARY'." << std::endl;
         }
         return markLongestEdge_;
+      }
+
+      //! returns true if grid is compatible for bisection refinement
+      bool bisectionCompatibility() const
+      {
+        if( (foundFlags_ & foundCompatible) == 0 )
+        {
+          dwarn << "GridParameterBlock: Parameter 'bisectioncompatibility' not specified, "
+                << "defaulting to '0' (false)." << std::endl;
+        }
+        return bisectionCompatibility_;
       }
 
       // some information

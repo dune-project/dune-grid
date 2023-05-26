@@ -54,6 +54,8 @@ class CartesianDomain(tuple):
         # set default value for refinementedge if not provided to avoid warning
         if not foundRefEdge:
             dgf += "REFINEMENTEDGE ARBITRARY\n"
+        # simplex grids built from interval blocks are bisection compatible
+        dgf += "BISECTIONCOMPATIBILITY 1\n"
         dgf += "#\n"
         try:
             periodic = parameters["periodic"]

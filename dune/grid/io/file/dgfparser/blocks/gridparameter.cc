@@ -20,7 +20,8 @@ namespace Dune
         foundFlags_( 0 ),
         name_( "Unnamed Grid" ), // default value (used if name is empty)
         dumpFileName_( "" ),
-        markLongestEdge_( false ) // default value
+        markLongestEdge_( false ), // default value
+        bisectionCompatibility_( false ) // default value
     {
       if( isempty() )
         return;
@@ -62,6 +63,19 @@ namespace Dune
         else
           dwarn << "GridParameterBlock: Found keyword 'refinementedge' without value." << std::endl;
         foundFlags_ |= foundLongestEdge;
+      }
+
+      // check for bisectioncompatibility
+      if( findtoken( "bisectioncompatibility" ) )
+      {
+        int entry;
+        if( getnextentry( entry ) )
+        {
+          bisectionCompatibility_ = bool(entry);
+        }
+        else
+          dwarn << "GridParameterBlock: Found keyword 'bisectioncompatibility' without value." << std::endl;
+        foundFlags_ |= foundCompatible;
       }
 
     }
