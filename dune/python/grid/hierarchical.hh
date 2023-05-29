@@ -442,7 +442,10 @@ namespace Dune
       cls.def_property_readonly( "maxLevel", [] ( const Grid &self ) -> int { return self.maxLevel(); } );
       cls.def_property_readonly_static( "dimension", [] ( pybind11::object ) { return int(Grid::dimension); } );
       cls.def_property_readonly_static( "dimensionworld", [] ( pybind11::object ) { return int(Grid::dimensionworld); } );
-      cls.def_property_readonly_static( "refineStepsForHalf", [] ( pybind11::object ) { return DGFGridInfo< Grid >::refineStepsForHalf(); } );
+      // evaluate this information at grid creation time since this changes for
+      // ALUGrid conform when used as simplex grid.
+      const int refineStepsForHalf = DGFGridInfo< Grid >::refineStepsForHalf();
+      cls.def_property_readonly_static( "refineStepsForHalf", [refineStepsForHalf] ( pybind11::object ) { return refineStepsForHalf; } );
 
       // export grid capabilities
 
