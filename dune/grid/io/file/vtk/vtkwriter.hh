@@ -1127,6 +1127,9 @@ namespace Dune
            ++it)
       {
         unsigned writecomps = it->fieldInfo().size();
+        // for 2d vector fields should be written as 3d vector fields
+        if(it->fieldInfo().type() == VTK::FieldInfo::Type::vector && writecomps == 2)
+          writecomps = 3;
         writer.addArray(it->name(), writecomps, it->fieldInfo().precision());
       }
       writer.endPointData();
@@ -1143,6 +1146,9 @@ namespace Dune
            ++it)
       {
         unsigned writecomps = it->fieldInfo().size();
+        // for 2d vector fields should be written as 3d vector fields
+        if(it->fieldInfo().type() == VTK::FieldInfo::Type::vector && writecomps == 2)
+          writecomps = 3;
         writer.addArray(it->name(), writecomps, it->fieldInfo().precision());
       }
       writer.endCellData();
