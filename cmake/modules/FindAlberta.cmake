@@ -110,8 +110,8 @@ find_package_handle_standard_args("Alberta"
 
 if(Alberta_FOUND)
   foreach(dim ${ALBERTA_WORLD_DIMS})
-    if(NOT Alberta::AlbertaGrid_${dim}d)
-      add_library(Alberta::AlbertaGrid_${dim}d ALIAS PkgConfig::Alberta${dim}d)
+    if(NOT Alberta::AlbertaGrid${dim}d)
+      add_library(Alberta::AlbertaGrid${dim}d ALIAS PkgConfig::Alberta${dim}d)
     endif()
   endforeach(dim)
 endif()
