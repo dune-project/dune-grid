@@ -12,7 +12,7 @@ add_python_targets(grid
   datahandle
 )
 dune_add_pybind11_module(NAME _grid)
-set_property(TARGET _grid PROPERTY LINK_LIBRARIES Dune::Common Dune::Geometry Dune::Grid APPEND)
+set_property(TARGET _grid PROPERTY LINK_LIBRARIES Dune::Grid APPEND)
 if(SKBUILD)
   install(TARGETS _grid LIBRARY DESTINATION python/dune/grid)
 endif()
