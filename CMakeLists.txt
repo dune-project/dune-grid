@@ -28,9 +28,9 @@ target_link_libraries(dunegrid PUBLIC ${DUNE_LIBS})
 # create a dune library for the albertagrid
 if(Alberta_FOUND)
   foreach(_dim ${ALBERTA_WORLD_DIMS})
-    dune_add_library(dunealbertagrid${_dim}d NO_MODULE_LIBRARY EXPORT_NAME AlbertaGrid${_dim}d)
+    dune_add_library(dunealbertagrid${_dim}d NO_MODULE_LIBRARY EXPORT_NAME AlbertaGrid${_dim}D)
     target_link_libraries(dunealbertagrid${_dim}d PUBLIC
-      dunegrid Alberta::AlbertaGrid${_dim}d)
+      dunegrid Alberta::AlbertaGrid${_dim}D)
     target_compile_definitions(dunealbertagrid${_dim}d PUBLIC
       ALBERTA_DIM=${_dim} ENABLE_ALBERTA=1)
     if(Alberta_DEBUG)
