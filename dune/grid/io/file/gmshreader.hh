@@ -878,7 +878,7 @@ namespace Dune
      *       argument.
      */
     template<class T>
-    static T &discarded(T &&value) { return value; }
+    static T &discarded(T &&value) { return static_cast<T&>(value); }
 
     struct DataArg {
       std::vector<int> *data_ = nullptr;
