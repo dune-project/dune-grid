@@ -51,7 +51,7 @@ macro(add_dune_alberta_flags)
 
     # link to ALBERTA libraries
     foreach(_target ${_ARG_TARGETS})
-      target_link_libraries(${_target} PUBLIC dunealbertagrid${WORLDDIM}d)
+      target_link_libraries(${_target} PUBLIC Dune::AlbertaGrid${WORLDDIM}D)
     endforeach(_target)
   endif(Alberta_FOUND)
 endmacro(add_dune_alberta_flags)
