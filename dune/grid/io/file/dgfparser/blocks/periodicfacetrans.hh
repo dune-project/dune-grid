@@ -24,9 +24,50 @@ namespace Dune
       : public BasicBlock
     {
       template< class T >
-      class Matrix;
+      class Matrix
+      {
+        int rows_;
+        int cols_;
+        std::vector< T > fields_;
 
-      struct AffineTransformation;
+      public:
+        Matrix ( int rows, int cols )
+          : rows_( rows ),
+            cols_( cols ),
+            fields_( rows * cols )
+        {}
+
+        const T &operator() ( int i, int j ) const
+        {
+          return fields_[ i * cols_ + j ];
+        }
+
+        T &operator() ( int i, int j )
+        {
+          return fields_[ i * cols_ + j ];
+        }
+
+        int rows () const
+        {
+          return rows_;
+        }
+
+        int cols () const
+        {
+          return cols_;
+        }
+      };
+
+      struct AffineTransformation
+      {
+        Matrix< double > matrix;
+        std::vector< double > shift;
+
+        explicit AffineTransformation ( int dimworld )
+          : matrix( dimworld, dimworld ),
+            shift( dimworld )
+        {}
+      };
 
     private:
       std::vector< AffineTransformation > transformations_;
@@ -54,58 +95,9 @@ namespace Dune
     };
 
 
-    // PeriodicFaceTransformationBlock::Matrix
-    // ---------------------------------------
-
-    template< class T >
-    class PeriodicFaceTransformationBlock::Matrix
-    {
-      int rows_;
-      int cols_;
-      std::vector< T > fields_;
-
-    public:
-      Matrix ( int rows, int cols )
-        : rows_( rows ),
-          cols_( cols ),
-          fields_( rows * cols )
-      {}
-
-      const T &operator() ( int i, int j ) const
-      {
-        return fields_[ i * cols_ + j ];
-      }
-
-      T &operator() ( int i, int j )
-      {
-        return fields_[ i * cols_ + j ];
-      }
-
-      int rows () const
-      {
-        return rows_;
-      }
-
-      int cols () const
-      {
-        return cols_;
-      }
-    };
-
 
     // PeriodicFaceTransformationBlock::AffineTransformation
     // -----------------------------------------------------
-
-    struct PeriodicFaceTransformationBlock::AffineTransformation
-    {
-      Matrix< double > matrix;
-      std::vector< double > shift;
-
-      explicit AffineTransformation ( int dimworld )
-        : matrix( dimworld, dimworld ),
-          shift( dimworld )
-      {}
-    };
 
 
     inline std::ostream &
