@@ -22,6 +22,8 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 
 - A new parameter 'bisectioncompatibility' for DGF block GridParameter was added.
 
+- `MultipleCodimMultipleGeomTypeMapper` is assignable.
+
 ## Python
 
 - Improve pickling support (GridViews and some GridFunction objects can now be pickled).
