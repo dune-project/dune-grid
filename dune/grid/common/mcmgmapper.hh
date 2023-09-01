@@ -374,7 +374,7 @@ namespace Dune
     // provide an array for the offsets
     std::array<Index, GlobalGeometryTypeIndex::size(GV::dimension)> offsets;
     std::array<Index, GlobalGeometryTypeIndex::size(GV::dimension)> blocks;
-    const MCMGLayout layout_;     // get layout object
+    MCMGLayout layout_;     // get layout object
     std::vector<GeometryType> myTypes_[GV::dimension+1];
   };
 
