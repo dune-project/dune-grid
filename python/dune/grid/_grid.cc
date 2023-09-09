@@ -5,6 +5,7 @@
 
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
+#include <dune/grid/common/partitionset.hh>
 
 #include <dune/python/grid/commops.hh>
 #include <dune/python/grid/enums.hh>
@@ -28,6 +29,31 @@ PYBIND11_MODULE( _grid, module )
   interfaceType.value( "Overlap_OverlapFront", Dune::Overlap_OverlapFront_Interface );
   interfaceType.value( "Overlap_All", Dune::Overlap_All_Interface );
   interfaceType.value( "All_All", Dune::All_All_Interface );
+
+  auto addPartition = [](auto &module, auto partition, std::string name) {
+    std::string className = name;
+    className[0] = std::toupper(name[0]);
+    pybind11::class_<decltype(partition)>(module, className.c_str());
+    module.attr( name.c_str() ) = pybind11::cast( partition );
+  };
+  auto partitions = module.def_submodule("Partitions");
+  addPartition(partitions, Dune::Partitions::interior, "interior");
+  addPartition(partitions, Dune::Partitions::overlap, "overlap");
+  addPartition(partitions, Dune::Partitions::ghost, "ghost");
+  addPartition(partitions, Dune::Partitions::all, "all");
+  addPartition(partitions, Dune::Partitions::interiorBorder, "interiorBorder");
+  addPartition(partitions, Dune::Partitions::interiorBorderOverlap, "interiorBorderOverlap");
+  addPartition(partitions, Dune::Partitions::interiorBorderOverlapFront, "interiorBorderOverlapFront");
+
+  /*
+  pybind11::enum_< Dune::PartitionIteratorType > partIterType( module, "PartitionIteratorType" );
+  partIterType.value( "Interior", Dune::Interior_Partition );
+  partIterType.value( "InteriorBorder", Dune::InteriorBorder_Partition );
+  partIterType.value( "Overlap", Dune::Overlap_Partition );
+  partIterType.value( "OverlapFront", Dune::OverlapFront_Partition );
+  partIterType.value( "All", Dune::All_Partition );
+  partIterType.value( "Ghost", Dune::Ghost_Partition );
+  */
 
   pybind11::enum_< Dune::CommunicationDirection > communicationDirection( module, "CommunicationDirection" );
   communicationDirection.value( "Forward", Dune::ForwardCommunication );

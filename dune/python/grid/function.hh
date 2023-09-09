@@ -93,6 +93,20 @@ namespace Dune
 
         cls.def( "cellData", [] ( const GridFunction &self, int level ) { return cellData( self, level ); }, "level"_a = 0 );
         cls.def( "pointData", [] ( const GridFunction &self, int level ) { return pointData( self, level ); }, "level"_a = 0 );
+        auto dataWithPartition = [&cls](auto &part)
+        {
+          cls.def( "cellData", [] ( const GridFunction &self, int level, decltype(part) partition )
+          { return cellData( self, level, partition ); }, "level"_a = 0, pybind11::kw_only(), "partition"_a );
+          cls.def( "pointData", [] ( const GridFunction &self, int level, decltype(part) partition )
+          { return pointData( self, level, partition ); }, "level"_a = 0, pybind11::kw_only(), "partition"_a );
+        };
+        dataWithPartition(Dune::Partitions::interior);
+        dataWithPartition(Dune::Partitions::ghost);
+        dataWithPartition(Dune::Partitions::all);
+        dataWithPartition(Dune::Partitions::interiorBorder);
+        dataWithPartition(Dune::Partitions::interiorBorderOverlap);
+        dataWithPartition(Dune::Partitions::interiorBorderOverlapFront);
+
         cls.def( "polygonData", [] ( const GridFunction &self ) { return polygonData( self ); },
           R"doc(
             Store the grid with piecewise constant data in numpy arrays.

@@ -44,15 +44,18 @@ namespace Dune
     // -----------
 
     template< class GridView, class Mapper >
-    inline static pybind11::array_t< typename GridView::ctype > coordinates ( const GridView &gridView, const Mapper &mapper )
+    inline static pybind11::array_t< typename GridView::ctype > coordinates
+           ( const GridView &gridView, const Mapper &mapper, size_t dimworld )
     {
       typedef typename GridView::ctype ctype;
 
-      const std::vector< std::size_t > shape{ static_cast< std::size_t >( mapper.size() ), static_cast< std::size_t >( GridView::dimensionworld ) };
-      const std::vector< std::size_t > stride{ GridView::dimensionworld * sizeof( ctype ), sizeof( ctype ) };
+      const std::vector< std::size_t > shape{ static_cast< std::size_t >( mapper.size() ), static_cast< std::size_t >( dimworld ) };
+      const std::vector< std::size_t > stride{ dimworld * sizeof( ctype ), sizeof( ctype ) };
       pybind11::array_t< ctype > coords( pybind11::buffer_info( nullptr, sizeof( ctype ), pybind11::format_descriptor< ctype >::value, 2, shape, stride ) );
-
       pybind11::buffer_info info = coords.request( true );
+      auto ret = [&info,dimworld](const typename Mapper::Index &idx)
+        { return static_cast< ctype * >( info.ptr ) + dimworld * idx; };
+
       for( const auto &vertex : vertices( gridView, Partitions::all ) )
       {
         typename Mapper::Index index;
@@ -60,20 +63,20 @@ namespace Dune
           continue;
 
         const auto x = vertex.geometry().center();
-        std::copy( x.begin(), x.end(), static_cast< ctype * >( info.ptr ) + GridView::dimensionworld * index );
+        std::copy( x.begin(), x.end(), ret(index) );
+        std::fill( ret(index) + GridView::dimensionworld, ret(index) + dimworld, 0 );
       }
 
       return coords;
     }
 
     template< class GridView >
-    inline static pybind11::array_t< typename GridView::ctype > coordinates ( const GridView &gridView )
+    inline static pybind11::array_t< typename GridView::ctype > coordinates
+           ( const GridView &gridView, size_t dimworld=GridView::dimensionworld )
     {
       MultipleCodimMultipleGeomTypeMapper< GridView > mapper( gridView, mcmgVertexLayout() );
-      return coordinates( gridView, mapper );
+      return coordinates( gridView, mapper, dimworld );
     }
-
-
 
     // flatCopy
     // --------
@@ -125,16 +128,14 @@ namespace Dune
     // ----------
     template< class GridView, unsigned int partitions >
     inline static std::pair< pybind11::array_t< typename GridView::ctype >, pybind11::array_t< int > >
-    tessellate ( const GridView &gridView, RefinementIntervals intervals, PartitionSet< partitions > ps )
+    tessellate ( const GridView &gridView, RefinementIntervals intervals, PartitionSet< partitions > ps, size_t dimworld)
     {
       typedef typename GridView::ctype ctype;
 
       const std::size_t dimGrid = GridView::dimension;
-      const std::size_t dimWorld = GridView::dimensionworld;
 
-      std::vector< FieldVector< ctype, dimWorld > > coords;
+      std::vector< std::vector< ctype > > coords;
       std::vector< std::array< int, dimGrid+1 > > simplices;
-
       for( const auto &element : elements( gridView, ps ) )
       {
         const auto &refinement = buildRefinement< dimGrid, double >( element.type(), GeometryTypes::simplex( dimGrid ) );
@@ -143,7 +144,11 @@ namespace Dune
         // get coordinates
         const auto geometry = element.geometry();
         for( auto it = refinement.vBegin( intervals ), end = refinement.vEnd( intervals ); it != end; ++it )
-          coords.push_back( geometry.global( it.coords() ) );
+        {
+          auto point = geometry.global( it.coords() );
+          coords.push_back( std::vector<ctype>(std::max((int)dimworld,GridView::dimensionworld), 0) );
+          std::copy(point.begin(),point.end(), coords[coords.size()-1].begin());
+        }
 
         // get simplices
         for( auto it = refinement.eBegin( intervals ), end = refinement.eEnd( intervals ); it != end; ++it )
@@ -155,15 +160,31 @@ namespace Dune
           simplices.push_back( simplex );
         }
       }
+      return std::make_pair(
+             makeNumPyArray< ctype >( coords, { coords.size(), dimworld } ),
+             makeNumPyArray< int >( simplices, { simplices.size(), dimGrid+1 } ) );
 
-      return std::make_pair( makeNumPyArray< ctype >( coords, { coords.size(), dimWorld } ), makeNumPyArray< int >( simplices, { simplices.size(), dimGrid+1 } ) );
     }
 
     template< class GridView, unsigned int partitions >
     inline static std::pair< pybind11::array_t< typename GridView::ctype >, pybind11::array_t< int > >
-    tessellate ( const GridView &gridView, int level, PartitionSet< partitions > ps )
+    tessellate ( const GridView &gridView, int level, PartitionSet< partitions > ps, size_t dimworld=GridView::dimensionworld )
     {
-      return tessellate( gridView, refinementLevels( level ), ps );
+      return tessellate( gridView, refinementLevels( level ), ps, dimworld );
+    }
+
+    template< class GridView, unsigned int partitions >
+    inline static std::pair< pybind11::array_t< typename GridView::ctype >, pybind11::array_t< int > >
+    tessellate ( const GridView &gridView, PartitionSet< partitions > ps, size_t dimworld=GridView::dimensionworld )
+    {
+      return tessellate( gridView, 0, ps, dimworld );
+    }
+
+    template< class GridView >
+    inline static std::pair< pybind11::array_t< typename GridView::ctype >, pybind11::array_t< int > >
+    tessellate ( const GridView &gridView, int level = 0, size_t dimworld=GridView::dimensionworld )
+    {
+      return tessellate( gridView, level, Partitions::all, dimworld );
     }
 
     template< class GridView, unsigned int partitions >
@@ -251,20 +272,6 @@ namespace Dune
         values.push_back( Python::makeNumPyArray< typename FieldTraits< Range >::field_type >( entry.second.second, { entry.second.second.size(), GetDimension<Range>::value } ) );
       }
       return std::make_pair(ret, values);
-    }
-
-    template< class GridView, unsigned int partitions >
-    inline static std::pair< pybind11::array_t< typename GridView::ctype >, pybind11::array_t< int > >
-    tessellate ( const GridView &gridView, PartitionSet< partitions > ps )
-    {
-      return tessellate( gridView, 0, ps );
-    }
-
-    template< class GridView >
-    inline static std::pair< pybind11::array_t< typename GridView::ctype >, pybind11::array_t< int > >
-    tessellate ( const GridView &gridView, int level = 0 )
-    {
-      return tessellate( gridView, level, Partitions::all );
     }
 
     template< class GridView >

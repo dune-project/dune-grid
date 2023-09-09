@@ -7,7 +7,7 @@ from dune.common.hashit import hashIt
 from dune.common import FieldVector
 from dune.common.utility import isString
 from dune.deprecate import deprecated
-from dune.grid import gridFunction, DataType
+from dune.grid import gridFunction, DataType, Partitions
 from dune.grid import OutputType
 from dune.generator.algorithm import cppType
 from dune.generator import builder
@@ -29,11 +29,13 @@ def getDimgrid(constructor):
         raise ValueError("Couldn't extract dimension of grid from constructor arguments, added dimgrid parameter")
     return dimgrid
 
-def triangulation(grid, level=0):
+def triangulation(grid, level=0, *, partition=Partitions.all):
     if grid.dimGrid != 2:
         raise Exception("Grid must be 2-dimensional for use as matplotlib triangulation.")
     from matplotlib.tri import Triangulation
-    x, triangles = grid.tessellate(level)
+    x, triangles = grid.tessellate(level, partition=partition)
+    if len(triangles) == 0: # no elements in this partition set
+        return None
     return Triangulation(x[:,0], x[:,1], triangles)
 
 _writeVTKDispatcher = []

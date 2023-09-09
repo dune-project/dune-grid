@@ -414,13 +414,16 @@ namespace Dune
 
       // export utility methods
 
-      cls.def( "coordinates", [] ( const GridView &self ) { return coordinates( self ); },
+      cls.def( "coordinates", [] ( const GridView &self, int dimworld ) { return coordinates( self, dimworld ); },
+        "dimworld"_a=GridView::dimensionworld,
         R"doc(
           Returns: `numpy` array with the coordinates of all vertices in the grid in
                    the format `[ [x_1,y_1], [x_2,y_2], ..., [x_N,y_N] ]` for example
-                   in 2d.
+                   in 2d (will be filled up by zeros if dimworld is larger
+                   than the world dimension of the view.
         )doc" );
-      cls.def( "tessellate", [] ( const GridView &self, int level ) { return tessellate( self, level ); }, "level"_a = 0,
+      cls.def( "tessellate", [] ( const GridView &self, int level, int dimworld) { return tessellate( self, level, dimworld ); },
+        "level"_a = 0, pybind11::kw_only(), "dimworld"_a=GridView::dimensionworld,
         R"doc(
           Generated a possibly refined tessellation using only simplices.
 
@@ -428,12 +431,43 @@ namespace Dune
               level: virtual refinement level to use to generate the tessellation
 
           Returns: (coordinates,simplices) where coordinates is a `numpy` array
-                   of the vertex coordinates
-                   (e.g. in 2d `[ [x_1,y_1], [x_2,y_2], ..., [x_N,y_N] ]` )
+                   of the vertex coordinates (padded by to `dimworld` is needed)
+                   (e.g. in 2d `[ [x_1,y_1,0], [x_2,y_2,0], ..., [x_N,y_N],0 ]`
+                   if `dimworld` is set to 3 - default is no padding,
+                   `dimworld` less than actual world dimension of grid is ignored)
                    and simplices is a `numpy` array of the vertices of the simplices
                    (e.g. in 2d `[s_11,s_12,s_13], [s_21,s_22,s_23], ..., [s_N1,s_N2,s_N3] ]` )
 
         )doc" );
+      auto tessellateWithPartition = [&cls](auto &part)
+      {
+        cls.def( "tessellate", [] ( const GridView &self, int level,
+                 decltype(part) partition, int dimworld)
+                 { return tessellate( self, level, partition, dimworld ); },
+          "level"_a = 0, pybind11::kw_only(), "partition"_a, "dimworld"_a=GridView::dimensionworld,
+          R"doc(
+            Generated a possibly refined tessellation using only simplices.
+
+            Args:
+                level: virtual refinement level to use to generate the tessellation
+
+            Returns: (coordinates,simplices) where coordinates is a `numpy` array
+                     of the vertex coordinates (padded by to `dimworld` is needed)
+                     (e.g. in 2d `[ [x_1,y_1,0], [x_2,y_2,0], ..., [x_N,y_N],0 ]`
+                     if `dimworld` is set to 3 - default is no padding,
+                     `dimworld` less than actual world dimension of grid is ignored)
+                     and simplices is a `numpy` array of the vertices of the simplices
+                     (e.g. in 2d `[s_11,s_12,s_13], [s_21,s_22,s_23], ..., [s_N1,s_N2,s_N3] ]` )
+
+          )doc" );
+      };
+      tessellateWithPartition(Dune::Partitions::interior);
+      tessellateWithPartition(Dune::Partitions::ghost);
+      tessellateWithPartition(Dune::Partitions::all);
+      tessellateWithPartition(Dune::Partitions::interiorBorder);
+      tessellateWithPartition(Dune::Partitions::interiorBorderOverlap);
+      tessellateWithPartition(Dune::Partitions::interiorBorderOverlapFront);
+
       cls.def( "polygons", [] ( const GridView &self ) { return polygons( self ); },
         R"doc(
           Store the grid in numpy arrays.
