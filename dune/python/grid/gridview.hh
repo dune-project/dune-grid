@@ -320,6 +320,10 @@ namespace Dune
         R"doc(
           associated hierarchical grid
         )doc" );
+      cls.def_property_readonly( "grid", [] ( const GridView &self ) -> const Grid & { return self.grid(); },
+        R"doc(
+          associated hierarchical grid
+        )doc" );
 
       cls.def_property_readonly_static( "dimension", [] ( pybind11::object ) { return int(GridView::dimension); } );
       cls.def_property_readonly_static( "dimensionworld", [] ( pybind11::object ) { return int(GridView::dimensionworld); } );
