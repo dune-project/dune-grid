@@ -480,14 +480,14 @@ namespace Dune {
 
     /** \brief Returns pointers to the coordinate arrays of a UG node */
     static int Corner_Coordinates(const UG_NS< UG_DIM >::Node* theNode, double* x[]) {
-      x[0] = theNode->myvertex->iv.x;
+      x[0] = theNode->myvertex->iv.x.data();
       return 1;
     }
 
     /** \brief Returns pointers to the coordinate arrays of a UG edge */
     static int Corner_Coordinates(const UG_NS< UG_DIM >::Edge* theEdge, double* x[]) {
-      x[0] = theEdge->links[0].nbnode->myvertex->iv.x;
-      x[1] = theEdge->links[1].nbnode->myvertex->iv.x;
+      x[0] = theEdge->links[0].nbnode->myvertex->iv.x.data();
+      x[1] = theEdge->links[1].nbnode->myvertex->iv.x.data();
       return 2;
     }
 
@@ -500,13 +500,13 @@ namespace Dune {
       for (int i = 0; i < n; i++)
       {
         unsigned idxInElem = Corner_Of_Side(center, side, i);
-        x[i] = Corner(center, idxInElem)->myvertex->iv.x;
+        x[i] = Corner(center, idxInElem)->myvertex->iv.x.data();
       }
       return n;
     }
 
     static int GlobalToLocal(int n, const double** cornerCoords,
-                             const double* EvalPoint, double* localCoord) {
+                             const FieldVector<UG::DOUBLE,UG_DIM>& EvalPoint, FieldVector<double,UG_DIM>& localCoord) {
       if (UG_DIM==2)
         // in 2d we can call this only for triangles and quadrilaterals
         assert(n==3 or n==4);
@@ -1098,7 +1098,7 @@ namespace Dune {
 
     /** \brief Get global position of a point on the grid boundary */
     static UG::INT BNDP_Global(BNDP *theBndP,
-                               UG::DOUBLE *global) {
+                               FieldVector<UG::DOUBLE,UG_DIM>& global) {
       return UG_NAMESPACE::BNDP_Global(theBndP, global);
     }
 

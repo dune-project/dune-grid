@@ -121,7 +121,8 @@ local (const FieldVector<typename GridImp::ctype, coorddim>& global) const
 
   // Actually do the computation
   /** \todo Why is this const_cast necessary? */
-  UG_NS<coorddim>::GlobalToLocal(n, const_cast<const double**>(cornerCoords), &global[0], &result[0]);
+  if constexpr (mydim!=0)
+    UG_NS<coorddim>::GlobalToLocal(n, const_cast<const double**>(cornerCoords), global, result);
 
   return result;
 }
