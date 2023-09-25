@@ -34,9 +34,9 @@ namespace Dune {
     // //////////////////////////////////////////////
 
 #if UG_DIM == 2
-#define UG_NAMESPACE UG::D2
+#define UG_NAMESPACE Dune::UG::D2
 #else
-#define UG_NAMESPACE UG::D3
+#define UG_NAMESPACE Dune::UG::D3
 #endif
 
     enum Priorities {
