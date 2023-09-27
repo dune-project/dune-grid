@@ -37,25 +37,6 @@ ubuntu-20.04-clang-10-20-nopython:
     DUNECI_CMAKE_FLAGS: '-DCMAKE_DISABLE_FIND_PACKAGE_Python3=TRUE'
   tags: [duneci]
 
-# no numpy version available for this image on the gitlab registry
-# disable python bindings for now
-ubuntu:18.04 clang-6-17:
-  image: registry.dune-project.org/docker/ci/ubuntu:18.04
-  script: duneci-standard-test
-  stage: test
-  variables:
-    DUNECI_TOOLCHAIN: clang-6-17
-    DUNECI_CMAKE_FLAGS: "-DDUNE_ENABLE_PYTHONBINDINGS=OFF"
-  tags: [duneci]
-ubuntu:18.04 clang-5-17:
-  image: registry.dune-project.org/docker/ci/ubuntu:18.04
-  script: duneci-standard-test
-  stage: test
-  variables:
-    DUNECI_TOOLCHAIN: clang-5-17
-    DUNECI_CMAKE_FLAGS: "-DDUNE_ENABLE_PYTHONBINDINGS=OFF"
-  tags: [duneci]
-
 # Check for spelling mistakes in text
 code-spelling-check:
   stage: .pre
