@@ -28,19 +28,16 @@ namespace Dune {
    \param result The world coordinates of the corresponding boundary point
  */
 
-static int boundarySegmentWrapper2d(void *data, double *param, double *result)
+static int boundarySegmentWrapper2d(void *data, double *param, FieldVector<double,2>& result)
 {
   const BoundarySegment<2>* boundarySegment = static_cast<BoundarySegment<2>*>(data);
 
-  FieldVector<double, 2> global = (*boundarySegment)(*((FieldVector<double,1>*)param));
-
-  result[0] = global[0];
-  result[1] = global[1];
+  result = (*boundarySegment)(*((FieldVector<double,1>*)param));
 
   return 0;
 }
 
-static int boundarySegmentWrapper3dTriangle(void *data, double *param, double *result)
+static int boundarySegmentWrapper3dTriangle(void *data, double *param, FieldVector<double,3>& result)
 {
   const BoundarySegment<3>* boundarySegment = static_cast<BoundarySegment<3>*>(data);
 
@@ -50,24 +47,16 @@ static int boundarySegmentWrapper3dTriangle(void *data, double *param, double *r
   local[0] = param[0]-param[1];
   local[1] = param[1];
 
-  FieldVector<double, 3> global = (*boundarySegment)(local);
-
-  result[0] = global[0];
-  result[1] = global[1];
-  result[2] = global[2];
+  result = (*boundarySegment)(local);
 
   return 0;
 }
 
-static int boundarySegmentWrapper3dQuad(void *data, double *param, double *result)
+static int boundarySegmentWrapper3dQuad(void *data, double *param, FieldVector<double,3>& result)
 {
   const BoundarySegment<3>* boundarySegment = static_cast<BoundarySegment<3>*>(data);
 
-  FieldVector<double, 3> global = (*boundarySegment)(*((FieldVector<double,2>*)param));
-
-  result[0] = global[0];
-  result[1] = global[1];
-  result[2] = global[2];
+  result = (*boundarySegment)(*((FieldVector<double,2>*)param));
 
   return 0;
 }
@@ -343,9 +332,9 @@ createGrid()
       const double alpha[2] = {0, 0};
       const double beta[2]  = {1, 1};
 
-      typedef int (*BndSegFuncPtr)(void *, double *,double *);
+      typedef int (*BndSegFuncPtr)(void *, double *, FieldVector<double,dimworld>&);
       BndSegFuncPtr boundarySegmentWrapper;
-      if (dimworld==2)
+      if constexpr (dimworld==2)
         boundarySegmentWrapper = boundarySegmentWrapper2d;
       else {
         if (vertices_c_style[3]==-1)      // triangular face

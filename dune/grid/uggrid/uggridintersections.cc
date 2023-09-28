@@ -26,22 +26,19 @@ void computeOuterNormal(
   //   Implementation for 3D
   // //////////////////////////////////////////////////////
 
-  if (dim == 3) {
+  if constexpr (dim == 3) {
 
     if (UG_NS<dim>::Corners_Of_Side(center, neighborCount) == 3) {
 
       // A triangular intersection.  The normals are constant
-      const ctype* aPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center, neighborCount, 0))->myvertex->iv.x;
-      const ctype* bPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center, neighborCount, 1))->myvertex->iv.x;
-      const ctype* cPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center, neighborCount, 2))->myvertex->iv.x;
+      const FieldVector<ctype,dim>& aPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center, neighborCount, 0))->myvertex->iv.x;
+      const FieldVector<ctype,dim>& bPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center, neighborCount, 1))->myvertex->iv.x;
+      const FieldVector<ctype,dim>& cPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center, neighborCount, 2))->myvertex->iv.x;
 
-      FieldVector<ctype, 3> ba, ca;
+      const FieldVector<ctype,dim> ba = bPos - aPos;
+      const FieldVector<ctype,dim> ca = cPos - aPos;
 
-      for (int i=0; i<3; i++) {
-        ba[i] = bPos[i] - aPos[i];
-        ca[i] = cPos[i] - aPos[i];
-      }
-
+      // Cross product
       outerNormal[0] = ba[1]*ca[2] - ba[2]*ca[1];
       outerNormal[1] = ba[2]*ca[0] - ba[0]*ca[2];
       outerNormal[2] = ba[0]*ca[1] - ba[1]*ca[0];
@@ -54,17 +51,14 @@ void computeOuterNormal(
       for (int i=0; i<4; i++) {
 
         // Compute the normal on the i-th corner
-        const ctype* aPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center,neighborCount,i))->myvertex->iv.x;
-        const ctype* bPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center,neighborCount,(i+1)%4))->myvertex->iv.x;
-        const ctype* cPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center,neighborCount,(i+3)%4))->myvertex->iv.x;
+        const FieldVector<ctype,dim> aPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center,neighborCount,i))->myvertex->iv.x;
+        const FieldVector<ctype,dim> bPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center,neighborCount,(i+1)%4))->myvertex->iv.x;
+        const FieldVector<ctype,dim> cPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center,neighborCount,(i+3)%4))->myvertex->iv.x;
 
-        FieldVector<ctype, 3> ba, ca;
+        const FieldVector<ctype,dim> ba = bPos - aPos;
+        const FieldVector<ctype,dim> ca = cPos - aPos;
 
-        for (int j=0; j<3; j++) {
-          ba[j] = bPos[j] - aPos[j];
-          ca[j] = cPos[j] - aPos[j];
-        }
-
+        // Cross product
         cornerNormals[i][0] = ba[1]*ca[2] - ba[2]*ca[1];
         cornerNormals[i][1] = ba[2]*ca[0] - ba[0]*ca[2];
         cornerNormals[i][2] = ba[0]*ca[1] - ba[1]*ca[0];
@@ -86,8 +80,8 @@ void computeOuterNormal(
     // //////////////////////////////////////////////////////
 
     // Get the vertices of this side.
-    const ctype* aPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center, neighborCount, 0))->myvertex->iv.x;
-    const ctype* bPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center, neighborCount, 1))->myvertex->iv.x;
+    const FieldVector<ctype,dim>& aPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center, neighborCount, 0))->myvertex->iv.x;
+    const FieldVector<ctype,dim>& bPos = UG_NS<dim>::Corner(center,UG_NS<dim>::Corner_Of_Side(center, neighborCount, 1))->myvertex->iv.x;
 
     // compute normal
     outerNormal[0] = bPos[1] - aPos[1];
@@ -297,7 +291,7 @@ UGGridLeafIntersection< GridImp >::geometryInInside () const
       for (int i=0; i<numCornersOfSide; i++) {
 
         // Get world coordinate of other element's vertex
-        const UGCtype* worldPos = UG_NS<dim>::Corner(otherFace.first,
+        const FieldVector<UGCtype,dimworld>& worldPos = UG_NS<dim>::Corner(otherFace.first,
                                                      UG_NS<dim>::Corner_Of_Side(otherFace.first,otherFace.second,i))->myvertex->iv.x;
 
         // Get the local coordinate with respect to this element
@@ -309,7 +303,7 @@ UGGridLeafIntersection< GridImp >::geometryInInside () const
         /** \todo Why is this const_cast necessary? */
         UG_NS<dim>::GlobalToLocal(UG_NS<dim>::Corners_Of_Elem(center_),
                                   const_cast<const double**>(cornerCoords), worldPos,
-                                  &coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)][0]);
+                                  coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)]);
 
       }
 
@@ -369,7 +363,7 @@ UGGridLeafIntersection< GridImp >::geometry () const
         int cornerIdx = UG_NS<dim>::Corner_Of_Side(otherFace.first, otherFace.second, i);
 
         // Get world coordinate of other element's vertex
-        const UGCtype* worldPos = UG_NS<dim>::Corner(otherFace.first,cornerIdx)->myvertex->iv.x;
+        const FieldVector<UGCtype,dimworld>& worldPos = UG_NS<dim>::Corner(otherFace.first,cornerIdx)->myvertex->iv.x;
 
         // and poke them into the Geometry
         for (int j=0; j<dim; j++)
@@ -415,7 +409,7 @@ UGGridLeafIntersection< GridImp >::geometryInOutside () const
         int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
 
         // Get world coordinate of this element's vertex
-        const UGCtype* worldPos = UG_NS<dim>::Corner(center_,cornerIdx)->myvertex->iv.x;
+        const FieldVector<UGCtype,dimworld>& worldPos = UG_NS<dim>::Corner(center_,cornerIdx)->myvertex->iv.x;
 
         // Get the local coordinate with respect to the other element
         // coorddim*coorddim is an upper bound for the number of vertices
@@ -426,7 +420,7 @@ UGGridLeafIntersection< GridImp >::geometryInOutside () const
         /** \todo Why is this const_cast necessary? */
         UG_NS<dim>::GlobalToLocal(UG_NS<dim>::Corners_Of_Elem(other),
                                   const_cast<const double**>(cornerCoords), worldPos,
-                                  &coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)][0]);
+                                  coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)]);
 
       }
 
