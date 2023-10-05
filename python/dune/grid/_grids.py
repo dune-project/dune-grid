@@ -201,7 +201,8 @@ def tensorProductCoordinates(coords, offset=None, ctype='double'):
     if len(offset) != dim:
         raise ValueError("tensorProductCoordinates: offset parameter has wrong size")
     dtype = coords_.numpy_ctype
-    coords = np.array(coords, dtype=dtype)
+    ## to get the right dtype we use
+    coords = [ np.array(c,dtype=dtype) for c in coords]
     return coords_(coords,offset)
 
 def yaspGrid(constructor, dimgrid=None, coordinates="equidistant", ctype=None,
