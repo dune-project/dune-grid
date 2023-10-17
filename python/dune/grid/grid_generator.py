@@ -302,11 +302,11 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
                 else:
                     return self._localCall(e,x)
             gfFunc.__call__ = gfCall
-            gfFunc.plot = functools.partial(gfPlot, gfFunc)
             gv.__class__._functions[dimRange] = gfFunc
         gf = gv.__class__._functions[dimRange](gv,callback)
         if callback_ is not None: # allow to still call with only global coordinate
             gf._globalCall = callback_
+    gf.plot = functools.partial(gfPlot, gf)
     gf.name = name
     gf.order = order
     return gf
