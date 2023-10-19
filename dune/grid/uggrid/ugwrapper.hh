@@ -1150,15 +1150,13 @@ namespace Dune {
       return UG_NAMESPACE ::InsertInnerNode(grid, pos);
     }
 
-    static void* CreateBoundarySegment(const char *name, int left, int right,
+    static void* CreateBoundarySegment(const char *name,
                                        int index,
                                        UG::INT *point,
                                        const double *alpha, const double *beta,
                                        UG_NAMESPACE ::BndSegFuncPtr boundarySegmentFunction,
                                        void *userData) {
       return UG_NAMESPACE ::CreateBoundarySegment(name,            // internal name of the boundary segment
-                                                  left,             //  id of left subdomain
-                                                  right,             //  id of right subdomain
                                                   index,         // Index of the segment
                                                   point,
                                                   alpha,
@@ -1168,14 +1166,11 @@ namespace Dune {
     }
 
     static void* CreateLinearSegment(const char *name,
-                                     int left, int right,
                                      int index, int numVertices,
                                      const UG::INT* cornerIndices,
                                      double cornerCoordinates[2][ UG_DIM ])
     {
       return UG_NAMESPACE ::CreateLinearSegment(name,            // internal name of the boundary segment
-                                                left,            //  id of left subdomain
-                                                right,           //  id of right subdomain
                                                 index,           // Index of the segment
                                                 numVertices,
                                                 cornerIndices,

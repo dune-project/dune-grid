@@ -345,8 +345,6 @@ createGrid()
 
       // Actually create the segment
       if (UG_NS<dimworld>::CreateBoundarySegment(segmentName,                   // internal name of the boundary segment
-                                                 1,                        //  id of left subdomain
-                                                 2,                        //  id of right subdomain
                                                  i,  // Index of the segment
                                                  vertices_c_style,
                                                  alpha,
@@ -368,8 +366,6 @@ createGrid()
           segmentCoordinates[j][k] = vertexPositions_[boundarySegmentVertices_[i][j]][k];
 
       if (UG_NS<dimworld>::CreateLinearSegment(segmentName,
-                                               1,               /*id of left subdomain */
-                                               2,              /*id of right subdomain*/
                                                i,                  /*id of segment*/
                                                numVertices,          // Number of corners
                                                vertices_c_style,
@@ -427,8 +423,6 @@ createGrid()
         segmentCoordinates[j][k] = vertexPositions_[thisSegment[j]][k];
 
     if (UG_NS<dimworld>::CreateLinearSegment(segmentName,
-                                             1,        /*id of left subdomain */
-                                             2,       /*id of right subdomain*/
                                              i,           /*id of segment*/
                                              thisSegment.numVertices(),   // Number of corners
                                              vertices_c_style,
