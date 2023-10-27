@@ -300,9 +300,10 @@ createGrid()
   grid_->numBoundarySegments_ = boundarySegments.size();
   std::string domainName = grid_->name_ + "_Domain";
 
-  if (UG_NS<dimworld>::CreateDomain(domainName.c_str(),     // The domain name
-                                    grid_->numBoundarySegments_,
-                                    noOfBNodes) == nullptr)
+  auto* ugDomain =UG_NS<dimworld>::CreateDomain(domainName.c_str(),     // The domain name
+                                                grid_->numBoundarySegments_,
+                                                noOfBNodes);
+  if (ugDomain == nullptr)
     DUNE_THROW(GridError, "Calling UG::" << dimworld << "d::CreateDomain failed!");
 
   // ///////////////////////////////////////////
@@ -360,19 +361,14 @@ createGrid()
                         ? 2
                         : ((boundarySegmentVertices_[i][3]==-1) ? 3 : 4);
 
-      double segmentCoordinates[dimworld*2-2][dimworld];
+      std::array<FieldVector<double,dimworld>, 2*(dimworld-1)> segmentCoordinates;
       for (int j=0; j<numVertices; j++)
-        for (int k=0; k<dimworld; k++)
-          segmentCoordinates[j][k] = vertexPositions_[boundarySegmentVertices_[i][j]][k];
+        segmentCoordinates[j] = vertexPositions_[boundarySegmentVertices_[i][j]];
 
-      if (UG_NS<dimworld>::CreateLinearSegment(segmentName,
-                                               i,                  /*id of segment*/
-                                               numVertices,          // Number of corners
-                                               vertices_c_style,
-                                               segmentCoordinates
-                                               )==nullptr)
-        DUNE_THROW(IOError, "Error calling CreateLinearSegment");
-
+      ugDomain->linearSegments.emplace_back(i,                  // id of segment
+                                            numVertices,        // Number of corners
+                                            vertices_c_style,
+                                            segmentCoordinates);
     }
 
     // /////////////////////////////////////////////////////////////////////
@@ -412,24 +408,14 @@ createGrid()
     for (int j=0; j<thisSegment.numVertices(); j++)
       vertices_c_style[j] = isBoundaryNode[thisSegment[j]];
 
-    // Create some boundary segment name
-    char segmentName[20];
-    if(sprintf(segmentName, "BS %d", i) < 0)
-      DUNE_THROW(GridError, "sprintf returned error code!");
-
-    double segmentCoordinates[2*dimworld-2][dimworld];
+    std::array<FieldVector<double,dimworld>, 2*(dimworld-1)> segmentCoordinates;
     for (int j=0; j<thisSegment.numVertices(); j++)
-      for (int k=0; k<dimworld; k++)
-        segmentCoordinates[j][k] = vertexPositions_[thisSegment[j]][k];
+      segmentCoordinates[j] = vertexPositions_[thisSegment[j]];
 
-    if (UG_NS<dimworld>::CreateLinearSegment(segmentName,
-                                             i,           /*id of segment*/
-                                             thisSegment.numVertices(),   // Number of corners
-                                             vertices_c_style,
-                                             segmentCoordinates
-                                             )==nullptr)
-      DUNE_THROW(IOError, "Error calling CreateLinearSegment");
-
+    ugDomain->linearSegments.emplace_back(i,                  // id of segment
+                                          thisSegment.numVertices(),        // Number of corners
+                                          vertices_c_style,
+                                          segmentCoordinates);
   }
 
 

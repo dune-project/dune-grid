@@ -1138,7 +1138,7 @@ namespace Dune {
                                             optimizedIE, insertMesh, ppifContext);
     }
 
-    static void* CreateDomain(const char* name, int segments, int corners) {
+    static auto* CreateDomain(const char* name, int segments, int corners) {
       return UG_NAMESPACE ::CreateDomain(name, segments, corners);
     }
 
@@ -1164,19 +1164,6 @@ namespace Dune {
                                                   boundarySegmentFunction,
                                                   userData);
     }
-
-    static void* CreateLinearSegment(const char *name,
-                                     int index, int numVertices,
-                                     const UG::INT* cornerIndices,
-                                     double cornerCoordinates[2][ UG_DIM ])
-    {
-      return UG_NAMESPACE ::CreateLinearSegment(name,            // internal name of the boundary segment
-                                                index,           // Index of the segment
-                                                numVertices,
-                                                cornerIndices,
-                                                cornerCoordinates);
-    }
-
   };
 
   template <>
