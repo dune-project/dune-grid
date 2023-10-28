@@ -312,11 +312,6 @@ createGrid()
   unsigned int i;
   for (i=0; i<grid_->boundarySegments_.size(); i++) {
 
-    // Create some boundary segment name
-    char segmentName[20];
-    if(sprintf(segmentName, "BS %d", i) < 0)
-      DUNE_THROW(GridError, "sprintf returned error code!");
-
     // Copy the vertices into a C-style array
     // We copy four vertices here even if the segment is a triangle -- it doesn't matter
     int vertices_c_style[dimworld*2-2];
@@ -329,9 +324,6 @@ createGrid()
 
     if (grid_->boundarySegments_[i]) {
 
-      // Create dummy parameter ranges
-      const double alpha[2] = {0, 0};
-      const double beta[2]  = {1, 1};
 
       typedef int (*BndSegFuncPtr)(void *, double *, FieldVector<double,dimworld>&);
       BndSegFuncPtr boundarySegmentWrapper;
@@ -345,15 +337,10 @@ createGrid()
       }
 
       // Actually create the segment
-      if (UG_NS<dimworld>::CreateBoundarySegment(segmentName,                   // internal name of the boundary segment
-                                                 i,  // Index of the segment
-                                                 vertices_c_style,
-                                                 alpha,
-                                                 beta,
-                                                 boundarySegmentWrapper,
-                                                 grid_->boundarySegments_[i].get())==nullptr) {
-        DUNE_THROW(GridError, "Calling UG" << dimworld << "d::CreateBoundarySegment failed!");
-      }
+      ugDomain->boundarySegments.emplace_back(i,  // Index of the segment
+                                              vertices_c_style,
+                                              boundarySegmentWrapper,
+                                              grid_->boundarySegments_[i].get());
 
     } else {       // No explicit boundary parametrization has been given. We insert a linear segment
 

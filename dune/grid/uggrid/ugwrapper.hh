@@ -1149,21 +1149,6 @@ namespace Dune {
     static void* InsertInnerNode(UG_NAMESPACE ::grid* grid, const double* pos) {
       return UG_NAMESPACE ::InsertInnerNode(grid, pos);
     }
-
-    static void* CreateBoundarySegment(const char *name,
-                                       int index,
-                                       UG::INT *point,
-                                       const double *alpha, const double *beta,
-                                       UG_NAMESPACE ::BndSegFuncPtr boundarySegmentFunction,
-                                       void *userData) {
-      return UG_NAMESPACE ::CreateBoundarySegment(name,            // internal name of the boundary segment
-                                                  index,         // Index of the segment
-                                                  point,
-                                                  alpha,
-                                                  beta,
-                                                  boundarySegmentFunction,
-                                                  userData);
-    }
   };
 
   template <>
