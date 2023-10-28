@@ -300,9 +300,10 @@ createGrid()
   grid_->numBoundarySegments_ = boundarySegments.size();
   std::string domainName = grid_->name_ + "_Domain";
 
-  if (UG_NS<dimworld>::CreateDomain(domainName.c_str(),     // The domain name
-                                    grid_->numBoundarySegments_,
-                                    noOfBNodes) == nullptr)
+  auto* ugDomain =UG_NS<dimworld>::CreateDomain(domainName.c_str(),     // The domain name
+                                                grid_->numBoundarySegments_,
+                                                noOfBNodes);
+  if (ugDomain == nullptr)
     DUNE_THROW(GridError, "Calling UG::" << dimworld << "d::CreateDomain failed!");
 
   // ///////////////////////////////////////////
@@ -310,11 +311,6 @@ createGrid()
   // ///////////////////////////////////////////
   unsigned int i;
   for (i=0; i<grid_->boundarySegments_.size(); i++) {
-
-    // Create some boundary segment name
-    char segmentName[20];
-    if(sprintf(segmentName, "BS %d", i) < 0)
-      DUNE_THROW(GridError, "sprintf returned error code!");
 
     // Copy the vertices into a C-style array
     // We copy four vertices here even if the segment is a triangle -- it doesn't matter
@@ -328,9 +324,6 @@ createGrid()
 
     if (grid_->boundarySegments_[i]) {
 
-      // Create dummy parameter ranges
-      const double alpha[2] = {0, 0};
-      const double beta[2]  = {1, 1};
 
       typedef int (*BndSegFuncPtr)(void *, double *, FieldVector<double,dimworld>&);
       BndSegFuncPtr boundarySegmentWrapper;
@@ -344,17 +337,10 @@ createGrid()
       }
 
       // Actually create the segment
-      if (UG_NS<dimworld>::CreateBoundarySegment(segmentName,                   // internal name of the boundary segment
-                                                 1,                        //  id of left subdomain
-                                                 2,                        //  id of right subdomain
-                                                 i,  // Index of the segment
-                                                 vertices_c_style,
-                                                 alpha,
-                                                 beta,
-                                                 boundarySegmentWrapper,
-                                                 grid_->boundarySegments_[i].get())==nullptr) {
-        DUNE_THROW(GridError, "Calling UG" << dimworld << "d::CreateBoundarySegment failed!");
-      }
+      ugDomain->boundarySegments.emplace_back(i,  // Index of the segment
+                                              vertices_c_style,
+                                              boundarySegmentWrapper,
+                                              grid_->boundarySegments_[i].get());
 
     } else {       // No explicit boundary parametrization has been given. We insert a linear segment
 
@@ -362,21 +348,14 @@ createGrid()
                         ? 2
                         : ((boundarySegmentVertices_[i][3]==-1) ? 3 : 4);
 
-      double segmentCoordinates[dimworld*2-2][dimworld];
+      std::array<FieldVector<double,dimworld>, 2*(dimworld-1)> segmentCoordinates;
       for (int j=0; j<numVertices; j++)
-        for (int k=0; k<dimworld; k++)
-          segmentCoordinates[j][k] = vertexPositions_[boundarySegmentVertices_[i][j]][k];
+        segmentCoordinates[j] = vertexPositions_[boundarySegmentVertices_[i][j]];
 
-      if (UG_NS<dimworld>::CreateLinearSegment(segmentName,
-                                               1,               /*id of left subdomain */
-                                               2,              /*id of right subdomain*/
-                                               i,                  /*id of segment*/
-                                               numVertices,          // Number of corners
-                                               vertices_c_style,
-                                               segmentCoordinates
-                                               )==nullptr)
-        DUNE_THROW(IOError, "Error calling CreateLinearSegment");
-
+      ugDomain->linearSegments.emplace_back(i,                  // id of segment
+                                            numVertices,        // Number of corners
+                                            vertices_c_style,
+                                            segmentCoordinates);
     }
 
     // /////////////////////////////////////////////////////////////////////
@@ -416,26 +395,14 @@ createGrid()
     for (int j=0; j<thisSegment.numVertices(); j++)
       vertices_c_style[j] = isBoundaryNode[thisSegment[j]];
 
-    // Create some boundary segment name
-    char segmentName[20];
-    if(sprintf(segmentName, "BS %d", i) < 0)
-      DUNE_THROW(GridError, "sprintf returned error code!");
-
-    double segmentCoordinates[2*dimworld-2][dimworld];
+    std::array<FieldVector<double,dimworld>, 2*(dimworld-1)> segmentCoordinates;
     for (int j=0; j<thisSegment.numVertices(); j++)
-      for (int k=0; k<dimworld; k++)
-        segmentCoordinates[j][k] = vertexPositions_[thisSegment[j]][k];
+      segmentCoordinates[j] = vertexPositions_[thisSegment[j]];
 
-    if (UG_NS<dimworld>::CreateLinearSegment(segmentName,
-                                             1,        /*id of left subdomain */
-                                             2,       /*id of right subdomain*/
-                                             i,           /*id of segment*/
-                                             thisSegment.numVertices(),   // Number of corners
-                                             vertices_c_style,
-                                             segmentCoordinates
-                                             )==nullptr)
-      DUNE_THROW(IOError, "Error calling CreateLinearSegment");
-
+    ugDomain->linearSegments.emplace_back(i,                  // id of segment
+                                          thisSegment.numVertices(),        // Number of corners
+                                          vertices_c_style,
+                                          segmentCoordinates);
   }
 
 
