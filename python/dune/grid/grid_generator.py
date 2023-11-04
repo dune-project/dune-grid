@@ -273,14 +273,19 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
             source += "#endif\n"
             gfModule = builder.load(moduleName, source, signature)
             gfFunc = getattr(gfModule,"gf"+str(dimRange))
-            if callback_ is not None:
-                gfFunc.localCall = gfFunc.__call__
-                feval = lambda self,e,x=None: callback_(e) if x is None else self.localCall(e,x)
-                subclass = type(gfFunc.__name__, (gfFunc,), {"__call__": feval})
-                gv.__class__._functions[dimRange] = subclass
-            else:
-                gv.__class__._functions[dimRange] = gfFunc
+            gfFunc._localCall = gfFunc.__call__
+            def gfCall(self,e,x=None):
+                if x is None:
+                    if not hasattr(self,"_globalCall"):
+                        raise AttributeError("this grid function can not be called with a global coordinate")
+                    return self._globalCall(e)
+                else:
+                    return self._localCall(e,x)
+            gfFunc.__call__ = gfCall
+            gv.__class__._functions[dimRange] = gfFunc
         gf = gv.__class__._functions[dimRange](gv,callback)
+        if callback_ is not None: # allow to still call with only global coordinate
+            gf._globalCall = callback_
     def gfPlot(gf, *args, **kwargs):
         gf.grid.plot(gf,*args,**kwargs)
     gf.plot = gfPlot.__get__(gf)
