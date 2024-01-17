@@ -662,7 +662,7 @@ namespace Dune {
       for (typename Torus<Communication,dim>::ProcListIterator i=_torus.recvbegin(); i!=_torus.recvend(); ++i)
       {
         // what must be sent to this neighbor
-        Intersection send_intersection;
+        Intersection send_intersection{};
         mpifriendly_ygrid yg = mpifriendly_recv_recvgrid[i.index()];
         recv_recvgrid[i.index()] = YGridComponent<Coordinates>(yg.origin,yg.size);
         send_intersection.grid = sendgrid.intersection(recv_recvgrid[i.index()]);
@@ -670,7 +670,7 @@ namespace Dune {
         send_intersection.distance = i.distance();
         if (!send_intersection.grid.empty()) sendlist.push_front(send_intersection);
 
-        Intersection recv_intersection;
+        Intersection recv_intersection{};
         yg = mpifriendly_recv_sendgrid[i.index()];
         recv_sendgrid[i.index()] = YGridComponent<Coordinates>(yg.origin,yg.size);
         recv_intersection.grid = recvgrid.intersection(recv_sendgrid[i.index()]);
