@@ -8,9 +8,9 @@
 #include <concepts>
 #include <utility>
 
+#include <dune/common/rangeutilities.hh>
 #include <dune/geometry/type.hh>
 #include <dune/grid/common/gridenums.hh>
-#include <dune/grid/concepts/entity.hh>
 #include <dune/grid/concepts/geometry.hh>
 #include <dune/grid/concepts/archetypes/entity.hh>
 
@@ -62,12 +62,9 @@ namespace Impl {
     { e.template subEntity<codim>(subEntity) } -> EntityGeneral;
   };
 
-  template<class E, int first, int last>
-  concept EntityAllCodimsExtended = requires(std::make_integer_sequence<int,last-first> codims)
-  {
-    []<int... c>(std::integer_sequence<int,c...>)
-        requires (EntityCodimExtended<E,(first+c)> &&...) {} (codims);
-  };
+  template<typename E, std::size_t... c>
+  void entityAllCodimsExtended(std::integer_sequence<std::size_t,c...>)
+   requires (EntityCodimExtended<E,int(c)> &&...);
 
 } // end namespace Impl
 
@@ -96,7 +93,9 @@ requires(const E e, int maxLevel)
   requires std::same_as<E, typename E::template Codim<0>::Entity>;
 } &&
 Impl::EntityCodimExtended<E,0> &&
-Impl::EntityAllCodimsExtended<E,1,E::dimension+1>;
+requires (index_constant<1> from, index_constant<E::dimension+1> to) {
+  Impl::entityAllCodimsExtended<E>(range(from, to).to_integer_sequence());
+};
 
 /**
  * @brief Model of a grid entity

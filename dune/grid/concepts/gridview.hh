@@ -64,12 +64,11 @@ namespace Impl {
     requires (not Dune::Capabilities::hasEntityIterator<Grid,codim>::v)
   void requireGridViewCodim() {}
 
-  template <class GV, int first, int last>
-  concept GridViewAllCodims = requires(std::make_integer_sequence<int,last-first> codims)
-  {
-    []<int... c>(std::integer_sequence<int,c...>) requires
-      requires { (requireGridViewCodim<GV,typename GV::Grid,(first+c)>(),...); } {} (codims);
-  };
+  template <class GV, std::size_t... c>
+  void gridViewAllCodims(std::index_sequence<c...>)
+    requires requires {
+      (requireGridViewCodim<GV,typename GV::Grid,int(c)>(),...);
+    };
 
 } // end namespace Impl
 
@@ -105,7 +104,9 @@ requires(const GV gv, int codim, Dune::GeometryType type)
   };
 } &&
 Impl::GridViewCodim<GV,0> &&
-Impl::GridViewAllCodims<GV,1,GV::dimension+1>;
+requires (index_constant<1> from, index_constant<GV::dimension+1> to) {
+  Impl::gridViewAllCodims<GV>(range(from, to).to_integer_sequence());
+};
 
 }  // end namespace Dune::Concept
 

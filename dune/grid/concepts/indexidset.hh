@@ -28,12 +28,9 @@ namespace Impl {
     { is.contains(entity)                      } -> std::convertible_to<bool>;
   };
 
-  template<class IS, int first, int last>
-  concept IndexSetEntityAllCodims = requires(std::make_integer_sequence<int,last-first> codims)
-  {
-    []<int... c>(std::integer_sequence<int,c...>)
-        requires (IndexSetEntityCodim<IS,(first+c)> &&...) {} (codims);
-  };
+  template<class IS, std::size_t... c>
+  void indexSetEntityAllCodims(std::integer_sequence<std::size_t,c...>)
+    requires (IndexSetEntityCodim<IS,int(c)> &&...);
 
 } // end namespace Impl
 
@@ -56,8 +53,9 @@ concept IndexSet = requires(const IS is, Dune::GeometryType type, int codim)
   { is.size(codim)  } -> std::convertible_to<typename IS::IndexType>;
 } &&
 Impl::IndexSetEntityCodim<IS,0> &&
-Impl::IndexSetEntityAllCodims<IS,1,IS::dimension+1>;
-
+requires (index_constant<1> from, index_constant<IS::dimension+1> to) {
+  Impl::indexSetEntityAllCodims<IS>(range(from, to).to_integer_sequence());
+};
 
 namespace Impl {
 
@@ -69,12 +67,9 @@ namespace Impl {
     { is.id(entity)                 } -> std::same_as<typename IS::IdType>;
   };
 
-  template<class IS, int first, int last>
-  concept IdSetEntityAllCodims = requires(std::make_integer_sequence<int,last-first> codims)
-  {
-    []<int... c>(std::integer_sequence<int,c...>)
-        requires (IdSetEntityCodim<IS,(first+c)> &&...) {} (codims);
-  };
+  template<class IS, std::size_t... c>
+  void idSetEntityAllCodims(std::integer_sequence<std::size_t,c...>)
+    requires (IdSetEntityCodim<IS,int(c)> &&...);
 
 } // end namespace Impl
 
@@ -92,7 +87,9 @@ concept IdSet = requires(const IS is, const typename IS::template Codim<0>::Enti
   { is.subId(entity,i,cc) } -> std::same_as<typename IS::IdType>;
 } &&
 Impl::IdSetEntityCodim<IS,0> &&
-Impl::IdSetEntityAllCodims<IS,1,IS::dimension+1>;
+requires (index_constant<1> from, index_constant<IS::dimension+1> to) {
+  Impl::idSetEntityAllCodims<IS>(range(from, to).to_integer_sequence());
+};
 
 } // end namespace Dune::Concept
 
