@@ -50,6 +50,8 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
   don't comply with the new mapper interface.
   Just use `SingleCodimSingleGeomTypeMapper` and `MultipleCodimMultipleGeomTypeMapper`.
 
+- Remove deprecated CMake module `UseUG.cmake`.
+
 # Release 2.9
 - UGGrid is now thread safe on the grid view.
 

@@ -8,5 +8,4 @@ install(FILES
   DuneGridMacros.cmake
   FindAlberta.cmake
   GridType.cmake
-  UseUG.cmake
   DESTINATION ${DUNE_INSTALL_MODULEDIR})
