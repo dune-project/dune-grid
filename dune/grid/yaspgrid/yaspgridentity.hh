@@ -43,18 +43,6 @@ namespace Dune {
         return _values[_offsets[d] + c];
       }
 
-      // the actual implementation
-      [[deprecated("Use binomial from dune-common's math.hh")]]
-      static constexpr int binomial(int d, int c)
-      {
-        long binomial=1;
-        for (int i=d-c+1; i<=d; i++)
-          binomial *= i;
-        for (long i=2; i<=c; i++)
-          binomial /= i;
-        return binomial;
-      }
-
     private:
       // prevent construction
       BinomialTable() = delete;
