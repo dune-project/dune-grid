@@ -1063,9 +1063,6 @@ namespace Dune
     //! Dynamic Gmsh reader interface
     //\{
 
-    [[deprecated("Will be removed after 2.8. Either use other constructors or use static methods without constructing an object")]]
-    GmshReader() = default;
-
     using Opts = Gmsh::ReaderOptions;
 
     static constexpr Opts defaultOpts =
