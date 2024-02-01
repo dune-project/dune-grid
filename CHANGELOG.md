@@ -53,6 +53,8 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
   don't comply with the new mapper interface.
   Just use `SingleCodimSingleGeomTypeMapper` and `MultipleCodimMultipleGeomTypeMapper`.
 
+- Remove Yasp's deprecated `YLoadBalance` interface. Use `Yasp::Partitioning` instead.
+
 - Remove deprecated `GmshReader`'s default constructor. Either use other constructors or use static
   methods without constructing an object.
 
