@@ -7,6 +7,8 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 
 ## Changelog
 
+- Gmsh reader learned to read and export gmsh physical entity names.
+
 - Removed the deprecated method `geomTypes()` from all the grid (indexset) implementations since
   they have not been used nor supported by the grid interface for ages. Use `types()` instead. Note
   that `types()` returns an object of type `IndexSet::Types`, which might not be `std::vector<GeometryType>`.
