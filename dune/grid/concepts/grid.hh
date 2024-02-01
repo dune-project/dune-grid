@@ -131,7 +131,7 @@ requires(const G cg, int level, int codim, Dune::GeometryType type)
   { cg.localIdSet()          } -> std::convertible_to<const typename G::LocalIdSet&>;
   { cg.levelIndexSet(level)  } -> std::convertible_to<const typename G::LevelIndexSet&>;
   { cg.leafIndexSet()        } -> std::convertible_to<const typename G::LeafIndexSet&>;
-  { cg.comm()                } -> std::convertible_to<typename G::CollectiveCommunication>;
+  { cg.comm()                } -> std::convertible_to<typename G::Communication>;
 
   // mutable methods
   requires requires(G g, int refCount, const typename G::template Codim<0>::Entity& entity)

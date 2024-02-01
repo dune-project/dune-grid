@@ -471,11 +471,11 @@ namespace Dune
       cls.def_property_readonly_static( "threadSafe", [] ( pybind11::object ) { return Capabilities::threadSafe< Grid >::v; } );
       cls.def_property_readonly_static( "viewThreadSafe", [] ( pybind11::object ) { return Capabilities::viewThreadSafe< Grid >::v; } );
 
-      auto [ clsComm, notRegistered ] = insertClass< typename Grid::CollectiveCommunication >( cls, "CollectiveCommunication", GenerateTypeName( cls, "CollectiveCommunication" ) );
+      auto [ clsComm, notRegistered ] = insertClass< typename Grid::Communication >( cls, "Communication", GenerateTypeName( cls, "Communication" ) );
       if( notRegistered )
         registerCommunication( clsComm );
 
-      cls.def_property_readonly( "comm", [] ( const Grid &grid ) -> const typename Grid::CollectiveCommunication & {
+      cls.def_property_readonly( "comm", [] ( const Grid &grid ) -> const typename Grid::Communication & {
           return grid.comm();
         }, pybind11::return_value_policy::reference, pybind11::keep_alive< 0, 1 >(),
         R"doc(

@@ -377,7 +377,7 @@ namespace Dune
           index set for the grid
         )doc" );
 
-      cls.def_property_readonly( "comm", [] ( const GridView &gridView ) -> const typename Grid::CollectiveCommunication & {
+      cls.def_property_readonly( "comm", [] ( const GridView &gridView ) -> const typename Grid::Communication & {
           return gridView.grid().comm();
         }, pybind11::return_value_policy::reference, pybind11::keep_alive< 0, 1 >(),
         R"doc(
