@@ -179,7 +179,6 @@ namespace Dune {
     typedef typename Coordinates::ctype ctype;
 
     using Communication = typename Base::Communication;
-    using CollectiveCommunicationType [[deprecated("Use Communication. Will be removed after release 2.9")]] = typename Base::Communication;
 
 #ifndef DOXYGEN
     typedef typename Dune::YGrid<Coordinates> YGrid;

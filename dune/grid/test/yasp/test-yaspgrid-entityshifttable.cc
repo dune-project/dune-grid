@@ -4,7 +4,6 @@
 
 #include <iostream>
 
-#include <dune/common/deprecated.hh>
 #include <dune/common/test/testsuite.hh>
 #include <dune/grid/yaspgrid.hh>
 
@@ -28,9 +27,6 @@ TestSuite testBinomialTable(std::vector<int> const* reference = nullptr, bool du
     for (int c = 0; c <= d; ++c, ++i) {
       const auto value = Table::evaluate(d, c);
 
-      DUNE_NO_DEPRECATED_BEGIN
-      t.check(value == Table::binomial(d, c));
-      DUNE_NO_DEPRECATED_END
       if (reference)
         t.check(Table::evaluate(d, c) == reference->at(i));
 

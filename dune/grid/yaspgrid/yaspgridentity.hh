@@ -43,18 +43,6 @@ namespace Dune {
         return _values[_offsets[d] + c];
       }
 
-      // the actual implementation
-      [[deprecated("Use binomial from dune-common's math.hh")]]
-      static constexpr int binomial(int d, int c)
-      {
-        long binomial=1;
-        for (int i=d-c+1; i<=d; i++)
-          binomial *= i;
-        for (long i=2; i<=c; i++)
-          binomial /= i;
-        return binomial;
-      }
-
     private:
       // prevent construction
       BinomialTable() = delete;
@@ -87,13 +75,6 @@ namespace Dune {
       static constexpr std::array<int,(n+1)*(n+2)/2> _values = computeValues(std::make_index_sequence<(n+1)*(n+2)/2>{});
       static constexpr std::array<int,n+1> _offsets = computeOffsets(std::make_index_sequence<n+1>{});
     };
-
-#if __cplusplus < 201703L
-    template<int n>
-    constexpr std::array<int,(n+1)*(n+2)/2> BinomialTable<n>::_values;
-    template<int n>
-    constexpr std::array<int,n+1> BinomialTable<n>::_offsets;
-#endif
 
     /** \returns number of subentities of given codim in a cube of dimension dim
      *  \tparam dimworld the maximum dimension the table holds entries for
@@ -168,13 +149,6 @@ namespace Dune {
       static constexpr std::array<unsigned char,Dune::power(3,dim)> _values = computeValues(std::make_index_sequence<Dune::power(3,dim)>{});
 
     };
-
-#if __cplusplus < 201703L
-    template<typename F, int dim>
-    constexpr std::array<int,dim+1> EntityShiftTable<F, dim>::_offsets;
-    template<typename F, int dim>
-    constexpr std::array<unsigned char,Dune::power(3,dim)> EntityShiftTable<F, dim>::_values;
-#endif
 
     // functor for doing the actual entity shift calculation
     template<int dim>

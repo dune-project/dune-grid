@@ -39,6 +39,9 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 
 - Deprecated `CommDataHandleIF::fixedsize()` has been removed. Use `fixedSize()` with capital
   S instead.
+
+- Remove deprecated `CollectiveCommunication`, use `Communication` instead.
+
 - Deprecated `update()` member function of mappers have been removed. Use the
   member function `update(gridView)` with a grid view argument when updating
   the mapper after the grid or grid view changes. The interface
@@ -49,6 +52,11 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
   `LevelMultipleCodimMultipleGeomTypeMapper` have been removed since they
   don't comply with the new mapper interface.
   Just use `SingleCodimSingleGeomTypeMapper` and `MultipleCodimMultipleGeomTypeMapper`.
+
+- Remove deprecated `GmshReader`'s default constructor. Either use other constructors or use static
+  methods without constructing an object.
+
+- Remove deprecated CMake module `UseUG.cmake`.
 
 # Release 2.9
 - UGGrid is now thread safe on the grid view.
