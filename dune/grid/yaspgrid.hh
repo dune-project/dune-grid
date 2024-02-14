@@ -1870,7 +1870,6 @@ namespace Dune {
     bool adaptActive;
   };
 
-#if __cpp_deduction_guides >= 201611
   // Class template deduction guides
   template<typename ctype, int dim>
   YaspGrid(FieldVector<ctype, dim>,
@@ -1898,7 +1897,6 @@ namespace Dune {
            YaspCommunication = YaspCommunication(),
            const Yasp::Partitioning<dim>* = YaspGrid<int{dim}, TensorProductCoordinates<ctype, int{dim}>>::defaultPartitioner())
     -> YaspGrid< int{dim}, TensorProductCoordinates<ctype, int{dim}> >;
-#endif
 
   //! Output operator for multigrids
   template <int d, class CC>
