@@ -5,7 +5,6 @@
 #ifndef DUNE_GRID_COMMON_PARTITIONSET_HH
 #define DUNE_GRID_COMMON_PARTITIONSET_HH
 
-#include <dune/common/keywords.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/grid/common/gridenums.hh>
 
@@ -305,23 +304,11 @@ namespace Dune {
     typedef decltype(partitionSet<FrontEntity>()) Front;
     typedef decltype(partitionSet<GhostEntity>()) Ghost;
 
-#ifndef __cpp_inline_variables
-    namespace {
-#endif
-
-      // place global objects in anonymous namespace to ensure that visibility is
-      // restricted to the current translation unit, making it easier for the compiler
-      // to eliminate the actual objects and to avoid linking problems
-
-      DUNE_INLINE_VARIABLE constexpr Interior interior = {};
-      DUNE_INLINE_VARIABLE constexpr Border border = {};
-      DUNE_INLINE_VARIABLE constexpr Overlap overlap = {};
-      DUNE_INLINE_VARIABLE constexpr Front front = {};
-      DUNE_INLINE_VARIABLE constexpr Ghost ghost = {};
-
-#ifndef __cpp_inline_variables
-    }
-#endif
+    inline constexpr Interior interior = {};
+    inline constexpr Border border = {};
+    inline constexpr Overlap overlap = {};
+    inline constexpr Front front = {};
+    inline constexpr Ghost ghost = {};
 
     // Now we can declare the partition sets that are a result of combining partitions
 
@@ -330,20 +317,10 @@ namespace Dune {
     typedef decltype(interior + border + overlap + front) InteriorBorderOverlapFront;
     typedef decltype(interior + border + overlap + front + ghost) All;
 
-#ifndef __cpp_inline_variables
-    namespace {
-#endif
-
-      // again, place the global objects in an anonymous namespace
-
-      DUNE_INLINE_VARIABLE constexpr InteriorBorder interiorBorder = {};
-      DUNE_INLINE_VARIABLE constexpr InteriorBorderOverlap interiorBorderOverlap = {};
-      DUNE_INLINE_VARIABLE constexpr InteriorBorderOverlapFront interiorBorderOverlapFront = {};
-      DUNE_INLINE_VARIABLE constexpr All all = {};
-
-#ifndef __cpp_inline_variables
-    }
-#endif
+    inline constexpr InteriorBorder interiorBorder = {};
+    inline constexpr InteriorBorderOverlap interiorBorderOverlap = {};
+    inline constexpr InteriorBorderOverlapFront interiorBorderOverlapFront = {};
+    inline constexpr All all = {};
 
 #endif // DOXYGEN
 
