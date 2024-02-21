@@ -125,12 +125,12 @@ requires(const G cg, int level, int codim, Dune::GeometryType type)
   { cg.size(level, type)     } -> std::convertible_to<int>;
   { cg.size(type)            } -> std::convertible_to<int>;
   { cg.numBoundarySegments() } -> std::convertible_to<std::size_t>;
-  { cg.levelGridView(level)  } -> std::convertible_to<typename G::LevelGridView>;
-  { cg.leafGridView()        } -> std::convertible_to<typename G::LeafGridView>;
-  { cg.globalIdSet()         } -> std::convertible_to<const typename G::GlobalIdSet&>;
-  { cg.localIdSet()          } -> std::convertible_to<const typename G::LocalIdSet&>;
-  { cg.levelIndexSet(level)  } -> std::convertible_to<const typename G::LevelIndexSet&>;
-  { cg.leafIndexSet()        } -> std::convertible_to<const typename G::LeafIndexSet&>;
+  { cg.levelGridView(level)  } -> std::same_as<typename G::LevelGridView>;
+  { cg.leafGridView()        } -> std::same_as<typename G::LeafGridView>;
+  { cg.globalIdSet()         } -> std::same_as<const typename G::GlobalIdSet&>;
+  { cg.localIdSet()          } -> std::same_as<const typename G::LocalIdSet&>;
+  { cg.levelIndexSet(level)  } -> std::same_as<const typename G::LevelIndexSet&>;
+  { cg.leafIndexSet()        } -> std::same_as<const typename G::LeafIndexSet&>;
   { cg.comm()                } -> std::convertible_to<typename G::Communication>;
 
   // mutable methods

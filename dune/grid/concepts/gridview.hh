@@ -26,8 +26,8 @@ namespace Impl {
     EntityIterator<typename GV::template Codim<codim>::template Partition<partition>::Iterator> &&
   requires(const GV gv)
   {
-    { gv.template begin<codim,partition>() } -> std::convertible_to<typename GV::template Codim<codim>::template Partition<partition>::Iterator>;
-    { gv.template end<codim,partition>()   } -> std::convertible_to<typename GV::template Codim<codim>::template Partition<partition>::Iterator>;
+    { gv.template begin<codim,partition>() } -> std::same_as<typename GV::template Codim<codim>::template Partition<partition>::Iterator>;
+    { gv.template end<codim,partition>()   } -> std::same_as<typename GV::template Codim<codim>::template Partition<partition>::Iterator>;
   };
 
   template<class GV, int codim>
@@ -45,13 +45,13 @@ namespace Impl {
     EntityIterator<typename GV::template Codim<codim>::Iterator> &&
   requires(const GV gv)
   {
-    { gv.template begin<codim>() } -> std::convertible_to<typename GV::template Codim<codim>::Iterator>;
-    { gv.template end<codim>()   } -> std::convertible_to<typename GV::template Codim<codim>::Iterator>;
+    { gv.template begin<codim>() } -> std::same_as<typename GV::template Codim<codim>::Iterator>;
+    { gv.template end<codim>()   } -> std::same_as<typename GV::template Codim<codim>::Iterator>;
 
     requires (codim != 0) || requires(const typename GV::template Codim<codim>::Entity& entity)
     {
-      { gv.ibegin(entity) } -> std::convertible_to<typename GV::IntersectionIterator>;
-      { gv.iend(entity)   } -> std::convertible_to<typename GV::IntersectionIterator>;
+      { gv.ibegin(entity) } -> std::same_as<typename GV::IntersectionIterator>;
+      { gv.iend(entity)   } -> std::same_as<typename GV::IntersectionIterator>;
     };
   } && GridViewAllPartitions<GV,codim>;
 
@@ -89,8 +89,8 @@ requires(const GV gv, int codim, Dune::GeometryType type)
   { GV::conforming        } -> std::convertible_to<bool>;
   { GV::dimension         } -> std::convertible_to<int>;
   { GV::dimensionworld    } -> std::convertible_to<int>;
-  { gv.grid()             } -> std::convertible_to<const typename GV::Grid&>;
-  { gv.indexSet()         } -> std::convertible_to<const typename GV::IndexSet&>;
+  { gv.grid()             } -> std::same_as<const typename GV::Grid&>;
+  { gv.indexSet()         } -> std::same_as<const typename GV::IndexSet&>;
   { gv.size(codim)        } -> std::convertible_to<int>;
   { gv.size(type)         } -> std::convertible_to<int>;
   { gv.comm()             } -> std::convertible_to<typename GV::Communication>;
