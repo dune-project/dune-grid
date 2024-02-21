@@ -44,11 +44,11 @@ requires(const E e, unsigned int codim)
 {
   requires E::mydimension == (E::dimension - E::codimension);
   { e.level()            } -> std::convertible_to<int>;
-  { e.partitionType()    } -> std::convertible_to<Dune::PartitionType>;
-  { e.geometry()         } -> std::convertible_to<typename E::Geometry>;
-  { e.type()             } -> std::convertible_to<Dune::GeometryType>;
+  { e.partitionType()    } -> std::same_as<Dune::PartitionType>;
+  { e.geometry()         } -> std::same_as<typename E::Geometry>;
+  { e.type()             } -> std::same_as<Dune::GeometryType>;
   { e.subEntities(codim) } -> std::convertible_to<unsigned int>;
-  { e.seed()             } -> std::convertible_to<typename E::EntitySeed>;
+  { e.seed()             } -> std::same_as<typename E::EntitySeed>;
 };
 
 static_assert(EntityGeneral< Archetypes::Entity<2,0> >);
@@ -79,13 +79,13 @@ concept EntityExtended = EntityGeneral<E> &&
 requires(const E e, int maxLevel)
 {
   requires (E::codimension == 0);
-  { e.father()                   } -> std::convertible_to<E>;
+  { e.father()                   } -> std::same_as<E>;
   { e.hasFather()                } -> std::convertible_to<bool>;
   { e.isLeaf()                   } -> std::convertible_to<bool>;
   { e.isRegular()                } -> std::convertible_to<bool>;
-  { e.geometryInFather()         } -> std::convertible_to<typename E::LocalGeometry>;
-  { e.hbegin(maxLevel)           } -> std::convertible_to<typename E::HierarchicIterator>;
-  { e.hend(maxLevel)             } -> std::convertible_to<typename E::HierarchicIterator>;
+  { e.geometryInFather()         } -> std::same_as<typename E::LocalGeometry>;
+  { e.hbegin(maxLevel)           } -> std::same_as<typename E::HierarchicIterator>;
+  { e.hend(maxLevel)             } -> std::same_as<typename E::HierarchicIterator>;
   { e.isNew()                    } -> std::convertible_to<bool>;
   { e.mightVanish()              } -> std::convertible_to<bool>;
   { e.hasBoundaryIntersections() } -> std::convertible_to<bool>;
