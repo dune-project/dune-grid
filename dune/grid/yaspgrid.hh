@@ -309,14 +309,6 @@ namespace Dune {
       return _levels.end();
     }
 
-    // static method to create the default load balance strategy
-    [[deprecated("use defaultPartitioner")]]
-    static const YLoadBalanceDefault<dim>* defaultLoadbalancer()
-    {
-      static YLoadBalanceDefault<dim> lb;
-      return & lb;
-    }
-
     // static method to create the default partitioning strategy
     static const Yasp::Partitioning<dim>* defaultPartitioner()
     {
@@ -1878,7 +1870,6 @@ namespace Dune {
     bool adaptActive;
   };
 
-#if __cpp_deduction_guides >= 201611
   // Class template deduction guides
   template<typename ctype, int dim>
   YaspGrid(FieldVector<ctype, dim>,
@@ -1886,7 +1877,7 @@ namespace Dune {
            std::bitset<std::size_t{dim}> = std::bitset<std::size_t{dim}>{0ULL},
            int = 1,
            YaspCommunication = YaspCommunication(),
-           const YLoadBalance<dim>* = YaspGrid< dim, EquidistantCoordinates<ctype, dim> >::defaultLoadbalancer())
+           const Yasp::Partitioning<dim>* = YaspGrid<dim, EquidistantCoordinates<ctype, dim>>::defaultPartitioner())
     -> YaspGrid< dim, EquidistantCoordinates<ctype, dim> >;
 
   template<typename ctype, int dim>
@@ -1896,7 +1887,7 @@ namespace Dune {
            std::bitset<std::size_t{dim}> = std::bitset<std::size_t{dim}>{0ULL},
            int = 1,
            YaspCommunication = YaspCommunication(),
-           const YLoadBalance<dim>* = YaspGrid< dim, EquidistantOffsetCoordinates<ctype, dim> >::defaultLoadbalancer())
+           const Yasp::Partitioning<dim>* = YaspGrid<dim, EquidistantOffsetCoordinates<ctype, dim>>::defaultPartitioner())
     -> YaspGrid< dim, EquidistantOffsetCoordinates<ctype, dim> >;
 
   template<typename ctype, std::size_t dim>
@@ -1904,9 +1895,8 @@ namespace Dune {
            std::bitset<dim> = std::bitset<dim>{0ULL},
            int = 1,
            YaspCommunication = YaspCommunication(),
-           const YLoadBalance<int{dim}>* = YaspGrid< int{dim}, TensorProductCoordinates<ctype, int{dim}> >::defaultLoadbalancer())
+           const Yasp::Partitioning<dim>* = YaspGrid<int{dim}, TensorProductCoordinates<ctype, int{dim}>>::defaultPartitioner())
     -> YaspGrid< int{dim}, TensorProductCoordinates<ctype, int{dim}> >;
-#endif
 
   //! Output operator for multigrids
   template <int d, class CC>

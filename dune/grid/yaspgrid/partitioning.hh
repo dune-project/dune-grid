@@ -13,7 +13,6 @@
 #include<array>
 
 #include<dune/common/math.hh>
-#include <dune/common/deprecated.hh>
 
 namespace Dune
 {
@@ -167,78 +166,6 @@ namespace Dune
 
     /** \endgroup */
   }
-
-  /** \brief a base class for the yaspgrid partitioning strategy
-   * \deprecated use the new interface of Yasp::Partitioning
-   */
-  template<int d>
-  class YLoadBalance : public Yasp::Partitioning<d>
-  {
-  public:
-    typedef std::array<int, d> iTupel;
-    [[deprecated("use the new interface of Yasp::Partitioning")]]
-    virtual ~YLoadBalance() {}
-    void partition (const iTupel& size, int P, iTupel& dims, int overlap) const final {
-      this->loadbalance(size,P,dims);
-    }
-    virtual void loadbalance(const iTupel&, int, iTupel&) const = 0;
-  };
-
-DUNE_NO_DEPRECATED_BEGIN
-  template<int d>
-  class YLoadBalanceForward : public YLoadBalance<d>
-  {
-    std::unique_ptr<Yasp::Partitioning<d>> p_;
-  public:
-    typedef std::array<int, d> iTupel;
-    YLoadBalanceForward(std::unique_ptr<Yasp::Partitioning<d>> && p) : p_(std::move(p)) {}
-    virtual ~YLoadBalanceForward() {}
-    void loadbalance(const iTupel& size, int P, iTupel& dims) const final {
-      return p_->partition(size,P,dims,1); // assuming the usual overlap of 1
-    }
-  };
-
-  /** \brief Implement the default load balance strategy of yaspgrid
-   * \deprecated use Yasp::DefaultPartitioning
-   */
-  template<int d>
-  class YLoadBalanceDefault : public YLoadBalanceForward<d>
-  {
-  public:
-    YLoadBalanceDefault() :
-      YLoadBalanceForward<d>(std::make_unique<Yasp::DefaultPartitioning<d>>())
-    {}
-  };
-
-  /** \brief Implement yaspgrid load balance strategy for P=x^{dim} processors
-   * \deprecated use Yasp::PowerDPartitioning
-   */
-  template<int d>
-  class YLoadBalancePowerD : public YLoadBalanceForward<d>
-  {
-  public:
-    typedef std::array<int, d> iTupel;
-    YLoadBalancePowerD() :
-      YLoadBalanceForward<d>(std::make_unique<Yasp::PowerDPartitioning<d>>())
-    {}
-  };
-
-  /** \brief Implement partitioner that gets a fixed partitioning from an array
-   *  If the given partitioning doesn't match the number of processors, the grid should
-   *  be distributed to, an exception is thrown.
-   * \deprecated use FixedSizePartitioning
-   */
-  template<int d>
-  class YaspFixedSizePartitioner : public YLoadBalanceForward<d>
-  {
-  public:
-    typedef std::array<int, d> iTupel;
-    YaspFixedSizePartitioner(const std::array<int,d>& dims) :
-      YLoadBalanceForward<d>(std::make_unique<Yasp::FixedSizePartitioning<d>>(dims))
-    {}
-  };
-
-DUNE_NO_DEPRECATED_END
 }
 
 #endif
