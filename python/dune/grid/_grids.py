@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: Copyright © DUNE Project contributors, see file LICENSE.md in module root
 # SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 
-from dune.common.checkconfiguration import assertCMakeHave, ConfigurationError
 from dune.typeregistry import generateTypeName
 
 class CartesianDomain(tuple):
