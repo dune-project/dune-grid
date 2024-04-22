@@ -872,6 +872,34 @@ namespace Dune {
       return View(ViewImp(asImp()));
     }
 
+    /** \brief obtain begin intersection iterator on the leaf level */
+    typename Traits::LeafIntersectionIterator
+    ileafbegin ( const typename Traits::template Codim<0>::Entity &entity ) const
+    {
+      return entity.impl().ileafbegin();
+    }
+
+    /** \brief obtain end intersection iterator on the leaf level */
+    typename Traits::LeafIntersectionIterator
+    ileafend ( const typename Traits::template Codim<0>::Entity &entity ) const
+    {
+      return entity.impl().ileafend();
+    }
+
+    /** \brief obtain begin intersection iterator on the entity level */
+    typename Traits::LevelIntersectionIterator
+    ilevelbegin ( const typename Traits::template Codim<0>::Entity &entity ) const
+    {
+      return entity.impl().ilevelbegin();
+    }
+
+    /** \brief obtain end intersection iterator on the entity level */
+    typename Traits::LevelIntersectionIterator
+    ilevelend ( const typename Traits::template Codim<0>::Entity &entity ) const
+    {
+      return entity.impl().ilevelend();
+    }
+
     //***************************************************************
     //  Interface for Adaptation
     //***************************************************************

@@ -164,14 +164,14 @@ namespace Dune
     IntersectionIterator
     ibegin ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return entity.impl().ilevelbegin();
+      return grid().ilevelbegin(entity);
     }
 
     /** \brief obtain end intersection iterator with respect to this view */
     IntersectionIterator
     iend ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return entity.impl().ilevelend();
+      return grid().ilevelend(entity);
     }
 
     /** \brief obtain communication object */
@@ -349,14 +349,14 @@ namespace Dune
     IntersectionIterator
     ibegin ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return entity.impl().ileafbegin();
+      return grid().ileafbegin(entity);
     }
 
     /** \brief obtain end intersection iterator with respect to this view */
     IntersectionIterator
     iend ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return entity.impl().ileafend();
+      return grid().ileafend(entity);
     }
 
     /** \brief obtain communication object */
