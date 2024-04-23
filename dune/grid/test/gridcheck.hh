@@ -18,6 +18,7 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/float_cmp.hh>
 #include <dune/common/stdstreams.hh>
+#include <dune/common/typeutilities.hh>
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/type.hh>
 #include <dune/grid/common/gridinfo.hh>
@@ -914,8 +915,10 @@ void checkBoundarySegmentIndex ( const GridView &gridView )
 // can't actually check "everywhere", test whether the determinant changes sign between
 // different quadrature points. As the determinant should be continuous, a sign flip
 // implies that the determinant is zero at some point.
-template <class Grid>
-typename std::enable_if<Grid::dimension == 3, void>::type checkCodim1Mapping(const Grid &g)
+template <class Grid,
+  std::enable_if_t<(Grid::dimension == 3), int> = 0,
+  std::enable_if_t<Dune::Capabilities::hasEntity<Grid, 1>::v, int> = 0>
+void checkCodim1Mapping(const Grid &g, Dune::PriorityTag<1>)
 {
   bool error = false;
   const auto& gv = g.leafGridView();
@@ -975,8 +978,15 @@ void checkConforming(const GridView& view)
 }
 
 template<class Grid>
-typename std::enable_if<Grid::dimension != 3, void>::type checkCodim1Mapping(const Grid &/*g*/)
+void checkCodim1Mapping(const Grid &/*g*/, Dune::PriorityTag<0>)
 {}
+
+template<class Grid>
+void checkCodim1Mapping(const Grid &g)
+{
+  checkCodim1Mapping(g, Dune::PriorityTag<4>{});
+}
+
 
 template <class Grid>
 void gridcheck (Grid &g)
