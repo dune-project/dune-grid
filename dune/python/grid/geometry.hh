@@ -303,7 +303,7 @@ namespace Dune
           } );
 
         cls.def( "jacobianInverse", [] ( const Geometry &self, const LocalCoordinate &x ) {
-            return static_cast< JacobianInverseTransposed >( self.jacobianInverseTransposed( x ) );
+            return static_cast< JacobianInverse >( self.jacobianInverse( x ) );
           }, "x"_a,
           R"doc(
             obtain inverse Jacobian of this mapping in a local point
