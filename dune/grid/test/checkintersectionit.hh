@@ -342,17 +342,20 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
       checkJIn( intNormal, jit, "integrationOuterNormal" );
       if( !inside.type().isNone() )
+      {
         checkParallel( intNormal, refIntNormal, "integrationOuterNormal" );
 
-      if( (intNormal - refIntNormal).two_norm() > tolerance )
-      {
-        std::cerr << "Error: Wrong integration outer normal (" << intNormal
-                  << ", should be " << refIntNormal << ")." << std::endl;
-        std::cerr << "       Intersection: " << geometry.corner( 0 );
-        for( int c = 1; c < geometry.corners(); ++c )
-          std::cerr << ", " << geometry.corner( c );
-        std::cerr << "." << std::endl;
-        assert( false );
+        if( (intNormal - refIntNormal).two_norm() > tolerance )
+        {
+          std::cerr << "Error: Wrong integration outer normal (" << intNormal
+
+                    << ", should be " << refIntNormal << ")." << std::endl;
+          std::cerr << "       Intersection: " << geometry.corner( 0 );
+          for( int c = 1; c < geometry.corners(); ++c )
+            std::cerr << ", " << geometry.corner( c );
+          std::cerr << "." << std::endl;
+          assert( false );
+        }
       }
 
       // check unit outer normal
