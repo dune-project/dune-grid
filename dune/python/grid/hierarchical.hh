@@ -268,7 +268,15 @@ namespace Dune
       return reader< Grid >( args, PriorityTag< 42 >() );
     }
 
+    namespace detail {
+      // Variable template that checks if a grid has refineStepsForHalf or not
+      template<typename, typename = void>
+      struct has_refine_steps_for_half : public std::false_type{};
 
+      // specialization for grids that have
+      template<typename T>
+      struct has_refine_steps_for_half<T, std::void_t<decltype(std::declval<T&>().refineStepsForHalf() )> > : public std::true_type {};
+    }
 
     // registerHierarchicalGrid
     // ------------------------
@@ -442,10 +450,17 @@ namespace Dune
       cls.def_property_readonly( "maxLevel", [] ( const Grid &self ) -> int { return self.maxLevel(); } );
       cls.def_property_readonly_static( "dimension", [] ( pybind11::object ) { return int(Grid::dimension); } );
       cls.def_property_readonly_static( "dimensionworld", [] ( pybind11::object ) { return int(Grid::dimensionworld); } );
-      // evaluate this information at grid creation time since this changes for
-      // ALUGrid conform when used as simplex grid.
-      const int refineStepsForHalf = DGFGridInfo< Grid >::refineStepsForHalf();
-      cls.def_property_readonly_static( "refineStepsForHalf", [refineStepsForHalf] ( pybind11::object ) { return refineStepsForHalf; } );
+
+      // if the grid implements a method refineStepsForHalf then use that to evaluate needed refine steps
+      if constexpr ( detail::has_refine_steps_for_half< Grid >::value )
+      {
+        cls.def_property_readonly( "refineStepsForHalf", [] ( const Grid& self ) -> int { return self.refineStepsForHalf(); } );
+      }
+      else
+      {
+        // default implementation based on DGFGridInfo
+        cls.def_property_readonly_static( "refineStepsForHalf", [] ( pybind11::object ) { return int(DGFGridInfo< Grid >::refineStepsForHalf()); } );
+      }
 
       // export grid capabilities
 
