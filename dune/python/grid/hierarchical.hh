@@ -155,14 +155,30 @@ namespace Dune
 
     // readDGF (input can be either an filename string or an input stream)
     // -------
+    namespace Impl
+    {
+      template <typename, typename, typename = void>
+      constexpr bool hasDGFGridFactory = false;
 
-    template< class Grid, typename In >
-    inline static std::shared_ptr< Grid > readDGF ( In &input )
+      template <typename G, typename T>
+      constexpr bool hasDGFGridFactory<
+          G, T,
+          std::void_t<decltype(DGFGridFactory<G>{std::declval<T>()})>> = true;
+    }
+
+    template <class Grid, typename In, std::enable_if_t<Impl::hasDGFGridFactory<Grid,In>, int> = 0>
+    inline static std::shared_ptr<Grid> readDGF(In &input)
     {
       DGFGridFactory< Grid > dgfFactory( input );
       std::shared_ptr< Grid > grid( dgfFactory.grid() );
       grid->loadBalance();
       return grid;
+    }
+
+    template <class Grid, typename In, std::enable_if_t<!Impl::hasDGFGridFactory<Grid, In>, int> = 0>
+    inline static std::shared_ptr<Grid> readDGF(In &input)
+    {
+      throw std::invalid_argument("Can only read DGF files into grids supporting the DGFGridFactory concept.");
     }
 
     // readGmsh
