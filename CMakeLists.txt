@@ -56,9 +56,9 @@ endif()
 # Use a  custom section to export path to the grid examples.
 set(DUNE_CUSTOM_PKG_CONFIG_SECTION "#Export the directory with the grid example for downstream modules
 if(${ProjectName}_INSTALLED)
-  set(DUNE_GRID_EXAMPLE_GRIDS_PATH \"\${PACKAGE_PREFIX_DIR}/${CMAKE_INSTALL_DOCDIR}/grids/\")
+  set_and_check(DUNE_GRID_EXAMPLE_GRIDS_PATH \"\${dune-grid_PREFIX}/${CMAKE_INSTALL_DOCDIR}/grids/\")
 else()
-  set(DUNE_GRID_EXAMPLE_GRIDS_PATH \"\${PACKAGE_PREFIX_DIR}/doc/grids/\")
+  set_and_check(DUNE_GRID_EXAMPLE_GRIDS_PATH \"\${dune-grid_PREFIX}/doc/grids/\")
 endif()
 ")
 # finalize the dune project, e.g. generating config.h etc.
