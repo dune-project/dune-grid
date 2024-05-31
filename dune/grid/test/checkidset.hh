@@ -91,31 +91,34 @@ namespace Dune
         Hybrid::forEach( std::make_index_sequence< dim+1 >{},
                          [ & ]( auto codim )
         {
-          for (size_t face=0; face<element.subEntities(codim); ++face)
+          if constexpr( Capabilities::hasEntity<Grid, codim>::v )
           {
-            const auto& entity = element.template subEntity<codim>(face);
-
-            auto id = idSet.id(entity);
-
-            // Has the same id already been used by a different entity?
-            if (idContainer.find(id) != idContainer.end())
+            for (size_t face=0; face<element.subEntities(codim); ++face)
             {
-              // Yes.  Then either we have seen the same entity before, or we are now
-              // on the copy of an entity we have seen before.  In either case we must
-              // have the same entity center.
-              // CAVEAT: This last reasoning does not hold if the grid uses parametrized
-              // elements or parametrized boundaries.
-              if (! FloatCmp::eq(entity.geometry().center(), idContainer[id], 1e-12 ))
-                DUNE_THROW(GridError, "IdSet is not injective");
-            }
-            else
-            {
-              idContainer[id] = entity.geometry().center();
-            }
+              const auto& entity = element.template subEntity<codim>(face);
 
-            // While we are here: Do subEntity.id and subId return the same value?
-            if (id != idSet.subId(element,face,codim))
-              DUNE_THROW(GridError, "subEntity.id and subId do not return the same value!");
+              auto id = idSet.id(entity);
+
+              // Has the same id already been used by a different entity?
+              if (idContainer.find(id) != idContainer.end())
+              {
+                // Yes.  Then either we have seen the same entity before, or we are now
+                // on the copy of an entity we have seen before.  In either case we must
+                // have the same entity center.
+                // CAVEAT: This last reasoning does not hold if the grid uses parametrized
+                // elements or parametrized boundaries.
+                if (! FloatCmp::eq(entity.geometry().center(), idContainer[id], 1e-12 ))
+                  DUNE_THROW(GridError, "IdSet is not injective");
+              }
+              else
+              {
+                idContainer[id] = entity.geometry().center();
+              }
+
+              // While we are here: Do subEntity.id and subId return the same value?
+              if (id != idSet.subId(element,face,codim))
+                DUNE_THROW(GridError, "subEntity.id and subId do not return the same value!");
+            }
           }
         });
       }
