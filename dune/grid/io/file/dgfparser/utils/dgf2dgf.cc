@@ -28,8 +28,6 @@
  *  parser and the DGFWriter.
  */
 
-#include <config.h>
-
 #include <iostream>
 
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>

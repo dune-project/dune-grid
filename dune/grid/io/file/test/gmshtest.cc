@@ -3,8 +3,6 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 
-#include "config.h"
-
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -18,6 +16,7 @@
 #include <dune/common/std/type_traits.hh>
 
 // dune grid includes
+#include <dune-grid-config.hh>
 #if HAVE_DUNE_UGGRID
 #include <dune/grid/uggrid.hh>
 #endif

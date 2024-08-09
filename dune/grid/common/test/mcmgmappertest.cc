@@ -7,12 +7,12 @@
     \brief A unit test for the MultipleCodimMultipleGeometryMapper
  */
 
-#include <config.h>
-
 #include <iostream>
 #include <set>
 
 #include <dune/common/parallel/mpihelper.hh>
+
+#include <dune-grid-config.hh> // HAVE_DUNE_UGGRID
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/yaspgrid.hh>
 #include <dune/grid/utility/structuredgridfactory.hh>

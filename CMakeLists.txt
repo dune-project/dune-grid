@@ -32,7 +32,7 @@ if(Alberta_FOUND)
     target_link_libraries(dunealbertagrid${_dim}d PUBLIC
       dunegrid Alberta::AlbertaGrid${_dim}D)
     target_compile_definitions(dunealbertagrid${_dim}d PUBLIC
-      ALBERTA_DIM=${_dim} ENABLE_ALBERTA=1)
+      ALBERTA_DIM=${_dim} HAVE_ALBERTA=1)
     if(Alberta_DEBUG)
       target_compile_definitions(dunealbertagrid${_dim}d PUBLIC
         ALBERTA_DEBUG=1)

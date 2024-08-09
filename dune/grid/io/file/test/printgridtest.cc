@@ -4,10 +4,6 @@
 
 // Based on: Boilerplate tutorial poisson_uniform.cc
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <array>
 #include <iostream>
 

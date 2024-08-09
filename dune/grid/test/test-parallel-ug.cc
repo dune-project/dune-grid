@@ -4,8 +4,6 @@
 // vi: set et ts=4 sw=2 sts=2:
 // Test parallel interface if a parallel UG is used
 
-#include <config.h>
-
 #include <unistd.h>
 #include <iostream>
 #include <iomanip>

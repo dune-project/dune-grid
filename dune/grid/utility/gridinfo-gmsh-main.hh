@@ -34,10 +34,6 @@
  * This header contains a generic main() function.  To use it for your grid,
  * write a .cc file like this:
    \code
-   #ifdef HAVE_CONFIG_H
-   #include "config.h"
-   #endif
-
    #include <string>
 
    #include <dune/grid/mygrid.hh>

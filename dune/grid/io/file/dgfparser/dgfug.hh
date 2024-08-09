@@ -17,6 +17,7 @@
 #include <dune/common/parallel/mpihelper.hh>
 
 //- dune-grid includes
+#include <dune-grid-config.hh> // HAVE_DUNE_UGGRID
 #include <dune/grid/common/intersection.hh>
 #include <dune/grid/uggrid.hh>
 

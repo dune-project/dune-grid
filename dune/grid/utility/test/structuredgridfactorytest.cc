@@ -6,20 +6,19 @@
     \brief A unit test for the StructuredGridFactory
  */
 
-#include <config.h>
-
 #include <cassert>
 #include <iostream>
 #include <memory>
 
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/test/testsuite.hh>
+
+#include <dune-grid-config.hh> // HAVE_DUNE_UGGRID
 #include <dune/grid/onedgrid.hh>
 #include <dune/grid/yaspgrid.hh>
 #if HAVE_DUNE_UGGRID
 #include <dune/grid/uggrid.hh>
 #endif
-
 #include <dune/grid/utility/structuredgridfactory.hh>
 #include <dune/grid/test/gridcheck.hh>
 

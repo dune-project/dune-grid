@@ -8,8 +8,6 @@
  * See https://gitlab.dune-project.org/flyspray/FS/issues/1463
  */
 
-#include <config.h>
-
 #include <dune/grid/geometrygrid/coordfunction.hh>
 
 class Analytical

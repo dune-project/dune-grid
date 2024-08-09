@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 
 #ifdef COORDFUNCTION
 
@@ -20,6 +17,7 @@
 #include <ext/pool_allocator.h>
 #endif
 
+#include <dune-grid-config.hh> // HAVE_DUNE_UGGRID, GRIDTYPE
 #include <dune/grid/geometrygrid.hh>
 #include <dune/grid/geometrygrid/cachedcoordfunction.hh>
 #include <dune/grid/io/file/dgfparser.hh>

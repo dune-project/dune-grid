@@ -48,11 +48,6 @@
  * See explanation at @ref recipe-integration
  */
 
-
-// always include the config file
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 // C++ includes
 #include<math.h>
 #include<iostream>

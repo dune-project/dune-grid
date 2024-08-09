@@ -6,18 +6,17 @@
     \brief A unit test for the TensorGridFactory
  */
 
-#include <config.h>
-
 #include <iostream>
 #include <cassert>
 
 #include <dune/common/parallel/mpihelper.hh>
+
+#include <dune-grid-config.hh> // HAVE_DUNE_UGGRID
 #include <dune/grid/onedgrid.hh>
 #if HAVE_DUNE_UGGRID
 #include <dune/grid/uggrid.hh>
 #endif
 #include <dune/grid/yaspgrid.hh>
-
 #include <dune/grid/utility/tensorgridfactory.hh>
 #include <dune/grid/test/gridcheck.hh>
 

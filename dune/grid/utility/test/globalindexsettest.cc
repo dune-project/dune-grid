@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-#include "config.h"
 
 #include <iostream>
 #include <numeric>
 
 #include <dune/common/exceptions.hh>
 
+#include <dune-grid-config.hh> // HAVE_DUNE_UGGRID
 #include <dune/grid/yaspgrid.hh>
 #include <dune/grid/uggrid.hh>
 #include <dune/grid/utility/globalindexset.hh>

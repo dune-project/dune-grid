@@ -7,8 +7,6 @@
     \brief A unit test for the SingleCodimSingleGeomTypeMapper
  */
 
-#include <config.h>
-
 #include <iostream>
 #include <set>
 
