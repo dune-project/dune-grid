@@ -7,6 +7,7 @@
 
 #include <algorithm>
 
+#include <dune-uggrid-config.hh> // DUNE_UGGRID_HAVE_DDDCONTEXT
 #include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/grid/common/gridenums.hh>

@@ -14,6 +14,8 @@
  *
  **/
 
+#include <dune-grid-config.hh> // HAVE_GRIDTYPE
+
 #ifndef HEADERCHECK
 
 // NOGRID is used to specify that no default was set during configure

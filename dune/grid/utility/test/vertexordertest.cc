@@ -7,10 +7,6 @@
     \brief A unit test for the VertexOrder classes
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -28,6 +24,7 @@
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/generalvertexorder.hh>
 
+#include <dune-grid-config.hh> // HAVE_DUNE_UGGRID
 #include <dune/grid/onedgrid.hh>
 #include <dune/grid/uggrid.hh>
 #include "../structuredgridfactory.hh"

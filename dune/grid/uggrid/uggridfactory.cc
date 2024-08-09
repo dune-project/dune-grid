@@ -3,8 +3,6 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 
-#include <config.h>
-
 #include <memory>
 
 #include <dune/common/stdstreams.hh>
@@ -12,6 +10,7 @@
 #include <dune/grid/uggrid/uggridfactory.hh>
 #include "boundaryextractor.hh"
 
+#include <dune-uggrid-config.hh>
 #if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
 #  include <dune/uggrid/parallel/ppif/ppifcontext.hh>
 #endif

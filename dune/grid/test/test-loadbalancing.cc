@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: Copyright © DUNE Project contributors, see file LICENSE.md in module root
 // SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
+
 #include <iostream>
 
 #include <dune/grid/io/file/vtk/vtkwriter.hh>

@@ -15,8 +15,6 @@
     \endcode
  */
 
-#include <config.h>
-
 #include <iostream>
 
 #include <dune/common/parallel/mpihelper.hh>

@@ -5,8 +5,6 @@
 #ifndef DUNE_GRID_TEST_CHECKCOMMCORRECTNESS_HH
 #define DUNE_GRID_TEST_CHECKCOMMCORRECTNESS_HH
 
-#include <config.h>
-
 #include <iostream>
 #include <fstream>
 #include <sstream>

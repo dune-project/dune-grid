@@ -6,6 +6,8 @@
  * \brief Encapsulates some UG macros and functions
  */
 
+#include <dune-uggrid-config.hh> // DUNE_UGGRID_HAVE_DDDCONTEXT, ModelP
+
 /** \todo Here only to provide the constant DBL_EPSILON.  There's maybe a better way? */
 #include "float.h"
 

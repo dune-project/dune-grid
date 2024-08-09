@@ -98,7 +98,7 @@ namespace Dune
    *  cmake function <tt>add_dune_alberta_flags(WORLDDIM [N] [targets]...)</tt>
    *  with N the world dimension.
    *
-   *  CMake sets the config.h variables <tt>HAVE_ALBERTA</tt> that tells you whether
+   *  CMake sets the compile flag <tt>HAVE_ALBERTA</tt> that tells you whether
    *  ALBERTA was found, and <tt>ALBERTA_DIM</tt> compile flags which tells you the
    *  dimension of world <em>for this program</em>.
    */

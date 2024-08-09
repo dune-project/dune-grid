@@ -7,6 +7,8 @@
 
 #include <memory>
 
+#include <dune/grid/uggrid.hh>
+#include <dune/grid/uggrid/uggridentity.hh>
 #include <dune/grid/uggrid/uggridrenumberer.hh>
 
 /** \file

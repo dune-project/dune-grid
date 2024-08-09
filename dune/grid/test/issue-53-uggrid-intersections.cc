@@ -9,9 +9,6 @@
  * Reference: https://gitlab.dune-project.org/core/dune-grid/issues/53
  */
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
 #include <iostream>
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/test/testsuite.hh>

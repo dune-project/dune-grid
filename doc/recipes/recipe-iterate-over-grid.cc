@@ -36,11 +36,6 @@
  * See explanation at @ref recipe-iterate-over-grid
  */
 
-
-// always include the config file
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 // C++ includes
 #include<math.h>
 #include<iostream>
