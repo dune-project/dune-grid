@@ -3,23 +3,23 @@ Copyright holders:
 2015--2017    Marco Agnese
 2003--2012    Peter Bastian
 2013          Timo Betcke
-2004--2021    Markus Blatt
+2004--2023    Markus Blatt
 2013          Andreas Buhr
 2020--2022    Samuel Burbulla
-2012--2022    Ansgar Burchardt
+2012--2023    Ansgar Burchardt
 2004--2005    Adrian Burri
 2013          Benjamin Bykowski
-2006--2022    Andreas Dedner
+2006--2024    Andreas Dedner
 2018--2020    Nils-Arne Dreier
 2010          Martin Drohmann
 2003          Marc Droske
-2003--2022    Christian Engwer
+2003--2023    Christian Engwer
 2004--2020    Jorrit Fahlke
 2007--2018    Bernd Flemisch
 2006--2016    Christoph Gersbacher
 2015--2022    Felix Gruber
-2005--2022    Carsten Gräser
-2011--2022    Christoph Grüninger
+2005--2024    Carsten Gräser
+2011--2024    Christoph Grüninger
 2006          Bernard Haasdonk
 2016--2020    René Heß
 2019          Stephan Hilb
@@ -28,15 +28,16 @@ Copyright holders:
 2013--2021    Dominic Kempf
 2010--2015    Ole Klein
 2015          Angela Klewinghaus
-2003--2022    Robert Klöfkorn
+2003--2024    Robert Klöfkorn
 2017          Marcel Koch
-2018--2022    Timo Koch
+2018--2023    Timo Koch
 2005--2007    Sreejith Pulloor Kuttanikkad
 2009--2013    Andreas Lauser
 2017--2018    Tobias Leibner
 2012--2017    Tobias Malkmus
 2007--2009    Sven Marnach
 2013          René Milk
+2023--2024    Alexander Müller
 2012          Eike Müller
 2011          Thomas Müller
 2010--2019    Steffen Müthing
@@ -48,11 +49,11 @@ Copyright holders:
 2014--2015    Marian Piatkowski
 2009--2016    Elias Pipping
 2010          Dan Popovic
-2018--2022    Simon Praetorius
+2018--2024    Simon Praetorius
 2009          Atgeirr Flø Rassmussen
-2018--2022    Santiago Ospina De Los Ríos
+2018--2024    Santiago Ospina De Los Ríos
 2009          Uli Sack
-2003--2022    Oliver Sander
+2003--2023    Oliver Sander
 2011--2012    Alexander Schlaich
 2017          Jakob Schneck
 2004          Roland Schulz
