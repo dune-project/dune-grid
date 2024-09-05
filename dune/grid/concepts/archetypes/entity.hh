@@ -7,7 +7,6 @@
 
 #include <dune/geometry/type.hh>
 #include <dune/grid/common/gridenums.hh>
-#include <dune/grid/concepts/archetypes/entity.hh>
 #include <dune/grid/concepts/archetypes/geometry.hh>
 
 #ifndef DOXYGEN
