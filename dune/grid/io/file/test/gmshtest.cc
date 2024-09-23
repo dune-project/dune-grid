@@ -51,9 +51,6 @@ struct EnableLevelIntersectionIteratorCheck< Dune::AlbertaGrid< dim, dimworld > 
 };
 #endif
 
-template<class T>
-T &discarded(T &&v) { return v; }
-
 template<class Grid, class... Args>
 using read_gf_result_t =
   decltype(GmshReader<Grid>::read(std::declval<GridFactory<Grid>&>(),
@@ -182,25 +179,29 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
   {
     auto read = [&] (auto &&... args)
     {
-      return GmshReader<GridType>::read(discarded(GridFactory<GridType>{}),
+      GridFactory<GridType> gridFactory{};
+      return GmshReader<GridType>::read(gridFactory,
                                         inputName,
                                         std::forward<decltype(args)>(args)...);
     };
 
+    std::vector<int> boundarySegmentToPhysicalEntity;
+    std::vector<int> elementToPhysicalEntity;
+
     // boundary data provided, element data provided
-    read(discarded(std::vector<int>{}), discarded(std::vector<int>{}));
-    read(discarded(std::vector<int>{}), discarded(std::vector<int>{}), false);
-    read(discarded(std::vector<int>{}), discarded(std::vector<int>{}), true);
+    read(boundarySegmentToPhysicalEntity, elementToPhysicalEntity);
+    read(boundarySegmentToPhysicalEntity, elementToPhysicalEntity, false);
+    read(boundarySegmentToPhysicalEntity, elementToPhysicalEntity, true);
 
     // boundary data provided, element data omitted
-    read(discarded(std::vector<int>{}), std::ignore);
-    read(discarded(std::vector<int>{}), std::ignore, false);
-    read(discarded(std::vector<int>{}), std::ignore, true);
+    read(boundarySegmentToPhysicalEntity, std::ignore);
+    read(boundarySegmentToPhysicalEntity, std::ignore, false);
+    read(boundarySegmentToPhysicalEntity, std::ignore, true);
 
     // boundary data omitted, segment insertion omitted, element data provided
-    read(std::ignore, discarded(std::vector<int>{}));
-    read(std::ignore, discarded(std::vector<int>{}), false);
-    read(std::ignore, discarded(std::vector<int>{}), true);
+    read(std::ignore, elementToPhysicalEntity);
+    read(std::ignore, elementToPhysicalEntity, false);
+    read(std::ignore, elementToPhysicalEntity, true);
 
     // boundary data omitted, segment insertion omitted, element data omitted
     read(std::ignore, std::ignore);
@@ -208,9 +209,9 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
     read(std::ignore, std::ignore, true);
 
     // boundary data omitted, segment insertion omitted, element data provided
-    read(false, discarded(std::vector<int>{}));
-    read(false, discarded(std::vector<int>{}), false);
-    read(false, discarded(std::vector<int>{}), true);
+    read(false, elementToPhysicalEntity);
+    read(false, elementToPhysicalEntity, false);
+    read(false, elementToPhysicalEntity, true);
 
     // boundary data omitted, segment insertion omitted, element data omitted
     read(false, std::ignore);
@@ -218,9 +219,9 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
     read(false, std::ignore, true);
 
     // boundary data omitted, segment insertion done, element data provided
-    read(true, discarded(std::vector<int>{}));
-    read(true, discarded(std::vector<int>{}), false);
-    read(true, discarded(std::vector<int>{}), true);
+    read(true, elementToPhysicalEntity);
+    read(true, elementToPhysicalEntity, false);
+    read(true, elementToPhysicalEntity, true);
 
     // boundary data omitted, segment insertion done, element data omitted
     read(true, std::ignore);
