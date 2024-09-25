@@ -127,7 +127,7 @@ integrationElement (const FieldVector<typename GridImp::ctype, mydim>& local) co
     return 1;
   else
     /** \todo No need to recompute the determinant every time on a simplex */
-    return std::abs(1/jacobianInverseTransposed(local).determinant());
+    return std::abs(jacobianTransposed(local).determinant());
 }
 
 
