@@ -62,13 +62,8 @@ FieldVector<typename GridImp::ctype, coorddim> UGGridGeometry<mydim,coorddim,Gri
 corner(int i) const
 {
   // This geometry is a vertex
-  if (mydim==0) {
-    FieldVector<typename GridImp::ctype, coorddim> result;
-    for (size_t j=0; j<coorddim; j++)
-      // The cast is here to make the code compile even when target_ is not a node
-      result[j] = ((typename UG_NS<coorddim>::Node*)target_)->myvertex->iv.x[j];
-    return result;
-  }
+  if constexpr (mydim==0)
+    return target_->myvertex->iv.x;
 
   // ////////////////////////////////
   //  This geometry is an element
@@ -77,11 +72,8 @@ corner(int i) const
 
   i = UGGridRenumberer<mydim>::verticesDUNEtoUG(i,type());
 
-  FieldVector<typename GridImp::ctype, coorddim> result;
-  for (size_t j=0; j<coorddim; j++)
-    // The cast is here to make the code compile even when target_ is not an element
-    result[j] = UG_NS<coorddim>::Corner(((typename UG_NS<coorddim>::Element*)target_),i)->myvertex->iv.x[j];
-  return result;
+  if constexpr (mydim==coorddim)
+    return UG_NS<coorddim>::Corner(target_,i)->myvertex->iv.x;
 }
 
 template< int mydim, int coorddim, class GridImp>
