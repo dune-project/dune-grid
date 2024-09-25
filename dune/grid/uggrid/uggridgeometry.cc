@@ -143,7 +143,7 @@ jacobianInverseTransposed (const FieldVector<typename GridImp::ctype, mydim>& lo
   int n = UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
 
   // compute the transformation onto the reference element (or vice versa?)
-  UG_NS<coorddim>::Transformation(n, cornerCoords, local, jIT);
+  UG_NS<coorddim>::JacobianInverseTransformation(n, cornerCoords, local, jIT);
 
   return jIT;
 }
