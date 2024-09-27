@@ -17,6 +17,10 @@
 #
 #       The dimension of the world space
 #
+include_guard(GLOBAL)
+
+set_package_properties(Alberta PROPERTIES TYPE OPTIONAL
+  PURPOSE "Provides the grid manager AlbertaGrid and file reader AlbertaReader")
 
 # set HAVE_ALBERTA for config.h
 set(HAVE_ALBERTA ${Alberta_FOUND})

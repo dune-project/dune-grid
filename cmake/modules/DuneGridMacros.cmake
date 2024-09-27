@@ -20,8 +20,6 @@ include(AddParMETISFlags)
 
 find_package(Alberta 3.0)
 include(AddAlbertaFlags)
-set_package_properties(Alberta PROPERTIES TYPE OPTIONAL
-  PURPOSE "Provides the grid manager AlbertaGrid and file reader AlbertaReader")
 
 set(DEFAULT_DGF_GRIDDIM 1)
 set(DEFAULT_DGF_WORLDDIM 1)
