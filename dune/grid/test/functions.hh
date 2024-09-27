@@ -5,6 +5,8 @@
 #ifndef DUNE_GEOGRID_TEST_FUNCTIONS_HH
 #define DUNE_GEOGRID_TEST_FUNCTIONS_HH
 
+#include <dune/common/math.hh>
+
 #include <dune/grid/geometrygrid/coordfunction.hh>
 #include <dune/grid/geometrygrid/identity.hh>
 
@@ -23,8 +25,8 @@ namespace Dune
 
     void evaluate ( const DomainVector &x, RangeVector &y ) const
     {
-      y[ 0 ] = (x[ 0 ] + 0.2) * cos( 2.0 * M_PI * x[ 1 ] );
-      y[ 1 ] = (x[ 0 ] + 0.2) * sin( 2.0 * M_PI * x[ 1 ] );
+      y[ 0 ] = (x[ 0 ] + 0.2) * cos( 2.0 * MathematicalConstants<double>::pi() * x[ 1 ] );
+      y[ 1 ] = (x[ 0 ] + 0.2) * sin( 2.0 * MathematicalConstants<double>::pi() * x[ 1 ] );
       y[ 2 ] = x[ 1 ];
     }
   };
@@ -42,8 +44,8 @@ namespace Dune
 
     void evaluate ( const DomainVector &x, RangeVector &y ) const
     {
-      y[ 0 ] = (x[ 0 ] + 0.2) * cos( 2.0 * M_PI * x[ 1 ] );
-      y[ 1 ] = (x[ 0 ] + 0.2) * sin( 2.0 * M_PI * x[ 1 ] );
+      y[ 0 ] = (x[ 0 ] + 0.2) * cos( 2.0 * MathematicalConstants<double>::pi() * x[ 1 ] );
+      y[ 1 ] = (x[ 0 ] + 0.2) * sin( 2.0 * MathematicalConstants<double>::pi() * x[ 1 ] );
     }
   };
 
@@ -78,8 +80,8 @@ namespace Dune
           angle += 1.;
           fac=5;
         }
-        y[ 0 ] = (x[ 0 ] + 0.2) * cos( 2.0 * M_PI * angle );
-        y[ 1 ] += (x[ 0 ] + 0.2) * sin( 2.0 * M_PI * angle );
+        y[ 0 ] = (x[ 0 ] + 0.2) * cos( 2.0 * MathematicalConstants<double>::pi() * angle );
+        y[ 1 ] += (x[ 0 ] + 0.2) * sin( 2.0 * MathematicalConstants<double>::pi() * angle );
         y[ 2 ] = x[ 2 ] + fac*std::abs(angle);
       }
     }

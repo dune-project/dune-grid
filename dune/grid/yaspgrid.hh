@@ -406,10 +406,10 @@ namespace Dune {
       for (unsigned int codim = 0; codim < dim + 1; codim++)
       {
         // set the begin iterator for the corresponding ygrids
-        g.overlapfront[codim].setBegin(overlapfront_it);
-        g.overlap[codim].setBegin(overlap_it);
-        g.interiorborder[codim].setBegin(interiorborder_it);
-        g.interior[codim].setBegin(interior_it);
+        g.overlapfront[codim].setBegin(&*overlapfront_it);
+        g.overlap[codim].setBegin(&*overlap_it);
+        g.interiorborder[codim].setBegin(&*interiorborder_it);
+        g.interior[codim].setBegin(&*interior_it);
         g.send_overlapfront_overlapfront[codim].setBegin(send_overlapfront_overlapfront_it);
         g.recv_overlapfront_overlapfront[codim].setBegin(recv_overlapfront_overlapfront_it);
         g.send_overlap_overlapfront[codim].setBegin(send_overlap_overlapfront_it);
@@ -513,10 +513,10 @@ namespace Dune {
         }
 
         // set end iterators in the corresponding ygrids
-        g.overlapfront[codim].finalize(overlapfront_it);
-        g.overlap[codim].finalize(overlap_it);
-        g.interiorborder[codim].finalize(interiorborder_it);
-        g.interior[codim].finalize(interior_it);
+        g.overlapfront[codim].finalize(&*overlapfront_it);
+        g.overlap[codim].finalize(&*overlap_it);
+        g.interiorborder[codim].finalize(&*interiorborder_it);
+        g.interior[codim].finalize(&*interior_it);
         g.send_overlapfront_overlapfront[codim].finalize(send_overlapfront_overlapfront_it,g.overlapfront[codim]);
         g.recv_overlapfront_overlapfront[codim].finalize(recv_overlapfront_overlapfront_it,g.overlapfront[codim]);
         g.send_overlap_overlapfront[codim].finalize(send_overlap_overlapfront_it,g.overlapfront[codim]);
@@ -1429,8 +1429,7 @@ namespace Dune {
 
       // sum over all components of the codimension
       int count = 0;
-      typedef typename std::array<YGridComponent<Coordinates>, Dune::power(2,dim)>::iterator DAI;
-      for (DAI it = g->overlapfront[codim].dataBegin(); it != g->overlapfront[codim].dataEnd(); ++it)
+      for (auto it = g->overlapfront[codim].dataBegin(); it != g->overlapfront[codim].dataEnd(); ++it)
         count += it->totalsize();
 
       return count;
