@@ -49,7 +49,15 @@ namespace Dune {
     GeometryType type () const;
 
     //! returns true if type is simplex, false otherwise
-    bool affine() const { return type().isSimplex(); }
+    bool affine() const
+    {
+      if constexpr (mydim==0 || mydim==1)  // Vertices and edges are always affine
+        return true;
+      else if constexpr (mydim==2)
+        return UG_NS<coorddim>::Tag(target_)==UG::D2::TRIANGLE;
+      else
+        return UG_NS<coorddim>::Tag(target_)==UG::D3::TETRAHEDRON;
+    }
 
     //! return the number of corners of this element.
     int corners () const {
