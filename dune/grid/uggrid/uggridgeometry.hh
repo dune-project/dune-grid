@@ -121,12 +121,21 @@ namespace Dune {
     void setToTarget(typename UG_NS<coorddim>::template Entity<coorddim-mydim>::T* target)
     {
       target_ = target;
+
+      cachedIntegrationElement_.reset();
+      cachedJacobianTransposed_.reset();
+      cachedJacobianInverseTransposed_.reset();
     }
 
     // in element mode this points to the element we map to
     // in coord_mode this is the element whose reference element is mapped into the father's one
     typename UG_NS<coorddim>::template Entity<coorddim-mydim>::T* target_;
 
+    // If the element is affine, then the geometry Jacobian is constant, and only needs to be
+    // computed once per element.  Therefore, keep them in a cache.
+    mutable std::optional<UGCtype> cachedIntegrationElement_;
+    mutable std::optional<FieldMatrix<UGCtype,mydim,coorddim> > cachedJacobianTransposed_;
+    mutable std::optional<FieldMatrix<UGCtype,coorddim,mydim> > cachedJacobianInverseTransposed_;
   };
 
 

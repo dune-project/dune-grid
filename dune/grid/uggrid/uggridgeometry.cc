@@ -125,9 +125,16 @@ integrationElement (const FieldVector<typename GridImp::ctype, mydim>& local) co
 {
   if (mydim==0)
     return 1;
-  else
-    /** \todo No need to recompute the determinant every time on a simplex */
+
+  // Geometry is not affine --> the integrationElement cannot be cached
+  if (!affine())
     return std::abs(jacobianTransposed(local).determinant());
+
+  // Geometry is affine --> try to use the integrationElement from the cache
+  if (!cachedIntegrationElement_)
+    cachedIntegrationElement_.emplace(std::abs(jacobianTransposed(local).determinant()));
+
+  return *cachedIntegrationElement_;
 }
 
 
@@ -135,33 +142,40 @@ template< int mydim, int coorddim, class GridImp>
 FieldMatrix<typename GridImp::ctype, coorddim,mydim> UGGridGeometry<mydim,coorddim, GridImp>::
 jacobianInverseTransposed (const FieldVector<typename GridImp::ctype, mydim>& local) const
 {
-  FieldMatrix<UGCtype,coorddim,mydim> jIT;
+  if (!affine() || !cachedJacobianInverseTransposed_)
+  {
+    cachedJacobianInverseTransposed_.emplace();
 
-  // compile array of pointers to corner coordinates
-  // coorddim*coorddim is an upper bound for the number of vertices
-  UGCtype* cornerCoords[coorddim*coorddim];
-  int n = UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
+    // compile array of pointers to corner coordinates
+    // coorddim*coorddim is an upper bound for the number of vertices
+    UGCtype* cornerCoords[coorddim*coorddim];
+    const int n = UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
 
-  // compute the transformation onto the reference element (or vice versa?)
-  UG_NS<coorddim>::JacobianInverseTransformation(n, cornerCoords, local, jIT);
+    // compute the transformation onto the reference element (or vice versa?)
+    UG_NS<coorddim>::JacobianInverseTransformation(n, cornerCoords, local, *cachedJacobianInverseTransposed_);
+  }
 
-  return jIT;
+  return *cachedJacobianInverseTransposed_;
 }
+
 template< int mydim, int coorddim, class GridImp>
 FieldMatrix<typename GridImp::ctype, mydim,coorddim> UGGridGeometry<mydim,coorddim, GridImp>::
 jacobianTransposed (const FieldVector<typename GridImp::ctype, mydim>& local) const
 {
-  FieldMatrix<UGCtype,mydim,coorddim> jac;
+  if (!affine() || !cachedJacobianTransposed_)
+  {
+    cachedJacobianTransposed_.emplace();
 
-  // compile array of pointers to corner coordinates
-  // coorddim*coorddim is an upper bound for the number of vertices
-  UGCtype* cornerCoords[coorddim*coorddim];
-  int n = UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
+    // compile array of pointers to corner coordinates
+    // coorddim*coorddim is an upper bound for the number of vertices
+    UGCtype* cornerCoords[coorddim*coorddim];
+    const int n = UG_NS<coorddim>::Corner_Coordinates(target_, cornerCoords);
 
-  // compute the transformation onto the reference element (or vice versa?)
-  UG_NS<coorddim>::JacobianTransformation(n, cornerCoords, local, jac);
+    // compute the transformation onto the reference element (or vice versa?)
+    UG_NS<coorddim>::JacobianTransformation(n, cornerCoords, local, *cachedJacobianTransposed_);
+  }
 
-  return jac;
+  return *cachedJacobianTransposed_;
 }
 
 
