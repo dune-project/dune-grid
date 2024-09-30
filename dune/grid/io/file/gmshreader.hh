@@ -335,7 +335,7 @@ namespace Dune
     {
       std::va_list ap;
       va_start(ap, format);
-      off_t pos = ftello(file);
+      auto pos = std::ftell(file);
       int c = std::vfscanf(file, format, ap);
       va_end(ap);
       if (c != cnt)
@@ -480,7 +480,7 @@ namespace Dune
       //    actually occur as corners of an element.
       //=========================================
 
-      off_t section_element_offset = ftello(file);
+      auto section_element_offset = std::ftell(file);
       std::map<int,unsigned int> renumber;
       for (int i=1; i<=number_of_elements; i++)
       {
@@ -513,7 +513,7 @@ namespace Dune
       // Pass 2: Insert boundary segments and elements
       //==============================================
 
-      fseeko(file, section_element_offset, SEEK_SET);
+      std::fseek(file, section_element_offset, SEEK_SET);
       boundary_element_count = 0;
       element_count = 0;
       for (int i=1; i<=number_of_elements; i++)

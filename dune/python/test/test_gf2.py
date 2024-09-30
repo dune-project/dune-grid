@@ -9,6 +9,7 @@ from dune.grid import gridFunction, structuredGrid
 codeFunc = """
 #include <cmath>
 #include <dune/common/fvector.hh>
+#include <dune/common/math.hh>
 
 template <class GridView>
 auto myFunction(double a)
@@ -16,7 +17,7 @@ auto myFunction(double a)
   return [a](const auto& en,const auto& x) -> auto
   {
     auto y = en.geometry().global(x);
-    return std::sin(a*M_PI*(y[0]+y[1]));
+    return std::sin(a*Dune::MathematicalConstants<double>::pi()*(y[0]+y[1]));
   };
 }
 """

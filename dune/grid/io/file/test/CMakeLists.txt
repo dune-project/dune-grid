@@ -15,15 +15,23 @@ dune_add_test(SOURCES nonconformboundaryvtktest.cc)
 
 dune_add_test(SOURCES printgridtest.cc)
 
-dune_add_test(NAME subsamplingvtktest
-              SOURCES subsamplingvtktest.cc test-linking.cc
-              TIMEOUT 600)
+if(TARGET Python3::Python)
+  dune_add_test(NAME subsamplingvtktest
+                LINK_LIBRARIES ${DUNE_LIBS} Python3::Python
+                SOURCES subsamplingvtktest.cc test-linking.cc
+                TIMEOUT 600
+                COMPILE_DEFINITIONS PYTHON_INTERPRETER=L"${DUNE_PYTHON_VIRTUALENV_EXECUTABLE}")
 
-dune_add_test(SOURCES vtktest.cc
-              MPI_RANKS 1 2
-              TIMEOUT 1200)
+  dune_add_test(SOURCES vtktest.cc
+                LINK_LIBRARIES ${DUNE_LIBS} Python3::Python
+                MPI_RANKS 1 2
+                TIMEOUT 1200
+                COMPILE_DEFINITIONS PYTHON_INTERPRETER=L"${DUNE_PYTHON_VIRTUALENV_EXECUTABLE}")
 
-dune_add_test(SOURCES vtksequencetest.cc)
+  dune_add_test(SOURCES vtksequencetest.cc
+                LINK_LIBRARIES ${DUNE_LIBS} Python3::Python
+                COMPILE_DEFINITIONS PYTHON_INTERPRETER=L"${DUNE_PYTHON_VIRTUALENV_EXECUTABLE}")
+endif()
 
 dune_add_test(SOURCES starcdreadertest.cc
               LINK_LIBRARIES dunegrid

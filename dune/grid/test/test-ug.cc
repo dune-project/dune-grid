@@ -6,6 +6,7 @@
 #include <iostream>
 #include <memory>
 
+#include <dune/common/math.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
 /*
@@ -57,6 +58,7 @@ public:
 void makeHalfCircleQuad(Dune::UGGrid<2>& grid, bool boundarySegments, bool parametrization)
 {
   Dune::GridFactory<Dune::UGGrid<2> > factory(&grid);
+  const double pi = Dune::MathematicalConstants<double>::pi();
 
   // /////////////////////////////
   //   Create boundary segments
@@ -67,9 +69,9 @@ void makeHalfCircleQuad(Dune::UGGrid<2>& grid, bool boundarySegments, bool param
 
     if (parametrization) {
 
-      factory.insertBoundarySegment({1,2}, std::make_shared<ArcOfCircle>(center, 15, M_PI, M_PI*4/3));
-      factory.insertBoundarySegment({2,3}, std::make_shared<ArcOfCircle>(center, 15, M_PI*4/3, M_PI*5/3));
-      factory.insertBoundarySegment({3,0}, std::make_shared<ArcOfCircle>(center, 15, M_PI*5/3, M_PI*2));
+      factory.insertBoundarySegment({1,2}, std::make_shared<ArcOfCircle>(center, 15, pi, pi*4/3));
+      factory.insertBoundarySegment({2,3}, std::make_shared<ArcOfCircle>(center, 15, pi*4/3, pi*5/3));
+      factory.insertBoundarySegment({3,0}, std::make_shared<ArcOfCircle>(center, 15, pi*5/3, pi*2));
 
     } else {
 
@@ -324,7 +326,7 @@ int main (int argc , char **argv) try
   {
     // geometry is a half circle with radius 15, so the exact length
     // of the boundary is $`R \cdot \pi + 2 R`$
-    double exact = (M_PI + 2.0) * 15.0;
+    double exact = (Dune::MathematicalConstants<double>::pi() + 2.0) * 15.0;
     testGeometryApproximation(gridWithParametrization, exact);
   }
 

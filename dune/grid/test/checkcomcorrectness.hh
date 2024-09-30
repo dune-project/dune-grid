@@ -10,7 +10,6 @@
 #include <sstream>
 #include <unordered_set>
 #include <unordered_map>
-#include <unistd.h>
 
 #include <dune/common/hash.hh>
 #include <dune/common/float_cmp.hh>

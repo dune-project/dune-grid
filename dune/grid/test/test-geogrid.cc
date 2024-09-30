@@ -76,7 +76,9 @@ typedef Dune::GeometryGrid< Grid, CoordFunction, Dune::PoolAllocator< char, 1638
 #ifdef GCCPOOL
 typedef Dune::GeometryGrid< Grid, CoordFunction, __gnu_cxx::__pool_alloc<char> > GeometryGridWithGCCPoolAllocator;
 #endif
+#ifdef HAVE_MPROTECT
 typedef Dune::GeometryGrid< Grid, CoordFunction, Dune::DebugAllocator<char> > GeometryGridWithDebugAllocator;
+#endif
 
 template <class HostGridView>
 struct DeformationFunction
@@ -226,8 +228,10 @@ try
 #endif
 
   watch.reset();
+#ifdef HAVE_MPROTECT
   test<GeometryGridWithDebugAllocator>(gridfile);
   std::cout << "=== GeometryGridWithDebugAllocator took " << watch.elapsed() << " seconds\n";
+#endif
 
   // Check with a discrete coordinate function
   Dune::GridPtr< Grid > hostGridPtr(gridfile);

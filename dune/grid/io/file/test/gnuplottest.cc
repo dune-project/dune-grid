@@ -27,7 +27,7 @@ void testIO(const GV & gridView, std::string fname)
 
   // register data
   gnuplot.template addVertexData< std::vector<float> >(vertexdata, std::string("vertexdata"));
-  gnuplot.template addCellData(celldata, std::string("celldata"));
+  gnuplot.addCellData(celldata, std::string("celldata"));
 
   // write data
   gnuplot.write(fname);

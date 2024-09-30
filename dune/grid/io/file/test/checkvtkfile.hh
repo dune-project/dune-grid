@@ -14,10 +14,10 @@
 #include <sstream>
 #include <string>
 
-#include <sys/wait.h>
-
 #include <dune/common/exceptions.hh>
 #include <dune/common/test/testsuite.hh>
+
+#include <Python.h>
 
 namespace Dune {
 
@@ -46,43 +46,26 @@ inline std::string pyq(const std::string &s)
   return result.str();
 }
 
-// quote so the result can be used inside '...' in the bourne shell
-// quotes not included in the result
-inline std::string shq(const std::string &s)
-{
-  std::ostringstream result;
-  bool pend = false;
-  for(std::size_t i = 0; i < s.size(); ++i)
-  {
-    char c = s[i];
-    switch(c) {
-    case '\0': DUNE_THROW(Dune::NotImplemented,
-                          "Can't pass \\0 through the shell");
-    case '\'': result << (pend ? "" : "'") << "\\'"; pend = true;  break;
-    default:   result << (pend ? "'" : "") << c;     pend = false; break;
-    }
-  }
-  if(pend) result << "'";
-  return result.str();
-}
-
-inline int runShell(const std::string &code)
-{
-  int result = std::system(code.c_str());
-  // Avoid returning anything that is a multiple of 256, unless the return
-  // value was 0.  This way the return value can be directly used as an
-  // argument to exit(), which usually interprets its argument modulo 256.
-  if(WIFEXITED(result))
-    return WEXITSTATUS(result);
-  if(WIFSIGNALED(result))
-    return WTERMSIG(result) + 256;
-  else
-    return 513;
-}
-
 inline int runPython(const std::string &code)
 {
-  return runShell("python3 -c '"+shq(code)+"'");
+#if (PY_MAJOR_VERSION >= 3) && (PY_MINOR_VERSION >= 8)
+  PyConfig config;
+  PyConfig_InitPythonConfig(&config);
+  PyConfig_SetString(&config, &config.program_name, PYTHON_INTERPRETER);
+  PyStatus status = Py_InitializeFromConfig(&config);
+  PyConfig_Clear(&config);
+  if (PyStatus_Exception(status)) {
+    Py_ExitStatusException(status);
+    return PyStatus_IsExit(status) ? status.exitcode : EXIT_FAILURE;
+  }
+#else
+  Py_SetProgramName(PYTHON_INTERPRETER);
+  Py_Initialize();
+#endif
+
+  int exitcode = PyRun_SimpleString(code.c_str());
+  int finalizecode = Py_FinalizeEx();
+  return (exitcode + finalizecode) ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
 inline bool is_suffix(const std::string &s, const std::string &suffix)
@@ -96,7 +79,7 @@ inline bool havePythonVTK()
   static const bool result = [] {
     // This check is invoked only once, even in a multithreading environment,
     // since it is invoked in the initializer of a static variable.
-    if(runPython("from vtk import *") == 0)
+    if(runPython("from vtk import *") == EXIT_SUCCESS)
       return true;
     std::cerr << "warning: python or python vtk module not available.  This "
               << "will result in skipped tests, since we cannot check that "
@@ -138,7 +121,7 @@ public:
       }
       else if (not files_.empty()) {
         const int result = Impl::runPython(generatePythonCode());
-        testSuite_.check(result == 0);
+        testSuite_.check(result == EXIT_SUCCESS);
       }
       return testSuite_.exit();
     }
