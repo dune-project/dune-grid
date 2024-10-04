@@ -49,7 +49,15 @@ namespace Dune {
     GeometryType type () const;
 
     //! returns true if type is simplex, false otherwise
-    bool affine() const { return type().isSimplex(); }
+    bool affine() const
+    {
+      if constexpr (mydim==0 || mydim==1)  // Vertices and edges are always affine
+        return true;
+      else if constexpr (mydim==2)
+        return UG_NS<coorddim>::Tag(target_)==UG::D2::TRIANGLE;
+      else
+        return UG_NS<coorddim>::Tag(target_)==UG::D3::TETRAHEDRON;
+    }
 
     //! return the number of corners of this element.
     int corners () const {
@@ -113,12 +121,21 @@ namespace Dune {
     void setToTarget(typename UG_NS<coorddim>::template Entity<coorddim-mydim>::T* target)
     {
       target_ = target;
+
+      cachedIntegrationElement_.reset();
+      cachedJacobianTransposed_.reset();
+      cachedJacobianInverseTransposed_.reset();
     }
 
     // in element mode this points to the element we map to
     // in coord_mode this is the element whose reference element is mapped into the father's one
     typename UG_NS<coorddim>::template Entity<coorddim-mydim>::T* target_;
 
+    // If the element is affine, then the geometry Jacobian is constant, and only needs to be
+    // computed once per element.  Therefore, keep them in a cache.
+    mutable std::optional<UGCtype> cachedIntegrationElement_;
+    mutable std::optional<FieldMatrix<UGCtype,mydim,coorddim> > cachedJacobianTransposed_;
+    mutable std::optional<FieldMatrix<UGCtype,coorddim,mydim> > cachedJacobianInverseTransposed_;
   };
 
 
