@@ -9,6 +9,9 @@
  * \brief The UGGridGeometry class and its specializations
  */
 
+#include <optional>
+#include <vector>
+
 #include <dune/common/fmatrix.hh>
 
 #include <dune/geometry/multilineargeometry.hh>
