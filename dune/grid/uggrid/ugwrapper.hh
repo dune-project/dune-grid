@@ -1073,11 +1073,6 @@ namespace Dune {
                                                        numOfUserFct, userfct);
     }
 
-    static int STD_BVP_Configure(int argc, char **argv, UG_NAMESPACE::domain *theDomain)
-    {
-      return UG_NAMESPACE :: STD_BVP_Configure(argc, argv, theDomain);
-    }
-
     //! Set the current boundary value problem
     static void Set_Current_BVP(void** thisBVP) {
       UG_NAMESPACE ::Set_Current_BVP(thisBVP);

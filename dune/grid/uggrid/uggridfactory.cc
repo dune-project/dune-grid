@@ -420,7 +420,7 @@ createGrid()
   if (BVP_SetBVPDesc(theBVP,&theBVPDesc) != 0)
     DUNE_THROW(GridError, "Calling BVP_SetBVPDesc failed!");
 
-  if (UG_NS<dimworld>::STD_BVP_Configure(2,const_cast<char**>(configureArgs_c),ugDomain))
+  if (STD_BVP_Configure(2,const_cast<char**>(configureArgs_c),ugDomain))
     DUNE_THROW(GridError, "Calling STD_BVP_Configure failed!");
 
   // Make sure there is no old multigrid object with the same name.
