@@ -79,6 +79,8 @@ namespace Dune {
 
     typedef UG_NAMESPACE ::vertex Vertex;
 
+    typedef UG_NAMESPACE ::domain domain;
+
     typedef UG_NAMESPACE ::BVP BVP;
 
     typedef UG_NAMESPACE ::BVP_DESC BVP_DESC;
@@ -1071,9 +1073,9 @@ namespace Dune {
                                                        numOfUserFct, userfct);
     }
 
-    static int STD_BVP_Configure(int argc, char **argv)
+    static int STD_BVP_Configure(int argc, char **argv, UG_NAMESPACE::domain *theDomain)
     {
-      return UG_NAMESPACE :: STD_BVP_Configure(argc, argv);
+      return UG_NAMESPACE :: STD_BVP_Configure(argc, argv, theDomain);
     }
 
     //! Set the current boundary value problem
@@ -1143,14 +1145,6 @@ namespace Dune {
       return UG_NAMESPACE ::CreateMultiGrid(const_cast<char*>(MultigridName),
                                             const_cast<char*>(BndValProblem), format,
                                             optimizedIE, insertMesh, ppifContext);
-    }
-
-    static auto* CreateDomain(const char* name, int segments, int corners) {
-      return UG_NAMESPACE ::CreateDomain(name, segments, corners);
-    }
-
-    static void RemoveDomain(const char* name) {
-      UG_NAMESPACE ::RemoveDomain(name);
     }
 
     static void* InsertInnerNode(UG_NAMESPACE ::grid* grid, const double* pos) {

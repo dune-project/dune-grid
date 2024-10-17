@@ -297,13 +297,10 @@ createGrid()
   //   Create the domain data structure
   // ///////////////////////////////////////////
   grid_->numBoundarySegments_ = boundarySegments.size();
-  std::string domainName = grid_->name_ + "_Domain";
 
-  auto* ugDomain =UG_NS<dimworld>::CreateDomain(domainName.c_str(),     // The domain name
-                                                grid_->numBoundarySegments_,
-                                                noOfBNodes);
-  if (ugDomain == nullptr)
-    DUNE_THROW(GridError, "Calling UG::" << dimworld << "d::CreateDomain failed!");
+  auto* ugDomain = new UG_NS<dimworld>::domain;
+  ugDomain->numOfSegments = grid_->numBoundarySegments_;
+  ugDomain->numOfCorners = noOfBNodes;
 
   // ///////////////////////////////////////////
   //   Insert the boundary segments
@@ -423,7 +420,7 @@ createGrid()
   if (BVP_SetBVPDesc(theBVP,&theBVPDesc) != 0)
     DUNE_THROW(GridError, "Calling BVP_SetBVPDesc failed!");
 
-  if (UG_NS<dimworld>::STD_BVP_Configure(2,const_cast<char**>(configureArgs_c)))
+  if (UG_NS<dimworld>::STD_BVP_Configure(2,const_cast<char**>(configureArgs_c),ugDomain))
     DUNE_THROW(GridError, "Calling STD_BVP_Configure failed!");
 
   // Make sure there is no old multigrid object with the same name.
@@ -572,12 +569,6 @@ createBegin()
   elementTypes_.resize(0);
   elementVertices_.resize(0);
   vertexPositions_.resize(0);
-
-  // //////////////////////////////////////////////////////////
-  //   Delete the UG domain, if it exists
-  // //////////////////////////////////////////////////////////
-  std::string domainName = grid_->name_ + "_Domain";
-  UG_NS<dimworld>::RemoveDomain(domainName.c_str());
 }
 
 
