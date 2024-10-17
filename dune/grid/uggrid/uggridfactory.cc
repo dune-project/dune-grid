@@ -298,7 +298,7 @@ createGrid()
   // ///////////////////////////////////////////
   grid_->numBoundarySegments_ = boundarySegments.size();
 
-  auto* ugDomain = new UG_NS<dimworld>::domain;
+  auto ugDomain = std::make_unique<typename UG_NS<dimworld>::domain>();
   ugDomain->numOfSegments = grid_->numBoundarySegments_;
   ugDomain->numOfCorners = noOfBNodes;
 
@@ -417,7 +417,7 @@ createGrid()
   if (BVP_SetBVPDesc(theBVP,&theBVPDesc) != 0)
     DUNE_THROW(GridError, "Calling BVP_SetBVPDesc failed!");
 
-  if (STD_BVP_Configure(BVPName,ugDomain))
+  if (STD_BVP_Configure(BVPName,std::move(ugDomain)))
     DUNE_THROW(GridError, "Calling STD_BVP_Configure failed!");
 
   // Make sure there is no old multigrid object with the same name.
