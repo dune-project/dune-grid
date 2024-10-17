@@ -413,14 +413,11 @@ createGrid()
   typename UG_NS<dimworld>::BVP* theBVP = UG_NS<dimworld>::BVP_GetByName(BVPName.c_str());
   assert(theBVP);
 
-  std::string configureArgs[2] = {"configure " + BVPName, "d " + grid_->name_ + "_Domain"};
-  const char* configureArgs_c[2] = {configureArgs[0].c_str(), configureArgs[1].c_str()};
-
   typename UG_NS<dimworld>::BVP_DESC theBVPDesc;
   if (BVP_SetBVPDesc(theBVP,&theBVPDesc) != 0)
     DUNE_THROW(GridError, "Calling BVP_SetBVPDesc failed!");
 
-  if (STD_BVP_Configure(2,const_cast<char**>(configureArgs_c),ugDomain))
+  if (STD_BVP_Configure(BVPName,ugDomain))
     DUNE_THROW(GridError, "Calling STD_BVP_Configure failed!");
 
   // Make sure there is no old multigrid object with the same name.
