@@ -122,7 +122,7 @@ UGGridLevelIntersection<GridImp>::geometryInInside () const
 
     }
 
-    geometryInInside_ = std::make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
+    geometryInInside_ = std::make_optional<LocalGeometryImpl>(intersectionGeometryType, std::move(coordinates));
 
   }
 
@@ -151,7 +151,7 @@ UGGridLevelIntersection<GridImp>::geometry () const
 
     }
 
-    geometry_ = std::make_shared<GeometryImpl>(intersectionGeometryType, coordinates);
+    geometry_ = std::make_optional<GeometryImpl>(intersectionGeometryType, std::move(coordinates));
 
   }
 
@@ -198,7 +198,7 @@ UGGridLevelIntersection<GridImp>::geometryInOutside () const
 
     }
 
-    geometryInOutside_ = std::make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
+    geometryInOutside_ = std::make_optional<LocalGeometryImpl>(intersectionGeometryType, std::move(coordinates));
 
   }
 
@@ -277,7 +277,7 @@ UGGridLeafIntersection< GridImp >::geometryInInside () const
 
       }
 
-      geometryInInside_ = std::make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
+      geometryInInside_ = std::make_optional<LocalGeometryImpl>(intersectionGeometryType, std::move(coordinates));
 
     } else {
 
@@ -306,7 +306,7 @@ UGGridLeafIntersection< GridImp >::geometryInInside () const
 
       }
 
-      geometryInInside_ = std::make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
+      geometryInInside_ = std::make_optional<LocalGeometryImpl>(intersectionGeometryType, std::move(coordinates));
     }
 
   }
@@ -346,7 +346,7 @@ UGGridLeafIntersection< GridImp >::geometry () const
 
       }
 
-      geometry_ = std::make_shared<GeometryImpl>(intersectionGeometryType, coordinates);
+      geometry_ = std::make_optional<GeometryImpl>(intersectionGeometryType, std::move(coordinates));
 
     } else {
 
@@ -370,7 +370,7 @@ UGGridLeafIntersection< GridImp >::geometry () const
 
       }
 
-      geometry_ = std::make_shared<GeometryImpl>(intersectionGeometryType, coordinates);
+      geometry_ = std::make_optional<GeometryImpl>(intersectionGeometryType, std::move(coordinates));
 
     }
 
@@ -423,7 +423,7 @@ UGGridLeafIntersection< GridImp >::geometryInOutside () const
 
       }
 
-      geometryInOutside_ = std::make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
+      geometryInOutside_ = std::make_optional<LocalGeometryImpl>(intersectionGeometryType, std::move(coordinates));
 
     } else {
 
@@ -441,7 +441,7 @@ UGGridLeafIntersection< GridImp >::geometryInOutside () const
 
       }
 
-      geometryInOutside_ = std::make_shared<LocalGeometryImpl>(intersectionGeometryType, coordinates);
+      geometryInOutside_ = std::make_optional<LocalGeometryImpl>(intersectionGeometryType, std::move(coordinates));
 
     }
 

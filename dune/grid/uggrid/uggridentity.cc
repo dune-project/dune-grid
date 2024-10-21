@@ -386,7 +386,7 @@ UGGridEntity < 0, dim, GridImp>::geometryInFather () const
 
   }
 
-  return LocalGeometry(LocalGeometryImpl(type(), cornerCoordinates));
+  return LocalGeometry(LocalGeometryImpl(type(), std::move(cornerCoordinates)));
 }
 
 template class UGGridEntity<2,2, const UGGrid<2> >;

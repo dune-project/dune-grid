@@ -5,7 +5,7 @@
 #ifndef DUNE_UGGRID_INTERSECTIONS_HH
 #define DUNE_UGGRID_INTERSECTIONS_HH
 
-#include <memory>
+#include <optional>
 
 #include <dune/grid/uggrid.hh>
 #include <dune/grid/uggrid/uggridentity.hh>
@@ -176,9 +176,9 @@ namespace Dune {
     mutable WorldVector unitOuterNormal_;
 
     //! pointers holding the global and local geometries
-    mutable std::shared_ptr<GeometryImpl>      geometry_;
-    mutable std::shared_ptr<LocalGeometryImpl> geometryInInside_;
-    mutable std::shared_ptr<LocalGeometryImpl> geometryInOutside_;
+    mutable std::optional<GeometryImpl>      geometry_;
+    mutable std::optional<LocalGeometryImpl> geometryInInside_;
+    mutable std::optional<LocalGeometryImpl> geometryInOutside_;
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;
@@ -426,9 +426,9 @@ namespace Dune {
     mutable WorldVector unitOuterNormal_;
 
     //! pointer to global and local intersection geometries
-    mutable std::shared_ptr<GeometryImpl>      geometry_;
-    mutable std::shared_ptr<LocalGeometryImpl> geometryInInside_;
-    mutable std::shared_ptr<LocalGeometryImpl> geometryInOutside_;
+    mutable std::optional<GeometryImpl>      geometry_;
+    mutable std::optional<LocalGeometryImpl> geometryInInside_;
+    mutable std::optional<LocalGeometryImpl> geometryInOutside_;
 
     //! The UG element the iterator was created from
     typename UG_NS<dim>::Element *center_;

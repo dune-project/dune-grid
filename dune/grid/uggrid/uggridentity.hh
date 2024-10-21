@@ -9,7 +9,7 @@
  * \brief The UGGridEntity class and its specializations
  */
 
-#include <memory>
+#include <optional>
 
 #include <dune/geometry/referenceelements.hh>
 
@@ -84,15 +84,10 @@ namespace Dune {
     {}
 
     /** \brief Copy constructor */
-    UGGridEntity(const UGGridEntity& other)
-      : target_(other.target_)
-      , gridImp_(other.gridImp_)
-    {
-      if constexpr (codim==dim)
-        geo_ = other.geo_;
-      else
-        geo_ = std::make_unique<GeometryImpl>(*other.geo_);
-    }
+    UGGridEntity(const UGGridEntity& other) = default;
+
+    /** \brief Move constructor */
+    UGGridEntity(UGGridEntity&& other) = default;
 
     UGGridEntity(typename UG_NS<dim>::template Entity<codim>::T* target, const GridImp* gridImp)
     {
@@ -254,16 +249,7 @@ namespace Dune {
     }
 
     //! Copy assignment operator from an existing entity.
-    UGGridEntity& operator=(const UGGridEntity& other)
-    {
-      target_ = other.target_;
-      gridImp_ = other.gridImp_;
-      if constexpr (codim==dim)
-        geo_ = other.geo_;
-      else
-        geo_ = std::make_unique<GeometryImpl>(*other.geo_);
-      return *this;
-    }
+    UGGridEntity& operator=(const UGGridEntity& other) = default;
 
     //! Move assignment operator from an existing entity.
     UGGridEntity& operator=(UGGridEntity&& other) = default;
@@ -286,7 +272,7 @@ namespace Dune {
           for (size_t j=0; j < dim; j++)
             geometryCoords[i][j] = cornerCoords[i][j];
 
-        geo_ = std::make_unique<GeometryImpl>(type(), geometryCoords);
+        geo_ = std::make_optional<GeometryImpl>(type(), std::move(geometryCoords));
       }
       else if constexpr ((dim-codim)==2)   // Facet entity
       {
@@ -301,7 +287,7 @@ namespace Dune {
           for (size_t j = 0; j < dim; j++)
             geometryCoords[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, type())][j] = cornerCoords[i][j];
 
-        geo_ = std::make_unique<GeometryImpl>(type(), geometryCoords);
+        geo_ = std::make_optional<GeometryImpl>(type(), std::move(geometryCoords));
       }
       else
         geo_.setToTarget(target);
@@ -309,8 +295,7 @@ namespace Dune {
 
     // The geometric realization of the entity.  It is a native UG type for vertices,
     // and a dune-geometry MultiLinearGeometry for edges and facets.
-    // TODO: Maybe use MultiLinearGeometry for all these cases!
-    std::conditional_t<(dim-codim)==0, GeometryImpl, std::unique_ptr<GeometryImpl> > geo_;
+    std::conditional_t<(dim-codim)==0, GeometryImpl, std::optional<GeometryImpl> > geo_;
 
     /** \brief The UG object that represents this entity
      * - 0d entities: node
