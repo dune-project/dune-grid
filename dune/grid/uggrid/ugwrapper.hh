@@ -926,8 +926,8 @@ namespace Dune {
      * \return The return type is int because the macro INVERSE_TRANSFORMATION
      *  returns 1 on failure.
      */
-    static int Transformation(int n, double** x,
-                              const FieldVector<double, UG_DIM>& local, FieldMatrix<double,UG_DIM,UG_DIM>& mat) {
+    static int JacobianInverseTransformation(int n, double** x,
+                                             const FieldVector<double, UG_DIM>& local, FieldMatrix<double,UG_DIM,UG_DIM>& mat) {
       using UG_NAMESPACE ::DOUBLE_VECTOR;
       using UG::DOUBLE;
       double det;
@@ -939,8 +939,8 @@ namespace Dune {
     }
 
     /** \brief Dummy method for vertices */
-    static int Transformation(int n, double** x,
-                              const FieldVector<double, 0>& local, FieldMatrix<double,UG_DIM,0>& mat) {
+    static int JacobianInverseTransformation(int n, double** x,
+                                             const FieldVector<double, 0>& local, FieldMatrix<double,UG_DIM,0>& mat) {
       return 0;
     }
 

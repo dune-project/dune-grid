@@ -26,6 +26,10 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 
 - `MultipleCodimMultipleGeomTypeMapper` is assignable.
 
+- The method `UGGridGeometry::integrationElement` has been simplified, and is faster now.
+
+- The method `UGGridGeometry::affine` has been reimplemented, and is much faster now.
+
 ## Python
 
 - Improve pickling support (GridViews and some GridFunction objects can now be pickled).
