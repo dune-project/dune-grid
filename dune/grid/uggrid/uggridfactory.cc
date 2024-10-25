@@ -413,10 +413,6 @@ createGrid()
   typename UG_NS<dimworld>::BVP* theBVP = UG_NS<dimworld>::BVP_GetByName(BVPName.c_str());
   assert(theBVP);
 
-  typename UG_NS<dimworld>::BVP_DESC theBVPDesc;
-  if (BVP_SetBVPDesc(theBVP,&theBVPDesc) != 0)
-    DUNE_THROW(GridError, "Calling BVP_SetBVPDesc failed!");
-
   if (STD_BVP_Configure(BVPName,std::move(ugDomain)))
     DUNE_THROW(GridError, "Calling STD_BVP_Configure failed!");
 

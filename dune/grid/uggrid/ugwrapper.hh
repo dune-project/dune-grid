@@ -54,10 +54,6 @@ namespace Dune {
 
     typedef UG_NAMESPACE ::RefinementRule RefinementRule;
 
-    typedef UG_NAMESPACE ::CoeffProcPtr CoeffProcPtr;
-
-    typedef UG_NAMESPACE ::UserProcPtr UserProcPtr;
-
     typedef UG_NAMESPACE ::BndSegFuncPtr BndSegFuncPtr;
 
     /** \brief This is actually a type of the UG algebra, not the grid.
@@ -82,8 +78,6 @@ namespace Dune {
     typedef UG_NAMESPACE ::domain domain;
 
     typedef UG_NAMESPACE ::BVP BVP;
-
-    typedef UG_NAMESPACE ::BVP_DESC BVP_DESC;
 
     /** \brief Point on a UG boundary patch */
     typedef UG_NAMESPACE ::BNDP BNDP;
@@ -1064,13 +1058,8 @@ namespace Dune {
     }
 
     //! \todo Please doc me!
-    static void* CreateBoundaryValueProblem(const char* BVPname,
-                                            int numOfCoeffFunc,
-                                            UG_NAMESPACE ::CoeffProcPtr coeffs[],
-                                            int numOfUserFct,
-                                            UG_NAMESPACE ::UserProcPtr userfct[]) {
-      return UG_NAMESPACE ::CreateBoundaryValueProblem(BVPname, 0, numOfCoeffFunc, coeffs,
-                                                       numOfUserFct, userfct);
+    static void* CreateBoundaryValueProblem(const char* BVPname) {
+      return UG_NAMESPACE ::CreateBoundaryValueProblem(BVPname);
     }
 
     //! Set the current boundary value problem

@@ -85,10 +85,6 @@ UGGrid < dim >::UGGrid(UGCommunication comm)
     free(arg);
   }
 
-  // Create a dummy problem
-  typename UG_NS<dim>::CoeffProcPtr coeffs[1] = {nullptr};
-  typename UG_NS<dim>::UserProcPtr upp[1] = {nullptr};
-
   // Create unique problem name
   std::stringstream numberAsAscii;
   numberAsAscii << numOfUGGrids;
@@ -96,7 +92,7 @@ UGGrid < dim >::UGGrid(UGCommunication comm)
 
   std::string problemName = name_ + "_Problem";
 
-  if (UG_NS<dim>::CreateBoundaryValueProblem(problemName.c_str(), 1,coeffs,1,upp) == nullptr)
+  if (UG_NS<dim>::CreateBoundaryValueProblem(problemName.c_str()) == nullptr)
     DUNE_THROW(GridError, "UG" << dim << "d::CreateBoundaryValueProblem() returned an error code!");
 
   numOfUGGrids++;
