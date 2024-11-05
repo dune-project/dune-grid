@@ -30,7 +30,7 @@ namespace Dune
       typedef typename GridView::template Codim< 0 >::Entity Element;
 
       typedef typename Element::Geometry::LocalCoordinate LocalCoordinate;
-      typedef std::decay_t< std::result_of_t< LocalEvaluator( Element, LocalCoordinate ) > > Value;
+      typedef std::decay_t< std::invoke_result_t< LocalEvaluator, Element, LocalCoordinate > > Value;
 
       explicit SimpleLocalFunction ( LocalEvaluator localEvaluator ) : localEvaluator_( std::move( localEvaluator ) ) {}
       ~SimpleLocalFunction() { unbind(); }
@@ -147,7 +147,7 @@ namespace Dune
     // ------------------
 
     template< class GV, class LE,
-              class = std::result_of_t< std::decay_t< LE >( typename GV::template Codim< 0 >::Entity, typename GV::template Codim< 0 >::Geometry::LocalCoordinate ) > >
+              class = std::invoke_result_t< std::decay_t< LE >, typename GV::template Codim< 0 >::Entity, typename GV::template Codim< 0 >::Geometry::LocalCoordinate > >
     inline static auto simpleGridFunction ( const GV &gridView, LE &&localEvaluator, PriorityTag< 1 > )
       -> SimpleGridFunction< GV, std::decay_t< LE > >
     {
@@ -155,7 +155,7 @@ namespace Dune
     }
 
     template< class GV, class E,
-              class = std::result_of_t< std::decay_t< E >( typename GV::template Codim< 0 >::Geometry::GlobalCoordinate ) > >
+              class = std::invoke_result_t< std::decay_t< E >, typename GV::template Codim< 0 >::Geometry::GlobalCoordinate > >
     inline static auto simpleGridFunction ( const GV &gridView, E &&evaluator, PriorityTag< 0 > )
       -> SimpleGlobalGridFunction< GV, std::decay_t< E > >
     {
