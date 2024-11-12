@@ -100,9 +100,9 @@ namespace Dune {
 
       intersectionImp.subNeighborCount_++;
 
-      // are there no more intersections for the current element face?
-      if (intersectionImp.subNeighborCount_ >= intersectionImp.leafSubFaces_.size() ) {
+      using Face = typename UGGridLeafIntersection<GridImp>::Face;
 
+      auto onLastFace = [&intersectionImp]{
         // move to the next face
         intersectionImp.neighborCount_++;
         intersectionImp.subNeighborCount_ = 0;
@@ -110,8 +110,17 @@ namespace Dune {
         // if the next face is not the end iterator construct all intersections for it
         if (intersectionImp.neighborCount_ < UG_NS<dim>::Sides_Of_Elem(intersectionImp.center_))
           intersectionImp.constructLeafSubfaces();
+      };
 
-      }
+      // are there no more intersections for the current element face?
+      std::visit(orderedOverload(
+        [&](std::monostate){onLastFace();},
+        [&](Face face){onLastFace();},
+        [&](const std::vector<Face>& faces){
+          if (intersectionImp.subNeighborCount_ >= faces.size() )
+            onLastFace();
+        }
+      ), intersectionImp.leafSubFaces_);
 
       // make sure geometries are not taken from the cache the next time
       // the geometry{|InInside|InOutside} methods are called.

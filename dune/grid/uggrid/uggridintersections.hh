@@ -6,6 +6,9 @@
 #define DUNE_UGGRID_INTERSECTIONS_HH
 
 #include <optional>
+#include <variant>
+
+#include <dune/common/overloadset.hh>
 
 #include <dune/grid/uggrid.hh>
 #include <dune/grid/uggrid/uggridentity.hh>
@@ -255,13 +258,13 @@ namespace Dune {
     //! (that is the neighboring Entity)
     Entity outside() const {
 
-      const typename UG_NS<dim>::Element* otherelem = leafSubFaces_[subNeighborCount_].first;
+      std::optional<Face> otherelem = getCurrentFace();
 
-      if (otherelem==0)
+      if (!otherelem)
         DUNE_THROW(GridError,"no neighbor found in outside()");
 
       /** \todo Remove the const_cast */
-      return Entity(UGGridEntity<0,dim,GridImp>(const_cast<typename UG_NS<dim>::Element*>(otherelem),gridImp_));
+      return Entity(UGGridEntity<0,dim,GridImp>(const_cast<typename UG_NS<dim>::Element*>(otherelem->first),gridImp_));
     }
 
     //! return true if intersection is with boundary.
@@ -271,7 +274,7 @@ namespace Dune {
 
     //! return true if a neighbor element exists across this intersection
     bool neighbor () const {
-      return leafSubFaces_[subNeighborCount_].first != nullptr;
+      return getCurrentFace().has_value();
     }
 
     /** \brief Return index of corresponding coarse grid boundary segment */
@@ -287,19 +290,21 @@ namespace Dune {
     /** \brief Is this intersection conforming? */
     bool conforming() const {
 
-      const typename UG_NS<dim>::Element* outside = leafSubFaces_[subNeighborCount_].first;
+      std::optional<Face> otherFace = getCurrentFace();
 
-      if (outside == nullptr         // boundary intersection
+      if (!otherFace        // boundary intersection
           // inside and outside are on the same level
-          || UG_NS<dim>::myLevel(outside) == UG_NS<dim>::myLevel(center_)
+          || UG_NS<dim>::myLevel(otherFace->first) == UG_NS<dim>::myLevel(center_)
           // outside is on a higher level, but there is only one intersection
-          || (UG_NS<dim>::myLevel(outside) > UG_NS<dim>::myLevel(center_)
-              && leafSubFaces_.size()==1))
+          || (UG_NS<dim>::myLevel(otherFace->first) > UG_NS<dim>::myLevel(center_)
+              && std::holds_alternative<Face>(leafSubFaces_)))
         return true;
+
+      const typename UG_NS<dim>::Element* outside = otherFace->first;
 
       // outside is on a lower level.  we have to check whether vertices match
       int numInsideIntersectionVertices  = UG_NS<dim>::Corners_Of_Side(center_, neighborCount_);
-      int numOutsideIntersectionVertices = UG_NS<dim>::Corners_Of_Side(outside, leafSubFaces_[subNeighborCount_].second);
+      int numOutsideIntersectionVertices = UG_NS<dim>::Corners_Of_Side(outside, otherFace->second);
       if (numInsideIntersectionVertices != numOutsideIntersectionVertices)
         return false;
 
@@ -313,7 +318,7 @@ namespace Dune {
         for (int j=0; j<numOutsideIntersectionVertices; j++) {
 
           // get vertex
-          const typename UG_NS<dim>::Vertex* outsideVertex = UG_NS<dim>::Corner(outside, UG_NS<dim>::Corner_Of_Side(outside, leafSubFaces_[subNeighborCount_].second, j))->myvertex;
+          const typename UG_NS<dim>::Vertex* outsideVertex = UG_NS<dim>::Corner(outside, UG_NS<dim>::Corner_Of_Side(outside, otherFace->second, j))->myvertex;
 
           // Stop if we have found corresponding vertices
           if (insideVertex==outsideVertex) {
@@ -414,6 +419,15 @@ namespace Dune {
       return -1;
     }
 
+    /** \brief Obtain current face */
+    std::optional<Face> getCurrentFace() const {
+      return std::visit(orderedOverload(
+        [&](std::monostate) -> std::optional<Face> { return std::nullopt;},
+        [&](Face face) -> std::optional<Face> { return face;},
+        [&](const std::vector<Face>& faces) -> std::optional<Face> { return faces[subNeighborCount_];}
+      ), leafSubFaces_);
+    }
+
     /** \brief Find the topological father face of a given fact*/
     int getFatherSide(const Face& currentFace) const;
 
@@ -436,8 +450,8 @@ namespace Dune {
     //! count on which neighbor we are lookin' at. Note that this is interpreted in UG's ordering!
     int neighborCount_;
 
-    /** \brief List of precomputed intersections */
-    std::vector<Face> leafSubFaces_;
+    /** \brief List of precomputed intersections and optimize for common case: when one or no faces exist */
+    std::variant<std::monostate,Face,std::vector<Face>> leafSubFaces_;
 
     /** \brief Current position in the leafSubFaces_ array */
     unsigned int subNeighborCount_;
