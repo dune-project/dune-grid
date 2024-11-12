@@ -228,7 +228,7 @@ UGGridEntity < 0, dim, GridImp>::geometryInFather () const
   UG_NS<dim>::GetNodeContext(fatherElement, context);
 
   // loop through all corner nodes
-  std::vector<FieldVector<typename GridImp::ctype,dim> > cornerCoordinates(UG_NS<dim>::Corners_Of_Elem(target_));
+  auto cornerCoordinates = LocalGeometryImpl::makeCornerStorage(UG_NS<dim>::Corners_Of_Elem(target_));
 
   for (int i=0; i<UG_NS<dim>::Corners_Of_Elem(target_); i++) {
 

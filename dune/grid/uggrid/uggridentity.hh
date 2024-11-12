@@ -267,7 +267,7 @@ namespace Dune {
         UG_NS<dim>::Corner_Coordinates(target_, cornerCoords);
 
         // convert to the type required by MultiLinearGeometry
-        std::vector<FieldVector<UGCtype, dim> > geometryCoords(2);
+        std::array<FieldVector<UGCtype, dim>, 2> geometryCoords;
         for (size_t i=0; i < 2; i++)
           for (size_t j=0; j < dim; j++)
             geometryCoords[i][j] = cornerCoords[i][j];
@@ -282,7 +282,7 @@ namespace Dune {
 
         // convert to the type required by MultiLinearGeometry
         size_t numCorners = type().isTriangle() ? 3 : 4;
-        std::vector<FieldVector<UGCtype, dim> > geometryCoords(numCorners);
+        ReservedVector<FieldVector<UGCtype, dim>, 4> geometryCoords(numCorners);
         for(size_t i = 0; i < numCorners; i++)
           for (size_t j = 0; j < dim; j++)
             geometryCoords[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, type())][j] = cornerCoords[i][j];
