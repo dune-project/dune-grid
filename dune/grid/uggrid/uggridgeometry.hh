@@ -13,6 +13,7 @@
 #include <vector>
 
 #include <dune/common/fmatrix.hh>
+#include <dune/common/reservedvector.hh>
 
 #include <dune/geometry/multilineargeometry.hh>
 
@@ -141,7 +142,24 @@ namespace Dune {
     mutable std::optional<FieldMatrix<UGCtype,coorddim,mydim> > cachedJacobianInverseTransposed_;
   };
 
+  //! custom geometry traits with storage on the stack for the corners of cubes and simplicies
+  template <class ct>
+  struct UGGridGeometryTraits : MultiLinearGeometryTraits<ct>
+  {
+    template <int mydim, int cdim>
+    class CornerStorage
+    {
+      // we only have simplices and cubes
+      static constexpr std::size_t simplexCorners = mydim + 1;
+      static constexpr std::size_t cubeCorners = (1 << mydim); // mydim^2
+      using Coordinate = FieldVector<ct, cdim>;
 
+    public:
+      using Type = std::conditional_t<(mydim < 2),
+                                      std::array<Coordinate, simplexCorners>,   // storage when simplex(dim) == cube(dim)
+                                      ReservedVector<Coordinate, cubeCorners>>; // storage when simplex(dim) != cube(dim)
+    };
+  };
 
   /****************************************************************/
   /*                                                              */
@@ -151,15 +169,16 @@ namespace Dune {
 
   template<class GridImp>
   class UGGridGeometry<2, 3, GridImp> :
-    public MultiLinearGeometry<typename GridImp::ctype, 2, 3>
+    public MultiLinearGeometry<typename GridImp::ctype, 2, 3, UGGridGeometryTraits<typename GridImp::ctype>>
   {
   public:
+    // inherit constructor from MultiLinearGeometry
+    using MultiLinearGeometry<typename GridImp::ctype, 2, 3, UGGridGeometryTraits<typename GridImp::ctype>>::MultiLinearGeometry;
 
-    /** \brief Constructor from a given geometry type and a vector of corner coordinates */
-    UGGridGeometry(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,3> >& coordinates)
-      : MultiLinearGeometry<typename GridImp::ctype, 2, 3>(type, coordinates)
-    {}
-
+    // factory of uninitialized corner storage used to construct this geometry
+    static auto makeCornerStorage(std::size_t count) {
+      return ReservedVector<FieldVector<typename GridImp::ctype,3>, 4>(count);
+    }
   };
 
 
@@ -171,15 +190,16 @@ namespace Dune {
 
   template<class GridImp>
   class UGGridGeometry<1, 3, GridImp> :
-    public MultiLinearGeometry<typename GridImp::ctype, 1, 3>
+    public MultiLinearGeometry<typename GridImp::ctype, 1, 3, UGGridGeometryTraits<typename GridImp::ctype>>
   {
   public:
+    // inherit constructor from MultiLinearGeometry
+    using MultiLinearGeometry<typename GridImp::ctype, 1, 3, UGGridGeometryTraits<typename GridImp::ctype>>::MultiLinearGeometry;
 
-    /** \brief Constructor from a given geometry type and a vector of corner coordinates */
-    UGGridGeometry(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,3> >& coordinates)
-      : MultiLinearGeometry<typename GridImp::ctype, 1, 3>(type, coordinates)
-    {}
-
+    // factory of uninitialized corner storage used to construct this geometry
+    static auto makeCornerStorage(std::size_t) {
+      return std::array<FieldVector<typename GridImp::ctype, 3>, 2>();
+    }
   };
 
 
@@ -191,15 +211,16 @@ namespace Dune {
 
   template<class GridImp>
   class UGGridGeometry <1, 2, GridImp> :
-    public MultiLinearGeometry<typename GridImp::ctype,1,2>
+    public MultiLinearGeometry<typename GridImp::ctype,1,2, UGGridGeometryTraits<typename GridImp::ctype>>
   {
   public:
+    // inherit constructor from MultiLinearGeometry
+    using MultiLinearGeometry<typename GridImp::ctype,1,2, UGGridGeometryTraits<typename GridImp::ctype>>::MultiLinearGeometry;
 
-    /** \brief Constructor from a given geometry type and a vector of corner coordinates */
-    UGGridGeometry(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,2> >& coordinates)
-      : MultiLinearGeometry<typename GridImp::ctype, 1, 2>(type, coordinates)
-    {}
-
+    // factory of uninitialized corner storage used to construct this geometry
+    static auto makeCornerStorage(std::size_t) {
+      return std::array<FieldVector<typename GridImp::ctype, 2>, 2>();
+    }
   };
 
 }  // namespace Dune

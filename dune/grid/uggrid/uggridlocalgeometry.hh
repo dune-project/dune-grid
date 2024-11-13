@@ -11,6 +11,8 @@
 
 #include <dune/geometry/multilineargeometry.hh>
 
+#include <dune/grid/uggrid/uggridgeometry.hh>
+
 namespace Dune {
 
 
@@ -26,15 +28,19 @@ namespace Dune {
    */
   template<int mydim, int coorddim, class GridImp>
   class UGGridLocalGeometry :
-    public MultiLinearGeometry<typename GridImp::ctype, mydim, coorddim>
+    public MultiLinearGeometry<typename GridImp::ctype, mydim, coorddim, UGGridGeometryTraits<typename GridImp::ctype>>
   {
   public:
+    // inherit constructor from MultiLinearGeometry
+    using MultiLinearGeometry<typename GridImp::ctype, mydim, coorddim, UGGridGeometryTraits<typename GridImp::ctype>>::MultiLinearGeometry;
 
-    /** \brief Constructor from a given geometry type and a vector of corner coordinates */
-    UGGridLocalGeometry(const GeometryType& type, const std::vector<FieldVector<typename GridImp::ctype,coorddim> >& coordinates)
-      : MultiLinearGeometry<typename GridImp::ctype, mydim, coorddim>(type, coordinates)
-    {}
-
+    // factory of uninitialized corner storage used to construct this geometry
+    static auto makeCornerStorage(std::size_t count) {
+      if constexpr (mydim < 2) // storage when simplex(dim) == cube(dim)
+        return std::array<FieldVector<typename GridImp::ctype, coorddim>, (1 << mydim)>{};
+      else // storage when simplex(dim) != cube(dim)
+        return ReservedVector<FieldVector<typename GridImp::ctype, coorddim>, (1 << mydim)>(count);
+    }
   };
 
 }  // namespace Dune
