@@ -118,7 +118,7 @@ UGGrid < dim >::~UGGrid() noexcept(false)
   // DisposeMultiGrid cleans up the BVP as well.  But if there was no
   // multigrid we have to take care of the BVP ourselves.
   std::string problemName = name_ + "_Problem";
-  void** BVP = UG_NS<dim>::BVP_GetByName(problemName.c_str());
+  auto** BVP = UG_NS<dim>::BVP_GetByName(problemName.c_str());
 
   if (BVP)
     if (UG_NS<dim>::BVP_Dispose(BVP))
