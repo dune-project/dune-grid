@@ -410,9 +410,6 @@ createGrid()
   std::string BVPName = MultiGridName + "_Problem";
   std::string FormatName = "DuneFormat" + std::to_string(dimworld) + "d";
 
-  typename UG_NS<dimworld>::BVP* theBVP = UG_NS<dimworld>::BVP_GetByName(BVPName.c_str());
-  assert(theBVP);
-
   if (STD_BVP_Configure(BVPName,std::move(ugDomain)))
     DUNE_THROW(GridError, "Calling STD_BVP_Configure failed!");
 

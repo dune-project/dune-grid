@@ -92,7 +92,9 @@ UGGrid < dim >::UGGrid(UGCommunication comm)
 
   std::string problemName = name_ + "_Problem";
 
-  if (UG_NS<dim>::CreateBoundaryValueProblem(problemName.c_str()) == nullptr)
+  bvp_ = UG_NS<dim>::CreateBoundaryValueProblem(problemName.c_str());
+
+  if (bvp_ == nullptr)
     DUNE_THROW(GridError, "UG" << dim << "d::CreateBoundaryValueProblem() returned an error code!");
 
   numOfUGGrids++;
@@ -106,6 +108,7 @@ template < int dim >
 UGGrid < dim >::~UGGrid() noexcept(false)
 {
   // Delete the UG multigrid if there is one (== createEnd() has been called)
+  // DisposeMultiGrid cleans up the BVP as well.
   if (multigrid_) {
     // Set UG's currBVP variable to the BVP corresponding to this
     // grid.  This is necessary if we have more than one UGGrid in use.
@@ -114,17 +117,6 @@ UGGrid < dim >::~UGGrid() noexcept(false)
     if (UG_NS<dim>::DisposeMultiGrid(multigrid_) != 0)
       DUNE_THROW(GridError, "UG" << dim << "d::DisposeMultiGrid returned error code!");
   }
-
-  // DisposeMultiGrid cleans up the BVP as well.  But if there was no
-  // multigrid we have to take care of the BVP ourselves.
-  std::string problemName = name_ + "_Problem";
-  auto** BVP = UG_NS<dim>::BVP_GetByName(problemName.c_str());
-
-  if (BVP)
-    if (UG_NS<dim>::BVP_Dispose(BVP))
-      DUNE_THROW(GridError, "Couldn't dispose of UG boundary value problem!");
-
-
 
   numOfUGGrids--;
 

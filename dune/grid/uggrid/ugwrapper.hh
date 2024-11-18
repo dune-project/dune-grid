@@ -1058,23 +1058,14 @@ namespace Dune {
     }
 
     //! \todo Please doc me!
-    static void* CreateBoundaryValueProblem(const char* BVPname) {
-      return UG_NAMESPACE ::CreateBoundaryValueProblem(BVPname);
+    static BVP CreateBoundaryValueProblem(const char* BVPname) {
+      // TODO: Remove the cast!
+      return (BVP) UG_NAMESPACE ::CreateBoundaryValueProblem(BVPname);
     }
 
     //! Set the current boundary value problem
     static void Set_Current_BVP(UG_NAMESPACE ::STD_BVP** thisBVP) {
       UG_NAMESPACE ::Set_Current_BVP(thisBVP);
-    }
-
-    //! Get UG boundary value problem from its name
-    static UG_NAMESPACE ::STD_BVP** BVP_GetByName(const char* name) {
-      return UG_NAMESPACE ::BVP_GetByName(name);
-    }
-
-    //! Dispose of a boundary value problem
-    static int BVP_Dispose(UG_NAMESPACE ::STD_BVP** BVP) {
-      return UG_NAMESPACE ::BVP_Dispose(BVP);
     }
 
     /** \brief Create new point on the grid boundary by giving local coordinates.
