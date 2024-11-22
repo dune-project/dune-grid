@@ -410,8 +410,7 @@ createGrid()
   std::string BVPName = MultiGridName + "_Problem";
   std::string FormatName = "DuneFormat" + std::to_string(dimworld) + "d";
 
-  if (STD_BVP_Configure(BVPName,std::move(ugDomain)))
-    DUNE_THROW(GridError, "Calling STD_BVP_Configure failed!");
+  grid_->bvp_->Domain = std::move(ugDomain);
 
   // Make sure there is no old multigrid object with the same name.
   // TODO: Can this happen at all?
