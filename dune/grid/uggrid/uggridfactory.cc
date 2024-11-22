@@ -407,7 +407,6 @@ createGrid()
   /////////////////////////////////////////////////
 
   std::string MultiGridName = grid_->name_;
-  std::string BVPName = MultiGridName + "_Problem";
   std::string FormatName = "DuneFormat" + std::to_string(dimworld) + "d";
 
   grid_->bvp_->Domain = std::move(ugDomain);
@@ -423,7 +422,7 @@ createGrid()
 #if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
   ppifContext = std::make_shared<PPIF::PPIFContext>(grid_->comm());
 #endif
-  grid_->multigrid_ = UG_NS<dimworld>::CreateMultiGrid(MultiGridName.c_str(),BVPName.c_str(),FormatName.c_str(),true,true, ppifContext);
+  grid_->multigrid_ = UG_NS<dimworld>::CreateMultiGrid(MultiGridName.c_str(),grid_->bvp_,FormatName.c_str(),true,true, ppifContext);
   if (grid_->multigrid_==nullptr)
     DUNE_THROW(GridError, "Could not create multigrid");
 

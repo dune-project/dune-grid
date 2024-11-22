@@ -638,7 +638,6 @@ template <int dim>
 void UGGrid<dim>::loadState(const std::string& filename)
 {
   const char* type = "asc";
-  std::string problemName = name_ + "_Problem";
   std::string formatName = "DuneFormat2d";
 
   if (dim==2) {
@@ -647,7 +646,7 @@ void UGGrid<dim>::loadState(const std::string& filename)
       name_.c_str(),
       filename.c_str(),
       type,
-      problemName.c_str(),
+      nullptr,  // dummy BVP point -- this will crash!
       formatName.c_str(),
       0,    // dummy heap size
       true, //force,
@@ -663,7 +662,7 @@ void UGGrid<dim>::loadState(const std::string& filename)
       name_.c_str(),
       filename.c_str(),
       type,
-      problemName.c_str(),
+      nullptr,  // dummy BVP point -- this will crash!
       formatName.c_str(),
       0,    // dummy heap size
       true, //force,

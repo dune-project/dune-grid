@@ -1113,12 +1113,12 @@ namespace Dune {
 #endif
     }
 
-    static MultiGrid *CreateMultiGrid(const char *MultigridName, const char *BndValProblem,
+    static MultiGrid *CreateMultiGrid(const char *MultigridName, BVP theBVP,
                                       const char *format,
                                       int optimizedIE, int insertMesh,
                                       std::shared_ptr<PPIF::PPIFContext> ppifContext = nullptr) {
       return UG_NAMESPACE ::CreateMultiGrid(const_cast<char*>(MultigridName),
-                                            const_cast<char*>(BndValProblem), format,
+                                            theBVP, format,
                                             optimizedIE, insertMesh, ppifContext);
     }
 
