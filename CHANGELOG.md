@@ -5,7 +5,7 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 
 # Master (will become release 2.12)
 
-- ...
+- Implement missing sub-indices of sub-entities in the index set of `UGGrid`.
 
 # Release 2.11
 

@@ -610,6 +610,13 @@ namespace Dune {
       return CORNER_OF_SIDE(theElement, side, corner);
     }
 
+    //! Return local number of a given edge of a given element side
+    static unsigned char Edge_Of_Side(const UG_NS< UG_DIM >::Element* theElement, int side, int edge) {
+      using UG_NAMESPACE ::element_descriptors;
+      using UG::UINT;
+      return static_cast<unsigned char>EDGE_OF_SIDE(theElement, side, edge);
+    }
+
     //! Return local number of a given corner of a given element edge
     static int Corner_Of_Edge(const UG_NS< UG_DIM >::Element* theElement, int edge, int corner) {
       using UG_NAMESPACE ::element_descriptors;

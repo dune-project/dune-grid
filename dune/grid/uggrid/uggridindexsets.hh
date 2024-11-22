@@ -128,7 +128,20 @@ namespace Dune {
         // The entity is a face
         if constexpr (cc==1)
         {
-          DUNE_THROW(NotImplemented, "Subindices of an element face");
+          // get element of codimension 0
+          unsigned int side = std::numeric_limits<unsigned int>::max();
+          typename UG_NS<dim>::Element* element_ptr = nullptr;
+          UG_NS<dim>::GetElementAndSideFromSideVector(entity.impl().getTarget(), element_ptr, side);
+
+          // edge index
+          if (codim == 2)
+            return UG_NS<dim>::levelIndex(UG_NS<dim>::ElementEdge(element_ptr,
+                UG_NS<dim>::Edge_Of_Side(element_ptr, side, UGGridRenumberer<dim>::faceEdgeDUNEtoUG(entity.type(), side, i))));
+
+          // vertex index
+          if (codim == 3)
+            return UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(element_ptr,
+                UG_NS<dim>::Corner_Of_Side(element_ptr, side, UGGridRenumberer<dim>::faceVertexDUNEtoUG(entity.type(), side, i))));
         }
 
         // The entity is an edge
@@ -332,7 +345,20 @@ namespace Dune {
         // The entity is a face
         if constexpr (cc==1)
         {
-          DUNE_THROW(NotImplemented, "Subindices of an element face");
+          // get element of codimension 0
+          unsigned int side = std::numeric_limits<unsigned int>::max();
+          typename UG_NS<dim>::Element* element_ptr = nullptr;
+          UG_NS<dim>::GetElementAndSideFromSideVector(entity.impl().getTarget(), element_ptr, side);
+
+          // edge index
+          if (codim == 2)
+            return UG_NS<dim>::leafIndex(UG_NS<dim>::ElementEdge(element_ptr,
+                UG_NS<dim>::Edge_Of_Side(element_ptr, side, UGGridRenumberer<dim>::faceEdgeDUNEtoUG(entity.type(), side, i))));
+
+          // vertex index
+          if (codim == 3)
+            return UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(element_ptr,
+                UG_NS<dim>::Corner_Of_Side(element_ptr, side, UGGridRenumberer<dim>::faceVertexDUNEtoUG(entity.type(), side, i))));
         }
 
         // The entity is an edge
