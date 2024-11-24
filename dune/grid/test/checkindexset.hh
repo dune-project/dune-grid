@@ -93,6 +93,45 @@ namespace Dune
                  "wrong number of subEntities of codim " << codim);
     }
 
+    // check that sub-sub-entites indices
+    std::set<typename IndexSetType::IndexType> subIndices, subSubIndices;
+    if constexpr (codim == 0) {
+      Dune::Hybrid::forEach(std::make_index_sequence<GridType::dimension+1-codim>{}, [&](auto cc){
+        Dune::Hybrid::forEach(std::make_index_sequence<GridType::dimension+1-codim-cc>{}, [&](auto ccc){
+          if constexpr (Dune::Capabilities::hasEntity< GridType, codim + cc >::v) {
+            // collect all indices of every sub-entity on same codim as sub-sub-entity
+            for (const auto& sse : subEntities(en, Dune::Codim<codim + cc + ccc>{}))
+              subIndices.insert(lset.index( sse ));
+
+            // collect all indices of every sub-sub-entity of the sub-entity
+            for (const auto& sse : subEntities(en, Dune::Codim<codim + cc>{}))
+              for (unsigned int subSubIndex = 0; subSubIndex != sse.subEntities(codim + cc + ccc); ++subSubIndex)
+                subSubIndices.insert(lset.subIndex(sse, subSubIndex, codim + cc + ccc));
+
+            // check that sub-index are strictly contained in sub-sub-indices set
+            if(subIndices != subSubIndices or subIndices.size() != en.subEntities(codim + cc + ccc)) {
+              std::cerr << "entity index = " << lset.index(en)
+                        << ", type = " << en.type()
+                        << ", sub-index codim = " << codim+cc
+                        << ", sub-sub-index codim = " << codim+cc+ccc << std::endl
+                        << "sub-index = ";
+              for (auto i : subIndices)
+                std::cerr << i << " ";
+              std::cerr << std::endl << "sub-sub-index = ";
+              for (auto i : subSubIndices)
+                std::cerr << i << " ";
+              std::cerr << std::endl;
+              DUNE_THROW(GridError,
+                        "subIndices and subSubIndices of codim " << codim+cc << " do not match");
+            }
+
+            subIndices.clear();
+            subSubIndices.clear();
+          }
+        });
+      });
+    }
+
     for( int subEntity = 0; subEntity < refElem.size( 0, 0, codim ); ++subEntity )
     {
 
