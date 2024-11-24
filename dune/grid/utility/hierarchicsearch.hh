@@ -33,6 +33,7 @@ namespace Dune
   template<class Grid, class IS>
   class HierarchicSearch
   {
+  protected:
     //! get dimension from the grid
     constexpr static int dim = Grid::dimension;
 
@@ -171,7 +172,7 @@ namespace Dune
       DUNE_THROW( GridError, "Coordinate " << global << " is outside the grid." );
     }
 
-  private:
+  protected:
     const Grid& grid_;
     const IS&   indexSet_;
   };
