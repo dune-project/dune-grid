@@ -79,6 +79,8 @@ namespace Dune {
 
     typedef UG_NAMESPACE ::BVP BVP;
 
+    typedef UG_NAMESPACE ::STD_BVP STD_BVP;
+
     /** \brief Point on a UG boundary patch */
     typedef UG_NAMESPACE ::BNDP BNDP;
 
@@ -1055,12 +1057,6 @@ namespace Dune {
 
     static int DisposeMultiGrid(UG_NAMESPACE ::multigrid* mg) {
       return UG_NAMESPACE ::DisposeMultiGrid(mg);
-    }
-
-    //! \todo Please doc me!
-    static BVP CreateBoundaryValueProblem(const char* BVPname) {
-      // TODO: Remove the cast!
-      return (BVP) UG_NAMESPACE ::CreateBoundaryValueProblem(BVPname);
     }
 
     //! Set the current boundary value problem

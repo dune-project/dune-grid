@@ -92,10 +92,7 @@ UGGrid < dim >::UGGrid(UGCommunication comm)
 
   std::string problemName = name_ + "_Problem";
 
-  bvp_ = UG_NS<dim>::CreateBoundaryValueProblem(problemName.c_str());
-
-  if (bvp_ == nullptr)
-    DUNE_THROW(GridError, "UG" << dim << "d::CreateBoundaryValueProblem() returned an error code!");
+  bvp_ = new typename UG_NS<dim>::STD_BVP;
 
   numOfUGGrids++;
 
