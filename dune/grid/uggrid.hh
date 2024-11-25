@@ -43,13 +43,6 @@
    But we also need the headers twice!  Once with UG_DIM_2 set and once with UG_DIM_3!
    So here we go:*/
 
-/* The following define tells the UG headers that we want access to a few
-   special fields, for example the extra index fields in the element data structures.
-   This define remains only for backwards compatibility with older version of UG.
-   All dune-uggrid versions since 2016-08-05 do not need this #define or the #undef
-   further below. */
-#define FOR_DUNE
-
 // Set UG's space-dimension flag to 2d
 #define UG_DIM_2
 // And include all necessary UG headers
@@ -97,7 +90,6 @@
 #include "uggrid/ug_undefs.hh"
 
 #undef UG_DIM_3
-#undef FOR_DUNE
 
 // The components of the UGGrid interface
 #include "uggrid/uggridgeometry.hh"
@@ -663,6 +655,15 @@ namespace Dune {
   private:
     /** \brief UG multigrid, which contains the actual grid hierarchy structure */
     typename UG_NS<dim>::MultiGrid* multigrid_;
+
+    /** \brief The UG3 BoundaryValueProblem, a description of the domain boundary
+     *
+     * \todo The multigrid_ object also has pointer to this.  I don't like this
+     * redundancy, but I also don't quite know yet what to do about it.
+     *
+     * \note BVP is a pointer type!
+     */
+    typename UG_NS<dim>::BVP bvp_;
 
     /** \brief The communication object. */
     UGCommunication ccobj_;

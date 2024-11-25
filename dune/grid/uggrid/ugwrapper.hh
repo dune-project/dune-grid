@@ -54,10 +54,6 @@ namespace Dune {
 
     typedef UG_NAMESPACE ::RefinementRule RefinementRule;
 
-    typedef UG_NAMESPACE ::CoeffProcPtr CoeffProcPtr;
-
-    typedef UG_NAMESPACE ::UserProcPtr UserProcPtr;
-
     typedef UG_NAMESPACE ::BndSegFuncPtr BndSegFuncPtr;
 
     /** \brief This is actually a type of the UG algebra, not the grid.
@@ -83,7 +79,7 @@ namespace Dune {
 
     typedef UG_NAMESPACE ::BVP BVP;
 
-    typedef UG_NAMESPACE ::BVP_DESC BVP_DESC;
+    typedef UG_NAMESPACE ::STD_BVP STD_BVP;
 
     /** \brief Point on a UG boundary patch */
     typedef UG_NAMESPACE ::BNDP BNDP;
@@ -1063,29 +1059,9 @@ namespace Dune {
       return UG_NAMESPACE ::DisposeMultiGrid(mg);
     }
 
-    //! \todo Please doc me!
-    static void* CreateBoundaryValueProblem(const char* BVPname,
-                                            int numOfCoeffFunc,
-                                            UG_NAMESPACE ::CoeffProcPtr coeffs[],
-                                            int numOfUserFct,
-                                            UG_NAMESPACE ::UserProcPtr userfct[]) {
-      return UG_NAMESPACE ::CreateBoundaryValueProblem(BVPname, 0, numOfCoeffFunc, coeffs,
-                                                       numOfUserFct, userfct);
-    }
-
     //! Set the current boundary value problem
-    static void Set_Current_BVP(void** thisBVP) {
+    static void Set_Current_BVP(UG_NAMESPACE ::STD_BVP** thisBVP) {
       UG_NAMESPACE ::Set_Current_BVP(thisBVP);
-    }
-
-    //! Get UG boundary value problem from its name
-    static void** BVP_GetByName(const char* name) {
-      return UG_NAMESPACE ::BVP_GetByName(name);
-    }
-
-    //! Dispose of a boundary value problem
-    static int BVP_Dispose(void** BVP) {
-      return UG_NAMESPACE ::BVP_Dispose(BVP);
     }
 
     /** \brief Create new point on the grid boundary by giving local coordinates.
@@ -1133,12 +1109,12 @@ namespace Dune {
 #endif
     }
 
-    static MultiGrid *CreateMultiGrid(const char *MultigridName, const char *BndValProblem,
+    static MultiGrid *CreateMultiGrid(const char *MultigridName, BVP theBVP,
                                       const char *format,
                                       int optimizedIE, int insertMesh,
                                       std::shared_ptr<PPIF::PPIFContext> ppifContext = nullptr) {
       return UG_NAMESPACE ::CreateMultiGrid(const_cast<char*>(MultigridName),
-                                            const_cast<char*>(BndValProblem), format,
+                                            theBVP, format,
                                             optimizedIE, insertMesh, ppifContext);
     }
 

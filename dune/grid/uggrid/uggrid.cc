@@ -85,10 +85,6 @@ UGGrid < dim >::UGGrid(UGCommunication comm)
     free(arg);
   }
 
-  // Create a dummy problem
-  typename UG_NS<dim>::CoeffProcPtr coeffs[1] = {nullptr};
-  typename UG_NS<dim>::UserProcPtr upp[1] = {nullptr};
-
   // Create unique problem name
   std::stringstream numberAsAscii;
   numberAsAscii << numOfUGGrids;
@@ -96,8 +92,7 @@ UGGrid < dim >::UGGrid(UGCommunication comm)
 
   std::string problemName = name_ + "_Problem";
 
-  if (UG_NS<dim>::CreateBoundaryValueProblem(problemName.c_str(), 1,coeffs,1,upp) == nullptr)
-    DUNE_THROW(GridError, "UG" << dim << "d::CreateBoundaryValueProblem() returned an error code!");
+  bvp_ = new typename UG_NS<dim>::STD_BVP;
 
   numOfUGGrids++;
 
@@ -110,6 +105,7 @@ template < int dim >
 UGGrid < dim >::~UGGrid() noexcept(false)
 {
   // Delete the UG multigrid if there is one (== createEnd() has been called)
+  // DisposeMultiGrid cleans up the BVP as well.
   if (multigrid_) {
     // Set UG's currBVP variable to the BVP corresponding to this
     // grid.  This is necessary if we have more than one UGGrid in use.
@@ -118,17 +114,6 @@ UGGrid < dim >::~UGGrid() noexcept(false)
     if (UG_NS<dim>::DisposeMultiGrid(multigrid_) != 0)
       DUNE_THROW(GridError, "UG" << dim << "d::DisposeMultiGrid returned error code!");
   }
-
-  // DisposeMultiGrid cleans up the BVP as well.  But if there was no
-  // multigrid we have to take care of the BVP ourselves.
-  std::string problemName = name_ + "_Problem";
-  void** BVP = UG_NS<dim>::BVP_GetByName(problemName.c_str());
-
-  if (BVP)
-    if (UG_NS<dim>::BVP_Dispose(BVP))
-      DUNE_THROW(GridError, "Couldn't dispose of UG boundary value problem!");
-
-
 
   numOfUGGrids--;
 
@@ -650,7 +635,6 @@ template <int dim>
 void UGGrid<dim>::loadState(const std::string& filename)
 {
   const char* type = "asc";
-  std::string problemName = name_ + "_Problem";
   std::string formatName = "DuneFormat2d";
 
   if (dim==2) {
@@ -659,7 +643,7 @@ void UGGrid<dim>::loadState(const std::string& filename)
       name_.c_str(),
       filename.c_str(),
       type,
-      problemName.c_str(),
+      nullptr,  // dummy BVP point -- this will crash!
       formatName.c_str(),
       0,    // dummy heap size
       true, //force,
@@ -675,7 +659,7 @@ void UGGrid<dim>::loadState(const std::string& filename)
       name_.c_str(),
       filename.c_str(),
       type,
-      problemName.c_str(),
+      nullptr,  // dummy BVP point -- this will crash!
       formatName.c_str(),
       0,    // dummy heap size
       true, //force,
