@@ -111,7 +111,7 @@ UGGridLevelIntersection<GridImp>::geometryInInside () const
     auto coordinates = LocalGeometryImpl::makeCornerStorage(numCornersOfSide);
     GeometryType intersectionGeometryType = (numCornersOfSide == 4 ? GeometryTypes::cube(dim-1) : GeometryTypes::simplex(dim-1));
 
-    for (int i=0; i<coordinates.size(); i++) {
+    for (std::size_t i=0; i<coordinates.size(); i++) {
 
       // get number of corner in UG's numbering system
       int ugIdx     = UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType);
@@ -140,15 +140,11 @@ UGGridLevelIntersection<GridImp>::geometry () const
     auto coordinates = GeometryImpl::makeCornerStorage(numCornersOfSide);
     GeometryType intersectionGeometryType = (numCornersOfSide == 4 ? GeometryTypes::cube(dim-1) : GeometryTypes::simplex(dim-1));
 
-    for (int i=0; i<coordinates.size(); i++) {
+    for (std::size_t i=0; i<coordinates.size(); i++) {
 
       int ugIdx     = UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType);
       int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, ugIdx);
-      typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_, cornerIdx);
-
-      for (int j=0; j<dim; j++)
-        coordinates[i][j] = node->myvertex->iv.x[j];
-
+      coordinates[i] = UG_NS<dim>::Corner(center_, cornerIdx)->myvertex->iv.x;
     }
 
     geometry_ = std::make_optional<GeometryImpl>(intersectionGeometryType, std::move(coordinates));
@@ -179,7 +175,7 @@ UGGridLevelIntersection<GridImp>::geometryInOutside () const
     auto coordinates = LocalGeometryImpl::makeCornerStorage(numCornersOfSide);
     GeometryType intersectionGeometryType = (numCornersOfSide == 4 ? GeometryTypes::cube(dim-1) : GeometryTypes::simplex(dim-1));
 
-    for (int i=0; i<coordinates.size(); i++) {
+    for (std::size_t i=0; i<coordinates.size(); i++) {
 
       // get the node in this element
       int localCornerNumber = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
@@ -268,7 +264,7 @@ UGGridLeafIntersection< GridImp >::geometryInInside () const
       auto coordinates = LocalGeometryImpl::makeCornerStorage(numCornersOfSide);
       GeometryType intersectionGeometryType = (numCornersOfSide == 4 ? GeometryTypes::cube(dim-1) : GeometryTypes::simplex(dim-1));
 
-      for (int i=0; i<coordinates.size(); i++)
+      for (std::size_t i=0; i<coordinates.size(); i++)
       {
         // get number of corner in UG's numbering system
         int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
@@ -286,7 +282,7 @@ UGGridLeafIntersection< GridImp >::geometryInInside () const
       auto coordinates = LocalGeometryImpl::makeCornerStorage(numCornersOfSide);
       GeometryType intersectionGeometryType = (numCornersOfSide == 4 ? GeometryTypes::cube(dim-1) : GeometryTypes::simplex(dim-1));
 
-      for (int i=0; i<coordinates.size(); i++) {
+      for (std::size_t i=0; i<coordinates.size(); i++) {
 
         // Get world coordinate of other element's vertex
         const FieldVector<UGCtype,dimworld>& worldPos = UG_NS<dim>::Corner(otherFace->first,
@@ -337,13 +333,12 @@ UGGridLeafIntersection< GridImp >::geometry () const
       auto coordinates = GeometryImpl::makeCornerStorage(numCornersOfSide);
       GeometryType intersectionGeometryType = (numCornersOfSide == 4 ? GeometryTypes::cube(dim-1) : GeometryTypes::simplex(dim-1));
 
-      for (int i=0; i<coordinates.size(); i++) {
+      for (std::size_t i=0; i<coordinates.size(); i++) {
 
         int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
         const typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_, cornerIdx);
 
-        for (int j=0; j<dim; j++)
-          coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)][j] = node->myvertex->iv.x[j];
+        coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)] = node->myvertex->iv.x;
 
       }
 
@@ -356,7 +351,7 @@ UGGridLeafIntersection< GridImp >::geometry () const
       auto coordinates = GeometryImpl::makeCornerStorage(numCornersOfSide);
       GeometryType intersectionGeometryType = (numCornersOfSide == 4 ? GeometryTypes::cube(dim-1) : GeometryTypes::simplex(dim-1));
 
-      for (int i=0; i<coordinates.size(); i++) {
+      for (std::size_t i=0; i<coordinates.size(); i++) {
 
         // get number of corner in UG's numbering system
         int cornerIdx = UG_NS<dim>::Corner_Of_Side(otherFace->first, otherFace->second, i);
@@ -365,8 +360,7 @@ UGGridLeafIntersection< GridImp >::geometry () const
         const FieldVector<UGCtype,dimworld>& worldPos = UG_NS<dim>::Corner(otherFace->first,cornerIdx)->myvertex->iv.x;
 
         // and poke them into the Geometry
-        for (int j=0; j<dim; j++)
-          coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)][j] = worldPos[j];
+        coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)] = worldPos;
 
       }
 
@@ -402,7 +396,7 @@ UGGridLeafIntersection< GridImp >::geometryInOutside () const
       auto coordinates = LocalGeometryImpl::makeCornerStorage(numCornersOfSide);
       GeometryType intersectionGeometryType = (numCornersOfSide == 4 ? GeometryTypes::cube(dim-1) : GeometryTypes::simplex(dim-1));
 
-      for (int i=0; i<coordinates.size(); i++) {
+      for (std::size_t i=0; i<coordinates.size(); i++) {
 
         // get number of corner in UG's numbering system
         int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
@@ -431,7 +425,7 @@ UGGridLeafIntersection< GridImp >::geometryInOutside () const
       auto coordinates = LocalGeometryImpl::makeCornerStorage(numCornersOfSide);
       GeometryType intersectionGeometryType = (numCornersOfSide == 4 ? GeometryTypes::cube(dim-1) : GeometryTypes::simplex(dim-1));
 
-      for (int i=0; i<coordinates.size(); i++) {
+      for (std::size_t i=0; i<coordinates.size(); i++) {
 
         // get the local coordinate of j-th corner
         int v = UG_NS<dim>::Corner_Of_Side(otherFace->first,otherFace->second,i);
