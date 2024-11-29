@@ -128,7 +128,7 @@ int doWrite( Dune::VTKChecker& vtkChecker, const std::string& gridViewName, cons
 
   vtk.addVertexData(f2,
                     Dune :: VTK :: FieldInfo("vector-valued lambda",
-                                             Dune :: VTK :: FieldInfo :: Type :: vector, 2,
+                                             Dune :: VTK :: FieldInfo :: Type :: vector, dim,
                                              Dune :: VTK :: Precision::float64));
 
   int result = 0;
