@@ -144,11 +144,7 @@ UGGridLevelIntersection<GridImp>::geometry () const
 
       int ugIdx     = UGGridRenumberer<dim-1>::verticesDUNEtoUG(i, intersectionGeometryType);
       int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, ugIdx);
-      typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_, cornerIdx);
-
-      for (int j=0; j<dim; j++)
-        coordinates[i][j] = node->myvertex->iv.x[j];
-
+      coordinates[i] = UG_NS<dim>::Corner(center_, cornerIdx)->myvertex->iv.x;
     }
 
     geometry_ = std::make_optional<GeometryImpl>(intersectionGeometryType, std::move(coordinates));
@@ -342,8 +338,7 @@ UGGridLeafIntersection< GridImp >::geometry () const
         int cornerIdx = UG_NS<dim>::Corner_Of_Side(center_, neighborCount_, i);
         const typename UG_NS<dim>::Node* node = UG_NS<dim>::Corner(center_, cornerIdx);
 
-        for (int j=0; j<dim; j++)
-          coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)][j] = node->myvertex->iv.x[j];
+        coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)] = node->myvertex->iv.x;
 
       }
 
@@ -365,8 +360,7 @@ UGGridLeafIntersection< GridImp >::geometry () const
         const FieldVector<UGCtype,dimworld>& worldPos = UG_NS<dim>::Corner(otherFace->first,cornerIdx)->myvertex->iv.x;
 
         // and poke them into the Geometry
-        for (int j=0; j<dim; j++)
-          coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)][j] = worldPos[j];
+        coordinates[UGGridRenumberer<dim-1>::verticesUGtoDUNE(i, intersectionGeometryType)] = worldPos;
 
       }
 
