@@ -18,12 +18,18 @@ list(APPEND CMAKE_MODULE_PATH ${dune-common_MODULE_PATH}
 #include the dune macros
 include(DuneMacros)
 
+# deactivate global include-directories
+dune_policy(SET DP_DEFAULT_INCLUDE_DIRS NEW)
+
 # start a dune project with information from dune.module
 dune_project()
 
 # create the dune library for dune-grid
 dune_add_library(dunegrid EXPORT_NAME Grid)
 target_link_libraries(dunegrid PUBLIC ${DUNE_LIBS})
+
+# set include directories to target
+dune_default_include_directories(dunegrid PUBLIC)
 
 # create a dune library for the albertagrid
 if(Alberta_FOUND)
