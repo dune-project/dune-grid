@@ -71,7 +71,7 @@ Dune::OneDGrid::OneDGrid(const std::vector<ctype>& coords)
 
   // Init vertex set
   for (size_t i=0; i<coords.size(); i++) {
-    OneDEntityImp<0> newVertex(0, coords[i], getNextFreeId());
+    OneDEntityImp<0> newVertex(0, FieldVector<ctype,1>(coords[i]), getNextFreeId());
     vertices(0).push_back(newVertex);
   }
 
@@ -84,7 +84,7 @@ Dune::OneDGrid::OneDGrid(const std::vector<ctype>& coords)
     it = it->succ_;
     newElement.vertex_[1] = it;
 
-    if (newElement.vertex_[0]->pos_ >= newElement.vertex_[1]->pos_)
+    if (newElement.vertex_[0]->pos_[0] >= newElement.vertex_[1]->pos_[0])
       DUNE_THROW(GridError, "The coordinates have to be in ascending order!");
 
     elements(0).push_back(newElement);
@@ -318,7 +318,7 @@ bool Dune::OneDGrid::adapt()
         // Create new center vertex
         // //////////////////////////////////
 
-        ctype p = 0.5*(eIt->vertex_[0]->pos_[0] + eIt->vertex_[1]->pos_[0]);
+        FieldVector<ctype,1> p(0.5*(eIt->vertex_[0]->pos_[0] + eIt->vertex_[1]->pos_[0]));
 
         OneDEntityImp<0> centerVertex(i+1, p, getNextFreeId());
 

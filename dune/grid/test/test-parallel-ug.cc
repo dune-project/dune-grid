@@ -32,7 +32,7 @@ class DataExchange
 public:
   //! export type of data for message buffer
   typedef double DataType;
-  typedef std::vector<Dune::FieldVector<double,1> > UserDataType;
+  typedef std::vector<double> UserDataType;
 
   //! constructor
   DataExchange(const MapperT &mapper,
@@ -79,7 +79,7 @@ public:
     DataType x = mapper_.index(e);
     gatherCounter_[mapper_.index(e)]++;
 
-    userDataSend_[mapper_.index(e)][0] = x;
+    userDataSend_[mapper_.index(e)] = x;
     dverb << "Process "
               << Dune::MPIHelper::getCommunication().rank()+1
               << " sends for entity "
@@ -101,7 +101,7 @@ public:
     DataType x;
     buff.read(x);
 
-    userDataReceive_[mapper_.index(e)][0] = x;
+    userDataReceive_[mapper_.index(e)] = x;
     scatterCounter_[mapper_.index(e)]++;
     dverb << "Process "
               << Dune::MPIHelper::getCommunication().rank()+1
@@ -241,7 +241,7 @@ void testCommunication(const GridView &gridView,
   MapperType mapper(gridView, mcmgLayout);
 
   // create the user data arrays
-  using UserDataType = std::vector<Dune::FieldVector<double, 1> >;
+  using UserDataType = std::vector<double>;
 
   UserDataType userDataSend(mapper.size(), 0.0);
   UserDataType userDataReceive(mapper.size(), 0.0);
