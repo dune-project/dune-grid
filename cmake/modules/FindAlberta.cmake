@@ -109,8 +109,17 @@ find_package_handle_standard_args("Alberta"
 )
 
 if(Alberta_FOUND)
+  include(CheckIncludeFileCXX)
+  check_include_file_cxx("stdbool.h" HAVE_STDBOOL_H_HEADER)
+
   foreach(dim ${ALBERTA_WORLD_DIMS})
     if(NOT Alberta::AlbertaGrid${dim}D)
+      if (${HAVE_STDBOOL_H_HEADER})
+         # Tell Alberta that we have a stdbool.h header so that it doesn't
+         # try to define `bool` itself (which would lead to a `typedef bool bool`
+         # and hence a compile error in clang).
+         target_compile_definitions(PkgConfig::Alberta${dim}D INTERFACE -DHAVE_STDBOOL_H)
+      endif()
       add_library(Alberta::AlbertaGrid${dim}D ALIAS PkgConfig::Alberta${dim}D)
     endif()
   endforeach(dim)
