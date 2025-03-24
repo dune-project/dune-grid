@@ -609,70 +609,14 @@ void UGGrid < dim >::setPosition(const typename Traits::template Codim<dim>::Ent
 template <int dim>
 void UGGrid<dim>::saveState(const std::string& filename) const
 {
-  const char* type = "asc";
-  const char* comment = "written by DUNE";
-
-  if (dim==2)
-    UG::D2::SaveMultiGrid((UG::D2::multigrid*)multigrid_,
-                          filename.c_str(),
-                          type,
-                          comment,
-                          0,      // autosave
-                          0       // rename
-                          );
-  else
-    UG::D3::SaveMultiGrid((UG::D3::multigrid*)multigrid_,
-                          filename.c_str(),
-                          type,
-                          comment,
-                          0,      // autosave
-                          0       // rename
-                          );
+  DUNE_THROW(NotImplemented, "Writing complete UGGrid hierarchies is not implemented yet.");
 }
 
 
 template <int dim>
 void UGGrid<dim>::loadState(const std::string& filename)
 {
-  const char* type = "asc";
-  std::string formatName = "DuneFormat2d";
-
-  if (dim==2) {
-    std::string formatName = "DuneFormat2d";
-    multigrid_ = (typename UG_NS<dim>::MultiGrid*) UG::D2::LoadMultiGrid(
-      name_.c_str(),
-      filename.c_str(),
-      type,
-      nullptr,  // dummy BVP point -- this will crash!
-      formatName.c_str(),
-      0,    // dummy heap size
-      true, //force,
-      true, //optimizedIO,
-      false //autosave
-#if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
-      , std::make_shared<PPIF::PPIFContext>(comm())
-#endif
-      );
-  } else {
-    std::string formatName = "DuneFormat3d";
-    multigrid_ = (typename UG_NS<dim>::MultiGrid*) UG::D3::LoadMultiGrid(
-      name_.c_str(),
-      filename.c_str(),
-      type,
-      nullptr,  // dummy BVP point -- this will crash!
-      formatName.c_str(),
-      0,    // dummy heap size
-      true, //force,
-      true, //optimizedIO,
-      false //autosave
-#if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
-      , std::make_shared<PPIF::PPIFContext>(comm())
-#endif
-      );
-  }
-
-  if (multigrid_==nullptr)
-    DUNE_THROW(GridError, "In loadState()");
+  DUNE_THROW(NotImplemented, "Loading complete UGGrid hierarchies is not implemented yet.");
 }
 
 template < int dim >
