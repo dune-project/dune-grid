@@ -20,6 +20,8 @@ include(DuneMacros)
 
 # deactivate global include-directories
 dune_policy(SET DP_DEFAULT_INCLUDE_DIRS NEW)
+# do not making all suggested dependencies required automatically
+dune_policy(SET DP_SUGGESTED_MODULE_DEPENDENCIES_REQUIRED_DOWNSTREAM NEW)
 
 # start a dune project with information from dune.module
 dune_project()
@@ -44,6 +46,11 @@ if(Alberta_FOUND)
         ALBERTA_DEBUG=1)
     endif()
   endforeach(_dim)
+endif()
+
+# if UG is found it becomes a required dependency for dunegrid
+if(dune-uggrid_FOUND)
+  dune_mark_module_as_required_dependency(MODULE dune-uggrid)
 endif()
 
 # create alias HAVE_UG
