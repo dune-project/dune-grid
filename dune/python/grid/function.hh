@@ -27,7 +27,6 @@
 
 #if HAVE_DUNE_VTK
 #include <dune/vtk/gridfunctions/gridfunction.hh>
-#include <dune/python/grid/pygridfunction.hh>
 #endif
 
 #include <dune/python/pybind11/numpy.h>
@@ -173,7 +172,7 @@ namespace Dune
           Python::IncludeFiles{"dune/vtk/gridfunctions/gridfunction.hh"});
       vgfClass.first.def( pybind11::init( [] ( GridFunction &gf ) {
           // TODO: perhaps grid functions should just have a name attribute in general
-          return new VirtualizedGF( pyGridFunction(gf), "tmp" );
+          return new VirtualizedGF( gf, Dune::Vtk::FieldInfo{"tmp"} );
         } ) );
       pybind11::implicitly_convertible<GridFunction,VirtualizedGF>();
 #endif
