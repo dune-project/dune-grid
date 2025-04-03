@@ -34,7 +34,7 @@
 #include <iostream>
 
 #if HAVE_DUNE_VTK
-#include <dune/vtk/function.hh>
+#include <dune/vtk/gridfunctions/gridfunction.hh>
 #endif
 
 namespace Dune
@@ -506,10 +506,10 @@ namespace Dune
         )doc" );
 
 #if HAVE_DUNE_VTK
-      using VirtualizedGF = Dune::Vtk::Function<GridView>;
+      using VirtualizedGF = Dune::Vtk::GridFunction<GridView>;
       auto vgfClass = Python::insertClass<VirtualizedGF>(scope,"VtkFunction",
-          Python::GenerateTypeName("Dune::Vtk::Function", MetaType<GridView>()),
-          Python::IncludeFiles{"dune/vtk/function.hh"});
+          Python::GenerateTypeName("Dune::Vtk::GridFunction", MetaType<GridView>()),
+          Python::IncludeFiles{"dune/vtk/gridfunctions/gridfunction.hh"});
       if( vgfClass.second )
       {
         vgfClass.first.def("name",[](VirtualizedGF &self) { return self.name(); });
