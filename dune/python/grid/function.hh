@@ -26,7 +26,7 @@
 #include <dune/python/grid/vtk.hh>
 
 #if HAVE_DUNE_VTK
-#include <dune/vtk/function.hh>
+#include <dune/vtk/gridfunctions/gridfunction.hh>
 #include <dune/python/grid/pygridfunction.hh>
 #endif
 
@@ -166,11 +166,11 @@ namespace Dune
       detail::registerGridFunction(scope,cls);
 #if HAVE_DUNE_VTK
       typedef typename GridFunctionTraits< GridFunction >::GridView GridView;
-      using VirtualizedGF = Dune::Vtk::Function<GridView>;
+      using VirtualizedGF = Dune::Vtk::GridFunction<GridView>;
       // register the Function class if not already available
       auto vgfClass = Python::insertClass<VirtualizedGF>(scope,"VtkFunction",
           Python::GenerateTypeName("Dune::Vtk::Function",MetaType<GridView>()),
-          Python::IncludeFiles{"dune/vtk/function.hh"});
+          Python::IncludeFiles{"dune/vtk/gridfunctions/gridfunction.hh"});
       vgfClass.first.def( pybind11::init( [] ( GridFunction &gf ) {
           // TODO: perhaps grid functions should just have a name attribute in general
           return new VirtualizedGF( pyGridFunction(gf), "tmp" );
