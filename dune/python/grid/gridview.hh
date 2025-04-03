@@ -506,7 +506,7 @@ namespace Dune
         )doc" );
 
 #if HAVE_DUNE_VTK
-      using VirtualizedGF = Dune::Vtk::Function<GridView>;
+      using VirtualizedGF = Dune::Vtk::GridFunction<GridView>;
       auto vgfClass = Python::insertClass<VirtualizedGF>(scope,"VtkFunction",
           Python::GenerateTypeName("Dune::Vtk::GridFunction", MetaType<GridView>()),
           Python::IncludeFiles{"dune/vtk/gridfunctions/gridfunction.hh"});
