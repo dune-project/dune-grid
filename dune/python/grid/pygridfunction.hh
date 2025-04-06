@@ -3,6 +3,8 @@
 #ifndef DUNE_GRID_PY_PYFUNCTION_HH
 #define DUNE_GRID_PY_PYFUNCTION_HH
 
+#warning "The header <dune/python/grid/pygridfunction.hh> is deprecated."
+
 #include <string>
 #include <utility>
 
@@ -19,7 +21,7 @@ namespace Dune
     // --------------
 
     template< class GridFunction >
-    class DUNE_PRIVATE PyGridFunction
+    class DUNE_PRIVATE [[deprecated]] PyGridFunction
     {
     public:
       PyGridFunction ( const GridFunction &impl, pybind11::object pyObj )
