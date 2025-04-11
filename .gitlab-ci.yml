@@ -16,10 +16,6 @@ before_script:
   - duneci-install-module https://gitlab.dune-project.org/core/dune-geometry.git
   - duneci-install-module https://gitlab.dune-project.org/staging/dune-uggrid.git
 
-variables:
-  # Alberta + python bindings fail at the moment with linker error
-  DUNECI_CMAKE_FLAGS: '-DCMAKE_DISABLE_FIND_PACKAGE_Alberta=TRUE'
-
 # Check for spelling mistakes in text
 code-spelling-check:
   stage: .pre
