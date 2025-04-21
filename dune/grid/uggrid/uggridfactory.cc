@@ -257,8 +257,6 @@ createGrid()
   typedef typename std::set<UGGridBoundarySegment<dimworld> >::iterator SetIterator;
 
   BoundaryExtractor::detectBoundarySegments(elementTypes_, elementVertices_, boundarySegments);
-  if (boundarySegments.empty())
-    DUNE_THROW(GridError, "Couldn't extract grid boundary.");
 
   std::vector<int> isBoundaryNode;
   BoundaryExtractor::detectBoundaryNodes(boundarySegments, vertexPositions_.size(), isBoundaryNode);
