@@ -572,7 +572,7 @@ void checkIntersectionIterator ( const GridViewType &view,
                       << "obtained from inside and outside." << std::endl;
             std::cerr << "       inside sub-sub-indices = ";
             for (unsigned int subSubIndex = 0; subSubIndex != insideFace.subEntities(1 + cc); ++subSubIndex)
-              std::cerr << indexSet.subIndex( *eIt, indexInInside, 1 );
+              std::cerr << indexSet.subIndex( *eIt, indexInInside, 1 + cc);
             std::cerr << ", outside sub-sub-index = " << indexSet.subIndex(outsideFace, subSubIndex, 1 + cc) << std::endl;
             DUNE_THROW(Dune::GridError, "Intersection error");
           }
@@ -582,7 +582,7 @@ void checkIntersectionIterator ( const GridViewType &view,
                     << "obtained from inside and outside." << std::endl;
             std::cerr << "       inside sub-sub-indices = ";
             for (unsigned int subSubIndex = 0; subSubIndex != insideFace.subEntities(1 + cc); ++subSubIndex)
-              std::cerr << indexSet.subIndex( *eIt, indexInInside, 1 );
+              std::cerr << indexSet.subIndex( *eIt, indexInInside, 1 + cc);
             std::cerr << ", outside sub-sub-indices = ";
             for (unsigned int subSubIndex = 0; subSubIndex != insideFace.subEntities(1 + cc); ++subSubIndex)
               std::cerr << indexSet.subIndex(outsideFace, subSubIndex, 1 + cc);
