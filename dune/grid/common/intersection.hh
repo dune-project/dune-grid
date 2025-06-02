@@ -263,7 +263,12 @@ namespace Dune
       return this->real.outside();
     }
 
-    /*! @brief Return true if intersection is conforming.
+    /** @brief Return true if intersection is conforming.
+     *
+     * The intersection is called conforming if it is conforming with respect
+     * to all involved elements, i.e., it does geometrically coincide with the
+     * indexInInside()'s facet of the inside() element and - if neighbor() is true-
+     * with the indexInOutside()'s facet of the outside() element.
      */
     bool conforming () const
     {
