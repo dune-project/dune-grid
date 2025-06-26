@@ -5,6 +5,10 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 
 # Master (will become release 2.11)
 
+- The grid concepts are now able to check grids that have entity types disabled.
+  For such entity codimension, the type `typename T::template Codim<0>::Entity` is required to satisfy the `EntityGeneral` concept
+  only if the type exists (i.e. substitution failure is allowed).
+
 - The `GmshReader` facility now supports reading Version 4 Gmsh files. This includes both
   the ASCII and the binary variants of this format. The user interface is unchanged by this,
   but this may change eventually. The code is essentially the one from Simon Praetorius'
