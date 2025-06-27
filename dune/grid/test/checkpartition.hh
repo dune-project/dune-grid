@@ -117,13 +117,13 @@ template< class GridView, Dune::PartitionIteratorType pitype >
 template< int codim >
 struct CheckPartitionType< GridView, pitype >::CheckCodim
 {
-  typedef typename GridView::template Codim< codim >::template Partition< pitype >::Iterator Iterator;
-  typedef typename GridView::template Codim< 0 >::template Partition< Dune::All_Partition >::Iterator AllIterator;
-
   template< class IdSet >
   static void check ( const std::true_type &, const GridView &gridView,
                       const IdSet &idSet )
   {
+    typedef typename GridView::template Codim< codim >::template Partition< pitype >::Iterator Iterator;
+    typedef typename GridView::template Codim< 0 >::template Partition< Dune::All_Partition >::Iterator AllIterator;
+
     typedef std::map< typename IdSet::IdType, Dune::PartitionType > Map;
     typedef typename Map::iterator MapIterator;
     Map map;
