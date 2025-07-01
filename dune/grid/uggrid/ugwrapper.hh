@@ -74,8 +74,6 @@ namespace Dune {
 
     typedef UG_NAMESPACE ::domain domain;
 
-    typedef UG_NAMESPACE ::BVP BVP;
-
     typedef UG_NAMESPACE ::STD_BVP STD_BVP;
 
     /** \brief Point on a UG boundary patch */
@@ -1054,7 +1052,7 @@ namespace Dune {
     }
 
     //! Set the current boundary value problem
-    static void Set_Current_BVP(UG_NAMESPACE ::STD_BVP** thisBVP) {
+    static void Set_Current_BVP(UG_NAMESPACE ::STD_BVP* thisBVP) {
       UG_NAMESPACE ::Set_Current_BVP(thisBVP);
     }
 
@@ -1103,7 +1101,7 @@ namespace Dune {
 #endif
     }
 
-    static MultiGrid *CreateMultiGrid(const char *MultigridName, BVP theBVP,
+    static MultiGrid *CreateMultiGrid(const char *MultigridName, STD_BVP *theBVP,
                                       const char *format,
                                       int optimizedIE, int insertMesh,
                                       std::shared_ptr<PPIF::PPIFContext> ppifContext = nullptr) {

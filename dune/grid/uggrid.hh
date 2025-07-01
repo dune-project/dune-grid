@@ -660,10 +660,8 @@ namespace Dune {
      *
      * \todo The multigrid_ object also has pointer to this.  I don't like this
      * redundancy, but I also don't quite know yet what to do about it.
-     *
-     * \note BVP is a pointer type!
      */
-    typename UG_NS<dim>::BVP bvp_;
+    typename UG_NS<dim>::STD_BVP* bvp_;
 
     /** \brief The communication object. */
     UGCommunication ccobj_;
