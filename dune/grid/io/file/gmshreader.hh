@@ -421,8 +421,8 @@ namespace Dune
         physical_entity_names.resize(number_of_names);
         std::string buf_name;
         for( int i = 0; i < number_of_names; ++i ) {
-          int dim, id;
-          readfile(file,3, "%d %d %s\n", &dim, &id, buf);
+          int edim, id;
+          readfile(file,3, "%d %d %s\n", &edim, &id, buf);
           buf_name.assign(buf);
           auto begin = buf_name.find_first_of('\"') + 1;
           auto end = buf_name.find_last_of('\"') - begin;

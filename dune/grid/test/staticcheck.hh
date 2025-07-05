@@ -330,7 +330,7 @@ struct EntityInterface<Grid, 0, dim, false>
 {
   typedef typename Grid::template Codim<0>::Entity Entity;
 
-  static void check (Entity &e)
+  static void check (Entity &/*e*/)
   {
     // recursively check sub-entities
     EntityInterface<Grid, 1, dim,
@@ -375,7 +375,7 @@ struct EntityInterface<Grid, dim, dim, false>
   typedef typename Grid::template Codim<dim>::Entity Entity;
 
   // end recursion
-  static void check (Entity &e)
+  static void check (Entity &/*e*/)
   {}
 
   EntityInterface()

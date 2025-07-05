@@ -126,7 +126,7 @@ namespace Dune
       typedef std::array<int, d> iTupel;
       virtual ~PowerDPartitioning() {}
 
-      void partition (const iTupel& size, int P, iTupel& dims, int overlap) const final
+      void partition (const iTupel& /*size*/, int P, iTupel& dims, int /*overlap*/) const final
       {
         for (int i=1; i<=P; ++i)
           if (Dune::power(i, d) == P) {
@@ -150,7 +150,7 @@ namespace Dune
 
       virtual ~FixedSizePartitioning() {}
 
-      void partition(const std::array<int,d>&, int P, std::array<int,d>& dims, int overlap) const final
+      void partition(const std::array<int,d>&, int P, std::array<int,d>& dims, int /*overlap*/) const final
       {
         int prod = 1;
         for (int i=0; i<d; i++)

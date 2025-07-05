@@ -203,27 +203,27 @@ namespace Dune
           _f.unbind();
         }
 
-        virtual void write(const Coordinate& pos, Writer& w, std::size_t count) const
+        virtual void write(const Coordinate& pos, Writer& writer, std::size_t count) const
         {
           auto r = _f(pos);
           // we need to do different things here depending on whether r supports indexing into it or not.
-          do_write(w,r,count,IsIndexable<decltype(r)>());
+          do_write(writer,r,count,IsIndexable<decltype(r)>());
         }
 
       private:
 
         template<typename R>
-        void do_write(Writer& w, const R& r, std::size_t count, std::true_type) const
+        void do_write(Writer& writer, const R& r, std::size_t count, std::true_type) const
         {
           for (std::size_t i = 0; i < count; ++i)
-            w.write(r[i]);
+            writer.write(r[i]);
         }
 
         template<typename R>
-        void do_write(Writer& w, const R& r, std::size_t count, std::false_type) const
+        void do_write(Writer& writer, const R& r, std::size_t count, std::false_type) const
         {
           assert(count == 1);
-          w.write(r);
+          writer.write(r);
         }
 
         Function _f;
@@ -252,17 +252,17 @@ namespace Dune
           element_ = nullptr;
         }
 
-        virtual void write(const Coordinate& pos, Writer& w, std::size_t count) const
+        virtual void write(const Coordinate& pos, Writer& writer, std::size_t count) const
         {
           auto globalPos = element_->geometry().global(pos);
           auto r = _f(globalPos);
           if constexpr (IsIndexable<decltype(r)>()) {
             for (std::size_t i = 0; i < count; ++i)
-                w.write(r[i]);
+                writer.write(r[i]);
           }
           else {
             assert(count == 1);
-            w.write(r);
+            writer.write(r);
           }
         }
       private:
@@ -289,10 +289,10 @@ namespace Dune
           _entity = nullptr;
         }
 
-        virtual void write(const Coordinate& pos, Writer& w, std::size_t count) const
+        virtual void write(const Coordinate& pos, Writer& writer, std::size_t count) const
         {
           for (std::size_t i = 0; i < count; ++i)
-            w.write(_f->evaluate(i,*_entity,pos));
+            writer.write(_f->evaluate(i,*_entity,pos));
         }
 
       private:
@@ -362,10 +362,10 @@ namespace Dune
         _f->unbind();
       }
 
-      //! Write the value of the data set at local coordinate pos to the writer w.
-      void write(const Coordinate& pos, Writer& w) const
+      //! Write the value of the data set at local coordinate @c pos to the @c writer.
+      void write(const Coordinate& pos, Writer& writer) const
       {
-        _f->write(pos,w,fieldInfo().size());
+        _f->write(pos,writer,fieldInfo().size());
       }
 
       std::shared_ptr<FunctionWrapperBase> _f;

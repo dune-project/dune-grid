@@ -81,7 +81,7 @@ namespace Dune
         Dune::checkGeometry(geometry);
       }
       template<class Geometry>
-      static void checkGeometry(const std::false_type&,const Geometry& geometry)
+      static void checkGeometry(const std::false_type&,const Geometry& /*geometry*/)
       {}
       template <class Entity>
       static void check(const std::true_type&, const Entity &entity)

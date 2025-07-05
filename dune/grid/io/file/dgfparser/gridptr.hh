@@ -144,7 +144,7 @@ namespace Dune
     }
 
     // if dimension world > 3 throw GridError
-    void readGmsh( const std::string& filename, std::integral_constant< bool, false > )
+    void readGmsh( const std::string& /*filename*/, std::integral_constant< bool, false > )
     {
       DUNE_THROW(GridError, "GmshReader requires dimWorld <= 3." );
     }

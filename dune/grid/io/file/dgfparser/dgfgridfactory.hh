@@ -155,7 +155,7 @@ namespace Dune
 
     template< class GG, class II >
     const typename DGFBoundaryParameter::type &
-    boundaryParameter ( const Intersection< GG, II > & intersection ) const
+    boundaryParameter ( const Intersection< GG, II > & /*intersection*/ ) const
     {
       return DGFBoundaryParameter::defaultValue();
     }
