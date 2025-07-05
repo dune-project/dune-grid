@@ -926,7 +926,7 @@ namespace Dune {
              This template method will vanish due to the inheritance
              rules.
      */
-    bool mark( int refCount, const typename Traits :: template Codim<0>::Entity & e )
+    bool mark( int /*refCount*/, const typename Traits :: template Codim<0>::Entity & /*e*/ )
     {
       return false;
     }
@@ -938,7 +938,7 @@ namespace Dune {
 
        \return int adaptation mark, here the default value 0 is returned
      */
-    int getMark ( const typename Traits::template Codim< 0 >::Entity &e ) const
+    int getMark ( const typename Traits::template Codim< 0 >::Entity& /*e*/ ) const
     {
       return 0;
     }

@@ -374,10 +374,10 @@ class CheckCommunication
       const Entity &entity = *it;
 
       CoordinateVector mid( 0.0 );
-      const int numVertices = entity.subEntities(dim);
-      for( int i = 0; i < numVertices; ++i )
+      const int numVerticesDim = entity.subEntities(dim);
+      for( int i = 0; i < numVerticesDim; ++i )
         mid += entity.geometry().corner( i );
-      mid /= ctype(numVertices);
+      mid /= ctype(numVerticesDim);
 
       if( cdim == 0 )
       {

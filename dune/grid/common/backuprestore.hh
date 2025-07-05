@@ -48,7 +48,7 @@ namespace Dune
      *
      *  \note This method might create multiple files based on the filename plus internal extension.
      */
-    static void backup ( const Grid &grid, const std::string &filename )
+    static void backup ( const Grid &/*grid*/, const std::string &/*filename*/ )
     {
       DUNE_THROW( NotImplemented, "backup / restore not implemented." );
     }
@@ -62,7 +62,7 @@ namespace Dune
      *        written in another language than C++ might need to emulate this
      *        method by writing through a temporary file.
      */
-    static void backup ( const Grid &grid, std::ostream &stream )
+    static void backup ( const Grid &/*grid*/, std::ostream &/*stream*/ )
     {
       DUNE_THROW( NotImplemented, "backup / restore not implemented." );
     }
@@ -75,7 +75,7 @@ namespace Dune
      *
      *  \note This method might require multiple files based on the filename plus some extension.
      */
-    static Grid *restore ( const std::string &filename )
+    static Grid *restore ( const std::string &/*filename*/ )
     {
       DUNE_THROW( NotImplemented, "backup / restore not implemented." );
     }
@@ -88,7 +88,7 @@ namespace Dune
      *        written in another language than C++ might need to emulate this
      *        method by writing through a temporary file.
      */
-    static Grid *restore ( std::istream &stream )
+    static Grid *restore ( std::istream &/*stream*/ )
     {
       DUNE_THROW( NotImplemented, "backup / restore not implemented." );
     }

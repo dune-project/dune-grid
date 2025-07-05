@@ -119,11 +119,11 @@ namespace Dune
         simplices).  There are grids that can't handle inverted elements.
      */
     virtual void
-    insertElement(const GeometryType& type,
-                  const std::vector<unsigned int>& vertices,
+    insertElement(const GeometryType& /*type*/,
+                  const std::vector<unsigned int>& /*vertices*/,
                   std::function<FieldVector<ctype,dimworld>
                                   (FieldVector<ctype,dimension>)>
-                       elementParametrization)
+                       /*elementParametrization*/)
     {
       DUNE_THROW(GridError, "There is no grid factory for this grid type!");
     }

@@ -508,7 +508,7 @@ namespace Dune
     typedef FieldMatrix< ctype, cdim, mydim > Jacobian;
 
     //! return the only coordinate
-    FieldVector<ctype, cdim> global (const FieldVector<ctype, mydim>& local) const
+    FieldVector<ctype, cdim> global (const FieldVector<ctype, mydim>& /*local*/) const
     {
       return asImp().corner(0);
     }
