@@ -7,7 +7,6 @@
 
 #include <algorithm>
 
-#include <dune-uggrid-config.hh> // DUNE_UGGRID_HAVE_DDDCONTEXT
 #include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/grid/common/gridenums.hh>
@@ -65,9 +64,7 @@ namespace Dune {
     // called by DDD_IFOneway to serialize the data structure to
     // be sent
     static int ugGather_(
-#if DUNE_UGGRID_HAVE_DDDCONTEXT
       DDD::DDDContext&,
-#endif
       typename UG_NS<gridDim>::DDD_OBJ obj, void* data)
     {
       // cast the DDD object to a UG entity pointer
@@ -91,9 +88,7 @@ namespace Dune {
     // called by DDD_IFOneway to deserialize the data structure
     // that has been received
     static int ugScatter_(
-#if DUNE_UGGRID_HAVE_DDDCONTEXT
       DDD::DDDContext&,
-#endif
       typename UG_NS<gridDim>::DDD_OBJ obj, void* data)
     {
       // cast the DDD object to a UG entity pointer
