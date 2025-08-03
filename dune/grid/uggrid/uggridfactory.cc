@@ -10,7 +10,6 @@
 #include <dune/grid/uggrid/uggridfactory.hh>
 #include "boundaryextractor.hh"
 
-#include <dune-uggrid-config.hh>
 #if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
 #  include <dune/uggrid/parallel/ppif/ppifcontext.hh>
 #endif

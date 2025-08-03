@@ -6,8 +6,6 @@
  * \brief Encapsulates some UG macros and functions
  */
 
-#include <dune-uggrid-config.hh> // ModelP
-
 namespace Dune {
 
   /** \brief Encapsulates a few UG methods and macros
