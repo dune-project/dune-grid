@@ -553,27 +553,26 @@ namespace Dune {
                         InterfaceType iftype,
                         CommunicationDirection dir) const
     {
-      typename UG_NS<dim>::DDD_IF_DIR ugIfDir;
       // Translate the communication direction from Dune-Speak to UG-Speak
-      if (dir==ForwardCommunication)
-        ugIfDir = UG_NS<dim>::IF_FORWARD();
-      else
-        ugIfDir = UG_NS<dim>::IF_BACKWARD();
+      const auto ugIfDir = (dir==ForwardCommunication) ? UG_NS<dim>::IF_FORWARD() : UG_NS<dim>::IF_BACKWARD();
 
-      typedef UGMessageBuffer<DataHandle,dim,codim> UGMsgBuf;
+      // Set up the message buffer
+      // No actual object is constructed, because the DDD_IFOneway method called below
+      // needs *static* methods. Therefore, everything is currently routed
+      // via static data members of the UGMessageBuffer class.
+      using UGMsgBuf = UGMessageBuffer<DataHandle,dim,codim>;
       UGMsgBuf::duneDataHandle_ = &dataHandle;
-
       UGMsgBuf::level = level;
+      UGMsgBuf::grid_ = this;
 
-      std::vector<typename UG_NS<dim>::DDD_IF> ugIfs = findDDDInterfaces(iftype, codim);
+      const std::vector<typename UG_NS<dim>::DDD_IF> ugIfs = findDDDInterfaces(iftype, codim);
 
-      unsigned bufSize = UGMsgBuf::ugBufferSize(gv);
+      const auto bufSize = UGMsgBuf::ugBufferSize(gv);
       if (!bufSize)
         return;     // we don't need to communicate if we don't have any data!
-      UGMsgBuf::grid_ = this;
-      for (unsigned i=0; i < ugIfs.size(); ++i)
+      for (auto&& dddInterface : ugIfs)
         UG_NS<dim>::DDD_IFOneway(multigrid_->dddContext(),
-                                 ugIfs[i],
+                                 dddInterface,
                                  ugIfDir,
                                  bufSize,
                                  &UGMsgBuf::ugGather_,
