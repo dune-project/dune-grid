@@ -9,10 +9,7 @@
 
 #include <dune/grid/uggrid.hh>
 
-#include <dune-uggrid-config.hh>
-#if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
-#  include <dune/uggrid/parallel/ppif/ppifcontext.hh>
-#endif
+#include <dune/uggrid/parallel/ppif/ppifcontext.hh>
 
 /** \todo Remove the following two includes once getAllSubfaces... is gone */
 #include <list>
@@ -210,11 +207,7 @@ int UGGrid<dim>::getMark(const typename Traits::template Codim<0>::Entity& e) co
     return -1;
 
   // If the element is not regular, it's mark is actually stored on its regular
-  // ancestor.  That's what we look for here.
-  if (dim==2)
-    target = (typename UG_NS<dim>::Element*) UG::D2::ELEMENT_TO_MARK((UG::D2::element*)target);
-  else
-    target = (typename UG_NS<dim>::Element*) UG::D3::ELEMENT_TO_MARK((UG::D3::element*)target);
+  target = ELEMENT_TO_MARK(target);
 
   // Return 0 if element is not marked at all
   if (UG_NS<dim>::ReadCW(target,UG_NS<dim>::MARK_CE)==UG_NS<dim>::NO_REFINEMENT)

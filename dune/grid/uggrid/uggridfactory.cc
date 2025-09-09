@@ -10,10 +10,7 @@
 #include <dune/grid/uggrid/uggridfactory.hh>
 #include "boundaryextractor.hh"
 
-#include <dune-uggrid-config.hh>
-#if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
-#  include <dune/uggrid/parallel/ppif/ppifcontext.hh>
-#endif
+#include <dune/uggrid/parallel/ppif/ppifcontext.hh>
 
 namespace Dune {
 
@@ -417,7 +414,7 @@ createGrid()
 
   // Create the actual multigrid data structure
   std::shared_ptr<PPIF::PPIFContext> ppifContext;
-#if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
+#if ModelP
   ppifContext = std::make_shared<PPIF::PPIFContext>(grid_->comm());
 #endif
   grid_->multigrid_ = UG_NS<dimworld>::CreateMultiGrid(MultiGridName.c_str(),grid_->bvp_,FormatName.c_str(),true,true, ppifContext);
@@ -428,7 +425,7 @@ createGrid()
   // If we are in a parallel setting and we are _not_ the master
   // process we can stop here.
   // ///////////////////////////////////////////////////////////////
-#if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
+#if ModelP
   const bool isMaster = grid_->multigrid_->ppifContext().isMaster();
 #else
   const bool isMaster = (PPIF::me == PPIF::master);
