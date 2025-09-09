@@ -9,9 +9,7 @@
 
 #include <dune/grid/uggrid.hh>
 
-#if ModelP and DUNE_UGGRID_HAVE_PPIFCONTEXT
-#  include <dune/uggrid/parallel/ppif/ppifcontext.hh>
-#endif
+#include <dune/uggrid/parallel/ppif/ppifcontext.hh>
 
 /** \todo Remove the following two includes once getAllSubfaces... is gone */
 #include <list>
