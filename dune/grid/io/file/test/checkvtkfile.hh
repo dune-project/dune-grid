@@ -17,7 +17,9 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/test/testsuite.hh>
 
+#ifdef PYTHON_INTERPRETER
 #include <Python.h>
+#endif
 
 namespace Dune {
 
@@ -48,6 +50,7 @@ inline std::string pyq(const std::string &s)
 
 inline int runPython(const std::string &code)
 {
+#ifdef PYTHON_INTERPRETER
 #if (PY_MAJOR_VERSION >= 3) && (PY_MINOR_VERSION >= 8)
   PyConfig config;
   PyConfig_InitPythonConfig(&config);
@@ -66,6 +69,9 @@ inline int runPython(const std::string &code)
   int exitcode = PyRun_SimpleString(code.c_str());
   int finalizecode = Py_FinalizeEx();
   return (exitcode + finalizecode) ? EXIT_FAILURE : EXIT_SUCCESS;
+#else
+  return EXIT_FAILURE;
+#endif // PYTHON_INTERPRETER
 }
 
 inline bool is_suffix(const std::string &s, const std::string &suffix)
