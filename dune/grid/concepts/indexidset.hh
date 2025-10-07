@@ -46,7 +46,7 @@ concept IndexSet = requires(const IS is, Dune::GeometryType type, int codim)
   { IS::dimension   } -> std::convertible_to<int>;
 
   requires RandomAccessContainer<typename IS::Types>;
-  { is.types(codim) } -> std::same_as<typename IS::Types>;
+  { is.types(codim) } -> std::convertible_to<typename IS::Types>;
 
   requires std::integral<typename IS::IndexType>;
   { is.size(type)   } -> std::convertible_to<typename IS::IndexType>;
