@@ -18,23 +18,54 @@ dune_add_test(SOURCES nonconformboundaryvtktest.cc)
 
 dune_add_test(SOURCES printgridtest.cc)
 
-if(TARGET Python3::Python)
-  dune_add_test(NAME subsamplingvtktest
-                LINK_LIBRARIES ${DUNE_LIBS} Python3::Python
-                SOURCES subsamplingvtktest.cc test-linking.cc
-                TIMEOUT 600
-                COMPILE_DEFINITIONS PYTHON_INTERPRETER=L"${DUNE_PYTHON_VIRTUALENV_EXECUTABLE}")
+# If VTK is found in venv, use that interpreter to run the tests
+# otherwise use the interpreter of Python3::Python
+unset(VTK_INTERPRETER_LOCATION)
 
-  dune_add_test(SOURCES vtktest.cc
-                LINK_LIBRARIES ${DUNE_LIBS} Python3::Python
-                MPI_RANKS 1 2
-                TIMEOUT 1200
-                COMPILE_DEFINITIONS PYTHON_INTERPRETER=L"${DUNE_PYTHON_VIRTUALENV_EXECUTABLE}")
+option(DUNE_GRID_SKIP_VTK_PYTHON_TESTS
+  "Skip tests that require VTK Python bindings.\n
+  On some systems (e.g. Ubuntu, Debian) the VTK package, it is known that it cannot read binary files due to a security patch.\n
+  See https://gitlab.dune-project.org/core/dune-grid/-/merge_requests/784"
+  OFF)
 
-  dune_add_test(SOURCES vtksequencetest.cc
-                LINK_LIBRARIES ${DUNE_LIBS} Python3::Python
-                COMPILE_DEFINITIONS PYTHON_INTERPRETER=L"${DUNE_PYTHON_VIRTUALENV_EXECUTABLE}")
+if((TARGET Python3::Python) AND (NOT ${DUNE_GRID_SKIP_VTK_PYTHON_TESTS}))
+  if(DUNE_PYTHON_VIRTUALENV_EXECUTABLE)
+    dune_python_find_package(PACKAGE vtk
+                             RESULT DUNE_PYTHON_VTK_FOUND
+                             INTERPRETER ${DUNE_PYTHON_VIRTUALENV_EXECUTABLE})
+
+    if(DUNE_PYTHON_VTK_FOUND)
+      set(VTK_INTERPRETER_LOCATION ${DUNE_PYTHON_VIRTUALENV_EXECUTABLE})
+    endif()
+  endif()
+
+  if(NOT VTK_INTERPRETER_LOCATION)
+    get_target_property(VTK_INTERPRETER_LOCATION Python3::Interpreter LOCATION)
+  endif()
 endif()
+
+# Note that an empty PYTHON_INTERPRETER will result in an skipped test
+unset(VTK_COMPILE_DEFINITIONS)
+if(VTK_INTERPRETER_LOCATION)
+  message(STATUS "Using VTK interpreter at ${VTK_INTERPRETER_LOCATION} for tests")
+  set(VTK_COMPILE_DEFINITIONS $<$<TARGET_EXISTS:Python3::Python>:PYTHON_INTERPRETER=L"${VTK_INTERPRETER_LOCATION}">)
+endif()
+
+dune_add_test(NAME subsamplingvtktest
+              LINK_LIBRARIES ${DUNE_LIBS} $<TARGET_NAME_IF_EXISTS:Python3::Python>
+              SOURCES subsamplingvtktest.cc test-linking.cc
+              TIMEOUT 600
+              COMPILE_DEFINITIONS ${VTK_COMPILE_DEFINITIONS})
+
+dune_add_test(SOURCES vtktest.cc
+              LINK_LIBRARIES ${DUNE_LIBS} $<TARGET_NAME_IF_EXISTS:Python3::Python>
+              MPI_RANKS 1 2
+              TIMEOUT 1200
+              COMPILE_DEFINITIONS ${VTK_COMPILE_DEFINITIONS})
+
+dune_add_test(SOURCES vtksequencetest.cc
+              LINK_LIBRARIES ${DUNE_LIBS} $<TARGET_NAME_IF_EXISTS:Python3::Python>
+              COMPILE_DEFINITIONS ${VTK_COMPILE_DEFINITIONS})
 
 dune_add_test(SOURCES starcdreadertest.cc
               COMPILE_DEFINITIONS DUNE_GRID_EXAMPLE_GRIDS_PATH=\"${PROJECT_SOURCE_DIR}/doc/grids/\"
