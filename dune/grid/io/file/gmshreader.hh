@@ -34,8 +34,12 @@ namespace Dune
      \{
    */
 
-  //! Options for read operation
-  struct GmshReaderOptions
+  /** \brief Options for read operation
+   *
+   * \deprecated The class is deprecated, because it looks like it should be used
+   * in the GmshReader implementation, but it is not actually used anywhere.
+   */
+  struct [[deprecated]] GmshReaderOptions
   {
     enum GeometryOrder {
       /** @brief edges are straight lines. */
