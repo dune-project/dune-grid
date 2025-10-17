@@ -5,6 +5,15 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 
 # Master (will become release 2.11)
 
+- The `GmshReader` facility now supports reading Version 4 Gmsh files. This includes both
+  the ASCII and the binary variants of this format. The user interface is unchanged by this,
+  but this may change eventually. The code is essentially the one from Simon Praetorius'
+  `dune-gmsh4` module, but not all features of that module are supported yet.
+  Likewise, not every feature of `GmshReader` works for Version 4 files. In particular,
+  getting element or boundary segment data is not supported yet, and neither is
+  constructing explicit `BoundarySegment` objects. However, basic grid file reading works,
+  and more features will/may be added eventually.
+
 - Make `YaspGrid` compatible with MSVC's implementation of the C++ Standard Library.
 
 # Release 2.10

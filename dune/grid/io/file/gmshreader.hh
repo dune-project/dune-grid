@@ -16,6 +16,8 @@
 
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/io/file/gmsh/gmsh2parser.hh>
+#include <dune/grid/io/file/gmsh/gmsh4reader.hh>
+#include <dune/grid/io/file/gmsh/utility/version.hh>
 
 namespace Dune
 {
@@ -98,14 +100,6 @@ namespace Dune
      All grids in a gmsh file live in three-dimensional Euclidean space.  If the world dimension
      of the grid type that you are reading the file into is less than three, the remaining coordinates
      are simply ignored.
-
-     \note Recent versions of Gmsh introduced a new .msh file format (version 4) with a different syntax.
-     This is currently not supported by GmshReader. One can export to an older .msh version as follows:
-       - select File&rarr;Export (or CTRL+E)
-       - select file format `.msh`
-       - a dialog asks for options
-       - select 'Version 2 ASCII' and mark 'Save all elements'
-
    */
   template<typename GridType>
   class GmshReader
@@ -226,6 +220,10 @@ namespace Dune
      *       intent to do this. An alternative is to use the other overloads which provide compile-time
      *       checking of the provided parameter combinations.
      *
+     * \warning The following does not work when the file is in Version 4 Gmsh format:
+     * Filling the boundarySegmentToPhysicalEntity and elementToPhysicalEntity fields,
+     * controlling verbosity, and inserting boundary segments.
+     *
      * \todo This interface is error-prone and should not be exposed to the user. However, the
      *       compile-time overloads may not provide sufficient runtime flexibility in all cases.
      *       Therefore this interface is kept until a better interface can be agreed on.
@@ -239,6 +237,12 @@ namespace Dune
       // make a grid factory
       Dune::GridFactory<Grid> factory;
 
+      if (Impl::Gmsh::fileVersion(fileName)[0]==4)
+      {
+        Impl::Gmsh::Gmsh4Reader<Grid>::fillFactory(factory, fileName);
+        return factory.createGrid();
+      }
+
       doRead(
         factory, fileName, boundarySegmentToPhysicalEntity,
         elementToPhysicalEntity, verbose, insertBoundarySegments
@@ -247,10 +251,20 @@ namespace Dune
       return factory.createGrid();
     }
 
-    /** \todo doc me */
+    /** \brief Read Gmsh grid file into a `GridFactory` object
+     *
+     * \warning Controlling verbosity, and inserting boundary segments does not work
+     * when the file is in Version 4 Gmsh format.
+     */
     static void read (Dune::GridFactory<Grid>& factory, const std::string& fileName,
                       bool verbose = true, bool insertBoundarySegments=true)
     {
+      if (Impl::Gmsh::fileVersion(fileName)[0]==4)
+      {
+        Impl::Gmsh::Gmsh4Reader<Grid>::fillFactory(factory, fileName);
+        return;
+      }
+
       doRead(
         factory, fileName, discarded(std::vector<int>{}),
         discarded(std::vector<int>{}), verbose, insertBoundarySegments
@@ -276,6 +290,9 @@ namespace Dune
      * intersection.  These can be obtained from the `factory`, and are lost
      * once the grid gets modified (refined or load-balanced).
      *
+     * \warning The following does not work when the file is in Version 4 Gmsh format:
+     * Filling the boundarySegmentData and elementData fields, and controlling verbosity.
+     *
      * \note At the moment the data containers are still filled internally,
      *       even if they are ignored.  So not having to pass them is more of
      *       a convenience feature and less of an optimization.  This may
@@ -287,6 +304,12 @@ namespace Dune
                       DataArg elementData,
                       bool verbose=true)
     {
+      if (Impl::Gmsh::fileVersion(fileName)[0]==4)
+      {
+        Impl::Gmsh::Gmsh4Reader<Grid>::fillFactory(factory, fileName);
+        return;
+      }
+
       doRead(
         factory, fileName,
         boundarySegmentData.data_
@@ -313,6 +336,10 @@ namespace Dune
      *       intent to do this. An alternative is to use the other overloads which provide compile-time
      *       checking of the provided parameter combinations.
      *
+     * \warning The following does not work when the file is in Version 4 Gmsh format:
+     * Filling the boundarySegmentToPhysicalEntity and elementToPhysicalEntity fields,
+     * controlling verbosity, and inserting boundary segments.
+     *
      * \todo This interface is error-prone and should not be exposed to the user. However, the
      *       compile-time overloads may not provide sufficient runtime flexibility in all cases.
      *       Therefore this interface is kept until a better interface can be agreed on.
@@ -324,6 +351,12 @@ namespace Dune
                       std::vector<int>& elementToPhysicalEntity,
                       bool verbose, bool insertBoundarySegments)
     {
+      if (Impl::Gmsh::fileVersion(fileName)[0]==4)
+      {
+        Impl::Gmsh::Gmsh4Reader<Grid>::fillFactory(factory, fileName);
+        return;
+      }
+
       doRead(
         factory, fileName, boundarySegmentToPhysicalEntity,
         elementToPhysicalEntity, verbose, insertBoundarySegments
@@ -361,6 +394,8 @@ namespace Dune
      * Passing any option to the interface will overwrite these defaults.
      *
      * A Dune grid object can be obtained via the `createGrid()` member
+     *
+     * \warning All options are automatically `false` when the file is in Version 4 Gmsh format.
      */
     GmshReader(const std::string& fileName,
                Gmsh::ReaderOptions options = defaultOpts)
@@ -480,6 +515,12 @@ namespace Dune
 
     void readGridFile (const std::string& fileName, GridFactory<Grid>& factory, Gmsh::ReaderOptions options)
     {
+      if (Impl::Gmsh::fileVersion(fileName)[0]==4)
+      {
+        Impl::Gmsh::Gmsh4Reader<Grid>::fillFactory(factory, fileName);
+        return;
+      }
+
       const bool verbose = options & Opts::verbose;
       const bool insertBoundarySegments = options & Opts::insertBoundarySegments;
       const bool readBoundaryData = options & Opts::readBoundaryData;
