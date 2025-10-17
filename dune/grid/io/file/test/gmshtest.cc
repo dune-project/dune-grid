@@ -293,11 +293,6 @@ try
   return 0;
 
 }
-catch ( Dune::Exception &e )
-{
-  std::cerr << e << std::endl;
-  return 1;
-}
 catch (std::exception &e) {
   std::cerr << e.what() << std::endl;
   return 1;
