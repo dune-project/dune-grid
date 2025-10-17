@@ -16,7 +16,6 @@
 
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/grid/common/datahandleif.hh>
-#include <dune/grid/io/file/gmshreader.hh>
 
 namespace Dune
 {
