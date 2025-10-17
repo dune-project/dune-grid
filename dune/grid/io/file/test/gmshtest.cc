@@ -71,7 +71,7 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
   auto elementsIDs = reader.extractElementData();
   auto boundaryIDs = reader.extractBoundaryData();
 
-  // Reorder boundary IDs according to the inserction index
+  // Reorder boundary IDs according to the insertion index
   const auto leafGridView(grid->leafGridView());
   if(!boundaryIDs.empty())
   {
