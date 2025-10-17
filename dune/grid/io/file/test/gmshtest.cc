@@ -34,7 +34,9 @@
 #endif
 
 #include <dune/common/exceptions.hh>
+#if GMSH_ONEDGRID
 #include <dune/grid/onedgrid.hh>
+#endif
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/test/gridcheck.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
