@@ -23,8 +23,28 @@ int main(int argc, char** argv)
 {
   MPIHelper::instance(argc, argv);
 
-  { // Read a 2d triangle grid from a Gmsh V2 file
-    std::unique_ptr grid = Impl::Gmsh::Gmsh4Reader<UGGrid<2> >::createGridFromFile(DUNE_GRID_EXAMPLE_GRIDS_PATH "/gmsh/curved2d.msh");
+  const std::string path = DUNE_GRID_EXAMPLE_GRIDS_PATH "gmsh/";
+
+  { // Read a 2d ASCII test grid
+    auto grid = Impl::Gmsh::Gmsh4Reader<UGGrid<2> >::createGridFromFile(path + "hybrid-testgrid-2d-v4-ascii.msh");
+
+    gridcheck(*grid);
+  }
+
+  { // Read a 2d binary test grid
+    auto grid = Impl::Gmsh::Gmsh4Reader<UGGrid<2> >::createGridFromFile(path + "hybrid-testgrid-2d-v4-binary.msh");
+
+    gridcheck(*grid);
+  }
+
+  { // Read a 3d ASCII test grid
+    auto grid = Impl::Gmsh::Gmsh4Reader<UGGrid<3> >::createGridFromFile(path + "hybrid-testgrid-3d-v4-ascii.msh");
+
+    gridcheck(*grid);
+  }
+
+  { // Read a 3d binary test grid
+    auto grid = Impl::Gmsh::Gmsh4Reader<UGGrid<2> >::createGridFromFile(path + "hybrid-testgrid-3d-v4-ascii.msh");
 
     gridcheck(*grid);
   }
