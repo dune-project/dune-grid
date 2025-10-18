@@ -125,15 +125,7 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
 
   // Test whether grid can be read without giving the gridfactory explicitly
   {
-    // unique_ptr
-    std::unique_ptr<GridType> gridUnique =
-      GmshReader<GridType>::read(inputName);
-  }
-
-  {
-    // shared_ptr
-    std::shared_ptr<GridType> gridShared =
-      GmshReader<GridType>::read(inputName);
+    std::unique_ptr gridUnique = GmshReader<GridType>::read(inputName);
   }
 
   // test deprecated reading without gridfactory but with data
