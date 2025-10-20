@@ -35,7 +35,7 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
   interfaces at compilation time using c++20 concepts. Note that, this feature is still in development and
   might be subject to changes.
 
-- A new parameter 'bisectioncompatibility' for DGF block GridParameter was added.
+- A new parameter `bisectioncompatibility` for DGF block GridParameter was added.
 
 - `MultipleCodimMultipleGeomTypeMapper` is assignable.
 
