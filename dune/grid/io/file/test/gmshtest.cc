@@ -34,7 +34,9 @@
 #endif
 
 #include <dune/common/exceptions.hh>
+#if GMSH_ONEDGRID
 #include <dune/grid/onedgrid.hh>
+#endif
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/test/gridcheck.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
@@ -71,7 +73,7 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
   auto elementsIDs = reader.extractElementData();
   auto boundaryIDs = reader.extractBoundaryData();
 
-  // Reorder boundary IDs according to the inserction index
+  // Reorder boundary IDs according to the insertion index
   const auto leafGridView(grid->leafGridView());
   if(!boundaryIDs.empty())
   {
@@ -123,15 +125,7 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
 
   // Test whether grid can be read without giving the gridfactory explicitly
   {
-    // unique_ptr
-    std::unique_ptr<GridType> gridUnique =
-      GmshReader<GridType>::read(inputName);
-  }
-
-  {
-    // shared_ptr
-    std::shared_ptr<GridType> gridShared =
-      GmshReader<GridType>::read(inputName);
+    std::unique_ptr gridUnique = GmshReader<GridType>::read(inputName);
   }
 
   // test deprecated reading without gridfactory but with data
@@ -292,11 +286,6 @@ try
 
   return 0;
 
-}
-catch ( Dune::Exception &e )
-{
-  std::cerr << e << std::endl;
-  return 1;
 }
 catch (std::exception &e) {
   std::cerr << e.what() << std::endl;

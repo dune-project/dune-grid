@@ -34,8 +34,12 @@ namespace Dune
      \{
    */
 
-  //! Options for read operation
-  struct GmshReaderOptions
+  /** \brief Options for read operation
+   *
+   * \deprecated The class is deprecated, because it looks like it should be used
+   * in the GmshReader implementation, but it is not actually used anywhere.
+   */
+  struct [[deprecated]] GmshReaderOptions
   {
     enum GeometryOrder {
       /** @brief edges are straight lines. */
@@ -929,10 +933,6 @@ namespace Dune
     typedef GridType Grid;
 
     /** \todo doc me
-     *
-     * \return The return type is a special pointer type that casts into Grid*,
-     *    std::unique_ptr<Grid>, and std::shared_ptr<Grid>.  It is scheduled
-     *    to be replaced by std::unique_ptr<Grid> eventually.
      */
     static std::unique_ptr<Grid> read (const std::string& fileName, bool verbose = true, bool insertBoundarySegments=true)
     {
@@ -1105,8 +1105,9 @@ namespace Dune
      * \brief Construct a Gmsh reader object from a file name and a grid factory
      * \param fileName Name of the file to read from.
      * \param options Options of the type `Dune::Gmsh::ReaderOptions`
-     * \note Use this constructor if you need access to the grid factor,
-     *       e.g. for obtaining boundary segment insertion indices.
+     *
+     * Use this constructor if you need access to the grid factory after the grid
+     * has been read, e.g., for obtaining boundary segment insertion indices.
      */
     GmshReader(const std::string& fileName, GridFactory<Grid>& factory,
                Gmsh::ReaderOptions options = defaultOpts)
