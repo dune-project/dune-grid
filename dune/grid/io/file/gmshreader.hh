@@ -547,8 +547,8 @@ namespace Dune
     std::vector<int> elementIndexToGmshPhysicalEntity_;
     std::vector<int> boundarySegmentIndexToGmshPhysicalEntity_;
 
-    bool hasElementData_;
-    bool hasBoundaryData_;
+    bool hasElementData_ = false;
+    bool hasBoundaryData_ = false;
 
     // for better error messages, we keep track of these separately
     bool extractedElementData_ = false;
