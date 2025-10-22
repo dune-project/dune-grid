@@ -61,6 +61,7 @@ using read_gf_result_t =
 template <typename GridType>
 void testReadingAndWritingGrid( const std::string& path, const std::string& gridName,
                                 const std::string& gridManagerName, int refinements,
+                                bool expectsElementData = true,
                                 bool expectsBoundarySegments = false)
 {
   // Read the grid
@@ -70,8 +71,10 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
   std::cout<<"Reading mesh file "<<inputName<<std::endl;
   auto reader = GmshReader<GridType>(inputName, gridFactory);
   auto grid = gridFactory.createGrid();
-  auto elementsIDs = reader.extractElementData();
-  auto boundaryIDs = reader.extractBoundaryData();
+
+  // Version 4 file apparently do not always have element data
+  auto elementsIDs = (expectsElementData) ? reader.extractElementData() : std::vector<int>{};
+  auto boundaryIDs = (expectsBoundarySegments) ? reader.extractBoundaryData() : std::vector<int>{};
 
   // Reorder boundary IDs according to the insertion index
   const auto leafGridView(grid->leafGridView());
@@ -260,6 +263,7 @@ try
   const std::string path(static_cast<std::string>(DUNE_GRID_EXAMPLE_GRIDS_PATH)+"gmsh/");
 
 #if GMSH_UGGRID
+  // Test reading Version 2 Gmsh files
   testReadingAndWritingGrid<UGGrid<2> >( path, "curved2d", "UGGrid-2D", refinements );
   testReadingAndWritingGrid<UGGrid<2> >( path, "circle2ndorder", "UGGrid-2D", refinements );
   testReadingAndWritingGrid<UGGrid<2> >( path, "unitsquare_quads_2x2", "UGGrid-2D", refinements );
@@ -268,6 +272,12 @@ try
   testReadingAndWritingGrid<UGGrid<3> >( path, "pyramid2ndorder", "UGGrid-3D", refinements );
   testReadingAndWritingGrid<UGGrid<3> >( path, "hybrid-testgrid-3d", "UGGrid-3D", refinements );
   testReadingAndWritingGrid<UGGrid<3> >( path, "unitcube", "UGGrid-3D", refinements );
+
+  // Test reading Version 4 Gmsh files
+  testReadingAndWritingGrid<UGGrid<2> >( path, "hybrid-testgrid-2d-v4-ascii", "UGGrid-2D", refinements, false, false );
+  testReadingAndWritingGrid<UGGrid<2> >( path, "hybrid-testgrid-2d-v4-binary", "UGGrid-2D", refinements, false, false );
+  testReadingAndWritingGrid<UGGrid<3> >( path, "hybrid-testgrid-3d-v4-ascii", "UGGrid-3D", refinements, false, false );
+  testReadingAndWritingGrid<UGGrid<3> >( path, "hybrid-testgrid-3d-v4-binary", "UGGrid-3D", refinements, false, false );
 #endif
 
 #if GMSH_ALBERTAGRID

@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: Copyright © DUNE Project contributors, see file LICENSE.md in module root
 # SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 
+add_subdirectory(gmsh)
 add_subdirectory(test)
 add_subdirectory(dgfparser)
 add_subdirectory(vtk)
