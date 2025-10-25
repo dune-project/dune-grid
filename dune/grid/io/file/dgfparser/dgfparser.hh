@@ -67,7 +67,6 @@ namespace Dune {
        macrogrid format (dgf)
 
        @section General
-       <!--=========-->
        The DGF format allows the simple description of macrogrids, which
        can be used to construct Dune grids independent of the underlying
        implementation. Due to the generality of the approach only a subset of
@@ -75,7 +74,6 @@ namespace Dune {
        this interface.
 
        @section Usage
-       <!---------------------------------------------->
        There are two ways of constructing Dune grids using DGF files:
 
        -# By defining one of the symbols
@@ -140,7 +138,6 @@ namespace Dune {
           one is available.
 
        @section FORMAT Format Description
-       <!--=========-->
        We assume in the following that the type
        \c GridType  is suitably defined, denoting a dune grid type
        in \c dimworld  space dimension.
@@ -156,13 +153,11 @@ namespace Dune {
        Some example files are given below (\ref EXAMPLES).
 
        @subsection START First line
-       <!---------------------------------------------->
        DGF files must start with the keyword \b DGF. Files passed to the
        grid parser not starting with this keyword are directly passed to a
        suitable constructor in the GridType class.
 
        @subsection BLOCKS Blocks
-       <!---------------------------------------------->
        In the following all blocks are briefly described in alphabetical order.
        The construction of the grid is detailed below. In general lines
        are parse sequentially, with the exception of lines starting
@@ -279,7 +274,6 @@ namespace Dune {
        .
 
        @section CONSTR The Grid Construction Process
-       <!---------------------------------------------->
        For simplicity we first describe how the grid is manually constructed,
        i.e., if no \b Simplexgenerator  block is found. Details on how
        Tetgen/Triangle can be used is detailed below (see \ref Simplexgeneration).
@@ -400,7 +394,6 @@ namespace Dune {
        Afterwards the parameters can be extracted on each processor using the
        method GridPtr<GridType>::parameters.
 
-      <!---------------------------------------------->
      \section Simplexgeneration Using Tetgen/Triangle
          The freely available simplex grid generators are directly
          called via system
@@ -489,8 +482,6 @@ namespace Dune {
 
 
 
-       <!---------------------------------------------->
-
      @section OPEN Work in progress
      -# There should be a mechanism to fix the desired refinement edge
         for simplex grids. An automatic selection is performed using the
@@ -501,7 +492,6 @@ namespace Dune {
         here e.g. a post-processing of the vertex coordinates could be included.
 
      @section EXAMPLES Examples
-     <!--=========-->
      In two space dimensions:
      - \ref dgfexample1
      - \ref dgfexample2
@@ -618,7 +608,6 @@ namespace Dune {
      is added than the same simplex grid as for AlbertaGrid<2,2> would be
      constructed.
 
-       <!---------------------------------------------->
      \section dgfexample6 Boundary Projections
      The following example shows a DGF file that projects 3 sides of a
      quadrilateral onto the surrounding circle:
@@ -626,7 +615,6 @@ namespace Dune {
 
      \image html  example-projection.png "The resulting grid using AlbertaGrid<2>"
 
-       <!---------------------------------------------->
      \section dgfexample4 Grid Generation in 3d
      An automatic tessellation of the unit square using
      a Cartesian Grid is shown.
@@ -660,7 +648,6 @@ namespace Dune {
      Second: \b min-angle = 1.2 and \b max-area = 0.1
              (remove both \% in the \b Simplexgenerator block)
      \image html  examplegrid7area.png "The resulting grid using ALUGrid<3,3,simplex,nonconforming>"
-       <!---------------------------------------------->
 
      This examples show different ways to define a grid for the following
      domain and boundary ids:
@@ -718,7 +705,6 @@ namespace Dune {
 
      \image html  examplegrid10b.png "The resulting grid with vertex parameters"
 
-     <!---------------------------------------------->
      \section dgfexample5 Importing Grids written in a Tetgen/Triangle format
 
      Here a .mesh file used to generate a 3d simplex grid through Tetgen. The

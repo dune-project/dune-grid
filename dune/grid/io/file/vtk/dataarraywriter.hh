@@ -58,7 +58,7 @@ namespace Dune
       //! \brief construct a data array writer
       /**
        * \brief construct a data array writer
-       * \param prec the precision type with which to write the data
+       * \param _prec the precision type with which to write the data
        */
       DataArrayWriter(Precision _prec)
       : prec(_prec)
@@ -117,6 +117,7 @@ namespace Dune
        * \param indent_   Indentation to use.  This is use as-is for the
        *                  header and trailer lines, but increase by one level
        *                  for the actual data.
+       * \param prec_     The precision type with which to write the data.
        */
       AsciiDataArrayWriter(std::ostream& theStream, std::string name,
                            int ncomps, const Indent& indent_, Precision prec_)
@@ -206,6 +207,7 @@ namespace Dune
        * \param indent_   Indentation to use.  This is use as-is for the
        *                  header and trailer lines, but increase by one level
        *                  for the actual data.
+       * \param prec_     The precision type with which to write the data.
        */
       BinaryDataArrayWriter(std::ostream& theStream, std::string name,
                             int ncomps, int nitems, const Indent& indent_, Precision prec_)
@@ -279,6 +281,7 @@ namespace Dune
        *                  section later.
        * \param indent    Indentation to use.  This is uses as-is for the
        *                  header line.
+       * \param prec_     The precision type with which to write the data.
        */
       AppendedRawDataArrayWriter(std::ostream& s, std::string name,
                                  int ncomps, unsigned nitems, unsigned& offset,
@@ -321,6 +324,7 @@ namespace Dune
        *                  appended data section later.
        * \param indent    Indentation to use.  This is uses as-is for the
        *                  header line.
+       * \param prec_     The precision type with which to write the data.
        */
       AppendedBase64DataArrayWriter(std::ostream& s, std::string name,
                                     int ncomps, unsigned nitems,
@@ -365,6 +369,7 @@ namespace Dune
        * \param ncomps    Number of components of the array.
        * \param nitems    Number of cells for cell data/Number of vertices for
        *                  point data.
+       * \param prec_     The precision type with which to write the data.
        */
       NakedBase64DataArrayWriter(std::ostream& theStream, int ncomps,
                                  int nitems, Precision prec_)
@@ -415,6 +420,7 @@ namespace Dune
        * \param ncomps    Number of components of the array.
        * \param nitems    Number of cells for cell data/Number of vertices for
        *                  point data.
+       * \param prec_     The precision type with which to write the data.
        */
       NakedRawDataArrayWriter(std::ostream& theStream, int ncomps,
                               int nitems, Precision prec_)

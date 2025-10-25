@@ -555,9 +555,8 @@ namespace Dune {
      *
      * \param recvgrid the grid stored in this processor
      * \param sendgrid the subgrid to be sent to neighboring processors
-     * \param sendlist the deque to fill with send intersections
-     * \param recvlist the deque to fill with recv intersections
-     * \returns two lists: Intersections to be sent and Intersections to be received
+     * \param[out] sendlist the deque to fill with send intersections
+     * \param[out] recvlist the deque to fill with recv intersections
      */
     void intersections(const YGridComponent<Coordinates>& sendgrid, const YGridComponent<Coordinates>& recvgrid,
                         std::deque<Intersection>& sendlist, std::deque<Intersection>& recvlist)

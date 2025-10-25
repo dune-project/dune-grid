@@ -21,7 +21,7 @@ namespace Dune
   {
 
     /**
-       \defgroup YaspGridPartitioning
+       \defgroup YaspGridPartitioning YaspGrid Partitioning
        \brief Interface and implementations of different partitioning strategies for YaspGrid
 
        If you want to write your own partitioner, inherit from Yasp::Partitioning

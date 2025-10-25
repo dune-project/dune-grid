@@ -372,6 +372,7 @@ namespace Dune {
        * \param ncomps Number of components of the vectors in the array.
        * \param nitems Number of vectors in the array (number of cells/number
        *               of points/number of corners).
+       * \param prec   The precision type with which to write the data.
        *
        * There should never be more than one DataArrayWriter created by the
        * same VTUWriter around.  The returned object should be freed with
