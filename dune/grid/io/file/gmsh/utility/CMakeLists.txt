@@ -3,7 +3,6 @@
 
 install(FILES
   errors.hh
-  lagrangepoints.hh
-  lagrangepoints.impl.hh
   string.hh
+  version.hh
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/io/file/gmsh/utility)
