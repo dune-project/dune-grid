@@ -83,7 +83,11 @@ namespace Dune
    * \since dune-grid 2.11
    */
   template <typename GridType>
-  using GmshReaderParser [[deprecated("Use Impl::Gmsh::Gmsh2Parser directly")]] = Impl::Gmsh::Gmsh2Parser<GridType>;
+  struct [[deprecated("Public interface of the GmshReaderParser has been deprecated since dune 2.11. Use Impl::Gmsh::Gmsh2Parser directly")]]
+  GmshReaderParser : Impl::Gmsh::Gmsh2Parser<GridType>
+  {
+    using Impl::Gmsh::Gmsh2Parser<GridType>::Gmsh2Parser;
+  };
 
   /**
      \ingroup Gmsh
