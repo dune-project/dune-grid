@@ -47,12 +47,6 @@ namespace Impl {
   {
     { gv.template begin<codim>() } -> std::same_as<typename GV::template Codim<codim>::Iterator>;
     { gv.template end<codim>()   } -> std::same_as<typename GV::template Codim<codim>::Iterator>;
-
-    requires (codim != 0) || requires(const typename GV::template Codim<codim>::Entity& entity)
-    {
-      { gv.ibegin(entity) } -> std::same_as<typename GV::IntersectionIterator>;
-      { gv.iend(entity)   } -> std::same_as<typename GV::IntersectionIterator>;
-    };
   } && GridViewAllPartitions<GV,codim>;
 
   template<class GV, class Grid, int codim>
@@ -103,6 +97,14 @@ requires(const GV gv, int codim, Dune::GeometryType type)
     gv.communicate(handle, iface, dir);
   };
 } &&
+(
+  !Dune::Capabilities::hasEntity<typename GV::Grid,0>::v ||
+  requires(const GV gv, const typename GV::template Codim<0>::Entity& entity)
+  {
+    { gv.ibegin(entity) } -> std::same_as<typename GV::IntersectionIterator>;
+    { gv.iend(entity)   } -> std::same_as<typename GV::IntersectionIterator>;
+  }
+) &&
 Impl::GridViewCodim<GV,0> &&
 requires (index_constant<1> from, index_constant<GV::dimension+1> to) {
   Impl::gridViewAllCodims<GV>(range(from, to).to_integer_sequence());
