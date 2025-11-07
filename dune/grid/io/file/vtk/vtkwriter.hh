@@ -27,6 +27,7 @@
 #include <dune/geometry/referenceelements.hh>
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/common/gridenums.hh>
+#include <dune/grid/common/capabilities.hh>
 #include <dune/grid/io/file/vtk/common.hh>
 #include <dune/grid/io/file/vtk/dataarraywriter.hh>
 #include <dune/grid/io/file/vtk/function.hh>
@@ -1449,6 +1450,8 @@ namespace Dune
       {
         if( VTK::geometryType( geomType ) == VTK::polyhedron )
         {
+          if (Capabilities::hasEntity<typename GridView::Grid, 1>::v == false)
+            DUNE_THROW(IOError, "VTKWriter: grid must support codim 1 entities to be able to write VTK polyhedral cells");
           return true;
         }
       }
@@ -1563,19 +1566,23 @@ namespace Dune
       // extract each face as a set of vertex indices
       for( int fce = 0; fce < nFaces; ++ fce )
       {
-        // obtain face
-        const auto face = element.template subEntity< 1 > ( fce );
+        if constexpr (Capabilities::hasEntity<typename GridView::Grid, 1>::v) {
+          // obtain face
+          const auto face = element.template subEntity< 1 > ( fce );
 
-        // get all vertex indices from current face
-        const int nVxFace = face.subEntities( dim );
-        faces.push_back( nVxFace );
-        ++offset ;
-        for( int i=0; i<nVxFace; ++i )
-        {
-          const T vxIndex = indexSet.subIndex( face, i, dim );
-          assert( vxMap.find( vxIndex ) != vxMap.end() );
-          faces.push_back( vxMap[ vxIndex ] );
+          // get all vertex indices from current face
+          const int nVxFace = face.subEntities( dim );
+          faces.push_back( nVxFace );
           ++offset ;
+          for( int i=0; i<nVxFace; ++i )
+          {
+            const T vxIndex = indexSet.subIndex( face, i, dim );
+            assert( vxMap.find( vxIndex ) != vxMap.end() );
+            faces.push_back( vxMap[ vxIndex ] );
+            ++offset ;
+          }
+        } else {
+          DUNE_THROW(IOError, "VTKWriter: grid must support codim 1 entities to be able to write VTK polyhedral cells");
         }
       }
 
