@@ -19,6 +19,8 @@
 #include <dune/common/float_cmp.hh>
 #include <dune/common/stdstreams.hh>
 #include <dune/common/typeutilities.hh>
+#include <dune/common/hybridutilities.hh>
+#include <dune/common/rangeutilities.hh>
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/type.hh>
 #include <dune/grid/common/gridinfo.hh>
@@ -114,6 +116,17 @@ struct subIndexCheck
       assert( seCopy == se );
 
       checkEntitySeedRecovery(g,se);
+
+      // Check subentity counts against reference elements
+      Dune::Hybrid::forEach(Dune::range(Dune::index_constant<Entity::dimension+1-cd>()), [&](auto ccd){
+        if (Dune::Capabilities::hasEntity<Grid, ccd+cd>::v && se.subEntities(cd+ccd) != referenceElement<double,Entity::dimension-cd>(se.type()).size(ccd)) {
+          std::cerr << "Error: Number of subentities of codim " << ccd << " does not match reference element." << std::endl;
+          std::cerr << "       ... entity type: " << se.type() << std::endl;
+          std::cerr << "       ... expected: " << referenceElement<double,Entity::dimension-cd>(se.type()).size(ccd)
+                    << ", got: " << se.subEntities(cd+ccd) << std::endl;
+          DUNE_THROW(Dune::GridError, "subEntities check failed");
+        }
+      });
 
       const typename Grid::LevelGridView &levelGridView = g.levelGridView(e.level());
 
@@ -355,7 +368,7 @@ void assertNeighbor (Grid &g)
       // call global id
       [[maybe_unused]] const typename GlobalIdSet::IdType idG = globalid.id( entity );
 
-      const int numFaces = entity.subEntities(1);
+      const int numFaces = referenceElement<double, dim>(entity.type()).size(1);
       // flag vector for elements faces
       std::vector< bool > visited( numFaces, false );
 
@@ -443,7 +456,7 @@ void assertNeighbor (Grid &g)
 
           // numbering
           const int indexInOutside = it->indexInOutside();
-          const int outNumFaces = outside.subEntities(1);
+          const int outNumFaces = referenceElement<double, dim>(outside.type()).size(1);
           if( (indexInOutside < 0) || (indexInOutside >= outNumFaces) )
           {
             std :: cout << "Error: Invalid indexInOutside: " << indexInOutside
