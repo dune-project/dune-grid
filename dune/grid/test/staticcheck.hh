@@ -424,30 +424,32 @@ struct GridViewInterface
     gv.indexSet();
     using namespace Dune::Hybrid;
     forEach(std::make_integer_sequence< int, dimension+1 >(), [&](auto codim) {
-      typedef typename GridView::template Codim< codim >::Entity Entity;
-      using Iterator [[maybe_unused]] = typename GridView::template Codim< codim >::Iterator;
+      if constexpr (Dune::Capabilities::hasEntity<GridView, codim>::v) {
+        typedef typename GridView::template Codim< codim >::Entity Entity;
+        using Iterator [[maybe_unused]] = typename GridView::template Codim< codim >::Iterator;
 
-      if( gv.template begin< 0 >() == gv.template end< 0 >() )
-        return;
+        if( gv.template begin< 0 >() == gv.template end< 0 >() )
+          return;
 
-      const Entity &entity = gv.template begin< 0 >()->template subEntity< codim >( 0 );
-      gv.indexSet().index( entity );
-      gv.indexSet().contains( entity );
-      try
-      {
-        using namespace Dune::Hybrid;
-        forEach(std::make_integer_sequence< int, GridView::dimension+1 - codim>(), [&](auto subCodim) {
-          gv.indexSet().subIndex( entity, 0, codim+subCodim);
-        });
+        const Entity &entity = gv.template begin< 0 >()->template subEntity< codim >( 0 );
+        gv.indexSet().index( entity );
+        gv.indexSet().contains( entity );
+        try
+        {
+          using namespace Dune::Hybrid;
+          forEach(std::make_integer_sequence< int, GridView::dimension+1 - codim>(), [&](auto subCodim) {
+            gv.indexSet().subIndex( entity, 0, codim+subCodim);
+          });
+        }
+        catch( const Dune::NotImplemented& )
+        {
+          // ignore Dune::NotImplemented for higher codimension
+          if( codim == 0 )
+            throw;
+        }
+
+        gv.indexSet().types( codim );
       }
-      catch( const Dune::NotImplemented& )
-      {
-        // ignore Dune::NotImplemented for higher codimension
-        if( codim == 0 )
-          throw;
-      }
-
-      gv.indexSet().types( codim );
     });
 
     // intersections
