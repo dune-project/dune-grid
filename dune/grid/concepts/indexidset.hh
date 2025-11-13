@@ -17,16 +17,25 @@
 namespace Dune::Concept {
 namespace Impl {
 
+  // only check if Codim<cd>::Entity exists
   template<class IS, int codim>
-  concept IndexSetEntityCodim = Entity<typename IS::template Codim<codim>::Entity> &&
-    requires(const IS is, int i, unsigned int cc, const typename IS::template Codim<codim>::Entity& entity)
-  {
-    { is.template index<codim>(entity)         } -> std::same_as<typename IS::IndexType>;
-    { is.index(entity)                         } -> std::same_as<typename IS::IndexType>;
-    { is.template subIndex<codim>(entity,i,cc) } -> std::same_as<typename IS::IndexType>;
-    { is.subIndex(entity,i,cc)                 } -> std::same_as<typename IS::IndexType>;
-    { is.contains(entity)                      } -> std::convertible_to<bool>;
-  };
+  concept IndexSetEntityCodim =
+  (
+    !requires
+    {
+      typename IS::template Codim<codim>::Entity;
+    }
+  ) || (
+    Entity<typename IS::template Codim<codim>::Entity> &&
+      requires(const IS is, int i, unsigned int cc, const typename IS::template Codim<codim>::Entity& entity)
+    {
+      { is.template index<codim>(entity)         } -> std::same_as<typename IS::IndexType>;
+      { is.index(entity)                         } -> std::same_as<typename IS::IndexType>;
+      { is.template subIndex<codim>(entity,i,cc) } -> std::same_as<typename IS::IndexType>;
+      { is.subIndex(entity,i,cc)                 } -> std::same_as<typename IS::IndexType>;
+      { is.contains(entity)                      } -> std::convertible_to<bool>;
+    }
+  );
 
   template<class IS, std::size_t... c>
   void indexSetEntityAllCodims(std::integer_sequence<std::size_t,c...>)
@@ -39,6 +48,8 @@ namespace Impl {
  * @ingroup GridConcepts
  * @details Dune::Grid::LevelIndexSet and Dune::Grid::LeafIndexSet are templates
  * for this model
+ * @note The type `typename IS::template Codim<0>::Entity` is required to satisfy the EntityGeneral concept
+ * only if the type exists (i.e. substitution failure is allowed).
  */
 template<class IS>
 concept IndexSet = requires(const IS is, Dune::GeometryType type, int codim)
@@ -59,13 +70,22 @@ requires (index_constant<1> from, index_constant<IS::dimension+1> to) {
 
 namespace Impl {
 
+  // only check if Codim<cd>::Entity exists
   template<class IS, int codim>
-  concept IdSetEntityCodim = Entity<typename IS::template Codim<codim>::Entity> &&
-    requires(const IS is, const typename IS::template Codim<codim>::Entity& entity)
-  {
-    { is.template id<codim>(entity) } -> std::same_as<typename IS::IdType>;
-    { is.id(entity)                 } -> std::same_as<typename IS::IdType>;
-  };
+  concept IdSetEntityCodim =
+  (
+    !requires
+    {
+      typename IS::template Codim<codim>::Entity;
+    }
+  ) || (
+    Entity<typename IS::template Codim<codim>::Entity> &&
+      requires(const IS is, const typename IS::template Codim<codim>::Entity& entity)
+    {
+      { is.template id<codim>(entity) } -> std::same_as<typename IS::IdType>;
+      { is.id(entity)                 } -> std::same_as<typename IS::IdType>;
+    }
+  );
 
   template<class IS, std::size_t... c>
   void idSetEntityAllCodims(std::integer_sequence<std::size_t,c...>)
@@ -78,6 +98,8 @@ namespace Impl {
  * @ingroup GridConcepts
  * @details Dune::Grid::GlobalIdSet and Dune::Grid::LocalIdSet are templates
  * for this model
+ * @note The type `typename IS::template Codim<0>::Entity` is required to satisfy the EntityGeneral concept
+ * only if the type exists (i.e. substitution failure is allowed).
  */
 template<class IS>
 concept IdSet = requires(const IS is, const typename IS::template Codim<0>::Entity& entity, int i, unsigned int cc)

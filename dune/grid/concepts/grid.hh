@@ -42,29 +42,40 @@ namespace Impl {
 
   template<class G, int codim>
   concept GridCodimAllPartitions =
-    GridCodimPartition<G,codim,Dune::PartitionIteratorType::Interior_Partition> &&
-    GridCodimPartition<G,codim,Dune::PartitionIteratorType::InteriorBorder_Partition> &&
-    GridCodimPartition<G,codim,Dune::PartitionIteratorType::Overlap_Partition> &&
-    GridCodimPartition<G,codim,Dune::PartitionIteratorType::OverlapFront_Partition> &&
-    GridCodimPartition<G,codim,Dune::PartitionIteratorType::All_Partition> &&
-    GridCodimPartition<G,codim,Dune::PartitionIteratorType::Ghost_Partition>;
+    (
+      !(Dune::Capabilities::hasEntityIterator<G,codim>::v)
+    ) || (
+      GridCodimPartition<G,codim,Dune::PartitionIteratorType::Interior_Partition> &&
+      GridCodimPartition<G,codim,Dune::PartitionIteratorType::InteriorBorder_Partition> &&
+      GridCodimPartition<G,codim,Dune::PartitionIteratorType::Overlap_Partition> &&
+      GridCodimPartition<G,codim,Dune::PartitionIteratorType::OverlapFront_Partition> &&
+      GridCodimPartition<G,codim,Dune::PartitionIteratorType::All_Partition> &&
+      GridCodimPartition<G,codim,Dune::PartitionIteratorType::Ghost_Partition>
+    );
 
   template<class G, int codim>
   concept GridCodim =
-    Geometry<typename G::template Codim<codim>::Geometry> &&
-    Geometry<typename G::template Codim<codim>::LocalGeometry> &&
-    Entity<typename G::template Codim<codim>::Entity> &&
-    EntitySeed<typename G::template Codim<codim>::EntitySeed> &&
-  requires(const G cg, const typename G::template Codim<codim>::EntitySeed& seed)
-  {
-    { cg.entity(seed) } -> std::convertible_to<typename G::template Codim<codim>::Entity>;
+  (
+    !(Dune::Capabilities::hasEntity<G,codim>::v)
+  ) || (
+      Geometry<typename G::template Codim<codim>::Geometry> &&
+      Geometry<typename G::template Codim<codim>::LocalGeometry> &&
+      Entity<typename G::template Codim<codim>::Entity> &&
+      EntitySeed<typename G::template Codim<codim>::EntitySeed> &&
+      std::same_as<typename G::template Codim<codim>::Entity, typename G::template Codim<0>::Entity::template Codim<codim>::Entity> &&
+      std::same_as<typename G::template Codim<codim>::Entity, typename G::LeafIndexSet::template Codim<codim>::Entity> &&
+      std::same_as<typename G::template Codim<codim>::Entity, typename G::LevelIndexSet::template Codim<codim>::Entity> &&
+    requires(const G cg, const typename G::template Codim<codim>::EntitySeed& seed)
+    {
+      { cg.entity(seed) } -> std::convertible_to<typename G::template Codim<codim>::Entity>;
 
-    requires (not Dune::Capabilities::canCommunicate<G,codim>::v) ||
-      requires(G g, Archetypes::CommDataHandle<std::byte>& handle)
-      {
-        { g.loadBalance(handle) } -> std::convertible_to<bool>;
-      };
-  } && GridCodimAllPartitions<G,codim>;
+      requires (not Dune::Capabilities::canCommunicate<G,codim>::v) ||
+        requires(G g, Archetypes::CommDataHandle<std::byte>& handle)
+        {
+          { g.loadBalance(handle) } -> std::convertible_to<bool>;
+        };
+    } && GridCodimAllPartitions<G,codim>
+  );
 
   template<class G, std::size_t... c>
   void gridAllCodims(std::index_sequence<c...>)
