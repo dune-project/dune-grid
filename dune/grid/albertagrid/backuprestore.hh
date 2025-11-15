@@ -26,22 +26,22 @@ namespace Dune
   {
     typedef AlbertaGrid< dim, dimworld > Grid;
 
-    /** \copydoc Dune::BackupRestoreFacility::backup(grid,filename)  */
+    /** \copydoc Dune::BackupRestoreFacility::backup()  */
     static void backup ( const Grid &grid, const std::string &filename )
     {
       grid.writeGrid( filename, 0.0 );
     }
 
-    /** \copydoc Dune::BackupRestoreFacility::backup(grid,stream)
+    /** \copydoc Dune::BackupRestoreFacility::backup()
         \note This method is not available for AlbertGrid.
               Use try/catch to catch the NotImplemented exception
               and fall back to the other backup method. */
-    static void backup ( const Grid &grid, std::ostream &stream )
+    static void backup ( const Grid &/*grid*/, std::ostream &/*stream*/ )
     {
       DUNE_THROW( NotImplemented, "backup / restore using streams not implemented." );
     }
 
-    /** \copydoc Dune::BackupRestoreFacility::restore(filename) */
+    /** \copydoc Dune::BackupRestoreFacility::restore(const std::string&) */
     static Grid *restore ( const std::string &filename )
     {
       Grid *grid = new Grid;
@@ -50,11 +50,11 @@ namespace Dune
       return grid;
     }
 
-    /** \copydoc Dune::BackupRestoreFacility::restore(stream)
+    /** \copydoc Dune::BackupRestoreFacility::restore()
         \note This method is not available for AlbertGrid.
               Use try/catch to catch the NotImplemented exception
               and fall back to the other restore method. */
-    static Grid *restore ( std::istream &stream )
+    static Grid *restore ( std::istream &/*stream*/ )
     {
       DUNE_THROW( NotImplemented, "backup / restore using streams not implemented." );
     }

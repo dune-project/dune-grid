@@ -85,7 +85,7 @@ namespace Dune
     typedef typename Grid::ctype ctype;
     typedef typename Grid::Traits::Communication Comm;
 
-    /** \copydoc Dune::BackupRestoreFacility::backup(grid,filename)  */
+    /** \copydoc BackupRestoreFacility::backup() */
     static void backup ( const Grid &grid, const std::string &filename )
     {
       if (grid.comm().rank() == 0)
@@ -101,7 +101,7 @@ namespace Dune
       }
     }
 
-    /** \copydoc Dune::BackupRestoreFacility::backup(grid,stream)  */
+    /** \copydoc BackupRestoreFacility::backup() */
     static void backup ( const Grid &grid, std::ostream &stream )
     {
       stream << "YaspGrid BackupRestore Format Version: " << YASPGRID_BACKUPRESTORE_FORMAT_VERSION << std::endl;
@@ -128,7 +128,9 @@ namespace Dune
       MaybeHaveOrigin<Coordinates>::writeOrigin(stream, grid.begin()->coords);
     }
 
-    /** \copydoc Dune::BackupRestoreFacility::restore(filename) */
+    /** \copydoc BackupRestoreFacility::restore(const std::string &)
+     * \param comm Communication object.
+     */
     static Grid *restore (const std::string &filename, Comm comm = Comm())
     {
       std::ifstream file(filename);
@@ -141,7 +143,9 @@ namespace Dune
       }
     }
 
-    /** \copydoc Dune::BackupRestoreFacility::restore(stream) */
+    /** \copydoc BackupRestoreFacility::restore(std::istream &)
+     * \param comm Communication object.
+     */
     static Grid *restore (std::istream &stream, Comm comm = Comm())
     {
       std::string input;
@@ -223,7 +227,7 @@ namespace Dune
     typedef YaspGrid<dim,TensorProductCoordinates<ctype,dim> > Grid;
     typedef typename Grid::Traits::Communication Comm;
 
-    /** \copydoc Dune::BackupRestoreFacility::backup(grid,filename)  */
+    /** \copydoc BackupRestoreFacility::backup() */
     static void backup ( const Grid &grid, const std::string &filename )
     {
       std::ostringstream filename_str;
@@ -238,7 +242,7 @@ namespace Dune
         std::cerr << "ERROR: BackupRestoreFacility::backup: couldn't open file `" << filename_str.str() << "'" << std::endl;
     }
 
-    /** \copydoc Dune::BackupRestoreFacility::backup(grid,stream)  */
+    /** \copydoc BackupRestoreFacility::backup() */
     static void backup ( const Grid &grid, std::ostream &stream )
     {
       stream << "YaspGrid BackupRestore Format Version: " << YASPGRID_BACKUPRESTORE_FORMAT_VERSION << std::endl;
@@ -262,7 +266,10 @@ namespace Dune
       grid.begin()->coords.print(stream);
     }
 
-    /** \copydoc Dune::BackupRestoreFacility::restore(filename) */
+    /**
+     * \copydoc Dune::BackupRestoreFacility::restore()
+     * \param comm Communication object.
+     */
     static Grid *restore (const std::string &filename, Comm comm = Comm())
     {
       std::ostringstream filename_str;
@@ -278,7 +285,10 @@ namespace Dune
       }
     }
 
-    /** \copydoc Dune::BackupRestoreFacility::restore(stream) */
+    /**
+     * \copydoc BackupRestoreFacility::restore()
+     * \param comm Communication object.
+     */
     static Grid *restore (std::istream &stream, Comm comm = Comm())
     {
       std::string input;
