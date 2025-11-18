@@ -20,6 +20,10 @@ include(DuneMacros)
 
 # deactivate global include-directories
 dune_policy(SET DP_DEFAULT_INCLUDE_DIRS NEW)
+
+# deactivate global calls to add_dune_all_flags in tests
+dune_policy(SET DP_TEST_ADD_ALL_FLAGS NEW)
+
 # do not making all suggested dependencies required automatically
 dune_policy(SET DP_SUGGESTED_MODULE_DEPENDENCIES_REQUIRED_DOWNSTREAM NEW)
 
