@@ -3,7 +3,11 @@ SPDX-FileCopyrightText: Copyright © DUNE Project contributors, see file LICENSE
 SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 -->
 
-# Master (will become release 2.11)
+# Master (will become release 2.12)
+
+- ...
+
+# Release 2.11
 
 - The grid concepts are now able to check grids that have entity types disabled.
   For such entity codimension, the type `typename T::template Codim<0>::Entity` is required to satisfy the `EntityGeneral` concept
