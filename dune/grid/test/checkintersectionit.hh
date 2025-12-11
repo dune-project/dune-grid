@@ -14,6 +14,7 @@
 
 #include "checkiterators.hh"
 #include "checkgeometry.hh"
+#include "checkindexset.hh"
 
 /** \file
     \brief Tests for the IntersectionIterator
@@ -543,20 +544,22 @@ void checkIntersectionIterator ( const GridViewType &view,
 
       if( indexSet.index(insideFace) != indexSet.index(outsideFace) )
       {
-        DUNE_THROW(Dune::GridError)
-                  << "Error: Index of conforming intersection differs when "
+        std::cerr << "Error: Index of conforming intersection differs when "
                   << "obtained from inside and outside.\n"
                   << "       inside index = " << indexSet.index(insideFace)
                   << ", outside index = " << indexSet.index(outsideFace) << std::endl;
+        if (EnableSubIndexCheck<GridType>::v)
+          DUNE_THROW(Dune::GridError, "Intersection error");
       }
 
       if( indexSet.subIndex( *eIt, indexInInside, 1 ) != indexSet.subIndex( outside, indexInOutside, 1 ) )
       {
-        DUNE_THROW(Dune::GridError)
-                  << "Error: SubIndex of conforming intersection differs when "
+        std::cerr << "Error: SubIndex of conforming intersection differs when "
                   << "obtained from inside and outside.\n"
                   << "       inside sub-index = " << indexSet.subIndex( *eIt, indexInInside, 1 )
                   << ", outside sub-index = " << indexSet.subIndex( outside, indexInOutside, 1 ) << std::endl;
+        if (EnableSubIndexCheck<GridType>::v)
+          DUNE_THROW(Dune::GridError, "Intersection error");
       }
 
       for (std::size_t cc = 0; cc != GridType::dimension; ++cc) {
@@ -574,7 +577,8 @@ void checkIntersectionIterator ( const GridViewType &view,
             for (unsigned int subSubIndex = 0; subSubIndex != insideFace.subEntities(1 + cc); ++subSubIndex)
               std::cerr << indexSet.subIndex( *eIt, indexInInside, 1 + cc);
             std::cerr << ", outside sub-sub-index = " << indexSet.subIndex(outsideFace, subSubIndex, 1 + cc) << std::endl;
-            DUNE_THROW(Dune::GridError, "Intersection error");
+            if (EnableSubIndexCheck<GridType>::v)
+              DUNE_THROW(Dune::GridError, "Intersection error");
           }
         }
         if (not sub_indices.empty()) {
@@ -586,7 +590,8 @@ void checkIntersectionIterator ( const GridViewType &view,
             std::cerr << ", outside sub-sub-indices = ";
             for (unsigned int subSubIndex = 0; subSubIndex != insideFace.subEntities(1 + cc); ++subSubIndex)
               std::cerr << indexSet.subIndex(outsideFace, subSubIndex, 1 + cc);
-          DUNE_THROW(Dune::GridError, "Intersection error");
+          if (EnableSubIndexCheck<GridType>::v)
+            DUNE_THROW(Dune::GridError, "Intersection error");
         }
       }
 

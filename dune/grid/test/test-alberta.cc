@@ -38,6 +38,12 @@ struct EnableLevelIntersectionIteratorCheck< Dune::AlbertaGrid< dim, dimworld > 
   static const bool v = false;
 };
 
+template< int dim, int dimworld >
+struct EnableSubIndexCheck< Dune::AlbertaGrid< dim, dimworld > >
+{
+  static const bool v = false;
+};
+
 
 template <class GridType >
 void markOne ( GridType & grid , int num , int ref )

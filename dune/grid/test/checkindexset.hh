@@ -35,6 +35,12 @@ struct EnableLevelIntersectionIteratorCheck< const Grid >
   static const bool v = EnableLevelIntersectionIteratorCheck< Grid >::v;
 };
 
+template< class Grid >
+struct EnableSubIndexCheck
+{
+  static const bool v = true;
+};
+
 
 namespace Dune
 {
@@ -121,8 +127,9 @@ namespace Dune
               for (auto i : subSubIndices)
                 std::cerr << i << " ";
               std::cerr << std::endl;
-              DUNE_THROW(GridError,
-                        "subIndices and subSubIndices of codim " << codim+cc << " do not match");
+              if constexpr (EnableSubIndexCheck<GridType>::v)
+                DUNE_THROW(GridError,
+                          "subIndices and subSubIndices of codim " << codim+cc << " do not match");
             }
 
             subIndices.clear();
@@ -171,7 +178,8 @@ namespace Dune
       if( lset.subIndex( en, subEntity, codim ) != lset.index( subE) )
       {
         std::cerr << "Index for subEntity does not match." << std::endl;
-        assert( lset.subIndex( en, subEntity, codim ) == lset.index( subE) );
+        if constexpr (EnableSubIndexCheck<GridType>::v)
+          DUNE_THROW(Dune::GridError, "SubEntity index error");
       }
 
       // Make a unique identifier for the subEntity.  Since indices are unique only per GeometryType,
@@ -500,7 +508,8 @@ namespace Dune
           if( vxidx != lset.index( vxE ) )
           {
             std::cerr << "Error: index( *subEntity< dim >( i ) ) != subIndex( entity, i, dim )" << std::endl;
-            assert( vxidx == lset.index( vxE ) );
+            if constexpr (EnableSubIndexCheck<Grid>::v)
+              DUNE_THROW(Dune::GridError, "SubEntity index error");
           }
 
           // check whether the coordinates are the same
