@@ -8,6 +8,6 @@ Maintainer: dune-devel@lists.dune-project.org
 Description: module providing main interfaces for setting and traversing grids
 URL: https://gitlab.dune-project.org/core/dune-grid
 Python-Requires:
-Depends: dune-geometry (>= 2.11)
-Suggests: dune-uggrid (>=2.11)
+Depends: dune-geometry (>= 2.12)
+Suggests: dune-uggrid (>=2.12)
 Whitespace-Hook: Yes
