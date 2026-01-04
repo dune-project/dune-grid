@@ -148,12 +148,14 @@ private:
            << "  passed = True\n";
 
       for (const auto& file : files_) {
-        code << "  reader = " << Impl::pythonVTKReader(file) << "()\n"
+        code << "  print(f\"Reading file "<<file<<"\")\n"
+             << "  reader = " << Impl::pythonVTKReader(file) << "()\n"
              << "  reader.SetFileName('" << Impl::pyq(file) << "')\n"
              << "  reader.Update()\n"
              << "  if (not (reader.GetOutput().GetNumberOfCells() > 0)):\n"
              << "      print('ERROR in {}'.format('" << Impl::pyq(file) << "'))\n"
-             << "      passed = False\n";
+             << "      passed = False\n"
+             << "  print(f\"Finished reading file "<<file<<"\")\n";
       }
 
       code << "  if passed:\n      return 0\n  else:\n     return 1\n";
