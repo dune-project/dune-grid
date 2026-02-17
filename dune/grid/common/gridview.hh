@@ -287,7 +287,49 @@ namespace Dune
       return impl().ghostSize(codim);
     }
 
-    /** \brief Communicate data on this view */
+    /** \brief Communicate data on this view.
+     *
+     *  \remark \n
+     *   The method returns an object that behaves similar to a
+     *   std::future (without providing access to something)
+     *   and should fulfill the following interface.
+     *
+     *  \code{.cpp}
+     *  class CommunicationFuture
+     *  {
+     *  public:
+     *    // Destructor: make sure that communication was finalized before destruction
+     *    ~CommunicationFuture() { if( ! ready() ) wait(); }
+     *
+     *    // return \b true if the communication was finalized
+     *    bool ready() const;
+     *
+     *    // actively wait until the communication is finalized
+     *    void wait();
+     *  };
+     *  \endcode
+     *
+     *  \remark \n
+     *  The communication can be used both in blocking and
+     *  non-blocking mode in the following way.
+     *  \code{.cpp}
+     *  ...
+     *  // blocking communication, which is finish upon return of the method
+     *  // Note: This requires the communication future to ensure that the
+     *  // communication is finalized upon destruction (if not before)
+     *  gridView.communicate(dataHandle, iftype, dir);
+     *
+     *  ...
+     *  // non-blocking communication, where the future object is stored
+     *  auto future = gridView.communicate(dataHandle, iftype, dir);
+     *
+     *  // do some computations
+     *  ...
+     *  // wait for the communication to finish
+     *  if( ! future.ready() )
+     *    future.wait();
+     *  \endcode
+     */
     template< class DataHandleImp, class DataType >
     auto communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
                        InterfaceType iftype,
@@ -313,7 +355,7 @@ namespace Dune
     const Implementation &impl () const { return impl_; }
 
   protected:
-    /** \brief Communicate data on this view */
+    /** \protected communicate forwarding to implementation */
     template< class DataHandleImp, class DataType >
     auto communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
                        InterfaceType iftype,
@@ -338,7 +380,7 @@ namespace Dune
       bool valid () const { printMessage(); return true; }
     };
 
-    /** \brief Communicate data on this view */
+    /** \protected communicate forwarding to deprecated implementation */
     template< class DataHandleImp, class DataType >
     auto communicate ( CommDataHandleIF< DataHandleImp, DataType > &data,
                        InterfaceType iftype,
