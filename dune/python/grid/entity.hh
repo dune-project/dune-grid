@@ -124,13 +124,13 @@ namespace Dune
           },
           R"doc(
                Inter-level access to father entity on the next-coarser grid.
-                 The given entity resulted directly from a subdivision of its father
-                 entity. For elements on the macro grid, father is None.
+               The given entity resulted directly from a subdivision of its father
+               entity. For elements on the macro grid, father is None.
 
-                 Note: If the partitionType of the Entity is GhostEntity,
-                       it is not guaranteed that this method is working
-                       or implemented in general.
-                       For some grids it might be available, though.
+               Note: If the partitionType of the Entity is GhostEntity,
+                     it is not guaranteed that this method is working
+                     or implemented in general.
+                     For some grids it might be available, though.
           )doc"
           );
 
