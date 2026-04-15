@@ -243,12 +243,14 @@ namespace Dune
             auto vertices = item.template cast< std::vector< unsigned int > >();
 
             pybind11::function f;
+            /*
             try
             {
               f = item.template cast< pybind11::function >();
             }
             catch( const pybind11::cast_error & )
             {}
+            */
 
             if( f )
               factory.insertBoundarySegment( vertices, std::make_shared< BoundarySegment< dimGrid, dimWorld > >( f ) );
