@@ -10,6 +10,7 @@ add_python_targets(grid
   core
   map
   datahandle
+  mesh2dgf
 )
 dune_add_pybind11_module(NAME _grid)
 set_property(TARGET _grid PROPERTY LINK_LIBRARIES Dune::Grid APPEND)
