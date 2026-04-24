@@ -14,6 +14,7 @@
 
 #include "checkiterators.hh"
 #include "checkgeometry.hh"
+#include "checkindexset.hh"
 
 /** \file
     \brief Tests for the IntersectionIterator
@@ -45,9 +46,9 @@ inline void checkParallel ( const Dune::FieldVector< ctype, dimworld > &normal,
   using std::sqrt;
   if( (normal.two_norm()*refNormal.two_norm() - normal*refNormal) > sqrt(std::numeric_limits< ctype >::epsilon()) )
   {
-    std::cerr << "Error: " << name << " does not point in the direction of outer normal." << std::endl;
-    std::cerr << "       " << name << " = " << normal << ", outer normal = " << refNormal << std :: endl;
-    assert( false );
+    DUNE_THROW(Dune::GridError)
+          << "Error: " << name << " does not point in the direction of outer normal.\n"
+          << "       " << name << " = " << normal << ", outer normal = " << refNormal << std :: endl;
   }
 }
 
@@ -67,11 +68,10 @@ inline void checkJIn ( const Dune :: FieldVector< ctype, dimworld > &normal,
   if (x.infinity_norm() > sqrt(std::numeric_limits< ctype >::epsilon()))
   {
     const Dune::FieldMatrix< ctype, dimworld, facedim > &mjit = jit;
-    std :: cerr << "Error:  (J^-1 * n) != 0." << std :: endl;
-    std :: cerr << "       " << name << " = " << normal
-                << std :: endl;
-    std :: cerr << "       J^-1^T = \n" << mjit << std::endl;
-    assert( false );
+    DUNE_THROW(Dune::GridError)
+                << "Error: The normal vector is not orthogonal to the intersection geometry (J^-1 * n != 0).\n"
+                << "       Normal vector: " << name << " = " << normal << "\n"
+                << "       Transposed inverse Jacobian (J^-1^T): \n" << mjit << std::endl;
   }
 }
 
@@ -92,15 +92,21 @@ void checkIntersectionAssignment ( const GridView &view, const typename GridView
     IntersectionIterator it2 = view.ibegin( *l2 );
 
     // verify prerequisites
-    assert( l1 != l2 );
-    assert( it1 != it2 );
-    assert( it1->inside() == *l1 );
-    assert( it2->inside() == *l2 );
+    if( l1 == l2 )
+      DUNE_THROW(Dune::GridError, "Error: Iterators l1 and l2 should not be equal during intersection assignment check.");
+    if( it1 == it2 )
+      DUNE_THROW(Dune::GridError, "Error: Intersection iterators it1 and it2 should not be equal during intersection assignment check.");
+    if( it1->inside() != *l1 )
+      DUNE_THROW(Dune::GridError, "Error: Intersection iterator it1 does not point to the expected inside entity.");
+    if( it2->inside() != *l2 )
+      DUNE_THROW(Dune::GridError, "Error: Intersection iterator it2 does not point to the expected inside entity.");
 
     // check assignment
     it1 = it2;
-    assert( it1 == it2 );
-    assert( it1->inside() == *l2 );
+    if( it1 != it2 )
+      DUNE_THROW(Dune::GridError, "Error: Assignment of intersection iterator it2 to it1 failed.");
+    if( it1->inside() != *l2 )
+      DUNE_THROW(Dune::GridError, "Error: After assignment, intersection iterator it1 does not point to the expected inside entity.");
   }
 }
 
@@ -145,7 +151,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
   if( intersection.boundary() )
   {
     if( !intersection.conforming() && !intersection.neighbor() )
-      DUNE_THROW( Dune::GridError, "Boundary intersections must be conforming." );
+      DUNE_THROW(Dune::GridError, "Error: Boundary intersections must be conforming or have a neighboring entity.");
   }
 
   // check the geometry
@@ -155,8 +161,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
   if( geometry.type() != intersection.type() )
   {
-    std::cerr << "Error: Reference geometry type for intersection and its global geometry differ." << std::endl;
-    assert( false );
+    DUNE_THROW(Dune::GridError) << "Error: The type of the intersection geometry does not match the reference geometry type." << std::endl;
   }
 
   // check the geometryInInside
@@ -167,7 +172,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
     checkLocalGeometry( geometryInInside, inside.type(), "geometryInInside" );
 
     if( geometryInInside.corners() != geometry.corners() )
-      DUNE_THROW( Dune::GridError, "Intersection's geometry is inconsistent with concatenation of inside entity's geometry and intersection's geometryInInside.");
+      DUNE_THROW(Dune::GridError, "Error: The number of corners in geometryInInside does not match the intersection geometry.");
 
     // create quadrature rule as a set of test points
 
@@ -203,7 +208,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
           std::cerr << " | " << insideGeometry.corner( i );
         std::cerr << std::endl;
 
-        assert( false );
+        DUNE_THROW(Dune::GridError, "Intersection error");
       }
     }
   }
@@ -220,7 +225,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
       const LocalGeometry geometryInOutside = intersection.geometryInOutside();
       checkLocalGeometry( geometryInOutside, outside.type(), "geometryInOutside" );
       if( geometryInOutside.corners() != geometry.corners() )
-        DUNE_THROW( Dune::GridError, "Intersection's geometry is inconsistent with concatenation of outside entity's geometry and intersection's geometryInOutside.");
+        DUNE_THROW(Dune::GridError, "Error: The number of corners in geometryInOutside does not match the intersection geometry.");
 
       if( !intersection.boundary() )
       {
@@ -260,7 +265,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
               std::cerr << " | " << outsideGeometry.corner( i );
             std::cerr << std::endl;
 
-            assert( false );
+            DUNE_THROW(Dune::GridError, "Intersection error");
           }
         }
       }
@@ -316,9 +321,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
           x -= geometry.corner( c );
           if( x*normal >= tolerance )
           {
-            std::cerr << "outerNormal not orthogonal to line between corner "
-                      << (c-1) << " and corner " << c << "." << std::endl;
-            assert( false );
+            DUNE_THROW(Dune::GridError) << "Error: The outer normal is not orthogonal to the line connecting the corners of the geometry.";
           }
         }
       }
@@ -334,10 +337,10 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
       const ctype det = geometry.integrationElement( pt );
       if( std::abs( det - intNormal.two_norm() ) > tolerance )
       {
-        std::cerr << "Error: integrationOuterNormal yields wrong length." << std::endl;
-        std::cerr << "       |integrationOuterNormal| = " << intNormal.two_norm()
+        DUNE_THROW(Dune::GridError)
+                  << "Error: The length of the integrationOuterNormal does not match the integration element.\n"
+                  << "       |integrationOuterNormal| = " << intNormal.two_norm()
                   << ", integrationElement = " << det << std::endl;
-        assert( false );
       }
 
       checkJIn( intNormal, jit, "integrationOuterNormal" );
@@ -348,13 +351,12 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
         if( (intNormal - refIntNormal).two_norm() > tolerance )
         {
           std::cerr << "Error: Wrong integration outer normal (" << intNormal
-
                     << ", should be " << refIntNormal << ")." << std::endl;
           std::cerr << "       Intersection: " << geometry.corner( 0 );
           for( int c = 1; c < geometry.corners(); ++c )
             std::cerr << ", " << geometry.corner( c );
           std::cerr << "." << std::endl;
-          assert( false );
+          DUNE_THROW(Dune::GridError, "Intersection error");
         }
       }
 
@@ -363,9 +365,9 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
       const typename Intersection::GlobalCoordinate unitNormal = intersection.unitOuterNormal( pt );
       if( std::abs( ctype( 1 ) - unitNormal.two_norm() ) > tolerance )
       {
-        std::cerr << "Error: unitOuterNormal yields wrong length." << std::endl;
-        std::cerr << "       |unitOuterNormal| = " << unitNormal.two_norm() << std::endl;
-        assert( false );
+        DUNE_THROW(Dune::GridError)
+                  << "Error: The length of the unitOuterNormal is not equal to 1.\n"
+                  << "       |unitOuterNormal| = " << unitNormal.two_norm() << std::endl;
       }
 
       checkJIn( unitNormal, jit, "unitOuterNormal" );
@@ -384,7 +386,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
         normal[ indexInInside / 2 ] = 2 * (indexInInside % 2) - 1;
 
         if( (normal - unitNormal).infinity_norm() > tolerance )
-          DUNE_THROW( Dune::GridError, "Unit normal is not in Cartesian format, although isCartesian is true" );
+          DUNE_THROW( Dune::GridError, "Error: The unit normal is not in Cartesian format, although isCartesian is true." );
       }
     }
 
@@ -394,12 +396,11 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
     if( (intersection.centerUnitOuterNormal() - intersection.unitOuterNormal( refFace.position( 0, 0 ) )).two_norm() > tolerance )
     {
-      std::cerr << "Error: centerUnitOuterNormal() does not match unitOuterNormal( "
-                << refFace.position( 0, 0 ) << " )." << std::endl;
-      std::cerr << "       centerUnitOuterNormal = " << intersection.centerUnitOuterNormal()
+      DUNE_THROW(Dune::GridError)
+                << "Error: The centerUnitOuterNormal does not match the unitOuterNormal at the reference face position.\n"
+                << "       centerUnitOuterNormal = " << intersection.centerUnitOuterNormal()
                 << ", unitOuterNormal( " << refFace.position( 0, 0 ) << " ) = "
                 << intersection.unitOuterNormal( refFace.position( 0, 0 ) ) << std::endl;
-      assert( false );
     }
   }
 }
@@ -462,8 +463,7 @@ void checkIntersectionIterator ( const GridViewType &view,
 
     if( *eIt != intersection.inside() )
     {
-      std::cerr << "Error: Intersection's inside entity does not equal the entity the intersection iterator was started on." << std::endl;
-      assert( false );
+      DUNE_THROW(Dune::GridError, "Error: Intersection's inside entity does not equal the entity the intersection iterator was started on.");
     }
 
     // check if conforming() method is compatible with static information on grid view
@@ -492,25 +492,25 @@ void checkIntersectionIterator ( const GridViewType &view,
 
         if( oiit->indexInInside() != intersection.indexInOutside() )
         {
-          std::cerr << "Error: symmetric intersection found, but with incorrect numbering." << std::endl;
-          std::cerr << "       (from inside: indexInOutside = " << intersection.indexInOutside()
+          DUNE_THROW(Dune::GridError)
+                    << "Error: symmetric intersection found, but with incorrect numbering.\n"
+                    << "       (from inside: indexInOutside = " << intersection.indexInOutside()
                     << ", from outside: indexInInside = " << oiit->indexInInside() << ")." << std::endl;
-          assert( false );
         }
         if( oiit->indexInOutside() != intersection.indexInInside() )
         {
-          std::cerr << "Error: symmetric intersection found, but with incorrect numbering." << std::endl;
-          std::cerr << "       (from inside: indexInInside = " << intersection.indexInInside()
+          DUNE_THROW(Dune::GridError)
+                    << "Error: symmetric intersection found, but with incorrect numbering.\n"
+                    << "       (from inside: indexInInside = " << intersection.indexInInside()
                     << ", from outside: indexInOutside = " << oiit->indexInOutside() << ")." << std::endl;
-          assert( false );
         }
 
         if( oiit->boundary() != intersection.boundary() )
         {
-          std::cerr << "Error: symmetric intersection found, but with incorrect boundary flag." << std::endl;
-          std::cerr << "       (from inside: boundary = " << intersection.boundary()
+          DUNE_THROW(Dune::GridError)
+                    << "Error: symmetric intersection found, but with incorrect boundary flag.\n"
+                    << "       (from inside: boundary = " << intersection.boundary()
                     << ", from outside: boundary = " << oiit->boundary() << ")." << std::endl;
-          assert( false );
         }
       }
 
@@ -527,8 +527,9 @@ void checkIntersectionIterator ( const GridViewType &view,
       }
     }
 
-    // check consistency of conforming intersection
+    std::set<typename GridViewType::IndexSet::IndexType> sub_indices;
 
+    // check consistency of conforming intersection
     if( intersection.conforming() && intersection.neighbor() && !intersection.boundary() )
     {
       const Entity outside = intersection.outside();
@@ -536,34 +537,82 @@ void checkIntersectionIterator ( const GridViewType &view,
       const int indexInInside = intersection.indexInInside();
       const int indexInOutside = intersection.indexInOutside();
 
+      const auto& insideFace = eIt->template subEntity<1>( indexInInside );
+      const auto& outsideFace = outside.template subEntity<1>( indexInOutside );
+
       const typename GridViewType::IndexSet &indexSet = view.indexSet();
-      if( indexSet.subIndex( *eIt, indexInInside, 1 ) != indexSet.subIndex( outside, indexInOutside, 1 ) )
+
+      if( indexSet.index(insideFace) != indexSet.index(outsideFace) )
       {
         std::cerr << "Error: Index of conforming intersection differs when "
-                  << "obtained from inside and outside." << std::endl;
-        std::cerr << "       inside index = " << indexSet.subIndex( *eIt, indexInInside, 1 )
-                  << ", outside index = " << indexSet.subIndex( outside, indexInOutside, 1 ) << std::endl;
-        assert( false );
+                  << "obtained from inside and outside.\n"
+                  << "       inside index = " << indexSet.index(insideFace)
+                  << ", outside index = " << indexSet.index(outsideFace) << std::endl;
+        if (EnableSubIndexCheck<GridType>::v)
+          DUNE_THROW(Dune::GridError, "Intersection error");
+      }
+
+      if( indexSet.subIndex( *eIt, indexInInside, 1 ) != indexSet.subIndex( outside, indexInOutside, 1 ) )
+      {
+        std::cerr << "Error: SubIndex of conforming intersection differs when "
+                  << "obtained from inside and outside.\n"
+                  << "       inside sub-index = " << indexSet.subIndex( *eIt, indexInInside, 1 )
+                  << ", outside sub-index = " << indexSet.subIndex( outside, indexInOutside, 1 ) << std::endl;
+        if (EnableSubIndexCheck<GridType>::v)
+          DUNE_THROW(Dune::GridError, "Intersection error");
+      }
+
+      for (std::size_t cc = 0; cc != GridType::dimension; ++cc) {
+        for (unsigned int subSubIndex = 0; subSubIndex != insideFace.subEntities(1 + cc); ++subSubIndex)
+        {
+          sub_indices.insert(indexSet.subIndex(insideFace, subSubIndex, 1 + cc));
+        }
+        for (unsigned int subSubIndex = 0; subSubIndex != outsideFace.subEntities(1 + cc); ++subSubIndex)
+        {
+          if (sub_indices.erase(indexSet.subIndex(outsideFace, subSubIndex, 1 + cc)) == 0)
+          {
+            std::cerr << "Error: SubSubIndices of codim " << 1+cc << " of conforming intersection differs when "
+                      << "obtained from inside and outside." << std::endl;
+            std::cerr << "       inside sub-sub-indices = ";
+            for (unsigned int subSubIndex = 0; subSubIndex != insideFace.subEntities(1 + cc); ++subSubIndex)
+              std::cerr << indexSet.subIndex( *eIt, indexInInside, 1 + cc);
+            std::cerr << ", outside sub-sub-index = " << indexSet.subIndex(outsideFace, subSubIndex, 1 + cc) << std::endl;
+            if (EnableSubIndexCheck<GridType>::v)
+              DUNE_THROW(Dune::GridError, "Intersection error");
+          }
+        }
+        if (not sub_indices.empty()) {
+          std::cerr << "Error: SubSubIndex of conforming intersection differs when "
+                    << "obtained from inside and outside." << std::endl;
+            std::cerr << "       inside sub-sub-indices = ";
+            for (unsigned int subSubIndex = 0; subSubIndex != insideFace.subEntities(1 + cc); ++subSubIndex)
+              std::cerr << indexSet.subIndex( *eIt, indexInInside, 1 + cc);
+            std::cerr << ", outside sub-sub-indices = ";
+            for (unsigned int subSubIndex = 0; subSubIndex != insideFace.subEntities(1 + cc); ++subSubIndex)
+              std::cerr << indexSet.subIndex(outsideFace, subSubIndex, 1 + cc);
+          if (EnableSubIndexCheck<GridType>::v)
+            DUNE_THROW(Dune::GridError, "Intersection error");
+        }
       }
 
       const typename GridType::LocalIdSet &localIdSet = view.grid().localIdSet();
       if( localIdSet.subId( *eIt, indexInInside, 1 ) != localIdSet.subId( outside, indexInOutside, 1 ) )
       {
-        std::cerr << "Error: Local id of conforming intersection differs when "
-                  << "obtained from inside and outside." << std::endl;
-        std::cerr << "       inside id = " << localIdSet.subId( *eIt, indexInInside, 1 )
+        DUNE_THROW(Dune::GridError)
+                  << "Error: Local id of conforming intersection differs when "
+                  << "obtained from inside and outside.\n"
+                  << "       inside id = " << localIdSet.subId( *eIt, indexInInside, 1 )
                   << ", outside id = " << localIdSet.subId( outside, indexInOutside, 1 ) << std::endl;
-        assert( false );
       }
 
       const typename GridType::GlobalIdSet &globalIdSet = view.grid().globalIdSet();
       if( globalIdSet.subId( *eIt, indexInInside, 1 ) != globalIdSet.subId( outside, indexInOutside, 1 ) )
       {
-        std::cerr << "Error: Global id of conforming intersection differs when "
-                  << "obtained from inside and outside." << std::endl;
-        std::cerr << "       inside id = " << globalIdSet.subId( *eIt, indexInInside, 1 )
+        DUNE_THROW(Dune::GridError)
+                  << "Error: Global id of conforming intersection differs when "
+                  << "obtained from inside and outside.\n"
+                  << "       inside id = " << globalIdSet.subId( *eIt, indexInInside, 1 )
                   << ", outside id = " << globalIdSet.subId( outside, indexInOutside, 1 ) << std::endl;
-        assert( false );
       }
     }
 
@@ -583,10 +632,7 @@ void checkIntersectionIterator ( const GridViewType &view,
   if( hasBoundaryIntersection != eIt->hasBoundaryIntersections() )
   {
     if( !hasBoundaryIntersection )
-    {
-      std::cerr << "Entity::hasBoundaryIntersections has a false positive." << std::endl;
-      assert( false );
-    }
+      DUNE_THROW(Dune::GridError, "Entity::hasBoundaryIntersections has a false positive.");
     else
       DUNE_THROW( Dune::GridError, "Entity::hasBoundaryIntersections has a false negative." );
   }

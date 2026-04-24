@@ -412,6 +412,38 @@ namespace Dune {
       return i;
     }
 
+    /** \brief For a given element side, renumber subvertex numbers
+     * from Dune numbering to UG numbering
+     */
+    static int faceVertexDUNEtoUG(GeometryType sideType, int side, int subVertex)
+    {
+      if (sideType.isTriangle())
+        return subVertex;
+
+      // If it's not a triangle it must be a quadrilateral
+      const int renumbering[4] = {0, 1, 3, 2};
+      return renumbering[subVertex];
+
+    }
+
+
+    /** \brief For a given element side, renumber subedge numbers
+     * from Dune numbering to UG numbering
+     */
+    static int faceEdgeDUNEtoUG(GeometryType sideType, int side, int subEdge)
+    {
+      if (sideType.isTriangle())
+      {
+        constexpr int renumbering[3] = {0, 2, 1};
+        return renumbering[subEdge];
+      }
+
+      // If it's not a triangle it must be a quadrilateral
+      constexpr int renumbering[4] = {2, 1, 3, 0};
+      return renumbering[subEdge];
+
+    }
+
   };
 }
 

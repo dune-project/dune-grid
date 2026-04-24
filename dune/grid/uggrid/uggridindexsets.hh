@@ -59,10 +59,11 @@ namespace Dune {
                            int i,
                            unsigned int codim) const
     {
-      // The entity is a vertex, so each subentity must be a vertex too (anything else is not supported)
-      if (cc==dim)
+      // Index of the entity itself
+      assert(codim >= cc);
+      if (cc==codim)
       {
-        assert(codim==dim);
+        assert(i == 0);
         return UG_NS<dim>::levelIndex(entity.impl().getTarget());
       }
 
@@ -72,10 +73,6 @@ namespace Dune {
         // The entity is an element
         if constexpr (cc==0)
         {
-          // Element indices
-          if (codim==0)
-            return UG_NS<dim>::levelIndex(entity.impl().getTarget());
-
           // Edge indices
           if (codim==1)
           {
@@ -105,10 +102,6 @@ namespace Dune {
         // The entity is an element
         if constexpr (cc==0)
         {
-          // Element indices
-          if (codim==0)
-            return UG_NS<dim>::levelIndex(entity.impl().getTarget());
-
           // Face indices
           if (codim==1)
             return UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(entity.impl().getTarget(),
@@ -135,12 +128,29 @@ namespace Dune {
         // The entity is a face
         if constexpr (cc==1)
         {
-          DUNE_THROW(NotImplemented, "Subindices of an element face");
+          // get element of codimension 0
+          unsigned int side = std::numeric_limits<unsigned int>::max();
+          typename UG_NS<dim>::Element* element_ptr = nullptr;
+          UG_NS<dim>::GetElementAndSideFromSideVector(entity.impl().getTarget(), element_ptr, side);
+
+          // edge index
+          if (codim == 2)
+            return UG_NS<dim>::levelIndex(UG_NS<dim>::ElementEdge(element_ptr,
+                UG_NS<dim>::Edge_Of_Side(element_ptr, side, UGGridRenumberer<dim>::faceEdgeDUNEtoUG(entity.type(), side, i))));
+
+          // vertex index
+          if (codim == 3)
+            return UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(element_ptr,
+                UG_NS<dim>::Corner_Of_Side(element_ptr, side, UGGridRenumberer<dim>::faceVertexDUNEtoUG(entity.type(), side, i))));
         }
 
         // The entity is an edge
         if constexpr (cc==2)
+        {
+          // vertex index
+          assert(codim == 3);
           return UG_NS<dim>::levelIndex(entity.impl().getTarget()->links[i].nbnode);
+        }
       }
 
       // Should never happen
@@ -266,10 +276,11 @@ namespace Dune {
                            int i,
                            unsigned int codim) const
     {
-      // The entity is a vertex, so each subentity must be a vertex too (anything else is not supported)
-      if (cc==dim)
+      // Index of the entity itself
+      assert(codim >= cc);
+      if (cc==codim)
       {
-        assert(codim==dim);
+        assert(i == 0);
         return UG_NS<dim>::leafIndex(entity.impl().getTarget());
       }
 
@@ -279,10 +290,6 @@ namespace Dune {
         // The entity is an element
         if constexpr (cc==0)
         {
-          // Element indices
-          if (codim==0)
-            return UG_NS<dim>::leafIndex(entity.impl().getTarget());
-
           // Edge indices
           if (codim==1)
           {
@@ -312,10 +319,6 @@ namespace Dune {
         // The entity is an element
         if constexpr (cc==0)
         {
-          // Element indices
-          if (codim==0)
-            return UG_NS<dim>::leafIndex(entity.impl().getTarget());
-
           // Face indices
           if (codim==1)
             return UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(entity.impl().getTarget(),
@@ -342,12 +345,29 @@ namespace Dune {
         // The entity is a face
         if constexpr (cc==1)
         {
-          DUNE_THROW(NotImplemented, "Subindices of an element face");
+          // get element of codimension 0
+          unsigned int side = std::numeric_limits<unsigned int>::max();
+          typename UG_NS<dim>::Element* element_ptr = nullptr;
+          UG_NS<dim>::GetElementAndSideFromSideVector(entity.impl().getTarget(), element_ptr, side);
+
+          // edge index
+          if (codim == 2)
+            return UG_NS<dim>::leafIndex(UG_NS<dim>::ElementEdge(element_ptr,
+                UG_NS<dim>::Edge_Of_Side(element_ptr, side, UGGridRenumberer<dim>::faceEdgeDUNEtoUG(entity.type(), side, i))));
+
+          // vertex index
+          if (codim == 3)
+            return UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(element_ptr,
+                UG_NS<dim>::Corner_Of_Side(element_ptr, side, UGGridRenumberer<dim>::faceVertexDUNEtoUG(entity.type(), side, i))));
         }
 
         // The entity is an edge
         if constexpr (cc==2)
+        {
+          // vertex index
+          assert(codim == 3);
           return UG_NS<dim>::leafIndex(entity.impl().getTarget()->links[i].nbnode);
+        }
       }
 
       return std::numeric_limits<unsigned int>::max();

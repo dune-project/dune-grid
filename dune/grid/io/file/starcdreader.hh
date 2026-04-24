@@ -154,6 +154,7 @@ namespace Dune {
               std::vector<unsigned int> pyramidVertices(5);
               for (int k = 0; k < 5; k++)
                 pyramidVertices[k] = vertices[k] - 1;
+              std::swap(pyramidVertices[2], pyramidVertices[3]);
               factory.insertElement(Dune::GeometryTypes::pyramid, pyramidVertices);
             }
             else {             // cube

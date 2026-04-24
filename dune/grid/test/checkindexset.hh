@@ -35,6 +35,12 @@ struct EnableLevelIntersectionIteratorCheck< const Grid >
   static const bool v = EnableLevelIntersectionIteratorCheck< Grid >::v;
 };
 
+template< class Grid >
+struct EnableSubIndexCheck
+{
+  static const bool v = true;
+};
+
 
 namespace Dune
 {
@@ -93,6 +99,46 @@ namespace Dune
                  "wrong number of subEntities of codim " << codim);
     }
 
+    // check that sub-sub-entites indices
+    std::set<typename IndexSetType::IndexType> subIndices, subSubIndices;
+    if constexpr (codim == 0) {
+      Dune::Hybrid::forEach(std::make_index_sequence<GridType::dimension+1-codim>{}, [&](auto cc){
+        Dune::Hybrid::forEach(std::make_index_sequence<GridType::dimension+1-codim-cc>{}, [&](auto ccc){
+          if constexpr (Dune::Capabilities::hasEntity< GridType, codim + cc >::v) {
+            // collect all indices of every sub-entity on same codim as sub-sub-entity
+            for (const auto& sse : subEntities(en, Dune::Codim<codim + cc + ccc>{}))
+              subIndices.insert(lset.index( sse ));
+
+            // collect all indices of every sub-sub-entity of the sub-entity
+            for (const auto& sse : subEntities(en, Dune::Codim<codim + cc>{}))
+              for (unsigned int subSubIndex = 0; subSubIndex != sse.subEntities(codim + cc + ccc); ++subSubIndex)
+                subSubIndices.insert(lset.subIndex(sse, subSubIndex, codim + cc + ccc));
+
+            // check that sub-index are strictly contained in sub-sub-indices set
+            if(subIndices != subSubIndices or subIndices.size() != en.subEntities(codim + cc + ccc)) {
+              std::cerr << "entity index = " << lset.index(en)
+                        << ", type = " << en.type()
+                        << ", sub-index codim = " << codim+cc
+                        << ", sub-sub-index codim = " << codim+cc+ccc << std::endl
+                        << "sub-index = ";
+              for (auto i : subIndices)
+                std::cerr << i << " ";
+              std::cerr << std::endl << "sub-sub-index = ";
+              for (auto i : subSubIndices)
+                std::cerr << i << " ";
+              std::cerr << std::endl;
+              if constexpr (EnableSubIndexCheck<GridType>::v)
+                DUNE_THROW(GridError,
+                          "subIndices and subSubIndices of codim " << codim+cc << " do not match");
+            }
+
+            subIndices.clear();
+            subSubIndices.clear();
+          }
+        });
+      });
+    }
+
     for( int subEntity = 0; subEntity < refElem.size( 0, 0, codim ); ++subEntity )
     {
 
@@ -132,7 +178,8 @@ namespace Dune
       if( lset.subIndex( en, subEntity, codim ) != lset.index( subE) )
       {
         std::cerr << "Index for subEntity does not match." << std::endl;
-        assert( lset.subIndex( en, subEntity, codim ) == lset.index( subE) );
+        if constexpr (EnableSubIndexCheck<GridType>::v)
+          DUNE_THROW(Dune::GridError, "SubEntity index error");
       }
 
       // Make a unique identifier for the subEntity.  Since indices are unique only per GeometryType,
@@ -461,7 +508,8 @@ namespace Dune
           if( vxidx != lset.index( vxE ) )
           {
             std::cerr << "Error: index( *subEntity< dim >( i ) ) != subIndex( entity, i, dim )" << std::endl;
-            assert( vxidx == lset.index( vxE ) );
+            if constexpr (EnableSubIndexCheck<Grid>::v)
+              DUNE_THROW(Dune::GridError, "SubEntity index error");
           }
 
           // check whether the coordinates are the same

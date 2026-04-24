@@ -7,6 +7,13 @@
 
 using namespace Dune;
 
+template< int dim, int dimworld >
+struct EnableSubIndexCheck< Dune::AlbertaGrid< dim, dimworld > >
+{
+  static const bool v = false;
+};
+
+
 int main(int argc, char ** argv)
 try {
   runDGFTest<AlbertaGrid<2>>(argc,argv);
