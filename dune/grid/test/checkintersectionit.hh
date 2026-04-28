@@ -545,7 +545,7 @@ void checkIntersectionIterator ( const GridViewType &view,
                   << "obtained from inside and outside.\n"
                   << "       inside sub-index = " << indexSet.subIndex( *eIt, indexInInside, 1 )
                   << ", outside sub-index = " << indexSet.subIndex( outside, indexInOutside, 1 ) << std::endl;
-        if (EnableSubIndexCheck<GridType>::v)
+        if (EnableSubIndexCheck<GridViewType>::v)
           DUNE_THROW(Dune::GridError, "Intersection error");
       }
 
@@ -559,7 +559,7 @@ void checkIntersectionIterator ( const GridViewType &view,
                     << "obtained from inside and outside.\n"
                     << "       inside index = " << indexSet.index(insideFace)
                     << ", outside index = " << indexSet.index(outsideFace) << std::endl;
-          if (EnableSubIndexCheck<GridType>::v)
+          if (EnableSubIndexCheck<GridViewType>::v)
             DUNE_THROW(Dune::GridError, "Intersection error");
         }
 
@@ -579,7 +579,7 @@ void checkIntersectionIterator ( const GridViewType &view,
               for (unsigned int subSubIndex = 0; subSubIndex != insideFace.subEntities(1 + cc); ++subSubIndex)
                 std::cerr << indexSet.subIndex( *eIt, indexInInside, 1 + cc);
               std::cerr << ", outside sub-sub-index = " << indexSet.subIndex(outsideFace, subSubIndex, 1 + cc) << std::endl;
-              if (EnableSubIndexCheck<GridType>::v)
+              if (EnableSubIndexCheck<GridViewType>::v)
                 DUNE_THROW(Dune::GridError, "Intersection error");
             }
           }
@@ -592,7 +592,7 @@ void checkIntersectionIterator ( const GridViewType &view,
               std::cerr << ", outside sub-sub-indices = ";
               for (unsigned int subSubIndex = 0; subSubIndex != insideFace.subEntities(1 + cc); ++subSubIndex)
                 std::cerr << indexSet.subIndex(outsideFace, subSubIndex, 1 + cc);
-            if (EnableSubIndexCheck<GridType>::v)
+            if (EnableSubIndexCheck<GridViewType>::v)
               DUNE_THROW(Dune::GridError, "Intersection error");
           }
         }
