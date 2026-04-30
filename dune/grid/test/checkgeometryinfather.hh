@@ -108,7 +108,7 @@ void checkGeometryInFather(const GridType& grid)
             sons != end; ++sons)
         {
           ++countChildren;
-          int count = sons->level();
+          [[maybe_unused]] int count = sons->level();
           if( sons->hasFather() )
           {
             typedef typename GridType::template Codim<0>::Entity Entity;

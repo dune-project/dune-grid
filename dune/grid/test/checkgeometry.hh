@@ -139,7 +139,7 @@ namespace Dune
     typedef typename GV::ctype ctype;
     constexpr static int dim  = GV::dimension;
 
-    const FieldVector<ctype, dim> pos(0.2);
+    [[maybe_unused]] const FieldVector<ctype, dim> pos(0.2);
 
     auto it = gridView.template begin<0>();
     const auto end = gridView.template end<0>();

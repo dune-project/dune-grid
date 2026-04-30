@@ -118,15 +118,19 @@ struct subIndexCheck
       checkEntitySeedRecovery(g,se);
 
       // Check subentity counts against reference elements
-      Dune::Hybrid::forEach(Dune::range(Dune::index_constant<Entity::dimension+1-cd>()), [&](auto ccd){
-        if (Dune::Capabilities::hasEntity<Grid, ccd+cd>::v && se.subEntities(cd+ccd) != referenceElement<double,Entity::dimension-cd>(se.type()).size(ccd)) {
-          std::cerr << "Error: Number of subentities of codim " << ccd << " does not match reference element." << std::endl;
-          std::cerr << "       ... entity type: " << se.type() << std::endl;
-          std::cerr << "       ... expected: " << referenceElement<double,Entity::dimension-cd>(se.type()).size(ccd)
-                    << ", got: " << se.subEntities(cd+ccd) << std::endl;
-          DUNE_THROW(Dune::GridError, "subEntities check failed");
-        }
-      });
+      if (!se.type().isNone())
+      {
+        Dune::Hybrid::forEach(Dune::range(Dune::index_constant<Entity::dimension+1-cd>()), [&](auto ccd){
+          if (Dune::Capabilities::hasEntity<Grid, ccd+cd>::v &&
+              (int)se.subEntities(cd+ccd) != referenceElement<double,Entity::dimension-cd>(se.type()).size(ccd)) {
+            std::cerr << "Error: Number of subentities of codim " << ccd << " does not match reference element." << std::endl;
+            std::cerr << "       ... entity type: " << se.type() << std::endl;
+            std::cerr << "       ... expected: " << referenceElement<double,Entity::dimension-cd>(se.type()).size(ccd)
+                      << ", got: " << se.subEntities(cd+ccd) << std::endl;
+            DUNE_THROW(Dune::GridError, "subEntities check failed");
+          }
+        });
+      }
 
       const typename Grid::LevelGridView &levelGridView = g.levelGridView(e.level());
 
@@ -216,7 +220,7 @@ void zeroEntityConsistency (Grid &g)
   for (; it!=endit; ++it)
   {
     // check entity copy ctor
-    Entity e( *it ) ;
+    [[maybe_unused]] Entity e( *it ) ;
     assert( e == *it );
 
     Entity subEntity = it->template subEntity< 0 >( 0 );
@@ -678,8 +682,8 @@ void iteratorEquals (Grid &g)
 
   // check '==' consistency
   typedef typename Grid::template Codim<0>::Entity Entity;
-  Entity a( *levelGridView.template begin<0,Dune::All_Partition>() );
-  Entity i( *levelGridView.template begin<0,Dune::InteriorBorder_Partition>() );
+  [[maybe_unused]] Entity a( *levelGridView.template begin<0,Dune::All_Partition>() );
+  [[maybe_unused]] Entity i( *levelGridView.template begin<0,Dune::InteriorBorder_Partition>() );
 
   assert(
     (levelGridView.indexSet().index(a) != levelGridView.indexSet().index(i)) // index equal
