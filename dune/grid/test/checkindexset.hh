@@ -39,7 +39,7 @@ struct EnableLevelIntersectionIteratorCheck< const Grid >
 template< class GridType, typename=void >
 struct EnableSubIndexCheck
 {
-  static const bool v = true;
+  static const bool v = false;
 };
 // default implementation given a gridview - look for implementation for the underlying grid
 // Note: checking only for GridView::Grid fails because grids usually

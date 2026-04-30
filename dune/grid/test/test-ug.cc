@@ -22,6 +22,12 @@
 #include "checkintersectionit.hh"
 #include "checkpartition.hh"
 
+#include <dune/grid/test/checkindexset.hh>
+template< int dim >
+struct EnableSubIndexCheck< Dune::UGGrid< dim > >
+{
+  static const bool v = true;
+};
 
 using namespace Dune;
 
