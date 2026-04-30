@@ -186,7 +186,7 @@ void testNestedGeometryGrid(const std::string& gridfile) {
   auto const& is2 = pgv2->indexSet();
   auto const& is3 = gv3.indexSet();
   for(auto const& e : elements(gv1)) {
-    bool idxCorrect = (is1.index(e)==is2.index(e));
+    [[maybe_unused]] bool idxCorrect = (is1.index(e)==is2.index(e));
     idxCorrect &= (is1.index(e)==is3.index(e));
     assert(idxCorrect);
   }

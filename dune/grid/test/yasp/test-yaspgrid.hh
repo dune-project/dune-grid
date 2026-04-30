@@ -22,6 +22,12 @@
 
 #include <dune/grid/yaspgrid/coordinates.hh>
 
+#include <dune/grid/test/checkindexset.hh>
+template <int dim, class CC>
+struct EnableSubIndexCheck< Dune::YaspGrid< dim, CC > >
+{
+  static const bool v = true;
+};
 
 template<int dim, class CC>
 struct YaspFactory

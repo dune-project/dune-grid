@@ -537,20 +537,7 @@ void checkIntersectionIterator ( const GridViewType &view,
       const int indexInInside = intersection.indexInInside();
       const int indexInOutside = intersection.indexInOutside();
 
-      const auto& insideFace = eIt->template subEntity<1>( indexInInside );
-      const auto& outsideFace = outside.template subEntity<1>( indexInOutside );
-
       const typename GridViewType::IndexSet &indexSet = view.indexSet();
-
-      if( indexSet.index(insideFace) != indexSet.index(outsideFace) )
-      {
-        std::cerr << "Error: Index of conforming intersection differs when "
-                  << "obtained from inside and outside.\n"
-                  << "       inside index = " << indexSet.index(insideFace)
-                  << ", outside index = " << indexSet.index(outsideFace) << std::endl;
-        if (EnableSubIndexCheck<GridType>::v)
-          DUNE_THROW(Dune::GridError, "Intersection error");
-      }
 
       if( indexSet.subIndex( *eIt, indexInInside, 1 ) != indexSet.subIndex( outside, indexInOutside, 1 ) )
       {
@@ -558,40 +545,56 @@ void checkIntersectionIterator ( const GridViewType &view,
                   << "obtained from inside and outside.\n"
                   << "       inside sub-index = " << indexSet.subIndex( *eIt, indexInInside, 1 )
                   << ", outside sub-index = " << indexSet.subIndex( outside, indexInOutside, 1 ) << std::endl;
-        if (EnableSubIndexCheck<GridType>::v)
+        if (EnableSubIndexCheck<GridViewType>::v)
           DUNE_THROW(Dune::GridError, "Intersection error");
       }
 
-      for (std::size_t cc = 0; cc != GridType::dimension; ++cc) {
-        for (unsigned int subSubIndex = 0; subSubIndex != insideFace.subEntities(1 + cc); ++subSubIndex)
+      if constexpr (Dune::Capabilities::hasEntity< GridType, 1 >::v) {
+        const auto& insideFace = eIt->template subEntity<1>( indexInInside );
+        const auto& outsideFace = outside.template subEntity<1>( indexInOutside );
+
+        if( indexSet.index(insideFace) != indexSet.index(outsideFace) )
         {
-          sub_indices.insert(indexSet.subIndex(insideFace, subSubIndex, 1 + cc));
+          std::cerr << "Error: Index of conforming intersection differs when "
+                    << "obtained from inside and outside.\n"
+                    << "       inside index = " << indexSet.index(insideFace)
+                    << ", outside index = " << indexSet.index(outsideFace) << std::endl;
+          if (EnableSubIndexCheck<GridViewType>::v)
+            DUNE_THROW(Dune::GridError, "Intersection error");
         }
-        for (unsigned int subSubIndex = 0; subSubIndex != outsideFace.subEntities(1 + cc); ++subSubIndex)
-        {
-          if (sub_indices.erase(indexSet.subIndex(outsideFace, subSubIndex, 1 + cc)) == 0)
+
+
+        for (std::size_t cc = 0; cc != GridType::dimension; ++cc) {
+          for (unsigned int subSubIndex = 0; subSubIndex != insideFace.subEntities(1 + cc); ++subSubIndex)
           {
-            std::cerr << "Error: SubSubIndices of codim " << 1+cc << " of conforming intersection differs when "
+            sub_indices.insert(indexSet.subIndex(insideFace, subSubIndex, 1 + cc));
+          }
+          for (unsigned int subSubIndex = 0; subSubIndex != outsideFace.subEntities(1 + cc); ++subSubIndex)
+          {
+            if (sub_indices.erase(indexSet.subIndex(outsideFace, subSubIndex, 1 + cc)) == 0)
+            {
+              std::cerr << "Error: SubSubIndices of codim " << 1+cc << " of conforming intersection differs when "
+                        << "obtained from inside and outside." << std::endl;
+              std::cerr << "       inside sub-sub-indices = ";
+              for (unsigned int subSubIndex = 0; subSubIndex != insideFace.subEntities(1 + cc); ++subSubIndex)
+                std::cerr << indexSet.subIndex( *eIt, indexInInside, 1 + cc);
+              std::cerr << ", outside sub-sub-index = " << indexSet.subIndex(outsideFace, subSubIndex, 1 + cc) << std::endl;
+              if (EnableSubIndexCheck<GridViewType>::v)
+                DUNE_THROW(Dune::GridError, "Intersection error");
+            }
+          }
+          if (not sub_indices.empty()) {
+            std::cerr << "Error: SubSubIndex of conforming intersection differs when "
                       << "obtained from inside and outside." << std::endl;
-            std::cerr << "       inside sub-sub-indices = ";
-            for (unsigned int subSubIndex = 0; subSubIndex != insideFace.subEntities(1 + cc); ++subSubIndex)
-              std::cerr << indexSet.subIndex( *eIt, indexInInside, 1 + cc);
-            std::cerr << ", outside sub-sub-index = " << indexSet.subIndex(outsideFace, subSubIndex, 1 + cc) << std::endl;
-            if (EnableSubIndexCheck<GridType>::v)
+              std::cerr << "       inside sub-sub-indices = ";
+              for (unsigned int subSubIndex = 0; subSubIndex != insideFace.subEntities(1 + cc); ++subSubIndex)
+                std::cerr << indexSet.subIndex( *eIt, indexInInside, 1 + cc);
+              std::cerr << ", outside sub-sub-indices = ";
+              for (unsigned int subSubIndex = 0; subSubIndex != insideFace.subEntities(1 + cc); ++subSubIndex)
+                std::cerr << indexSet.subIndex(outsideFace, subSubIndex, 1 + cc);
+            if (EnableSubIndexCheck<GridViewType>::v)
               DUNE_THROW(Dune::GridError, "Intersection error");
           }
-        }
-        if (not sub_indices.empty()) {
-          std::cerr << "Error: SubSubIndex of conforming intersection differs when "
-                    << "obtained from inside and outside." << std::endl;
-            std::cerr << "       inside sub-sub-indices = ";
-            for (unsigned int subSubIndex = 0; subSubIndex != insideFace.subEntities(1 + cc); ++subSubIndex)
-              std::cerr << indexSet.subIndex( *eIt, indexInInside, 1 + cc);
-            std::cerr << ", outside sub-sub-indices = ";
-            for (unsigned int subSubIndex = 0; subSubIndex != insideFace.subEntities(1 + cc); ++subSubIndex)
-              std::cerr << indexSet.subIndex(outsideFace, subSubIndex, 1 + cc);
-          if (EnableSubIndexCheck<GridType>::v)
-            DUNE_THROW(Dune::GridError, "Intersection error");
         }
       }
 

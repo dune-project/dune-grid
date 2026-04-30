@@ -35,10 +35,21 @@ struct EnableLevelIntersectionIteratorCheck< const Grid >
   static const bool v = EnableLevelIntersectionIteratorCheck< Grid >::v;
 };
 
-template< class Grid >
+// default implementation used for all gridviews of a given grid
+template< class GridType, typename=void >
 struct EnableSubIndexCheck
 {
-  static const bool v = true;
+  static const bool v = false;
+};
+// default implementation given a gridview - look for implementation for the underlying grid
+// Note: checking only for GridView::Grid fails because grids usually
+// derive from 'Grid' and therefore have a 'Grid::Grid' type.
+template <class GridView>
+struct EnableSubIndexCheck<GridView,
+                           std::void_t<typename GridView::Grid,
+                                       typename GridView::IndexSet>>
+{
+  static const int v=EnableSubIndexCheck<typename GridView::Grid>::v;
 };
 
 
@@ -62,15 +73,16 @@ namespace Dune
       \param subEntityPerSetOfVertices The reverse: a map that associates a subEntity to a vector of vertex indices
       \param vertexCoordsMap Map that associates vertex positions to indices (integers)
    */
-  template <int codim, class GridType, class Entity,
+  template <int codim, class GridView, class Entity,
       class IndexSetType, class OutputStreamImp,
       class MapType1 , class MapType2 , class MapType3 >
-  void checkSubEntity ( const GridType &,
+  void checkSubEntity ( const GridView &,
                         const Entity &en , const IndexSetType & lset,
                         OutputStreamImp & sout , MapType1 & setOfVerticesPerSubEntity ,
                         MapType2 & subEntityPerSetOfVertices,
                         const MapType3 & vertexCoordsMap )
   {
+    typedef typename GridView::Grid GridType;
     constexpr static int dim = GridType::dimension;
     const int dimworld = GridType::dimensionworld;
     typedef typename GridType::ctype coordType;
@@ -104,7 +116,7 @@ namespace Dune
     if constexpr (codim == 0) {
       Dune::Hybrid::forEach(std::make_index_sequence<GridType::dimension+1-codim>{}, [&](auto cc){
         Dune::Hybrid::forEach(std::make_index_sequence<GridType::dimension+1-codim-cc>{}, [&](auto ccc){
-          if constexpr (Dune::Capabilities::hasEntity< GridType, codim + cc >::v) {
+          if constexpr (EnableSubIndexCheck<GridView>::v) {
             // collect all indices of every sub-entity on same codim as sub-sub-entity
             for (const auto& sse : subEntities(en, Dune::Codim<codim + cc + ccc>{}))
               subIndices.insert(lset.index( sse ));
@@ -127,7 +139,7 @@ namespace Dune
               for (auto i : subSubIndices)
                 std::cerr << i << " ";
               std::cerr << std::endl;
-              if constexpr (EnableSubIndexCheck<GridType>::v)
+              if constexpr (EnableSubIndexCheck<GridView>::v)
                 DUNE_THROW(GridError,
                           "subIndices and subSubIndices of codim " << codim+cc << " do not match");
             }
@@ -178,7 +190,7 @@ namespace Dune
       if( lset.subIndex( en, subEntity, codim ) != lset.index( subE) )
       {
         std::cerr << "Index for subEntity does not match." << std::endl;
-        if constexpr (EnableSubIndexCheck<GridType>::v)
+        if constexpr (EnableSubIndexCheck<GridView>::v)
           DUNE_THROW(Dune::GridError, "SubEntity index error");
       }
 
@@ -508,7 +520,7 @@ namespace Dune
           if( vxidx != lset.index( vxE ) )
           {
             std::cerr << "Error: index( *subEntity< dim >( i ) ) != subIndex( entity, i, dim )" << std::endl;
-            if constexpr (EnableSubIndexCheck<Grid>::v)
+            if constexpr (EnableSubIndexCheck<GridView>::v)
               DUNE_THROW(Dune::GridError, "SubEntity index error");
           }
 
@@ -527,7 +539,7 @@ namespace Dune
         ////////////////////////////////////////////////////////////
         // check sub entities
         ////////////////////////////////////////////////////////////
-        checkSubEntity< codim >( grid, *itC, lset, sout,
+        checkSubEntity< codim >( view, *itC, lset, sout,
                                  setOfVerticesPerSubEntity, subEntityPerSetOfVertices, vertexCoordsMap );
 
         // check neighbors
@@ -543,7 +555,7 @@ namespace Dune
               if( !nit->neighbor() )
                 continue;
 
-              checkSubEntity< codim >( grid, nit->outside(), lset, sout,
+              checkSubEntity< codim >( view, nit->outside(), lset, sout,
                                        setOfVerticesPerSubEntity, subEntityPerSetOfVertices, vertexCoordsMap );
             }
           }
