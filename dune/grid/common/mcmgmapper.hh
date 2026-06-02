@@ -160,6 +160,48 @@ namespace Dune
       update(gridView);
     }
 
+    /**
+     * \brief Copy constructor
+     */
+    MultipleCodimMultipleGeomTypeMapper(const MultipleCodimMultipleGeomTypeMapper& other)
+      : gridView_(other.gridView_)
+      , indexSet_(&gridView_.indexSet())
+      , layout_(other.layout_)
+    {
+      update_();
+    }
+
+    /**
+     * \brief Move constructor
+     */
+    MultipleCodimMultipleGeomTypeMapper(MultipleCodimMultipleGeomTypeMapper&& other)
+      : gridView_(std::move(other.gridView_))
+      , indexSet_(&gridView_.indexSet())
+      , layout_(std::move(other.layout_))
+    {
+      update_();
+    }
+
+    /**
+     * \brief Copy assignment
+     */
+    MultipleCodimMultipleGeomTypeMapper& operator=(const MultipleCodimMultipleGeomTypeMapper& other)
+    {
+      layout_ = other.layout_;
+      update(other.gridView_);
+      return *this;
+    }
+
+    /**
+     * \brief Move assignment
+     */
+    MultipleCodimMultipleGeomTypeMapper& operator=(MultipleCodimMultipleGeomTypeMapper&& other)
+    {
+      layout_ = std::move(other.layout_);
+      update(std::move(other.gridView_));
+      return *this;
+    }
+
     /*!
      * \brief Map entity to starting index in array for dof block
      *
