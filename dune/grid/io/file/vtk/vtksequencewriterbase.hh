@@ -137,7 +137,7 @@ namespace Dune {
             fullname = vtkWriter_->getSerialPieceName(seqName(i), piecepath);
           }
           else {
-            piecepath = concatPaths(path_, extendpath_);
+            piecepath = path_;
             fullname = vtkWriter_->getParallelHeaderName(seqName(i), piecepath, size_);
           }
           pvdFile << "<DataSet timestep=\"" << timesteps_[i]

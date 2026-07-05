@@ -65,6 +65,8 @@ dune_add_test(SOURCES vtktest.cc
 
 dune_add_test(SOURCES vtksequencetest.cc
               LINK_LIBRARIES ${DUNE_LIBS} $<TARGET_NAME_IF_EXISTS:Python3::Python>
+              MPI_RANKS 1 2
+              TIMEOUT 120
               COMPILE_DEFINITIONS ${VTK_COMPILE_DEFINITIONS})
 
 dune_add_test(SOURCES starcdreadertest.cc
