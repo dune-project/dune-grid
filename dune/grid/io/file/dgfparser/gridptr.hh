@@ -388,7 +388,6 @@ namespace Dune
       gridPtr_ = mygrid_ptr( dgfFactory.grid() );
 
       const auto gridView = gridPtr_->levelGridView( 0 );
-      const auto &indexSet = gridView.indexSet();
 
       nofElParam_ = dgfFactory.template numParameters< 0 >();
       nofVtxParam_ = dgfFactory.template numParameters< dimension >();
@@ -410,23 +409,30 @@ namespace Dune
       if( (nofElParam_ != nofParams[ 0 ]) || (nofVtxParam_ != nofParams[ 1 ]) )
         DUNE_THROW( DGFException, "Number of parameters differs between processes" );
 
-      elParam_.resize( nofElParam_ > 0 ? indexSet.size( 0 ) : 0 );
-      vtxParam_.resize( nofVtxParam_ > 0 ? indexSet.size( dimension ) : 0 );
+      if( nofElParam_ > 0 )
+        elParam_.resize( gridView.indexSet().size( 0 ) );
 
-      bndId_.resize( indexSet.size( 1 ) );
+      if( nofVtxParam_ > 0 )
+        vtxParam_.resize( gridView.indexSet().size( dimension ) );
+
       if( haveBndParam_ )
+      {
+        bndId_.resize( gridView.indexSet().size( 1 ) );
         bndParam_.resize( gridPtr_->numBoundarySegments() );
+      }
 
       for( const auto &element : elements( gridView, Partitions::interiorBorder ) )
       {
         if( nofElParam_ > 0 )
         {
+          const auto &indexSet = gridView.indexSet();
           std::swap( elParam_[ indexSet.index( element ) ], dgfFactory.parameter( element ) );
           assert( elParam_[ indexSet.index( element ) ].size() == static_cast< std::size_t >( nofElParam_ ) );
         }
 
         if( nofVtxParam_ > 0 )
         {
+          const auto &indexSet = gridView.indexSet();
           for( unsigned int v = 0, n = element.subEntities( dimension ); v < n; ++v )
           {
             const auto index = indexSet.subIndex( element, v, dimension );
@@ -436,8 +442,9 @@ namespace Dune
           }
         }
 
-        if( element.hasBoundaryIntersections() )
+        if( haveBndParam_ && element.hasBoundaryIntersections() )
         {
+          const auto &indexSet = gridView.indexSet();
           for( const auto &intersection : intersections( gridView, element ) )
           {
             // dirty hack: check for "none" to make corner point grid work
@@ -540,36 +547,39 @@ namespace Dune
         : gridPtr_( gridPtr ), idSet_( gridPtr->localIdSet() )
       {
         const auto gridView = gridPtr_->levelGridView( 0 );
-        const auto &indexSet = gridView.indexSet();
 
-        for( const auto &element : elements( gridView, Partitions::interiorBorder ) )
+        if( gridPtr_.nofElParam_ > 0 || gridPtr_.nofVtxParam_ > 0 || gridPtr_.haveBndParam_ )
         {
-          if( gridPtr_.nofElParam_ > 0 )
-            std::swap( gridPtr_.elParam_[ indexSet.index( element ) ], elData_[ idSet_.id( element ) ] );
-
-          if( gridPtr_.nofVtxParam_ > 0 )
+          const auto &indexSet = gridView.indexSet();
+          for( const auto &element : elements( gridView, Partitions::interiorBorder ) )
           {
-            for( unsigned int v = 0, n = element.subEntities( dimension ); v < n; ++v )
+            if( gridPtr_.nofElParam_ > 0 )
+              std::swap( gridPtr_.elParam_[ indexSet.index( element ) ], elData_[ idSet_.id( element ) ] );
+
+            if( gridPtr_.nofVtxParam_ > 0 )
             {
-              const auto index = indexSet.subIndex( element, v, dimension );
-              if ( !gridPtr_.vtxParam_[ index ].empty() )
-                std::swap( gridPtr_.vtxParam_[ index ], vtxData_[ idSet_.subId( element, v, dimension ) ] );
+              for( unsigned int v = 0, n = element.subEntities( dimension ); v < n; ++v )
+              {
+                const auto index = indexSet.subIndex( element, v, dimension );
+                if ( !gridPtr_.vtxParam_[ index ].empty() )
+                  std::swap( gridPtr_.vtxParam_[ index ], vtxData_[ idSet_.subId( element, v, dimension ) ] );
+              }
             }
-          }
 
-          if( element.hasBoundaryIntersections() )
-          {
-            for( const auto &intersection : intersections( gridView, element ) )
+            if( gridPtr_.haveBndParam_ && element.hasBoundaryIntersections() )
             {
-              // dirty hack: check for "none" to make corner point grid work
-              if( !intersection.boundary() || intersection.type().isNone() )
-                continue;
+              for( const auto &intersection : intersections( gridView, element ) )
+              {
+                // dirty hack: check for "none" to make corner point grid work
+                if( !intersection.boundary() || intersection.type().isNone() )
+                  continue;
 
-              const int i = intersection.indexInInside();
-              auto &bndData = bndData_[ idSet_.subId( element, i, 1 ) ];
-              bndData.first = gridPtr_.bndId_[ indexSet.subIndex( element, i, 1 ) ];
-              if( gridPtr_.haveBndParam_ )
-                std::swap( bndData.second, gridPtr_.bndParam_[ intersection.boundarySegmentIndex() ] );
+                const int i = intersection.indexInInside();
+                auto &bndData = bndData_[ idSet_.subId( element, i, 1 ) ];
+                bndData.first = gridPtr_.bndId_[ indexSet.subIndex( element, i, 1 ) ];
+                if( gridPtr_.haveBndParam_ )
+                  std::swap( bndData.second, gridPtr_.bndParam_[ intersection.boundarySegmentIndex() ] );
+              }
             }
           }
         }
@@ -581,48 +591,55 @@ namespace Dune
       ~DataHandle ()
       {
         const auto gridView = gridPtr_->levelGridView( 0 );
-        const auto &indexSet = gridView.indexSet();
 
-        if( gridPtr_.nofElParam_ > 0 )
-          gridPtr_.elParam_.resize( indexSet.size( 0 ) );
-        if( gridPtr_.nofVtxParam_ > 0 )
-          gridPtr_.vtxParam_.resize( indexSet.size( dimension ) );
-        gridPtr_.bndId_.resize( indexSet.size( 1 ) );
-        if( gridPtr_.haveBndParam_ )
-            gridPtr_.bndParam_.resize( gridPtr_->numBoundarySegments() );
 
-        for( const auto &element : elements( gridView, Partitions::all ) )
+        if( gridPtr_.nofElParam_ > 0 || gridPtr_.nofVtxParam_ > 0 || gridPtr_.haveBndParam_ )
         {
+          const auto &indexSet = gridView.indexSet();
+
           if( gridPtr_.nofElParam_ > 0 )
-          {
-            std::swap( gridPtr_.elParam_[ indexSet.index( element ) ], elData_[ idSet_.id( element ) ] );
-            assert( gridPtr_.elParam_[ indexSet.index( element ) ].size() == static_cast< std::size_t >( gridPtr_.nofElParam_ ) );
-          }
-
+            gridPtr_.elParam_.resize( indexSet.size( 0 ) );
           if( gridPtr_.nofVtxParam_ > 0 )
+            gridPtr_.vtxParam_.resize( indexSet.size( dimension ) );
+          if( gridPtr_.haveBndParam_ )
           {
-            for( unsigned int v = 0; v < element.subEntities( dimension ); ++v )
-            {
-              const auto index = indexSet.subIndex( element, v, dimension );
-              if( gridPtr_.vtxParam_[ index ].empty() )
-                std::swap( gridPtr_.vtxParam_[ index ], vtxData_[ idSet_.subId( element, v, dimension ) ] );
-              assert( gridPtr_.vtxParam_[ index ].size() == static_cast< std::size_t >( gridPtr_.nofVtxParam_ ) );
-            }
+            gridPtr_.bndId_.resize( indexSet.size( 1 ) );
+            gridPtr_.bndParam_.resize( gridPtr_->numBoundarySegments() );
           }
 
-          if( element.hasBoundaryIntersections() )
+          for( const auto &element : elements( gridView, Partitions::all ) )
           {
-            for( const auto &intersection : intersections( gridView, element ) )
+            if( gridPtr_.nofElParam_ > 0 )
             {
-              // dirty hack: check for "none" to make corner point grid work
-              if( !intersection.boundary() || intersection.type().isNone() )
-                continue;
+              std::swap( gridPtr_.elParam_[ indexSet.index( element ) ], elData_[ idSet_.id( element ) ] );
+              assert( gridPtr_.elParam_[ indexSet.index( element ) ].size() == static_cast< std::size_t >( gridPtr_.nofElParam_ ) );
+            }
 
-              const int i = intersection.indexInInside();
-              auto &bndData = bndData_[ idSet_.subId( element, i, 1 ) ];
-              gridPtr_.bndId_[ indexSet.subIndex( element, i, 1 ) ] = bndData.first;
-              if( gridPtr_.haveBndParam_ )
-                std::swap( bndData.second, gridPtr_.bndParam_[ intersection.boundarySegmentIndex() ] );
+            if( gridPtr_.nofVtxParam_ > 0 )
+            {
+              for( unsigned int v = 0; v < element.subEntities( dimension ); ++v )
+              {
+                const auto index = indexSet.subIndex( element, v, dimension );
+                if( gridPtr_.vtxParam_[ index ].empty() )
+                  std::swap( gridPtr_.vtxParam_[ index ], vtxData_[ idSet_.subId( element, v, dimension ) ] );
+                assert( gridPtr_.vtxParam_[ index ].size() == static_cast< std::size_t >( gridPtr_.nofVtxParam_ ) );
+              }
+            }
+
+            if( gridPtr_.haveBndParam_ && element.hasBoundaryIntersections() )
+            {
+              for( const auto &intersection : intersections( gridView, element ) )
+              {
+                // dirty hack: check for "none" to make corner point grid work
+                if( !intersection.boundary() || intersection.type().isNone() )
+                  continue;
+
+                const int i = intersection.indexInInside();
+                auto &bndData = bndData_[ idSet_.subId( element, i, 1 ) ];
+                gridPtr_.bndId_[ indexSet.subIndex( element, i, 1 ) ] = bndData.first;
+                if( gridPtr_.haveBndParam_ )
+                  std::swap( bndData.second, gridPtr_.bndParam_[ intersection.boundarySegmentIndex() ] );
+              }
             }
           }
         }
