@@ -449,6 +449,14 @@ namespace Dune {
       static const bool v = true;
     };
 
+    /** \brief OneDGrid is thread-safe for grid views
+     *       \ingroup UGGrid
+     */
+    template<>
+    struct viewThreadSafe< OneDGrid > {
+      static const bool v = true;
+    };
+
   }
 
 } // namespace Dune
