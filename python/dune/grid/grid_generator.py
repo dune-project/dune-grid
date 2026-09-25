@@ -234,7 +234,13 @@ def function(gv,callback,includeFiles=None,*args,name=None,order=None,dimRange=N
             # try to evaluate the function to determine the dimension of
             # the return value. This can fail if the function is singular in
             # the computational domain in which case an exception is raised
-            e = gv.elements.__iter__().__next__()
+            # it can also fail if the grid is empty due to load balancing or
+            # filtered grid views
+            try:
+                e = gv.elements.__iter__().__next__()
+            except StopIteration:
+                raise Exception("Empty grid view encountered. Please provide `dimRange` of gridFunction to circumvent this problem!")
+
             try:
                 y = callback(e,e.referenceElement.position(0,0))
             except ArithmeticError:
