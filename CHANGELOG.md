@@ -7,6 +7,8 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 
 - Implement missing sub-indices of sub-entities in the index set of `UGGrid`.
 
+- `OneDGrid` now sets `Capabilities::viewThreadSafe::v` to `true`.
+
 # Release 2.11
 
 - The grid concepts are now able to check grids that have entity types disabled.

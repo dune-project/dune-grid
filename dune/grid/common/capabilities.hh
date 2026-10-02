@@ -17,8 +17,9 @@ namespace Dune
   {
 
     /** \brief Specialize with 'true' for if the codimension 0 entity
-        of the grid has only one possible geometry type. In this case the
-        topologyId of this geometry type has also to be specified.
+        of the grid has only one possible geometry type
+
+        In this case the topologyId of this geometry type also has to be specified.
         (default=false, topologyId=undefined)
         \ingroup GICapabilities
      */
@@ -31,9 +32,10 @@ namespace Dune
       static const unsigned int topologyId = ~0u;
     };
 
-    /** \brief Specialize with 'true' if the grid is a Cartesian grid.
+    /** \brief Specialize with 'true' if the grid is a Cartesian grid
+     *
         Cartesian grids satisfy the following properties:
-          - all geometries are axis-aligned hypercubes
+          - All geometries are axis-aligned hypercubes
           - The unit outer normal for the i-th intersection
             can be computed by the following code:
           \code
@@ -60,7 +62,7 @@ namespace Dune
     };
 
     /**
-     * \brief specialize with 'true' for all codims that a grid provides an iterator for (default=hasEntity<codim>::v)
+     * \brief Specialize with 'true' for all codims that a grid provides an iterator for (default=hasEntity<codim>::v)
      *
      * \note Being able to iterate over a codimension implies that the grid
      *       provides entities for that codimension.
@@ -133,7 +135,7 @@ namespace Dune
 
         \sa viewThreadSafe
 
-        \note that the communicate method can only be called by one individual thread,
+        \note The communicate method can only be called by one individual thread,
         as the whole Dune parallel components are not (i.e. cannot be) thread safe.
 
         \ingroup GICapabilities
@@ -151,17 +153,13 @@ namespace Dune
 
         \sa threadSafe
 
-        \note that the communicate method can only be called by one individual thread,
+        \note The communicate method can only be called by one individual thread,
         as the whole Dune parallel components are (i.e. cannot be) not thread safe.
 
-        \note the methods leafGridView(), levelGridView(level) on the Grid can only be called single-threaded
+        \note The methods leafGridView(), levelGridView(level) on the Grid can only be called single-threaded
 
-        \note calling the methods indexSet(), idSet(), globalIdSet() on the Grid or the GridView is only allowed,
+        \note Calling the methods indexSet(), idSet(), globalIdSet() on the Grid or the GridView is only allowed,
         if they were called once before starting the threads.
-
-        \code
-
-        \endcode
 
         \ingroup GICapabilities
      */
