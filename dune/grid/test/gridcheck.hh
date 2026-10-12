@@ -1126,6 +1126,11 @@ void gridcheck (Grid &g)
     checkIntersectionLifetime(g.levelGridView(g.maxLevel()));
   checkEntityLifetime(g.leafGridView());
   checkIntersectionLifetime(g.leafGridView());
+
+  // check that stored geometries remain valid after further grid traversal
+  if (EnableLevelIntersectionIteratorCheck< Grid >::v)
+    checkGeometryLifetime(g.levelGridView(g.maxLevel()));
+  checkGeometryLifetime(g.leafGridView());
 }
 
 #endif // #ifndef DUNE_GRID_TEST_GRIDCHECK_HH

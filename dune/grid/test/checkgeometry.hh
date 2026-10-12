@@ -6,17 +6,25 @@
 #ifndef DUNE_GRID_TEST_CHECKGEOMETRY_HH
 #define DUNE_GRID_TEST_CHECKGEOMETRY_HH
 
+#include <cstddef>
 #include <limits>
+#include <string>
+#include <tuple>
 #include <utility>
+#include <vector>
 
+#include <dune/common/exceptions.hh>
 #include <dune/common/hybridutilities.hh>
+#include <dune/common/indices.hh>
 #include <dune/common/typetraits.hh>
 
 #include <dune/geometry/test/checkgeometry.hh>
 
+#include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/geometry.hh>
 #include <dune/grid/common/entity.hh>
 #include <dune/grid/common/gridview.hh>
+#include <dune/grid/common/rangegenerators.hh>
 
 namespace Dune
 {
@@ -133,34 +141,166 @@ namespace Dune
     };
   };
 
-  template<typename GV>
-  void checkGeometryLifetime (const GV &gridView)
+  namespace Impl
   {
-    typedef typename GV::ctype ctype;
-    constexpr static int dim  = GV::dimension;
 
-    [[maybe_unused]] const FieldVector<ctype, dim> pos(0.2);
-
-    auto it = gridView.template begin<0>();
-    const auto end = gridView.template end<0>();
-
-    // check that it != end otherwise the following is not valid
-    if( it == end ) return ;
-
-    #ifndef NDEBUG
-    constexpr static int dimw = GV::dimensionworld;
-    const FieldVector<ctype, dimw> glob = it->geometry().global(pos);
-    #endif
-
-    const auto geomCopy = it->geometry();
-    checkGeometry ( geomCopy );
-
-    for( ; it != end; ++it )
+    // Stores copies of geometries together with a snapshot of their corners
+    // taken at the moment the geometry was obtained from the grid.
+    template< class Geo >
+    class GeometryLifetimeSnapshots
     {
-      // due to register/memory differences we might have
-      // errors < 1e-16
-      assert (std::abs((geomCopy.global(pos) - glob).one_norm()) < std::numeric_limits<ctype>::epsilon());
+      struct Snapshot
+      {
+        Geo geometry;
+        GeometryType type;
+        std::vector< typename Geo::GlobalCoordinate > corners;
+        std::string description;
+      };
+
+    public:
+      void push_back ( const Geo &geometry, std::string description )
+      {
+        Snapshot snapshot{ geometry, geometry.type(), {}, std::move( description ) };
+        for( int i = 0; i < geometry.corners(); ++i )
+          snapshot.corners.push_back( geometry.corner( i ) );
+        snapshots_.push_back( std::move( snapshot ) );
+      }
+
+      // check that the stored geometries still describe the snapshot
+      void check () const
+      {
+        using ctype = typename Geo::ctype;
+        const ctype tolerance = 8 * std::numeric_limits< ctype >::epsilon();
+        for( const Snapshot &snapshot : snapshots_ )
+        {
+          const Geo &geometry = snapshot.geometry;
+          if( (geometry.type() != snapshot.type) || (std::size_t( geometry.corners() ) != snapshot.corners.size()) )
+            DUNE_THROW( InvalidStateException, "Stored copy of " << snapshot.description
+                        << " changed its type or number of corners after further grid traversal." );
+          for( std::size_t i = 0; i < snapshot.corners.size(); ++i )
+          {
+            const auto corner = geometry.corner( i );
+            using std::max;
+            if( (corner - snapshot.corners[ i ]).two_norm() > tolerance * max( ctype( 1 ), snapshot.corners[ i ].two_norm() ) )
+              DUNE_THROW( InvalidStateException, "Stored copy of " << snapshot.description
+                          << " changed after further grid traversal: corner " << i << " is " << corner
+                          << " but was " << snapshot.corners[ i ] << "." );
+          }
+        }
+      }
+
+    private:
+      std::vector< Snapshot > snapshots_;
+    };
+
+    // traverse the grid view and evaluate all geometries to touch any
+    // internal caches the grid implementation might have
+    template< class GV >
+    void touchAllGeometries ( const GV &gridView )
+    {
+      using Grid = typename GV::Grid;
+      for( const auto &element : elements( gridView ) )
+      {
+        if( element.partitionType() == GhostEntity )
+          continue;
+
+        element.geometry().corner( 0 );
+        Hybrid::forEach( std::make_index_sequence< GV::dimension >{}, [ & ] ( auto i ) {
+          constexpr int codim = i + 1;
+          if constexpr (Capabilities::hasEntity< Grid, codim >::v)
+            for( unsigned int j = 0; j < element.subEntities( codim ); ++j )
+              element.template subEntity< codim >( j ).geometry().corner( 0 );
+        } );
+        if( element.hasFather() )
+          element.geometryInFather().corner( 0 );
+
+        for( const auto &intersection : intersections( gridView, element ) )
+        {
+          intersection.geometry().corner( 0 );
+          intersection.geometryInInside().corner( 0 );
+          if( intersection.neighbor() )
+            intersection.geometryInOutside().corner( 0 );
+        }
+      }
     }
+
+  } // namespace Impl
+
+
+  /** \brief check that geometries remain valid until the grid is modified
+   *
+   *  The grid interface guarantees that geometry objects returned by
+   *  entities and intersections remain valid until the grid is modified (or
+   *  deleted). In particular, neither advancing the iterator nor destroying
+   *  the entity or intersection the geometry was obtained from may change a
+   *  stored copy of the geometry.
+   *
+   *  This check stores copies of the element geometries, the sub-entity
+   *  geometries, the geometries in father, and of all intersection geometries
+   *  for the first \p checkElementCount elements. After a further traversal
+   *  of the whole grid view, the stored geometries are compared against
+   *  their state at the time they were obtained.
+   */
+  template<typename GV>
+  void checkGeometryLifetime (const GV &gridView, std::size_t checkElementCount = 32)
+  {
+    using Grid = typename GV::Grid;
+    using Element = typename GV::template Codim< 0 >::Entity;
+    using Intersection = typename GV::Intersection;
+
+    Impl::GeometryLifetimeSnapshots< typename Element::Geometry > elementGeometries;
+    Impl::GeometryLifetimeSnapshots< typename Element::LocalGeometry > fatherGeometries;
+    Impl::GeometryLifetimeSnapshots< typename Intersection::Geometry > intersectionGeometries;
+    Impl::GeometryLifetimeSnapshots< typename Intersection::LocalGeometry > intersectionLocalGeometries;
+
+    auto subEntityGeometryStorage = unpackIntegerSequence( [ & ] ( auto... i ) {
+      return std::make_tuple( Impl::GeometryLifetimeSnapshots< typename GV::template Codim< i+1 >::Geometry >{}... );
+    }, std::make_index_sequence< GV::dimension >{} );
+
+    std::size_t count = 0;
+    for( const auto &element : elements( gridView ) )
+    {
+      if( count >= checkElementCount )
+        break;
+      if( element.partitionType() == GhostEntity )
+        continue;
+
+      const std::string elementName = "element " + std::to_string( count );
+      ++count;
+
+      elementGeometries.push_back( element.geometry(), "geometry of " + elementName );
+
+      Hybrid::forEach( std::make_index_sequence< GV::dimension >{}, [ & ] ( auto i ) {
+        constexpr int codim = i + 1;
+        if constexpr (Capabilities::hasEntity< Grid, codim >::v)
+          for( unsigned int j = 0; j < element.subEntities( codim ); ++j )
+            std::get< i >( subEntityGeometryStorage ).push_back( element.template subEntity< codim >( j ).geometry(),
+              "geometry of sub-entity " + std::to_string( j ) + " of codimension " + std::to_string( codim ) + " of " + elementName );
+      } );
+
+      if( element.hasFather() )
+        fatherGeometries.push_back( element.geometryInFather(), "geometryInFather of " + elementName );
+
+      for( const auto &intersection : intersections( gridView, element ) )
+      {
+        const std::string intersectionName = "intersection " + std::to_string( intersection.indexInInside() ) + " of " + elementName;
+        intersectionGeometries.push_back( intersection.geometry(), "geometry of " + intersectionName );
+        intersectionLocalGeometries.push_back( intersection.geometryInInside(), "geometryInInside of " + intersectionName );
+        if( intersection.neighbor() )
+          intersectionLocalGeometries.push_back( intersection.geometryInOutside(), "geometryInOutside of " + intersectionName );
+      }
+    }
+
+    // traverse the grid again
+    Impl::touchAllGeometries( gridView );
+
+    elementGeometries.check();
+    Hybrid::forEach( std::make_index_sequence< GV::dimension >{}, [ & ] ( auto i ) {
+      std::get< i >( subEntityGeometryStorage ).check();
+    } );
+    fatherGeometries.check();
+    intersectionGeometries.check();
+    intersectionLocalGeometries.check();
   }
 
   template<class Grid>
