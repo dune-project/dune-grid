@@ -13,6 +13,10 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
   `geometryInFather`, and all intersection geometries remain unchanged during further grid traversal,
   as guaranteed by the grid interface. It is now also called from `gridcheck`.
 
+- The grid checks compare global coordinates with an absolute tolerance relative to the
+  size of the domain (new header `dune/grid/test/coordinatetolerance.hh`). Before, some checks
+  used the relative default of `FloatCmp`, which is an exact comparison for coordinates near zero.
+
 # Release 2.11
 
 - The grid concepts are now able to check grids that have entity types disabled.

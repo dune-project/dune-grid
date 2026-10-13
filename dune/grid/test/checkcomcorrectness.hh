@@ -12,12 +12,12 @@
 #include <unordered_map>
 
 #include <dune/common/hash.hh>
-#include <dune/common/float_cmp.hh>
 #include <dune/geometry/dimension.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/mcmgmapper.hh>
+#include <dune/grid/test/coordinatetolerance.hh>
 
 namespace Dune {
 
@@ -135,8 +135,7 @@ namespace Dune {
           if (_gv.comm().rank() == 0)
             std::cout << "Gathering from entity " << _mapper.index(e) << " at " << e.geometry().center() << std::endl;
           ++_writes[_mapper.index(e)];
-          center -= _coords[_mapper.index(e)];
-          assert(Dune::FloatCmp::eq(center.two_norm(),ctype(0)));
+          assert(GridCheck::coordinatesEqual(center, _coords[_mapper.index(e)], _tolerance));
         }
 
         template<typename Buf, typename E>
@@ -147,10 +146,8 @@ namespace Dune {
           buf.read(data);
           ++_reads[_mapper.index(e)];
           auto center = e.geometry().center();
-          data -= e.geometry().center();
-          assert(Dune::FloatCmp::eq(data.two_norm(),ctype(0)));
-          center -= _coords[_mapper.index(e)];
-          assert(Dune::FloatCmp::eq(center.two_norm(),ctype(0)));
+          assert(GridCheck::coordinatesEqual(data, center, _tolerance));
+          assert(GridCheck::coordinatesEqual(center, _coords[_mapper.index(e)], _tolerance));
         }
 
         template<int cd, typename Check>
@@ -184,6 +181,7 @@ namespace Dune {
           , _reads(_mapper.size(),0)
           , _writes(_mapper.size(),0)
           , _coords(coords)
+          , _tolerance(GridCheck::coordinateTolerance(gv))
         {}
 
         GV _gv;
@@ -194,6 +192,7 @@ namespace Dune {
         mutable std::vector<std::size_t> _reads;
         mutable std::vector<std::size_t> _writes;
         const std::vector<typename GV::template Codim<0>::Geometry::GlobalCoordinate>& _coords;
+        const ctype _tolerance;
 
       };
 

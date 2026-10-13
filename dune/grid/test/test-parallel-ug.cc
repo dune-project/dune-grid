@@ -19,6 +19,7 @@
 #include <dune/grid/common/mcmgmapper.hh>
 #include <dune/grid/uggrid.hh>
 #include <dune/grid/utility/structuredgridfactory.hh>
+#include <dune/grid/test/coordinatetolerance.hh>
 
 using namespace Dune;
 
@@ -455,6 +456,7 @@ class LoadBalance
   static bool checkVector(const GridView& gv, const Data& data)
   {
     const auto& idSet = gv.grid().localIdSet();
+    const auto tolerance = Dune::GridCheck::coordinateTolerance(gv);
 
     for (const auto& entity : entities(gv, Dune::Codim<codim>(),
                                        Dune::Partitions::interiorBorder)) {
@@ -463,15 +465,12 @@ class LoadBalance
       const auto& realPos = entity.geometry().center();
 
       // compare the position with the balanced data
-      for (int k = 0; k < dimension; k++)
+      if (!Dune::GridCheck::coordinatesEqual(commPos, realPos, tolerance))
       {
-        if (Dune::FloatCmp::ne(commPos[k], realPos[k]))
-        {
-          DUNE_THROW(Dune::ParallelError,
-                     gv.comm().rank() << ": position " << realPos
-                                      << " does not coincide with communicated data "
-                                      << commPos);
-        }
+        DUNE_THROW(Dune::ParallelError,
+                   gv.comm().rank() << ": position " << realPos
+                                    << " does not coincide with communicated data "
+                                    << commPos);
       }
     }
 
