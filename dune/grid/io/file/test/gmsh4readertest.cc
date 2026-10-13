@@ -44,7 +44,7 @@ int main(int argc, char** argv)
   }
 
   { // Read a 3d binary test grid
-    auto grid = Impl::Gmsh::Gmsh4Reader<UGGrid<2> >::createGridFromFile(path + "hybrid-testgrid-3d-v4-ascii.msh");
+    auto grid = Impl::Gmsh::Gmsh4Reader<UGGrid<3> >::createGridFromFile(path + "hybrid-testgrid-3d-v4-ascii.msh");
 
     gridcheck(*grid);
   }
