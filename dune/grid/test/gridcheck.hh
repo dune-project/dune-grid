@@ -34,6 +34,7 @@
 #include "checkentitylifetime.hh"
 #include <dune/grid/test/checkidset.hh>
 #include "checkintersectionlifetime.hh"
+#include <dune/grid/test/coordinatetolerance.hh>
 
 #include <limits>
 
@@ -939,6 +940,7 @@ void checkCodim1Mapping(const Grid &g, Dune::PriorityTag<1>)
 {
   bool error = false;
   const auto& gv = g.leafGridView();
+  const auto tolerance = Dune::GridCheck::coordinateTolerance(gv);
   for (const auto& entity : Dune::elements(gv)) {
     for (unsigned int index = 0; index < entity.subEntities(1); ++index) {
       const auto& subEntity = entity.template subEntity<1>(index);
@@ -948,8 +950,8 @@ void checkCodim1Mapping(const Grid &g, Dune::PriorityTag<1>)
       const auto& firstCornerCoords = subGeom.corner(0);
       for (int c = 1; c < numCorners; ++c)
         for (size_t i = 0; i < 3; ++i)
-          equalCoords[i] = equalCoords[i] && Dune::FloatCmp::eq(subGeom.corner(c)[i],
-                                                                firstCornerCoords[i]);
+          equalCoords[i] = equalCoords[i] && Dune::GridCheck::coordinatesEqual(subGeom.corner(c)[i],
+                                                                               firstCornerCoords[i], tolerance);
       if (equalCoords.count() == 1) {
         size_t detPositive(0), detNegative(0), detZero(0), size(0);
         for (const auto& ip : Dune::QuadratureRules<double,2>::rule(subEntity.type(),2)) {

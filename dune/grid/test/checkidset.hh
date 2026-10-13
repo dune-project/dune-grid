@@ -9,10 +9,11 @@
 #include <map>
 #include <utility>
 
-#include <dune/common/float_cmp.hh>
 #include <dune/common/hybridutilities.hh>
 
 #include <dune/grid/common/exceptions.hh>
+
+#include <dune/grid/test/coordinatetolerance.hh>
 
 /** @file
    @brief Unit tests for IdSet implementations
@@ -80,6 +81,8 @@ namespace Dune
 
     std::map<IdType,GlobalCoordinate> idContainer;
 
+    const auto tolerance = GridCheck::coordinateTolerance(grid.leafGridView());
+
     // Loop over all entities of all codimensions on all grid levels
     for (int i=0; i<=grid.maxLevel(); ++i)
     {
@@ -107,7 +110,7 @@ namespace Dune
                 // have the same entity center.
                 // CAVEAT: This last reasoning does not hold if the grid uses parametrized
                 // elements or parametrized boundaries.
-                if (! FloatCmp::eq(entity.geometry().center(), idContainer[id], 1e-12 ))
+                if (! GridCheck::coordinatesEqual(entity.geometry().center(), idContainer[id], tolerance))
                   DUNE_THROW(GridError, "IdSet is not injective");
               }
               else

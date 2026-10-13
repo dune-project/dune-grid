@@ -89,6 +89,7 @@ install(FILES basicunitcube.hh
               checkjacobians.hh
               checkpartition.hh
               checktwists.hh
+              coordinatetolerance.hh
               functions.hh
               gridcheck.hh
               staticcheck.hh
