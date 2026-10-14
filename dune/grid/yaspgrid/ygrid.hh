@@ -781,8 +781,13 @@ namespace Dune {
         _itbegins.push_back(i->begin());
         _itends.push_back(i->end());
 
-        // store index offset
-        _indexOffset.push_back(_indexOffset.back() + i->totalsize());
+        // store index offset; the superindex of a component refers to its
+        // enclosing component, so the offset is the size of the enclosing
+        // component and not the size of the (possibly smaller) component itself
+        int supertotalsize = 1;
+        for (int j=0; j<dim; j++)
+          supertotalsize *= i->supersize(j);
+        _indexOffset.push_back(_indexOffset.back() + supertotalsize);
 
         // store shift to component mapping
         _shiftmapping[i->shift().to_ulong()] = k;
