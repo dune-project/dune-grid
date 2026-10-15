@@ -17,6 +17,10 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
   size of the domain (new header `dune/grid/test/coordinatetolerance.hh`). Before, some checks
   used the relative default of `FloatCmp`, which is an exact comparison for coordinates near zero.
 
+- `checkIndexSet` has been tightened: Entities of a given grid view should have the same index
+  no matter whether they have been visited by direct iteration, or as subentity of a grid
+  element. This is now checked for all codimensions and partition types.
+
 # Release 2.11
 
 - The grid concepts are now able to check grids that have entity types disabled.
