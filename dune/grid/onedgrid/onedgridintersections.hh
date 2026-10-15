@@ -158,14 +158,14 @@ namespace Dune {
     //! where iteration started.
     LocalGeometry geometryInInside () const
     {
-      return LocalGeometry( LocalGeometryImpl( (indexInInside() == 0) ? 0 : 1 ) );
+      return LocalGeometry( LocalGeometryImpl( typename LocalGeometry::GlobalCoordinate(indexInInside() == 0 ? 0 : 1) ) );
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
     LocalGeometry geometryInOutside () const
     {
-      return LocalGeometry( LocalGeometryImpl( (indexInInside() == 0) ? 1 : 0 ) );
+      return LocalGeometry( LocalGeometryImpl( typename LocalGeometry::GlobalCoordinate(indexInInside() == 0 ? 1 : 0) ) );
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
@@ -416,14 +416,14 @@ namespace Dune {
     //! where iteration started.
     LocalGeometry geometryInInside () const
     {
-      return LocalGeometry( LocalGeometryImpl( (indexInInside() == 0) ? 0 : 1 ) );
+      return LocalGeometry( LocalGeometryImpl( typename LocalGeometry::GlobalCoordinate(indexInInside() == 0 ? 0 : 1) ) );
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.
     //! Here returned element is in LOCAL coordinates of neighbor
     LocalGeometry geometryInOutside () const
     {
-      return LocalGeometry( LocalGeometryImpl( (indexInInside() == 0) ? 1 : 0 ) );
+      return LocalGeometry( LocalGeometryImpl( typename LocalGeometry::GlobalCoordinate(indexInInside() == 0 ? 1 : 0) ) );
     }
 
     //! intersection of codimension 1 of this neighbor with element where iteration started.

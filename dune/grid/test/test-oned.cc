@@ -20,7 +20,7 @@ std::unique_ptr<OneDGrid> testFactory()
   GridFactory<OneDGrid> factory;
 
   // Insert vertices
-  std::vector<FieldVector<double,1> > vertexPositions = {0.6, 1.0, 0.2, 0.0, 0.4, 0.3, 0.7};
+  std::vector<FieldVector<double,1> > vertexPositions = {{0.6}, {1.0}, {0.2}, {0.0}, {0.4}, {0.3}, {0.7}};
 
   for (auto&& pos : vertexPositions)
     factory.insertVertex(pos);

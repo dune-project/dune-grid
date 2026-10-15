@@ -39,7 +39,7 @@ GridFactory<Dune::OneDGrid>::
 void GridFactory<Dune::OneDGrid>::
 insertVertex(const Dune::FieldVector<GridFactory<OneDGrid >::ctype,1>& pos)
 {
-  vertexPositions_.insert(std::make_pair(pos, vertexIndex_++));
+  vertexPositions_.insert(std::make_pair(pos[0], vertexIndex_++));
 }
 
 void GridFactory<Dune::OneDGrid>::
@@ -115,7 +115,7 @@ createGrid()
   grid_->entityImps_.resize(1);
   for (const auto& vtx : vertexPositions_)
   {
-    OneDEntityImp<0> newVertex(0, vtx.first, grid_->getNextFreeId());
+    OneDEntityImp<0> newVertex(0, FieldVector<ctype,1>(vtx.first), grid_->getNextFreeId());
 
     newVertex.leafIndex_ = vtx.second;
     newVertex.levelIndex_ = vtx.second;
@@ -133,7 +133,7 @@ createGrid()
     DUNE_THROW(GridError, "You cannot provide more than two boundary segments to a OneDGrid (it must be connected).");
 
   if (boundarySegments_.size() > 1
-      && vertexPositionsByIndex_[boundarySegments_[0]] > vertexPositions_.begin()->first[0])
+      && vertexPositionsByIndex_[boundarySegments_[0]] > vertexPositions_.begin()->first)
     grid_->reversedBoundarySegmentNumbering_ = true;
 
   // ///////////////////////////////////////////////////////////////////

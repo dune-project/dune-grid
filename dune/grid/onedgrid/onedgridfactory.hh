@@ -110,7 +110,7 @@ namespace Dune {
     std::vector<std::array<unsigned int, 2> > elements_;
 
     /** \brief Buffer the vertices until createGrid() is called */
-    std::map<FieldVector<ctype,1>, unsigned int > vertexPositions_;
+    std::map<ctype, unsigned int > vertexPositions_;
 
     /** \brief Counter that creates the vertex indices */
     unsigned int vertexIndex_;

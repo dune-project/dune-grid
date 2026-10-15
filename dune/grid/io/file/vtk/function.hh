@@ -246,7 +246,7 @@ namespace Dune
 
       // (Ab)use the MultiLinearGeometry class to do multi-linear interpolation between scalars
       const MultiLinearGeometry<ctype,dim,1> interpolation(e.type(), cornerValues);
-      return interpolation.global(xi);
+      return interpolation.global(xi)[0];
     }
 
     //! get name
