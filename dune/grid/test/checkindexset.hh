@@ -6,17 +6,23 @@
 #define DUNE_GRID_TEST_CHECKINDEXSET_HH
 
 #include <algorithm>
+#include <cstddef>
 #include <iostream>
 #include <limits>
 #include <map>
 #include <set>
+#include <utility>
 #include <vector>
 
 #include <dune/common/fvector.hh>
 #include <dune/common/stdstreams.hh>
 #include <dune/geometry/referenceelements.hh>
+#include <dune/geometry/typeindex.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/common/exceptions.hh>
+#include <dune/grid/common/partitionset.hh>
+#include <dune/grid/common/rangegenerators.hh>
+#include <dune/grid/test/coordinatetolerance.hh>
 
 /** @file
    @author Robert Kloefkorn
@@ -280,6 +286,112 @@ namespace Dune
   }
 
 
+  /** \brief Check that partition iterators return the index of the index set
+
+      A grid view has a single index set; partition iterators only select which
+      entities are visited. Every entity obtained by a partition iterator must have
+      the index of the same entity obtained as a subentity of an element.
+
+      "The same entity" means a copy in the sense of the hierarchical grid: in a
+      leaf view, a vertex may be represented by its copies on different levels,
+      which are different entities (operator== may return false) but share the
+      leaf index. Copies are identified by their id, and in addition by their
+      center: the id alone does not distinguish periodic copies of an entity
+      (different entities of the grid view that may share the id of the original).
+
+      The reference uses index() of the subentities of the non-ghost elements only:
+      subentities of ghost elements need not exist. Entities that are no subentity of
+      a non-ghost element (ghost entities, but on nonconforming grids also border
+      entities next to refined ghost elements) cannot be verified; for them only
+      containment in the index set is checked. An error is an index that belongs to a
+      different entity.
+
+      \param view The grid view we are testing
+   */
+  template< int codim, class GridView >
+  void checkPartitionIteratorIndex ( const GridView &view )
+  {
+    static_assert( Capabilities::hasEntityIterator< typename GridView::Grid, codim >::v,
+                   "checkPartitionIteratorIndex requires entities and iterators of this codimension" );
+
+    using GlobalCoordinate = typename GridView::template Codim< 0 >::Geometry::GlobalCoordinate;
+    using IdType = typename GridView::Grid::LocalIdSet::IdType;
+
+    const auto &indexSet = view.indexSet();
+    const auto &idSet = view.grid().localIdSet();
+    const auto tolerance = GridCheck::coordinateTolerance( view );
+
+    // we don't check Ghost entities as they have weaker guarantees.
+    //
+    // collect the reference information of entity <-> (geomType, index) relation
+    // - entity is identified by Id and center
+    // - geomType is stored by its index
+    using Key = std::pair< std::size_t, typename GridView::IndexSet::IndexType >;
+    std::map< Key, std::pair< IdType, GlobalCoordinate > > subEntityByIndex;
+    for( const auto &element : elements( view, Partitions::interiorBorderOverlapFront ) )
+    {
+      for (const auto& subEntity : subEntities(element, Codim<codim>{}))
+      {
+        subEntityByIndex.emplace(
+            Key( GlobalGeometryTypeIndex::index( subEntity.type() ), indexSet.index( subEntity ) ),
+            std::make_pair( idSet.id( subEntity ), subEntity.geometry().center() )
+            );
+      }
+    }
+
+    std::size_t errors = 0;
+    std::size_t notContained = 0;
+    auto checkPartitionSet = [ & ] ( auto partitionSet )
+    {
+      for( const auto &entity : entities( view, Codim< codim >{}, partitionSet ) )
+      {
+        // every entity of the view must be contained in its index set (partitions are
+        // only subsets); entities violating this are reported as a warning only, as some
+        // grids still violate it (e.g. level views of parallel ALUGrid); they have no index
+        if( !indexSet.contains( entity ) )
+        {
+          ++notContained;
+          continue;
+        }
+
+        // entities that are no subentity of a non-ghost element cannot be verified
+        const auto it = subEntityByIndex.find( Key( GlobalGeometryTypeIndex::index( entity.type() ),
+                                                    indexSet.index( entity ) ) );
+        if( it == subEntityByIndex.end() )
+          continue;
+
+        // compare entity to reference data corresponding to the same entity index on the All_Partition
+        // we expect the id and the center to be the same
+        if( (it->second.first != idSet.id( entity ))
+            || !GridCheck::coordinatesEqual( it->second.second, entity.geometry().center(), tolerance ) )
+        {
+          if( errors++ < 10 )
+            std::cerr << "Error: Codim " << codim << " entity with index " << indexSet.index( entity )
+                      << " obtained by the iterator over " << partitionSet
+                      << " is not the subentity with this index." << std::endl;
+        }
+      }
+    };
+    checkPartitionSet( Partitions::interior );
+    checkPartitionSet( Partitions::interiorBorder );
+    checkPartitionSet( Partitions::interiorBorderOverlap );
+    checkPartitionSet( Partitions::interiorBorderOverlapFront );
+    checkPartitionSet( Partitions::ghost );
+    checkPartitionSet( Partitions::all );
+
+    if( notContained > 0 )
+      std::cerr << "WARNING: " << notContained << " codim " << codim << " entities obtained by partition"
+           << " iterators are not contained in the index set." << std::endl;
+
+    if( errors > 0 )
+    {
+      std::cerr << "Error: " << errors << " codim " << codim << " entities obtained by partition"
+                << " iterators have the index of a different entity." << std::endl;
+      DUNE_THROW(GridError, "Partition iterators return a wrong index");
+    }
+  }
+
+
   // check some functionality of grid
   template< int codim, class Grid, class GridView, class OutputStream >
   void checkIndexSetForCodim ( const Grid &grid, const GridView &view,
@@ -408,6 +520,9 @@ namespace Dune
       // gridsize should be at least the size of found entities
       //assert( gridsize <= (int) entityfound.size() );
     }
+
+    // check the index of entities obtained by partition iterators
+    checkPartitionIteratorIndex< codim >( view );
 
     //******************************************************************
 
