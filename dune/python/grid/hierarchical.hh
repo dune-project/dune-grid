@@ -279,10 +279,16 @@ namespace Dune
       // Variable template that checks if a grid has refineStepsForHalf or not
       template<typename, typename = void>
       struct has_refine_steps_for_half : public std::false_type{};
-
       // specialization for grids that have
       template<typename T>
       struct has_refine_steps_for_half<T, std::void_t<decltype(std::declval<T&>().refineStepsForHalf() )> > : public std::true_type {};
+
+      // detection traits to check if 'noFactory' exists on the DGFGridFactory or if the value is true/false
+      template<typename T, typename = void>
+      struct can_use_dgf : std::true_type {};
+      template<typename T>
+      struct can_use_dgf<T, std::void_t<decltype(DGFGridFactory<T>::noFactory)>>
+      : std::bool_constant<!DGFGridFactory<T>::noFactory> {};
     }
 
     // registerHierarchicalGrid
@@ -463,7 +469,7 @@ namespace Dune
       {
         cls.def_property_readonly( "refineStepsForHalf", [] ( const Grid& self ) -> int { return self.refineStepsForHalf(); } );
       }
-      else if (!DGFGridFactory<Grid>::noFactory)
+      else if constexpr (detail::can_use_dgf<Grid>::value)
       {
         // default implementation based on DGFGridInfo
         cls.def_property_readonly_static( "refineStepsForHalf", [] ( pybind11::object ) { return int(DGFGridInfo< Grid >::refineStepsForHalf()); } );
