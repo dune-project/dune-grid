@@ -12,6 +12,7 @@
 #include <memory>
 #include <sstream>
 #include <type_traits>
+#include <stdexcept>
 
 #include <dune/common/hybridutilities.hh>
 #include <dune/common/iteratorrange.hh>
@@ -156,8 +157,14 @@ namespace Dune
     // readDGF (input can be either an filename string or an input stream)
     // -------
 
-    template< class Grid, typename In >
-    inline static std::shared_ptr< Grid > readDGF ( In &input )
+    template< class Grid, typename In,
+         std::enable_if_t<DGFGridFactory<Grid>::noFactory, int> = 0>
+    inline static std::shared_ptr< Grid > readDGF ( In &input, PriorityTag< 1 > )
+    {
+      throw std::runtime_error("DGF grid factory is unavailable");
+    }
+    template< class Grid, typename In>
+    inline static std::shared_ptr< Grid > readDGF ( In &input, PriorityTag< 0> )
     {
       DGFGridFactory< Grid > dgfFactory( input );
       std::shared_ptr< Grid > grid( dgfFactory.grid() );
@@ -193,12 +200,12 @@ namespace Dune
       switch( std::get< 0 >( args ) )
       {
         case Reader::dgf:
-          return readDGF< Grid >( std::get< 1 >( args ) );
+          return readDGF< Grid >( std::get< 1 >( args ), PriorityTag< 42 >() );
 
         case Reader::dgfString:
           {
             std::istringstream input( std::get< 1 >( args ) );
-            return readDGF< Grid >( input );
+            return readDGF< Grid >( input, PriorityTag< 42 >() );
           }
 
         case Reader::gmsh:
@@ -272,10 +279,16 @@ namespace Dune
       // Variable template that checks if a grid has refineStepsForHalf or not
       template<typename, typename = void>
       struct has_refine_steps_for_half : public std::false_type{};
-
       // specialization for grids that have
       template<typename T>
       struct has_refine_steps_for_half<T, std::void_t<decltype(std::declval<T&>().refineStepsForHalf() )> > : public std::true_type {};
+
+      // detection traits to check if 'noFactory' exists on the DGFGridFactory or if the value is true/false
+      template<typename T, typename = void>
+      struct can_use_dgf : std::true_type {};
+      template<typename T>
+      struct can_use_dgf<T, std::void_t<decltype(DGFGridFactory<T>::noFactory)>>
+      : std::bool_constant<!DGFGridFactory<T>::noFactory> {};
     }
 
     // registerHierarchicalGrid
@@ -456,7 +469,7 @@ namespace Dune
       {
         cls.def_property_readonly( "refineStepsForHalf", [] ( const Grid& self ) -> int { return self.refineStepsForHalf(); } );
       }
-      else
+      else if constexpr (detail::can_use_dgf<Grid>::value)
       {
         // default implementation based on DGFGridInfo
         cls.def_property_readonly_static( "refineStepsForHalf", [] ( pybind11::object ) { return int(DGFGridInfo< Grid >::refineStepsForHalf()); } );

@@ -77,16 +77,26 @@ namespace Dune
     template< class GridType >
     struct Impl
     {
+      static const bool hasDGFFactory = (GridType::dimension<0);
       static GridType* generate(MacroGrid& /*mg*/,
                                 const char* /*filename*/, [[maybe_unused]] MPICommunicatorType MPICOMM = MPIHelper::getCommunicator() )
       {
         // make assertion depend on the template argument but always evaluate to false
-        static_assert( GridType::dimension<0,"DGF grid factory missing. Did you forget to add the corresponding dgf header?");
+        static_assert( hasDGFFactory, "DGF grid factory missing. Did you forget to add the corresponding dgf header?");
       }
     };
 
     const char* filename_;
     MPICommunicatorType MPICOMM_;
+
+    // provide check to see if Impl<GridType> was overloaded
+    template<class T, class = void>
+    struct ImplHasDGFFactory : std::true_type {}; // absent: specialized Impl, assume available
+    template<class T>
+    struct ImplHasDGFFactory<T, std::void_t<decltype(Impl<T>::hasDGFFactory)> > : std::bool_constant<Impl<T>::hasDGFFactory> {};
+
+    public:
+    template<class GridType> static constexpr bool noDGFFactory = !ImplHasDGFFactory<GridType>::value;
   };
 
 } // end namespace Dune
