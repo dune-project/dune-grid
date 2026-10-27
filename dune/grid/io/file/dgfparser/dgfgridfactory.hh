@@ -39,6 +39,7 @@ namespace Dune
     typedef G Grid;
     const static int dimension = Grid::dimension;
     typedef MPIHelper::MPICommunicator MPICommunicatorType;
+    static constexpr bool noFactory = MacroGrid::noDGFFactory<G>;
 
   private:
     typedef typename Grid::template Codim< 0 >::Entity Element;
