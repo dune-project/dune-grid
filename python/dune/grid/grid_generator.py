@@ -62,7 +62,7 @@ def _writeVTK(vtk,grid,f,name,dataTag):
 def writeVTK(grid, name,
              celldata=None, pointdata=None,
              cellvector=None, pointvector=None,
-             number=None, subsampling=None,outputType=OutputType.appendedraw,
+             number=None, subsampling=None, outputType=OutputType.appendedraw,
              write=True, nonconforming=False):
     vtk = grid.vtkWriter(nonconforming) if subsampling is None else grid.vtkWriter(subsampling)
 
@@ -105,20 +105,24 @@ Try using a dictionary with name:function instead.""")
 class SequencedVTK:
     def __init__(self, grid, name, number,
                  celldata, pointdata, cellvector, pointvector,
-                 subsampling, outputType=OutputType.appendedraw):
+                 subsampling, nonconforming,
+                 outputType=OutputType.appendedraw):
         self.number = number
         self.name = name
-        self.vtk = grid.writeVTK(name,celldata=celldata,pointdata=pointdata,cellvector=cellvector,pointvector=pointvector,subsampling=subsampling,write=False)
+        self.vtk = grid.writeVTK(name,celldata=celldata,pointdata=pointdata,cellvector=cellvector,pointvector=pointvector,
+                       subsampling=subsampling,nonconforming=nonconforming,write=False)
         self.outputType = outputType
     def __call__(self):
         self.vtk.write(self.name, self.number, self.outputType)
         self.number += 1
 
 def sequencedVTK(grid, name, celldata=None, pointdata=None, cellvector=None, pointvector=None,
-                 number=0, subsampling=None, outputType=OutputType.appendedraw):
+                 number=0, subsampling=None, nonconforming=False,
+                 outputType=OutputType.appendedraw):
     return SequencedVTK(grid,name,number,
                         celldata=celldata,pointdata=pointdata,
                         cellvector=cellvector,pointvector=pointvector,
+                        nonconforming=nonconforming,
                         subsampling=subsampling,outputType=outputType)
 
 def plot(self, function=None, *args, **kwargs):
