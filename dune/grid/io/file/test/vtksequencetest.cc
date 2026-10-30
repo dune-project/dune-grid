@@ -3,14 +3,19 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 
-#include <memory>
-#include <vector>
+#include <array>
+#include <filesystem>
 #include <fstream>
+#include <iterator>
+#include <memory>
+#include <regex>
 #include <string>
-#include <unistd.h>
+#include <vector>
 
 // dune headers
 #include <dune/common/math.hh>
+#include <dune/common/parallel/mpihelper.hh>
+#include <dune/common/test/testsuite.hh>
 #include <dune/grid/yaspgrid.hh>
 #include <dune/grid/io/file/vtk/vtksequencewriter.hh>
 
@@ -98,7 +103,7 @@ std::string doWrite( const GridView &gridView, Dune::VTK::DataMode dm,
   std::vector<int> celldata(is.size(0),0);
 
   std::stringstream name;
-  name << "vtktest-" << dim << "D-" << VTKDataMode(dm);
+  name << "vtksequencetest-" << gridView.comm().size() << "ranks-" << dim << "D-" << VTKDataMode(dm);
 
   if (testRestart)
     name << "-restart";
@@ -150,13 +155,63 @@ void vtkCheck(const std::array<int,dim>& n,
 
   const auto fileName = doWrite( g.leafGridView(), Dune::VTK::conforming ) + ".pvd";
   const auto fileNameRestart = doWrite( g.leafGridView(), Dune::VTK::conforming, testRestart ) + ".pvd";
-  checkFileEqualNumLines(fileName, fileNameRestart);
+  g.comm().barrier();
+  if (g.comm().rank() == 0)
+    checkFileEqualNumLines(fileName, fileNameRestart);
+  g.comm().barrier();
 
   doWrite( g.leafGridView(), Dune::VTK::nonconforming );
   doWrite( g.levelGridView( 0 ), Dune::VTK::conforming );
   doWrite( g.levelGridView( 0 ), Dune::VTK::nonconforming );
   doWrite( g.levelGridView( g.maxLevel() ), Dune::VTK::conforming );
   doWrite( g.levelGridView( g.maxLevel() ), Dune::VTK::nonconforming );
+}
+
+// Test that VTKSequenceWriter generates correct PVD file references when
+// using path and extendpath parameters (issue #92).
+int checkPvdFileReferences()
+{
+  constexpr int dim = 2;
+  const std::array<int, dim> n = {8, 8};
+  const Dune::FieldVector<double, dim> h = {1.0, 1.0};
+  Dune::YaspGrid<dim> grid(h, n);
+  const auto gridView = grid.leafGridView();
+  const auto& comm = gridView.comm();
+
+  // All ranks use the same directory. Separate serial and parallel test runs.
+  const std::string name = "vtkseq-paths-" + std::to_string(comm.size()) + "ranks";
+  const std::filesystem::path outputPath = name + "-output";
+  const std::string extendPath = "pieces";
+  std::filesystem::create_directories(outputPath / extendPath);
+
+  auto vtkWriter = std::make_shared<Dune::VTKWriter<decltype(grid.leafGridView())>>(
+    gridView, Dune::VTK::conforming);
+  Dune::VTKSequenceWriter<decltype(grid.leafGridView())> vtk(
+    vtkWriter, name, outputPath.string(), extendPath);
+  vtk.write(0.0);
+  vtk.write(0.1);
+  comm.barrier();
+
+  Dune::TestSuite test;
+  if (comm.rank() == 0) {
+    const std::filesystem::path pvdPath = name + ".pvd";
+    std::ifstream pvdFile(pvdPath);
+    test.check(pvdFile.is_open()) << "Could not open " << pvdPath;
+    const std::string content((std::istreambuf_iterator<char>(pvdFile)),
+                             std::istreambuf_iterator<char>());
+    const std::regex fileRegex(R"re(file="([^"]+)")re");
+    int fileCount = 0;
+    for (auto it = std::sregex_iterator(content.begin(), content.end(), fileRegex);
+         it != std::sregex_iterator(); ++it) {
+      const auto referencedFile = pvdPath.parent_path() / (*it)[1].str();
+      test.check(std::filesystem::exists(referencedFile))
+        << "Referenced file does not exist: " << referencedFile;
+      ++fileCount;
+    }
+    test.check(fileCount == 2) << "Expected two timestep references, found " << fileCount;
+  }
+
+  return comm.max(test.exit());
 }
 
 int main(int argc, char **argv)
@@ -166,7 +221,7 @@ int main(int argc, char **argv)
     const Dune::MPIHelper &mpiHelper = Dune::MPIHelper::instance(argc, argv);
 
     if(mpiHelper.rank() == 0)
-      std::cout << "subsamplingvtktest: MPI_Comm_size == " << mpiHelper.size()
+      std::cout << "vtksequencetest: communicator size == " << mpiHelper.size()
                 << std::endl;
 
     {
@@ -184,6 +239,9 @@ int main(int argc, char **argv)
       Dune::FieldVector<double,3> h = { 1.0, 2.0, 3.0 };
       vtkCheck<3>(n,h, /*testRestart=*/true);
     }
+
+    // Test PVD file references with path/extendpath (issue #92)
+    return checkPvdFileReferences();
 
   } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
