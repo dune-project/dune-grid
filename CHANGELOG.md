@@ -5,6 +5,9 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 
 # Master (will become release 2.12)
 
+- Add `GridDefaultImplementation::userData()` to attach application data to a grid
+  in a mutable `std::map<std::string, std::any>`.
+
 - Implement missing sub-indices of sub-entities in the index set of `UGGrid`.
 
 - `OneDGrid` now sets `Capabilities::viewThreadSafe::v` to `true`.

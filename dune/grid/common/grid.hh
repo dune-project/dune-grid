@@ -9,9 +9,11 @@
     \brief Different resources needed by all grid implementations
  */
 // system includes
+#include <any>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 
 // dune-common includes
 #include <dune/common/fvector.hh>
@@ -874,6 +876,9 @@ namespace Dune {
      */
     typedef typename GridFamily::Traits Traits;
 
+    //! User data attached to the grid, identified by string keys.
+    using UserDataContainer = std::map< std::string, std::any >;
+
     //! View for a grid level for All_Partition
     typename Traits::LevelGridView levelGridView(int level) const
     {
@@ -989,8 +994,27 @@ namespace Dune {
       return false;
     }
 
+    /** \brief Access user data attached to this grid.
+     *
+     * The map associates string keys with arbitrary copy-constructible values stored
+     * in std::any. Use distinct keys (e.g. prefixed with your module name) to avoid
+     * collisions. Non-copyable objects can be stored through std::shared_ptr.
+     * The map is mutable, so entries can also be modified through a const grid.
+     *
+     * \warning The map is destroyed after the derived grid's own members.
+     * Destructors of stored objects must not access the grid. If cleanup requires
+     * grid access, remove the corresponding entries while the grid is still alive.
+     *
+     * \return Mutable reference to the user data map.
+     */
+    UserDataContainer& userData() const
+    {
+      return userData_;
+    }
+
   protected:
     using Grid< dim, dimworld, ct, GridFamily >::asImp;
+    mutable UserDataContainer userData_;
   };
 
   /** @} */
