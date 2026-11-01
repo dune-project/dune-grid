@@ -121,7 +121,7 @@ namespace Dune
     //! return size of set for given GeometryType
     std::size_t size ( const GeometryType &type ) const
     {
-      return (type.isSimplex() ? size( dimension - type.dim() ) : 0);
+      return (type.isSimplex() && (int(type.dim()) <= dimension) ? size( dimension - type.dim() ) : 0);
     }
 
     //! return size of set
@@ -411,7 +411,7 @@ namespace Dune
 
     std::size_t size ( const GeometryType &type ) const
     {
-      return (type.isSimplex() ? size( dimension - type.dim() ) : 0);
+      return (type.isSimplex() && (int(type.dim()) <= dimension) ? size( dimension - type.dim() ) : 0);
     }
 
     std::size_t size ( int codim ) const

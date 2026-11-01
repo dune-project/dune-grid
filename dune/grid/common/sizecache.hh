@@ -191,6 +191,8 @@ namespace Dune {
     int size (int level, GeometryType type) const
     {
       int codim = GridType ::dimension - type.dim();
+      if( codim < 0 )
+        return 0;
       if( levelSizes_[codim][level] < 0)
         Hybrid::forEach( std::make_index_sequence< dim+1 >{}, [ & ]( auto i ){ CountLevelEntities< i >::apply( *this, level, codim ); } );
 
@@ -217,6 +219,8 @@ namespace Dune {
     int size ( const GeometryType type ) const
     {
       int codim = GridType :: dimension - type.dim();
+      if( codim < 0 )
+        return 0;
       if( leafSizes_[codim] < 0 )
         Hybrid::forEach( std::make_index_sequence< dim+1 >{}, [ & ]( auto i ){ CountLeafEntities< i >::apply( *this, codim ); } );
 

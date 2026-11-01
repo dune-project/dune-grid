@@ -1443,7 +1443,7 @@ namespace Dune {
     //! number of entities per level and geometry type in this process
     int size (int level, GeometryType type) const
     {
-      return (type.isCube()) ? size(level,dim-type.dim()) : 0;
+      return (type.isCube() && int(type.dim()) <= dim) ? size(level,dim-type.dim()) : 0;
     }
 
     //! number of leaf entities per geometry type in this process

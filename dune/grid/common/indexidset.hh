@@ -216,6 +216,9 @@ namespace Dune
 
     /** @brief Return total number of entities of given geometry type in entity set \f$E\f$.
 
+       Returns 0 if \f$E\f$ does not contain entities of the given type,
+       in particular if `type.dim()` exceeds the grid dimension.
+
        \param[in] type A valid geometry type.
        \return    number of entities (type is auto determined by the
                   implementation. std::size_t is the expected return type).

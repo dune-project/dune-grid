@@ -685,10 +685,53 @@ namespace Dune
     }
   }
 
+  /** \brief Check that size(type) returns 0 for geometry types not contained in the index set
+   *
+   * Includes geometry types with a dimension larger than the grid dimension,
+   * e.g. `size(GeometryTypes::tetrahedron)` on a 2d grid. Such queries are
+   * valid and must not fail, since generic code (e.g. in dune-functions)
+   * may ask for the number of entities of a type independent of the grid
+   * dimension.
+   */
+  template< class Grid, class GridView >
+  void checkIndexSetSizeOfUnusedTypes ( const GridView &view )
+  {
+    constexpr static int dim = Grid :: dimension;
+    const auto &lset = view.indexSet();
+
+    std::set< GeometryType > candidates;
+    for( int d = 0; d <= std::max( dim, 3 ); ++d )
+    {
+      candidates.insert( GeometryTypes::simplex( d ) );
+      candidates.insert( GeometryTypes::cube( d ) );
+    }
+    candidates.insert( GeometryTypes::prism );
+    candidates.insert( GeometryTypes::pyramid );
+
+    for( const GeometryType &type : candidates )
+    {
+      if( int(type.dim()) <= dim )
+      {
+        const auto types = lset.types( dim - type.dim() );
+        if( std::find( types.begin(), types.end(), type ) != types.end() )
+          continue;
+      }
+
+      if( lset.size( type ) != 0 )
+        DUNE_THROW( GridError, "IndexSet::size(" << type << ") must be 0 for a type not "
+                    "contained in the index set, but returned " << lset.size( type ) << "." );
+      if( view.size( type ) != 0 )
+        DUNE_THROW( GridError, "GridView::size(" << type << ") must be 0 for a type not "
+                    "contained in the grid view, but returned " << view.size( type ) << "." );
+    }
+  }
+
   template< class Grid, class GridView, class OutputStream >
   void checkIndexSet ( const Grid &grid, const GridView &view,
                        OutputStream &sout,  bool levelIndex = false )
   {
+    checkIndexSetSizeOfUnusedTypes< Grid >( view );
+
     Hybrid::forEach( std::make_index_sequence< Grid :: dimension+1 >{},
       [ & ]( auto codim )
     {

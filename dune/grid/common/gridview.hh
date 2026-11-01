@@ -185,7 +185,11 @@ namespace Dune
       return impl().size( codim );
     }
 
-    /** \brief obtain number of entities with a given geometry type */
+    /** \brief obtain number of entities with a given geometry type
+     *
+     *  Returns 0 if the grid view does not contain entities of this type,
+     *  in particular if `type.dim()` exceeds the grid dimension.
+     */
     int size ( const GeometryType &type ) const
     {
       return impl().size( type );

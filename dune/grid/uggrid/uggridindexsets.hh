@@ -175,6 +175,9 @@ namespace Dune {
     {
       int codim = GridImp::dimension-type.dim();
 
+      if (codim<0 || codim>dim)
+        return 0;
+
       if (codim==0) {
         if (type.isSimplex())
           return numSimplices_;
