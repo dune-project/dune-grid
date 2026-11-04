@@ -85,7 +85,23 @@ PYBIND11_MODULE( _grid, module )
   pybind11::enum_< Dune::Python::Reader > reader( module, "reader" );
   reader.value( "dgf", Dune::Python::Reader::dgf );
   reader.value( "dgfString", Dune::Python::Reader::dgfString );
+  reader.value( "dgfNoLB", Dune::Python::Reader::dgfNoLB );
+  reader.value( "dgfStringNoLB", Dune::Python::Reader::dgfStringNoLB );
   reader.value( "gmsh", Dune::Python::Reader::gmsh );
   reader.value( "structured", Dune::Python::Reader::structured );
   reader.value( "meshio", Dune::Python::Reader::meshio );
+  reader.def(
+    "__call__",
+    [](Dune::Python::Reader self, bool loadBalance) {
+        using R = Dune::Python::Reader;
+
+        if (self == R::dgf)
+            return loadBalance ? R::dgf : R::dgfNoLB;
+        if (self == R::dgfString)
+            return loadBalance ? R::dgfString : R::dgfStringNoLB;
+
+        return self;
+    },
+    pybind11::arg("loadBalance") = true
+  );
 }

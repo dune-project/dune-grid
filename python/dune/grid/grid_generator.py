@@ -26,7 +26,7 @@ def getDimgrid(constructor):
         except KeyError:
             pass
     if not dimgrid:
-        raise ValueError("Couldn't extract dimension of grid from constructor arguments, added dimgrid parameter")
+        raise ValueError("Couldn't extract dimension of grid from constructor arguments, provide a value for the dimgrid parameter")
     return dimgrid
 
 def triangulation(grid, level=0, *, partition=Partitions.all):
