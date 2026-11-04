@@ -29,7 +29,7 @@ class CartesianDomain(tuple):
                                 " " + " ".join(str(x+eps) for x in u) + "\n"
         return bnd
 
-    def __new__ (cls, lower,upper,division,boundary=True,**parameters):
+    def __new__ (cls, lower,upper,division,boundary=True,loadBalance=True,**parameters):
         from ._grid import reader
 
         dgf = "DGF\n"
@@ -83,15 +83,17 @@ class CartesianDomain(tuple):
             if parameters["verbose"]:
                 print(dgf)
 
+        readerType = reader.dgfString(loadBalance)
         return super(CartesianDomain, cls).__new__(cls,
-                       tuple( (reader.dgfString, dgf) ) )
-    def __init__(self,lower,upper,division,boundary=True,**parameters):
+                       tuple( (readerType, dgf) ) )
+    def __init__(self,lower,upper,division,boundary=True,loadBalance=True,**parameters):
         self.dimgrid = len(lower)
         self.lower = lower
         self.upper = upper
         self.division = division
         self.param = parameters
         self.boundaryWasSet = boundary
+        self.loadBalance = loadBalance
     def dimgrid(self):
         return self.dimgrid
 

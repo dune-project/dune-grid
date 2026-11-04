@@ -159,17 +159,23 @@ namespace Dune
 
     template< class Grid, typename In,
          std::enable_if_t<DGFGridFactory<Grid>::noFactory, int> = 0>
-    inline static std::shared_ptr< Grid > readDGF ( In &input, PriorityTag< 1 > )
+    inline static std::shared_ptr< Grid > readDGF ( In &input, bool loadBalance, PriorityTag< 1 > )
     {
       throw std::runtime_error("DGF grid factory is unavailable");
     }
     template< class Grid, typename In>
-    inline static std::shared_ptr< Grid > readDGF ( In &input, PriorityTag< 0> )
+    inline static std::shared_ptr< Grid > readDGF ( In &input, bool loadBalance, PriorityTag< 0> )
     {
       DGFGridFactory< Grid > dgfFactory( input );
       std::shared_ptr< Grid > grid( dgfFactory.grid() );
-      grid->loadBalance();
+      if (loadBalance)
+        grid->loadBalance();
       return grid;
+    }
+    template< class Grid, typename In, class PT>
+    inline static std::shared_ptr< Grid > readDGF ( In &input, PT pt)
+    {
+      return readDGF(input,true,pt);
     }
 
     // readGmsh
@@ -200,12 +206,19 @@ namespace Dune
       switch( std::get< 0 >( args ) )
       {
         case Reader::dgf:
-          return readDGF< Grid >( std::get< 1 >( args ), PriorityTag< 42 >() );
+          return readDGF< Grid >( std::get< 1 >( args ), true, PriorityTag< 42 >() );
+        case Reader::dgfNoLB:
+          return readDGF< Grid >( std::get< 1 >( args ), false, PriorityTag< 42 >() );
 
         case Reader::dgfString:
           {
             std::istringstream input( std::get< 1 >( args ) );
-            return readDGF< Grid >( input, PriorityTag< 42 >() );
+            return readDGF< Grid >( input, true, PriorityTag< 42 >() );
+          }
+        case Reader::dgfStringNoLB:
+          {
+            std::istringstream input( std::get< 1 >( args ) );
+            return readDGF< Grid >( input, false, PriorityTag< 42 >() );
           }
 
         case Reader::gmsh:
