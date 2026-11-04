@@ -5,6 +5,11 @@ SPDX-License-Identifier: LicenseRef-GPL-2.0-only-with-DUNE-exception
 
 # Master (will become release 2.12)
 
+- Construction of grid in Python that relied on DGF (`reader.dgf`, `reader.dgfString`, and usage of `cartesianDomain`)
+  automatically included a call to `loadBalance`. This can now be deactivated by using
+  `reader.dgf(False)`, `reader.dgfString(False)`, and setting `loadBalance=False` in the argument list to the call of
+  `cartesianDomain`. Current behavior remains unchanged.
+
 - Add `GridDefaultImplementation::userData()` to attach application data to a grid
   in a mutable `std::map<std::string, std::any>`.
 
